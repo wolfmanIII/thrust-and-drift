@@ -1,0 +1,10 @@
+{
+  "tailwindCSS.experimental.configFile": "src/index.css",
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "eslint.validate": ["javascript", "javascriptreact"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+}
