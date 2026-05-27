@@ -1,0 +1,89 @@
+/**
+ * BattleLog — collapsible bottom-overlay event log.
+ * Shows the last N entries; auto-scrolls to bottom on new entries.
+ */
+
+import { useState, useEffect, useRef } from 'react'
+import { useBattleStore } from '../../store/battleStore.js'
+
+const MAX_VISIBLE = 60
+
+const TYPE_COLORS = {
+  move:   'text-blue-400',
+  attack: 'text-red-400',
+  damage: 'text-orange-400',
+  action: 'text-purple-400',
+  system: 'text-slate-500',
+  info:   'text-slate-300',
+}
+
+const TYPE_PREFIX = {
+  move:   '→',
+  attack: '⚡',
+  damage: '💥',
+  action: '⚙',
+  system: '·',
+  info:   '»',
+}
+
+export function BattleLog() {
+  const [collapsed, setCollapsed] = useState(false)
+  const log    = useBattleStore((s) => s.log)
+  const clearLog = useBattleStore((s) => s.clearLog)
+  const listRef  = useRef(null)
+
+  const visible = log.slice(-MAX_VISIBLE)
+
+  // Auto-scroll to bottom on new entries
+  useEffect(() => {
+    if (!collapsed && listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight
+    }
+  }, [log.length, collapsed])
+
+  return (
+    <div
+      className={`absolute bottom-0 left-0 right-0 z-10 transition-all duration-200 ${
+        collapsed ? 'h-8' : 'h-40'
+      }`}
+    >
+      <div className="h-full bg-slate-950/85 border-t border-slate-700 backdrop-blur-sm flex flex-col">
+        {/* Header bar */}
+        <div className="flex items-center gap-3 px-3 py-1 border-b border-slate-800 shrink-0">
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 transition-colors font-mono text-xs tracking-widest"
+          >
+            <span>{collapsed ? '▲' : '▼'}</span>
+            <span>LOG BATTAGLIA</span>
+            <span className="text-slate-600">({log.length})</span>
+          </button>
+          <button
+            onClick={clearLog}
+            className="ml-auto text-slate-600 hover:text-red-400 font-mono text-xs transition-colors"
+          >
+            CANCELLA
+          </button>
+        </div>
+
+        {/* Entries */}
+        {!collapsed && (
+          <div ref={listRef} className="flex-1 overflow-y-auto px-3 py-1 space-y-px">
+            {visible.length === 0 && (
+              <p className="text-slate-600 font-mono text-xs italic">Nessun evento registrato.</p>
+            )}
+            {visible.map((entry) => (
+              <div key={entry.id} className="flex items-start gap-2 font-mono text-xs leading-relaxed">
+                <span className={`shrink-0 ${TYPE_COLORS[entry.type] ?? 'text-slate-400'}`}>
+                  {TYPE_PREFIX[entry.type] ?? '·'}
+                </span>
+                <span className="text-slate-500 shrink-0">R{entry.round}</span>
+                <span className="text-slate-300">{entry.message}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

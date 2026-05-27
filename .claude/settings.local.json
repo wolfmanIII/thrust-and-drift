@@ -1,0 +1,13 @@
+{
+  "model": "opusplan",
+  "permissions": {
+    "allow": [
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run preview:*)"
+    ]
+  }
+}

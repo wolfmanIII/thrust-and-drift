@@ -1,0 +1,429 @@
+/**
+ * AttackModal — 3-step attack resolution: configure → roll → damage.
+ * Each step is a focused sub-component; the root component owns shared state.
+ * // MgT2e CRB p.163–165
+ */
+
+import { useState } from 'react'
+import { Modal } from './Modal.jsx'
+import { useUiStore } from '../../store/uiStore.js'
+import { useBattleStore } from '../../store/battleStore.js'
+import { WEAPONS, DEFENSIVE_WEAPONS } from '../../data/weapons.js'
+import { hexDistance, getRangeBand } from '../../utils/hex.js'
+import { rollAttack, getRangeDM, getTargetSizeDM, isCriticalHit } from '../../utils/combat.js'
+import { rollDice } from '../../utils/dice.js'
+
+/** @typedef {'config'|'roll'|'damage'} AttackStep */
+
+// ── UI primitive ──────────────────────────────────────────────────────────
+
+function DmRow({ label, value, highlight = false }) {
+  const sign = value >= 0 ? '+' : ''
+  return (
+    <div className={`flex justify-between ${highlight ? 'text-[--neon-cyan] font-bold' : 'text-slate-400'}`}>
+      <span>{label}</span>
+      <span>{sign}{value}</span>
+    </div>
+  )
+}
+
+// ── Step 1: weapon + target configuration ────────────────────────────────
+
+/**
+ * @param {{
+ *   enemies: object[],
+ *   availableWeapons: string[],
+ *   weaponKey: string,
+ *   setWeaponKey: Function,
+ *   targetId: string,
+ *   setTargetId: Function,
+ *   target: object|undefined,
+ *   weapon: object|null,
+ *   rangeBand: string,
+ *   distance: number,
+ *   rangeDM: number,
+ *   sizeDM: number,
+ *   evasiveDM: number,
+ *   gunnerSkill: number,
+ *   totalDM: number,
+ *   onNext: Function,
+ *   onClose: Function,
+ * }} props
+ */
+function AttackConfigStep({
+  enemies, availableWeapons,
+  weaponKey, setWeaponKey, targetId, setTargetId,
+  target, weapon, rangeBand, distance, rangeDM, sizeDM, evasiveDM, sensorLockDM,
+  gunnerSkill, totalDM, onNext, onClose,
+}) {
+  return (
+    <Modal title="Attacco" onClose={onClose}>
+      <div className="space-y-4">
+        {/* Weapon select */}
+        <div>
+          <p className="text-slate-500 font-mono text-xs mb-1.5">Arma</p>
+          <div className="flex flex-col gap-1">
+            {availableWeapons.length === 0 && (
+              <p className="text-slate-600 font-mono text-xs italic">Nessuna arma offensiva disponibile.</p>
+            )}
+            {availableWeapons.map((w) => (
+              <button
+                key={w}
+                onClick={() => setWeaponKey(w)}
+                className={`text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
+                  weaponKey === w
+                    ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                    : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                }`}
+              >
+                {w}
+                {WEAPONS[w] && (
+                  <span className="ml-2 text-slate-600">
+                    DM {WEAPONS[w].attackDM >= 0 ? `+${WEAPONS[w].attackDM}` : WEAPONS[w].attackDM}
+                    {' · '}
+                    {WEAPONS[w].damageDice}D danno
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Target select */}
+        <div>
+          <p className="text-slate-500 font-mono text-xs mb-1.5">Bersaglio</p>
+          <div className="flex flex-col gap-1">
+            {enemies.map((e) => (
+              <button
+                key={e.id}
+                onClick={() => setTargetId(e.id)}
+                className={`flex items-center gap-2 text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
+                  targetId === e.id
+                    ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                    : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: e.color }} />
+                <span>{e.profile.name}</span>
+                {target?.id === e.id && (
+                  <span className="ml-auto text-slate-500">{rangeBand} ({distance} hex)</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* DM summary */}
+        {weapon && target && (
+          <div className="bg-slate-800 rounded p-3 font-mono text-xs space-y-0.5">
+            <p className="text-slate-400 mb-2">Riepilogo DM (target: 8+)</p>
+            <DmRow label="Artigliere" value={gunnerSkill} />
+            <DmRow label={`Arma (${weaponKey})`} value={weapon.attackDM} />
+            <DmRow label={`Distanza (${rangeBand})`} value={rangeDM} />
+            <DmRow label="Dimensione bersaglio" value={sizeDM} />
+            {evasiveDM !== 0 && <DmRow label="Evasione" value={evasiveDM} />}
+            {sensorLockDM !== 0 && <DmRow label="Sensor Lock" value={sensorLockDM} />}
+            <div className="border-t border-slate-700 mt-1 pt-1">
+              <DmRow label="Totale DM" value={totalDM} highlight />
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={onNext}
+          disabled={!weapon || !target}
+          className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          LANCIA ATTACCO →
+        </button>
+      </div>
+    </Modal>
+  )
+}
+
+// ── Step 2: 2D6 roll + hit/miss ───────────────────────────────────────────
+
+/**
+ * @param {{
+ *   attackerName: string,
+ *   targetName: string,
+ *   weaponKey: string,
+ *   weapon: object|null,
+ *   gunnerSkill: number,
+ *   rangeDM: number,
+ *   sizeDM: number,
+ *   evasiveDM: number,
+ *   totalDM: number,
+ *   attackResult: object|null,
+ *   setAttackResult: Function,
+ *   onNext: Function,
+ *   onClose: Function,
+ * }} props
+ */
+function AttackRollStep({
+  attackerName, targetName, weaponKey, weapon,
+  gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM,
+  attackResult, setAttackResult, onNext, onClose,
+}) {
+  const handleRoll = () => {
+    const result = rollAttack({
+      gunnerSkill,
+      dexDM: 0,
+      aidGunnersDM: 0,
+      rangeDM,
+      weaponDM: weapon?.attackDM ?? 0,
+      targetSizeDM: sizeDM,
+      evasiveDM,
+      sensorLockDM,
+    })
+    setAttackResult(result)
+  }
+
+  return (
+    <Modal title="Tiro di Attacco" onClose={onClose}>
+      <div className="space-y-4">
+        <div className="text-center font-mono text-xs text-slate-400">
+          {attackerName} → {targetName} con {weaponKey}
+        </div>
+
+        {!attackResult ? (
+          <button
+            onClick={handleRoll}
+            className="w-full py-3 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-lg tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+          >
+            🎲 LANCIA 2D6
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <div className="bg-slate-800 rounded p-4 text-center font-mono">
+              <div className="flex justify-center gap-3 mb-2">
+                {attackResult.roll.results.map((r, i) => (
+                  <span
+                    key={i}
+                    className="w-10 h-10 bg-slate-700 rounded border border-slate-600 flex items-center justify-center text-lg text-white font-bold"
+                  >
+                    {r}
+                  </span>
+                ))}
+              </div>
+              <p className="text-slate-400 text-xs">
+                [{attackResult.roll.results.join('+')}] + DM {totalDM >= 0 ? `+${totalDM}` : totalDM}{' '}={' '}
+                <span className={`font-bold text-sm ${attackResult.hit ? 'text-green-400' : 'text-red-400'}`}>
+                  {attackResult.total}
+                </span>
+              </p>
+            </div>
+
+            <div className={`text-center py-2 rounded font-mono font-bold text-sm ${
+              attackResult.hit ? 'bg-green-950/40 text-green-400' : 'bg-red-950/40 text-red-400'
+            }`}>
+              {attackResult.hit
+                ? `COLPITO! Effetto: +${attackResult.effect}`
+                : 'MANCATO'}
+            </div>
+
+            {isCriticalHit(attackResult.effect) && (
+              <p className="text-orange-400 font-mono text-xs text-center">
+                ⚠ COLPO CRITICO (Effetto {attackResult.effect} ≥ 6)
+              </p>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setAttackResult(null)}
+                className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500"
+              >
+                RIRUOTA
+              </button>
+              {attackResult.hit ? (
+                <button
+                  onClick={onNext}
+                  className="flex-1 py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs rounded hover:bg-[--neon-cyan]/20"
+                >
+                  CALCOLA DANNO →
+                </button>
+              ) : (
+                <button
+                  onClick={onClose}
+                  className="flex-1 py-2 border border-slate-600 text-slate-300 font-mono text-xs rounded hover:border-slate-400"
+                >
+                  CHIUDI
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  )
+}
+
+// ── Step 3: damage roll + application ────────────────────────────────────
+
+/**
+ * @param {{
+ *   damageDice: number,
+ *   effectBonus: number,
+ *   armor: number,
+ *   damageResult: object|null,
+ *   setDamageResult: Function,
+ *   onApply: Function,
+ *   onClose: Function,
+ * }} props
+ */
+function AttackDamageStep({ damageDice, effectBonus, armor, damageResult, setDamageResult, onApply, onClose }) {
+  const handleDamageRoll = () => {
+    const roll  = rollDice(damageDice, 6)
+    const total = Math.max(0, roll.total + effectBonus - armor)
+    setDamageResult({ roll, total, effectBonus, armor })
+  }
+
+  return (
+    <Modal title="Danno" onClose={onClose}>
+      <div className="space-y-4">
+        <div className="text-center font-mono text-xs text-slate-400">
+          {damageDice}D + Effetto ({effectBonus}) − Armatura ({armor})
+        </div>
+
+        {!damageResult ? (
+          <button
+            onClick={handleDamageRoll}
+            className="w-full py-3 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-lg tracking-widest rounded hover:bg-red-900/40 transition-colors"
+          >
+            🎲 LANCIA DANNO
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <div className="bg-slate-800 rounded p-4 text-center font-mono text-xs">
+              <p className="text-slate-400">
+                [{damageResult.roll.results.join('+')}] + {effectBonus} − {armor} armatura
+              </p>
+              <p className="text-red-400 font-bold text-2xl mt-1">{damageResult.total}</p>
+              <p className="text-slate-500">danno applicato</p>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setDamageResult(null)}
+                className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500"
+              >
+                RIRUOTA
+              </button>
+              <button
+                onClick={onApply}
+                className="flex-1 py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-xs rounded hover:bg-red-900/40"
+              >
+                APPLICA DANNO
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  )
+}
+
+// ── Root component — owns state, computes derived DMs ────────────────────
+
+export function AttackModal() {
+  const closeModal     = useUiStore((s) => s.closeModal)
+  const modalPayload   = useUiStore((s) => s.modalPayload)
+  const ships          = useBattleStore((s) => s.ships)
+  const applyDamage    = useBattleStore((s) => s.applyDamage)
+  const addCriticalHit = useBattleStore((s) => s.addCriticalHit)
+
+  const attacker = ships.find((s) => s.id === modalPayload?.shipId)
+
+  const [step, setStep]                 = useState('config')
+  const [targetId, setTargetId]         = useState('')
+  const [weaponKey, setWeaponKey]       = useState('')
+  const [attackResult, setAttackResult] = useState(null)
+  const [damageResult, setDamageResult] = useState(null)
+
+  if (!attacker) return null
+
+  const availableWeapons = (attacker.profile.turrets ?? [])
+    .flatMap((t) => t.weapons)
+    .filter((w) => !DEFENSIVE_WEAPONS.includes(w))
+    .filter((value, idx, arr) => arr.indexOf(value) === idx)
+
+  const target      = ships.find((s) => s.id === targetId)
+  const weapon      = weaponKey ? WEAPONS[weaponKey] : null
+  const enemies     = ships.filter((s) => s.id !== attacker.id)
+
+  const distance     = target ? hexDistance(attacker.position, target.position) : 0
+  const rangeBand    = getRangeBand(distance)
+  const rangeDM      = getRangeDM(rangeBand)
+  const sizeDM       = target ? getTargetSizeDM(target.profile.tonnage ?? 0) : 0
+  const evasiveDM    = target ? -(attacker.profile.crew?.pilot ?? 0) * target.evasiveThrust : 0
+  const sensorLockDM = attacker.sensorLockOn === targetId ? (attacker.sensorLockDM ?? 0) : 0
+  const gunnerSkill  = attacker.profile.crew?.gunner ?? 0
+  const totalDM      = gunnerSkill + (weapon?.attackDM ?? 0) + rangeDM + sizeDM + evasiveDM + sensorLockDM
+
+  const handleApply = () => {
+    if (!damageResult || !target) return
+    applyDamage(target.id, damageResult.total, `${weaponKey} di ${attacker.profile.name}`)
+    if (isCriticalHit(attackResult?.effect ?? 0)) {
+      addCriticalHit(target.id, { system: 'Hull', severity: 1 })
+    }
+    closeModal()
+  }
+
+  if (step === 'config') {
+    return (
+      <AttackConfigStep
+        enemies={enemies}
+        availableWeapons={availableWeapons}
+        weaponKey={weaponKey}
+        setWeaponKey={setWeaponKey}
+        targetId={targetId}
+        setTargetId={setTargetId}
+        target={target}
+        weapon={weapon}
+        rangeBand={rangeBand}
+        distance={distance}
+        rangeDM={rangeDM}
+        sizeDM={sizeDM}
+        evasiveDM={evasiveDM}
+        sensorLockDM={sensorLockDM}
+        gunnerSkill={gunnerSkill}
+        totalDM={totalDM}
+        onNext={() => setStep('roll')}
+        onClose={closeModal}
+      />
+    )
+  }
+
+  if (step === 'roll') {
+    return (
+      <AttackRollStep
+        attackerName={attacker.profile.name}
+        targetName={target?.profile.name ?? '?'}
+        weaponKey={weaponKey}
+        weapon={weapon}
+        gunnerSkill={gunnerSkill}
+        rangeDM={rangeDM}
+        sizeDM={sizeDM}
+        evasiveDM={evasiveDM}
+        sensorLockDM={sensorLockDM}
+        totalDM={totalDM}
+        attackResult={attackResult}
+        setAttackResult={setAttackResult}
+        onNext={() => setStep('damage')}
+        onClose={closeModal}
+      />
+    )
+  }
+
+  return (
+    <AttackDamageStep
+      damageDice={weapon?.damageDice ?? 1}
+      effectBonus={attackResult?.effect ?? 0}
+      armor={target?.profile.armor ?? 0}
+      damageResult={damageResult}
+      setDamageResult={setDamageResult}
+      onApply={handleApply}
+      onClose={closeModal}
+    />
+  )
+}

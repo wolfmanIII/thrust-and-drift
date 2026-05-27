@@ -1,0 +1,8 @@
+/* App-level overrides and canvas layer utilities */
+
+/* Canvas fills its parent completely */
+.battle-map-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
