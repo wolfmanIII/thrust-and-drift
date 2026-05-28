@@ -273,36 +273,34 @@ export function Dashboard() {
   const catalogOpen = view === 'catalog'
 
   return (
-    <div className="w-full h-full flex flex-col bg-slate-950">
+    <div className="w-full h-full flex bg-slate-950">
 
-      {/* ── Header ───────────────────────────────────────────────────── */}
-      <header className="shrink-0 px-6 py-4 border-b border-slate-800 flex items-center gap-4">
-        <img src={tdLogo} alt="Thrust & Drift" className="w-16 h-16 shrink-0" />
-        <h1 className="font-display font-bold text-[--neon-cyan] tracking-widest text-lg">
-          THRUST &amp; DRIFT
-        </h1>
-        <span className="text-slate-600 font-display text-xs tracking-widest hidden sm:block">
-          // SPACE COMBAT SIMULATOR
-        </span>
-        <span className="ml-auto text-slate-700 font-mono text-xs">v0.1</span>
-      </header>
+      {/* ── Left: sidebar full-height ─────────────────────────────────── */}
+      <div className="w-72 shrink-0 border-r border-slate-800 flex flex-col overflow-hidden">
+        <ProfilesPanel
+          editingId={editingId}
+          onEdit={handleEdit}
+          onNew={handleNew}
+          onCatalog={handleCatalog}
+          catalogOpen={catalogOpen}
+        />
+      </div>
 
-      {/* ── Main ─────────────────────────────────────────────────────── */}
-      <main className="flex flex-1 overflow-hidden">
+      {/* ── Right: header + content ───────────────────────────────────── */}
+      <div className="flex-1 flex flex-col overflow-hidden">
 
-        {/* Left: profile management */}
-        <div className="w-72 shrink-0 border-r border-slate-800 flex flex-col overflow-hidden">
-          <ProfilesPanel
-            editingId={editingId}
-            onEdit={handleEdit}
-            onNew={handleNew}
-            onCatalog={handleCatalog}
-            catalogOpen={catalogOpen}
-          />
-        </div>
+        <header className="shrink-0 px-6 py-4 border-b border-slate-800 flex items-center gap-4">
+          <img src={tdLogo} alt="Thrust & Drift" className="w-16 h-16 shrink-0" />
+          <h1 className="font-display font-bold text-[--neon-cyan] tracking-widest text-lg">
+            THRUST &amp; DRIFT
+          </h1>
+          <span className="text-slate-600 font-display text-xs tracking-widest hidden sm:block">
+            // SPACE COMBAT SIMULATOR
+          </span>
+          <span className="ml-auto text-slate-700 font-mono text-xs">v0.1</span>
+        </header>
 
-        {/* Right: session controls, profile form, or official catalog */}
-        <div className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden">
           {catalogOpen ? (
             <CatalogPanel />
           ) : editingId ? (
@@ -315,9 +313,9 @@ export function Dashboard() {
           ) : (
             <SessionPanel />
           )}
-        </div>
+        </main>
 
-      </main>
+      </div>
     </div>
   )
 }
