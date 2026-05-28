@@ -41,11 +41,7 @@ function DmRow({ label, value, highlight = false }) {
  *   weapon: object|null,
  *   rangeBand: string,
  *   distance: number,
- *   rangeDM: number,
- *   sizeDM: number,
- *   evasiveDM: number,
- *   gunnerSkill: number,
- *   totalDM: number,
+ *   dmBreakdown: object,
  *   onNext: Function,
  *   onClose: Function,
  * }} props
@@ -53,9 +49,10 @@ function DmRow({ label, value, highlight = false }) {
 function AttackConfigStep({
   enemies, availableWeapons,
   weaponKey, setWeaponKey, targetId, setTargetId,
-  target, weapon, rangeBand, distance, rangeDM, sizeDM, evasiveDM, sensorLockDM,
-  gunnerSkill, totalDM, onNext, onClose,
+  target, weapon, rangeBand, distance, dmBreakdown,
+  onNext, onClose,
 }) {
+  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
   return (
     <Modal title="Attacco" onClose={onClose}>
       <div className="space-y-4">
@@ -324,11 +321,8 @@ function AttackDamageStep({ damageDice, effectBonus, armor, damageResult, setDam
 export function AttackModal() {
   const closeModal     = useUiStore((s) => s.closeModal)
   const modalPayload   = useUiStore((s) => s.modalPayload)
-  const ships          = useBattleStore((s) => s.ships)
   const applyDamage    = useBattleStore((s) => s.applyDamage)
   const addCriticalHit = useBattleStore((s) => s.addCriticalHit)
-
-  const attacker = ships.find((s) => s.id === modalPayload?.shipId)
 
   const [step, setStep]                 = useState('config')
   const [targetId, setTargetId]         = useState('')
@@ -336,12 +330,10 @@ export function AttackModal() {
   const [attackResult, setAttackResult] = useState(null)
   const [damageResult, setDamageResult] = useState(null)
 
-  const { enemies, target, weapon, availableWeapons, distance, rangeBand, dmBreakdown } =
-    useAttackSetup(attacker ?? null, targetId, weaponKey)
+  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, dmBreakdown } =
+    useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey)
 
   if (!attacker) return null
-
-  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
 
   const handleApply = () => {
     if (!damageResult || !target) return
@@ -365,12 +357,7 @@ export function AttackModal() {
         weapon={weapon}
         rangeBand={rangeBand}
         distance={distance}
-        rangeDM={rangeDM}
-        sizeDM={sizeDM}
-        evasiveDM={evasiveDM}
-        sensorLockDM={sensorLockDM}
-        gunnerSkill={gunnerSkill}
-        totalDM={totalDM}
+        dmBreakdown={dmBreakdown}
         onNext={() => setStep('roll')}
         onClose={closeModal}
       />

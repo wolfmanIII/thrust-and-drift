@@ -10,10 +10,11 @@ import { hexDistance, getRangeBand } from '../../utils/hex.js'
 import { getRangeDM, getTargetSizeDM, getEvasiveDM } from '../../utils/combat.js'
 
 /**
- * @param {object|null} attacker  ShipInstance of the attacking ship
- * @param {string}      targetId  ID of the selected target ship
- * @param {string}      weaponKey Weapon type key (e.g. 'Pulse Laser')
+ * @param {string|null} attackerShipId  ID of the attacking ship
+ * @param {string}      targetId        ID of the selected target ship
+ * @param {string}      weaponKey       Weapon type key (e.g. 'Pulse Laser')
  * @returns {{
+ *   attacker:         object|undefined,
  *   enemies:          object[],
  *   target:           object|undefined,
  *   weapon:           object|null,
@@ -31,11 +32,12 @@ import { getRangeDM, getTargetSizeDM, getEvasiveDM } from '../../utils/combat.js
  *   },
  * }}
  */
-export function useAttackSetup(attacker, targetId, weaponKey) {
+export function useAttackSetup(attackerShipId, targetId, weaponKey) {
   const ships = useBattleStore((s) => s.ships)
 
-  const enemies = ships.filter((s) => s.id !== attacker?.id)
-  const target  = ships.find((s) => s.id === targetId)
+  const attacker = ships.find((s) => s.id === attackerShipId)
+  const enemies  = ships.filter((s) => s.id !== attackerShipId)
+  const target   = ships.find((s) => s.id === targetId)
   const weapon  = weaponKey ? (WEAPONS[weaponKey] ?? null) : null
 
   const availableWeapons = (attacker?.profile.turrets ?? [])
@@ -43,7 +45,7 @@ export function useAttackSetup(attacker, targetId, weaponKey) {
     .filter((w) => !DEFENSIVE_WEAPONS.includes(w))
     .filter((v, i, a) => a.indexOf(v) === i)
 
-  const distance    = target ? hexDistance(attacker.position, target.position) : 0
+  const distance    = (target && attacker) ? hexDistance(attacker.position, target.position) : 0
   const rangeBand   = getRangeBand(distance)
   const rangeDM     = getRangeDM(rangeBand)
   const sizeDM      = target ? getTargetSizeDM(target.profile.tonnage ?? 0) : 0
@@ -54,6 +56,7 @@ export function useAttackSetup(attacker, targetId, weaponKey) {
   const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + evasiveDM + sensorLockDM
 
   return {
+    attacker,
     enemies,
     target,
     weapon,

@@ -139,14 +139,14 @@ function EmptyContextMenu({ x, y, menuRef, hex, close }) {
 // === DISPATCHER ===
 
 /**
- * Map context type → component.
+ * Map context type → { component, getProps }.
  * Extend here to support new context types — no other file needs to change.
- * @type {Record<string, Function>}
+ * @type {Record<string, { component: Function, getProps: Function }>}
  */
 const MENU_MAP = {
-  ship:    ShipContextMenu,
-  missile: MissileContextMenu,
-  empty:   EmptyContextMenu,
+  ship:    { component: ShipContextMenu,    getProps: (ctx) => ({ ship: ctx.ship,       targetId: ctx.targetId }) },
+  missile: { component: MissileContextMenu, getProps: (ctx) => ({ missile: ctx.missile, targetId: ctx.targetId }) },
+  empty:   { component: EmptyContextMenu,   getProps: (ctx) => ({ hex: ctx.hex }) },
 }
 
 export function ContextMenu() {
@@ -175,15 +175,12 @@ export function ContextMenu() {
   const missile = missiles.find((m) => m.id === targetId) ?? null
   const close   = () => hideContextMenu()
 
-  const MenuComponent = MENU_MAP[type]
-  if (!MenuComponent) return null
+  const entry = MENU_MAP[type]
+  if (!entry) return null
 
+  const { component: MenuComponent, getProps } = entry
   const shared = { x, y, menuRef, close }
-  const typedProps = {
-    ship:    { ...shared, ship, targetId },
-    missile: { ...shared, missile, targetId },
-    empty:   { ...shared, hex },
-  }
+  const typeCtx = { ship, missile, targetId, hex }
 
-  return <MenuComponent {...typedProps[type]} />
+  return <MenuComponent {...shared} {...getProps(typeCtx)} />
 }

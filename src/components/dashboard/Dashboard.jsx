@@ -4,7 +4,7 @@
  * Right panel: session controls (default) or ShipProfileForm (when editing).
  */
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useUiStore }       from '../../store/uiStore.js'
 import { useBattleStore }   from '../../store/battleStore.js'
 import { useProfilesStore } from '../../store/profilesStore.js'
