@@ -15,15 +15,23 @@ const BATTLE_VERSION = '1.0'
  * @throws {Error} On malformed JSON or wrong type tag
  */
 async function parseJSONFile(file, expectedType) {
-  const text = await file.text()
+  let text
+  try {
+    text = await file.text()
+  } catch (e) {
+    throw new Error(`Impossibile leggere il file: ${e.message}`)
+  }
   let data
   try {
     data = JSON.parse(text)
-  } catch {
-    throw new Error('File non valido: JSON malformato.')
+  } catch (e) {
+    throw new Error(`File non valido: JSON malformato. (${e.message})`)
+  }
+  if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+    throw new Error('File non valido: struttura JSON inattesa.')
   }
   if (data.type !== expectedType) {
-    throw new Error(`File non valido: tipo errato. Atteso "${expectedType}".`)
+    throw new Error(`File non valido: tipo errato. Atteso "${expectedType}", ricevuto "${data.type ?? 'nessuno'}".`)
   }
   return data
 }
