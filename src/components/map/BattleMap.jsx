@@ -7,12 +7,14 @@
 
 import { useRef, useEffect, useCallback } from 'react'
 import { useCanvasRenderer, HEX_SIZE } from './useCanvasRenderer.js'
+import { useCanvasEffects } from './useCanvasEffects.js'
 import { useMapInteraction } from './useMapInteraction.js'
 import { useShipHover } from './useShipHover.js'
 import { ShipTooltip } from './ShipTooltip.jsx'
 
 export function BattleMap() {
-  const canvasRef = useRef(null)
+  const canvasRef        = useRef(null)
+  const effectsCanvasRef = useRef(null)
 
   const {
     offset,
@@ -29,6 +31,7 @@ export function BattleMap() {
   const { onHoverMove, onHoverLeave, onHoverDown } = useShipHover({ canvasRef, hexSize: HEX_SIZE, offset, zoom })
 
   useCanvasRenderer({ canvasRef, offset, zoom })
+  useCanvasEffects({ effectsCanvasRef, offset, zoom })
 
   const combinedMouseMove = useCallback((e) => { onMouseMove(e); onHoverMove(e) }, [onMouseMove, onHoverMove])
   const combinedMouseDown = useCallback((e) => { onMouseDown(e); onHoverDown(e) }, [onMouseDown, onHoverDown])
@@ -55,6 +58,11 @@ export function BattleMap() {
         onClick={onClick}
         onContextMenu={onContextMenu}
         onDoubleClick={onDoubleClick}
+      />
+      {/* Effects overlay — pointer-events:none so all interaction passes through */}
+      <canvas
+        ref={effectsCanvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
       />
       <ShipTooltip />
     </>

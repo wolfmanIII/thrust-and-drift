@@ -14,6 +14,10 @@ import { rollAttack, isCriticalHit, getCriticalSeverity } from '../../utils/comb
 import { rollDice, roll2D6 } from '../../utils/dice.js'
 import { getCriticalLocation, getCriticalEffect } from '../../data/criticalHits.js'
 import { useAttackSetup } from './useAttackSetup.js'
+import { emitEffect } from '../../utils/effectQueue.js'
+
+/** Weapons that fire a visible beam/ray toward the target. */
+const BEAM_WEAPONS = ['Pulse Laser', 'Beam Laser', 'Particle Beam', 'Railgun']
 
 /** @typedef {'config'|'roll'|'damage'|'critical'} AttackStep */
 
@@ -498,6 +502,23 @@ export function AttackModal() {
   const handleApplyDamage = () => {
     if (!damageResult || !target) return
     applyDamage(target.id, damageResult.total, `${weaponKey} di ${attacker.profile.name}`)
+
+    if (attackResult?.hit) {
+      if (BEAM_WEAPONS.includes(weaponKey)) {
+        emitEffect('laser_ray', {
+          duration: 300,
+          fromHex:    attacker.position,
+          toHex:      target.position,
+          weaponType: weaponKey,
+        })
+      }
+      emitEffect('impact_burst', {
+        duration:  500,
+        hex:       target.position,
+        shipColor: target.color,
+      })
+    }
+
     if (isCriticalHit(attackResult?.effect ?? 0)) {
       setStep('critical')
     } else {
@@ -515,6 +536,12 @@ export function AttackModal() {
       ? Math.max(attackSeverity, existingCrit.severity + 1)
       : attackSeverity
     const effect = getCriticalEffect(location, isMaxSeverity ? 6 : effectiveSeverity)
+
+    emitEffect('critical_flash', {
+      duration: 600,
+      hex:    target.position,
+      system: location,
+    })
 
     if (isMaxSeverity) {
       if (extraDamageResult !== null) {

@@ -10,6 +10,7 @@ import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { hexDistance, hexAdd, HEX_DIRECTIONS } from '../../utils/hex.js'
 import { isValidThrustDelta } from '../../utils/combat.js'
+import { emitEffect } from '../../utils/effectQueue.js'
 
 export function ThrustModal() {
   const closeModal   = useUiStore((s) => s.closeModal)
@@ -41,6 +42,12 @@ export function ThrustModal() {
   const handleConfirm = () => {
     if (!isValid || cost === 0) { closeModal(); return }
     applyShipThrust(ship.id, delta, cost)
+    emitEffect('thrust_plume', {
+      duration:  400,
+      hex:       ship.position,
+      delta,
+      shipColor: ship.color,
+    })
     closeModal()
   }
 
