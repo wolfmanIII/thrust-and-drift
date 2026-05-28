@@ -573,7 +573,7 @@ export function Dashboard() {
               src={tdLogo}
               alt="Thrust & Drift"
               className="w-24 h-24"
-              style={{ filter: 'drop-shadow(0 0 6px rgba(125,211,252,0.55)) drop-shadow(0 0 18px rgba(125,211,252,0.25))' }}
+              style={{ filter: 'drop-shadow(0 0 2px #fff) drop-shadow(0 0 8px #7dd3fc) drop-shadow(0 0 22px rgba(125,211,252,0.6)) drop-shadow(0 0 45px rgba(125,211,252,0.25))' }}
             />
             <div className="logo-shimmer" />
           </div>
