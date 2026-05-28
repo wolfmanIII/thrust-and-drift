@@ -395,3 +395,224 @@ describe('rollAllInitiative', () => {
     expect(useBattleStore.getState().ships[0].initiativeBonusNextRound).toBe(0)
   })
 })
+
+// === THRUST ===
+
+describe('applyShipThrust', () => {
+  it('updates velocity vector', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyShipThrust(id, { q: 1, r: -1 }, 1)
+    expect(useBattleStore.getState().ships[0].vector).toEqual({ q: 1, r: -1 })
+  })
+
+  it('accumulates thrustUsedThisRound', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyShipThrust(id, { q: 1, r: 0 }, 1)
+    useBattleStore.getState().applyShipThrust(id, { q: 0, r: 1 }, 1)
+    expect(useBattleStore.getState().ships[0].thrustUsedThisRound).toBe(2)
+  })
+
+  it('multiple thrusts accumulate vector', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyShipThrust(id, { q: 2, r: 0 }, 2)
+    useBattleStore.getState().applyShipThrust(id, { q: -1, r: 1 }, 1)
+    expect(useBattleStore.getState().ships[0].vector).toEqual({ q: 1, r: 1 })
+  })
+
+  it('unknown shipId is no-op', () => {
+    expect(() => useBattleStore.getState().applyShipThrust('ghost', { q: 1, r: 0 }, 1)).not.toThrow()
+  })
+
+  it('adds log entry', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    const logBefore = useBattleStore.getState().log.length
+    useBattleStore.getState().applyShipThrust(id, { q: 1, r: 0 }, 1)
+    expect(useBattleStore.getState().log.length).toBeGreaterThan(logBefore)
+  })
+})
+
+// === MOVEMENT ===
+
+describe('resolveMovement', () => {
+  it('moves ships by their vector', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 2, r: 1 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { vector: { q: 1, r: -1 } })
+    useBattleStore.getState().resolveMovement()
+    expect(useBattleStore.getState().ships[0].position).toEqual({ q: 3, r: 0 })
+  })
+
+  it('ship with zero vector stays in place', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 4, r: -2 }, 'players', '#fff')
+    useBattleStore.getState().resolveMovement()
+    expect(useBattleStore.getState().ships[0].position).toEqual({ q: 4, r: -2 })
+  })
+
+  it('missiles move and decrement thrustRemaining', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'B' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 2, { q: 1, r: 0 }, { q: 1, r: 0 })
+    const missileId = useBattleStore.getState().missiles[0].id
+    useBattleStore.getState().resolveMovement()
+    const missile = useBattleStore.getState().missiles.find(m => m.id === missileId)
+    expect(missile.position).toEqual({ q: 2, r: 0 })
+    expect(missile.thrustRemaining).toBe(9)
+  })
+
+  it('removes missiles with thrustRemaining reaching -1 after decrement', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 1, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 1, { q: 0, r: 0 }, { q: 0, r: 0 })
+    const missileId = useBattleStore.getState().missiles[0].id
+    useBattleStore.setState({
+      missiles: useBattleStore.getState().missiles.map(m =>
+        m.id === missileId ? { ...m, thrustRemaining: 0 } : m
+      )
+    })
+    useBattleStore.getState().resolveMovement()
+    // thrustRemaining becomes -1 after decrement → filtered out
+    expect(useBattleStore.getState().missiles.find(m => m.id === missileId)).toBeUndefined()
+  })
+})
+
+// === MISSILES ===
+
+describe('launchMissile', () => {
+  it('adds missile to missiles array', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'B' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 3, { q: 0, r: 0 }, { q: 1, r: 0 }, 'Smart')
+    expect(useBattleStore.getState().missiles).toHaveLength(1)
+    const m = useBattleStore.getState().missiles[0]
+    expect(m.count).toBe(3)
+    expect(m.type).toBe('Smart')
+    expect(m.thrustRemaining).toBe(10)
+  })
+
+  it('increments turretsNeedingReload on attacker', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 1, { q: 0, r: 0 }, { q: 0, r: 0 })
+    expect(useBattleStore.getState().ships[0].turretsNeedingReload).toBe(1)
+  })
+})
+
+describe('removeMissile', () => {
+  it('removes missile by id', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 1, { q: 0, r: 0 }, { q: 0, r: 0 })
+    const { id } = useBattleStore.getState().missiles[0]
+    useBattleStore.getState().removeMissile(id)
+    expect(useBattleStore.getState().missiles).toHaveLength(0)
+  })
+
+  it('unknown id is no-op', () => {
+    expect(() => useBattleStore.getState().removeMissile('ghost')).not.toThrow()
+  })
+})
+
+// === CREW ACTIONS (remaining) ===
+
+describe('repairCritical', () => {
+  it('removes first critical hit', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'Drive',  severity: 2 })
+    useBattleStore.getState().addCriticalHit(id, { system: 'Turret', severity: 1 })
+    useBattleStore.getState().repairCritical(id)
+    const crits = useBattleStore.getState().ships[0].criticalHits
+    expect(crits).toHaveLength(1)
+    expect(crits[0].system).toBe('Turret')
+  })
+
+  it('no-op when no crits', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    expect(() => useBattleStore.getState().repairCritical(id)).not.toThrow()
+    expect(useBattleStore.getState().ships[0].criticalHits).toHaveLength(0)
+  })
+
+  it('unknown shipId is no-op', () => {
+    expect(() => useBattleStore.getState().repairCritical('ghost')).not.toThrow()
+  })
+})
+
+describe('applyInitiativeBonus', () => {
+  it('accumulates bonus on ship', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyInitiativeBonus(id, 3)
+    useBattleStore.getState().applyInitiativeBonus(id, 2)
+    expect(useBattleStore.getState().ships[0].initiativeBonusNextRound).toBe(5)
+  })
+
+  it('clamps negative bonus to 0', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyInitiativeBonus(id, -3)
+    expect(useBattleStore.getState().ships[0].initiativeBonusNextRound).toBe(0)
+  })
+})
+
+describe('overloadDrive', () => {
+  it('adds thrustBonusThisRound', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().overloadDrive(id, 2)
+    expect(useBattleStore.getState().ships[0].thrustBonusThisRound).toBe(2)
+  })
+
+  it('accumulates on repeated calls', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().overloadDrive(id, 2)
+    useBattleStore.getState().overloadDrive(id, 1)
+    expect(useBattleStore.getState().ships[0].thrustBonusThisRound).toBe(3)
+  })
+
+  it('clamps negative bonus to 0', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().overloadDrive(id, -5)
+    expect(useBattleStore.getState().ships[0].thrustBonusThisRound).toBe(0)
+  })
+
+  it('bonus resets at next round', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().overloadDrive(id, 3)
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].thrustBonusThisRound).toBe(0)
+  })
+})
+
+describe('reloadTurret', () => {
+  it('decrements turretsNeedingReload', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { turretsNeedingReload: 2 })
+    useBattleStore.getState().reloadTurret(id)
+    expect(useBattleStore.getState().ships[0].turretsNeedingReload).toBe(1)
+  })
+
+  it('no-op when turretsNeedingReload = 0', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    expect(() => useBattleStore.getState().reloadTurret(id)).not.toThrow()
+    expect(useBattleStore.getState().ships[0].turretsNeedingReload).toBe(0)
+  })
+
+  it('unknown shipId is no-op', () => {
+    expect(() => useBattleStore.getState().reloadTurret('ghost')).not.toThrow()
+  })
+})
