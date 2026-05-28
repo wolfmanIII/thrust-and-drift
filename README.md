@@ -12,7 +12,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 
 | Feature | Description |
 |---------|-------------|
-| **Hex grid map** | Pointy-top axial hex grid with pan & zoom |
+| **Hex grid map** | Flat-top axial hex grid with pan & zoom |
 | **Vectorial movement** | Ships have velocity vectors; thrust modifies them |
 | **Ship profiles** | Full CRUD — create, edit, duplicate, delete |
 | **Attack resolution** | 3-step flow: weapon/target config → 2D6 roll → damage |

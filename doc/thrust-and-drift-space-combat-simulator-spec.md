@@ -26,10 +26,10 @@ Il simulatore implementa le **regole base di combattimento spaziale** del Core R
 
 | Layer | Tecnologia | Motivazione |
 |---|---|---|
-| Framework | **React 18 + Vite** | Component UI + build tool moderno |
+| Framework | **React 19 + Vite 8** | Component UI + build tool moderno |
 | Rendering mappa | **Canvas API** (nativo) | Performance, controllo totale, pan/zoom fluido |
-| Gestione stato | **Zustand** | Leggero, scalabile, ideale per stato di gioco complesso |
-| Styling | **Tailwind CSS** | UI pulita, dark mode, zero CSS custom |
+| Gestione stato | **Zustand 5** | Leggero, scalabile, ideale per stato di gioco complesso |
+| Styling | **Tailwind CSS v4** | UI pulita, dark mode, `@theme` tokens in CSS — nessun `tailwind.config.js` |
 | Matematica hex | **Custom (utils/hex.js)** | ~30 righe, zero dipendenze esterne |
 | File I/O | **Browser File API** | Import/export JSON nativo, zero dipendenze |
 
@@ -38,16 +38,19 @@ Il simulatore implementa le **regole base di combattimento spaziale** del Core R
 ```json
 {
   "dependencies": {
-    "react": "^18.x",
-    "react-dom": "^18.x",
-    "zustand": "^4.x"
+    "react": "^19.x",
+    "react-dom": "^19.x",
+    "zustand": "^5.x",
+    "uuid": "^14.x"
   },
   "devDependencies": {
-    "vite": "^5.x",
-    "@vitejs/plugin-react": "^4.x",
-    "tailwindcss": "^3.x",
-    "autoprefixer": "^10.x",
-    "postcss": "^8.x"
+    "vite": "^8.x",
+    "@vitejs/plugin-react": "^6.x",
+    "@tailwindcss/vite": "^4.x",
+    "tailwindcss": "^4.x",
+    "eslint": "^10.x",
+    "eslint-plugin-react-hooks": "^7.x",
+    "eslint-plugin-react-refresh": "^0.5.x"
   }
 }
 ```
@@ -59,15 +62,19 @@ Il simulatore implementa le **regole base di combattimento spaziale** del Core R
 ```text
 thrust-and-drift/
 ├── index.html
-├── vite.config.js
-├── tailwind.config.js
-├── postcss.config.js
+├── vite.config.js            ← Tailwind v4 via @tailwindcss/vite plugin
+├── eslint.config.js
 ├── public/
-│   └── favicon.ico
 └── src/
     ├── main.jsx
     ├── App.jsx
+    ├── index.css              ← Tailwind directives + @theme tokens
+    ├── App.css
     ├── components/
+    │   ├── dashboard/
+    │   │   ├── Dashboard.jsx          ← Pre-battle lobby (profili + avvio sessione)
+    │   │   ├── CatalogPanel.jsx       ← Catalogo navi ufficiali (sola lettura)
+    │   │   └── useProfileImport.js    ← Hook import profili da file
     │   ├── map/
     │   │   ├── BattleMap.jsx          ← Canvas principale
     │   │   ├── useCanvasRenderer.js   ← Hook rendering hex + token
@@ -75,34 +82,38 @@ thrust-and-drift/
     │   │   └── tokenRenderers.js      ← Funzioni draw per navi e missili
     │   ├── modals/
     │   │   ├── Modal.jsx              ← Wrapper modale generico
-    │   │   ├── ShipProfileModal.jsx   ← Crea/modifica profilo nave
+    │   │   ├── ShipProfileModal.jsx   ← Crea/modifica profilo nave (modale)
     │   │   ├── AddShipModal.jsx       ← Sceglie profilo da aggiungere in battaglia
     │   │   ├── ThrustModal.jsx        ← Applica Thrust con preview mappa
+    │   │   ├── EvasiveModal.jsx       ← Dichiara thrust evasivo
     │   │   ├── AttackModal.jsx        ← Risolve attacco con calcolo DM
+    │   │   ├── MissileLaunchModal.jsx ← Lancia salvo missili
     │   │   ├── ShipDetailModal.jsx    ← Scheda completa nave
     │   │   ├── ActionModal.jsx        ← Azioni fase Actions (engineer, ecc.)
-    │   │   └── InitiativeModal.jsx    ← Tiro iniziativa inizio round
+    │   │   ├── InitiativeModal.jsx    ← Tiro iniziativa inizio round
+    │   │   └── useAttackSetup.js      ← Hook derivazione DM attacco
     │   ├── ui/
     │   │   ├── ContextMenu.jsx        ← Menu tasto destro
     │   │   ├── HUD.jsx                ← Overlay minimo (round, fase, iniziativa)
     │   │   ├── BattleLog.jsx          ← Log eventi collassabile
     │   │   └── PhaseTracker.jsx       ← Indicatore fase corrente
     │   └── forms/
-    │       ├── ShipProfileForm.jsx    ← Form completo profilo nave
-    │       ├── ThrustInput.jsx        ← 6 pulsanti hex + input Δq/Δr
-    │       └── DiceRoller.jsx         ← Componente lancio dadi con DM
+    │       └── ShipProfileForm.jsx    ← Form completo profilo nave
     ├── store/
     │   ├── profilesStore.js           ← Profili nave (CRUD + import/export)
     │   ├── battleStore.js             ← Stato battaglia corrente
     │   └── uiStore.js                 ← Stato UI (modal aperto, nave selezionata, ecc.)
     ├── utils/
-    │   ├── hex.js                     ← Matematica esagonale
+    │   ├── hex.js                     ← Matematica esagonale (flat-top)
     │   ├── combat.js                  ← Calcoli combattimento (DM, danni, range band)
-    │   ├── io.js                      ← Import/export JSON
+    │   ├── io.js                      ← Import/export JSON via File API
     │   └── dice.js                    ← Lancio dadi e formattazione risultati
     └── data/
         ├── weapons.js                 ← Tabelle armi, tratti, danni
         ├── rangeBands.js              ← Soglie bande di distanza
+        ├── crewActions.js             ← Definizioni azioni equipaggio fase Actions
+        ├── factions.js                ← Fazioni disponibili
+        ├── shipCatalog.js             ← Catalogo ufficiale navi (sola lettura)
         └── defaultProfiles.js         ← Profili nave preimpostati (Scout, Free Trader, ecc.)
 ```
 
@@ -202,17 +213,20 @@ interface ShipInstance {
   // STATO COMBATTIMENTO
   hullCurrent: number           // Hull points rimanenti
   thrustUsedThisRound: number   // Thrust già speso nel round corrente
-  
+  thrustBonusThisRound: number  // Thrust extra da Overload Drive (reset ogni round)
   criticalHits: CriticalHit[]
-  
+
   // STATO ROUND
   initiative: number            // Valore iniziativa estratto
+  initiativeBonusNextRound: number // Bonus iniziativa da azione Captain (reset dopo uso)
   hasActedThisPhase: boolean    // Ha già agito nella fase corrente
   evasiveThrust: number         // Thrust riservato per evasione
-  
+  turretsNeedingReload: number  // Numero torrette che richiedono ricarica (Missile Rack)
+
   // GUERRA ELETTRONICA
-  sensorLockOn: string | null   // id nave su cui ha sensor lock
+  sensorLockOn: string | null   // id nave su cui ha sensor lock attivo
   sensorLockedBy: string | null // id nave che ha sensor lock su di essa
+  sensorLockDM: number          // DM attacco bonus da sensor lock (effetto del tiro)
 
   // MISSILI
   // I missili sono token separati (vedi MissileToken)
@@ -302,15 +316,10 @@ interface LogEntry {
 
 ## 5. Matematica Esagonale (utils/hex.js)
 
-Griglia **pointy-top** con coordinate assiali (q, r).
+Griglia **flat-top** con coordinate assiali (q, r). Il lato piatto è in alto (ore 12).
 
 ```javascript
 // === COORDINATE ===
-
-// Converti assiale → cubo
-function axialToCube(q, r) {
-  return { q, r, s: -q - r }
-}
 
 // Distanza tra due hex (formula cubica)
 function hexDistance(a, b) {
@@ -335,14 +344,15 @@ function hexMagnitude(v) {
   return hexDistance({ q: 0, r: 0 }, v)
 }
 
-// === 6 DIREZIONI (pointy-top) ===
+// === 6 DIREZIONI (flat-top) ===
+// // Traveller Companion p.172
 const HEX_DIRECTIONS = [
-  { q:  1, r:  0 }, // E
+  { q:  1, r:  0 }, // SE
   { q:  1, r: -1 }, // NE
-  { q:  0, r: -1 }, // NW
-  { q: -1, r:  0 }, // W
+  { q:  0, r: -1 }, // N
+  { q: -1, r:  0 }, // NW
   { q: -1, r:  1 }, // SW
-  { q:  0, r:  1 }, // SE
+  { q:  0, r:  1 }, // S
 ]
 
 // Vicini di un hex
@@ -350,34 +360,34 @@ function hexNeighbors(hex) {
   return HEX_DIRECTIONS.map(d => hexAdd(hex, d))
 }
 
-// === CONVERSIONE PIXEL ↔ HEX ===
+// === CONVERSIONE PIXEL ↔ HEX (flat-top) ===
 // size = raggio del hex (pixel)
 
 function hexToPixel(q, r, size, offsetX = 0, offsetY = 0) {
-  const x = size * (Math.sqrt(3) * q + Math.sqrt(3) / 2 * r)
-  const y = size * (3 / 2 * r)
+  const x = size * (1.5 * q)
+  const y = size * ((Math.sqrt(3) / 2) * q + Math.sqrt(3) * r)
   return { x: x + offsetX, y: y + offsetY }
 }
 
 function pixelToHex(px, py, size, offsetX = 0, offsetY = 0) {
   const x = (px - offsetX) / size
   const y = (py - offsetY) / size
-  const q = (Math.sqrt(3) / 3 * x - 1 / 3 * y)
-  const r = (2 / 3 * y)
+  const q = (2 / 3) * x
+  const r = -(1 / 3) * x + (Math.sqrt(3) / 3) * y
   return hexRound({ q, r })
 }
 
 // Arrotonda a hex intero (necessario per pixelToHex)
 function hexRound(hex) {
-  const q = Math.round(hex.q)
-  const r = Math.round(hex.r)
-  const s = Math.round(-hex.q - hex.r)
-  const dq = Math.abs(q - hex.q)
-  const dr = Math.abs(r - hex.r)
-  const ds = Math.abs(s - (-hex.q - hex.r))
-  if (dq > dr && dq > ds) return { q: -r - s, r }
-  if (dr > ds) return { q, r: -q - s }
-  return { q, r }
+  const rq = Math.round(hex.q)
+  const rr = Math.round(hex.r)
+  const rs = Math.round(-hex.q - hex.r)
+  const dq = Math.abs(rq - hex.q)
+  const dr = Math.abs(rr - hex.r)
+  const ds = Math.abs(rs - (-hex.q - hex.r))
+  if (dq > dr && dq > ds) return { q: -rr - rs, r: rr }
+  if (dr > ds) return { q: rq, r: -rq - rs }
+  return { q: rq, r: rr }
 }
 
 // === RANGE BANDS ===
