@@ -972,14 +972,7 @@ Funzionalità incluse nella prima versione funzionante:
 - ✅ Modale conferma abbandono sessione (⌂ HUD)
 - ✅ Suite di test (Vitest — utils, store, componenti UI)
 
-### 13.2 Versione 1.1 — Post-MVP
-
-- **Dogfighting** — rilevamento automatico navi nella stessa cella → transizione a round da 6 secondi; check Pilot contrapposto; DM dimensione/thrust; flusso separato dal combattimento standard
-- Electronic warfare (jamming)
-- Evasive action avanzata
-- Asse Z opzionale (3D)
-
-### 13.3 Versione 1.2 — HUD Contestuale
+### 13.2 Versione 1.1 — HUD Contestuale
 
 **Tooltip hover nave** — al passaggio del mouse su un token sulla mappa, mostra un pannello informativo minimale (overlay HTML sopra il canvas, non disegnato su Canvas):
 
@@ -996,7 +989,7 @@ Funzionalità incluse nella prima versione funzionante:
 
 Il pannello appare con breve delay (~200 ms) per evitare flickering durante il pan, scompare al mouseleave o all'apertura del context menu.
 
-### 13.4 Versione 1.3 — Effetti Visivi Canvas
+### 13.3 Versione 1.2 — Effetti Visivi Canvas
 
 Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`):
 
@@ -1011,7 +1004,24 @@ Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`
 
 Tutti gli effetti sono puramente decorativi — non bloccano input, non modificano stato di gioco, si esauriscono in autonomia senza dover essere gestiti dallo store.
 
-### 13.5 Versione 1.4 — Persistenza e Resilienza
+### 13.4 Versione 1.3 — Dogfighting
+
+- Rilevamento automatico navi nella stessa cella → transizione a round da 6 secondi
+- Check Pilot contrapposto; DM tonnaggio/thrust; gestione più gruppi in parallelo
+- Flusso micro-round (6 tick) prima della fase Attacco standard; navi esterne non bloccate
+- Fuga dal dogfight con check inseguimento
+- Electronic warfare (jamming), evasive action avanzata
+- Vedi `dogfight-system-design.md`
+
+### 13.5 Versione 1.4 — Abbordaggio
+
+- 4 fasi: Approccio → Contatto → Conflitto → Sicurezza (HG 2022 pp.125–135)
+- Metodi ingresso: airlock, breaching tube, forced linkage, taglio scafo con resilienza per armatura
+- Stacking corridoi, colpi mancati (tabella 2D), obiettivi tattici (Ponte / Engineering / Torrette)
+- Cambio fazione nave catturata; modalità astratta rapida (CR p.175) per abbordaggi di routine
+- Vedi `boarding-system-design.md`
+
+### 13.6 Versione 1.5 — Persistenza e Resilienza
 
 **Autosave su IndexedDB** — eliminare la dipendenza dal salvataggio manuale:
 
@@ -1027,10 +1037,10 @@ Tutti gli effetti sono puramente decorativi — non bloccano input, non modifica
 - Toast/banner per errori non fatali (import JSON malformato, azione su nave inesistente, ecc.) — attualmente silenti
 - Logging errori nel battle log con tipo `"system"` per mantenere traccia durante la sessione
 
-### 13.6 Versione 2.0 — Future
+### 13.7 Versione 2.0 — Future
 
-- **Abbordaggio** (HG 2022 pp.125–135) — 4 fasi: Approccio → Contatto → Conflitto → Sicurezza; metodi ingresso (airlock, breaching tube, taglio scafo); check Mechanic/Pilot; stacking, colpi mancati, obiettivi tattici (ponte/engineering/torrette); cambio fazione nave catturata; modalità astratta rapida (CR p.175); vedi `boarding-system-design.md`
 - Scale mappa multiple con transizione
+- Asse Z opzionale (3D)
 - Ostacoli ambientali (asteroidi, detriti)
 - Esporta resoconto battaglia in PDF
 
