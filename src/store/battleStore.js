@@ -79,13 +79,16 @@ const useBattleStore = create((set, get) => ({
       vector: { q: 0, r: 0 },
       hullCurrent: profile.hull,
       thrustUsedThisRound: 0,
+      thrustBonusThisRound: 0,
       criticalHits: [],
       initiative: 0,
+      initiativeBonusNextRound: 0,
       hasActedThisPhase: false,
       evasiveThrust: 0,
       sensorLockOn: null,
       sensorLockedBy: null,
       sensorLockDM: 0,
+      turretsNeedingReload: 0,
     }
     set((s) => ({
       ships: [...s.ships, instance],
@@ -142,7 +145,7 @@ const useBattleStore = create((set, get) => ({
       const result = rollInitiative(
         ship.profile.crew.pilot ?? 0,
         ship.profile.thrust,
-        tacticsEffects[ship.id] ?? 0,
+        (tacticsEffects[ship.id] ?? 0) + (ship.initiativeBonusNextRound ?? 0),
       )
       return { id: ship.id, initiative: result.total, roll: result }
     })
@@ -160,7 +163,7 @@ const useBattleStore = create((set, get) => ({
     set((s) => ({
       ships: s.ships.map((sh) => {
         const r = rolled.find((r) => r.id === sh.id)
-        return r ? { ...sh, initiative: r.initiative } : sh
+        return r ? { ...sh, initiative: r.initiative, initiativeBonusNextRound: 0 } : sh
       }),
       initiativeOrder: sorted.map((r) => r.id),
       currentActorIndex: 0,
@@ -305,6 +308,9 @@ const useBattleStore = create((set, get) => ({
     }
     set((s) => ({
       missiles: [...s.missiles, missile],
+      ships: s.ships.map((sh) =>
+        sh.id === launchedBy ? { ...sh, turretsNeedingReload: (sh.turretsNeedingReload ?? 0) + 1 } : sh
+      ),
       log: [...s.log, makeLogEntry({
         round: s.round,
         phase: s.phase,
@@ -364,6 +370,7 @@ const useBattleStore = create((set, get) => ({
       ships: s.ships.map((sh) => ({
         ...sh,
         thrustUsedThisRound: 0,
+        thrustBonusThisRound: 0,
         hasActedThisPhase: false,
         evasiveThrust: 0,
       })),
@@ -388,7 +395,7 @@ const useBattleStore = create((set, get) => ({
   declareEvasiveThrust: (shipId, amount) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
-    const maxEvasive = ship.profile.thrust - ship.thrustUsedThisRound
+    const maxEvasive = ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound
     const clamped = Math.max(0, Math.min(amount, maxEvasive))
     set((s) => ({
       ships: s.ships.map((sh) =>
@@ -476,6 +483,79 @@ const useBattleStore = create((set, get) => ({
         phase: s.phase,
         type: 'action',
         message: `${ship.profile.name}: ${removed.system} riparato (Sev. ${removed.severity} rimossa).`,
+        shipId,
+      })],
+    }))
+  },
+
+  /**
+   * Apply an initiative bonus for next round (Captain: Improve Initiative).
+   * Bonus is accumulated and consumed in rollAllInitiative.
+   * // MgT2e CRB p.166
+   * @param {string} shipId
+   * @param {number} bonus  Effect of the roll (>= 0)
+   */
+  applyInitiativeBonus: (shipId, bonus) => {
+    const ship = get().ships.find((s) => s.id === shipId)
+    if (!ship) return
+    const applied = Math.max(0, bonus)
+    set((s) => ({
+      ships: s.ships.map((sh) =>
+        sh.id === shipId ? { ...sh, initiativeBonusNextRound: (sh.initiativeBonusNextRound ?? 0) + applied } : sh
+      ),
+      log: [...s.log, makeLogEntry({
+        round: s.round,
+        phase: s.phase,
+        type: 'action',
+        message: `${ship.profile.name}: Iniziativa migliorata di +${applied} al prossimo round.`,
+        shipId,
+      })],
+    }))
+  },
+
+  /**
+   * Overload M-Drive: grant temporary thrust bonus for this round only.
+   * Bonus resets at start of next round.
+   * // MgT2e CRB p.167
+   * @param {string} shipId
+   * @param {number} bonus  Effect of the roll (>= 0)
+   */
+  overloadDrive: (shipId, bonus) => {
+    const ship = get().ships.find((s) => s.id === shipId)
+    if (!ship) return
+    const applied = Math.max(0, bonus)
+    set((s) => ({
+      ships: s.ships.map((sh) =>
+        sh.id === shipId ? { ...sh, thrustBonusThisRound: (sh.thrustBonusThisRound ?? 0) + applied } : sh
+      ),
+      log: [...s.log, makeLogEntry({
+        round: s.round,
+        phase: s.phase,
+        type: 'action',
+        message: `${ship.profile.name}: M-Drive in overload — +${applied} Thrust questo round.`,
+        shipId,
+      })],
+    }))
+  },
+
+  /**
+   * Reload one missile turret (Gunner: Reload Turret action).
+   * Decrements turretsNeedingReload; no-op if none need reloading.
+   * // MgT2e CRB p.167
+   * @param {string} shipId
+   */
+  reloadTurret: (shipId) => {
+    const ship = get().ships.find((s) => s.id === shipId)
+    if (!ship || (ship.turretsNeedingReload ?? 0) === 0) return
+    set((s) => ({
+      ships: s.ships.map((sh) =>
+        sh.id === shipId ? { ...sh, turretsNeedingReload: Math.max(0, (sh.turretsNeedingReload ?? 0) - 1) } : sh
+      ),
+      log: [...s.log, makeLogEntry({
+        round: s.round,
+        phase: s.phase,
+        type: 'action',
+        message: `${ship.profile.name}: torretta missilistica ricaricata.`,
         shipId,
       })],
     }))

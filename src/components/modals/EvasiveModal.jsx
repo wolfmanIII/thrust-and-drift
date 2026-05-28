@@ -18,7 +18,7 @@ export function EvasiveModal() {
 
   const ship = ships.find((s) => s.id === modalPayload?.shipId)
 
-  const maxEvasive  = ship ? ship.profile.thrust - ship.thrustUsedThisRound : 0
+  const maxEvasive  = ship ? ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound : 0
   const pilotSkill  = ship?.profile.crew?.pilot ?? 0
 
   const [amount, setAmount] = useState(() => ship?.evasiveThrust ?? 0)

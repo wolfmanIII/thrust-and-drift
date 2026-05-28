@@ -16,9 +16,12 @@ import { CREW_ACTIONS } from '../../data/crewActions.js'
  * Each action ID maps to a dedicated battleStore action.
  */
 function useActionEffects() {
-  const applySensorLock  = useBattleStore((s) => s.applySensorLock)
-  const clearSensorLock  = useBattleStore((s) => s.clearSensorLock)
-  const repairCritical   = useBattleStore((s) => s.repairCritical)
+  const applySensorLock    = useBattleStore((s) => s.applySensorLock)
+  const clearSensorLock    = useBattleStore((s) => s.clearSensorLock)
+  const repairCritical     = useBattleStore((s) => s.repairCritical)
+  const applyInitiativeBonus = useBattleStore((s) => s.applyInitiativeBonus)
+  const overloadDrive      = useBattleStore((s) => s.overloadDrive)
+  const reloadTurret       = useBattleStore((s) => s.reloadTurret)
 
   return (actionId, shipId, effect, targetShipId) => {
     switch (actionId) {
@@ -31,7 +34,15 @@ function useActionEffects() {
       case 'repair_system':
         repairCritical(shipId)
         break
-      // improve_initiative, overload_drive, reload_turret: logged only (no persistent state yet)
+      case 'improve_initiative':
+        applyInitiativeBonus(shipId, effect)
+        break
+      case 'overload_drive':
+        overloadDrive(shipId, effect)
+        break
+      case 'reload_turret':
+        reloadTurret(shipId)
+        break
       default:
         break
     }
@@ -191,9 +202,12 @@ export function ActionModal() {
             {/* Effect description */}
             {rollResult.success && selectedAction && (
               <p className="text-slate-400 font-mono text-xs text-center">
-                {selectedAction.id === 'sensor_lock'    && `Sensor lock acquisito su ${ships.find(s => s.id === targetShipId)?.profile.name ?? '?'}.`}
+                {selectedAction.id === 'sensor_lock'        && `Sensor lock acquisito su ${ships.find(s => s.id === targetShipId)?.profile.name ?? '?'}.`}
                 {selectedAction.id === 'electronic_warfare' && 'Sensor lock nemico rimosso.'}
-                {selectedAction.id === 'repair_system'  && 'Colpo critico rimosso.'}
+                {selectedAction.id === 'repair_system'      && 'Colpo critico rimosso.'}
+                {selectedAction.id === 'improve_initiative' && `+${rollResult.effect} all'iniziativa del prossimo round.`}
+                {selectedAction.id === 'overload_drive'     && `+${rollResult.effect} Thrust disponibile questo round.`}
+                {selectedAction.id === 'reload_turret'      && 'Torretta ricaricata.'}
               </p>
             )}
 
