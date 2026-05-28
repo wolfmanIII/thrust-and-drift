@@ -39,7 +39,7 @@
   transform: skewX(-12deg);
   /* screen blend: only brightens existing logo pixels, invisible on transparency */
   mix-blend-mode: screen;
-  animation: logo-shine 6s ease-in-out infinite;
+  animation: logo-shine 4s ease-in-out infinite;
 }
 
 @keyframes logo-shine {
