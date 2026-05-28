@@ -568,7 +568,10 @@ export function Dashboard() {
       <div className="flex-1 flex flex-col overflow-hidden">
 
         <header className="shrink-0 px-6 py-4 border-b border-slate-800 flex items-center gap-4">
-          <img src={tdLogo} alt="Thrust & Drift" className="w-24 h-24 shrink-0" />
+          <div className="relative shrink-0 w-24 h-24">
+            <img src={tdLogo} alt="Thrust & Drift" className="w-24 h-24" />
+            <div className="logo-shimmer" />
+          </div>
           <div className="flex flex-col gap-0.5">
             <h1 className="font-display font-bold text-[--neon-cyan] tracking-widest text-lg leading-tight">
               THRUST &amp; DRIFT

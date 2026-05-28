@@ -6,3 +6,46 @@
   width: 100%;
   height: 100%;
 }
+
+/* ── Logo shimmer ────────────────────────────────────────────────────────── */
+
+/* Clipping layer — contains the sweep within the logo bounds */
+.logo-shimmer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* The curved gleam streak itself */
+.logo-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -65%;
+  width: 32%;
+  height: 200%;
+  /* soft gradient: sharp cyan peak, fades on edges */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(186, 230, 253, 0.06) 30%,
+    rgba(186, 230, 253, 0.38) 50%,
+    rgba(186, 230, 253, 0.06) 70%,
+    transparent 100%
+  );
+  /* oval shape — wider at centre, tapered at poles — gives the curved feel */
+  border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+  transform: skewX(-12deg);
+  /* screen blend: only brightens existing logo pixels, invisible on transparency */
+  mix-blend-mode: screen;
+  animation: logo-shine 6s ease-in-out infinite;
+}
+
+@keyframes logo-shine {
+  /* pause at start, then quick sweep, then silence until next cycle */
+  0%,  58% { left: -65%; opacity: 0; }
+  61%      { opacity: 1; }
+  76%      { left: 130%; opacity: 0; }
+  100%     { left: 130%; opacity: 0; }
+}
