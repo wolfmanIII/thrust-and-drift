@@ -71,6 +71,17 @@ const useUiStore = create((set) => ({
   /** @param {{ profile: object, faction: string, color: string }} placement */
   startPlacement: (placement) => set({ pendingPlacement: placement }),
   cancelPlacement: () => set({ pendingPlacement: null }),
+
+  // === SHIP HOVER TOOLTIP ===
+  /**
+   * Ship currently hovered on the canvas, with its viewport position.
+   * @type {{ shipId: string, x: number, y: number }|null}
+   */
+  hoveredShip: null,
+
+  /** @param {{ shipId: string, x: number, y: number }} state */
+  setHoveredShip: (state) => set({ hoveredShip: state }),
+  clearHoveredShip: () => set({ hoveredShip: null }),
 }))
 
 export { useUiStore }

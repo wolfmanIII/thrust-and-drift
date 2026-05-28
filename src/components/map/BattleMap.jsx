@@ -5,9 +5,11 @@
  * No game logic here — pure wiring of hooks to DOM.
  */
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import { useCanvasRenderer, HEX_SIZE } from './useCanvasRenderer.js'
 import { useMapInteraction } from './useMapInteraction.js'
+import { useShipHover } from './useShipHover.js'
+import { ShipTooltip } from './ShipTooltip.jsx'
 
 export function BattleMap() {
   const canvasRef = useRef(null)
@@ -24,7 +26,12 @@ export function BattleMap() {
     onDoubleClick,
   } = useMapInteraction({ hexSize: HEX_SIZE, canvasRef })
 
+  const { onHoverMove, onHoverLeave, onHoverDown } = useShipHover({ canvasRef, hexSize: HEX_SIZE, offset, zoom })
+
   useCanvasRenderer({ canvasRef, offset, zoom })
+
+  const combinedMouseMove = useCallback((e) => { onMouseMove(e); onHoverMove(e) }, [onMouseMove, onHoverMove])
+  const combinedMouseDown = useCallback((e) => { onMouseDown(e); onHoverDown(e) }, [onMouseDown, onHoverDown])
 
   // Prevent default browser context menu and wheel scroll
   useEffect(() => {
@@ -36,16 +43,20 @@ export function BattleMap() {
   }, [])
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full cursor-crosshair"
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onWheel={onWheel}
-      onClick={onClick}
-      onContextMenu={onContextMenu}
-      onDoubleClick={onDoubleClick}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full cursor-crosshair"
+        onMouseDown={combinedMouseDown}
+        onMouseMove={combinedMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onHoverLeave}
+        onWheel={onWheel}
+        onClick={onClick}
+        onContextMenu={onContextMenu}
+        onDoubleClick={onDoubleClick}
+      />
+      <ShipTooltip />
+    </>
   )
 }
