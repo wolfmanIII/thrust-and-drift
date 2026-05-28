@@ -974,12 +974,27 @@ Funzionalità incluse nella prima versione funzionante:
 
 ### 13.2 Versione 1.1 — Post-MVP
 
-- Dogfighting completo (round da 6 secondi)
+- **Dogfighting** — rilevamento automatico navi nella stessa cella → transizione a round da 6 secondi; check Pilot contrapposto; DM dimensione/thrust; flusso separato dal combattimento standard
 - Electronic warfare (jamming)
 - Evasive action avanzata
 - Asse Z opzionale (3D)
 
-### 13.3 Versione 2.0 — Future
+### 13.3 Versione 1.2 — Effetti Visivi Canvas
+
+Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`):
+
+| Effetto | Trigger | Descrizione |
+| ------- | ------- | ----------- |
+| **Raggio laser** | Risoluzione attacco (Beam/Pulse Laser) | Linea animata da torretta a bersaglio, fade-out in ~0.3 s, colore per tipo arma |
+| **Scia missile** | Ogni tick di movimento missile | Trail di particelle lungo la traiettoria percorsa nel round |
+| **Impatto** | Hit confermato | Burst di scintille radiali sul token colpito |
+| **Chaff** | Sandcaster intercetta missile | Nuvola di punti grigi che si espande attorno al token |
+| **Jamming signal** | Electronic warfare attiva | Anello pulsante semi-trasparente attorno alla nave che esegue il jamming |
+| **Thrust plume** | Applicazione thrust confermata | Breve pennacchio nella direzione opposta al delta-v applicato |
+
+Tutti gli effetti sono puramente decorativi — non bloccano input, non modificano stato di gioco, si esauriscono in autonomia senza dover essere gestiti dallo store.
+
+### 13.4 Versione 2.0 — Future
 
 - Scale mappa multiple con transizione
 - Abbordaggio (integrazione con regole High Guard)
