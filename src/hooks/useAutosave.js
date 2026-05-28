@@ -57,8 +57,8 @@ export function useAutosave() {
     dbGet(STORE_BATTLE, BATTLE_KEY).then((saved) => {
       if (cancelled || !saved) return
       const { set } = useBattleStore.getState()
-      // Only restore if no ships have been placed yet (fresh load)
-      if (useBattleStore.getState().ships.length === 0) {
+      // Only restore if saved battle has ships AND store is still empty (fresh load)
+      if (Array.isArray(saved.ships) && saved.ships.length > 0 && useBattleStore.getState().ships.length === 0) {
         useBattleStore.setState({
           id: saved.id,
           name: saved.name,
