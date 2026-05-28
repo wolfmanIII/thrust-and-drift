@@ -29,9 +29,9 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(186, 230, 253, 0.06) 30%,
-    rgba(186, 230, 253, 0.38) 50%,
-    rgba(186, 230, 253, 0.06) 70%,
+    rgba(186, 230, 253, 0.10) 30%,
+    rgba(186, 230, 253, 0.60) 50%,
+    rgba(186, 230, 253, 0.10) 70%,
     transparent 100%
   );
   /* oval shape — wider at centre, tapered at poles — gives the curved feel */
