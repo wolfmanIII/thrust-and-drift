@@ -46,19 +46,22 @@ function hexCorners(cx, cy, size) {
  */
 function drawGrid(ctx, width, height, offset, zoom) {
   const size = HEX_SIZE * zoom
-  // Compute visible q/r range with margin (flat-top: q spaced 1.5*size, r spaced sqrt(3)*size)
+  // flat-top: x = 1.5*size*q  →  q range from x extents
   const margin = 2
   const qMin = Math.floor((-offset.x / zoom) / (1.5 * HEX_SIZE)) - margin
   const qMax = Math.ceil((width / zoom - offset.x / zoom) / (1.5 * HEX_SIZE)) + margin
-  const rMin = Math.floor((-offset.y / zoom) / (Math.sqrt(3) * HEX_SIZE)) - margin
-  const rMax = Math.ceil((height / zoom - offset.y / zoom) / (Math.sqrt(3) * HEX_SIZE)) + margin
 
   ctx.strokeStyle = GRID_COLOR
   ctx.lineWidth = GRID_STROKE
 
-  for (let r = rMin; r <= rMax; r++) {
-    for (let q = qMin; q <= qMax; q++) {
-      const { x: cx, y: cy } = hexToPixel(q, r, HEX_SIZE * zoom, offset.x, offset.y)
+  for (let q = qMin; q <= qMax; q++) {
+    // flat-top: y = sqrt(3)*size*(sqrt(3)/2*q + r)  →  r range depends on q
+    const qYShift = (Math.sqrt(3) / 2) * q
+    const rMin = Math.floor(((-offset.y / zoom) / HEX_SIZE - qYShift) / Math.sqrt(3)) - margin
+    const rMax = Math.ceil(((height / zoom - offset.y / zoom) / HEX_SIZE - qYShift) / Math.sqrt(3)) + margin
+
+    for (let r = rMin; r <= rMax; r++) {
+      const { x: cx, y: cy } = hexToPixel(q, r, size, offset.x, offset.y)
       const corners = hexCorners(cx, cy, size)
       ctx.beginPath()
       ctx.moveTo(corners[0].x, corners[0].y)
