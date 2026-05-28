@@ -1029,8 +1029,8 @@ Tutti gli effetti sono puramente decorativi — non bloccano input, non modifica
 
 ### 13.6 Versione 2.0 — Future
 
+- **Abbordaggio** (HG 2022 pp.125–135) — 4 fasi: Approccio → Contatto → Conflitto → Sicurezza; metodi ingresso (airlock, breaching tube, taglio scafo); check Mechanic/Pilot; stacking, colpi mancati, obiettivi tattici (ponte/engineering/torrette); cambio fazione nave catturata; modalità astratta rapida (CR p.175); vedi `boarding-system-design.md`
 - Scale mappa multiple con transizione
-- Abbordaggio (integrazione con regole High Guard)
 - Ostacoli ambientali (asteroidi, detriti)
 - Esporta resoconto battaglia in PDF
 
