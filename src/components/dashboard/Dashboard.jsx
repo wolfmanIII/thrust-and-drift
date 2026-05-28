@@ -307,6 +307,7 @@ export function Dashboard() {
             <CatalogPanel />
           ) : editingId ? (
             <ShipProfileForm
+              key={editingId}
               profileId={editingId === 'new' ? null : editingId}
               onSave={handleClose}
               onCancel={handleClose}
