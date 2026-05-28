@@ -573,8 +573,8 @@ export function Dashboard() {
             <div className="logo-shimmer" />
           </div>
           <div className="flex flex-col gap-0.5">
-            <h1 className="font-display font-bold text-[--neon-cyan] tracking-widest text-lg leading-tight">
-              THRUST &amp; DRIFT
+            <h1 className="font-display font-bold text-[--neon-cyan] tracking-widest text-2xl leading-tight">
+              <i>THRUST &amp; DRIFT</i>
             </h1>
             <span className="font-display text-xs text-slate-500 tracking-widest">
               TACTICAL INTERFACE // MONGOOSE TRAVELLER 2E
