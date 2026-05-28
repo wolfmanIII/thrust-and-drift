@@ -168,7 +168,7 @@ function StatusLine({ label, value, active = true }) {
     <div className="flex items-center gap-2">
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${active ? 'bg-[--neon-cyan] animate-pulse' : 'bg-slate-700'}`} />
       <span className="font-mono text-xs text-slate-600 flex-1">{label}</span>
-      <span className={`font-mono text-xs ${active ? 'text-[--neon-cyan]/60' : 'text-slate-700'}`}>{value}</span>
+      <span className={`font-mono text-xs ${active ? 'text-[--neon-cyan]/60' : 'text-slate-500'}`}>{value}</span>
     </div>
   )
 }
@@ -179,7 +179,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, loadi
     <div className="border-r border-slate-800 flex flex-col overflow-hidden">
 
       <div className="px-5 py-3 border-b border-slate-800 shrink-0">
-        <p className="font-display text-xs text-slate-700 tracking-widest">// CONSOLE OPERATIVA</p>
+        <p className="font-display text-xs text-slate-500 tracking-widest">// CONSOLE OPERATIVA</p>
       </div>
 
       <div className="px-5 py-3 space-y-1.5 border-b border-slate-800 shrink-0">
@@ -247,7 +247,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, loadi
       </div>
 
       <div className="shrink-0 px-5 py-3 border-t border-slate-800">
-        <p className="font-mono text-xs text-slate-700 leading-relaxed">
+        <p className="font-mono text-xs text-slate-500 leading-relaxed">
           Aggiungi profili nel pannello a sinistra prima di iniziare.
         </p>
       </div>
@@ -285,10 +285,10 @@ function TacticalDisplayIdle() {
       <div className="relative z-10 flex flex-col h-full">
 
         <div className="px-6 py-3 border-b border-slate-800/60 shrink-0 flex items-center gap-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-slate-800 shrink-0" />
-          <span className="font-display text-xs text-slate-700 tracking-widest">DISPLAY TATTICO</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-slate-600 shrink-0" />
+          <span className="font-display text-xs text-slate-500 tracking-widest">DISPLAY TATTICO</span>
           <div className="flex-1 h-px bg-slate-800" />
-          <span className="font-display text-xs text-slate-800 tracking-widest">STANDBY</span>
+          <span className="font-display text-xs text-slate-600 tracking-widest">STANDBY</span>
         </div>
 
         <div className="px-6 py-3 border-b border-slate-800/60 shrink-0 grid grid-cols-2 gap-x-8 gap-y-1">
@@ -301,8 +301,8 @@ function TacticalDisplayIdle() {
             { k: 'MISSILI',    v: '—' },
           ].map(({ k, v }) => (
             <div key={k} className="flex justify-between gap-2">
-              <span className="font-mono text-xs text-slate-800">{k}</span>
-              <span className="font-mono text-xs text-slate-800">{v}</span>
+              <span className="font-mono text-xs text-slate-600">{k}</span>
+              <span className="font-mono text-xs text-slate-500">{v}</span>
             </div>
           ))}
         </div>
@@ -311,15 +311,15 @@ function TacticalDisplayIdle() {
           <div className="text-center space-y-5">
             <TargetReticle />
             <div className="space-y-1">
-              <p className="font-display text-xs text-slate-800 tracking-widest">NESSUN DATO MISSIONE</p>
-              <p className="font-mono text-xs text-slate-800">Avvia una nuova sessione</p>
-              <p className="font-mono text-xs text-slate-800">o carica una sessione precedente</p>
+              <p className="font-display text-xs text-slate-500 tracking-widest">NESSUN DATO MISSIONE</p>
+              <p className="font-mono text-xs text-slate-600">Avvia una nuova sessione</p>
+              <p className="font-mono text-xs text-slate-600">o carica una sessione precedente</p>
             </div>
           </div>
         </div>
 
         <div className="shrink-0 px-6 py-2 border-t border-slate-800/60">
-          <div className="flex justify-between font-mono text-xs text-slate-800">
+          <div className="flex justify-between font-mono text-xs text-slate-600">
             <span>SYS:ONLINE</span>
             <span>TD-IF/0.1</span>
             <span>MONGOOSE TRAVELLER 2E</span>
