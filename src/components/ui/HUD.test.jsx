@@ -2,7 +2,6 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { beforeEach, vi } from 'vitest'
 import { HUD } from './HUD.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
-import { useUiStore } from '../../store/uiStore.js'
 
 vi.mock('../ui/Tooltip.jsx', () => ({
   Tooltip: ({ children }) => children,

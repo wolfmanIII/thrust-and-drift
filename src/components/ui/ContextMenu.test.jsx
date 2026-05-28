@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { beforeEach, vi } from 'vitest'
+import { beforeEach } from 'vitest'
 import { ContextMenu } from './ContextMenu.jsx'
 import { useUiStore }    from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'

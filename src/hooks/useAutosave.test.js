@@ -20,7 +20,7 @@ vi.mock('../utils/db.js', () => ({
   dbDelete: vi.fn(async () => {}),
 }))
 
-import { dbGet, dbPut } from '../utils/db.js'
+import { dbPut } from '../utils/db.js'
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 

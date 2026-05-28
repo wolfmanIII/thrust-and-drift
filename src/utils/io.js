@@ -19,13 +19,13 @@ async function parseJSONFile(file, expectedType) {
   try {
     text = await file.text()
   } catch (e) {
-    throw new Error(`Impossibile leggere il file: ${e.message}`)
+    throw new Error(`Impossibile leggere il file: ${e.message}`, { cause: e })
   }
   let data
   try {
     data = JSON.parse(text)
   } catch (e) {
-    throw new Error(`File non valido: JSON malformato. (${e.message})`)
+    throw new Error(`File non valido: JSON malformato. (${e.message})`, { cause: e })
   }
   if (data === null || typeof data !== 'object' || Array.isArray(data)) {
     throw new Error('File non valido: struttura JSON inattesa.')

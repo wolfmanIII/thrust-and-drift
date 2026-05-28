@@ -56,7 +56,6 @@ export function useAutosave() {
     let cancelled = false
     dbGet(STORE_BATTLE, BATTLE_KEY).then((saved) => {
       if (cancelled || !saved) return
-      const { set } = useBattleStore.getState()
       // Only restore if saved battle has ships AND store is still empty (fresh load)
       if (Array.isArray(saved.ships) && saved.ships.length > 0 && useBattleStore.getState().ships.length === 0) {
         useBattleStore.setState({
@@ -86,7 +85,7 @@ export function useAutosave() {
       if (saved.length > 0) {
         useProfilesStore.setState({ profiles: saved })
       }
-    }).catch(() => {})
+    }).catch(() => {/* IndexedDB unavailable — no recovery */})
 
     return () => { cancelled = true }
   }, [])
