@@ -58,9 +58,14 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
   const openModal  = useUiStore((s) => s.openModal)
   const removeShip = useBattleStore((s) => s.removeShip)
   const combatMode = useBattleStore((s) => s.combatMode)
+  const phase      = useBattleStore((s) => s.phase)
+
+  const open = (modal, payload) => { openModal(modal, payload); close() }
 
   return (
     <MenuShell x={x} y={y} menuRef={menuRef}>
+
+      {/* ── Header ────────────────────────────────────────────────── */}
       <div className="px-3 py-1.5 bg-slate-800 border-b border-slate-700">
         <p className="font-mono text-xs text-[--neon-cyan] font-bold truncate">{ship.profile.name}</p>
         <p className="font-mono text-xs text-slate-400">
@@ -70,21 +75,40 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
           )}
         </p>
       </div>
-      {combatMode === 'vectorial' && (
+
+      {/* ── Acceleration: thrust + evasion (vectorial only) ──────── */}
+      {phase === 'acceleration' && combatMode === 'vectorial' && (
         <>
-          <MenuItem icon="🚀" label="Applica Thrust"    onClick={() => { openModal('thrust',  { shipId: targetId }); close() }} />
-          <MenuItem icon="🛡" label="Dichiara Evasione" onClick={() => { openModal('evasive', { shipId: targetId }); close() }} />
+          <MenuItem icon="🚀" label="Applica Thrust"    onClick={() => open('thrust',  { shipId: targetId })} />
+          <MenuItem icon="🛡" label="Dichiara Evasione" onClick={() => open('evasive', { shipId: targetId })} />
+          <MenuDivider />
         </>
       )}
-      <MenuItem icon="🎯" label="Attacca…"             onClick={() => { openModal('attack',        { shipId: targetId }); close() }} />
-      {hasMissileRack(ship) && (
-        <MenuItem icon="🚀" label="Lancia Missili…"   onClick={() => { openModal('missileLaunch', { shipId: targetId }); close() }} />
+
+      {/* ── Attack: weapons + missiles ────────────────────────────── */}
+      {phase === 'attack' && (
+        <>
+          <MenuItem icon="🎯" label="Attacca…"          onClick={() => open('attack',        { shipId: targetId })} />
+          {hasMissileRack(ship) && (
+            <MenuItem icon="🚀" label="Lancia Missili…" onClick={() => open('missileLaunch', { shipId: targetId })} />
+          )}
+          <MenuDivider />
+        </>
       )}
-      <MenuItem icon="⚡" label="Azione equipaggio…"  onClick={() => { openModal('action',        { shipId: targetId }); close() }} />
-      <MenuDivider />
-      <MenuItem icon="📊" label="Scheda nave"          onClick={() => { openModal('shipDetail',    { shipId: targetId }); close() }} />
+
+      {/* ── Actions: crew actions ─────────────────────────────────── */}
+      {phase === 'actions' && (
+        <>
+          <MenuItem icon="⚡" label="Azione equipaggio…" onClick={() => open('action', { shipId: targetId })} />
+          <MenuDivider />
+        </>
+      )}
+
+      {/* ── Always available ──────────────────────────────────────── */}
+      <MenuItem icon="📊" label="Scheda nave"              onClick={() => open('shipDetail', { shipId: targetId })} />
       <MenuDivider />
       <MenuItem icon="🗑" label="Rimuovi dalla battaglia" danger onClick={() => { removeShip(targetId); close() }} />
+
     </MenuShell>
   )
 }
@@ -127,6 +151,7 @@ function EmptyContextMenu({ x, y, menuRef, hex, close }) {
   const openModal         = useUiStore((s) => s.openModal)
   const advancePhase      = useBattleStore((s) => s.advancePhase)
   const rollAllInitiative = useBattleStore((s) => s.rollAllInitiative)
+  const phase             = useBattleStore((s) => s.phase)
 
   return (
     <MenuShell x={x} y={y} menuRef={menuRef}>
@@ -135,7 +160,12 @@ function EmptyContextMenu({ x, y, menuRef, hex, close }) {
       <MenuItem icon="📂" label="Carica profili"     onClick={() => { openModal('shipProfile', { mode: 'import' }); close() }} />
       <MenuItem icon="💾" label="Salva profili"      onClick={() => { openModal('shipProfile', { mode: 'export' }); close() }} />
       <MenuDivider />
-      <MenuItem icon="🎲" label="Tira iniziativa"   onClick={() => { rollAllInitiative(); close() }} />
+      {phase === 'initiative' && (
+        <>
+          <MenuItem icon="🎲" label="Tira iniziativa (tutti)" onClick={() => { rollAllInitiative(); close() }} />
+          <MenuDivider />
+        </>
+      )}
       <MenuItem icon="🔄" label="Fase successiva"   onClick={() => { advancePhase(); close() }} />
     </MenuShell>
   )
