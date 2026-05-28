@@ -23,6 +23,7 @@ import { EvasiveModal }       from './components/modals/EvasiveModal.jsx'
 import { MissileLaunchModal } from './components/modals/MissileLaunchModal.jsx'
 import { useUiStore }      from './store/uiStore.js'
 import { useBattleStore }  from './store/battleStore.js'
+import { useAutosave }     from './hooks/useAutosave.js'
 import './App.css'
 
 /**
@@ -43,6 +44,8 @@ const MODAL_MAP = {
 }
 
 export function App() {
+  useAutosave()
+
   const screen           = useUiStore((s) => s.screen)
   const activeModal      = useUiStore((s) => s.activeModal)
   const pendingPlacement = useUiStore((s) => s.pendingPlacement)

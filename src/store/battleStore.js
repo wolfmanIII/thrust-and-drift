@@ -591,7 +591,7 @@ const useBattleStore = create((set, get) => ({
 
   exportBattleState: () => {
     const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, log, mapSettings } = get()
-    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, log, mapSettings })
+    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, log, mapSettings, savedAt: new Date().toISOString() })
   },
 
   /**
