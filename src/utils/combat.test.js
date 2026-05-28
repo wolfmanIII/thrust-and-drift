@@ -1,0 +1,251 @@
+/**
+ * Tests for space combat mechanical calculations.
+ * // MgT2e CRB p.160–168, Traveller Companion p.169–186
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import {
+  getRangeDM,
+  getTargetSizeDM,
+  getCharDM,
+  isValidThrustDelta,
+  applyThrust,
+  applyMovement,
+  getEvasiveDM,
+  isCriticalHit,
+  rollAttack,
+  rollInitiative,
+} from './combat.js'
+
+// === RANGE DMs ===
+// // MgT2e CRB p.164
+
+describe('getRangeDM', () => {
+  const CASES = [
+    ['Adjacent',    0],
+    ['Short',       1],
+    ['Medium',      0],
+    ['Long',       -2],
+    ['Very Long',  -4],
+    ['Distant',    -6],
+    ['Unknown',     0], // unknown band → fallback 0
+  ]
+
+  it.each(CASES)('"%s" → %i', (band, dm) => {
+    expect(getRangeDM(band)).toBe(dm)
+  })
+})
+
+// === TARGET SIZE DMs ===
+// // MgT2e CRB p.163 — +1 per 1,000 tons, max +6
+
+describe('getTargetSizeDM', () => {
+  const CASES = [
+    [0,     0],
+    [999,   0],
+    [1000,  1],
+    [1999,  1],
+    [2000,  2],
+    [3500,  3],
+    [6000,  6],
+    [7000,  6], // cap at +6
+    [10000, 6],
+  ]
+
+  it.each(CASES)('%i tons → DM %i', (tonnage, dm) => {
+    expect(getTargetSizeDM(tonnage)).toBe(dm)
+  })
+
+  it('null/undefined tonnage treated as 0', () => {
+    expect(getTargetSizeDM(null)).toBe(0)
+    expect(getTargetSizeDM(undefined)).toBe(0)
+  })
+})
+
+// === CHARACTERISTIC DMs ===
+// // MgT2e CRB p.6
+
+describe('getCharDM', () => {
+  const CASES = [
+    [0,  -3],
+    [1,  -2],
+    [2,  -2],
+    [3,  -1],
+    [5,  -1],
+    [6,   0],
+    [8,   0],
+    [9,  +1],
+    [11, +1],
+    [12, +2],
+    [14, +2],
+    [15, +3],
+    [20, +3],
+  ]
+
+  it.each(CASES)('value %i → DM %i', (v, dm) => {
+    expect(getCharDM(v)).toBe(dm)
+  })
+})
+
+// === THRUST VALIDATION ===
+// // Traveller Companion p.172
+
+describe('isValidThrustDelta', () => {
+  it('zero delta always valid (even with 0 thrust)', () => {
+    expect(isValidThrustDelta({ q: 0, r: 0 }, 0)).toBe(true)
+  })
+
+  it('delta within thrust = valid', () => {
+    expect(isValidThrustDelta({ q: 2, r: 0 }, 3)).toBe(true)
+    expect(isValidThrustDelta({ q: 1, r: -1 }, 2)).toBe(true)
+  })
+
+  it('delta exactly equals thrust = valid', () => {
+    expect(isValidThrustDelta({ q: 2, r: 0 }, 2)).toBe(true)
+  })
+
+  it('delta exceeds thrust = invalid', () => {
+    expect(isValidThrustDelta({ q: 3, r: 0 }, 2)).toBe(false)
+    expect(isValidThrustDelta({ q: 2, r: 2 }, 2)).toBe(false)
+  })
+})
+
+// === THRUST / MOVEMENT ===
+
+describe('applyThrust', () => {
+  it('adds delta to velocity vector', () => {
+    expect(applyThrust({ q: 1, r: 0 }, { q: 0, r: 1 })).toEqual({ q: 1, r: 1 })
+    expect(applyThrust({ q: -2, r: 3 }, { q: 1, r: -1 })).toEqual({ q: -1, r: 2 })
+  })
+
+  it('zero delta = velocity unchanged', () => {
+    const v = { q: 3, r: -2 }
+    expect(applyThrust(v, { q: 0, r: 0 })).toEqual(v)
+  })
+})
+
+describe('applyMovement', () => {
+  it('adds velocity to position', () => {
+    expect(applyMovement({ q: 2, r: 1 }, { q: -1, r: 3 })).toEqual({ q: 1, r: 4 })
+  })
+
+  it('zero velocity = position unchanged', () => {
+    const pos = { q: 5, r: -3 }
+    expect(applyMovement(pos, { q: 0, r: 0 })).toEqual(pos)
+  })
+})
+
+// === EVASIVE ACTION ===
+// // MgT2e CRB p.166
+
+describe('getEvasiveDM', () => {
+  it('0 evasive thrust = 0 DM', () => {
+    expect(getEvasiveDM(3, 0)).toBe(0)
+  })
+
+  it('negative thrust = 0 DM', () => {
+    expect(getEvasiveDM(5, -1)).toBe(0)
+  })
+
+  it('pilot 0 = 0 DM regardless of thrust', () => {
+    expect(getEvasiveDM(0, 4)).toBe(0)
+  })
+
+  it('pilot × thrust, negated', () => {
+    expect(getEvasiveDM(2, 3)).toBe(-6)
+    expect(getEvasiveDM(3, 2)).toBe(-6)
+    expect(getEvasiveDM(1, 5)).toBe(-5)
+  })
+})
+
+// === CRITICAL HITS ===
+// // MgT2e CRB p.165 — critical when Effect >= 6
+
+describe('isCriticalHit', () => {
+  it('effect < 6 = not critical', () => {
+    expect(isCriticalHit(5)).toBe(false)
+    expect(isCriticalHit(0)).toBe(false)
+    expect(isCriticalHit(-1)).toBe(false)
+  })
+
+  it('effect = 6 = critical', () => {
+    expect(isCriticalHit(6)).toBe(true)
+  })
+
+  it('effect > 6 = critical', () => {
+    expect(isCriticalHit(10)).toBe(true)
+    expect(isCriticalHit(100)).toBe(true)
+  })
+})
+
+// === ROLL ATTACK (deterministic via Math.random mock) ===
+// Math.floor(0.5 * 6) + 1 = 4 → each die = 4, 2d6 total = 8
+
+describe('rollAttack', () => {
+  beforeEach(() => vi.spyOn(Math, 'random').mockReturnValue(0.5))
+  afterEach(() => vi.restoreAllMocks())
+
+  it('returns correct shape', () => {
+    const r = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0 })
+    expect(r).toHaveProperty('roll')
+    expect(r).toHaveProperty('total')
+    expect(r).toHaveProperty('effect')
+    expect(r).toHaveProperty('hit')
+    expect(r).toHaveProperty('breakdown')
+  })
+
+  it('hit when total >= 8', () => {
+    // roll=8, gunner=2 → total=10 → hit, effect=2
+    const r = rollAttack({ gunnerSkill: 2, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0 })
+    expect(r.hit).toBe(true)
+    expect(r.total).toBe(10)
+    expect(r.effect).toBe(2)
+  })
+
+  it('miss when DMs push total below 8', () => {
+    // roll=8, rangeDM=-6 → total=2 → miss
+    const r = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: -6, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0 })
+    expect(r.hit).toBe(false)
+    expect(r.total).toBe(2)
+  })
+
+  it('critical when effect >= 6', () => {
+    // roll=8, gunner=4, aidGunners=2, rangeDM=1 → total=15, effect=7
+    const r = rollAttack({ gunnerSkill: 4, dexDM: 0, aidGunnersDM: 2, rangeDM: 1, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0 })
+    expect(isCriticalHit(r.effect)).toBe(true)
+  })
+
+  it('evasiveDM reduces total', () => {
+    const base = rollAttack({ gunnerSkill: 2, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0 })
+    const evasive = rollAttack({ gunnerSkill: 2, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: -3 })
+    expect(evasive.total).toBe(base.total - 3)
+  })
+
+  it('sensorLockDM adds to total', () => {
+    const base = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0 })
+    const locked = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0, sensorLockDM: 2 })
+    expect(locked.total).toBe(base.total + 2)
+  })
+})
+
+// === ROLL INITIATIVE ===
+// // MgT2e CRB p.160
+
+describe('rollInitiative', () => {
+  beforeEach(() => vi.spyOn(Math, 'random').mockReturnValue(0.5))
+  afterEach(() => vi.restoreAllMocks())
+
+  it('total = roll + pilot + thrust + tactics', () => {
+    // roll=8, pilot=2, thrust=3, tactics=1 → total=14
+    const r = rollInitiative(2, 3, 1)
+    expect(r.total).toBe(14)
+    expect(r.breakdown.pilotSkill).toBe(2)
+    expect(r.breakdown.thrust).toBe(3)
+    expect(r.breakdown.tacticsEffect).toBe(1)
+  })
+
+  it('tacticsEffect defaults to 0', () => {
+    const r = rollInitiative(1, 2)
+    expect(r.total).toBe(8 + 1 + 2)
+  })
+})

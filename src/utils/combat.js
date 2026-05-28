@@ -180,7 +180,7 @@ export function applyMovement(currentPosition, currentVector) {
  * @returns {number}  Negative DM to apply to attackers
  */
 export function getEvasiveDM(pilotSkill, evasiveThrust) {
-  if (evasiveThrust <= 0) return 0
+  if (evasiveThrust <= 0 || pilotSkill === 0) return 0
   return -(pilotSkill * evasiveThrust)
 }
 
