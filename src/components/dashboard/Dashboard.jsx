@@ -162,15 +162,298 @@ function ActionIcon({ label, title, onClick, dim = '' }) {
 
 // ── Right panel: session controls ─────────────────────────────────────────
 
+/** Blinking status dot with label and value. */
+function StatusLine({ label, value, active = true }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${active ? 'bg-[--neon-cyan] animate-pulse' : 'bg-slate-700'}`} />
+      <span className="font-mono text-xs text-slate-600 flex-1">{label}</span>
+      <span className={`font-mono text-xs ${active ? 'text-[--neon-cyan]/60' : 'text-slate-700'}`}>{value}</span>
+    </div>
+  )
+}
+
+/** Left column: mode selector + action buttons. */
+function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, loading, error }) {
+  return (
+    <div className="border-r border-slate-800 flex flex-col overflow-hidden">
+
+      <div className="px-5 py-3 border-b border-slate-800 shrink-0">
+        <p className="font-display text-xs text-slate-700 tracking-widest">// CONSOLE OPERATIVA</p>
+      </div>
+
+      <div className="px-5 py-3 space-y-1.5 border-b border-slate-800 shrink-0">
+        <StatusLine label="NAVIGAZIONE"  value="ATTIVA"  />
+        <StatusLine label="SENSORI"      value="ONLINE"  />
+        <StatusLine label="ARMAMENTI"    value="PRONTI"  />
+        <StatusLine label="DATI MISSIONE" value="IN ATTESA" active={false} />
+      </div>
+
+      <div className="flex-1 px-5 py-5 space-y-5 overflow-y-auto">
+
+        <div>
+          <p className="font-display text-xs text-slate-600 tracking-widest mb-2">MODALITÀ COMBATTIMENTO</p>
+          <div className="grid grid-cols-2 gap-1 p-1 bg-slate-900/60 border border-slate-800 rounded-lg">
+            {[
+              { value: 'vectorial', label: 'VETTORIALE', sub: 'Hex + vettori' },
+              { value: 'basic',     label: 'BASE',       sub: 'Bande distanza' },
+            ].map(({ value, label, sub }) => (
+              <button
+                key={value}
+                onClick={() => onModeChange(value)}
+                className={`py-2 px-2 rounded font-display text-xs tracking-widest transition-colors text-center ${
+                  mode === value
+                    ? 'bg-[--neon-cyan]/15 border border-[--neon-cyan]/40 text-[--neon-cyan]'
+                    : 'text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                {label}
+                <span className="block font-mono tracking-normal normal-case text-slate-600 mt-0.5 text-xs">{sub}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="font-display text-xs text-slate-600 tracking-widest mb-2">AZIONI</p>
+          <div className="space-y-2">
+            <button
+              onClick={onNewSession}
+              className="w-full py-3.5 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-display text-xs tracking-widest rounded-lg hover:bg-[--neon-cyan]/20 transition-colors"
+            >
+              <span className="text-base block mb-0.5">▶</span>
+              NUOVA SESSIONE
+              <span className="block font-mono text-slate-500 mt-0.5 normal-case tracking-normal font-normal text-xs">
+                Avvia da zero
+              </span>
+            </button>
+            <button
+              onClick={onResumeClick}
+              disabled={loading}
+              className="w-full py-3 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded-lg hover:border-slate-500 hover:text-slate-300 transition-colors disabled:opacity-40"
+            >
+              <span className="text-sm block mb-0.5">{loading ? '⌛' : '↺'}</span>
+              {loading ? 'CARICAMENTO…' : 'RIPRENDI SESSIONE'}
+              <span className="block font-mono text-slate-600 mt-0.5 normal-case tracking-normal font-normal text-xs">
+                Carica da file .json
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {error && (
+          <p className="text-red-400 font-mono text-xs">⚠ {error}</p>
+        )}
+      </div>
+
+      <div className="shrink-0 px-5 py-3 border-t border-slate-800">
+        <p className="font-mono text-xs text-slate-700 leading-relaxed">
+          Aggiungi profili nel pannello a sinistra prima di iniziare.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/** Crosshair decoration for the idle display. */
+function TargetReticle() {
+  return (
+    <svg width="96" height="96" viewBox="0 0 100 100" className="opacity-20" aria-hidden="true">
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#0891b2" strokeWidth="0.8" />
+      <circle cx="50" cy="50" r="24" fill="none" stroke="#0891b2" strokeWidth="0.8" />
+      <circle cx="50" cy="50" r="4"  fill="none" stroke="#0891b2" strokeWidth="0.8" />
+      <line x1="12" y1="50" x2="26" y2="50" stroke="#0891b2" strokeWidth="0.8" />
+      <line x1="74" y1="50" x2="88" y2="50" stroke="#0891b2" strokeWidth="0.8" />
+      <line x1="50" y1="12" x2="50" y2="26" stroke="#0891b2" strokeWidth="0.8" />
+      <line x1="50" y1="74" x2="50" y2="88" stroke="#0891b2" strokeWidth="0.8" />
+      <line x1="24" y1="24" x2="31" y2="31" stroke="#0891b2" strokeWidth="0.8" />
+      <line x1="76" y1="24" x2="69" y2="31" stroke="#0891b2" strokeWidth="0.8" />
+      <line x1="24" y1="76" x2="31" y2="69" stroke="#0891b2" strokeWidth="0.8" />
+      <line x1="76" y1="76" x2="69" y2="69" stroke="#0891b2" strokeWidth="0.8" />
+    </svg>
+  )
+}
+
+/** Right column shown when no session is loaded. */
+function TacticalDisplayIdle() {
+  return (
+    <div className="relative flex flex-col h-full overflow-hidden bg-slate-950">
+      <div
+        className="absolute inset-0 pointer-events-none opacity-25"
+        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(15,23,42,0.5) 3px, rgba(15,23,42,0.5) 4px)' }}
+      />
+      <div className="relative z-10 flex flex-col h-full">
+
+        <div className="px-6 py-3 border-b border-slate-800/60 shrink-0 flex items-center gap-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-slate-800 shrink-0" />
+          <span className="font-display text-xs text-slate-700 tracking-widest">DISPLAY TATTICO</span>
+          <div className="flex-1 h-px bg-slate-800" />
+          <span className="font-display text-xs text-slate-800 tracking-widest">STANDBY</span>
+        </div>
+
+        <div className="px-6 py-3 border-b border-slate-800/60 shrink-0 grid grid-cols-2 gap-x-8 gap-y-1">
+          {[
+            { k: 'PROTOCOLLO', v: 'MgT2E/VCS-1.0' },
+            { k: 'MODALITÀ',   v: '—' },
+            { k: 'ROUND',      v: '—' },
+            { k: 'FASE',       v: '—' },
+            { k: 'NAVI',       v: '—' },
+            { k: 'MISSILI',    v: '—' },
+          ].map(({ k, v }) => (
+            <div key={k} className="flex justify-between gap-2">
+              <span className="font-mono text-xs text-slate-800">{k}</span>
+              <span className="font-mono text-xs text-slate-800">{v}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center space-y-5">
+            <TargetReticle />
+            <div className="space-y-1">
+              <p className="font-display text-xs text-slate-800 tracking-widest">NESSUN DATO MISSIONE</p>
+              <p className="font-mono text-xs text-slate-800">Avvia una nuova sessione</p>
+              <p className="font-mono text-xs text-slate-800">o carica una sessione precedente</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="shrink-0 px-6 py-2 border-t border-slate-800/60">
+          <div className="flex justify-between font-mono text-xs text-slate-800">
+            <span>SYS:ONLINE</span>
+            <span>TD-IF/0.1</span>
+            <span>MONGOOSE TRAVELLER 2E</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Labeled data readout for session preview. */
+function DataField({ label, value, accent = false, small = false }) {
+  return (
+    <div>
+      <p className="font-display text-xs text-slate-600 tracking-widest leading-none mb-0.5">{label}</p>
+      <p className={`font-mono truncate ${small ? 'text-xs' : 'text-sm'} ${accent ? 'text-[--neon-cyan] font-bold' : 'text-slate-300'}`}>
+        {value ?? '—'}
+      </p>
+    </div>
+  )
+}
+
+/** Single ship row inside session preview. */
+function ShipPreviewRow({ ship }) {
+  const hull = ship.profile?.hull ?? 0
+  const pct  = hull > 0 ? Math.max(0, ship.hullCurrent / hull) : 1
+  const barColor = pct > 0.6 ? '#22c55e' : pct > 0.3 ? '#eab308' : '#ef4444'
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ship.color ?? '#64748b' }} />
+      <span className="font-mono text-xs text-slate-300 truncate flex-1">{ship.profile?.name ?? '?'}</span>
+      <div className="w-14 h-1 bg-slate-800 rounded-full overflow-hidden shrink-0">
+        <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, backgroundColor: barColor }} />
+      </div>
+      <span className="font-mono text-xs text-slate-600 w-10 text-right shrink-0">
+        {ship.hullCurrent}/{hull || '?'}
+      </span>
+    </div>
+  )
+}
+
+/** Right column shown after a session file is parsed (before import). */
+function SessionPreview({ data, onConfirm, onCancel, loading }) {
+  const { name, round, phase, combatMode, ships = [], missiles = [], _exportedAt, _filename } = data
+
+  const PHASE_LABELS = {
+    setup: 'SETUP', initiative: 'INIZIATIVA', acceleration: 'ACCELERAZIONE',
+    movement: 'MOVIMENTO', attack: 'ATTACCO', actions: 'AZIONI', end: 'FINE ROUND',
+  }
+  const FACTION_LABELS = { players: 'GIOCATORI', npc: 'NPC', neutral: 'NEUTRALI' }
+  const FACTION_COLORS = { players: 'text-[--neon-cyan]', npc: 'text-red-400', neutral: 'text-slate-400' }
+
+  const byFaction = ships.reduce((acc, ship) => {
+    const f = ship.faction ?? 'neutral'
+    if (!acc[f]) acc[f] = []
+    acc[f].push(ship)
+    return acc
+  }, {})
+
+  const savedAt = _exportedAt ? new Date(_exportedAt).toLocaleString('it-IT') : '—'
+
+  return (
+    <div className="relative flex flex-col h-full overflow-hidden">
+      <div
+        className="absolute inset-0 pointer-events-none opacity-20"
+        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(15,23,42,0.5) 3px, rgba(15,23,42,0.5) 4px)' }}
+      />
+      <div className="relative z-10 flex flex-col h-full">
+
+        <div className="px-6 py-3 border-b border-amber-900/40 shrink-0 flex items-center gap-3 bg-amber-950/10">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+          <span className="font-display text-xs text-amber-500/80 tracking-widest">MISSIONE IDENTIFICATA</span>
+          <div className="flex-1 h-px bg-amber-900/40" />
+        </div>
+
+        <div className="px-6 py-4 grid grid-cols-2 gap-x-6 gap-y-3 border-b border-slate-800 shrink-0">
+          <DataField label="DESIGNAZIONE" value={name} />
+          <DataField label="FILE" value={_filename} small />
+          <DataField label="ROUND" value={round} accent />
+          <DataField label="FASE" value={PHASE_LABELS[phase] ?? phase?.toUpperCase()} />
+          <DataField label="MODALITÀ" value={combatMode === 'vectorial' ? 'VETTORIALE' : 'BASE'} />
+          <DataField label="NAVI / MISSILI" value={`${ships.length} / ${missiles.length}`} />
+          <DataField label="SALVATO IL" value={savedAt} small />
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <p className="font-display text-xs text-slate-600 tracking-widest mb-3">ROSTER NAVI</p>
+          {ships.length === 0 && (
+            <p className="font-mono text-xs text-slate-700">Nessuna nave registrata.</p>
+          )}
+          {Object.entries(byFaction).map(([faction, factionShips]) => (
+            <div key={faction} className="mb-4">
+              <p className={`font-display text-xs tracking-widest mb-2 ${FACTION_COLORS[faction] ?? 'text-slate-400'}`}>
+                {FACTION_LABELS[faction] ?? faction.toUpperCase()} · {factionShips.length}
+              </p>
+              <div className="space-y-1.5">
+                {factionShips.map((ship) => <ShipPreviewRow key={ship.id} ship={ship} />)}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="shrink-0 px-6 py-4 border-t border-slate-800 space-y-2">
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="w-full py-3 bg-amber-600/20 border border-amber-500/40 text-amber-400 font-display text-sm tracking-widest rounded-lg hover:bg-amber-600/30 transition-colors disabled:opacity-40"
+          >
+            {loading ? 'CARICAMENTO…' : '▶  CARICA E INIZIA'}
+          </button>
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="w-full py-2 border border-slate-700 text-slate-500 font-display text-xs tracking-widest rounded-lg hover:border-slate-600 hover:text-slate-400 transition-colors disabled:opacity-40"
+          >
+            ANNULLA
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function SessionPanel() {
   const gotoScreen        = useUiStore((s) => s.gotoScreen)
   const resetBattle       = useBattleStore((s) => s.resetBattle)
   const importBattleState = useBattleStore((s) => s.importBattleState)
 
   const fileInputRef = useRef(null)
-  const [loading, setLoading]     = useState(false)
-  const [resumeErr, setResumeErr] = useState(null)
-  const [mode, setMode]           = useState('vectorial')
+  const [mode, setMode]               = useState('vectorial')
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState(null)
+  const [pendingFile, setPendingFile]  = useState(null)
+  const [pendingData, setPendingData]  = useState(null)
 
   const handleNewSession = () => {
     resetBattle(mode)
@@ -180,97 +463,69 @@ function SessionPanel() {
   const handleResumeFile = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setLoading(true)
-    setResumeErr(null)
+    setError(null)
     try {
-      await importBattleState(file)
-      gotoScreen('battle')
+      const text = await file.text()
+      const json = JSON.parse(text)
+      if (json?.type !== 'battle-state' || !json.battle) throw new Error('File non valido: tipo errato o campo "battle" mancante.')
+      setPendingFile(file)
+      setPendingData({ ...json.battle, _exportedAt: json.exportedAt, _filename: file.name })
     } catch (err) {
-      setResumeErr(err.message)
+      setError(err.message)
     } finally {
-      setLoading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
+  const handleConfirmLoad = async () => {
+    if (!pendingFile) return
+    setLoading(true)
+    setError(null)
+    try {
+      await importBattleState(pendingFile)
+      gotoScreen('battle')
+    } catch (err) {
+      setError(err.message)
+      setPendingFile(null)
+      setPendingData(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCancelPreview = () => {
+    setPendingFile(null)
+    setPendingData(null)
+    setError(null)
+  }
+
   return (
-    <div className="h-full flex flex-col items-center justify-center px-10 gap-6">
-      {/* Tagline */}
-      <div className="text-center space-y-1">
-        <p className="text-slate-500 font-display text-xs tracking-widest">
-          SIMULATORE DI COMBATTIMENTO SPAZIALE
-        </p>
-        <p className="text-slate-600 font-display text-xs">
-          Mongoose Traveller 2e · Vectorial Combat System
-        </p>
-      </div>
-
-      {/* Session actions */}
-      <div className="w-full max-w-sm space-y-3">
-
-        {/* Combat mode selector */}
-        <div className="grid grid-cols-2 gap-1 p-1 bg-slate-900 border border-slate-700 rounded-lg">
-          {[
-            { value: 'vectorial', label: 'VETTORIALE', sub: 'Mappa hex + vettori' },
-            { value: 'basic',     label: 'BASE',       sub: 'Solo bande distanza' },
-          ].map(({ value, label, sub }) => (
-            <button
-              key={value}
-              onClick={() => setMode(value)}
-              className={`py-2 px-3 rounded font-display text-xs tracking-widest transition-colors text-center ${
-                mode === value
-                  ? 'bg-[--neon-cyan]/15 border border-[--neon-cyan]/40 text-[--neon-cyan]'
-                  : 'text-slate-500 hover:text-slate-300'
-              }`}
-            >
-              {label}
-              <span className="block text-xs font-mono tracking-normal normal-case text-slate-600 mt-0.5">{sub}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* New session */}
-        <button
-          onClick={handleNewSession}
-          className="w-full py-4 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-display text-sm tracking-widest rounded-lg hover:bg-[--neon-cyan]/20 transition-colors group"
-        >
-          <span className="block text-lg mb-0.5">▶</span>
-          NUOVA SESSIONE
-          <span className="block text-xs text-slate-500 mt-0.5 normal-case tracking-normal font-normal group-hover:text-slate-400 transition-colors">
-            Avvia combattimento da zero
-          </span>
-        </button>
-
-        {/* Resume session */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json,application/json"
-          onChange={handleResumeFile}
-          className="hidden"
+    <div className="h-full grid grid-cols-[340px_1fr] overflow-hidden">
+      <CommandConsole
+        mode={mode}
+        onModeChange={setMode}
+        onNewSession={handleNewSession}
+        onResumeClick={() => fileInputRef.current?.click()}
+        loading={loading}
+        error={error}
+      />
+      {pendingData ? (
+        <SessionPreview
+          data={pendingData}
+          onConfirm={handleConfirmLoad}
+          onCancel={handleCancelPreview}
+          loading={loading}
         />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={loading}
-          className="w-full py-3 border border-slate-600 text-slate-300 font-display text-sm tracking-widest rounded-lg hover:border-slate-400 hover:text-slate-200 transition-colors disabled:opacity-40 group"
-        >
-          <span className="block text-base mb-0.5">{loading ? '⌛' : '↺'}</span>
-          {loading ? 'CARICAMENTO…' : 'RIPRENDI SESSIONE'}
-          <span className="block text-xs text-slate-500 mt-0.5 normal-case tracking-normal font-normal">
-            Carica da file .json
-          </span>
-        </button>
-
-        {resumeErr && (
-          <p className="text-red-400 font-mono text-xs text-center">⚠ {resumeErr}</p>
-        )}
-      </div>
-
-      {/* Hint */}
-      <p className="text-slate-700 font-mono text-xs text-center max-w-xs leading-relaxed">
-        Aggiungi profili nave nel pannello di sinistra prima di iniziare.
-        Le sessioni si salvano dall'interfaccia di combattimento.
-      </p>
+      ) : (
+        <TacticalDisplayIdle />
+      )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json,application/json"
+        onChange={handleResumeFile}
+        className="hidden"
+      />
     </div>
   )
 }
