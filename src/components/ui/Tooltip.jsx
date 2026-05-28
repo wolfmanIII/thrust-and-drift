@@ -26,7 +26,7 @@ export function Tooltip({ label, children, position = 'top' }) {
       {children}
       {coords && createPortal(
         <span
-          className="pointer-events-none fixed z-[9999] whitespace-nowrap px-2 py-1 rounded bg-slate-800 border border-slate-600 text-slate-200 font-display text-xs tracking-widest"
+          className="pointer-events-none fixed z-9999 whitespace-nowrap px-2 py-1 rounded bg-slate-800 border border-slate-600 text-slate-200 font-display text-xs tracking-widest"
           style={{
             left: coords.x,
             top: isTop ? coords.y - 6 : coords.y + 6,
