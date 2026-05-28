@@ -56,6 +56,7 @@ describe('addShip', () => {
     expect(ship.faction).toBe('npc')
     expect(ship.color).toBe('#ff0000')
     expect(ship.criticalHits).toEqual([])
+    expect(ship.thrustPenalty).toBe(0)
     expect(ship.evasiveThrust).toBe(0)
     expect(ship.thrustUsedThisRound).toBe(0)
   })
@@ -140,10 +141,11 @@ describe('updateShip', () => {
 
 describe('applyDamage', () => {
   it('reduces hullCurrent by damage', () => {
-    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    // hull=100 so damage=3 (3%) does not cross any 10% threshold
+    useBattleStore.getState().addShip(makeProfile({ hull: 100 }), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().applyDamage(id, 3, 'Laser')
-    expect(useBattleStore.getState().ships[0].hullCurrent).toBe(7)
+    expect(useBattleStore.getState().ships[0].hullCurrent).toBe(97)
   })
 
   it('clamps hull at 0 (no negative)', () => {
@@ -166,23 +168,136 @@ describe('applyDamage', () => {
   })
 })
 
+// Math.random = 0.5 → die = floor(0.5*6)+1 = 4; 4+4=8 → M-Drive
+describe('applyDamage — threshold criticals', () => {
+  beforeEach(() => vi.spyOn(Math, 'random').mockReturnValue(0.5))
+  afterEach(() => vi.restoreAllMocks())
+
+  it('damage < 10% hull → no threshold crit triggered', () => {
+    // hull=20, threshold=2; 1 damage = 5%
+    useBattleStore.getState().addShip(makeProfile({ hull: 20 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyDamage(id, 1, 'Laser')
+    expect(useBattleStore.getState().ships[0].criticalHits).toHaveLength(0)
+  })
+
+  it('exactly 10% damage triggers 1 Sev-1 crit', () => {
+    // hull=20, threshold=2; 2 damage = 10%
+    useBattleStore.getState().addShip(makeProfile({ hull: 20 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyDamage(id, 2, 'Laser')
+    // random=0.5 → 2D6=8 → M-Drive
+    const { criticalHits } = useBattleStore.getState().ships[0]
+    expect(criticalHits).toHaveLength(1)
+    expect(criticalHits[0].system).toBe('M-Drive')
+    expect(criticalHits[0].severity).toBe(1)
+  })
+
+  it('20% damage in one hit → M-Drive stacks sev 1→2 (upsert, length stays 1)', () => {
+    useBattleStore.getState().addShip(makeProfile({ hull: 20 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyDamage(id, 4, 'Missile')
+    // 2 threshold crits, both roll M-Drive; 2nd stacks → sev 2
+    const { criticalHits, thrustPenalty } = useBattleStore.getState().ships[0]
+    expect(criticalHits).toHaveLength(1)
+    expect(criticalHits[0].severity).toBe(2)
+    // M-Drive sev 2 → thrustPenalty = 1
+    expect(thrustPenalty).toBe(1)
+  })
+
+  it('skipThreshold flag suppresses further threshold crits (no cascade)', () => {
+    useBattleStore.getState().addShip(makeProfile({ hull: 20 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    // Apply secondary damage with _skipThreshold=true: no crit should be added
+    useBattleStore.getState().applyDamage(id, 10, 'Hull crit extra', true)
+    expect(useBattleStore.getState().ships[0].criticalHits).toHaveLength(0)
+  })
+})
+
 describe('addCriticalHit', () => {
-  it('appends to criticalHits with repairRoundsApplied = 0', () => {
+  it('appends new system with repairRoundsApplied = 0', () => {
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().addCriticalHit(id, { system: 'Drive', severity: 2 })
+    useBattleStore.getState().addCriticalHit(id, { system: 'Sensors', severity: 2 })
     const ship = useBattleStore.getState().ships[0]
     expect(ship.criticalHits).toHaveLength(1)
-    expect(ship.criticalHits[0].system).toBe('Drive')
+    expect(ship.criticalHits[0].system).toBe('Sensors')
+    expect(ship.criticalHits[0].severity).toBe(2)
     expect(ship.criticalHits[0].repairRoundsApplied).toBe(0)
   })
 
-  it('multiple crits stack', () => {
+  it('two different systems both persist', () => {
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().addCriticalHit(id, { system: 'Drive',  severity: 1 })
-    useBattleStore.getState().addCriticalHit(id, { system: 'Turret', severity: 2 })
+    useBattleStore.getState().addCriticalHit(id, { system: 'Sensors', severity: 1 })
+    useBattleStore.getState().addCriticalHit(id, { system: 'Fuel',    severity: 2 })
     expect(useBattleStore.getState().ships[0].criticalHits).toHaveLength(2)
+  })
+
+  it('same system: updates severity in-place (no duplicate entry)', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'Sensors', severity: 1 })
+    useBattleStore.getState().addCriticalHit(id, { system: 'Sensors', severity: 3 })
+    const { criticalHits } = useBattleStore.getState().ships[0]
+    expect(criticalHits).toHaveLength(1)
+    expect(criticalHits[0].severity).toBe(3)
+  })
+
+  it('adds log entry', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    const logBefore = useBattleStore.getState().log.length
+    useBattleStore.getState().addCriticalHit(id, { system: 'Hull', severity: 1 })
+    expect(useBattleStore.getState().log.length).toBeGreaterThan(logBefore)
+  })
+
+  it('unknown shipId is no-op', () => {
+    expect(() => useBattleStore.getState().addCriticalHit('ghost', { system: 'Hull', severity: 1 })).not.toThrow()
+  })
+
+  // === M-Drive thrust penalty ===
+
+  it('M-Drive Sev 1 → thrustPenalty = 0 (DM only, no thrust reduction)', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'M-Drive', severity: 1 })
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(0)
+  })
+
+  it('M-Drive Sev 2 → thrustPenalty = 1', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'M-Drive', severity: 2 })
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(1)
+  })
+
+  it('M-Drive Sev 4 → thrustPenalty = 1', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'M-Drive', severity: 4 })
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(1)
+  })
+
+  it('M-Drive Sev 5 → thrustPenalty = profile.thrust (zero thrust)', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'M-Drive', severity: 5 })
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(4)
+  })
+
+  it('M-Drive Sev 6 → thrustPenalty = profile.thrust', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 6 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'M-Drive', severity: 6 })
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(6)
+  })
+
+  it('non-M-Drive crit leaves thrustPenalty = 0', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'Hull', severity: 3 })
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(0)
   })
 })
 
@@ -263,6 +378,15 @@ describe('startNextRound', () => {
     expect(ship.evasiveThrust).toBe(0)
     expect(ship.hasActedThisPhase).toBe(false)
   })
+
+  it('does NOT reset thrustPenalty between rounds (M-Drive damage persists)', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'M-Drive', severity: 3 })
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(1)
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(1)
+  })
 })
 
 // === CREW ACTIONS ===
@@ -289,6 +413,15 @@ describe('declareEvasiveThrust', () => {
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().declareEvasiveThrust(id, -5)
     expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(0)
+  })
+
+  it('thrustPenalty reduces maximum evasive thrust', () => {
+    // thrust=4, penalty=2 → max evasive = 2
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { thrustPenalty: 2 })
+    useBattleStore.getState().declareEvasiveThrust(id, 4)
+    expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(2)
   })
 
   it('unknown shipId is no-op', () => {
@@ -536,12 +669,12 @@ describe('repairCritical', () => {
   it('removes first critical hit', () => {
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().addCriticalHit(id, { system: 'Drive',  severity: 2 })
-    useBattleStore.getState().addCriticalHit(id, { system: 'Turret', severity: 1 })
+    useBattleStore.getState().addCriticalHit(id, { system: 'Sensors', severity: 2 })
+    useBattleStore.getState().addCriticalHit(id, { system: 'Fuel',    severity: 1 })
     useBattleStore.getState().repairCritical(id)
     const crits = useBattleStore.getState().ships[0].criticalHits
     expect(crits).toHaveLength(1)
-    expect(crits[0].system).toBe('Turret')
+    expect(crits[0].system).toBe('Fuel')
   })
 
   it('no-op when no crits', () => {
@@ -553,6 +686,29 @@ describe('repairCritical', () => {
 
   it('unknown shipId is no-op', () => {
     expect(() => useBattleStore.getState().repairCritical('ghost')).not.toThrow()
+  })
+
+  it('repairing M-Drive crit resets thrustPenalty to 0', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'M-Drive', severity: 3 })
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(1) // sev 3 → penalty 1
+    useBattleStore.getState().repairCritical(id)
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(0)
+    expect(useBattleStore.getState().ships[0].criticalHits).toHaveLength(0)
+  })
+
+  it('repairing non-M-Drive crit preserves thrustPenalty from remaining M-Drive', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    // Hull first (gets repaired), M-Drive second (stays)
+    useBattleStore.getState().addCriticalHit(id, { system: 'Hull',    severity: 2 })
+    useBattleStore.getState().addCriticalHit(id, { system: 'M-Drive', severity: 4 })
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(1)
+    useBattleStore.getState().repairCritical(id) // removes Hull
+    // M-Drive Sev 4 still present → thrustPenalty remains 1
+    expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(1)
+    expect(useBattleStore.getState().ships[0].criticalHits[0].system).toBe('M-Drive')
   })
 })
 

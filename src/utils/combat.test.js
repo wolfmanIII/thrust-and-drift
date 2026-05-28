@@ -13,6 +13,8 @@ import {
   applyMovement,
   getEvasiveDM,
   isCriticalHit,
+  getCriticalSeverity,
+  getThresholdCriticalCount,
   rollAttack,
   rollInitiative,
 } from './combat.js'
@@ -175,6 +177,73 @@ describe('isCriticalHit', () => {
   it('effect > 6 = critical', () => {
     expect(isCriticalHit(10)).toBe(true)
     expect(isCriticalHit(100)).toBe(true)
+  })
+})
+
+// === CRITICAL SEVERITY ===
+// // MgT2e CRB p.169 — Severity = Effect − 5, clamped 1–6
+
+describe('getCriticalSeverity', () => {
+  const CASES = [
+    [6,   1], // minimum: Effect 6 → Sev 1
+    [7,   2],
+    [8,   3],
+    [9,   4],
+    [10,  5],
+    [11,  6],
+    [12,  6], // capped at 6
+    [100, 6],
+    [1,   1], // below threshold clamped to 1
+    [0,   1],
+  ]
+
+  it.each(CASES)('effect %i → severity %i', (effect, sev) => {
+    expect(getCriticalSeverity(effect)).toBe(sev)
+  })
+})
+
+// === THRESHOLD CRITICAL COUNT ===
+// // MgT2e CRB p.169 — Sustained Damage: 1 Sev-1 crit per 10% Hull chunk crossed
+
+describe('getThresholdCriticalCount', () => {
+  // Hull=20, threshold=2
+
+  it('no damage = 0 crits', () => {
+    expect(getThresholdCriticalCount(20, 20, 20)).toBe(0)
+  })
+
+  it('damage below 10% = 0 crits', () => {
+    expect(getThresholdCriticalCount(20, 19, 20)).toBe(0) // 1 dmg = 5%
+  })
+
+  it('exactly 10% damage triggers 1 crit', () => {
+    expect(getThresholdCriticalCount(20, 18, 20)).toBe(1) // 2 dmg = 10%
+  })
+
+  it('crossing two 10% thresholds in one hit triggers 2 crits', () => {
+    expect(getThresholdCriticalCount(20, 16, 20)).toBe(2) // 4 dmg = 20%
+  })
+
+  it('crossing three thresholds triggers 3 crits', () => {
+    expect(getThresholdCriticalCount(20, 14, 20)).toBe(3) // 6 dmg = 30%
+  })
+
+  it('no double-counting: starting from mid-hull', () => {
+    // prev=18 (already 1 threshold crossed), new=16 → 1 more threshold
+    expect(getThresholdCriticalCount(18, 16, 20)).toBe(1)
+  })
+
+  it('hull already damaged then healed edge case: newHull >= prevHull = 0', () => {
+    expect(getThresholdCriticalCount(10, 12, 20)).toBe(0)
+  })
+
+  it('maxHull = 0 = 0 (guard against division by zero)', () => {
+    expect(getThresholdCriticalCount(0, 0, 0)).toBe(0)
+  })
+
+  it('small hull (10): each 1 HP = 10%', () => {
+    expect(getThresholdCriticalCount(10, 9, 10)).toBe(1)
+    expect(getThresholdCriticalCount(10, 7, 10)).toBe(3)
   })
 })
 

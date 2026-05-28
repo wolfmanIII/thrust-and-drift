@@ -196,3 +196,31 @@ export function getEvasiveDM(pilotSkill, evasiveThrust) {
 export function isCriticalHit(effect) {
   return effect >= 6
 }
+
+/**
+ * Compute the severity of a critical hit from the attack Effect.
+ * Severity = Effect − 5, clamped to 1–6.
+ * // MgT2e CRB p.169
+ * @param {number} effect  Attack effect (total − 8)
+ * @returns {number}  1–6
+ */
+export function getCriticalSeverity(effect) {
+  return Math.max(1, Math.min(6, effect - 5))
+}
+
+/**
+ * Count how many 10%-threshold criticals a damage event triggers.
+ * Each full 10%-of-maxHull chunk newly crossed triggers one Severity-1 critical.
+ * // MgT2e CRB p.169 — Sustained Damage
+ * @param {number} prevHull
+ * @param {number} newHull
+ * @param {number} maxHull
+ * @returns {number}
+ */
+export function getThresholdCriticalCount(prevHull, newHull, maxHull) {
+  if (maxHull <= 0 || newHull >= prevHull) return 0
+  const threshold = maxHull * 0.1
+  const prevCrossed = Math.floor((maxHull - prevHull) / threshold)
+  const newCrossed  = Math.floor((maxHull - newHull)  / threshold)
+  return Math.max(0, newCrossed - prevCrossed)
+}

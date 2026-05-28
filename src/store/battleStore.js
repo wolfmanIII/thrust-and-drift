@@ -7,11 +7,28 @@
 import { create } from 'zustand'
 import { v7 as uuidv7 } from 'uuid'
 import { exportBattle, importBattle } from '../utils/io.js'
-import { applyThrust, applyMovement, rollInitiative } from '../utils/combat.js'
+import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount } from '../utils/combat.js'
+import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
+import { roll2D6, rollDice } from '../utils/dice.js'
 
 /**
  * @typedef {'setup'|'initiative'|'acceleration'|'movement'|'attack'|'actions'|'end'} BattlePhase
  */
+
+/**
+ * Derive thrustPenalty from the effective M-Drive critical severity.
+ * Sev 1 → 0 (DM only). Sev 2–4 → −1 thrust. Sev 5–6 → thrust = 0.
+ * // MgT2e CRB p.170
+ * @param {{ severity: number }|undefined} mDriveCrit
+ * @param {number} maxThrust
+ * @returns {number}
+ */
+function computeThrustPenalty(mDriveCrit, maxThrust) {
+  if (!mDriveCrit) return 0
+  if (mDriveCrit.severity >= 5) return maxThrust
+  if (mDriveCrit.severity >= 2) return 1
+  return 0
+}
 
 /**
  * Complete phase sequence including setup.
@@ -82,6 +99,7 @@ const useBattleStore = create((set, get) => ({
       hullCurrent: profile.hull,
       thrustUsedThisRound: 0,
       thrustBonusThisRound: 0,
+      thrustPenalty: 0,
       criticalHits: [],
       initiative: 0,
       initiativeBonusNextRound: 0,
@@ -237,15 +255,20 @@ const useBattleStore = create((set, get) => ({
   // === DAMAGE ===
 
   /**
-   * Apply damage to a ship's hull. Adds a log entry.
+   * Apply damage to a ship's hull. Automatically triggers Sustained Damage threshold
+   * criticals (one Sev-1 crit per 10% of starting Hull crossed).
+   * Pass _skipThreshold=true for secondary damage (hull crit extra damage) to avoid cascades.
+   * // MgT2e CRB p.169 — Sustained Damage
    * @param {string} shipId
    * @param {number} damage
    * @param {string} sourceLabel  Display name of the weapon/attacker
+   * @param {boolean} [_skipThreshold=false]
    */
-  applyDamage: (shipId, damage, sourceLabel) => {
+  applyDamage: (shipId, damage, sourceLabel, _skipThreshold = false) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
-    const hullCurrent = Math.max(0, ship.hullCurrent - damage)
+    const prevHull    = ship.hullCurrent
+    const hullCurrent = Math.max(0, prevHull - damage)
     get().updateShip(shipId, { hullCurrent })
     set((s) => ({
       log: [...s.log, makeLogEntry({
@@ -257,30 +280,68 @@ const useBattleStore = create((set, get) => ({
         details: { damage, hullCurrent, hullMax: ship.profile.hull },
       })],
     }))
+
+    if (_skipThreshold || damage <= 0) return
+
+    const thresholdCount = getThresholdCriticalCount(prevHull, hullCurrent, ship.profile.hull)
+    for (let i = 0; i < thresholdCount; i++) {
+      // Read fresh state each iteration — prior crits in this loop may have stacked
+      const current = get().ships.find((s) => s.id === shipId)
+      if (!current) break
+      const locRoll  = roll2D6()
+      const location = getCriticalLocation(locRoll.total)
+      const existing = current.criticalHits.find((c) => c.system === location)
+
+      if ((existing?.severity ?? 0) >= 6) {
+        // Max severity — apply 6D extra damage instead (CRB p.169)
+        const extra = rollDice(6, 6)
+        get().applyDamage(shipId, extra.total, `Critico ${location} (Sev. max — soglia)`, true)
+      } else {
+        const effectiveSeverity = existing
+          ? Math.max(1, Math.min(6, existing.severity + 1))
+          : 1
+        get().addCriticalHit(shipId, { system: location, severity: effectiveSeverity })
+        const effect = getCriticalEffect(location, effectiveSeverity)
+        if (effect?.mechanic === 'hull_extra_damage') {
+          const extra = rollDice(effect.value, 6)
+          get().applyDamage(shipId, extra.total, `Critico Hull Sev.${effectiveSeverity} (soglia)`, true)
+        }
+      }
+    }
   },
 
   /**
-   * Add a critical hit to a ship.
+   * Record a critical hit on a ship. Caller is responsible for computing effective
+   * severity (including stacking) before calling this action.
+   * Handles M-Drive thrustPenalty. Does not roll hull extra damage — caller handles that.
+   * // MgT2e CRB p.169–170
    * @param {string} shipId
-   * @param {{ system: string, severity: number }} crit
+   * @param {{ system: string, severity: number }} crit  severity must be effective (post-stacking)
    */
-  addCriticalHit: (shipId, crit) => {
+  addCriticalHit: (shipId, { system, severity }) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
-    const critEntry = { ...crit, repairRoundsApplied: 0 }
+
+    // Upsert: update existing entry for this system or append new one
+    const existingIdx = ship.criticalHits.findIndex((c) => c.system === system)
+    const updatedCrits = existingIdx >= 0
+      ? ship.criticalHits.map((c, i) => i === existingIdx ? { ...c, severity } : c)
+      : [...ship.criticalHits, { system, severity, repairRoundsApplied: 0 }]
+
+    const mDriveCrit = updatedCrits.find((c) => c.system === 'M-Drive')
+    const thrustPenalty = computeThrustPenalty(mDriveCrit, ship.profile.thrust)
+
     set((s) => ({
       ships: s.ships.map((sh) =>
-        sh.id === shipId
-          ? { ...sh, criticalHits: [...sh.criticalHits, critEntry] }
-          : sh
+        sh.id === shipId ? { ...sh, criticalHits: updatedCrits, thrustPenalty } : sh
       ),
       log: [...s.log, makeLogEntry({
         round: s.round,
         phase: s.phase,
         type: 'damage',
-        message: `${ship.profile.name}: Colpo critico su ${crit.system} (Severità ${crit.severity}).`,
+        message: `${ship.profile.name}: Colpo critico su ${system} (Severità ${severity}).`,
         shipId,
-        details: crit,
+        details: { system, severity },
       })],
     }))
   },
@@ -397,7 +458,7 @@ const useBattleStore = create((set, get) => ({
   declareEvasiveThrust: (shipId, amount) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
-    const maxEvasive = ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound
+    const maxEvasive = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0))
     const clamped = Math.max(0, Math.min(amount, maxEvasive))
     set((s) => ({
       ships: s.ships.map((sh) =>
@@ -469,16 +530,20 @@ const useBattleStore = create((set, get) => ({
 
   /**
    * Remove the first critical hit from a ship (Engineer repair).
+   * Recomputes thrustPenalty from remaining M-Drive crit, if any.
    * // MgT2e CRB p.167 — Repair System
    * @param {string} shipId
    */
   repairCritical: (shipId) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship || ship.criticalHits.length === 0) return
-    const removed = ship.criticalHits[0]
+    const removed       = ship.criticalHits[0]
+    const remainingCrits = ship.criticalHits.slice(1)
+    const mDriveCrit    = remainingCrits.find((c) => c.system === 'M-Drive')
+    const thrustPenalty = computeThrustPenalty(mDriveCrit, ship.profile.thrust)
     set((s) => ({
       ships: s.ships.map((sh) =>
-        sh.id === shipId ? { ...sh, criticalHits: sh.criticalHits.slice(1) } : sh
+        sh.id === shipId ? { ...sh, criticalHits: remainingCrits, thrustPenalty } : sh
       ),
       log: [...s.log, makeLogEntry({
         round: s.round,

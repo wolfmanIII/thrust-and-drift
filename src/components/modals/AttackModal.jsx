@@ -10,11 +10,12 @@ import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS } from '../../data/weapons.js'
 import { RANGE_BANDS } from '../../data/rangeBands.js'
-import { rollAttack, isCriticalHit } from '../../utils/combat.js'
-import { rollDice } from '../../utils/dice.js'
+import { rollAttack, isCriticalHit, getCriticalSeverity } from '../../utils/combat.js'
+import { rollDice, roll2D6 } from '../../utils/dice.js'
+import { getCriticalLocation, getCriticalEffect } from '../../data/criticalHits.js'
 import { useAttackSetup } from './useAttackSetup.js'
 
-/** @typedef {'config'|'roll'|'damage'} AttackStep */
+/** @typedef {'config'|'roll'|'damage'|'critical'} AttackStep */
 
 // ── UI primitive ──────────────────────────────────────────────────────────
 
@@ -340,6 +341,138 @@ function AttackDamageStep({ damageDice, effectBonus, armor, damageResult, setDam
   )
 }
 
+// ── Step 4: critical hit — location roll + effect display ────────────────
+
+/**
+ * @param {{
+ *   targetName: string,
+ *   attackEffect: number,
+ *   targetCrits: object[],
+ *   critRoll: object|null,
+ *   setCritRoll: Function,
+ *   extraDamageResult: number|null,
+ *   setExtraDamageResult: Function,
+ *   onApply: Function,
+ *   onClose: Function,
+ * }} props
+ */
+function AttackCriticalStep({
+  targetName, attackEffect, targetCrits,
+  critRoll, setCritRoll, extraDamageResult, setExtraDamageResult,
+  onApply, onClose,
+}) {
+  const attackSeverity = getCriticalSeverity(attackEffect)
+  const location = critRoll ? getCriticalLocation(critRoll.total) : null
+  const existingCrit = location ? targetCrits.find((c) => c.system === location) : null
+  const isMaxSeverity = (existingCrit?.severity ?? 0) >= 6
+
+  const effectiveSeverity = existingCrit && !isMaxSeverity
+    ? Math.max(attackSeverity, existingCrit.severity + 1)
+    : attackSeverity
+
+  const effect = location ? getCriticalEffect(location, isMaxSeverity ? 6 : effectiveSeverity) : null
+  // Max severity overflows as 6D extra damage; hull_extra_damage needs player roll
+  const extraDice = isMaxSeverity ? 6 : (effect?.mechanic === 'hull_extra_damage' ? effect.value : null)
+  const needsExtraRoll = extraDice !== null
+  const canApply = critRoll !== null && (!needsExtraRoll || extraDamageResult !== null)
+
+  const handleLocationRoll = () => {
+    setCritRoll(roll2D6())
+    setExtraDamageResult(null)
+  }
+
+  const handleExtraRoll = () => {
+    setExtraDamageResult(rollDice(extraDice, 6).total)
+  }
+
+  return (
+    <Modal title="Colpo Critico" onClose={onClose}>
+      <div className="space-y-4">
+        <div className="text-center font-mono text-xs text-orange-400">
+          ⚠ Effetto {attackEffect} ≥ 6 — Critico su {targetName}
+        </div>
+
+        {!critRoll ? (
+          <button
+            onClick={handleLocationRoll}
+            className="w-full py-3 bg-orange-900/30 border border-orange-700/50 text-orange-400 font-mono text-lg tracking-widest rounded hover:bg-orange-900/40 transition-colors"
+          >
+            🎲 TIRA POSIZIONE (2D6)
+          </button>
+        ) : (
+          <div className="space-y-3">
+            {/* Location dice */}
+            <div className="bg-slate-800 rounded p-3 text-center font-mono">
+              <div className="flex justify-center gap-3 mb-2">
+                {critRoll.results.map((r, i) => (
+                  <span
+                    key={i}
+                    className="w-10 h-10 bg-slate-700 rounded border border-slate-600 flex items-center justify-center text-lg text-white font-bold"
+                  >
+                    {r}
+                  </span>
+                ))}
+              </div>
+              <p className="text-orange-400 font-bold text-sm">{location}</p>
+              {isMaxSeverity ? (
+                <p className="text-red-400 text-xs mt-1">
+                  SEVERITÀ MASSIMA — 6D danno aggiuntivo
+                </p>
+              ) : (
+                <p className="text-slate-400 text-xs mt-1">
+                  Severità {effectiveSeverity}
+                  {existingCrit && (
+                    <span className="text-slate-500"> (era {existingCrit.severity}, stacking)</span>
+                  )}
+                </p>
+              )}
+            </div>
+
+            {/* Effect description */}
+            {effect && (
+              <div className="bg-red-950/30 border border-red-700/40 rounded p-3 font-mono text-xs text-red-300">
+                {effect.description}
+              </div>
+            )}
+
+            {/* Extra damage roll (hull crit or max-severity overflow) */}
+            {needsExtraRoll && extraDamageResult === null && (
+              <button
+                onClick={handleExtraRoll}
+                className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors"
+              >
+                🎲 TIRA {extraDice}D DANNO EXTRA
+              </button>
+            )}
+            {needsExtraRoll && extraDamageResult !== null && (
+              <div className="bg-slate-800 rounded p-2 text-center font-mono text-xs">
+                Danno extra:{' '}
+                <span className="text-red-400 font-bold text-xl">{extraDamageResult}</span>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setCritRoll(null); setExtraDamageResult(null) }}
+                className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500"
+              >
+                RIRUOTA
+              </button>
+              <button
+                onClick={onApply}
+                disabled={!canApply}
+                className="flex-1 py-2 bg-orange-900/30 border border-orange-700/50 text-orange-400 font-mono text-xs rounded hover:bg-orange-900/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                APPLICA CRITICO
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  )
+}
+
 // ── Root component — owns state, computes derived DMs ────────────────────
 
 export function AttackModal() {
@@ -354,17 +487,44 @@ export function AttackModal() {
   const [attackResult, setAttackResult]       = useState(null)
   const [damageResult, setDamageResult]       = useState(null)
   const [manualRangeBand, setManualRangeBand] = useState(null)
+  const [critRoll, setCritRoll]               = useState(null)
+  const [extraDamageResult, setExtraDamageResult] = useState(null)
 
   const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, combatMode, dmBreakdown } =
     useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand)
 
   if (!attacker) return null
 
-  const handleApply = () => {
+  const handleApplyDamage = () => {
     if (!damageResult || !target) return
     applyDamage(target.id, damageResult.total, `${weaponKey} di ${attacker.profile.name}`)
     if (isCriticalHit(attackResult?.effect ?? 0)) {
-      addCriticalHit(target.id, { system: 'Hull', severity: 1 })
+      setStep('critical')
+    } else {
+      closeModal()
+    }
+  }
+
+  const handleApplyCritical = () => {
+    if (!critRoll || !target) return
+    const location       = getCriticalLocation(critRoll.total)
+    const attackSeverity = getCriticalSeverity(attackResult.effect)
+    const existingCrit   = target.criticalHits.find((c) => c.system === location)
+    const isMaxSeverity  = (existingCrit?.severity ?? 0) >= 6
+    const effectiveSeverity = existingCrit && !isMaxSeverity
+      ? Math.max(attackSeverity, existingCrit.severity + 1)
+      : attackSeverity
+    const effect = getCriticalEffect(location, isMaxSeverity ? 6 : effectiveSeverity)
+
+    if (isMaxSeverity) {
+      if (extraDamageResult !== null) {
+        applyDamage(target.id, extraDamageResult, `Critico ${location} (Sev. max)`)
+      }
+    } else {
+      addCriticalHit(target.id, { system: location, severity: effectiveSeverity })
+      if (effect?.mechanic === 'hull_extra_damage' && extraDamageResult !== null) {
+        applyDamage(target.id, extraDamageResult, `Critico Hull (Sev. ${effectiveSeverity})`)
+      }
     }
     closeModal()
   }
@@ -407,6 +567,22 @@ export function AttackModal() {
     )
   }
 
+  if (step === 'critical') {
+    return (
+      <AttackCriticalStep
+        targetName={target?.profile.name ?? '?'}
+        attackEffect={attackResult?.effect ?? 6}
+        targetCrits={target?.criticalHits ?? []}
+        critRoll={critRoll}
+        setCritRoll={setCritRoll}
+        extraDamageResult={extraDamageResult}
+        setExtraDamageResult={setExtraDamageResult}
+        onApply={handleApplyCritical}
+        onClose={closeModal}
+      />
+    )
+  }
+
   return (
     <AttackDamageStep
       damageDice={weapon?.damageDice ?? 1}
@@ -414,7 +590,7 @@ export function AttackModal() {
       armor={target?.profile.armor ?? 0}
       damageResult={damageResult}
       setDamageResult={setDamageResult}
-      onApply={handleApply}
+      onApply={handleApplyDamage}
       onClose={closeModal}
     />
   )
