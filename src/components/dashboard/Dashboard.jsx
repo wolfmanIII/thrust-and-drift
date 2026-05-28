@@ -569,11 +569,12 @@ export function Dashboard() {
 
         <header className="shrink-0 px-6 py-4 border-b border-slate-800 flex items-center gap-4">
           <div className="relative shrink-0 w-24 h-24">
+            <div className="absolute -inset-2 bg-cyan-400/10 rounded-xl blur-md pointer-events-none" />
             <img
               src={tdLogo}
               alt="Thrust & Drift"
-              className="w-24 h-24"
-              style={{ filter: 'drop-shadow(0 0 5px rgba(125,211,252,0.7)) drop-shadow(0 0 16px rgba(125,211,252,0.3))' }}
+              className="relative w-24 h-24"
+              style={{ filter: 'drop-shadow(0 0 10px rgba(34,211,238,0.55))' }}
             />
             <div className="logo-shimmer" />
           </div>
