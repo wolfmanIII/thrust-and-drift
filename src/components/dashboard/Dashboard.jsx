@@ -12,7 +12,8 @@ import { useProfilesStore } from '../../store/profilesStore.js'
 import { ShipProfileForm }  from '../forms/ShipProfileForm.jsx'
 import { CatalogPanel }     from './CatalogPanel.jsx'
 import { useProfileImport } from './useProfileImport.js'
-import { Tooltip } from '../ui/Tooltip.jsx'
+import { Tooltip }          from '../ui/Tooltip.jsx'
+import { Modal }            from '../modals/Modal.jsx'
 
 // ── Left panel: profiles list ─────────────────────────────────────────────
 
@@ -33,7 +34,8 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
 
   const { importStatus, fileInputRef, handleImport } = useProfileImport()
 
-  const [filter, setFilter] = useState('')
+  const [filter, setFilter]               = useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   const filtered = profiles.filter((p) =>
     p.name.toLowerCase().includes(filter.toLowerCase()) ||
@@ -91,7 +93,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
             <div className={`flex gap-1 shrink-0 ${editingId === p.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
               <ActionIcon label="✎" title="Modifica" onClick={() => onEdit(p.id)} dim="text-[--neon-cyan]" />
               <ActionIcon label="⧉" title="Duplica"  onClick={() => duplicateProfile(p.id)} />
-              <ActionIcon label="⊗" title="Elimina"  onClick={() => deleteProfile(p.id)} dim="hover:text-red-400" />
+              <ActionIcon label="⊗" title="Elimina"  onClick={() => setConfirmDeleteId(p.id)} dim="hover:text-red-400" />
             </div>
           </div>
         ))}
@@ -142,6 +144,36 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
           </button>
         </div>
       </div>
+
+      {confirmDeleteId && (() => {
+        const target = profiles.find((p) => p.id === confirmDeleteId)
+        return (
+          <Modal title="ELIMINA PROFILO" onClose={() => setConfirmDeleteId(null)} width="max-w-sm">
+            <div className="space-y-4">
+              <p className="font-mono text-sm text-slate-300 leading-relaxed">
+                Eliminare il profilo <span className="text-[--neon-cyan] font-bold">{target?.name}</span>?
+              </p>
+              <p className="font-mono text-xs text-slate-500">
+                Operazione irreversibile. Il profilo non potrà essere recuperato.
+              </p>
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={() => { deleteProfile(confirmDeleteId); setConfirmDeleteId(null) }}
+                  className="flex-1 py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-display text-xs tracking-widest rounded hover:bg-red-900/50 transition-colors"
+                >
+                  ELIMINA
+                </button>
+                <button
+                  onClick={() => setConfirmDeleteId(null)}
+                  className="flex-1 py-2 border border-slate-600 text-slate-300 font-display text-xs tracking-widest rounded hover:border-slate-400 transition-colors"
+                >
+                  ANNULLA
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )
+      })()}
     </div>
   )
 }
