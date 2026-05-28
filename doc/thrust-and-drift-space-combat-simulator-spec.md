@@ -972,7 +972,23 @@ Funzionalità incluse nella prima versione funzionante:
 - ✅ Modale conferma abbandono sessione (⌂ HUD)
 - ✅ Suite di test (Vitest — utils, store, componenti UI)
 
-### 13.2 Versione 1.1 — HUD Contestuale
+### 13.2 Versione 1.1 — Persistenza e Resilienza
+
+**Autosave su IndexedDB** — eliminare la dipendenza dal salvataggio manuale:
+
+- Stato battaglia serializzato su IndexedDB dopo ogni azione significativa (fine fase, attacco, thrust applicato)
+- Al caricamento dell'app: rilevamento sessione sospesa → banner di ripristino in dashboard
+- Il file JSON rimane disponibile per backup esplicito e per trasferire la sessione tra dispositivi; IndexedDB è lo strato di recovery automatico
+- Nessun backend, nessuna rete — tutto locale, stesso modello mentale attuale
+
+**Error boundary globale** — gestione errori visibile al GM:
+
+- React `ErrorBoundary` al root dell'app: cattura eccezioni non gestite nel render tree
+- Pannello di errore con messaggio leggibile + pulsante "Ricarica" che tenta il ripristino da IndexedDB
+- Toast/banner per errori non fatali (import JSON malformato, azione su nave inesistente, ecc.) — attualmente silenti
+- Logging errori nel battle log con tipo `"system"` per mantenere traccia durante la sessione
+
+### 13.3 Versione 1.2 — HUD Contestuale
 
 **Tooltip hover nave** — al passaggio del mouse su un token sulla mappa, mostra un pannello informativo minimale (overlay HTML sopra il canvas, non disegnato su Canvas):
 
@@ -989,7 +1005,7 @@ Funzionalità incluse nella prima versione funzionante:
 
 Il pannello appare con breve delay (~200 ms) per evitare flickering durante il pan, scompare al mouseleave o all'apertura del context menu.
 
-### 13.3 Versione 1.2 — Effetti Visivi Canvas
+### 13.4 Versione 1.3 — Effetti Visivi Canvas
 
 Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`):
 
@@ -1004,7 +1020,7 @@ Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`
 
 Tutti gli effetti sono puramente decorativi — non bloccano input, non modificano stato di gioco, si esauriscono in autonomia senza dover essere gestiti dallo store.
 
-### 13.4 Versione 1.3 — Dogfighting
+### 13.5 Versione 1.4 — Dogfighting
 
 - Rilevamento automatico navi nella stessa cella → transizione a round da 6 secondi
 - Check Pilot contrapposto; DM tonnaggio/thrust; gestione più gruppi in parallelo
@@ -1013,29 +1029,13 @@ Tutti gli effetti sono puramente decorativi — non bloccano input, non modifica
 - Electronic warfare (jamming), evasive action avanzata
 - Vedi `dogfight-system-design.md`
 
-### 13.5 Versione 1.4 — Abbordaggio
+### 13.6 Versione 1.5 — Abbordaggio
 
 - 4 fasi: Approccio → Contatto → Conflitto → Sicurezza (HG 2022 pp.125–135)
 - Metodi ingresso: airlock, breaching tube, forced linkage, taglio scafo con resilienza per armatura
 - Stacking corridoi, colpi mancati (tabella 2D), obiettivi tattici (Ponte / Engineering / Torrette)
 - Cambio fazione nave catturata; modalità astratta rapida (CR p.175) per abbordaggi di routine
 - Vedi `boarding-system-design.md`
-
-### 13.6 Versione 1.5 — Persistenza e Resilienza
-
-**Autosave su IndexedDB** — eliminare la dipendenza dal salvataggio manuale:
-
-- Stato battaglia serializzato su IndexedDB dopo ogni azione significativa (fine fase, attacco, thrust applicato)
-- Al caricamento dell'app: rilevamento sessione sospesa → banner di ripristino in dashboard
-- Il file JSON rimane disponibile per backup esplicito; IndexedDB è lo strato di recovery automatico
-- Nessun backend, nessuna rete — tutto locale, stesso modello mentale attuale
-
-**Error boundary globale** — gestione errori visibile al GM:
-
-- React `ErrorBoundary` al root dell'app: cattura eccezioni non gestite nel render tree
-- Pannello di errore con messaggio leggibile + pulsante "Ricarica" che tenta il ripristino da IndexedDB
-- Toast/banner per errori non fatali (import JSON malformato, azione su nave inesistente, ecc.) — attualmente silenti
-- Logging errori nel battle log con tipo `"system"` per mantenere traccia durante la sessione
 
 ### 13.7 Versione 2.0 — Future
 
