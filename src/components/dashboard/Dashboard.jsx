@@ -43,10 +43,10 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
   return (
     <div className="flex flex-col h-full">
       {/* Panel header */}
-      <div className="px-4 py-3 border-b border-slate-800 shrink-0">
-        <h2 className="font-display text-xs text-slate-400 tracking-widest uppercase">
+      <div className="px-4 py-3 border-b border-slate-700 shrink-0 bg-slate-900">
+        <h2 className="font-display text-xs text-[--neon-cyan] tracking-widest uppercase">
           Profili Nave
-          <span className="ml-2 text-slate-600">({profiles.length})</span>
+          <span className="ml-2 text-slate-500">({profiles.length})</span>
         </h2>
       </div>
 
