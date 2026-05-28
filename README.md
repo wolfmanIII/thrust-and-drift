@@ -11,7 +11,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 ## Features
 
 | Feature | Description |
-|---------|-------------|
+| --------- | ------------- |
 | **Hex grid map** | Flat-top axial hex grid with pan & zoom |
 | **Vectorial movement** | Ships have velocity vectors; thrust modifies them |
 | **Ship profiles** | Full CRUD — create, edit, duplicate, delete |
@@ -65,6 +65,7 @@ A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 ### 3 — In battle
 
 **Right-click any hex** to open the context menu:
+
 - Empty hex → **Aggiungi Nave** (place a ship)
 - Ship hex → actions for that ship (Thrust, Attack, Actions, Detail, Remove)
 
@@ -79,7 +80,7 @@ A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 The HUD (top-left) shows the current round and phase.
 
 | Phase | What to do |
-|-------|------------|
+| ------- | ------------ |
 | **Setup** | Place ships on the map |
 | **Initiative** | Open right-click menu → roll initiative via modal |
 | **Acceleration** | Each ship in turn: right-click → Thrust |
@@ -102,7 +103,7 @@ automatically — save first).
 ## Tech Stack
 
 | Layer | Technology |
-|-------|------------|
+| ------- | ------------ |
 | Framework | React 19 + Vite 8 |
 | State | Zustand 5 |
 | Styling | Tailwind CSS v4 |
@@ -113,7 +114,7 @@ automatically — save first).
 
 ## Project Structure
 
-```
+```text
 src/
 ├── components/
 │   ├── dashboard/   ← Pre-battle lobby (Dashboard.jsx)

@@ -25,7 +25,7 @@ Il simulatore implementa le **regole base di combattimento spaziale** del Core R
 ## 2. Stack Tecnologico
 
 | Layer | Tecnologia | Motivazione |
-|---|---|---|
+| --- | --- | --- |
 | Framework | **React 19 + Vite 8** | Component UI + build tool moderno |
 | Rendering mappa | **Canvas API** (nativo) | Performance, controllo totale, pan/zoom fluido |
 | Gestione stato | **Zustand 5** | Leggero, scalabile, ideale per stato di gioco complesso |
@@ -885,7 +885,7 @@ function downloadJSON(data, filename) {
 Includere almeno questi profili come default per test e gioco rapido:
 
 | Nome | Tonnellaggio | Hull | Thrust | Armi | Note |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | Free Trader (Beowulf) | 200 ton | 22 | 1 | 1× doppia torretta (pulse+missile) | Mercantile standard |
 | Scout/Courier | 100 ton | 11 | 2 | 1× doppia torretta (pulse+missile) | Versatile |
 | Fighter Leggero | 10 ton | 2 | 6 | 1× singola torretta (pulse) | Alta manovrabilità |
@@ -968,7 +968,3 @@ Al lancio il missile eredita il vettore attuale della nave. Ogni round, nella fa
 3. Scala `thrustRemaining` di 1
 
 Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiunge la casella del bersaglio (o adiacente), si risolve l'impatto.
-
----
-
-*Fine documento — versione 1.0 — pronto per sviluppo con Claude Code*
