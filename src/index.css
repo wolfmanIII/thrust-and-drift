@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap');
 @import "tailwindcss";
 
 /* ── Design tokens ────────────────────────────────────────────────────────── */
@@ -23,7 +23,7 @@
   body {
     background-color: var(--color-slate-950, #020617);
     color: var(--color-slate-200, #e2e8f0);
-    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, monospace;
+    font-family: 'Share Tech Mono', ui-monospace, Consolas, monospace;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     user-select: none;

@@ -290,13 +290,18 @@ export function Dashboard() {
       <div className="flex-1 flex flex-col overflow-hidden">
 
         <header className="shrink-0 px-6 py-4 border-b border-slate-800 flex items-center gap-4">
-          <img src={tdLogo} alt="Thrust & Drift" className="w-16 h-16 shrink-0" />
-          <h1 className="font-display font-bold text-[--neon-cyan] tracking-widest text-lg">
-            THRUST &amp; DRIFT
-          </h1>
-          <span className="text-slate-600 font-display text-xs tracking-widest hidden sm:block">
-            // SPACE COMBAT SIMULATOR
-          </span>
+          <img src={tdLogo} alt="Thrust & Drift" className="w-24 h-24 shrink-0" />
+          <div className="flex flex-col gap-0.5">
+            <h1 className="font-display font-bold text-[--neon-cyan] tracking-widest text-lg leading-tight">
+              THRUST &amp; DRIFT
+            </h1>
+            <span className="font-display text-xs text-slate-500 tracking-widest">
+              TACTICAL INTERFACE // MONGOOSE TRAVELLER 2E
+            </span>
+            <span className="font-display text-xs text-slate-600 tracking-widest">
+              SPACE COMBAT SIMULATOR
+            </span>
+          </div>
           <span className="ml-auto text-slate-700 font-mono text-xs">v0.1</span>
         </header>
 
