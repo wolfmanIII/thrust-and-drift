@@ -6,6 +6,36 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.0] — 2026-05-28
+
+### Added
+- **Sistema effetti visivi Canvas** — animazioni non bloccanti su canvas overlay separato (`pointer-events: none`, `requestAnimationFrame`); puramente decorativi, zero modifiche allo stato di gioco — Spec §13.4
+
+**Effetti one-shot (trigger da evento, fade automatico):**
+- `laser_ray` — raggio animato Attaccante→Bersaglio per Pulse/Beam Laser, Particle Beam, Railgun; colore differenziato per arma + glow; 300ms
+- `impact_burst` — 8 scintille radiali sul token colpito (hit confermato); 500ms
+- `thrust_plume` — triangolo ambra nella direzione opposta al delta-v applicato; 400ms
+- `critical_flash` — anello rosso espandente + etichetta `[CRIT: sistema]` su colpo critico; 600ms
+- `missile_trail` — scia tratteggiata arancione rilevata automaticamente da diff posizione missile; 380ms
+- `chaff` — 24 frammenti scatter quando un sandcaster interviene; 200ms
+
+**Effetti persistenti (da stato store, ogni frame):**
+- `sensor_lock_ring` — linea ciano tratteggiata animata + anello pulsante sul bersaglio bloccato
+- `evasive_aura` — alone giallo pulsante attorno al token con `evasiveThrust > 0`
+- `missile_exhausted` — overlay grigio + anello tratteggiato su missile con `thrustRemaining === 0`
+- `dogfight_alert` — testo "DOGFIGHT" arancione pulsante quando 2+ navi condividono lo stesso esagono
+
+**Architettura:**
+- `src/utils/effectQueue.js` — coda module-level senza dipendenze React; `emitEffect` / `drainEffects`
+- `src/components/map/effectRenderers.js` — funzioni Canvas 2D pure (pixel coords + progress `t`); save/restore su ogni draw
+- `src/components/map/useCanvasEffects.js` — hook con loop rAF; legge store via refs per evitare restart del loop; rileva spostamento missile da diff array
+- `BattleMap.jsx` — canvas overlay effetti sopra il canvas principale
+
+### Tests
+- 355 test (da 346) — nuova suite `effectQueue.test.js` (9 test): `emitEffect`, `drainEffects`, ordine di inserimento, drain multipli
+
+---
+
 ## [1.2.5] — 2026-05-28
 
 ### Added
