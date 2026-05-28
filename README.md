@@ -22,6 +22,8 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
 | **Battle log** | Timestamped event log with colour-coded entry types |
 | **Session save / resume** | Export session to JSON; resume flow shows a full preview before loading |
+| **Autosave** | IndexedDB autosave after every significant action; one-click restore on Dashboard |
+| **Error boundary** | Global React error boundary — catches crashes, shows recovery UI |
 | **Profile I/O** | Import/export ship profiles via JSON files |
 | **Safety modals** | Confirm before deleting profiles; confirm before leaving battle without saving |
 
@@ -62,8 +64,9 @@ A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 
 ### 2 — Start or resume a session
 
+- **↺ RIPRENDI AUTOSALVATAGGIO** — if an autosaved session exists in IndexedDB, this button appears with round, phase, and ship count. Click to resume instantly.
 - **▶ Nuova Sessione** — resets battle state and enters the combat map
-- **↺ Riprendi Sessione** — load a `.json` file; a preview screen shows round, phase, and ship roster before confirming
+- **↓ Riprendi da File** — load a `.json` file; a preview screen shows round, phase, and ship roster before confirming
 
 ### 3 — In battle
 
@@ -111,8 +114,8 @@ that unsaved data will be lost.
 | State | Zustand 5 |
 | Styling | Tailwind CSS v4 |
 | Map rendering | Browser Canvas API |
-| Persistence | Browser File API (JSON) — no backend |
-| Testing | Vitest 4 + Testing Library + jsdom |
+| Persistence | IndexedDB (autosave) + Browser File API (JSON export/import) |
+| Testing | Vitest 4 + Testing Library + jsdom + fake-indexeddb |
 
 ---
 
@@ -124,7 +127,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-260 tests across utils, Zustand stores, and UI components.
+285 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 
@@ -162,7 +165,8 @@ src/
 │       ├── HUD.jsx             ← Round/phase overlay + exit confirmation
 │       ├── BattleLog.jsx       ← Collapsible event log
 │       ├── PhaseTracker.jsx    ← Initiative order display
-│       └── Tooltip.jsx         ← Portal-based tooltip
+│       ├── Tooltip.jsx         ← Portal-based tooltip
+│       └── ErrorBoundary.jsx   ← Global React error boundary
 ├── data/
 │   ├── weapons.js              ← Weapon tables, traits, damage
 │   ├── rangeBands.js           ← Distance band thresholds (hex)
@@ -174,11 +178,14 @@ src/
 │   ├── profilesStore.js        ← Ship profiles (CRUD + import/export)
 │   ├── battleStore.js          ← Active battle state
 │   └── uiStore.js              ← Modal state, selected ship, context menu
+├── hooks/
+│   └── useAutosave.js          ← IndexedDB autosave + restore on mount
 └── utils/
     ├── hex.js                  ← Hex math (flat-top, cube coords)
     ├── combat.js               ← DM calc, damage, range bands
     ├── io.js                   ← JSON import/export via File API
-    └── dice.js                 ← Dice rolling + result formatting
+    ├── dice.js                 ← Dice rolling + result formatting
+    └── db.js                   ← IndexedDB wrapper (openDB, get, put, delete)
 ```
 
 ---

@@ -56,7 +56,8 @@ Il simulatore implementa le **regole base di combattimento spaziale** del Core R
     "@testing-library/react": "^16.x",
     "@testing-library/user-event": "^14.x",
     "@testing-library/jest-dom": "^6.x",
-    "jsdom": "^29.x"
+    "jsdom": "^29.x",
+    "fake-indexeddb": "^6.x"
   }
 }
 ```
@@ -105,9 +106,12 @@ thrust-and-drift/
     │   │   ├── HUD.jsx                ← Overlay minimo + modale conferma uscita
     │   │   ├── BattleLog.jsx          ← Log eventi collassabile
     │   │   ├── PhaseTracker.jsx       ← Indicatore fase corrente
-    │   │   └── Tooltip.jsx            ← Tooltip via React portal
+    │   │   ├── Tooltip.jsx            ← Tooltip via React portal
+    │   │   └── ErrorBoundary.jsx      ← Error boundary globale con UI recovery
     │   └── forms/
     │       └── ShipProfileForm.jsx    ← Form completo profilo nave
+    ├── hooks/
+    │   └── useAutosave.js             ← Autosave IndexedDB + restore al mount
     ├── store/
     │   ├── profilesStore.js           ← Profili nave (CRUD + import/export)
     │   ├── battleStore.js             ← Stato battaglia corrente
@@ -116,7 +120,8 @@ thrust-and-drift/
     │   ├── hex.js                     ← Matematica esagonale (flat-top)
     │   ├── combat.js                  ← Calcoli combattimento (DM, danni, range band)
     │   ├── io.js                      ← Import/export JSON via File API
-    │   └── dice.js                    ← Lancio dadi e formattazione risultati
+    │   ├── dice.js                    ← Lancio dadi e formattazione risultati
+    │   └── db.js                      ← Wrapper IndexedDB (openDB, dbGet, dbPut, dbDelete)
     └── data/
         ├── weapons.js                 ← Tabelle armi, tratti, danni
         ├── rangeBands.js              ← Soglie bande di distanza
@@ -142,6 +147,9 @@ Suite Vitest collocata accanto ai file sorgente (`*.test.js` / `*.test.jsx`):
 | `components/ui/HUD.test.jsx` | HUD — round/fase, controllo attore |
 | `components/ui/BattleLog.test.jsx` | BattleLog — entries, collapse, clear |
 | `components/ui/ContextMenu.test.jsx` | ContextMenu — tutti i tipi, outside click |
+| `components/ui/ErrorBoundary.test.jsx` | ErrorBoundary — render normale, catch errore, reload |
+| `hooks/useAutosave.test.js` | useAutosave — restore mount, autosave su cambio significativo |
+| `utils/db.test.js` | db.js — dbGet/dbPut/dbDelete, store isolati, fake-indexeddb |
 
 ```bash
 npm test               # esegui tutti i test
@@ -971,22 +979,27 @@ Funzionalità incluse nella prima versione funzionante:
 - ✅ Modale conferma eliminazione profilo
 - ✅ Modale conferma abbandono sessione (⌂ HUD)
 - ✅ Suite di test (Vitest — utils, store, componenti UI)
+- ✅ Autosave IndexedDB — persist dopo ogni azione significativa, restore al mount
+- ✅ Pulsante "Riprendi Autosalvataggio" in Dashboard con round/fase/navi/timestamp
+- ✅ Error boundary globale — cattura crash render, mostra UI recovery con pulsante ricarica
+- ✅ `utils/db.js` — wrapper IndexedDB testato con fake-indexeddb (285 test totali)
 
-### 13.2 Versione 1.1 — Persistenza e Resilienza
+### 13.2 Versione 1.1 — Persistenza e Resilienza ✅ COMPLETATA
 
-**Autosave su IndexedDB** — eliminare la dipendenza dal salvataggio manuale:
+**Autosave su IndexedDB** — implementato:
 
-- Stato battaglia serializzato su IndexedDB dopo ogni azione significativa (fine fase, attacco, thrust applicato)
-- Al caricamento dell'app: rilevamento sessione sospesa → banner di ripristino in dashboard
-- Il file JSON rimane disponibile per backup esplicito e per trasferire la sessione tra dispositivi; IndexedDB è lo strato di recovery automatico
-- Nessun backend, nessuna rete — tutto locale, stesso modello mentale attuale
+- `utils/db.js`: wrapper IndexedDB (openDB, dbGet, dbPut, dbDelete) — due object store: `battle` e `profiles`
+- `hooks/useAutosave.js`: subscriber Zustand → IndexedDB dopo ogni cambio significativo (ships, missiles, round, phase, log, initiativeOrder); restore al mount solo se `saved.ships.length > 0` e store vuoto
+- Dashboard: pulsante `↺ RIPRENDI AUTOSALVATAGGIO` visibile solo se IndexedDB ha sessione con navi; mostra round, fase, contatore navi, timestamp
+- `↓ RIPRENDI DA FILE` (JSON) sovrascrive IndexedDB al caricamento — sorgente di verità unica: lo store Zustand
+- `savedAt: ISO string` aggiunto al payload export JSON
 
-**Error boundary globale** — gestione errori visibile al GM:
+**Error boundary globale** — implementato:
 
-- React `ErrorBoundary` al root dell'app: cattura eccezioni non gestite nel render tree
-- Pannello di errore con messaggio leggibile + pulsante "Ricarica" che tenta il ripristino da IndexedDB
-- Toast/banner per errori non fatali (import JSON malformato, azione su nave inesistente, ecc.) — attualmente silenti
-- Logging errori nel battle log con tipo `"system"` per mantenere traccia durante la sessione
+- `ErrorBoundary` class component in `components/ui/ErrorBoundary.jsx`
+- Wrappa `<App />` in `main.jsx`
+- Mostra messaggio errore leggibile + pulsante "RICARICA PAGINA"
+- `componentDidCatch` logga stack in console
 
 ### 13.3 Versione 1.2 — HUD Contestuale
 
