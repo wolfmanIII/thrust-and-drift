@@ -12,6 +12,7 @@ import { useProfilesStore } from '../../store/profilesStore.js'
 import { ShipProfileForm }  from '../forms/ShipProfileForm.jsx'
 import { CatalogPanel }     from './CatalogPanel.jsx'
 import { useProfileImport } from './useProfileImport.js'
+import { Tooltip } from '../ui/Tooltip.jsx'
 
 // ── Left panel: profiles list ─────────────────────────────────────────────
 
@@ -148,13 +149,14 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
 /** Tiny icon button used in profile rows. */
 function ActionIcon({ label, title, onClick, dim = '' }) {
   return (
-    <button
-      title={title}
-      onClick={onClick}
-      className={`w-6 h-6 flex items-center justify-center text-slate-500 font-mono text-sm rounded hover:bg-slate-700 transition-colors ${dim}`}
-    >
-      {label}
-    </button>
+    <Tooltip label={title}>
+      <button
+        onClick={onClick}
+        className={`w-6 h-6 flex items-center justify-center text-slate-500 font-mono text-sm rounded hover:bg-slate-700 transition-colors ${dim}`}
+      >
+        {label}
+      </button>
+    </Tooltip>
   )
 }
 
@@ -275,7 +277,7 @@ export function Dashboard() {
 
       {/* ── Header ───────────────────────────────────────────────────── */}
       <header className="shrink-0 px-6 py-4 border-b border-slate-800 flex items-center gap-4">
-        <img src={tdLogo} alt="Thrust & Drift" className="w-8 h-8 shrink-0" />
+        <img src={tdLogo} alt="Thrust & Drift" className="w-16 h-16 shrink-0" />
         <h1 className="font-display font-bold text-[--neon-cyan] tracking-widest text-lg">
           THRUST &amp; DRIFT
         </h1>

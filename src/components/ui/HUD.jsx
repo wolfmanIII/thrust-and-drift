@@ -5,6 +5,7 @@
 
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore } from '../../store/uiStore.js'
+import { Tooltip } from './Tooltip.jsx'
 
 /** Phases during which an actor turn control is shown. */
 const ACTOR_TURN_PHASES = new Set(['acceleration', 'attack', 'actions'])
@@ -77,20 +78,22 @@ export function HUD() {
 
       {/* Battle utilities */}
       <div className="pointer-events-auto flex gap-1 mt-0.5">
-        <button
-          onClick={exportBattleState}
-          title="Salva sessione su file"
-          className="flex-1 bg-slate-800/80 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
-        >
-          💾 SALVA
-        </button>
-        <button
-          onClick={() => gotoScreen('dashboard')}
-          title="Torna al menu principale"
-          className="bg-slate-800/80 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
-        >
-          ⌂
-        </button>
+        <Tooltip label="Salva sessione su file">
+          <button
+            onClick={exportBattleState}
+            className="flex-1 bg-slate-800/80 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
+          >
+            💾 SALVA
+          </button>
+        </Tooltip>
+        <Tooltip label="Torna al menu principale">
+          <button
+            onClick={() => gotoScreen('dashboard')}
+            className="bg-slate-800/80 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
+          >
+            ⌂
+          </button>
+        </Tooltip>
       </div>
     </div>
   )
