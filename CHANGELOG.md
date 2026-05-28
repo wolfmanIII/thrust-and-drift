@@ -6,6 +6,29 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.2.5] — 2026-05-28
+
+### Added
+- **Sistema colpi critici completo** — implementa MgT2e CRB pp.169–170 integralmente:
+  - `src/data/criticalHits.js` — tabella posizioni (2D6 → sistema) + tabella effetti per tutti gli 11 sistemi × 6 severità, con mechanic codes (`thrust_reduce`, `thrust_zero`, `hull_extra_damage`, `descriptive`)
+  - `getCriticalSeverity(effect)` in `combat.js` — Effect − 5, clamp 1–6
+  - `getThresholdCriticalCount(prev, new, max)` in `combat.js` — conta soglie 10% Hull attraversate (CRB p.169 Sustained Damage)
+- **`thrustPenalty`** — campo persistente su ogni nave; aggiornato da `addCriticalHit` quando M-Drive viene colpito (Sev 1 → 0, Sev 2–4 → −1, Sev 5–6 → thrust = 0); **non** resettato tra i round
+- **Stacking critici per sistema** — `addCriticalHit` usa upsert: colpo sullo stesso sistema aggiorna la severità (`max(nuova, esistente + 1)`) invece di aggiungere una entry duplicata; al cap Sev 6 si applica invece 6D danno extra
+- **Threshold criticals automatici** — `applyDamage` rileva automaticamente ogni soglia 10% Hull attraversata, lancia 2D6 posizione, applica stacking e hull extra damage; flag `_skipThreshold` previene cascate
+- **Step critico in AttackModal** — 4° step `'critical'` dopo il danno: tiro 2D6 per posizione, display severità effettiva (con indicatore stacking), descrizione effetto, tiro ND danno extra per critici Hull o overflow severità massima
+- **`repairCritical`** aggiornato — ricalcola `thrustPenalty` dai critici M-Drive residui dopo la riparazione
+
+### Changed
+- `ThrustModal` e `ShipTooltip` — thrust disponibile sottrae `thrustPenalty`
+- `declareEvasiveThrust` — thrust massimo evasivo ridotto da `thrustPenalty`
+- `AttackModal` — rimosso hardcode `{ system: 'Hull', severity: 1 }` per tutti i critici
+
+### Tests
+- 346 test (da 287) — nuovo `criticalHits.test.js` (29 test); aggiunte suite `getCriticalSeverity`, `getThresholdCriticalCount`, threshold criticals in `applyDamage`, M-Drive thrustPenalty, stacking, invariante `startNextRound`
+
+---
+
 ## [1.2.0] — 2026-05-28
 
 ### Added
