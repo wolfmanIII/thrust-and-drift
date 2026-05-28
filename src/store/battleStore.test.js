@@ -5,6 +5,15 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+
+vi.mock('../utils/io.js', () => ({
+  exportBattle:   vi.fn(),
+  importBattle:   vi.fn(),
+  exportProfiles: vi.fn(),
+  importProfiles: vi.fn(),
+}))
+
+import { exportBattle, importBattle } from '../utils/io.js'
 import { useBattleStore } from './battleStore.js'
 
 // === HELPERS ===
@@ -614,5 +623,81 @@ describe('reloadTurret', () => {
 
   it('unknown shipId is no-op', () => {
     expect(() => useBattleStore.getState().reloadTurret('ghost')).not.toThrow()
+  })
+})
+
+// === IMPORT / EXPORT ===
+
+describe('exportBattleState', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('calls exportBattle with current state snapshot', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.setState({ round: 3, phase: 'attack', combatMode: 'basic' })
+    useBattleStore.getState().exportBattleState()
+    expect(exportBattle).toHaveBeenCalledOnce()
+    const [arg] = exportBattle.mock.calls[0]
+    expect(arg.round).toBe(3)
+    expect(arg.phase).toBe('attack')
+    expect(arg.combatMode).toBe('basic')
+    expect(arg.ships).toHaveLength(1)
+  })
+})
+
+describe('importBattleState', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('sets state from imported battle data', async () => {
+    importBattle.mockResolvedValue({
+      id: 'imported-id', name: 'Imported Battle',
+      round: 5, combatMode: 'vectorial', phase: 'attack',
+      initiativeOrder: [], currentActorIndex: 0,
+      ships: [], missiles: [], log: [],
+      mapSettings: { scale: 2 },
+    })
+    await useBattleStore.getState().importBattleState({})
+    const s = useBattleStore.getState()
+    expect(s.round).toBe(5)
+    expect(s.phase).toBe('attack')
+    expect(s.mapSettings).toEqual({ scale: 2 })
+  })
+
+  it('applies ?? defaults for missing fields', async () => {
+    importBattle.mockResolvedValue({ id: 'x' })
+    await useBattleStore.getState().importBattleState({})
+    const s = useBattleStore.getState()
+    expect(s.round).toBe(1)
+    expect(s.combatMode).toBe('vectorial')
+    expect(s.ships).toEqual([])
+    expect(s.mapSettings).toEqual({ scale: 1 })
+  })
+})
+
+// === LOG ===
+
+describe('addLogEntry', () => {
+  it('appends info entry to log', () => {
+    useBattleStore.getState().addLogEntry('Messaggio GM')
+    const log = useBattleStore.getState().log
+    expect(log).toHaveLength(1)
+    expect(log[0].type).toBe('info')
+    expect(log[0].message).toBe('Messaggio GM')
+  })
+
+  it('includes current round and phase', () => {
+    useBattleStore.setState({ round: 4, phase: 'attack' })
+    useBattleStore.getState().addLogEntry('Test')
+    const entry = useBattleStore.getState().log[0]
+    expect(entry.round).toBe(4)
+    expect(entry.phase).toBe('attack')
+  })
+})
+
+describe('clearLog', () => {
+  it('empties the log', () => {
+    useBattleStore.getState().addLogEntry('uno')
+    useBattleStore.getState().addLogEntry('due')
+    useBattleStore.getState().clearLog()
+    expect(useBattleStore.getState().log).toHaveLength(0)
   })
 })

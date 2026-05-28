@@ -59,6 +59,26 @@ describe('ContextMenu — ship type', () => {
     expect(screen.getByText(/Dichiara Evasione/)).toBeInTheDocument()
   })
 
+  it('shows "Lancia Missili" when ship has Missile Rack', () => {
+    useBattleStore.setState({
+      ships: [makeShip({
+        id: 'ship-1',
+        profile: {
+          name: 'Viper', hull: 10,
+          turrets: [{ weapons: ['Missile Rack'] }],
+          crew: { pilot: 2 },
+        },
+      })],
+    })
+    render(<ContextMenu />)
+    expect(screen.getByText(/Lancia Missili/)).toBeInTheDocument()
+  })
+
+  it('hides "Lancia Missili" when ship has no Missile Rack', () => {
+    render(<ContextMenu />)
+    expect(screen.queryByText(/Lancia Missili/)).not.toBeInTheDocument()
+  })
+
   it('hides thrust items in basic mode', () => {
     useBattleStore.setState({ combatMode: 'basic' })
     render(<ContextMenu />)
@@ -119,6 +139,26 @@ describe('ContextMenu — empty type', () => {
   it('shows initiative roll option', () => {
     render(<ContextMenu />)
     expect(screen.getByText(/Tira iniziativa/)).toBeInTheDocument()
+  })
+
+  it('click Fase successiva calls advancePhase', () => {
+    useBattleStore.setState({ phase: 'setup' })
+    render(<ContextMenu />)
+    fireEvent.click(screen.getByText(/Fase successiva/))
+    expect(useBattleStore.getState().phase).toBe('initiative')
+  })
+
+  it('click Carica profili opens shipProfile modal', () => {
+    render(<ContextMenu />)
+    fireEvent.click(screen.getByText(/Carica profili/))
+    expect(useUiStore.getState().activeModal).toBe('shipProfile')
+    expect(useUiStore.getState().modalPayload).toEqual({ mode: 'import' })
+  })
+
+  it('click Salva profili opens shipProfile modal with export mode', () => {
+    render(<ContextMenu />)
+    fireEvent.click(screen.getByText(/Salva profili/))
+    expect(useUiStore.getState().modalPayload).toEqual({ mode: 'export' })
   })
 })
 

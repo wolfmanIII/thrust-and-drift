@@ -41,6 +41,13 @@ describe('Tooltip', () => {
     expect(document.body.textContent).toContain('Portal tip')
   })
 
+  it('renders with position=bottom (below anchor)', async () => {
+    const user = userEvent.setup()
+    render(<Tooltip label="Bottom tip" position="bottom"><button>Hover</button></Tooltip>)
+    await user.hover(screen.getByRole('button'))
+    expect(screen.getByText('Bottom tip')).toBeInTheDocument()
+  })
+
   it('different label per instance', async () => {
     const user = userEvent.setup()
     render(
