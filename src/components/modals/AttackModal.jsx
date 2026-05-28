@@ -9,6 +9,7 @@ import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS } from '../../data/weapons.js'
+import { RANGE_BANDS } from '../../data/rangeBands.js'
 import { rollAttack, isCriticalHit } from '../../utils/combat.js'
 import { rollDice } from '../../utils/dice.js'
 import { useAttackSetup } from './useAttackSetup.js'
@@ -50,6 +51,7 @@ function AttackConfigStep({
   enemies, availableWeapons,
   weaponKey, setWeaponKey, targetId, setTargetId,
   target, weapon, rangeBand, distance, dmBreakdown,
+  combatMode, manualRangeBand, setManualRangeBand,
   onNext, onClose,
 }) {
   const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
@@ -102,13 +104,35 @@ function AttackConfigStep({
               >
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: e.color }} />
                 <span>{e.profile.name}</span>
-                {target?.id === e.id && (
+                {target?.id === e.id && combatMode === 'vectorial' && (
                   <span className="ml-auto text-slate-500">{rangeBand} ({distance} hex)</span>
                 )}
               </button>
             ))}
           </div>
         </div>
+
+        {/* Range band selector — basic mode only */}
+        {combatMode === 'basic' && target && (
+          <div>
+            <p className="text-slate-500 font-mono text-xs mb-1.5">Distanza</p>
+            <div className="grid grid-cols-3 gap-1">
+              {RANGE_BANDS.map(({ label }) => (
+                <button
+                  key={label}
+                  onClick={() => setManualRangeBand(label)}
+                  className={`px-2 py-1 rounded font-mono text-xs border transition-colors ${
+                    (manualRangeBand ?? 'Medium') === label
+                      ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                      : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* DM summary */}
         {weapon && target && (
@@ -128,7 +152,7 @@ function AttackConfigStep({
 
         <button
           onClick={onNext}
-          disabled={!weapon || !target}
+          disabled={!weapon || !target || (combatMode === 'basic' && !manualRangeBand)}
           className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           LANCIA ATTACCO →
@@ -327,11 +351,12 @@ export function AttackModal() {
   const [step, setStep]                 = useState('config')
   const [targetId, setTargetId]         = useState('')
   const [weaponKey, setWeaponKey]       = useState('')
-  const [attackResult, setAttackResult] = useState(null)
-  const [damageResult, setDamageResult] = useState(null)
+  const [attackResult, setAttackResult]       = useState(null)
+  const [damageResult, setDamageResult]       = useState(null)
+  const [manualRangeBand, setManualRangeBand] = useState(null)
 
-  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, dmBreakdown } =
-    useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey)
+  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, combatMode, dmBreakdown } =
+    useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand)
 
   if (!attacker) return null
 
@@ -357,6 +382,9 @@ export function AttackModal() {
         weapon={weapon}
         rangeBand={rangeBand}
         distance={distance}
+        combatMode={combatMode}
+        manualRangeBand={manualRangeBand}
+        setManualRangeBand={setManualRangeBand}
         dmBreakdown={dmBreakdown}
         onNext={() => setStep('roll')}
         onClose={closeModal}

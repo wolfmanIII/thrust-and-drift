@@ -44,6 +44,8 @@ const useBattleStore = create((set, get) => ({
   id: uuidv7(),
   name: 'Nuova Battaglia',
   round: 1,
+  /** @type {'vectorial'|'basic'} */
+  combatMode: 'vectorial',
   /** @type {BattlePhase} */
   phase: 'setup',
   /** @type {string[]} Ordered ship IDs by initiative */
@@ -567,10 +569,15 @@ const useBattleStore = create((set, get) => ({
    * Reset all battle state for a new session.
    * Preserves no data — call before navigating to the battle screen.
    */
-  resetBattle: () => set({
+  /**
+   * Reset to a fresh battle, optionally specifying combat mode.
+   * @param {'vectorial'|'basic'} [mode='vectorial']
+   */
+  resetBattle: (mode = 'vectorial') => set({
     id: uuidv7(),
     name: 'Nuova Battaglia',
     round: 1,
+    combatMode: mode,
     phase: 'setup',
     initiativeOrder: [],
     currentActorIndex: 0,
@@ -583,8 +590,8 @@ const useBattleStore = create((set, get) => ({
   // === IMPORT / EXPORT ===
 
   exportBattleState: () => {
-    const { id, name, round, phase, initiativeOrder, currentActorIndex, ships, missiles, log, mapSettings } = get()
-    exportBattle({ id, name, round, phase, initiativeOrder, currentActorIndex, ships, missiles, log, mapSettings })
+    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, log, mapSettings } = get()
+    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, log, mapSettings })
   },
 
   /**
@@ -597,6 +604,7 @@ const useBattleStore = create((set, get) => ({
       id: battle.id ?? uuidv7(),
       name: battle.name ?? 'Battaglia importata',
       round: battle.round ?? 1,
+      combatMode: battle.combatMode ?? 'vectorial',
       phase: battle.phase ?? 'setup',
       initiativeOrder: battle.initiativeOrder ?? [],
       currentActorIndex: battle.currentActorIndex ?? 0,

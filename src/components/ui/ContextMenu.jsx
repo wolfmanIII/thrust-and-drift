@@ -57,6 +57,7 @@ function hasMissileRack(ship) {
 function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
   const openModal  = useUiStore((s) => s.openModal)
   const removeShip = useBattleStore((s) => s.removeShip)
+  const combatMode = useBattleStore((s) => s.combatMode)
 
   return (
     <MenuShell x={x} y={y} menuRef={menuRef}>
@@ -69,8 +70,12 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
           )}
         </p>
       </div>
-      <MenuItem icon="🚀" label="Applica Thrust"       onClick={() => { openModal('thrust',        { shipId: targetId }); close() }} />
-      <MenuItem icon="🛡" label="Dichiara Evasione"    onClick={() => { openModal('evasive',       { shipId: targetId }); close() }} />
+      {combatMode === 'vectorial' && (
+        <>
+          <MenuItem icon="🚀" label="Applica Thrust"    onClick={() => { openModal('thrust',  { shipId: targetId }); close() }} />
+          <MenuItem icon="🛡" label="Dichiara Evasione" onClick={() => { openModal('evasive', { shipId: targetId }); close() }} />
+        </>
+      )}
       <MenuItem icon="🎯" label="Attacca…"             onClick={() => { openModal('attack',        { shipId: targetId }); close() }} />
       {hasMissileRack(ship) && (
         <MenuItem icon="🚀" label="Lancia Missili…"   onClick={() => { openModal('missileLaunch', { shipId: targetId }); close() }} />

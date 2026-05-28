@@ -5,8 +5,9 @@
  * modal layer. Modal dispatch uses MODAL_MAP lookup (OCP).
  */
 
-import { Dashboard }       from './components/dashboard/Dashboard.jsx'
-import { BattleMap }       from './components/map/BattleMap.jsx'
+import { Dashboard }          from './components/dashboard/Dashboard.jsx'
+import { BattleMap }          from './components/map/BattleMap.jsx'
+import { BasicBattleView }    from './components/map/BasicBattleView.jsx'
 import { HUD }             from './components/ui/HUD.jsx'
 import { PhaseTracker }    from './components/ui/PhaseTracker.jsx'
 import { BattleLog }       from './components/ui/BattleLog.jsx'
@@ -21,6 +22,7 @@ import { ThrustModal }        from './components/modals/ThrustModal.jsx'
 import { EvasiveModal }       from './components/modals/EvasiveModal.jsx'
 import { MissileLaunchModal } from './components/modals/MissileLaunchModal.jsx'
 import { useUiStore }      from './store/uiStore.js'
+import { useBattleStore }  from './store/battleStore.js'
 import './App.css'
 
 /**
@@ -44,6 +46,7 @@ export function App() {
   const screen           = useUiStore((s) => s.screen)
   const activeModal      = useUiStore((s) => s.activeModal)
   const pendingPlacement = useUiStore((s) => s.pendingPlacement)
+  const combatMode       = useBattleStore((s) => s.combatMode)
 
   /** @type {React.ComponentType|null} */
   const ActiveModal = activeModal ? (MODAL_MAP[activeModal] ?? null) : null
@@ -55,8 +58,8 @@ export function App() {
   return (
     <div className="relative w-full h-full overflow-hidden bg-slate-950">
 
-      {/* ── Canvas layer ──────────────────────────────────────────────── */}
-      <BattleMap />
+      {/* ── Canvas / battle layer ────────────────────────────────────── */}
+      {combatMode === 'vectorial' ? <BattleMap /> : <BasicBattleView />}
 
       {/* ── HUD overlays ─────────────────────────────────────────────── */}
       <HUD />

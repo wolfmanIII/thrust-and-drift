@@ -10,17 +10,19 @@ import { hexDistance, getRangeBand } from '../../utils/hex.js'
 import { getRangeDM, getTargetSizeDM, getEvasiveDM } from '../../utils/combat.js'
 
 /**
- * @param {string|null} attackerShipId  ID of the attacking ship
- * @param {string}      targetId        ID of the selected target ship
- * @param {string}      weaponKey       Weapon type key (e.g. 'Pulse Laser')
+ * @param {string|null} attackerShipId   ID of the attacking ship
+ * @param {string}      targetId         ID of the selected target ship
+ * @param {string}      weaponKey        Weapon type key (e.g. 'Pulse Laser')
+ * @param {string|null} [manualRangeBand] Override range band (basic combat mode)
  * @returns {{
  *   attacker:         object|undefined,
  *   enemies:          object[],
  *   target:           object|undefined,
  *   weapon:           object|null,
  *   availableWeapons: string[],
- *   distance:         number,
+ *   distance:         number|null,
  *   rangeBand:        string,
+ *   combatMode:       'vectorial'|'basic',
  *   dmBreakdown: {
  *     gunnerSkill:  number,
  *     weaponDM:     number,
@@ -32,8 +34,9 @@ import { getRangeDM, getTargetSizeDM, getEvasiveDM } from '../../utils/combat.js
  *   },
  * }}
  */
-export function useAttackSetup(attackerShipId, targetId, weaponKey) {
-  const ships = useBattleStore((s) => s.ships)
+export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeBand = null) {
+  const ships      = useBattleStore((s) => s.ships)
+  const combatMode = useBattleStore((s) => s.combatMode)
 
   const attacker = ships.find((s) => s.id === attackerShipId)
   const enemies  = ships.filter((s) => s.id !== attackerShipId)
@@ -45,9 +48,13 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey) {
     .filter((w) => !DEFENSIVE_WEAPONS.includes(w))
     .filter((v, i, a) => a.indexOf(v) === i)
 
-  const distance    = (target && attacker) ? hexDistance(attacker.position, target.position) : 0
-  const rangeBand   = getRangeBand(distance)
-  const rangeDM     = getRangeDM(rangeBand)
+  const distance  = combatMode === 'vectorial' && target && attacker
+    ? hexDistance(attacker.position, target.position)
+    : null
+  const rangeBand = combatMode === 'vectorial'
+    ? getRangeBand(distance ?? 0)
+    : (manualRangeBand ?? 'Medium')
+  const rangeDM   = getRangeDM(rangeBand)
   const sizeDM      = target ? getTargetSizeDM(target.profile.tonnage ?? 0) : 0
   const evasiveDM   = target ? getEvasiveDM(attacker?.profile.crew?.pilot ?? 0, target.evasiveThrust) : 0
   const sensorLockDM = attacker?.sensorLockOn === targetId ? (attacker.sensorLockDM ?? 0) : 0
@@ -63,6 +70,7 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey) {
     availableWeapons,
     distance,
     rangeBand,
+    combatMode,
     dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM },
   }
 }

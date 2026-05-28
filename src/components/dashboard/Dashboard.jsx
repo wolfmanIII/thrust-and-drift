@@ -163,16 +163,17 @@ function ActionIcon({ label, title, onClick, dim = '' }) {
 // ── Right panel: session controls ─────────────────────────────────────────
 
 function SessionPanel() {
-  const gotoScreen       = useUiStore((s) => s.gotoScreen)
-  const resetBattle      = useBattleStore((s) => s.resetBattle)
+  const gotoScreen        = useUiStore((s) => s.gotoScreen)
+  const resetBattle       = useBattleStore((s) => s.resetBattle)
   const importBattleState = useBattleStore((s) => s.importBattleState)
 
   const fileInputRef = useRef(null)
-  const [loading, setLoading]   = useState(false)
+  const [loading, setLoading]     = useState(false)
   const [resumeErr, setResumeErr] = useState(null)
+  const [mode, setMode]           = useState('vectorial')
 
   const handleNewSession = () => {
-    resetBattle()
+    resetBattle(mode)
     gotoScreen('battle')
   }
 
@@ -206,6 +207,28 @@ function SessionPanel() {
 
       {/* Session actions */}
       <div className="w-full max-w-sm space-y-3">
+
+        {/* Combat mode selector */}
+        <div className="grid grid-cols-2 gap-1 p-1 bg-slate-900 border border-slate-700 rounded-lg">
+          {[
+            { value: 'vectorial', label: 'VETTORIALE', sub: 'Mappa hex + vettori' },
+            { value: 'basic',     label: 'BASE',       sub: 'Solo bande distanza' },
+          ].map(({ value, label, sub }) => (
+            <button
+              key={value}
+              onClick={() => setMode(value)}
+              className={`py-2 px-3 rounded font-display text-xs tracking-widest transition-colors text-center ${
+                mode === value
+                  ? 'bg-[--neon-cyan]/15 border border-[--neon-cyan]/40 text-[--neon-cyan]'
+                  : 'text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              {label}
+              <span className="block text-xs font-mono tracking-normal normal-case text-slate-600 mt-0.5">{sub}</span>
+            </button>
+          ))}
+        </div>
+
         {/* New session */}
         <button
           onClick={handleNewSession}

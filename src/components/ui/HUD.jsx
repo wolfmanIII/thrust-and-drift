@@ -29,6 +29,7 @@ export function HUD() {
   const advancePhase        = useBattleStore((s) => s.advancePhase)
   const advanceActor        = useBattleStore((s) => s.advanceActor)
   const exportBattleState   = useBattleStore((s) => s.exportBattleState)
+  const combatMode          = useBattleStore((s) => s.combatMode)
   const gotoScreen          = useUiStore((s) => s.gotoScreen)
 
   const currentActorId = initiativeOrder[currentActorIndex] ?? null
@@ -68,13 +69,15 @@ export function HUD() {
         </div>
       )}
 
-      {/* Phase advance */}
-      <button
-        onClick={advancePhase}
-        className="pointer-events-auto bg-slate-800/80 border border-slate-600 hover:border-[--neon-cyan]/60 text-slate-300 hover:text-[--neon-cyan] font-mono text-xs tracking-widest rounded px-3 py-1.5 backdrop-blur-sm transition-colors text-left"
-      >
-        FASE SUCCESSIVA ⟶
-      </button>
+      {/* Phase advance — skip movement phase in basic mode (no vectors) */}
+      {(combatMode === 'vectorial' || phase !== 'movement') && (
+        <button
+          onClick={advancePhase}
+          className="pointer-events-auto bg-slate-800/80 border border-slate-600 hover:border-[--neon-cyan]/60 text-slate-300 hover:text-[--neon-cyan] font-mono text-xs tracking-widest rounded px-3 py-1.5 backdrop-blur-sm transition-colors text-left"
+        >
+          FASE SUCCESSIVA ⟶
+        </button>
+      )}
 
       {/* Battle utilities */}
       <div className="pointer-events-auto flex gap-1 mt-0.5">
