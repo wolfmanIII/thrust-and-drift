@@ -88,6 +88,8 @@ thrust-and-drift/
     │   │   ├── BasicBattleView.jsx    ← Vista semplificata (modalità base)
     │   │   ├── useCanvasRenderer.js   ← Hook rendering hex + token
     │   │   ├── useMapInteraction.js   ← Hook pan, zoom, click, right-click
+    │   │   ├── useShipHover.js        ← Hook hover detection + timer 200ms
+    │   │   ├── ShipTooltip.jsx        ← Pannello tooltip nave (React portal)
     │   │   └── tokenRenderers.js      ← Funzioni draw per navi e missili
     │   ├── modals/
     │   │   ├── Modal.jsx              ← Wrapper modale generico
@@ -611,31 +613,31 @@ Appare al right-click su cella vuota della mappa.
 │ 📂 Carica profili nave       │
 │ 💾 Salva profili nave        │
 │ ─────────────────────────── │
-│ 📋 Carica battaglia          │
-│ 💾 Salva battaglia           │
+│ 🎲 Tira iniziativa (tutti)   │  ← solo fase: initiative
 │ ─────────────────────────── │
-│ ⚙️  Impostazioni mappa       │
-│ 🔄 Nuovo round               │
-│ 🎲 Tira iniziativa           │
+│ 🔄 Fase successiva           │
 └──────────────────────────────┘
 ```
 
 ### 7.6 Context Menu — Token Nave
 
-Appare al right-click su un token nave.
+Appare al right-click su un token nave. Le azioni visibili dipendono dalla **fase corrente**.
 
 ```text
 ┌──────────────────────────────┐
-│ [Nome Nave] — Hull: 18/22    │
+│ [Nome Nave] — Hull: 18/22    │  ← sempre visibile
 │ ─────────────────────────── │
-│ 🚀 Applica Thrust            │
-│ 🎯 Attacca...                │
-│ ⚡ Azione equipaggio...      │
+│ 🚀 Applica Thrust            │  ← solo fase: acceleration (vectorial)
+│ 🛡 Dichiara Evasione         │  ← solo fase: acceleration (vectorial)
 │ ─────────────────────────── │
-│ 📊 Scheda nave               │
-│ ✏️  Modifica stato           │
+│ 🎯 Attacca...                │  ← solo fase: attack
+│ 🚀 Lancia Missili...         │  ← solo fase: attack + ha Missile Rack
 │ ─────────────────────────── │
-│ 🗑️  Rimuovi dalla battaglia  │
+│ ⚡ Azione equipaggio...      │  ← solo fase: actions
+│ ─────────────────────────── │
+│ 📊 Scheda nave               │  ← sempre visibile
+│ ─────────────────────────── │
+│ 🗑️  Rimuovi dalla battaglia  │  ← sempre visibile
 └──────────────────────────────┘
 ```
 
@@ -1001,9 +1003,20 @@ Funzionalità incluse nella prima versione funzionante:
 - Mostra messaggio errore leggibile + pulsante "RICARICA PAGINA"
 - `componentDidCatch` logga stack in console
 
-### 13.3 Versione 1.2 — HUD Contestuale
+### 13.3 Versione 1.2 — HUD Contestuale ✅ COMPLETATA
 
-**Tooltip hover nave** — al passaggio del mouse su un token sulla mappa, mostra un pannello informativo minimale (overlay HTML sopra il canvas, non disegnato su Canvas):
+**Tooltip hover nave** — implementato:
+
+- `useShipHover.js`: hook SRP — rileva via `pixelToHex` quale ship è sotto il cursore, arma un timer da 200ms prima di mostrare il tooltip; resetta il timer ad ogni mousemove (nessun flickering durante il pan); cancella immediatamente su mousedown, mouseleave, cella vuota
+- `ShipTooltip.jsx`: pannello HTML via `createPortal` — mostra nome, fazione (colore), barra hull colorata (verde/giallo/rosso), vettore + magnitudine, thrust disponibile, evasione (se attiva), iniziativa, sensor lock (se attivo), lista critical hits con severità; si posiziona automaticamente accanto al cursore con flip verso il centro del viewport se il cursore è oltre il 65% del bordo
+- `uiStore`: stato `hoveredShip { shipId, x, y }` + `setHoveredShip` / `clearHoveredShip`
+- Si nasconde automaticamente all'apertura del context menu
+- `BattleMap.jsx`: combina `onMouseMove` e `onMouseDown` da entrambi i hook; aggiunge `onMouseLeave`
+
+**Phase-gating context menu** — implementato:
+
+- `ContextMenu.jsx` / `ShipContextMenu`: legge `phase` da battleStore, mostra solo le azioni valide per la fase corrente (acceleration → thrust/evasione; attack → attacca/missili; actions → azione equipaggio)
+- `EmptyContextMenu`: "Tira iniziativa" visibile solo in fase `initiative`
 
 | Campo | Valore |
 | ----- | ------ |
@@ -1015,8 +1028,6 @@ Funzionalità incluse nella prima versione funzionante:
 | Evasione dichiarata | thrust evasivo se > 0 |
 | Critical hits | lista sistemi colpiti con severità, se presenti |
 | Iniziativa | valore estratto nel round corrente |
-
-Il pannello appare con breve delay (~200 ms) per evitare flickering durante il pan, scompare al mouseleave o all'apertura del context menu.
 
 ### 13.4 Versione 1.3 — Effetti Visivi Canvas
 

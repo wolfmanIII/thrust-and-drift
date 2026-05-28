@@ -20,6 +20,8 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Crew actions** | Captain, Engineer, Sensors, Gunner actions with skill checks |
 | **Initiative** | 2D6 + Pilota + Thrust, automatically sorted |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
+| **Phase-gated menu** | Right-click actions shown only when valid for the current phase |
+| **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals (200ms delay) |
 | **Battle log** | Timestamped event log with colour-coded entry types |
 | **Session save / resume** | Export session to JSON; resume flow shows a full preview before loading |
 | **Autosave** | IndexedDB autosave after every significant action; one-click restore on Dashboard |
@@ -73,7 +75,11 @@ A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 **Right-click any hex** to open the context menu:
 
 - Empty hex → **Aggiungi Nave** (place a ship)
-- Ship hex → actions for that ship (Thrust, Attack, Actions, Detail, Remove)
+- Ship hex → actions valid for the **current phase** only:
+  - *Acceleration*: Thrust, Evasione
+  - *Attack*: Attacca, Lancia Missili
+  - *Actions*: Azione equipaggio
+  - *Always*: Scheda nave, Rimuovi
 
 **Left-click a ship** to select it.
 
@@ -127,7 +133,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-285 tests across utils, Zustand stores, hooks, and UI components.
+287 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 
@@ -147,6 +153,8 @@ src/
 │   │   ├── BasicBattleView.jsx ← Simplified view (basic combat mode)
 │   │   ├── useCanvasRenderer.js← Hex + token rendering hook
 │   │   ├── useMapInteraction.js← Pan, zoom, click, right-click hook
+│   │   ├── useShipHover.js     ← Hover detection + 200ms tooltip timer
+│   │   ├── ShipTooltip.jsx     ← Ship hover tooltip panel (portal)
 │   │   └── tokenRenderers.js   ← Draw functions for ships and missiles
 │   ├── modals/
 │   │   ├── Modal.jsx           ← Generic modal wrapper
