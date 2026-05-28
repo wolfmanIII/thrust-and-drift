@@ -178,16 +178,12 @@ export function ContextMenu() {
   const MenuComponent = MENU_MAP[type]
   if (!MenuComponent) return null
 
-  return (
-    <MenuComponent
-      x={x}
-      y={y}
-      menuRef={menuRef}
-      ship={ship}
-      missile={missile}
-      targetId={targetId}
-      hex={hex}
-      close={close}
-    />
-  )
+  const shared = { x, y, menuRef, close }
+  const typedProps = {
+    ship:    { ...shared, ship, targetId },
+    missile: { ...shared, missile, targetId },
+    empty:   { ...shared, hex },
+  }
+
+  return <MenuComponent {...typedProps[type]} />
 }

@@ -4,12 +4,13 @@
  * Right panel: session controls (default) or ShipProfileForm (when editing).
  */
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useUiStore }       from '../../store/uiStore.js'
 import { useBattleStore }   from '../../store/battleStore.js'
 import { useProfilesStore } from '../../store/profilesStore.js'
 import { ShipProfileForm }  from '../forms/ShipProfileForm.jsx'
 import { CatalogPanel }     from './CatalogPanel.jsx'
+import { useProfileImport } from './useProfileImport.js'
 
 // ── Left panel: profiles list ─────────────────────────────────────────────
 
@@ -27,30 +28,15 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
   const deleteProfile    = useProfilesStore((s) => s.deleteProfile)
   const duplicateProfile = useProfilesStore((s) => s.duplicateProfile)
   const exportAll        = useProfilesStore((s) => s.exportAll)
-  const importFromFile   = useProfilesStore((s) => s.importFromFile)
 
-  const [filter, setFilter]     = useState('')
-  const [importStatus, setImportStatus] = useState(null)
-  const fileInputRef = useRef(null)
+  const { importStatus, fileInputRef, handleImport } = useProfileImport()
+
+  const [filter, setFilter] = useState('')
 
   const filtered = profiles.filter((p) =>
     p.name.toLowerCase().includes(filter.toLowerCase()) ||
     (p.shipClass ?? '').toLowerCase().includes(filter.toLowerCase())
   )
-
-  const handleImport = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setImportStatus(null)
-    try {
-      const { added, skipped } = await importFromFile(file)
-      setImportStatus({ ok: true, msg: `${added} aggiunti, ${skipped} saltati.` })
-    } catch (err) {
-      setImportStatus({ ok: false, msg: err.message })
-    } finally {
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    }
-  }
 
   return (
     <div className="flex flex-col h-full">

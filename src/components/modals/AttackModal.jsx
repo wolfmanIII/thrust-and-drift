@@ -8,10 +8,10 @@ import { useState } from 'react'
 import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
-import { WEAPONS, DEFENSIVE_WEAPONS } from '../../data/weapons.js'
-import { hexDistance, getRangeBand } from '../../utils/hex.js'
-import { rollAttack, getRangeDM, getTargetSizeDM, isCriticalHit } from '../../utils/combat.js'
+import { WEAPONS } from '../../data/weapons.js'
+import { rollAttack, isCriticalHit } from '../../utils/combat.js'
 import { rollDice } from '../../utils/dice.js'
+import { useAttackSetup } from './useAttackSetup.js'
 
 /** @typedef {'config'|'roll'|'damage'} AttackStep */
 
@@ -148,12 +148,7 @@ function AttackConfigStep({
  *   attackerName: string,
  *   targetName: string,
  *   weaponKey: string,
- *   weapon: object|null,
- *   gunnerSkill: number,
- *   rangeDM: number,
- *   sizeDM: number,
- *   evasiveDM: number,
- *   totalDM: number,
+ *   dmBreakdown: { gunnerSkill: number, weaponDM: number, rangeDM: number, sizeDM: number, evasiveDM: number, sensorLockDM: number, totalDM: number },
  *   attackResult: object|null,
  *   setAttackResult: Function,
  *   onNext: Function,
@@ -161,17 +156,18 @@ function AttackConfigStep({
  * }} props
  */
 function AttackRollStep({
-  attackerName, targetName, weaponKey, weapon,
-  gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM,
+  attackerName, targetName, weaponKey,
+  dmBreakdown,
   attackResult, setAttackResult, onNext, onClose,
 }) {
+  const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
   const handleRoll = () => {
     const result = rollAttack({
       gunnerSkill,
       dexDM: 0,
       aidGunnersDM: 0,
       rangeDM,
-      weaponDM: weapon?.attackDM ?? 0,
+      weaponDM,
       targetSizeDM: sizeDM,
       evasiveDM,
       sensorLockDM,
@@ -340,25 +336,12 @@ export function AttackModal() {
   const [attackResult, setAttackResult] = useState(null)
   const [damageResult, setDamageResult] = useState(null)
 
+  const { enemies, target, weapon, availableWeapons, distance, rangeBand, dmBreakdown } =
+    useAttackSetup(attacker ?? null, targetId, weaponKey)
+
   if (!attacker) return null
 
-  const availableWeapons = (attacker.profile.turrets ?? [])
-    .flatMap((t) => t.weapons)
-    .filter((w) => !DEFENSIVE_WEAPONS.includes(w))
-    .filter((value, idx, arr) => arr.indexOf(value) === idx)
-
-  const target      = ships.find((s) => s.id === targetId)
-  const weapon      = weaponKey ? WEAPONS[weaponKey] : null
-  const enemies     = ships.filter((s) => s.id !== attacker.id)
-
-  const distance     = target ? hexDistance(attacker.position, target.position) : 0
-  const rangeBand    = getRangeBand(distance)
-  const rangeDM      = getRangeDM(rangeBand)
-  const sizeDM       = target ? getTargetSizeDM(target.profile.tonnage ?? 0) : 0
-  const evasiveDM    = target ? -(attacker.profile.crew?.pilot ?? 0) * target.evasiveThrust : 0
-  const sensorLockDM = attacker.sensorLockOn === targetId ? (attacker.sensorLockDM ?? 0) : 0
-  const gunnerSkill  = attacker.profile.crew?.gunner ?? 0
-  const totalDM      = gunnerSkill + (weapon?.attackDM ?? 0) + rangeDM + sizeDM + evasiveDM + sensorLockDM
+  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
 
   const handleApply = () => {
     if (!damageResult || !target) return
@@ -400,13 +383,7 @@ export function AttackModal() {
         attackerName={attacker.profile.name}
         targetName={target?.profile.name ?? '?'}
         weaponKey={weaponKey}
-        weapon={weapon}
-        gunnerSkill={gunnerSkill}
-        rangeDM={rangeDM}
-        sizeDM={sizeDM}
-        evasiveDM={evasiveDM}
-        sensorLockDM={sensorLockDM}
-        totalDM={totalDM}
+        dmBreakdown={dmBreakdown}
         attackResult={attackResult}
         setAttackResult={setAttackResult}
         onNext={() => setStep('damage')}
