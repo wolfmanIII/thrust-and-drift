@@ -4,7 +4,7 @@
  * Right panel: session controls (default) or ShipProfileForm (when editing).
  */
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import tdLogo from '../../assets/TD-logo-transparent.png'
 import { useUiStore }       from '../../store/uiStore.js'
 import { useBattleStore }   from '../../store/battleStore.js'
@@ -14,6 +14,7 @@ import { CatalogPanel }     from './CatalogPanel.jsx'
 import { useProfileImport } from './useProfileImport.js'
 import { Tooltip }          from '../ui/Tooltip.jsx'
 import { Modal }            from '../modals/Modal.jsx'
+import { dbGet, STORE_BATTLE } from '../../utils/db.js'
 
 // ── Left panel: profiles list ─────────────────────────────────────────────
 
@@ -205,8 +206,13 @@ function StatusLine({ label, value, active = true }) {
   )
 }
 
+const PHASE_LABELS = {
+  setup: 'SETUP', initiative: 'INIZIATIVA', acceleration: 'ACCELERAZIONE',
+  movement: 'MOVIMENTO', attack: 'ATTACCO', actions: 'AZIONI', end: 'FINE ROUND',
+}
+
 /** Left column: mode selector + action buttons. */
-function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, loading, error }) {
+function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onResumeAutosave, autosave, loading, error }) {
   return (
     <div className="border-r border-slate-800 flex flex-col overflow-hidden">
 
@@ -249,9 +255,30 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, loadi
         <div>
           <p className="font-display text-xs text-slate-600 tracking-widest mb-2">AZIONI</p>
           <div className="space-y-2">
+
+            {autosave && (
+              <button
+                onClick={onResumeAutosave}
+                className="w-full py-3.5 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-display text-xs tracking-widest rounded-lg hover:bg-[--neon-cyan]/20 transition-colors text-left px-4"
+              >
+                <span className="text-base block mb-0.5 text-center">↺</span>
+                <span className="block text-center">RIPRENDI AUTOSALVATAGGIO</span>
+                <span className="block font-mono text-[--neon-cyan]/50 mt-1 normal-case tracking-normal font-normal text-xs text-center">
+                  Round {autosave.round} — {PHASE_LABELS[autosave.phase] ?? autosave.phase?.toUpperCase()} — {autosave.shipCount} nav{autosave.shipCount === 1 ? 'e' : 'i'}
+                </span>
+                <span className="block font-mono text-slate-600 mt-0.5 normal-case tracking-normal font-normal text-xs text-center">
+                  {autosave.savedAt}
+                </span>
+              </button>
+            )}
+
             <button
               onClick={onNewSession}
-              className="w-full py-3.5 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-display text-xs tracking-widest rounded-lg hover:bg-[--neon-cyan]/20 transition-colors"
+              className={`w-full py-3.5 border font-display text-xs tracking-widest rounded-lg transition-colors ${
+                autosave
+                  ? 'border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-300'
+                  : 'bg-[--neon-cyan]/10 border-[--neon-cyan]/40 text-[--neon-cyan] hover:bg-[--neon-cyan]/20'
+              }`}
             >
               <span className="text-base block mb-0.5">▶</span>
               NUOVA SESSIONE
@@ -259,13 +286,14 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, loadi
                 Avvia da zero
               </span>
             </button>
+
             <button
               onClick={onResumeClick}
               disabled={loading}
               className="w-full py-3 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded-lg hover:border-slate-500 hover:text-slate-300 transition-colors disabled:opacity-40"
             >
-              <span className="text-sm block mb-0.5">{loading ? '⌛' : '↺'}</span>
-              {loading ? 'CARICAMENTO…' : 'RIPRENDI SESSIONE'}
+              <span className="text-sm block mb-0.5">{loading ? '⌛' : '↓'}</span>
+              {loading ? 'CARICAMENTO…' : 'RIPRENDI DA FILE'}
               <span className="block font-mono text-slate-600 mt-0.5 normal-case tracking-normal font-normal text-xs">
                 Carica da file .json
               </span>
@@ -397,10 +425,6 @@ function ShipPreviewRow({ ship }) {
 function SessionPreview({ data, onConfirm, onCancel, loading }) {
   const { name, round, phase, combatMode, ships = [], missiles = [], _exportedAt, _filename } = data
 
-  const PHASE_LABELS = {
-    setup: 'SETUP', initiative: 'INIZIATIVA', acceleration: 'ACCELERAZIONE',
-    movement: 'MOVIMENTO', attack: 'ATTACCO', actions: 'AZIONI', end: 'FINE ROUND',
-  }
   const FACTION_LABELS = { players: 'GIOCATORI', npc: 'NPC', neutral: 'NEUTRALI' }
   const FACTION_COLORS = { players: 'text-[--neon-cyan]', npc: 'text-red-400', neutral: 'text-slate-400' }
 
@@ -486,9 +510,30 @@ function SessionPanel() {
   const [error, setError]             = useState(null)
   const [pendingFile, setPendingFile]  = useState(null)
   const [pendingData, setPendingData]  = useState(null)
+  const [autosave, setAutosave]        = useState(null)
+
+  // Read autosave metadata from IndexedDB on mount
+  useEffect(() => {
+    dbGet(STORE_BATTLE, 'current').then((saved) => {
+      if (!saved || !Array.isArray(saved.ships) || saved.ships.length === 0) return
+      setAutosave({
+        round:     saved.round ?? 1,
+        phase:     saved.phase ?? 'setup',
+        shipCount: saved.ships.length,
+        savedAt:   saved.savedAt
+          ? new Date(saved.savedAt).toLocaleString('it-IT')
+          : '—',
+      })
+    }).catch(() => {})
+  }, [])
 
   const handleNewSession = () => {
     resetBattle(mode)
+    gotoScreen('battle')
+  }
+
+  const handleResumeAutosave = () => {
+    // battleStore already restored by useAutosave on mount
     gotoScreen('battle')
   }
 
@@ -538,6 +583,8 @@ function SessionPanel() {
         onModeChange={setMode}
         onNewSession={handleNewSession}
         onResumeClick={() => fileInputRef.current?.click()}
+        onResumeAutosave={handleResumeAutosave}
+        autosave={autosave}
         loading={loading}
         error={error}
       />
@@ -615,7 +662,7 @@ export function Dashboard() {
               SPACE COMBAT SIMULATOR
             </span>
           </div>
-          <span className="ml-auto text-slate-700 font-mono text-xs">v0.1</span>
+          <span className="ml-auto text-slate-700 font-mono text-xs">v1.0</span>
         </header>
 
         <main className="flex-1 overflow-hidden">
