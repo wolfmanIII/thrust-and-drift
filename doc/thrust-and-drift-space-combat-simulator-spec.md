@@ -979,7 +979,24 @@ Funzionalità incluse nella prima versione funzionante:
 - Evasive action avanzata
 - Asse Z opzionale (3D)
 
-### 13.3 Versione 1.2 — Effetti Visivi Canvas
+### 13.3 Versione 1.2 — HUD Contestuale
+
+**Tooltip hover nave** — al passaggio del mouse su un token sulla mappa, mostra un pannello informativo minimale (overlay HTML sopra il canvas, non disegnato su Canvas):
+
+| Campo | Valore |
+| ----- | ------ |
+| Nome nave | `profile.name` |
+| Fazione | colore + etichetta (Giocatori / NPC / Neutrali) |
+| Hull | barra `hullCurrent / hull` con colore stato (verde/giallo/rosso) |
+| Vettore corrente | `(q, r)` + magnitudine in caselle |
+| Thrust disponibile | `thrust - thrustUsedThisRound` |
+| Evasione dichiarata | thrust evasivo se > 0 |
+| Critical hits | lista sistemi colpiti con severità, se presenti |
+| Iniziativa | valore estratto nel round corrente |
+
+Il pannello appare con breve delay (~200 ms) per evitare flickering durante il pan, scompare al mouseleave o all'apertura del context menu.
+
+### 13.4 Versione 1.3 — Effetti Visivi Canvas
 
 Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`):
 
@@ -994,7 +1011,7 @@ Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`
 
 Tutti gli effetti sono puramente decorativi — non bloccano input, non modificano stato di gioco, si esauriscono in autonomia senza dover essere gestiti dallo store.
 
-### 13.4 Versione 2.0 — Future
+### 13.5 Versione 2.0 — Future
 
 - Scale mappa multiple con transizione
 - Abbordaggio (integrazione con regole High Guard)
