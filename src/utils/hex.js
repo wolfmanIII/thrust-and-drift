@@ -1,5 +1,5 @@
 /**
- * Hex grid math — pointy-top, axial coordinates (q, r).
+ * Hex grid math — flat-top, axial coordinates (q, r).
  * Cube coordinate s = -q - r (derived, never stored).
  * // Traveller Companion p.172 — hex grid spatial reference
  */
@@ -61,19 +61,19 @@ export function hexMagnitude(v) {
 // === DIRECTIONS ===
 
 /**
- * Six cardinal directions for pointy-top hex grid (E, NE, NW, W, SW, SE).
+ * Six cardinal directions for flat-top hex grid (SE, NE, N, NW, SW, S).
  * // Traveller Companion p.172
  */
 export const HEX_DIRECTIONS = [
-  { q:  1, r:  0 }, // E
+  { q:  1, r:  0 }, // SE
   { q:  1, r: -1 }, // NE
-  { q:  0, r: -1 }, // NW
-  { q: -1, r:  0 }, // W
+  { q:  0, r: -1 }, // N
+  { q: -1, r:  0 }, // NW
   { q: -1, r:  1 }, // SW
-  { q:  0, r:  1 }, // SE
+  { q:  0, r:  1 }, // S
 ]
 
-export const DIRECTION_LABELS = ['E', 'NE', 'NW', 'W', 'SW', 'SE']
+export const DIRECTION_LABELS = ['SE', 'NE', 'N', 'NW', 'SW', 'S']
 
 /**
  * Return the six neighbors of a hex cell.
@@ -87,7 +87,7 @@ export function hexNeighbors(hex) {
 // === PIXEL ↔ HEX CONVERSION ===
 
 /**
- * Convert axial hex coordinates to pixel center (pointy-top).
+ * Convert axial hex coordinates to pixel center (flat-top).
  * @param {number} q
  * @param {number} r
  * @param {number} size  Hex radius in pixels
@@ -96,13 +96,13 @@ export function hexNeighbors(hex) {
  * @returns {{ x: number, y: number }}
  */
 export function hexToPixel(q, r, size, offsetX = 0, offsetY = 0) {
-  const x = size * (Math.sqrt(3) * q + (Math.sqrt(3) / 2) * r)
-  const y = size * (1.5 * r)
+  const x = size * (1.5 * q)
+  const y = size * ((Math.sqrt(3) / 2) * q + Math.sqrt(3) * r)
   return { x: x + offsetX, y: y + offsetY }
 }
 
 /**
- * Convert pixel coordinates to the nearest hex cell (pointy-top).
+ * Convert pixel coordinates to the nearest hex cell (flat-top).
  * @param {number} px
  * @param {number} py
  * @param {number} size
@@ -113,8 +113,8 @@ export function hexToPixel(q, r, size, offsetX = 0, offsetY = 0) {
 export function pixelToHex(px, py, size, offsetX = 0, offsetY = 0) {
   const x = (px - offsetX) / size
   const y = (py - offsetY) / size
-  const q = (Math.sqrt(3) / 3) * x - (1 / 3) * y
-  const r = (2 / 3) * y
+  const q = (2 / 3) * x
+  const r = -(1 / 3) * x + (Math.sqrt(3) / 3) * y
   return hexRound({ q, r })
 }
 

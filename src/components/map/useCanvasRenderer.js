@@ -23,7 +23,7 @@ const GRID_COLOR = 'rgba(100, 116, 139, 0.3)'   // slate-500 @ 30%
 const GRID_STROKE = 1
 
 /**
- * Compute the six corner pixel coordinates of a pointy-top hex.
+ * Compute the six corner pixel coordinates of a flat-top hex.
  * @param {number} cx Center X
  * @param {number} cy Center Y
  * @param {number} size Hex radius
@@ -31,7 +31,7 @@ const GRID_STROKE = 1
  */
 function hexCorners(cx, cy, size) {
   return Array.from({ length: 6 }, (_, i) => {
-    const angle = (Math.PI / 180) * (60 * i - 30)
+    const angle = (Math.PI / 180) * (60 * i)
     return { x: cx + size * Math.cos(angle), y: cy + size * Math.sin(angle) }
   })
 }
@@ -46,12 +46,12 @@ function hexCorners(cx, cy, size) {
  */
 function drawGrid(ctx, width, height, offset, zoom) {
   const size = HEX_SIZE * zoom
-  // Compute visible q/r range with margin
+  // Compute visible q/r range with margin (flat-top: q spaced 1.5*size, r spaced sqrt(3)*size)
   const margin = 2
-  const qMin = Math.floor((-offset.x / zoom) / (Math.sqrt(3) * HEX_SIZE)) - margin
-  const qMax = Math.ceil((width / zoom - offset.x / zoom) / (Math.sqrt(3) * HEX_SIZE)) + margin
-  const rMin = Math.floor((-offset.y / zoom) / (1.5 * HEX_SIZE)) - margin
-  const rMax = Math.ceil((height / zoom - offset.y / zoom) / (1.5 * HEX_SIZE)) + margin
+  const qMin = Math.floor((-offset.x / zoom) / (1.5 * HEX_SIZE)) - margin
+  const qMax = Math.ceil((width / zoom - offset.x / zoom) / (1.5 * HEX_SIZE)) + margin
+  const rMin = Math.floor((-offset.y / zoom) / (Math.sqrt(3) * HEX_SIZE)) - margin
+  const rMax = Math.ceil((height / zoom - offset.y / zoom) / (Math.sqrt(3) * HEX_SIZE)) + margin
 
   ctx.strokeStyle = GRID_COLOR
   ctx.lineWidth = GRID_STROKE

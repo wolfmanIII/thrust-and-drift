@@ -138,12 +138,6 @@ All mechanical calculations implement:
 
 ---
 
-## Known Issues / Roadmap
-
-| # | Area | Note |
-|---|------|------|
-| 1 | **Hex orientation** | Gli esagoni vanno ruotati in **pointy-top** (vertice in alto, rosa dei venti). Attualmente il renderer usa flat-top. Fix in `useCanvasRenderer.js` + `pixelToHex` in `hex.js`. |
-
 ---
 
 ## License

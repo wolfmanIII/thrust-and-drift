@@ -85,28 +85,28 @@ export function ThrustModal() {
           Δ ({delta.q}, {delta.r}) — costo: {cost} thrust
         </div>
 
-        {/* Directional buttons — hex layout */}
+        {/* Directional buttons — flat-top hex layout (N/S axis, NE/SE/NW/SW diagonals) */}
         <div className="flex flex-col items-center gap-1">
-          {/* NW NE */}
-          <div className="flex gap-8">
-            <DirButton label="NW" onClick={() => applyDirectionStep(2, 1)} />
+          {/* NW N NE */}
+          <div className="flex gap-2">
+            <DirButton label="NW" onClick={() => applyDirectionStep(3, 1)} />
+            <DirButton label="N"  onClick={() => applyDirectionStep(2, 1)} />
             <DirButton label="NE" onClick={() => applyDirectionStep(1, 1)} />
           </div>
-          {/* W E */}
-          <div className="flex gap-20 items-center">
-            <DirButton label="W" onClick={() => applyDirectionStep(3, 1)} />
+          {/* RST */}
+          <div className="flex items-center justify-center">
             <button
               onClick={handleReset}
               className="w-10 h-10 rounded-full border border-slate-600 text-slate-500 font-mono text-xs hover:border-slate-400 hover:text-slate-300 transition-colors"
             >
               RST
             </button>
-            <DirButton label="E" onClick={() => applyDirectionStep(0, 1)} />
           </div>
-          {/* SW SE */}
-          <div className="flex gap-8">
+          {/* SW S SE */}
+          <div className="flex gap-2">
             <DirButton label="SW" onClick={() => applyDirectionStep(4, 1)} />
-            <DirButton label="SE" onClick={() => applyDirectionStep(5, 1)} />
+            <DirButton label="S"  onClick={() => applyDirectionStep(5, 1)} />
+            <DirButton label="SE" onClick={() => applyDirectionStep(0, 1)} />
           </div>
         </div>
 
