@@ -1011,7 +1011,23 @@ Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`
 
 Tutti gli effetti sono puramente decorativi — non bloccano input, non modificano stato di gioco, si esauriscono in autonomia senza dover essere gestiti dallo store.
 
-### 13.5 Versione 2.0 — Future
+### 13.5 Versione 1.4 — Persistenza e Resilienza
+
+**Autosave su IndexedDB** — eliminare la dipendenza dal salvataggio manuale:
+
+- Stato battaglia serializzato su IndexedDB dopo ogni azione significativa (fine fase, attacco, thrust applicato)
+- Al caricamento dell'app: rilevamento sessione sospesa → banner di ripristino in dashboard
+- Il file JSON rimane disponibile per backup esplicito; IndexedDB è lo strato di recovery automatico
+- Nessun backend, nessuna rete — tutto locale, stesso modello mentale attuale
+
+**Error boundary globale** — gestione errori visibile al GM:
+
+- React `ErrorBoundary` al root dell'app: cattura eccezioni non gestite nel render tree
+- Pannello di errore con messaggio leggibile + pulsante "Ricarica" che tenta il ripristino da IndexedDB
+- Toast/banner per errori non fatali (import JSON malformato, azione su nave inesistente, ecc.) — attualmente silenti
+- Logging errori nel battle log con tipo `"system"` per mantenere traccia durante la sessione
+
+### 13.6 Versione 2.0 — Future
 
 - Scale mappa multiple con transizione
 - Abbordaggio (integrazione con regole High Guard)
