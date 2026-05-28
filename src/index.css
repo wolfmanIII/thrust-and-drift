@@ -1,9 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap');
 @import "tailwindcss";
 
 /* ── Design tokens ────────────────────────────────────────────────────────── */
 @theme {
   /* Primary accent — neon cyan used throughout the UI */
   --neon-cyan: #7dd3fc;
+  /* Display font for UI chrome (headers, labels, buttons) */
+  --font-display: 'Orbitron', sans-serif;
 }
 
 /* ── Base layer ───────────────────────────────────────────────────────────── */

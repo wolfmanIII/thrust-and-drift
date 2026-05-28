@@ -43,7 +43,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
     <div className="flex flex-col h-full">
       {/* Panel header */}
       <div className="px-4 py-3 border-b border-slate-800 shrink-0">
-        <h2 className="font-mono text-xs text-slate-400 tracking-widest uppercase">
+        <h2 className="font-display text-xs text-slate-400 tracking-widest uppercase">
           Profili Nave
           <span className="ml-2 text-slate-600">({profiles.length})</span>
         </h2>
@@ -105,13 +105,13 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
         )}
         <button
           onClick={onNew}
-          className="w-full py-1.5 bg-[--neon-cyan]/10 border border-[--neon-cyan]/30 text-[--neon-cyan] font-mono text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+          className="w-full py-1.5 bg-[--neon-cyan]/10 border border-[--neon-cyan]/30 text-[--neon-cyan] font-display text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
         >
           + NUOVO PROFILO
         </button>
         <button
           onClick={onCatalog}
-          className={`w-full py-1.5 border font-mono text-xs tracking-widest rounded transition-colors ${
+          className={`w-full py-1.5 border font-display text-xs tracking-widest rounded transition-colors ${
             catalogOpen
               ? 'border-amber-600/50 bg-amber-900/20 text-amber-400'
               : 'border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-300'
@@ -129,13 +129,13 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex-1 py-1 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500 transition-colors"
+            className="flex-1 py-1 border border-slate-700 text-slate-400 font-display text-xs rounded hover:border-slate-500 transition-colors"
           >
             ↓ IMPORTA
           </button>
           <button
             onClick={exportAll}
-            className="flex-1 py-1 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500 transition-colors"
+            className="flex-1 py-1 border border-slate-700 text-slate-400 font-display text-xs rounded hover:border-slate-500 transition-colors"
           >
             ↑ ESPORTA
           </button>
@@ -194,10 +194,10 @@ function SessionPanel() {
     <div className="h-full flex flex-col items-center justify-center px-10 gap-6">
       {/* Tagline */}
       <div className="text-center space-y-1">
-        <p className="text-slate-500 font-mono text-xs tracking-widest">
+        <p className="text-slate-500 font-display text-xs tracking-widest">
           SIMULATORE DI COMBATTIMENTO SPAZIALE
         </p>
-        <p className="text-slate-600 font-mono text-xs">
+        <p className="text-slate-600 font-display text-xs">
           Mongoose Traveller 2e · Vectorial Combat System
         </p>
       </div>
@@ -207,7 +207,7 @@ function SessionPanel() {
         {/* New session */}
         <button
           onClick={handleNewSession}
-          className="w-full py-4 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded-lg hover:bg-[--neon-cyan]/20 transition-colors group"
+          className="w-full py-4 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-display text-sm tracking-widest rounded-lg hover:bg-[--neon-cyan]/20 transition-colors group"
         >
           <span className="block text-lg mb-0.5">▶</span>
           NUOVA SESSIONE
@@ -227,7 +227,7 @@ function SessionPanel() {
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={loading}
-          className="w-full py-3 border border-slate-600 text-slate-300 font-mono text-sm tracking-widest rounded-lg hover:border-slate-400 hover:text-slate-200 transition-colors disabled:opacity-40 group"
+          className="w-full py-3 border border-slate-600 text-slate-300 font-display text-sm tracking-widest rounded-lg hover:border-slate-400 hover:text-slate-200 transition-colors disabled:opacity-40 group"
         >
           <span className="block text-base mb-0.5">{loading ? '⌛' : '↺'}</span>
           {loading ? 'CARICAMENTO…' : 'RIPRENDI SESSIONE'}
@@ -276,10 +276,10 @@ export function Dashboard() {
       {/* ── Header ───────────────────────────────────────────────────── */}
       <header className="shrink-0 px-6 py-4 border-b border-slate-800 flex items-center gap-4">
         <img src={tdLogo} alt="Thrust & Drift" className="w-8 h-8 shrink-0" />
-        <h1 className="font-mono font-bold text-[--neon-cyan] tracking-widest text-lg">
+        <h1 className="font-display font-bold text-[--neon-cyan] tracking-widest text-lg">
           THRUST &amp; DRIFT
         </h1>
-        <span className="text-slate-600 font-mono text-xs tracking-widest hidden sm:block">
+        <span className="text-slate-600 font-display text-xs tracking-widest hidden sm:block">
           // SPACE COMBAT SIMULATOR
         </span>
         <span className="ml-auto text-slate-700 font-mono text-xs">v0.1</span>

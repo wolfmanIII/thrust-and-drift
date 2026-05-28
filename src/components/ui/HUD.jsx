@@ -41,10 +41,10 @@ export function HUD() {
     <div className="absolute top-3 left-3 z-10 flex flex-col gap-1 pointer-events-none">
       {/* Round + phase badge */}
       <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-700 rounded px-3 py-1.5 backdrop-blur-sm">
-        <span className="text-slate-400 text-xs font-mono tracking-widest">ROUND</span>
+        <span className="text-slate-400 text-xs font-display tracking-widest">ROUND</span>
         <span className="text-[--neon-cyan] font-mono font-bold text-lg leading-none">{round}</span>
         <span className="text-slate-600 text-xs">│</span>
-        <span className="text-slate-200 font-mono text-xs tracking-widest">{phaseLabel}</span>
+        <span className="text-slate-200 font-display text-xs tracking-widest">{phaseLabel}</span>
       </div>
 
       {/* Current actor */}
@@ -60,7 +60,7 @@ export function HUD() {
           <span className="text-slate-500 text-xs">({actorsLeft} rimasti)</span>
           <button
             onClick={advanceActor}
-            className="ml-1 text-[--neon-cyan] font-mono text-xs border border-[--neon-cyan]/40 rounded px-1.5 py-0.5 hover:bg-[--neon-cyan]/10 transition-colors"
+            className="ml-1 text-[--neon-cyan] font-display text-xs border border-[--neon-cyan]/40 rounded px-1.5 py-0.5 hover:bg-[--neon-cyan]/10 transition-colors"
           >
             AVANTI →
           </button>
