@@ -5,6 +5,7 @@
  */
 
 import { useState, useRef } from 'react'
+import tdLogo from '../../assets/TD-logo-transparent.png'
 import { useUiStore }       from '../../store/uiStore.js'
 import { useBattleStore }   from '../../store/battleStore.js'
 import { useProfilesStore } from '../../store/profilesStore.js'
@@ -273,7 +274,8 @@ export function Dashboard() {
     <div className="w-full h-full flex flex-col bg-slate-950">
 
       {/* ── Header ───────────────────────────────────────────────────── */}
-      <header className="shrink-0 px-6 py-4 border-b border-slate-800 flex items-baseline gap-4">
+      <header className="shrink-0 px-6 py-4 border-b border-slate-800 flex items-center gap-4">
+        <img src={tdLogo} alt="Thrust & Drift" className="w-8 h-8 shrink-0" />
         <h1 className="font-mono font-bold text-[--neon-cyan] tracking-widest text-lg">
           THRUST &amp; DRIFT
         </h1>
