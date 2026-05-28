@@ -50,7 +50,13 @@ Il simulatore implementa le **regole base di combattimento spaziale** del Core R
     "tailwindcss": "^4.x",
     "eslint": "^10.x",
     "eslint-plugin-react-hooks": "^7.x",
-    "eslint-plugin-react-refresh": "^0.5.x"
+    "eslint-plugin-react-refresh": "^0.5.x",
+    "vitest": "^4.x",
+    "@vitest/coverage-v8": "^4.x",
+    "@testing-library/react": "^16.x",
+    "@testing-library/user-event": "^14.x",
+    "@testing-library/jest-dom": "^6.x",
+    "jsdom": "^29.x"
   }
 }
 ```
@@ -62,21 +68,23 @@ Il simulatore implementa le **regole base di combattimento spaziale** del Core R
 ```text
 thrust-and-drift/
 ├── index.html
-├── vite.config.js            ← Tailwind v4 via @tailwindcss/vite plugin
+├── vite.config.js            ← Tailwind v4 via @tailwindcss/vite plugin + Vitest config
 ├── eslint.config.js
 ├── public/
 └── src/
     ├── main.jsx
     ├── App.jsx
     ├── index.css              ← Tailwind directives + @theme tokens
-    ├── App.css
+    ├── App.css                ← Global styles (logo shimmer animation, ecc.)
+    ├── test-setup.js          ← Vitest setup: @testing-library/jest-dom
     ├── components/
     │   ├── dashboard/
-    │   │   ├── Dashboard.jsx          ← Pre-battle lobby (profili + avvio sessione)
-    │   │   ├── CatalogPanel.jsx       ← Catalogo navi ufficiali (sola lettura)
+    │   │   ├── Dashboard.jsx          ← Pre-battle lobby (layout 2 colonne)
+    │   │   ├── CatalogPanel.jsx       ← Catalogo HG 2022 (sola lettura, filtri)
     │   │   └── useProfileImport.js    ← Hook import profili da file
     │   ├── map/
-    │   │   ├── BattleMap.jsx          ← Canvas principale
+    │   │   ├── BattleMap.jsx          ← Canvas principale (modalità vettoriale)
+    │   │   ├── BasicBattleView.jsx    ← Vista semplificata (modalità base)
     │   │   ├── useCanvasRenderer.js   ← Hook rendering hex + token
     │   │   ├── useMapInteraction.js   ← Hook pan, zoom, click, right-click
     │   │   └── tokenRenderers.js      ← Funzioni draw per navi e missili
@@ -94,9 +102,10 @@ thrust-and-drift/
     │   │   └── useAttackSetup.js      ← Hook derivazione DM attacco
     │   ├── ui/
     │   │   ├── ContextMenu.jsx        ← Menu tasto destro
-    │   │   ├── HUD.jsx                ← Overlay minimo (round, fase, iniziativa)
+    │   │   ├── HUD.jsx                ← Overlay minimo + modale conferma uscita
     │   │   ├── BattleLog.jsx          ← Log eventi collassabile
-    │   │   └── PhaseTracker.jsx       ← Indicatore fase corrente
+    │   │   ├── PhaseTracker.jsx       ← Indicatore fase corrente
+    │   │   └── Tooltip.jsx            ← Tooltip via React portal
     │   └── forms/
     │       └── ShipProfileForm.jsx    ← Form completo profilo nave
     ├── store/
@@ -113,8 +122,31 @@ thrust-and-drift/
         ├── rangeBands.js              ← Soglie bande di distanza
         ├── crewActions.js             ← Definizioni azioni equipaggio fase Actions
         ├── factions.js                ← Fazioni disponibili
-        ├── shipCatalog.js             ← Catalogo ufficiale navi (sola lettura)
+        ├── shipCatalog.js             ← Catalogo ufficiale navi HG 2022 (sola lettura)
         └── defaultProfiles.js         ← Profili nave preimpostati (Scout, Free Trader, ecc.)
+```
+
+### 3.1 Test
+
+Suite Vitest collocata accanto ai file sorgente (`*.test.js` / `*.test.jsx`):
+
+| File | Coverage |
+| ---- | -------- |
+| `utils/hex.test.js` | `hex.js` — coordinate, distanza, pixel↔hex, range band |
+| `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco |
+| `utils/dice.test.js` | `dice.js` — rollDice, formatDiceResults, formatCheckResult |
+| `store/battleStore.test.js` | battleStore — tutte le azioni, export/import |
+| `store/profilesStore.test.js` | profilesStore — CRUD, import/export |
+| `store/uiStore.test.js` | uiStore — screen, modal, selection, contextMenu |
+| `components/ui/Tooltip.test.jsx` | Tooltip — show/hide, portal, posizione |
+| `components/ui/HUD.test.jsx` | HUD — round/fase, controllo attore |
+| `components/ui/BattleLog.test.jsx` | BattleLog — entries, collapse, clear |
+| `components/ui/ContextMenu.test.jsx` | ContextMenu — tutti i tipi, outside click |
+
+```bash
+npm test               # esegui tutti i test
+npm run test:watch     # watch mode
+npx vitest --coverage  # report copertura (v8)
 ```
 
 ---
@@ -500,7 +532,25 @@ function applyMovement(currentPosition, currentVector) {
 
 ## 7. Interfaccia Utente
 
-### 7.1 Layout Generale
+### 7.1 Layout Dashboard
+
+Layout a 3 colonne:
+
+```text
+┌──────────────┬────────────────────────────────────────────┐
+│              │  Header: logo + titolo                     │
+│  Pannello    ├────────────────────────────────────────────┤
+│  Profili     │  [CommandConsole] │ [TacticalDisplay]      │
+│  (sinistra)  │  Modalità combat  │  Idle: reticolo        │
+│              │  Nuova / Riprendi │  Preview: roster navi  │
+└──────────────┴────────────────────────────────────────────┘
+```
+
+- **Pannello Profili** (colonna sinistra): lista profili con filtro, azioni ✎ ⧉ ⊗, import/export, accesso catalogo.
+- **CommandConsole** (colonna centrale fissa 340 px): selezione modalità, pulsanti Nuova Sessione / Riprendi Sessione.
+- **TacticalDisplay** (colonna destra): in stato idle mostra il reticolo di standby; dopo aver selezionato un file di sessione, mostra `SessionPreview` con round, fase, modalità e roster navi — il GM conferma prima di entrare in battaglia.
+
+### 7.2 Layout Battaglia
 
 ```text
 ┌──────────────────────────────────────────────────────────┐
@@ -520,7 +570,7 @@ function applyMovement(currentPosition, currentVector) {
 └──────────────────────────────────────────────────────────┘
 ```
 
-### 7.2 HUD (overlay minimo)
+### 7.3 HUD (overlay minimo)
 
 ```text
 Round 3 / ∞     Fase: ATTACCO     [Prossima fase →]
@@ -528,7 +578,9 @@ Round 3 / ∞     Fase: ATTACCO     [Prossima fase →]
 
 Posizionato top-left, sfondo semi-trasparente scuro, testo bianco.
 
-### 7.3 Phase Tracker
+**Pulsante ⌂** — apre modale di conferma "ABBANDONA SESSIONE" prima di tornare alla dashboard. I dati non salvati vengono persi se confermato.
+
+### 7.4 Phase Tracker
 
 Mostra la sequenza delle navi nell'ordine di iniziativa, con evidenziazione della nave che agisce ora. Posizionato top-right, collassabile.
 
@@ -540,7 +592,7 @@ Iniziativa:
 ○ Fighter-2       (ini:  9)
 ```
 
-### 7.4 Context Menu — Cella Vuota
+### 7.5 Context Menu — Cella Vuota
 
 Appare al right-click su cella vuota della mappa.
 
@@ -560,7 +612,7 @@ Appare al right-click su cella vuota della mappa.
 └──────────────────────────────┘
 ```
 
-### 7.5 Context Menu — Token Nave
+### 7.6 Context Menu — Token Nave
 
 Appare al right-click su un token nave.
 
@@ -579,7 +631,7 @@ Appare al right-click su un token nave.
 └──────────────────────────────┘
 ```
 
-### 7.6 Context Menu — Token Missile
+### 7.7 Context Menu — Token Missile
 
 ```text
 ┌──────────────────────────────┐
@@ -914,6 +966,11 @@ Funzionalità incluse nella prima versione funzionante:
 - ✅ Sensor lock
 - ✅ Log eventi
 - ✅ Profili predefiniti
+- ✅ Catalogo navi ufficiale HG 2022 (sola lettura, filtri per categoria)
+- ✅ Dashboard layout 2 colonne con preview sessione prima del caricamento
+- ✅ Modale conferma eliminazione profilo
+- ✅ Modale conferma abbandono sessione (⌂ HUD)
+- ✅ Suite di test (Vitest — utils, store, componenti UI)
 
 ### 13.2 Versione 1.1 — Post-MVP
 

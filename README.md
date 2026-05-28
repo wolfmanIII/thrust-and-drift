@@ -14,14 +14,16 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | --------- | ------------- |
 | **Hex grid map** | Flat-top axial hex grid with pan & zoom |
 | **Vectorial movement** | Ships have velocity vectors; thrust modifies them |
-| **Ship profiles** | Full CRUD — create, edit, duplicate, delete |
+| **Ship profiles** | Full CRUD — create, edit, duplicate, delete (with confirmation) |
+| **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
 | **Attack resolution** | 3-step flow: weapon/target config → 2D6 roll → damage |
 | **Crew actions** | Captain, Engineer, Sensors, Gunner actions with skill checks |
 | **Initiative** | 2D6 + Pilota + Thrust, automatically sorted |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
 | **Battle log** | Timestamped event log with colour-coded entry types |
-| **Session save / resume** | Export session to JSON, reimport to continue later |
+| **Session save / resume** | Export session to JSON; resume flow shows a full preview before loading |
 | **Profile I/O** | Import/export ship profiles via JSON files |
+| **Safety modals** | Confirm before deleting profiles; confirm before leaving battle without saving |
 
 ---
 
@@ -52,15 +54,16 @@ On the **Dashboard**, use the left panel to manage ship profiles:
 - **+ Nuovo Profilo** — create a new ship (name, stats, crew skills, turrets)
 - **✎** — edit an existing profile
 - **⧉** — duplicate a profile
-- **⊗** — delete a profile
+- **⊗** — delete a profile (confirmation required)
 - **↓ Importa / ↑ Esporta** — exchange profiles as JSON files
+- **📖 Catalogo Ufficiale** — browse the built-in High Guard 2022 catalog and add ships directly
 
 A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 
 ### 2 — Start or resume a session
 
 - **▶ Nuova Sessione** — resets battle state and enters the combat map
-- **↺ Riprendi Sessione** — load a `.json` file from a previous session
+- **↺ Riprendi Sessione** — load a `.json` file; a preview screen shows round, phase, and ship roster before confirming
 
 ### 3 — In battle
 
@@ -95,8 +98,8 @@ In the HUD (top-left), click **💾 SALVA** at any time to download the current
 session as a `.json` file. Use **↺ Riprendi Sessione** on the Dashboard to
 restore it.
 
-Click **⌂** in the HUD to return to the Dashboard (session is not saved
-automatically — save first).
+Click **⌂** in the HUD to return to the Dashboard — a confirmation modal warns
+that unsaved data will be lost.
 
 ---
 
@@ -109,6 +112,19 @@ automatically — save first).
 | Styling | Tailwind CSS v4 |
 | Map rendering | Browser Canvas API |
 | Persistence | Browser File API (JSON) — no backend |
+| Testing | Vitest 4 + Testing Library + jsdom |
+
+---
+
+## Running Tests
+
+```bash
+npm test                  # run all tests (utils, stores, components)
+npm run test:watch        # watch mode
+npx vitest --coverage     # coverage report (v8 provider)
+```
+
+260 tests across utils, Zustand stores, and UI components.
 
 ---
 
@@ -117,14 +133,52 @@ automatically — save first).
 ```text
 src/
 ├── components/
-│   ├── dashboard/   ← Pre-battle lobby (Dashboard.jsx)
-│   ├── forms/       ← ShipProfileForm
-│   ├── map/         ← Canvas hex map + hooks
-│   ├── modals/      ← All in-battle modals
-│   └── ui/          ← HUD, PhaseTracker, BattleLog, ContextMenu
-├── data/            ← Static game data (weapons, profiles, factions…)
-├── store/           ← Zustand slices (battle, profiles, ui)
-└── utils/           ← Pure logic (hex math, combat, dice, I/O)
+│   ├── dashboard/
+│   │   ├── Dashboard.jsx       ← Pre-battle lobby (profiles + session controls)
+│   │   ├── CatalogPanel.jsx    ← Read-only HG 2022 ship catalog
+│   │   └── useProfileImport.js ← Hook: import profiles from file
+│   ├── forms/
+│   │   └── ShipProfileForm.jsx ← Full ship profile form
+│   ├── map/
+│   │   ├── BattleMap.jsx       ← Canvas hex map
+│   │   ├── BasicBattleView.jsx ← Simplified view (basic combat mode)
+│   │   ├── useCanvasRenderer.js← Hex + token rendering hook
+│   │   ├── useMapInteraction.js← Pan, zoom, click, right-click hook
+│   │   └── tokenRenderers.js   ← Draw functions for ships and missiles
+│   ├── modals/
+│   │   ├── Modal.jsx           ← Generic modal wrapper
+│   │   ├── ShipProfileModal.jsx
+│   │   ├── AddShipModal.jsx
+│   │   ├── ThrustModal.jsx
+│   │   ├── EvasiveModal.jsx
+│   │   ├── AttackModal.jsx
+│   │   ├── MissileLaunchModal.jsx
+│   │   ├── ShipDetailModal.jsx
+│   │   ├── ActionModal.jsx
+│   │   ├── InitiativeModal.jsx
+│   │   └── useAttackSetup.js   ← Hook: attack DM derivation
+│   └── ui/
+│       ├── ContextMenu.jsx     ← Right-click context menu
+│       ├── HUD.jsx             ← Round/phase overlay + exit confirmation
+│       ├── BattleLog.jsx       ← Collapsible event log
+│       ├── PhaseTracker.jsx    ← Initiative order display
+│       └── Tooltip.jsx         ← Portal-based tooltip
+├── data/
+│   ├── weapons.js              ← Weapon tables, traits, damage
+│   ├── rangeBands.js           ← Distance band thresholds (hex)
+│   ├── crewActions.js          ← Crew action definitions (Actions phase)
+│   ├── factions.js             ← Available factions
+│   ├── shipCatalog.js          ← HG 2022 read-only catalog
+│   └── defaultProfiles.js      ← Preset ship profiles
+├── store/
+│   ├── profilesStore.js        ← Ship profiles (CRUD + import/export)
+│   ├── battleStore.js          ← Active battle state
+│   └── uiStore.js              ← Modal state, selected ship, context menu
+└── utils/
+    ├── hex.js                  ← Hex math (flat-top, cube coords)
+    ├── combat.js               ← DM calc, damage, range bands
+    ├── io.js                   ← JSON import/export via File API
+    └── dice.js                 ← Dice rolling + result formatting
 ```
 
 ---
@@ -136,8 +190,6 @@ All mechanical calculations implement:
 - **MgT2e CRB** — Mongoose Traveller 2nd Edition Core Rulebook  
   Space combat pp.160–168
 - **Traveller Companion 2024** — Vectorial Combat System pp.169–186
-
----
 
 ---
 
