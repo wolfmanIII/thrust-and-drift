@@ -1031,18 +1031,30 @@ Funzionalità incluse nella prima versione funzionante:
 
 ### 13.4 Versione 1.3 — Effetti Visivi Canvas
 
-Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`):
+Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`).  
+Tutti gli effetti sono puramente decorativi — non bloccano input, non modificano stato di gioco, si esauriscono in autonomia.
 
-| Effetto | Trigger | Descrizione |
-| ------- | ------- | ----------- |
-| **Raggio laser** | Risoluzione attacco (Beam/Pulse Laser) | Linea animata da torretta a bersaglio, fade-out in ~0.3 s, colore per tipo arma |
-| **Scia missile** | Ogni tick di movimento missile | Trail di particelle lungo la traiettoria percorsa nel round |
-| **Impatto** | Hit confermato | Burst di scintille radiali sul token colpito |
-| **Chaff** | Sandcaster intercetta missile | Nuvola di punti grigi che si espande attorno al token |
-| **Jamming signal** | Electronic warfare attiva | Anello pulsante semi-trasparente attorno alla nave che esegue il jamming |
-| **Thrust plume** | Applicazione thrust confermata | Breve pennacchio nella direzione opposta al delta-v applicato |
+**Effetti trigger-based** (one-shot, si attivano su evento e svaniscono):
 
-Tutti gli effetti sono puramente decorativi — non bloccano input, non modificano stato di gioco, si esauriscono in autonomia senza dover essere gestiti dallo store.
+| Effetto | Trigger | Descrizione | Fonte regola |
+| ------- | ------- | ----------- | ------------ |
+| **Raggio laser** | Attacco confermato (Beam/Pulse Laser) | Linea animata da torretta a bersaglio, fade-out ~0.3 s; colore differenziato per tipo arma | CRB p.167 |
+| **Scia missile** | Ogni tick di movimento missile (fase Movement) | Trail di particelle lungo la traiettoria percorsa nel round | TC p.175 |
+| **Impatto** | Hit confermato (Effect ≥ 0) | Burst di scintille radiali sul token colpito, fade-out ~0.5 s | CRB p.167 |
+| **Chaff** | Sandcaster intercetta salvo (tiro difesa 3+) | Lampo istantaneo di polvere/frammenti intorno alla torretta del sandcaster al momento della risoluzione impatto; durata ~0.2 s | CRB p.162 — Close-in defence |
+| **Thrust plume** | Applicazione thrust confermata (fase Acceleration) | Pennacchio nella direzione opposta al delta-v applicato, fade-out ~0.4 s | TC p.170 |
+| **Critical hit flash** | Critical hit inflitto | Lampo rosso non-bloccante sul token colpito, con icona sistema danneggiato (M-Drive, Sensors, ecc.) | CRB p.167 — Critical Hits table |
+| **Dogfight entry** | Due navi terminano il movimento nella stessa cella | Avviso "DOGFIGHT" sulla mappa con linea di collegamento tra i due token; persiste fino a risoluzione | CRB p.162 |
+
+**Effetti persistenti** (overlay sul token, durano finché la condizione è attiva):
+
+| Effetto | Condizione | Descrizione | Fonte regola |
+| ------- | ---------- | ----------- | ------------ |
+| **Sensor lock ring** | Nave ha sensor lock attivo su bersaglio (`sensorLockOn ≠ null`) | Linea tratteggiata ciano dalla nave al bersaglio; piccolo anello sul token bersaglio | TC p.182 — Sensor Lock action |
+| **Evasive aura** | `evasiveThrust > 0` dichiarato (fase Acceleration) | Alone giallo semi-trasparente attorno al token; scompare a fine round | TC p.170 — Evasive Action |
+| **Missile esaurito** | `thrustRemaining === 0` prima dell'impatto | Token missile sbiadito/grigio, traccia intermittente — segnala che non raggiungerà il bersaglio | TC p.175 |
+
+> **Nota:** L'effetto "Jamming signal / Electronic Warfare" è stato rimosso perché non corrisponde a una meccanica discreta del combattimento ufficiale MgT2e. L'EW offensiva non è un'azione separata nelle regole di combattimento spaziale (CRB pp.160–168, TC pp.169–186). Il Sensor Lock (TC p.182) è l'azione elettronica con effetti meccanici più vicina — ed è rappresentata dall'effetto **Sensor lock ring** qui sopra.
 
 ### 13.5 Versione 1.4 — Dogfighting
 
