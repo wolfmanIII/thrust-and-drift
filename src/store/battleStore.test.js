@@ -926,13 +926,16 @@ describe('pushHistory / undoLastAction', () => {
     expect(useBattleStore.getState().log.length).toBeGreaterThan(logLenAfterAdd)
   })
 
-  it('undoLastAction appends ↩ Undo log entry', () => {
+  it('undoLastAction appends ↩ Undo log entry with correct round and phase', () => {
     useBattleStore.setState({ round: 2, phase: 'attack' })
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    // snapshot captured at round=2, phase='attack'
     useBattleStore.getState().undoLastAction()
     const last = useBattleStore.getState().log.at(-1)
     expect(last.type).toBe('system')
     expect(last.message).toMatch(/↩ Undo/)
+    expect(last.message).toContain('Round 2')
+    expect(last.message).toContain('ATTACK')
   })
 })
 
