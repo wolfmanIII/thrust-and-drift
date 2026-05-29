@@ -1,6 +1,6 @@
 /**
  * ActionModal — crew actions during the Actions phase.
- * Rolls the check, shows result, and applies the mechanical effect to battle state.
+ * Flow: select crew member → select action → roll → result.
  * // MgT2e CRB p.166–167 — Crew Actions
  */
 
@@ -10,18 +10,18 @@ import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { roll2D6, formatCheckResult } from '../../utils/dice.js'
 import { CREW_ACTIONS } from '../../data/crewActions.js'
+import { migrateCrew, CREW_SKILLS } from '../../utils/crew.js'
 
 /**
  * Apply the mechanical effect of a successful action to the battle state.
- * Each action ID maps to a dedicated battleStore action.
  */
 function useActionEffects() {
-  const applySensorLock    = useBattleStore((s) => s.applySensorLock)
-  const clearSensorLock    = useBattleStore((s) => s.clearSensorLock)
-  const repairCritical     = useBattleStore((s) => s.repairCritical)
+  const applySensorLock      = useBattleStore((s) => s.applySensorLock)
+  const clearSensorLock      = useBattleStore((s) => s.clearSensorLock)
+  const repairCritical       = useBattleStore((s) => s.repairCritical)
   const applyInitiativeBonus = useBattleStore((s) => s.applyInitiativeBonus)
-  const overloadDrive      = useBattleStore((s) => s.overloadDrive)
-  const reloadTurret       = useBattleStore((s) => s.reloadTurret)
+  const overloadDrive        = useBattleStore((s) => s.overloadDrive)
+  const reloadTurret         = useBattleStore((s) => s.reloadTurret)
 
   return (actionId, shipId, effect, targetShipId) => {
     switch (actionId) {
@@ -49,6 +49,30 @@ function useActionEffects() {
   }
 }
 
+/** Derive available actions for a crew member based on their skills. */
+function getActionsForMember(member) {
+  return Object.entries(CREW_ACTIONS).flatMap(([role, actions]) => {
+    const skillLevel = member.skills[role] ?? 0
+    if (skillLevel === 0) return []
+    return actions.map((a) => ({ ...a, skillLevel }))
+  })
+}
+
+/** Compact skill badge list for a crew member row. */
+function SkillBadges({ skills }) {
+  const present = CREW_SKILLS.filter((s) => (skills[s] ?? 0) > 0)
+  if (present.length === 0) return <span className="text-slate-600 font-mono text-xs">no skills</span>
+  return (
+    <span className="flex flex-wrap gap-1">
+      {present.map((s) => (
+        <span key={s} className="font-mono text-xs text-slate-400">
+          {s} {skills[s]}
+        </span>
+      ))}
+    </span>
+  )
+}
+
 export function ActionModal() {
   const closeModal   = useUiStore((s) => s.closeModal)
   const modalPayload = useUiStore((s) => s.modalPayload)
@@ -59,23 +83,28 @@ export function ActionModal() {
 
   const ship = ships.find((s) => s.id === modalPayload?.shipId)
 
-  const [selectedAction, setSelectedAction]   = useState(null)
-  const [targetShipId, setTargetShipId]       = useState(null)
-  const [rollResult, setRollResult]           = useState(null)
+  const [selectedMemberId, setSelectedMemberId] = useState(null)
+  const [selectedAction, setSelectedAction]     = useState(null)
+  const [targetShipId, setTargetShipId]         = useState(null)
+  const [rollResult, setRollResult]             = useState(null)
 
   if (!ship) return null
 
-  const crew = ship.profile.crew ?? {}
+  // Normalise to array — handles legacy {pilot:N,...} saves
+  const crewArray = Array.isArray(ship.profile.crew)
+    ? ship.profile.crew
+    : migrateCrew(ship.profile.crew ?? {})
 
-  // Other ships that can be targeted for sensor lock
-  const otherShips = ships.filter((s) => s.id !== ship.id)
+  const selectedMember = crewArray.find((m) => m.id === selectedMemberId) ?? null
+  const memberActions  = selectedMember ? getActionsForMember(selectedMember) : []
+  const otherShips     = ships.filter((s) => s.id !== ship.id)
 
-  // Build available actions based on crew skills present
-  const availableActions = Object.entries(CREW_ACTIONS).flatMap(([role, actions]) => {
-    const skillLevel = crew[role] ?? 0
-    if (skillLevel === 0 && role !== 'gunner') return []
-    return actions.map((a) => ({ ...a, skillLevel }))
-  })
+  const handleSelectMember = (member) => {
+    setSelectedMemberId(member.id)
+    setSelectedAction(null)
+    setRollResult(null)
+    setTargetShipId(null)
+  }
 
   const handleSelectAction = (action) => {
     setSelectedAction(action)
@@ -89,7 +118,7 @@ export function ActionModal() {
 
     let result
     if (selectedAction.difficulty === 'auto') {
-      result = { display: 'Automatico', success: true, effect: 0, finalTotal: 8 }
+      result = { display: 'Automatic', success: true, effect: 0, finalTotal: 8 }
     } else {
       const roll = roll2D6()
       const dm   = selectedAction.skillLevel
@@ -98,7 +127,7 @@ export function ActionModal() {
 
     setRollResult(result)
     addLogEntry(
-      `${ship.profile.name}: ${selectedAction.label} — ${result.display} (${result.success ? 'SUCCESS' : 'FAILED'})`
+      `${ship.profile.name} / ${selectedMember?.name ?? '?'}: ${selectedAction.label} — ${result.display} (${result.success ? 'SUCCESS' : 'FAILED'})`
     )
 
     if (result.success) {
@@ -106,88 +135,19 @@ export function ActionModal() {
     }
   }
 
-  const canRoll = selectedAction &&
-    (!selectedAction.requiresTarget || targetShipId)
+  const canRoll = selectedAction && (!selectedAction.requiresTarget || targetShipId)
 
   return (
     <Modal title={`Actions — ${ship.profile.name}`} onClose={closeModal}>
       <div className="space-y-4">
-        {/* Action list */}
-        {!rollResult && (
-          <>
-            <div className="space-y-1">
-              {availableActions.length === 0 && (
-                <p className="text-slate-600 font-mono text-xs italic">No actions available.</p>
-              )}
-              {availableActions.map((action) => (
-                <button
-                  key={action.id}
-                  onClick={() => handleSelectAction(action)}
-                  className={`w-full text-left px-3 py-2 rounded font-mono text-xs border transition-colors ${
-                    selectedAction?.id === action.id
-                      ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
-                      : 'border-slate-700 text-slate-300 hover:border-slate-500'
-                  }`}
-                >
-                  <span className="font-bold">{action.label}</span>
-                  <span className="text-slate-500 ml-2">
-                    {action.difficulty === 'auto' ? 'Automatic' : `Target ${action.difficulty}+`}
-                    {' · '}Skill {action.skillLevel}
-                  </span>
-                </button>
-              ))}
-            </div>
 
-            {/* Target selector — shown only for actions that require a target */}
-            {selectedAction?.requiresTarget && (
-              <div>
-                <p className="text-slate-500 font-mono text-xs mb-1.5">Target</p>
-                <div className="space-y-0.5">
-                  {otherShips.length === 0 && (
-                    <p className="text-slate-600 font-mono text-xs italic">No ships available.</p>
-                  )}
-                  {otherShips.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => setTargetShipId(s.id)}
-                      className={`w-full flex items-center gap-2 text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
-                        targetShipId === s.id
-                          ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
-                          : 'border-slate-700 text-slate-400 hover:border-slate-500'
-                      }`}
-                    >
-                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-                      {s.profile.name}
-                      {s.sensorLockedBy === ship.id && (
-                        <span className="ml-auto text-[--neon-cyan] text-xs">🔒 locked</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {selectedAction && (
-              <p className="text-slate-500 font-mono text-xs leading-relaxed border-l-2 border-slate-700 pl-3">
-                {selectedAction.description}
-              </p>
-            )}
-
-            <button
-              onClick={handleRoll}
-              disabled={!canRoll}
-              className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              🎲 EXECUTE ACTION
-            </button>
-          </>
-        )}
-
-        {/* Result */}
+        {/* Roll result view */}
         {rollResult && (
           <div className="space-y-3">
             <div className="bg-slate-800 rounded p-4 text-center font-mono">
-              <p className="text-slate-400 text-xs mb-1">{selectedAction?.label}</p>
+              <p className="text-slate-400 text-xs mb-1">
+                {selectedMember?.name} — {selectedAction?.label}
+              </p>
               <p className="text-slate-300 text-sm">{rollResult.display}</p>
             </div>
 
@@ -199,7 +159,6 @@ export function ActionModal() {
                 : `FAILED — Effect ${rollResult.effect}`}
             </div>
 
-            {/* Effect description */}
             {rollResult.success && selectedAction && (
               <p className="text-slate-400 font-mono text-xs text-center">
                 {selectedAction.id === 'sensor_lock'        && `Sensor lock acquired on ${ships.find(s => s.id === targetShipId)?.profile.name ?? '?'}.`}
@@ -226,6 +185,112 @@ export function ActionModal() {
               </button>
             </div>
           </div>
+        )}
+
+        {/* Selection view */}
+        {!rollResult && (
+          <>
+            {/* Crew member list */}
+            <div>
+              <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">
+                Crew Member
+              </p>
+              {crewArray.length === 0 && (
+                <p className="text-slate-600 font-mono text-xs italic">No crew assigned to this ship.</p>
+              )}
+              <div className="space-y-1">
+                {crewArray.map((member) => (
+                  <button
+                    key={member.id}
+                    onClick={() => handleSelectMember(member)}
+                    className={`w-full text-left px-3 py-2 rounded font-mono text-xs border transition-colors ${
+                      selectedMemberId === member.id
+                        ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                        : 'border-slate-700 text-slate-300 hover:border-slate-500'
+                    }`}
+                  >
+                    <span className="font-bold mr-2">{member.name || '(unnamed)'}</span>
+                    <SkillBadges skills={member.skills} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Action list for selected member */}
+            {selectedMember && (
+              <div>
+                <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">
+                  Actions
+                </p>
+                {memberActions.length === 0 && (
+                  <p className="text-slate-600 font-mono text-xs italic">No actions available for this crew member.</p>
+                )}
+                <div className="space-y-1">
+                  {memberActions.map((action) => (
+                    <button
+                      key={action.id}
+                      onClick={() => handleSelectAction(action)}
+                      className={`w-full text-left px-3 py-2 rounded font-mono text-xs border transition-colors ${
+                        selectedAction?.id === action.id
+                          ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                          : 'border-slate-700 text-slate-300 hover:border-slate-500'
+                      }`}
+                    >
+                      <span className="font-bold">{action.label}</span>
+                      <span className="text-slate-500 ml-2">
+                        {action.difficulty === 'auto' ? 'Automatic' : `Target ${action.difficulty}+`}
+                        {' · '}Skill {action.skillLevel}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Target selector */}
+            {selectedAction?.requiresTarget && (
+              <div>
+                <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">Target</p>
+                <div className="space-y-0.5">
+                  {otherShips.length === 0 && (
+                    <p className="text-slate-600 font-mono text-xs italic">No ships available.</p>
+                  )}
+                  {otherShips.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => setTargetShipId(s.id)}
+                      className={`w-full flex items-center gap-2 text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
+                        targetShipId === s.id
+                          ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                          : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                      }`}
+                    >
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
+                      {s.profile.name}
+                      {s.sensorLockedBy === ship.id && (
+                        <span className="ml-auto text-[--neon-cyan] text-xs">🔒 locked</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Action description */}
+            {selectedAction && (
+              <p className="text-slate-500 font-mono text-xs leading-relaxed border-l-2 border-slate-700 pl-3">
+                {selectedAction.description}
+              </p>
+            )}
+
+            <button
+              onClick={handleRoll}
+              disabled={!canRoll}
+              className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              🎲 EXECUTE ACTION
+            </button>
+          </>
         )}
       </div>
     </Modal>
