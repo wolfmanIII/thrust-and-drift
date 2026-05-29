@@ -33,7 +33,9 @@ export function HUD() {
   const exportBattleState   = useBattleStore((s) => s.exportBattleState)
   const combatMode          = useBattleStore((s) => s.combatMode)
   const undoLastAction      = useBattleStore((s) => s.undoLastAction)
+  const redoLastAction      = useBattleStore((s) => s.redoLastAction)
   const canUndo             = useBattleStore((s) => s.undoStack.length > 0)
+  const canRedo             = useBattleStore((s) => s.redoStack.length > 0)
   const gotoScreen          = useUiStore((s) => s.gotoScreen)
 
   const [showExitWarning, setShowExitWarning] = useState(false)
@@ -42,16 +44,24 @@ export function HUD() {
     if (canUndo) undoLastAction()
   }, [canUndo, undoLastAction])
 
+  const handleRedo = useCallback(() => {
+    if (canRedo) redoLastAction()
+  }, [canRedo, redoLastAction])
+
   useEffect(() => {
     const onKey = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
         e.preventDefault()
         handleUndo()
       }
+      if ((e.ctrlKey && e.key === 'y') || ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey)) {
+        e.preventDefault()
+        handleRedo()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [handleUndo])
+  }, [handleUndo, handleRedo])
 
   const currentActorId = initiativeOrder[currentActorIndex] ?? null
   const currentActor   = ships.find((s) => s.id === currentActorId)
@@ -110,6 +120,16 @@ export function HUD() {
             className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:text-slate-300 hover:border-slate-500 disabled:hover:text-slate-500 disabled:hover:border-slate-700"
           >
             ⟲
+          </button>
+        </Tooltip>
+        <Tooltip label="Redo last action (Ctrl+Y)">
+          <button
+            onClick={handleRedo}
+            disabled={!canRedo}
+            aria-label="Redo last action (Ctrl+Y)"
+            className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:text-slate-300 hover:border-slate-500 disabled:hover:text-slate-500 disabled:hover:border-slate-700"
+          >
+            ↷
           </button>
         </Tooltip>
         <Tooltip label="Save session to file">

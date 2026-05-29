@@ -991,4 +991,92 @@ describe('undo — history suppression flags', () => {
     useBattleStore.getState().startNextRound()
     expect(useBattleStore.getState().undoStack).toHaveLength(stackBefore + 1)
   })
+
+  it('wh guard suppresses push when guard fails', () => {
+    // applyShipThrust with a non-existent shipId should not push
+    const stackBefore = useBattleStore.getState().undoStack.length
+    useBattleStore.getState().applyShipThrust('nonexistent', { q: 1, r: 0 }, 1)
+    expect(useBattleStore.getState().undoStack).toHaveLength(stackBefore)
+  })
+})
+
+describe('redoLastAction', () => {
+  it('redoLastAction is no-op when redoStack is empty', () => {
+    expect(useBattleStore.getState().redoStack).toHaveLength(0)
+    expect(() => useBattleStore.getState().redoLastAction()).not.toThrow()
+  })
+
+  it('undoLastAction populates redoStack', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    expect(useBattleStore.getState().redoStack).toHaveLength(0)
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().redoStack).toHaveLength(1)
+  })
+
+  it('redoLastAction restores undone state', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    expect(useBattleStore.getState().ships).toHaveLength(1)
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().ships).toHaveLength(0)
+    useBattleStore.getState().redoLastAction()
+    expect(useBattleStore.getState().ships).toHaveLength(1)
+  })
+
+  it('redoLastAction pushes current state to undoStack', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().undoLastAction()
+    const undoBefore = useBattleStore.getState().undoStack.length
+    useBattleStore.getState().redoLastAction()
+    expect(useBattleStore.getState().undoStack).toHaveLength(undoBefore + 1)
+  })
+
+  it('redoLastAction pops redoStack', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().redoStack).toHaveLength(1)
+    useBattleStore.getState().redoLastAction()
+    expect(useBattleStore.getState().redoStack).toHaveLength(0)
+  })
+
+  it('redoLastAction appends ↷ Redo log entry with correct round and phase', () => {
+    useBattleStore.setState({ round: 3, phase: 'attack' })
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().undoLastAction()
+    useBattleStore.getState().redoLastAction()
+    const last = useBattleStore.getState().log.at(-1)
+    expect(last.type).toBe('system')
+    expect(last.message).toMatch(/↷ Redo/)
+    expect(last.message).toContain('Round 3')
+    expect(last.message).toContain('ATTACK')
+  })
+
+  it('new action clears redoStack', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().redoStack).toHaveLength(1)
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 1, r: 0 }, 'players', '#00f')
+    expect(useBattleStore.getState().redoStack).toHaveLength(0)
+  })
+
+  it('resetBattle clears redoStack', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().redoStack).toHaveLength(1)
+    useBattleStore.getState().resetBattle()
+    expect(useBattleStore.getState().redoStack).toHaveLength(0)
+  })
+
+  it('undo/redo cycle preserves ship state correctly', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'Alpha' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'Beta' }), { q: 1, r: 0 }, 'players', '#00f')
+    // undo both
+    useBattleStore.getState().undoLastAction()
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().ships).toHaveLength(0)
+    // redo both
+    useBattleStore.getState().redoLastAction()
+    expect(useBattleStore.getState().ships).toHaveLength(1)
+    useBattleStore.getState().redoLastAction()
+    expect(useBattleStore.getState().ships).toHaveLength(2)
+  })
 })

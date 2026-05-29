@@ -81,7 +81,27 @@ function makeLogEntry({ round, phase, type, message, shipId = null, details = nu
   }
 }
 
-const useBattleStore = create((set, get) => ({
+const useBattleStore = create((set, get) => {
+  /**
+   * Wrap a store action to push history automatically.
+   * Single-arg form: wh(fn) — always pushes.
+   * Two-arg form: wh(guard, fn) — pushes only when guard(...args) returns truthy.
+   * @param {Function} guardOrFn
+   * @param {Function} [fn]
+   */
+  const wh = (guardOrFn, fn) => {
+    if (fn === undefined) {
+      return (...args) => { get().pushHistory(); return guardOrFn(...args) }
+    }
+    const guard = guardOrFn
+    return (...args) => {
+      if (!guard(...args)) return
+      get().pushHistory()
+      return fn(...args)
+    }
+  }
+
+  return {
   // === STATE ===
 
   /** @type {string} */
@@ -107,8 +127,10 @@ const useBattleStore = create((set, get) => ({
 
   /** @type {object[]} Undo history — snapshots of game state, capped at 20. */
   undoStack: [],
+  /** @type {object[]} Redo history — populated by undoLastAction, cleared on any new action. */
+  redoStack: [],
 
-  // === UNDO ===
+  // === UNDO / REDO ===
 
   /**
    * Snapshot current game state onto the undo stack (max 20 entries).
@@ -124,13 +146,22 @@ const useBattleStore = create((set, get) => ({
       initiativeOrder: [...initiativeOrder],
       currentActorIndex,
     }
-    set((s) => ({ undoStack: [...s.undoStack, snapshot].slice(-20) }))
+    // Any new user action invalidates the redo stack.
+    set((s) => ({ undoStack: [...s.undoStack, snapshot].slice(-20), redoStack: [] }))
   },
 
-  /** Restore the most recent snapshot; log is append-only and receives a ↩ entry. */
+  /** Restore the most recent snapshot; saves current state to redoStack; log is append-only. */
   undoLastAction: () => {
-    const { undoStack, log } = get()
+    const { undoStack, redoStack, log } = get()
     if (undoStack.length === 0) return
+    const { ships, missiles, round, phase, initiativeOrder, currentActorIndex } = get()
+    const redoSnapshot = {
+      ships: structuredClone(ships),
+      missiles: structuredClone(missiles),
+      round, phase,
+      initiativeOrder: [...initiativeOrder],
+      currentActorIndex,
+    }
     const stack = [...undoStack]
     const snapshot = stack.pop()
     const undoEntry = makeLogEntry({
@@ -139,7 +170,30 @@ const useBattleStore = create((set, get) => ({
       type: 'system',
       message: `↩ Undo — restored to Round ${snapshot.round}, ${snapshot.phase.toUpperCase()}.`,
     })
-    set({ ...snapshot, undoStack: stack, log: [...log, undoEntry] })
+    set({ ...snapshot, undoStack: stack, redoStack: [...redoStack, redoSnapshot].slice(-20), log: [...log, undoEntry] })
+  },
+
+  /** Restore the next state from the redoStack; saves current state to undoStack; log is append-only. */
+  redoLastAction: () => {
+    const { redoStack, undoStack, log } = get()
+    if (redoStack.length === 0) return
+    const { ships, missiles, round, phase, initiativeOrder, currentActorIndex } = get()
+    const undoSnapshot = {
+      ships: structuredClone(ships),
+      missiles: structuredClone(missiles),
+      round, phase,
+      initiativeOrder: [...initiativeOrder],
+      currentActorIndex,
+    }
+    const stack = [...redoStack]
+    const snapshot = stack.pop()
+    const redoEntry = makeLogEntry({
+      round: snapshot.round,
+      phase: snapshot.phase,
+      type: 'system',
+      message: `↷ Redo — restored to Round ${snapshot.round}, ${snapshot.phase.toUpperCase()}.`,
+    })
+    set({ ...snapshot, undoStack: [...undoStack, undoSnapshot].slice(-20), redoStack: stack, log: [...log, redoEntry] })
   },
 
   // === SHIP MANAGEMENT ===
@@ -151,8 +205,7 @@ const useBattleStore = create((set, get) => ({
    * @param {'players'|'npc'|'neutral'} faction
    * @param {string} color  CSS hex color
    */
-  addShip: (profile, position, faction, color) => {
-    get().pushHistory()
+  addShip: wh((profile, position, faction, color) => {
     const instance = {
       id: uuidv7(),
       profileId: profile.id,
@@ -185,28 +238,29 @@ const useBattleStore = create((set, get) => ({
         shipId: instance.id,
       })],
     }))
-  },
+  }),
 
   /**
    * Remove a ship instance from the battle.
    * @param {string} shipId
    */
-  removeShip: (shipId) => {
-    const ship = get().ships.find((s) => s.id === shipId)
-    if (!ship) return
-    get().pushHistory()
-    set((s) => ({
-      ships: s.ships.filter((sh) => sh.id !== shipId),
-      missiles: s.missiles.filter((m) => m.launchedBy !== shipId && m.target !== shipId),
-      initiativeOrder: s.initiativeOrder.filter((id) => id !== shipId),
-      log: [...s.log, makeLogEntry({
+  removeShip: wh(
+    (shipId) => !!get().ships.find((s) => s.id === shipId),
+    (shipId) => {
+      const ship = get().ships.find((s) => s.id === shipId)
+      set((s) => ({
+        ships: s.ships.filter((sh) => sh.id !== shipId),
+        missiles: s.missiles.filter((m) => m.launchedBy !== shipId && m.target !== shipId),
+        initiativeOrder: s.initiativeOrder.filter((id) => id !== shipId),
+        log: [...s.log, makeLogEntry({
         round: s.round,
         phase: s.phase,
         type: 'system',
         message: `${ship.profile.name} removed from battle.`,
       })],
     }))
-  },
+    },
+  ),
 
   /**
    * Apply partial updates to a ship instance.
@@ -225,8 +279,7 @@ const useBattleStore = create((set, get) => ({
    * Roll initiative for all ships and sort the order.
    * @param {Record<string, number>} [tacticsEffects]  Optional per-shipId tactics bonus
    */
-  rollAllInitiative: (tacticsEffects = {}) => {
-    get().pushHistory()
+  rollAllInitiative: wh((tacticsEffects = {}) => {
     const { ships, round } = get()
     const rolled = ships.map((ship) => {
       const result = rollInitiative(
@@ -256,7 +309,7 @@ const useBattleStore = create((set, get) => ({
       currentActorIndex: 0,
       log: [...s.log, ...entries],
     }))
-  },
+  }),
 
   // === THRUST ===
 
@@ -267,33 +320,33 @@ const useBattleStore = create((set, get) => ({
    * @param {{ q: number, r: number }} delta
    * @param {number} cost  Hex distance of the delta
    */
-  applyShipThrust: (shipId, delta, cost) => {
-    const ship = get().ships.find((s) => s.id === shipId)
-    if (!ship) return
-    get().pushHistory()
-    const newVector = applyThrust(ship.vector, delta)
-    set((s) => ({
-      ships: s.ships.map((sh) =>
-        sh.id === shipId
-          ? { ...sh, vector: newVector, thrustUsedThisRound: sh.thrustUsedThisRound + cost }
-          : sh
-      ),
-      log: [...s.log, makeLogEntry({
-        round: s.round,
-        phase: s.phase,
-        type: 'move',
-        message: `${ship.profile.name} applies Thrust Δ(${delta.q},${delta.r}). Vector: (${newVector.q},${newVector.r}).`,
-        shipId,
-        details: { delta, newVector, cost },
-      })],
-    }))
-  },
+  applyShipThrust: wh(
+    (shipId) => !!get().ships.find((s) => s.id === shipId),
+    (shipId, delta, cost) => {
+      const ship = get().ships.find((s) => s.id === shipId)
+      const newVector = applyThrust(ship.vector, delta)
+      set((s) => ({
+        ships: s.ships.map((sh) =>
+          sh.id === shipId
+            ? { ...sh, vector: newVector, thrustUsedThisRound: sh.thrustUsedThisRound + cost }
+            : sh
+        ),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'move',
+          message: `${ship.profile.name} applies Thrust Δ(${delta.q},${delta.r}). Vector: (${newVector.q},${newVector.r}).`,
+          shipId,
+          details: { delta, newVector, cost },
+        })],
+      }))
+    },
+  ),
 
   // === MOVEMENT (simultaneous) ===
 
   /** Move all ships and missiles by their current vector (movement phase). */
-  resolveMovement: () => {
-    get().pushHistory()
+  resolveMovement: wh(() => {
     const { ships, missiles, round } = get()
     const movedShips = ships.map((sh) => ({
       ...sh,
@@ -319,7 +372,7 @@ const useBattleStore = create((set, get) => ({
       missiles: movedMissiles.filter((m) => m.thrustRemaining >= 0),
       log: [...s.log, ...entries],
     }))
-  },
+  }),
 
   // === DAMAGE ===
 
@@ -429,8 +482,7 @@ const useBattleStore = create((set, get) => ({
    * @param {{ q: number, r: number }} vector    Initial vector (inherits attacker vector)
    * @param {'Standard'|'Smart'|'Nuclear'|'Ortillery'} type
    */
-  launchMissile: (launchedBy, target, count, position, vector, type = 'Standard') => {
-    get().pushHistory()
+  launchMissile: wh((launchedBy, target, count, position, vector, type = 'Standard') => {
     const attacker = get().ships.find((s) => s.id === launchedBy)
     const missile = {
       id: uuidv7(),
@@ -456,7 +508,7 @@ const useBattleStore = create((set, get) => ({
         details: missile,
       })],
     }))
-  },
+  }),
 
   /** Remove a missile salvo by id. */
   removeMissile: (missileId) => {
@@ -466,8 +518,7 @@ const useBattleStore = create((set, get) => ({
   // === PHASE / ROUND PROGRESSION ===
 
   /** Advance to the next phase in sequence. Drives all transitions via PHASE_ORDER. */
-  advancePhase: () => {
-    get().pushHistory()
+  advancePhase: wh(() => {
     const { phase } = get()
     const idx = PHASE_ORDER.indexOf(phase)
     if (idx === -1 || idx === PHASE_ORDER.length - 1) {
@@ -486,24 +537,22 @@ const useBattleStore = create((set, get) => ({
         message: `Phase start: ${nextPhase.toUpperCase()}.`,
       })],
     }))
-  },
+  }),
 
   /** Mark the current actor as having acted; advance the actor index. */
-  advanceActor: () => {
-    get().pushHistory()
+  advanceActor: wh(() => {
     const { initiativeOrder, currentActorIndex } = get()
     const shipId = initiativeOrder[currentActorIndex]
     if (shipId) {
       get().updateShip(shipId, { hasActedThisPhase: true })
     }
     set((s) => ({ currentActorIndex: s.currentActorIndex + 1 }))
-  },
+  }),
 
   /** Reset all round-scoped state and increment round counter. */
-  startNextRound: () => {
-    get().pushHistory()
+  startNextRound: wh(() => {
     set((s) => buildNextRoundState(s))
-  },
+  }),
 
   // === CREW ACTION EFFECTS ===
 
@@ -514,25 +563,26 @@ const useBattleStore = create((set, get) => ({
    * @param {string} shipId
    * @param {number} amount
    */
-  declareEvasiveThrust: (shipId, amount) => {
-    const ship = get().ships.find((s) => s.id === shipId)
-    if (!ship) return
-    get().pushHistory()
-    const maxEvasive = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0))
-    const clamped = Math.max(0, Math.min(amount, maxEvasive))
-    set((s) => ({
-      ships: s.ships.map((sh) =>
-        sh.id === shipId ? { ...sh, evasiveThrust: clamped } : sh
-      ),
-      log: [...s.log, makeLogEntry({
-        round: s.round,
-        phase: s.phase,
-        type: 'action',
-        message: `${ship.profile.name} declares ${clamped} evasive thrust (DM -${ship.profile.crew?.pilot ?? 0} × ${clamped} to attackers).`,
-        shipId,
-      })],
-    }))
-  },
+  declareEvasiveThrust: wh(
+    (shipId) => !!get().ships.find((s) => s.id === shipId),
+    (shipId, amount) => {
+      const ship = get().ships.find((s) => s.id === shipId)
+      const maxEvasive = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0))
+      const clamped = Math.max(0, Math.min(amount, maxEvasive))
+      set((s) => ({
+        ships: s.ships.map((sh) =>
+          sh.id === shipId ? { ...sh, evasiveThrust: clamped } : sh
+        ),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'action',
+          message: `${ship.profile.name} declares ${clamped} evasive thrust (DM -${ship.profile.crew?.pilot ?? 0} × ${clamped} to attackers).`,
+          shipId,
+        })],
+      }))
+    },
+  ),
 
   /**
    * Apply a sensor lock from one ship to another.
@@ -542,26 +592,27 @@ const useBattleStore = create((set, get) => ({
    * @param {string} targetId
    * @param {number} dmBonus  Effect of the sensor lock roll (>= 0)
    */
-  applySensorLock: (attackerId, targetId, dmBonus) => {
-    const attacker = get().ships.find((s) => s.id === attackerId)
-    const target = get().ships.find((s) => s.id === targetId)
-    if (!attacker || !target) return
-    get().pushHistory()
-    set((s) => ({
-      ships: s.ships.map((sh) => {
-        if (sh.id === attackerId) return { ...sh, sensorLockOn: targetId, sensorLockDM: Math.max(0, dmBonus) }
-        if (sh.id === targetId)   return { ...sh, sensorLockedBy: attackerId }
-        return sh
-      }),
-      log: [...s.log, makeLogEntry({
-        round: s.round,
-        phase: s.phase,
-        type: 'action',
-        message: `${attacker.profile.name}: Sensor Lock on ${target.profile.name} (DM +${Math.max(0, dmBonus)} to attacks).`,
-        shipId: attackerId,
-      })],
+  applySensorLock: wh(
+    (attackerId, targetId) => !!(get().ships.find((s) => s.id === attackerId) && get().ships.find((s) => s.id === targetId)),
+    (attackerId, targetId, dmBonus) => {
+      const attacker = get().ships.find((s) => s.id === attackerId)
+      const target = get().ships.find((s) => s.id === targetId)
+      set((s) => ({
+        ships: s.ships.map((sh) => {
+          if (sh.id === attackerId) return { ...sh, sensorLockOn: targetId, sensorLockDM: Math.max(0, dmBonus) }
+          if (sh.id === targetId)   return { ...sh, sensorLockedBy: attackerId }
+          return sh
+        }),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'action',
+          message: `${attacker.profile.name}: Sensor Lock on ${target.profile.name} (DM +${Math.max(0, dmBonus)} to attacks).`,
+          shipId: attackerId,
+        })],
     }))
-  },
+    },
+  ),
 
   /**
    * Clear sensor lock via Electronic Warfare success.
@@ -569,26 +620,27 @@ const useBattleStore = create((set, get) => ({
    * // MgT2e CRB p.167 — Electronic Warfare
    * @param {string} shipId  The defender (ship being locked)
    */
-  clearSensorLock: (shipId) => {
-    const ship = get().ships.find((s) => s.id === shipId)
-    if (!ship || !ship.sensorLockedBy) return
-    get().pushHistory()
-    const attackerId = ship.sensorLockedBy
-    set((s) => ({
-      ships: s.ships.map((sh) => {
-        if (sh.id === attackerId) return { ...sh, sensorLockOn: null, sensorLockDM: 0 }
-        if (sh.id === shipId)     return { ...sh, sensorLockedBy: null }
-        return sh
-      }),
-      log: [...s.log, makeLogEntry({
-        round: s.round,
-        phase: s.phase,
-        type: 'action',
-        message: `${ship.profile.name}: Electronic Warfare — sensor lock removed.`,
-        shipId,
-      })],
-    }))
-  },
+  clearSensorLock: wh(
+    (shipId) => { const s = get().ships.find((sh) => sh.id === shipId); return !!s && !!s.sensorLockedBy },
+    (shipId) => {
+      const ship = get().ships.find((s) => s.id === shipId)
+      const attackerId = ship.sensorLockedBy
+      set((s) => ({
+        ships: s.ships.map((sh) => {
+          if (sh.id === attackerId) return { ...sh, sensorLockOn: null, sensorLockDM: 0 }
+          if (sh.id === shipId)     return { ...sh, sensorLockedBy: null }
+          return sh
+        }),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'action',
+          message: `${ship.profile.name}: Electronic Warfare — sensor lock removed.`,
+          shipId,
+        })],
+      }))
+    },
+  ),
 
   /**
    * Remove the first critical hit from a ship (Engineer repair).
@@ -596,27 +648,28 @@ const useBattleStore = create((set, get) => ({
    * // MgT2e CRB p.167 — Repair System
    * @param {string} shipId
    */
-  repairCritical: (shipId) => {
-    const ship = get().ships.find((s) => s.id === shipId)
-    if (!ship || ship.criticalHits.length === 0) return
-    get().pushHistory()
-    const removed       = ship.criticalHits[0]
-    const remainingCrits = ship.criticalHits.slice(1)
-    const mDriveCrit    = remainingCrits.find((c) => c.system === 'M-Drive')
-    const thrustPenalty = computeThrustPenalty(mDriveCrit, ship.profile.thrust)
-    set((s) => ({
-      ships: s.ships.map((sh) =>
-        sh.id === shipId ? { ...sh, criticalHits: remainingCrits, thrustPenalty } : sh
-      ),
-      log: [...s.log, makeLogEntry({
-        round: s.round,
-        phase: s.phase,
-        type: 'action',
-        message: `${ship.profile.name}: ${removed.system} repaired (Sev. ${removed.severity} removed).`,
-        shipId,
-      })],
+  repairCritical: wh(
+    (shipId) => { const s = get().ships.find((sh) => sh.id === shipId); return !!s && s.criticalHits.length > 0 },
+    (shipId) => {
+      const ship = get().ships.find((s) => s.id === shipId)
+      const removed       = ship.criticalHits[0]
+      const remainingCrits = ship.criticalHits.slice(1)
+      const mDriveCrit    = remainingCrits.find((c) => c.system === 'M-Drive')
+      const thrustPenalty = computeThrustPenalty(mDriveCrit, ship.profile.thrust)
+      set((s) => ({
+        ships: s.ships.map((sh) =>
+          sh.id === shipId ? { ...sh, criticalHits: remainingCrits, thrustPenalty } : sh
+        ),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'action',
+          message: `${ship.profile.name}: ${removed.system} repaired (Sev. ${removed.severity} removed).`,
+          shipId,
+        })],
     }))
-  },
+    },
+  ),
 
   /**
    * Apply an initiative bonus for next round (Captain: Improve Initiative).
@@ -625,24 +678,25 @@ const useBattleStore = create((set, get) => ({
    * @param {string} shipId
    * @param {number} bonus  Effect of the roll (>= 0)
    */
-  applyInitiativeBonus: (shipId, bonus) => {
-    const ship = get().ships.find((s) => s.id === shipId)
-    if (!ship) return
-    get().pushHistory()
-    const applied = Math.max(0, bonus)
-    set((s) => ({
-      ships: s.ships.map((sh) =>
-        sh.id === shipId ? { ...sh, initiativeBonusNextRound: (sh.initiativeBonusNextRound ?? 0) + applied } : sh
-      ),
-      log: [...s.log, makeLogEntry({
-        round: s.round,
-        phase: s.phase,
-        type: 'action',
-        message: `${ship.profile.name}: Initiative improved by +${applied} next round.`,
-        shipId,
-      })],
-    }))
-  },
+  applyInitiativeBonus: wh(
+    (shipId) => !!get().ships.find((s) => s.id === shipId),
+    (shipId, bonus) => {
+      const ship = get().ships.find((s) => s.id === shipId)
+      const applied = Math.max(0, bonus)
+      set((s) => ({
+        ships: s.ships.map((sh) =>
+          sh.id === shipId ? { ...sh, initiativeBonusNextRound: (sh.initiativeBonusNextRound ?? 0) + applied } : sh
+        ),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'action',
+          message: `${ship.profile.name}: Initiative improved by +${applied} next round.`,
+          shipId,
+        })],
+      }))
+    },
+  ),
 
   /**
    * Overload M-Drive: grant temporary thrust bonus for this round only.
@@ -651,24 +705,25 @@ const useBattleStore = create((set, get) => ({
    * @param {string} shipId
    * @param {number} bonus  Effect of the roll (>= 0)
    */
-  overloadDrive: (shipId, bonus) => {
-    const ship = get().ships.find((s) => s.id === shipId)
-    if (!ship) return
-    get().pushHistory()
-    const applied = Math.max(0, bonus)
-    set((s) => ({
-      ships: s.ships.map((sh) =>
-        sh.id === shipId ? { ...sh, thrustBonusThisRound: (sh.thrustBonusThisRound ?? 0) + applied } : sh
-      ),
-      log: [...s.log, makeLogEntry({
-        round: s.round,
-        phase: s.phase,
-        type: 'action',
-        message: `${ship.profile.name}: M-Drive overloaded — +${applied} Thrust this round.`,
-        shipId,
-      })],
-    }))
-  },
+  overloadDrive: wh(
+    (shipId) => !!get().ships.find((s) => s.id === shipId),
+    (shipId, bonus) => {
+      const ship = get().ships.find((s) => s.id === shipId)
+      const applied = Math.max(0, bonus)
+      set((s) => ({
+        ships: s.ships.map((sh) =>
+          sh.id === shipId ? { ...sh, thrustBonusThisRound: (sh.thrustBonusThisRound ?? 0) + applied } : sh
+        ),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'action',
+          message: `${ship.profile.name}: M-Drive overloaded — +${applied} Thrust this round.`,
+          shipId,
+        })],
+      }))
+    },
+  ),
 
   /**
    * Reload one missile turret (Gunner: Reload Turret action).
@@ -676,23 +731,24 @@ const useBattleStore = create((set, get) => ({
    * // MgT2e CRB p.167
    * @param {string} shipId
    */
-  reloadTurret: (shipId) => {
-    const ship = get().ships.find((s) => s.id === shipId)
-    if (!ship || (ship.turretsNeedingReload ?? 0) === 0) return
-    get().pushHistory()
-    set((s) => ({
-      ships: s.ships.map((sh) =>
-        sh.id === shipId ? { ...sh, turretsNeedingReload: Math.max(0, (sh.turretsNeedingReload ?? 0) - 1) } : sh
-      ),
-      log: [...s.log, makeLogEntry({
-        round: s.round,
-        phase: s.phase,
-        type: 'action',
-        message: `${ship.profile.name}: missile turret reloaded.`,
-        shipId,
-      })],
-    }))
-  },
+  reloadTurret: wh(
+    (shipId) => { const s = get().ships.find((sh) => sh.id === shipId); return !!s && (s.turretsNeedingReload ?? 0) > 0 },
+    (shipId) => {
+      const ship = get().ships.find((s) => s.id === shipId)
+      set((s) => ({
+        ships: s.ships.map((sh) =>
+          sh.id === shipId ? { ...sh, turretsNeedingReload: Math.max(0, (sh.turretsNeedingReload ?? 0) - 1) } : sh
+        ),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'action',
+          message: `${ship.profile.name}: missile turret reloaded.`,
+          shipId,
+        })],
+      }))
+    },
+  ),
 
   // === RESET ===
 
@@ -717,6 +773,7 @@ const useBattleStore = create((set, get) => ({
     log: [],
     mapSettings: { scale: 1 },
     undoStack: [],
+    redoStack: [],
   }),
 
   // === IMPORT / EXPORT ===
@@ -745,6 +802,7 @@ const useBattleStore = create((set, get) => ({
       log: battle.log ?? [],
       mapSettings: battle.mapSettings ?? { scale: 1 },
       undoStack: [],
+      redoStack: [],
     })
   },
 
@@ -766,6 +824,7 @@ const useBattleStore = create((set, get) => ({
   },
 
   clearLog: () => set({ log: [] }),
-}))
+  }
+})
 
 export { useBattleStore }
