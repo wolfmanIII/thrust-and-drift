@@ -76,7 +76,7 @@ export function HelpScreen() {
     <div className="w-full h-full flex bg-slate-950 overflow-hidden">
 
       {/* ── Sidebar TOC ───────────────────────────────────────────────── */}
-      <aside className="w-52 shrink-0 border-r border-slate-800 flex flex-col overflow-hidden">
+      <aside className="help-sidebar w-52 shrink-0 border-r border-slate-800 flex flex-col overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-800 shrink-0">
           <p className="font-display text-xs text-[--neon-cyan] tracking-widest">// FIELD MANUAL</p>
         </div>
@@ -95,7 +95,13 @@ export function HelpScreen() {
             </button>
           ))}
         </nav>
-        <div className="shrink-0 px-4 py-3 border-t border-slate-800">
+        <div className="help-actions shrink-0 px-4 py-3 border-t border-slate-800 space-y-2">
+          <button
+            onClick={() => window.print()}
+            className="w-full py-2 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded hover:border-slate-500 hover:text-slate-200 transition-colors"
+          >
+            ⬇ EXPORT PDF
+          </button>
           <button
             onClick={() => gotoScreen('dashboard')}
             className="w-full py-2 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded hover:border-slate-500 hover:text-slate-200 transition-colors"
@@ -106,7 +112,7 @@ export function HelpScreen() {
       </aside>
 
       {/* ── Content ───────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-y-auto px-8 py-6 space-y-10">
+      <main className="help-content flex-1 overflow-y-auto px-8 py-6 space-y-10">
 
         {/* OVERVIEW */}
         <Section id="overview" title="Overview">
