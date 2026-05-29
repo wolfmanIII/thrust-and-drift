@@ -6,6 +6,23 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.5] — 2026-05-29
+
+### Changed
+- **Crew data model** — `crew` field on ship profiles changed from flat object `{pilot:N, ...}` to named-member array `[{id, name, skills:{pilot:N, engineer:N, ...}}]`; each member can hold multiple skills (e.g. a pilot/gunner on a single-seat fighter)
+- **ShipProfileForm** — Crew section rebuilt: Add/remove named crew members; each row has a name field and compact skill inputs (PLT/CPT/ENG/GNR/SEN 0–5); `initForm` auto-migrates legacy `{pilot:N}` format on load
+- **ActionModal** — new crew-selection step: pick a crew member first → see only actions available for their skills; log entry now includes member name
+- **ShipDetailModal** — Crew section shows name + skills per member instead of role → number pairs
+- **battleStore / EvasiveModal / useAttackSetup** — all `crew.pilot` and `crew.gunner` accesses replaced with `getCrewSkill(crew, skill)` (backwards-compatible)
+
+### Added
+- `src/utils/crew.js` — `getCrewSkill(crew, skill)` (handles both formats), `migrateCrew(legacy)`, `blankCrewMember()`
+
+### Tests
+- 401 tests (up from 386) — new `crew.test.js` (15 tests): `CREW_SKILLS`, `blankCrewMember`, `getCrewSkill` array/legacy/edge cases, `migrateCrew` conversion/identity/null
+
+---
+
 ## [1.3.4] — 2026-05-29
 
 ### Changed

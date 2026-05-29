@@ -17,7 +17,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Ship profiles** | Full CRUD — create, edit, duplicate, delete (with confirmation) |
 | **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
 | **Attack resolution** | 3-step flow: weapon/target config → 2D6 roll → damage |
-| **Crew actions** | Captain, Engineer, Sensors, Gunner actions with skill checks |
+| **Crew actions** | Named crew members with multi-skill support; pick member → available actions |
 | **Initiative** | 2D6 + Pilot + Thrust, automatically sorted |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase |
@@ -134,7 +134,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-386 tests across utils, Zustand stores, hooks, and UI components.
+401 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 
