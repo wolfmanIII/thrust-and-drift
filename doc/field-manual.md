@@ -1,3 +1,5 @@
+<!-- markdownlint-disable-file MD041 -->
+
 ![Thrust & Drift Logo](../src/assets/TD-logo-transparent.png)
 
 # Thrust & Drift — Field Manual
