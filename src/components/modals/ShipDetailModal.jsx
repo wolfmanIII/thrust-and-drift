@@ -5,6 +5,7 @@
 import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
+import { migrateCrew, CREW_SKILLS } from '../../utils/crew.js'
 
 function StatRow({ label, value }) {
   return (
@@ -63,11 +64,23 @@ export function ShipDetailModal() {
         {/* Right column */}
         <div className="space-y-3">
           <Section title="Crew">
-            <StatRow label="Pilot" value={profile.crew?.pilot} />
-            <StatRow label="Captain" value={profile.crew?.captain || '—'} />
-            <StatRow label="Engineer" value={profile.crew?.engineer || '—'} />
-            <StatRow label="Gunner" value={profile.crew?.gunner || '—'} />
-            <StatRow label="Sensors" value={profile.crew?.sensors || '—'} />
+            {(() => {
+              const crewArray = Array.isArray(profile.crew)
+                ? profile.crew
+                : migrateCrew(profile.crew ?? {})
+              if (crewArray.length === 0) {
+                return <p className="text-slate-600 font-mono text-xs italic">No crew.</p>
+              }
+              return crewArray.map((member) => {
+                const skillStr = CREW_SKILLS
+                  .filter((s) => (member.skills[s] ?? 0) > 0)
+                  .map((s) => `${s} ${member.skills[s]}`)
+                  .join(', ') || '—'
+                return (
+                  <StatRow key={member.id} label={member.name || '(unnamed)'} value={skillStr} />
+                )
+              })
+            })()}
           </Section>
 
           <Section title="Weapons">
