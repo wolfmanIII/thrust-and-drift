@@ -18,7 +18,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
 | **Attack resolution** | 3-step flow: weapon/target config → 2D6 roll → damage |
 | **Crew actions** | Captain, Engineer, Sensors, Gunner actions with skill checks |
-| **Initiative** | 2D6 + Pilota + Thrust, automatically sorted |
+| **Initiative** | 2D6 + Pilot + Thrust, automatically sorted |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase |
 | **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals (200ms delay) |
@@ -55,31 +55,31 @@ npm run preview
 
 On the **Dashboard**, use the left panel to manage ship profiles:
 
-- **+ Nuovo Profilo** — create a new ship (name, stats, crew skills, turrets)
+- **+ NEW PROFILE** — create a new ship (name, stats, crew skills, turrets)
 - **✎** — edit an existing profile
 - **⧉** — duplicate a profile
 - **⊗** — delete a profile (confirmation required)
-- **↓ Importa / ↑ Esporta** — exchange profiles as JSON files
-- **📖 Catalogo Ufficiale** — browse the built-in High Guard 2022 catalog and add ships directly
+- **↓ IMPORT / ↑ EXPORT** — exchange profiles as JSON files
+- **📖 OFFICIAL CATALOG** — browse the built-in High Guard 2022 catalog and add ships directly
 
 A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 
 ### 2 — Start or resume a session
 
-- **↺ RIPRENDI AUTOSALVATAGGIO** — if an autosaved session exists in IndexedDB, this button appears with round, phase, and ship count. Click to resume instantly.
-- **▶ Nuova Sessione** — resets battle state and enters the combat map
-- **↓ Riprendi da File** — load a `.json` file; a preview screen shows round, phase, and ship roster before confirming
+- **↺ RESUME AUTOSAVE** — if an autosaved session exists in IndexedDB, this button appears with round, phase, and ship count. Click to resume instantly.
+- **▶ NEW SESSION** — resets battle state and enters the combat map
+- **↓ RESUME FROM FILE** — load a `.json` file; a preview screen shows round, phase, and ship roster before confirming
 
 ### 3 — In battle
 
 **Right-click any hex** to open the context menu:
 
-- Empty hex → **Aggiungi Nave** (place a ship)
+- Empty hex → **Add ship here**
 - Ship hex → actions valid for the **current phase** only:
-  - *Acceleration*: Thrust, Evasione
-  - *Attack*: Attacca, Lancia Missili
-  - *Actions*: Azione equipaggio
-  - *Always*: Scheda nave, Rimuovi
+  - *Acceleration*: Apply Thrust, Declare Evasion
+  - *Attack*: Attack, Launch Missiles
+  - *Actions*: Crew Action
+  - *Always*: Ship Sheet, Remove from battle
 
 **Left-click a ship** to select it.
 
@@ -96,15 +96,15 @@ The HUD (top-left) shows the current round and phase.
 | **Setup** | Place ships on the map |
 | **Initiative** | Open right-click menu → roll initiative via modal |
 | **Acceleration** | Each ship in turn: right-click → Thrust |
-| **Movement** | Click **Fase Successiva** — all ships move by their vector |
-| **Attack** | Each ship in turn: right-click → Attacco |
-| **Actions** | Each ship in turn: right-click → Azioni equipaggio |
-| **Fine Round** | Click **Fase Successiva** to start the next round |
+| **Movement** | Click **NEXT PHASE** — all ships move by their vector |
+| **Attack** | Each ship in turn: right-click → Attack |
+| **Actions** | Each ship in turn: right-click → Crew Action |
+| **End of Round** | Click **NEXT PHASE** to start the next round |
 
 #### Saving a session
 
-In the HUD (top-left), click **💾 SALVA** at any time to download the current
-session as a `.json` file. Use **↺ Riprendi Sessione** on the Dashboard to
+In the HUD (top-left), click **💾 SAVE** at any time to download the current
+session as a `.json` file. Use **↓ RESUME FROM FILE** on the Dashboard to
 restore it.
 
 Click **⌂** in the HUD to return to the Dashboard — a confirmation modal warns
