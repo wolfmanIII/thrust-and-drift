@@ -19,7 +19,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   - **Canvas token visuals** — pulsing amber ring (rAF loop, ~0.67 Hz) + ⚔ badge on in-dogfight tokens; ghost position and velocity vector hidden for dogfight ships
 
 ### Tests
-- 452 tests (up from 406) — 28 dogfight utils + 9 battleStore dogfight slice + 9 useDogfightDetection + 9 battleStore detection integration
+- 479 tests (up from 452) — 28 dogfight utils + 9 battleStore dogfight slice + 9 useDogfightDetection + 10 DogfightNotificationModal + 13 DogfightRoundModal + 4 HUD dogfight tracker
 
 ---
 
