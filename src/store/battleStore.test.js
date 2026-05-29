@@ -1286,3 +1286,174 @@ describe('dogfight', () => {
     expect(useBattleStore.getState().dogfights).toHaveLength(0)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Boarding actions
+// ---------------------------------------------------------------------------
+
+describe('boarding', () => {
+  function addTwo() {
+    useBattleStore.getState().addShip(
+      makeProfile({ id: 'p1', name: 'Viper', thrust: 4 }),
+      { q: 0, r: 0 }, 'players', '#0f0',
+    )
+    useBattleStore.getState().addShip(
+      makeProfile({ id: 'p2', name: 'Far Trader', thrust: 2 }),
+      { q: 1, r: 0 }, 'npc', '#f00',
+    )
+    const [a, b] = useBattleStore.getState().ships
+    return [a.id, b.id]
+  }
+
+  it('startBoarding creates boarding + sets inBoarding on both ships', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const { boardings, ships } = useBattleStore.getState()
+    expect(boardings).toHaveLength(1)
+    expect(boardings[0].attackerId).toBe(a)
+    expect(boardings[0].defenderId).toBe(b)
+    expect(boardings[0].phase).toBe('contact')
+    expect(boardings[0].outcome).toBeNull()
+    expect(ships.find((s) => s.id === a).inBoarding).toBe(boardings[0].id)
+    expect(ships.find((s) => s.id === b).inBoarding).toBe(boardings[0].id)
+  })
+
+  it('startBoarding no-ops when same faction', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A', thrust: 4 }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'B', thrust: 2 }), { q: 1, r: 0 }, 'players', '#00f')
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().startBoarding(a.id, b.id)
+    expect(useBattleStore.getState().boardings).toHaveLength(0)
+  })
+
+  it('startBoarding appends log entry', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const { log } = useBattleStore.getState()
+    expect(log.some((e) => e.message.includes('Boarding initiated'))).toBe(true)
+  })
+
+  it('advanceBoardingPhase contact → conflict', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    useBattleStore.getState().advanceBoardingPhase(bid)
+    expect(useBattleStore.getState().boardings[0].phase).toBe('conflict')
+  })
+
+  it('advanceBoardingPhase conflict → security', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    useBattleStore.getState().advanceBoardingPhase(bid)
+    useBattleStore.getState().advanceBoardingPhase(bid)
+    expect(useBattleStore.getState().boardings[0].phase).toBe('security')
+  })
+
+  it('setContactMethod updates contactMethod', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    useBattleStore.getState().setContactMethod(bid, 'breaching_tube')
+    expect(useBattleStore.getState().boardings[0].contactMethod).toBe('breaching_tube')
+  })
+
+  it('setContactMethod no-ops when phase !== contact', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    useBattleStore.getState().advanceBoardingPhase(bid) // → conflict
+    useBattleStore.getState().setContactMethod(bid, 'airlock_forced')
+    expect(useBattleStore.getState().boardings[0].contactMethod).toBeNull()
+  })
+
+  it('toggleDefenderRotation toggles flag', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    expect(useBattleStore.getState().boardings[0].defenderRotating).toBe(false)
+    useBattleStore.getState().toggleDefenderRotation(bid)
+    expect(useBattleStore.getState().boardings[0].defenderRotating).toBe(true)
+    useBattleStore.getState().toggleDefenderRotation(bid)
+    expect(useBattleStore.getState().boardings[0].defenderRotating).toBe(false)
+  })
+
+  it('toggleForcedLinkage toggles flag', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    useBattleStore.getState().toggleForcedLinkage(bid)
+    expect(useBattleStore.getState().boardings[0].forcedLinkage).toBe(true)
+  })
+
+  it('setObjective marks bridge as conquered', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    useBattleStore.getState().advanceBoardingPhase(bid) // → conflict
+    useBattleStore.getState().setObjective(bid, 'bridge', true)
+    expect(useBattleStore.getState().boardings[0].objectives.bridge).toBe(true)
+    expect(useBattleStore.getState().boardings[0].objectives.engineering).toBe(false)
+  })
+
+  it('setObjective no-ops when phase !== conflict', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    // still in contact phase
+    useBattleStore.getState().setObjective(bid, 'bridge', true)
+    expect(useBattleStore.getState().boardings[0].objectives.bridge).toBe(false)
+  })
+
+  it('resolveBoarding attacker_wins sets outcome + clears inBoarding', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    useBattleStore.getState().resolveBoarding(bid, 'attacker_wins')
+    const { boardings, ships } = useBattleStore.getState()
+    expect(boardings[0].outcome).toBe('attacker_wins')
+    expect(ships.find((s) => s.id === a).inBoarding).toBeNull()
+    expect(ships.find((s) => s.id === b).inBoarding).toBeNull()
+  })
+
+  it('resolveBoarding no-ops when already resolved', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    useBattleStore.getState().resolveBoarding(bid, 'attacker_wins')
+    useBattleStore.getState().resolveBoarding(bid, 'defender_wins')
+    expect(useBattleStore.getState().boardings[0].outcome).toBe('attacker_wins')
+  })
+
+  it('resolveBoarding appends log entry', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    useBattleStore.getState().resolveBoarding(bid, 'defender_wins')
+    expect(useBattleStore.getState().log.some((e) => e.message.includes('DEFENDER WINS'))).toBe(true)
+  })
+
+  it('updateShipFaction changes faction and appends log', () => {
+    const [a] = addTwo()
+    useBattleStore.getState().updateShipFaction(a, 'npc')
+    const ship = useBattleStore.getState().ships.find((s) => s.id === a)
+    expect(ship.faction).toBe('npc')
+    expect(useBattleStore.getState().log.some((e) => e.message.includes('faction changed'))).toBe(true)
+  })
+
+  it('boardings are included in undo snapshot', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    useBattleStore.getState().addShip(makeProfile({ id: 'p3', name: 'C' }), { q: 2, r: 0 }, 'neutral', '#fff')
+    useBattleStore.getState().undoLastAction()
+    // boarding still present (was committed before the undone action)
+    expect(useBattleStore.getState().boardings).toHaveLength(1)
+  })
+
+  it('resetBattle clears boardings', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    useBattleStore.getState().resetBattle()
+    expect(useBattleStore.getState().boardings).toHaveLength(0)
+  })
+})
