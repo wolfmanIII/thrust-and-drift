@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
+import { getCrewSkill } from '../../utils/crew.js'
 
 export function EvasiveModal() {
   const closeModal           = useUiStore((s) => s.closeModal)
@@ -19,7 +20,7 @@ export function EvasiveModal() {
   const ship = ships.find((s) => s.id === modalPayload?.shipId)
 
   const maxEvasive  = ship ? ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound : 0
-  const pilotSkill  = ship?.profile.crew?.pilot ?? 0
+  const pilotSkill  = getCrewSkill(ship?.profile.crew, 'pilot')
 
   const [amount, setAmount] = useState(() => ship?.evasiveThrust ?? 0)
 

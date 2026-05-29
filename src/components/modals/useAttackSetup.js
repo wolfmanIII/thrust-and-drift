@@ -8,6 +8,7 @@ import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS, DEFENSIVE_WEAPONS } from '../../data/weapons.js'
 import { hexDistance, getRangeBand } from '../../utils/hex.js'
 import { getRangeDM, getTargetSizeDM, getEvasiveDM } from '../../utils/combat.js'
+import { getCrewSkill } from '../../utils/crew.js'
 
 /**
  * @param {string|null} attackerShipId   ID of the attacking ship
@@ -56,9 +57,9 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     : (manualRangeBand ?? 'Medium')
   const rangeDM   = getRangeDM(rangeBand)
   const sizeDM      = target ? getTargetSizeDM(target.profile.tonnage ?? 0) : 0
-  const evasiveDM   = target ? getEvasiveDM(attacker?.profile.crew?.pilot ?? 0, target.evasiveThrust) : 0
+  const evasiveDM   = target ? getEvasiveDM(getCrewSkill(attacker?.profile.crew, 'pilot'), target.evasiveThrust) : 0
   const sensorLockDM = attacker?.sensorLockOn === targetId ? (attacker.sensorLockDM ?? 0) : 0
-  const gunnerSkill = attacker?.profile.crew?.gunner ?? 0
+  const gunnerSkill = getCrewSkill(attacker?.profile.crew, 'gunner')
   const weaponDM    = weapon?.attackDM ?? 0
   const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + evasiveDM + sensorLockDM
 

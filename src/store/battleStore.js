@@ -10,6 +10,7 @@ import { exportBattle, importBattle } from '../utils/io.js'
 import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount } from '../utils/combat.js'
 import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
+import { getCrewSkill } from '../utils/crew.js'
 
 /**
  * @typedef {'setup'|'initiative'|'acceleration'|'movement'|'attack'|'actions'|'end'} BattlePhase
@@ -283,7 +284,7 @@ const useBattleStore = create((set, get) => {
     const { ships, round } = get()
     const rolled = ships.map((ship) => {
       const result = rollInitiative(
-        ship.profile.crew.pilot ?? 0,
+        getCrewSkill(ship.profile.crew, 'pilot'),
         ship.profile.thrust,
         (tacticsEffects[ship.id] ?? 0) + (ship.initiativeBonusNextRound ?? 0),
       )
@@ -577,7 +578,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${ship.profile.name} declares ${clamped} evasive thrust (DM -${ship.profile.crew?.pilot ?? 0} × ${clamped} to attackers).`,
+          message: `${ship.profile.name} declares ${clamped} evasive thrust (DM -${getCrewSkill(ship.profile.crew, 'pilot')} × ${clamped} to attackers).`,
           shipId,
         })],
       }))
