@@ -6,6 +6,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.8] — 2026-05-29
+
+### Fixed
+- **HUD tooltips** — `position="bottom"` on all HUD buttons; horizontal clamp via `useLayoutEffect` prevents tooltip cutoff near left/right viewport edges
+- **Undo/redo buttons** — conditionally rendered (not just dimmed); no layout space occupied when stacks are empty
+- **Brand watermark** — moved from bottom-right to top-right; no longer conflicts with BattleLog overlay
+- **HUD container** — `items-start` prevents children from stretching to container width
+
+---
+
 ## [1.3.7] — 2026-05-29
 
 ### Added
