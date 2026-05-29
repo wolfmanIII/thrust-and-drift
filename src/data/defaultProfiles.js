@@ -29,15 +29,14 @@ function makeProfile(overrides) {
     fuel: 0,
     cargo: 0,
     passengers: 0,
-    crew: {
-      pilot: 1,
-      captain: 0,
-      engineer: 0,
-      gunner: 0,
-      sensors: 0,
-    },
+    crew: [],
     ...overrides,
   }
+}
+
+/** Shorthand to create a crew member object. */
+function cm(name, skills) {
+  return { id: uuidv7(), name, skills }
 }
 
 /**
@@ -59,7 +58,11 @@ export const DEFAULT_PROFILES = [
     turrets: [
       { slot: 1, weapons: ['Pulse Laser', 'Missile Rack'] },
     ],
-    crew: { pilot: 1, engineer: 1, gunner: 1 },
+    crew: [
+      cm('Pilot', { pilot: 1 }),
+      cm('Engineer', { engineer: 1 }),
+      cm('Gunner', { gunner: 1 }),
+    ],
     fuel: 40,
     cargo: 82,
   }),
@@ -77,7 +80,11 @@ export const DEFAULT_PROFILES = [
     turrets: [
       { slot: 1, weapons: ['Pulse Laser', 'Missile Rack'] },
     ],
-    crew: { pilot: 1, engineer: 1, gunner: 1 },
+    crew: [
+      cm('Pilot', { pilot: 1 }),
+      cm('Engineer', { engineer: 1 }),
+      cm('Gunner', { gunner: 1 }),
+    ],
     fuel: 20,
     cargo: 3,
   }),
@@ -95,7 +102,9 @@ export const DEFAULT_PROFILES = [
     turrets: [
       { slot: 1, weapons: ['Pulse Laser'] },
     ],
-    crew: { pilot: 2, gunner: 2 },
+    crew: [
+      cm('Pilot', { pilot: 2, gunner: 2 }),
+    ],
     fuel: 0,
     cargo: 0,
   }),
@@ -114,7 +123,13 @@ export const DEFAULT_PROFILES = [
       { slot: 1, weapons: ['Pulse Laser', 'Pulse Laser', 'Missile Rack'] },
       { slot: 2, weapons: ['Pulse Laser', 'Pulse Laser', 'Sandcaster'] },
     ],
-    crew: { pilot: 2, captain: 1, engineer: 2, gunner: 2, sensors: 1 },
+    crew: [
+      cm('Pilot', { pilot: 2 }),
+      cm('Captain', { captain: 1 }),
+      cm('Chief Engineer', { engineer: 2 }),
+      cm('Gunner', { gunner: 2 }),
+      cm('Sensors Officer', { sensors: 1 }),
+    ],
     fuel: 80,
     cargo: 40,
   }),
@@ -132,7 +147,10 @@ export const DEFAULT_PROFILES = [
     turrets: [
       { slot: 1, weapons: ['Sandcaster'] },
     ],
-    crew: { pilot: 1, engineer: 1, gunner: 0 },
+    crew: [
+      cm('Pilot', { pilot: 1 }),
+      cm('Engineer', { engineer: 1 }),
+    ],
     fuel: 40,
     cargo: 73,
   }),
