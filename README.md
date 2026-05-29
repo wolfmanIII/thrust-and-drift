@@ -17,8 +17,9 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Ship profiles** | Full CRUD — create, edit, duplicate, delete (with confirmation) |
 | **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
 | **Attack resolution** | 3-step flow: weapon/target config → 2D6 roll → damage |
-| **Crew actions** | Named crew members with multi-skill support; pick member → available actions |
-| **Initiative** | 2D6 + Pilot + Thrust, automatically sorted |
+| **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in; NPC ships auto-roll |
+| **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action |
+| **Initiative** | 2D6 + Pilot + Thrust; player ships manual entry, NPC auto-rolled |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase |
 | **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals (200ms delay) |
@@ -148,7 +149,8 @@ src/
 │   │   ├── CatalogPanel.jsx    ← Read-only HG 2022 ship catalog
 │   │   └── useProfileImport.js ← Hook: import profiles from file
 │   ├── forms/
-│   │   └── ShipProfileForm.jsx ← Full ship profile form
+│   │   ├── ShipProfileForm.jsx ← Full ship profile form
+│   │   └── DiceInput.jsx       ← Manual 2D6 entry for player dice rolls
 │   ├── map/
 │   │   ├── BattleMap.jsx       ← Canvas hex map
 │   │   ├── BasicBattleView.jsx ← Simplified view (basic combat mode)
@@ -192,6 +194,7 @@ src/
 └── utils/
     ├── hex.js                  ← Hex math (flat-top, cube coords)
     ├── combat.js               ← DM calc, damage, range bands
+    ├── crew.js                 ← Crew array helpers (getCrewSkill, migrateCrew)
     ├── io.js                   ← JSON import/export via File API
     ├── dice.js                 ← Dice rolling + result formatting
     └── db.js                   ← IndexedDB wrapper (openDB, get, put, delete)

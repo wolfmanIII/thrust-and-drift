@@ -111,7 +111,8 @@ thrust-and-drift/
     │   │   ├── Tooltip.jsx            ← Tooltip via React portal
     │   │   └── ErrorBoundary.jsx      ← Error boundary globale con UI recovery
     │   └── forms/
-    │       └── ShipProfileForm.jsx    ← Form completo profilo nave
+    │       ├── ShipProfileForm.jsx    ← Form completo profilo nave
+    │       └── DiceInput.jsx          ← Input manuale 2D6 per dadi fisici giocatori
     ├── hooks/
     │   └── useAutosave.js             ← Autosave IndexedDB + restore al mount
     ├── store/
@@ -121,6 +122,7 @@ thrust-and-drift/
     ├── utils/
     │   ├── hex.js                     ← Matematica esagonale (flat-top)
     │   ├── combat.js                  ← Calcoli combattimento (DM, danni, range band)
+    │   ├── crew.js                    ← Helper equipaggio array (getCrewSkill, migrateCrew, blankCrewMember)
     │   ├── io.js                      ← Import/export JSON via File API
     │   ├── dice.js                    ← Lancio dadi e formattazione risultati
     │   └── db.js                      ← Wrapper IndexedDB (openDB, dbGet, dbPut, dbDelete)
@@ -142,6 +144,7 @@ Suite Vitest collocata accanto ai file sorgente (`*.test.js` / `*.test.jsx`):
 | `utils/hex.test.js` | `hex.js` — coordinate, distanza, pixel↔hex, range band |
 | `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco |
 | `utils/dice.test.js` | `dice.js` — rollDice, formatDiceResults, formatCheckResult |
+| `utils/crew.test.js` | `crew.js` — getCrewSkill (array/legacy/edge), migrateCrew, blankCrewMember |
 | `store/battleStore.test.js` | battleStore — tutte le azioni, export/import |
 | `store/profilesStore.test.js` | profilesStore — CRUD, import/export |
 | `store/uiStore.test.js` | uiStore — screen, modal, selection, contextMenu |
@@ -198,18 +201,21 @@ interface ShipProfile {
   sensors?: "Civilian" | "Military" | "Advanced"
   software?: string[]           // es. ["Fire Control/1", "Auto-Repair/1"]
 
-  // EQUIPAGGIO — pilot e gunner obbligatori se ha armi
-  crew: {
-    pilot: number               // ★ Skill level Pilot
-    captain?: number            // Skill level Tactics(naval)
-    engineer?: number           // Skill level Engineer
-    gunner?: number             // ★ Skill level Gunner (obbligatorio se ha armi)
-    sensors?: number            // Skill level Electronics(sensors)
-    marines?: {
-      count: number
-      skill: number             // Skill level Gun Combat
-    }
+  // EQUIPAGGIO — array di membri nominati con skill multiple per membro
+  // Retrocompatibile: getCrewSkill() gestisce anche il vecchio formato {pilot:N,...}
+  crew: CrewMember[]
+
+interface CrewMember {
+  id: string                    // UUID membro
+  name: string                  // Nome del membro (es. "Zhukov", "Chief Engineer")
+  skills: {
+    pilot?: number              // Skill level Pilot (0–5)
+    captain?: number            // Skill level Tactics(naval) (0–5)
+    engineer?: number           // Skill level Engineer (0–5)
+    gunner?: number             // Skill level Gunner (0–5)
+    sensors?: number            // Skill level Electronics(sensors) (0–5)
   }
+}
 
   // LOGISTICA
   fuel?: number                 // Tonnellate carburante
@@ -1093,6 +1099,38 @@ Tutti gli effetti sono puramente decorativi — non bloccano input, non modifica
 | **Missile esaurito** | `thrustRemaining === 0` prima dell'impatto | Token missile sbiadito/grigio, traccia intermittente — segnala che non raggiungerà il bersaglio | TC p.175 |
 
 > **Nota:** L'effetto "Jamming signal / Electronic Warfare" è stato rimosso perché non corrisponde a una meccanica discreta del combattimento ufficiale MgT2e. L'EW offensiva non è un'azione separata nelle regole di combattimento spaziale (CRB pp.160–168, TC pp.169–186). Il Sensor Lock (TC p.182) è l'azione elettronica con effetti meccanici più vicina — ed è rappresentata dall'effetto **Sensor lock ring** qui sopra.
+
+### 13.3f Versione 1.3.5 — Modello Equipaggio Array ✅ COMPLETATA
+
+**Crew array con skill multiple per membro:**
+
+- `crew` su `ShipProfile` cambiato da oggetto piatto `{pilot:N,...}` ad array `[{id, name, skills:{...}}]`; ogni membro può avere più skill (es. pilota/artigliere su fighter singolo posto)
+- `src/utils/crew.js`: `getCrewSkill(crew, skill)` retrocompatibile (gestisce entrambi i formati), `migrateCrew(legacy)` (converte vecchio formato), `blankCrewMember()`
+- `ShipProfileForm`: sezione Crew ricostruita — aggiungi/rimuovi membri nominati; ogni riga ha campo nome + input skill compatti (PLT/CPT/ENG/GNR/SEN 0–5); `initForm` migra automaticamente formato legacy
+- `ActionModal`: nuova selezione membro equipaggio prima dell'azione; solo azioni coerenti con skill del membro selezionato
+- `ShipDetailModal`: sezione Crew mostra nome + skill per membro
+- `battleStore`, `EvasiveModal`, `useAttackSetup`: tutti gli accessi `crew.pilot`/`crew.gunner` sostituiti con `getCrewSkill`
+- 403 test (da 386)
+
+### 13.3g Versione 1.3.6 — Dadi Fisici Giocatori ✅ COMPLETATA
+
+**Player manual dice entry:**
+
+- Navi con `faction === 'players'` entrano nei modal di tiro con input 2D6 vuoti — il giocatore inserisce il risultato dei dadi fisici
+- `DiceInput` (`src/components/forms/DiceInput.jsx`): due input 1–6 che partono vuoti; emette `null` finché entrambi i dadi non sono validi; totale mostra `?` finché incompleto; pulsante 🎲 per auto-roll digitale opt-in
+- `InitiativeModal`: navi player mostrano `DiceInput` (vuoto all'apertura); CONFIRM disabilitato finché tutte le navi player non hanno inserito i dadi; navi NPC auto-rollate al CONFIRM; REROLL azzera tutti gli input
+- `AttackModal`: `AttackRollStep` mostra `DiceInput` + "CONFIRM ROLL" per attaccanti player (disabilitato finché dadi incompleti); NPC mantengono auto-roll
+- `ActionModal`: `DiceInput` per navi player su azioni non-auto; azzerato ad ogni cambio azione
+- `rollInitiative` / `rollAttack` in `combat.js`: accettano `diceOverride` opzionale (retrocompatibile)
+- `rollAllInitiative` in `battleStore`: accetta `diceOverrides: { [shipId]: {results, total} }` map
+
+### 13.3h Versione 1.3.7 — Skill DM Override ✅ COMPLETATA
+
+**Override skill level per azione:**
+
+- `ActionModal`: quando si seleziona un'azione non-auto, compare input numerico con il valore base dello skill del membro selezionato
+- Il GM può sovrascrivere per specializzazioni (es. Engineer(M-Drive) 3 invece del generico Engineer 2 del profilo)
+- Pulsante `↺` ripristina il valore base; il tiro usa il valore override come DM
 
 ### 13.5 Versione 1.4 — Dogfighting
 

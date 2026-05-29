@@ -6,18 +6,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.7] — 2026-05-29
+
+### Added
+- **Skill DM override in ActionModal** — when a non-auto action is selected, a numeric input shows the crew member's base skill; GM can override for specialization checks (e.g. Engineer(M-Drive) 3 instead of generic Engineer 2); `↺` button resets to base; roll uses override value as DM
+
+---
+
 ## [1.3.6] — 2026-05-29
 
 ### Added
-- **Player manual dice entry** — ships with `faction === 'players'` always roll their own dice; NPC ships auto-roll as before
-- **`DiceInput` component** (`src/components/forms/DiceInput.jsx`) — two die inputs (1–6) + running total + 🎲 auto-roll button; reusable across modals
-- **InitiativeModal** — player ships show `DiceInput` with editable pre-rolled values; NPC ships shown as "auto" placeholders; initiative preview total (2D6 + Pilot + Thrust) updates live; REROLL resets player dice
-- **AttackModal** — `AttackRollStep` shows `DiceInput` + "CONFIRM ROLL" for player attackers; NPC attackers keep auto-roll button
-- **ActionModal** — `DiceInput` shown above EXECUTE for player ships (non-auto actions); dice reset on each action selection; button label changes to "CONFIRM ROLL"
+- **Player manual dice entry** — ships with `faction === 'players'` roll their own dice; NPC ships auto-roll on confirm
+- **`DiceInput` component** (`src/components/forms/DiceInput.jsx`) — two die inputs (1–6) that start **empty**; emits `null` until both dice are valid; running total shows `?` until complete; 🎲 auto-roll button as opt-in fallback; reusable across modals
+- **InitiativeModal** — player ships show `DiceInput` (empty on open); initiative preview total updates live as player types; CONFIRM disabled until all player ships have entered dice; NPC ships auto-rolled on confirm; REROLL clears all player inputs
+- **AttackModal** — `AttackRollStep` shows `DiceInput` + "CONFIRM ROLL" for player attackers (disabled until dice complete); NPC attackers keep auto-roll button
+- **ActionModal** — `DiceInput` shown for player ships on non-auto actions; dice cleared on each action selection; button label changes to "CONFIRM ROLL"
 
 ### Changed
 - `rollInitiative` / `rollAttack` in `combat.js` — accept optional `diceOverride` param (backwards-compatible)
-- `rollAllInitiative` in `battleStore` — accepts `diceOverrides: { [shipId]: { results, total } }` map; `undefined` entries auto-roll as before
+- `rollAllInitiative` in `battleStore` — accepts `diceOverrides: { [shipId]: { results, total } }` map; missing entries auto-roll as before
 
 ---
 
