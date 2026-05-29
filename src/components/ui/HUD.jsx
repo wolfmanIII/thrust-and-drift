@@ -71,7 +71,7 @@ export function HUD() {
   const showActorControl = ACTOR_TURN_PHASES.has(phase)
 
   return (
-    <div className="absolute top-3 left-3 z-10 flex flex-col gap-1 pointer-events-none">
+    <div className="absolute top-3 left-3 z-10 flex flex-col gap-1 items-start pointer-events-none">
       {/* Round + phase badge */}
       <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-700 rounded px-3 py-1.5 backdrop-blur-sm">
         <span className="text-slate-400 text-xs font-display tracking-widest">ROUND</span>
