@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.4.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.4.2** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -205,7 +205,27 @@ A **pulsing yellow aura** on the token indicates active evasion.
 Click **NEXT PHASE ⟶** to execute movement. Each ship's position advances by
 its current velocity vector.
 
-> In Basic mode this phase is skipped automatically.
+### 8.1 Ships That Pass in the Night
+
+If two hostile ships cross within **Short range (≤ 2 hexes)** during the same
+movement step — even if their final positions are far apart — the system detects
+the closest approach and opens the **Passing Encounter** window.
+
+For each encounter the GM sees:
+
+- Both ship names and faction colours
+- Closest approach distance and range band
+- **[Ship A] FIRES** / **[Ship B] FIRES** — opens the standard Attack Modal
+  pre-set to that attacker; the GM can adjust weapon and target freely
+- **PASS — LET THEM GO** — skips the opportunity with no attack
+
+Multiple encounters are resolved sequentially; the window closes automatically
+when all are dismissed.
+
+> **Note:** Ships that end in the same hex trigger the **Dogfight** system
+> instead and are handled at the movement → attack phase transition.
+
+In Basic mode this phase is skipped automatically.
 
 ---
 

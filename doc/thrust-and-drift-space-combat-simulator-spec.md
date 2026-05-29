@@ -1155,10 +1155,10 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 
 **Scope tecnico:**
 
-- `utils/hex.js` — `segmentMinDistance(a0, a1, b0, b1)`: distanza minima tra due segmenti hex
-- `battleStore` — `applyMovement` rileva le coppie "passing" e le espone come `passingEncounters[]` temporanei
-- `PassingAttackModal` — modal leggero: mostra coppia navi, range band del punto di minima distanza, pulsanti "ATTACK" / "SKIP"
-- Nessun nuovo store slice permanente — `passingEncounters` viene svuotato dopo la fase Movimento
+- `utils/hex.js` — `segmentMinDistance(a0, a1, b0, b1)`: distanza minima tra due traiettorie lineari simultanee; ricerca analitica O(1) sui breakpoint dei componenti cube (dq, dr, ds)
+- `battleStore` — `resolveMovement` rileva le coppie ostili in transito prima di aggiornare le posizioni; risultati in `passingEncounters[]` (escluse: stessa fazione, navi in dogfight, navi che finiscono nello stesso hex); `dismissPassingEncounter(id)` rimuove l'entry dopo la risoluzione
+- `PassingAttackModal` — mostra gli incontri uno alla volta; per ogni coppia il GM sceglie quale nave spara (apre `AttackModal` pre-configurato con `shipId`) oppure passa; il `rangeBand` visualizzato è quello della distanza minima
+- `passingEncounters` non è incluso negli snapshot undo/redo — è stato transitorio di UI
 
 ### 13.7 Versione 1.5 — Abbordaggio
 
