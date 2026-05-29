@@ -1045,6 +1045,18 @@ Funzionalità incluse nella prima versione funzionante:
 - `HUD`: pulsante `⟲` (disabilitato/opaco se stack vuoto) + shortcut `Ctrl+Z` / `Cmd+Z` globale
 - 370 test (da 355) — nuove suite: comportamento core, cap 20, pulizia stack, flag di soppressione, invariante `advancePhase→startNextRound`, pulsante HUD
 
+### 13.3e Versione 1.3.4 — wh() wrapper + Redo ✅ COMPLETATA
+
+**Wrapper `wh()` e redo stack:**
+
+- `wh(fn)` / `wh(guard, fn)` — funzione definita dentro `create()`; `pushHistory()` automatico su tutte le azioni user-facing; la forma con guard impedisce push su chiamate no-op
+- `applyDamage` e `addCriticalHit` mantengono push condizionale manuale (flag `_skipThreshold` / `_skipHistory`)
+- `redoStack[]` in state; `pushHistory()` lo azzera ad ogni nuova azione
+- `undoLastAction()` salva stato corrente su `redoStack`; `redoLastAction()` ripristina e appende `↷ Redo` nel log
+- `resetBattle` e `importBattleState` azzerano entrambi gli stack
+- HUD: bottone `↷` + `Ctrl+Y` / `Cmd+Shift+Z`
+- 386 test (da 373)
+
 ### 13.3d Versione 1.3.3 — Undo refactor ✅ COMPLETATA
 
 **Contract esplicito e log append-only:**

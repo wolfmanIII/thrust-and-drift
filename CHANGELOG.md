@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.4] — 2026-05-29
+
+### Changed
+- **`wh()` wrapper** — `wh(fn)` / `wh(guard, fn)` defined inside `create()`; `pushHistory()` is automatic on all user-facing actions; guarded form prevents push on no-op calls (e.g. action on non-existent ship); `applyDamage` and `addCriticalHit` keep manual conditional push due to `_skipThreshold` / `_skipHistory` flags
+
+### Added
+- **Redo** — `redoStack[]` in state; `pushHistory()` clears it on every new action; `undoLastAction()` saves current state to `redoStack` before restoring; `redoLastAction()` pops from `redoStack`, pushes current state to `undoStack`, appends `↷ Redo` log entry; `⟲` `↷` buttons in HUD; `Ctrl+Y` / `Cmd+Shift+Z` keyboard shortcut; `resetBattle` and `importBattleState` clear both stacks
+
+### Tests
+- 386 tests (up from 373) — new: `wh` guard suppresses push, `redoLastAction` full suite (no-op, populates, restores, pushes undo, pops redo, log entry, new action clears, `resetBattle` clears, undo/redo cycle), HUD redo button disabled/enabled/click
+
+---
+
 ## [1.3.3] — 2026-05-29
 
 ### Changed
