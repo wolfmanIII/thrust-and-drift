@@ -2,13 +2,23 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { beforeEach, vi } from 'vitest'
 import { HUD } from './HUD.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
+import { useUiStore } from '../../store/uiStore.js'
 
 vi.mock('../ui/Tooltip.jsx', () => ({
   Tooltip: ({ children }) => children,
 }))
 
+function makeProfile(overrides = {}) {
+  return {
+    id: 'p1', name: 'Test Ship', hull: 10, thrust: 4,
+    tonnage: 100, turrets: [], crew: { pilot: 2 },
+    ...overrides,
+  }
+}
+
 beforeEach(() => {
   useBattleStore.getState().resetBattle('vectorial')
+  useUiStore.setState({ activeModal: null, modalPayload: null })
 })
 
 describe('HUD — round and phase display', () => {
@@ -120,6 +130,59 @@ describe('HUD — undo button', () => {
     render(<HUD />)
     fireEvent.click(screen.getByRole('button', { name: /Undo last action/ }))
     expect(useBattleStore.getState().ships).toHaveLength(0)
+  })
+})
+
+describe('HUD — dogfight tracker', () => {
+  it('no dogfight panel when no active dogfights', () => {
+    render(<HUD />)
+    expect(screen.queryByText(/DOGFIGHT/)).not.toBeInTheDocument()
+  })
+
+  it('shows dogfight panel with micro-round when dogfight is active', () => {
+    useBattleStore.getState().addShip(
+      makeProfile({ id: 'p1', name: 'Viper' }), { q: 0, r: 0 }, 'players', '#0f0'
+    )
+    useBattleStore.getState().addShip(
+      makeProfile({ id: 'p2', name: 'Fighter' }), { q: 0, r: 0 }, 'npc', '#f00'
+    )
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().startDogfight([a.id, b.id])
+    render(<HUD />)
+    expect(screen.getByText(/DOGFIGHT 1/)).toBeInTheDocument()
+    expect(screen.getByText(/Micro-round 1\/6/)).toBeInTheDocument()
+  })
+
+  it('micro-round button opens dogfightRound modal', () => {
+    useBattleStore.getState().addShip(
+      makeProfile({ id: 'p1', name: 'Viper' }), { q: 0, r: 0 }, 'players', '#0f0'
+    )
+    useBattleStore.getState().addShip(
+      makeProfile({ id: 'p2', name: 'Fighter' }), { q: 0, r: 0 }, 'npc', '#f00'
+    )
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().startDogfight([a.id, b.id])
+    render(<HUD />)
+    fireEvent.click(screen.getByText(/MICRO-ROUND 1/))
+    expect(useUiStore.getState().activeModal).toBe('dogfightRound')
+    expect(useUiStore.getState().modalPayload?.groupId).toBe(
+      useBattleStore.getState().dogfights[0].id
+    )
+  })
+
+  it('tracker hidden after dogfight ends', () => {
+    useBattleStore.getState().addShip(
+      makeProfile({ id: 'p1', name: 'Viper' }), { q: 0, r: 0 }, 'players', '#0f0'
+    )
+    useBattleStore.getState().addShip(
+      makeProfile({ id: 'p2', name: 'Fighter' }), { q: 0, r: 0 }, 'npc', '#f00'
+    )
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().startDogfight([a.id, b.id])
+    const groupId = useBattleStore.getState().dogfights[0].id
+    useBattleStore.getState().endDogfight(groupId)
+    render(<HUD />)
+    expect(screen.queryByText(/DOGFIGHT/)).not.toBeInTheDocument()
   })
 })
 
