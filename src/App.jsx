@@ -59,7 +59,7 @@ export function App() {
   if (screen === 'dashboard') {
     return (
       <>
-        <div className="h-[calc(100%-1.25rem)]">
+        <div className="h-[calc(100%-1.75rem)]">
           <Dashboard />
         </div>
         <LegalFooter />

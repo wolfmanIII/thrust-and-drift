@@ -43,7 +43,7 @@ export function BattleLog() {
 
   return (
     <div
-      className={`absolute bottom-5 left-0 right-0 z-10 transition-all duration-200 ${
+      className={`absolute bottom-7 left-0 right-0 z-10 transition-all duration-200 ${
         collapsed ? 'h-8' : 'h-40'
       }`}
     >
