@@ -1,8 +1,8 @@
 /**
  * DogfightRoundModal — resolves one dogfight micro-round.
- * Collects Pilot check dice per ship, shows winner + attack DMs, then advances the counter.
+ * Flow: declare (escape intent) → escapeCheck (if needed) → rolling (Pilot checks) → result.
  * Opened by the HUD dogfight tracker; receives groupId via uiStore modalPayload.
- * // MgT2e CRB p.138 §6 — Dogfight micro-round mechanics
+ * // MgT2e CRB p.138 §6 — Dogfight micro-round mechanics; §6.4 — Escape
  */
 
 import { useState } from 'react'
@@ -11,41 +11,40 @@ import { DiceInput } from '../forms/DiceInput.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { getCrewSkill } from '../../utils/crew.js'
-import { getTonnageDM, resolveDogfightChecks, dogfightAttackDM } from '../../utils/dogfight.js'
+import {
+  getTonnageDM,
+  rollDogfightPilot,
+  resolveDogfightChecks,
+  dogfightAttackDM,
+  canEscape,
+} from '../../utils/dogfight.js'
 
-// ── DM calculation ──────────────────────────────────────────────────────────
+// ── DM helpers ──────────────────────────────────────────────────────────────
 
 /**
- * Compute all DMs for a ship's Pilot check within a dogfight group.
+ * Compute Pilot check DMs for a ship in a dogfight micro-round.
  * // MgT2e CRB p.138 §6.1
- * @param {object} ship  ShipInstance
- * @param {object[]} groupShips  All ships in the group
- * @param {object} group  DogfightGroup — used for prevRoundBonus
- * @returns {{ pilotSkill: number, tonnageDM: number, thrustDM: number, extraEnemyDM: number, prevRoundBonus: number }}
  */
 function computeShipDMs(ship, groupShips, group) {
   const pilotSkill    = getCrewSkill(ship.profile.crew, 'pilot')
   const tonnageDM     = getTonnageDM(ship.profile.tonnage)
-  // Ships in dogfight don't use movement thrust; full thrust available for the check
   const thrustDM      = Math.max(0, (ship.profile.thrust ?? 0) - (ship.thrustUsedThisRound ?? 0))
-  // Penalty when outnumbered: -(enemy count - 1) // §6.1
   const enemies       = groupShips.filter((s) => s.faction !== ship.faction)
   const extraEnemyDM  = -(Math.max(0, enemies.length - 1))
-  // Previous round winner carries their margin as a bonus DM // §6.2
   const prevRoundBonus = ship.id === group.roundWinnerId ? group.roundWinnerMargin : 0
   return { pilotSkill, tonnageDM, thrustDM, extraEnemyDM, prevRoundBonus }
 }
 
-// ── Sub-component: ship check row ───────────────────────────────────────────
+/** Best pilot among a list of ships (for representative checks). */
+function bestPilot(shipList) {
+  return shipList.reduce((best, s) => {
+    const sk = getCrewSkill(s.profile.crew, 'pilot')
+    return !best || sk > getCrewSkill(best.profile.crew, 'pilot') ? s : best
+  }, null)
+}
 
-/**
- * @param {{
- *   ship: object,
- *   dms: object,
- *   dice: object|null,
- *   onDice: (roll: object|null) => void,
- * }} props
- */
+// ── Sub-components ──────────────────────────────────────────────────────────
+
 function ShipCheckRow({ ship, dms, dice, onDice }) {
   const { pilotSkill, tonnageDM, thrustDM, extraEnemyDM, prevRoundBonus } = dms
   const total = dice !== null
@@ -80,6 +79,91 @@ function ShipCheckRow({ ship, dms, dice, onDice }) {
   )
 }
 
+/**
+ * One escape check row: fuggitivo dice + inseguitore dice, shows result live.
+ * // MgT2e CRB p.138 §3.1 — same pursuit formula as initial engagement
+ */
+function EscapeCheckRow({ ship, pursuer, fleeRoll, pursuerRoll, onFleeRoll, onPursuerRoll }) {
+  const fleeDMs    = {
+    pilot:   getCrewSkill(ship.profile.crew, 'pilot'),
+    tonnage: getTonnageDM(ship.profile.tonnage),
+    thrust:  Math.max(0, (ship.profile.thrust ?? 0) - (ship.thrustUsedThisRound ?? 0)),
+  }
+  const pursuerDMs = pursuer ? {
+    pilot:   getCrewSkill(pursuer.profile.crew, 'pilot'),
+    tonnage: getTonnageDM(pursuer.profile.tonnage),
+    thrust:  Math.max(0, (pursuer.profile.thrust ?? 0) - (pursuer.thrustUsedThisRound ?? 0)),
+  } : null
+
+  const fleeTotal = fleeRoll !== null
+    ? fleeRoll.total + fleeDMs.pilot + fleeDMs.tonnage + fleeDMs.thrust
+    : null
+  const pursuerTotal = pursuerRoll !== null && pursuerDMs
+    ? pursuerRoll.total + pursuerDMs.pilot + pursuerDMs.tonnage + pursuerDMs.thrust
+    : null
+
+  const resolved = fleeTotal !== null && pursuerTotal !== null
+    ? { escaped: fleeTotal > pursuerTotal, margin: Math.abs(fleeTotal - pursuerTotal) }
+    : null
+
+  return (
+    <div className="bg-slate-800/80 rounded px-3 py-2.5 space-y-2.5">
+      <div className="flex items-center gap-2">
+        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
+        <span className="text-slate-200 font-mono text-xs font-bold">{ship.profile.name}</span>
+        <span className="text-slate-500 font-mono text-xs">tenta la fuga</span>
+      </div>
+
+      {/* Fuggitivo row */}
+      <div className="flex items-center gap-2 pl-2">
+        <span className="text-slate-500 font-mono text-xs w-20 shrink-0">Fuggitivo</span>
+        <span className="text-slate-600 font-mono text-xs">
+          P{fleeDMs.pilot >= 0 ? '+' : ''}{fleeDMs.pilot} / T{fleeDMs.tonnage >= 0 ? '+' : ''}{fleeDMs.tonnage} / Thr+{fleeDMs.thrust}
+        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <DiceInput value={null} onChange={onFleeRoll} />
+          {fleeTotal !== null && (
+            <span className="text-[--neon-cyan] font-mono text-sm font-bold w-6 text-right">{fleeTotal}</span>
+          )}
+        </div>
+      </div>
+
+      {/* Inseguitore row */}
+      {pursuer && pursuerDMs && (
+        <div className="flex items-center gap-2 pl-2">
+          <span className="text-slate-500 font-mono text-xs w-20 shrink-0">
+            <span className="w-2 h-2 rounded-full inline-block mr-1" style={{ backgroundColor: pursuer.color }} />
+            Inseg.
+          </span>
+          <span className="text-slate-600 font-mono text-xs">
+            P{pursuerDMs.pilot >= 0 ? '+' : ''}{pursuerDMs.pilot} / T{pursuerDMs.tonnage >= 0 ? '+' : ''}{pursuerDMs.tonnage} / Thr+{pursuerDMs.thrust}
+          </span>
+          <div className="ml-auto flex items-center gap-2">
+            <DiceInput value={null} onChange={onPursuerRoll} />
+            {pursuerTotal !== null && (
+              <span className="text-[--neon-cyan] font-mono text-sm font-bold w-6 text-right">{pursuerTotal}</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Live result */}
+      {resolved && (
+        <div className={`rounded px-2 py-1 font-mono text-xs border ${
+          resolved.escaped
+            ? 'bg-slate-700/40 border-slate-500 text-slate-300'
+            : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+        }`}>
+          {resolved.escaped
+            ? `◦ FUGA RIUSCITA (+${resolved.margin}) — lascia il dogfight.`
+            : `⚔ CATTURATO (+${resolved.margin}) — rimane nel dogfight.`
+          }
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main component ──────────────────────────────────────────────────────────
 
 export function DogfightRoundModal() {
@@ -89,41 +173,172 @@ export function DogfightRoundModal() {
   const ships                     = useBattleStore((s) => s.ships)
   const dogfights                 = useBattleStore((s) => s.dogfights)
   const advanceDogfightMicroRound = useBattleStore((s) => s.advanceDogfightMicroRound)
+  const escapeDogfight            = useBattleStore((s) => s.escapeDogfight)
 
   const group      = dogfights.find((g) => g.id === groupId && g.active) ?? null
   const groupShips = group
     ? group.shipIds.map((id) => ships.find((s) => s.id === id)).filter(Boolean)
     : []
 
-  // rolls: { [shipId]: DiceRoll | null }
+  // ── Phase state ──
+  // 'declare' → ['escapeCheck'] → 'rolling' → 'result'
+  const [phase, setPhase] = useState('declare')
+
+  // declare phase
+  const [fleeingIds, setFleeingIds]             = useState(new Set())
+  const [enemiesNotPursuing, setEnemiesNotPursuing] = useState(new Set())
+
+  // escapeCheck phase
+  // { [shipId]: { fleeRoll: DiceRoll|null, pursuerRoll: DiceRoll|null } }
+  const [escapeDice, setEscapeDice] = useState({})
+  // { [shipId]: { escaped: boolean, fleeTotal: number, pursuerTotal: number } }
+  const [escapeOutcomes, setEscapeOutcomes] = useState({})
+
+  // rolling phase
   const [rolls, setRolls] = useState(() => {
     const map = {}
     if (group) group.shipIds.forEach((id) => { map[id] = null })
     return map
   })
-  const [phase, setPhase] = useState('rolling') // 'rolling' | 'result'
 
   if (!group) return null
+
+  // ── Derived: declare phase ──
+
+  const getEnemies    = (ship) => groupShips.filter((s) => s.faction !== ship.faction)
+  const getEnemyThrusts = (ship) => getEnemies(ship).map((s) => s.profile.thrust ?? 0)
+
+  const isAutoEscape = (ship) =>
+    enemiesNotPursuing.has(ship.id) ||
+    canEscape(ship.profile.thrust ?? 0, getEnemyThrusts(ship))
+
+  const fleeingShips     = groupShips.filter((s) => fleeingIds.has(s.id))
+  const needsCheck       = fleeingShips.filter((s) => !isAutoEscape(s))
+  const autoEscapeShips  = fleeingShips.filter((s) => isAutoEscape(s))
+
+  const toggleFleeing = (shipId) =>
+    setFleeingIds((prev) => {
+      const next = new Set(prev)
+      next.has(shipId) ? next.delete(shipId) : next.add(shipId)
+      return next
+    })
+
+  const toggleEnemiesNotPursuing = (shipId) =>
+    setEnemiesNotPursuing((prev) => {
+      const next = new Set(prev)
+      next.has(shipId) ? next.delete(shipId) : next.add(shipId)
+      return next
+    })
+
+  const handleDeclareConfirm = () => {
+    if (fleeingIds.size === 0) {
+      setPhase('rolling')
+      return
+    }
+
+    // Resolve auto-escapes immediately
+    for (const ship of autoEscapeShips) {
+      escapeDogfight(ship.id, groupId)
+    }
+
+    // Check if group still active after auto-escapes
+    const activeGroup = useBattleStore.getState().dogfights.find((g) => g.id === groupId && g.active)
+    if (!activeGroup) { closeModal(); return }
+
+    if (needsCheck.length > 0) {
+      const initial = {}
+      needsCheck.forEach((s) => { initial[s.id] = { fleeRoll: null, pursuerRoll: null } })
+      setEscapeDice(initial)
+      setPhase('escapeCheck')
+    } else {
+      setPhase('rolling')
+    }
+  }
+
+  // ── Derived: escapeCheck phase ──
+
+  const allEscapeChecksEntered = needsCheck.every((s) => {
+    const d = escapeDice[s.id]
+    const enemies = getEnemies(s)
+    // If no enemies remain (all escaped), fuggitivo auto-escapes — no pursuer roll needed
+    return d?.fleeRoll !== null && (enemies.length === 0 || d?.pursuerRoll !== null)
+  })
+
+  const computeEscape = (ship) => {
+    const d = escapeDice[ship.id]
+    if (!d?.fleeRoll) return null
+    const fleeDMs = {
+      pilot:   getCrewSkill(ship.profile.crew, 'pilot'),
+      tonnage: getTonnageDM(ship.profile.tonnage),
+      thrust:  Math.max(0, (ship.profile.thrust ?? 0) - (ship.thrustUsedThisRound ?? 0)),
+    }
+    const r = rollDogfightPilot({
+      pilotSkill: fleeDMs.pilot,
+      tonnage:    ship.profile.tonnage,
+      thrustDM:   fleeDMs.thrust,
+      diceOverride: d.fleeRoll,
+    })
+    const fleeTotal = r.total
+
+    const enemies = getEnemies(ship)
+    if (enemies.length === 0 || !d.pursuerRoll) return { escaped: true, fleeTotal, pursuerTotal: 0 }
+
+    const pursuer = bestPilot(enemies)
+    const pThrustFree = Math.max(0, (pursuer.profile.thrust ?? 0) - (pursuer.thrustUsedThisRound ?? 0))
+    const pr = rollDogfightPilot({
+      pilotSkill: getCrewSkill(pursuer.profile.crew, 'pilot'),
+      tonnage:    pursuer.profile.tonnage,
+      thrustDM:   pThrustFree,
+      diceOverride: d.pursuerRoll,
+    })
+    return {
+      escaped: fleeTotal > pr.total,
+      fleeTotal,
+      pursuerTotal: pr.total,
+    }
+  }
+
+  const setEscapeDiceFor = (shipId, key, roll) =>
+    setEscapeDice((prev) => ({ ...prev, [shipId]: { ...prev[shipId], [key]: roll } }))
+
+  const handleEscapeCheckConfirm = () => {
+    const outcomes = {}
+    for (const ship of needsCheck) {
+      const result = computeEscape(ship)
+      if (!result) continue
+      outcomes[ship.id] = result
+      if (result.escaped) escapeDogfight(ship.id, groupId)
+    }
+    setEscapeOutcomes(outcomes)
+
+    const activeGroup = useBattleStore.getState().dogfights.find((g) => g.id === groupId && g.active)
+    if (!activeGroup) { closeModal(); return }
+
+    setPhase('rolling')
+  }
+
+  // ── Derived: rolling phase ──
+  // groupShips is re-derived from store each render — reflects post-escape membership
+
+  const activeGroupShips = group.shipIds
+    .map((id) => ships.find((s) => s.id === id))
+    .filter(Boolean)
 
   const setRoll = (shipId, dice) =>
     setRolls((prev) => ({ ...prev, [shipId]: dice }))
 
-  const allRolled = groupShips.every((s) => rolls[s.id] !== null)
+  const allRolled = activeGroupShips.every((s) => rolls[s.id] !== null)
 
-  // Build check results with totals for store action
   const checkResults = allRolled
-    ? groupShips.map((s) => {
-        const dms = computeShipDMs(s, groupShips, group)
+    ? activeGroupShips.map((s) => {
+        const dms  = computeShipDMs(s, activeGroupShips, group)
         const dice = rolls[s.id]
         const total = dice.total + dms.pilotSkill + dms.tonnageDM + dms.thrustDM + dms.extraEnemyDM + dms.prevRoundBonus
         return { shipId: s.id, total }
       })
     : null
 
-  // Local preview of the resolution (same logic as the store's resolveDogfightChecks)
   const resolved = checkResults ? resolveDogfightChecks(checkResults) : null
-
-  const handleConfirmCheck = () => setPhase('result')
 
   const handleAdvance = () => {
     advanceDogfightMicroRound(groupId, checkResults)
@@ -131,6 +346,8 @@ export function DogfightRoundModal() {
   }
 
   const isLastRound = group.microRound >= 6
+
+  // ── Shared header ──
 
   return (
     <Modal
@@ -151,36 +368,169 @@ export function DogfightRoundModal() {
           ))}
         </div>
 
-        {/* Previous round advantage banner */}
+        {/* Previous round advantage */}
         {group.roundWinnerId && (
           <div className="bg-amber-500/10 border border-amber-500/20 rounded px-3 py-1.5 font-mono text-xs text-amber-400">
             ↑ Round {group.microRound - 1}:{' '}
             {ships.find((s) => s.id === group.roundWinnerId)?.profile.name ?? '—'}
-            {' '}vince con margine +{group.roundWinnerMargin} — bonus al check corrente.
+            {' '}+{group.roundWinnerMargin} — bonus al check corrente.
           </div>
+        )}
+
+        {/* ── PHASE: DECLARE ── */}
+        {phase === 'declare' && (
+          <>
+            <p className="text-slate-500 font-mono text-xs">
+              Dichiara le intenzioni di fuga prima del check Pilot. // MgT2e CRB p.138 §6.4
+            </p>
+            <div className="space-y-2">
+              {groupShips.map((ship) => {
+                const autoOk   = isAutoEscape(ship)
+                const isFleeing = fleeingIds.has(ship.id)
+                const notPursued = enemiesNotPursuing.has(ship.id)
+                const enemyThrusts = getEnemyThrusts(ship)
+                const thrustAdvantage = canEscape(ship.profile.thrust ?? 0, enemyThrusts)
+                return (
+                  <div key={ship.id} className="bg-slate-800 rounded px-3 py-2 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
+                      <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.profile.name}</span>
+                      <span className="text-slate-600 font-mono text-xs shrink-0">
+                        Thrust {ship.profile.thrust} vs max {enemyThrusts.length > 0 ? Math.max(...enemyThrusts) : '—'}
+                      </span>
+                      <button
+                        onClick={() => toggleFleeing(ship.id)}
+                        className={`px-2.5 py-1 font-mono text-xs rounded border transition-colors shrink-0 ${
+                          isFleeing
+                            ? 'bg-slate-600/40 border-slate-400/50 text-slate-300'
+                            : 'border-slate-600 text-slate-500 hover:border-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        {isFleeing ? '↩ FUGGE' : 'RIMANE'}
+                      </button>
+                    </div>
+                    {isFleeing && (
+                      <div className="flex items-center gap-2 pl-4">
+                        {thrustAdvantage ? (
+                          <span className="text-slate-400 font-mono text-xs">
+                            ✓ Thrust superiore — fuga automatica
+                          </span>
+                        ) : (
+                          <>
+                            <span className="text-amber-400/70 font-mono text-xs">
+                              {notPursued ? '✓ Nemici non inseguono — fuga automatica' : 'Check inseguimento necessario'}
+                            </span>
+                            <button
+                              onClick={() => toggleEnemiesNotPursuing(ship.id)}
+                              className={`ml-auto px-2 py-0.5 font-mono text-xs rounded border transition-colors shrink-0 ${
+                                notPursued
+                                  ? 'bg-slate-600/40 border-slate-500 text-slate-300'
+                                  : 'border-slate-700 text-slate-600 hover:border-slate-500 hover:text-slate-400'
+                              }`}
+                            >
+                              {notPursued ? 'NON INSEGUONO ✓' : 'INSEGUONO?'}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setFleeingIds(new Set()); setPhase('rolling') }}
+                className="flex-1 py-2 border border-slate-600 text-slate-400 font-mono text-xs tracking-widest rounded hover:border-slate-500 transition-colors"
+              >
+                NESSUNA FUGA →
+              </button>
+              {fleeingIds.size > 0 && (
+                <button
+                  onClick={handleDeclareConfirm}
+                  className="flex-1 py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors"
+                >
+                  CONFERMA FUGA →
+                </button>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* ── PHASE: ESCAPE CHECK ── */}
+        {phase === 'escapeCheck' && (
+          <>
+            <p className="text-amber-400 font-mono text-xs tracking-wider uppercase">
+              Check inseguimento // §3.1 — 2D6 + Pilot + Tonnage + Thrust libero
+            </p>
+            <div className="space-y-3">
+              {needsCheck.map((ship) => {
+                const enemies  = getEnemies(ship)
+                const pursuer  = bestPilot(enemies)
+                const d        = escapeDice[ship.id] ?? { fleeRoll: null, pursuerRoll: null }
+                return (
+                  <EscapeCheckRow
+                    key={ship.id}
+                    ship={ship}
+                    pursuer={pursuer}
+                    fleeRoll={d.fleeRoll}
+                    pursuerRoll={d.pursuerRoll}
+                    onFleeRoll={(r) => setEscapeDiceFor(ship.id, 'fleeRoll', r)}
+                    onPursuerRoll={(r) => setEscapeDiceFor(ship.id, 'pursuerRoll', r)}
+                  />
+                )
+              })}
+            </div>
+            <button
+              onClick={handleEscapeCheckConfirm}
+              disabled={!allEscapeChecksEntered}
+              className="w-full py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              CONFERMA CHECK FUGA →
+            </button>
+          </>
         )}
 
         {/* ── PHASE: ROLLING ── */}
         {phase === 'rolling' && (
           <>
+            {/* Escape outcomes summary if any */}
+            {Object.keys(escapeOutcomes).length > 0 && (
+              <div className="space-y-1">
+                {Object.entries(escapeOutcomes).map(([shipId, outcome]) => {
+                  const ship = ships.find((s) => s.id === shipId)
+                  return (
+                    <div key={shipId} className={`rounded px-2 py-1 font-mono text-xs border ${
+                      outcome.escaped
+                        ? 'bg-slate-700/40 border-slate-600 text-slate-400'
+                        : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                    }`}>
+                      {outcome.escaped
+                        ? `◦ ${ship?.profile.name ?? shipId} è fuggita (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
+                        : `⚔ ${ship?.profile.name ?? shipId} è rimasta nel dogfight (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
+                      }
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
             <p className="text-slate-500 font-mono text-xs">
               2D6 + Pilot + Tonnage + Thrust + DM round precedente // MgT2e CRB p.138
             </p>
-
             <div className="space-y-3">
-              {groupShips.map((ship) => (
+              {activeGroupShips.map((ship) => (
                 <ShipCheckRow
                   key={ship.id}
                   ship={ship}
-                  dms={computeShipDMs(ship, groupShips, group)}
-                  dice={rolls[ship.id]}
+                  dms={computeShipDMs(ship, activeGroupShips, group)}
+                  dice={rolls[ship.id] ?? null}
                   onDice={(d) => setRoll(ship.id, d)}
                 />
               ))}
             </div>
-
             <button
-              onClick={handleConfirmCheck}
+              onClick={() => setPhase('result')}
               disabled={!allRolled}
               className="w-full py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
@@ -192,13 +542,12 @@ export function DogfightRoundModal() {
         {/* ── PHASE: RESULT ── */}
         {phase === 'result' && resolved && (
           <>
-            {/* Per-ship check totals + attack DMs */}
             <div className="space-y-2">
               {checkResults.map(({ shipId, total }) => {
-                const ship = groupShips.find((s) => s.id === shipId)
+                const ship     = activeGroupShips.find((s) => s.id === shipId)
                 if (!ship) return null
-                const isWinner  = shipId === resolved.winnerId
-                const attackDM  = dogfightAttackDM(shipId, resolved.winnerId)
+                const isWinner = shipId === resolved.winnerId
+                const attackDM = dogfightAttackDM(shipId, resolved.winnerId)
                 return (
                   <div
                     key={shipId}
@@ -210,10 +559,7 @@ export function DogfightRoundModal() {
                           : 'bg-slate-800/50 border-slate-700/50'
                     }`}
                   >
-                    <span
-                      className="w-2.5 h-2.5 rounded-full shrink-0"
-                      style={{ backgroundColor: ship.color }}
-                    />
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
                     <span className={`font-mono text-xs flex-1 min-w-0 truncate ${
                       isWinner && !resolved.tied ? 'text-amber-200' : 'text-slate-300'
                     }`}>
@@ -234,7 +580,6 @@ export function DogfightRoundModal() {
               })}
             </div>
 
-            {/* Outcome banner */}
             <div className={`rounded px-3 py-2 font-mono text-xs border ${
               resolved.tied
                 ? 'bg-slate-700/40 border-slate-600 text-slate-400'
@@ -246,14 +591,12 @@ export function DogfightRoundModal() {
               }
             </div>
 
-            {/* Attack DM reminder */}
             {!resolved.tied && (
               <p className="text-slate-500 font-mono text-xs">
                 Applica i DM attacco sopra all&apos;apertura del pannello Attacchi.
               </p>
             )}
 
-            {/* Advance button */}
             <button
               onClick={handleAdvance}
               className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
