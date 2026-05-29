@@ -53,19 +53,19 @@ describe('BoardingOutcomeModal — display', () => {
   it('shows 3 outcome options', () => {
     setupSecurity()
     render(<BoardingOutcomeModal />)
-    expect(screen.getByText(/Attaccante vince/i)).toBeInTheDocument()
-    expect(screen.getByText(/Difensore respinge/i)).toBeInTheDocument()
-    expect(screen.getByText(/Nave distrutta/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/Attacker wins/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Defender repels/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Ship destroyed/i).length).toBeGreaterThan(0)
   })
 
   it('confirm button is disabled when no outcome selected', () => {
     setupSecurity()
     render(<BoardingOutcomeModal />)
-    const btn = screen.getByText(/CONFERMA ESITO/i)
+    const btn = screen.getByText(/CONFIRM OUTCOME/i)
     expect(btn).toBeDisabled()
   })
 
-  it('shows conquered objectives summary when any are taken', () => {
+  it('shows captured objectives summary when any are taken', () => {
     const { bid } = setupSecurity()
     useBattleStore.setState({
       boardings: useBattleStore.getState().boardings.map((b) =>
@@ -73,7 +73,7 @@ describe('BoardingOutcomeModal — display', () => {
       ),
     })
     render(<BoardingOutcomeModal />)
-    expect(screen.getByText(/Obiettivi conquistati/i)).toBeInTheDocument()
+    expect(screen.getByText(/Captured objectives/i)).toBeInTheDocument()
   })
 })
 
@@ -81,8 +81,8 @@ describe('BoardingOutcomeModal — actions', () => {
   it('selecting defender_wins and confirming resolves boarding', () => {
     const { bid } = setupSecurity()
     render(<BoardingOutcomeModal />)
-    fireEvent.click(screen.getByText(/Difensore respinge/i))
-    fireEvent.click(screen.getByText(/CONFERMA ESITO/i))
+    fireEvent.click(screen.getByText(/Defender repels/i))
+    fireEvent.click(screen.getByText(/CONFIRM OUTCOME/i))
     expect(useBattleStore.getState().boardings.find((b) => b.id === bid).outcome).toBe('defender_wins')
     expect(useUiStore.getState().activeModal).toBeNull()
   })
@@ -90,16 +90,16 @@ describe('BoardingOutcomeModal — actions', () => {
   it('selecting ship_destroyed resolves with ship_destroyed', () => {
     const { bid } = setupSecurity()
     render(<BoardingOutcomeModal />)
-    fireEvent.click(screen.getByText(/Nave distrutta/i))
-    fireEvent.click(screen.getByText(/CONFERMA ESITO/i))
+    fireEvent.click(screen.getAllByText(/Ship destroyed/i)[0])
+    fireEvent.click(screen.getByText(/CONFIRM OUTCOME/i))
     expect(useBattleStore.getState().boardings.find((b) => b.id === bid).outcome).toBe('ship_destroyed')
   })
 
   it('attacker_wins clears inBoarding on both ships', () => {
-    const { a, b, bid } = setupSecurity()
+    const { a, b } = setupSecurity()
     render(<BoardingOutcomeModal />)
-    fireEvent.click(screen.getByText(/Attaccante vince/i))
-    fireEvent.click(screen.getByText(/CONFERMA ESITO/i))
+    fireEvent.click(screen.getByText(/Attacker wins/i))
+    fireEvent.click(screen.getByText(/CONFIRM OUTCOME/i))
     const { ships } = useBattleStore.getState()
     expect(ships.find((s) => s.id === a.id).inBoarding).toBeNull()
     expect(ships.find((s) => s.id === b.id).inBoarding).toBeNull()
@@ -108,7 +108,7 @@ describe('BoardingOutcomeModal — actions', () => {
   it('confirm button is enabled after selecting an outcome', () => {
     setupSecurity()
     render(<BoardingOutcomeModal />)
-    fireEvent.click(screen.getByText(/Difensore respinge/i))
-    expect(screen.getByText(/CONFERMA ESITO/i)).not.toBeDisabled()
+    fireEvent.click(screen.getByText(/Defender repels/i))
+    expect(screen.getByText(/CONFIRM OUTCOME/i)).not.toBeDisabled()
   })
 })

@@ -204,7 +204,7 @@ export function HUD() {
       {activeBoardings.map((boarding) => {
         const attacker = ships.find((s) => s.id === boarding.attackerId)
         const defender = ships.find((s) => s.id === boarding.defenderId)
-        const phaseLabel = { contact: 'CONTATTO', conflict: 'CONFLITTO', security: 'SICUREZZA' }[boarding.phase] ?? boarding.phase.toUpperCase()
+        const phaseLabel = { contact: 'CONTACT', conflict: 'CONFLICT', security: 'SECURITY' }[boarding.phase] ?? boarding.phase.toUpperCase()
         const modalId = boarding.phase === 'contact'
           ? 'boarding-contact'
           : boarding.phase === 'conflict'

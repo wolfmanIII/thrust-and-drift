@@ -15,26 +15,26 @@ import { roll2D6 } from './dice.js'
 /** @type {Record<string, { label: string, check: string|null, difficulty: number|null, time: string, dm: number, decompression: boolean }>} */
 export const ENTRY_METHODS = {
   airlock_voluntary: {
-    label:         'Airlock (cooperativo)',
+    label:         'Airlock (cooperative)',
     check:         null,
     difficulty:    null,
-    time:          'Istantaneo',
+    time:          'Instant',
     dm:            0,
     decompression: false,
   },
   airlock_forced: {
-    label:         'Airlock (forzato)',
+    label:         'Airlock (forced)',
     check:         'Mechanic (STR)',
     difficulty:    14,   // Formidable
-    time:          '2D round + 1D per apertura',
+    time:          '2D rounds + 1D to open',
     dm:            0,
     decompression: false,
   },
   maintenance_hatch: {
-    label:         'Portellone/Manutenzione',
+    label:         'Maintenance Hatch',
     check:         'Mechanic (STR)',
     difficulty:    12,   // Very Difficult
-    time:          '2D round',
+    time:          '2D rounds',
     dm:            0,
     decompression: true,
   },
@@ -50,15 +50,15 @@ export const ENTRY_METHODS = {
     label:         'Forced Linkage Apparatus',
     check:         'Pilot (DEX)',
     difficulty:    8,    // Average
-    time:          'Immediato se successo',
-    dm:            2,    // DM +2 ai check Contatto successivi
+    time:          'Immediate on success',
+    dm:            2,    // DM +2 to subsequent Contact checks
     decompression: false,
   },
   hull_cut: {
-    label:         'Taglio scafo',
+    label:         'Hull Cut',
     check:         'Mechanic (DEX)',
     difficulty:    8,    // Average per round
-    time:          'Per round (riduce Resilienza)',
+    time:          'Per round (reduces Resilience)',
     dm:            0,
     decompression: true,
   },
@@ -157,19 +157,19 @@ export function rollMissedShot(armoredBulkhead = false) {
   let label
   if (modified <= 3) {
     outcome = 'attacker_hit'
-    label   = 'Colpisce membro casuale — squadra ATTACCANTE (8+)'
+    label   = 'Hits random member — ATTACKER squad (8+ to hit)'
   } else if (modified <= 5) {
     outcome = 'defender_hit'
-    label   = 'Colpisce membro casuale — squadra DIFENSORE (8+)'
+    label   = 'Hits random member — DEFENDER squad (8+ to hit)'
   } else if (modified <= 8) {
     outcome = 'minor_system'
-    label   = 'Sistema minore danneggiato (luci, controllo porta, ecc.)'
+    label   = 'Minor system damaged (lights, door controls, etc.)'
   } else if (modified <= 10) {
     outcome = 'no_effect'
-    label   = 'Nessun danno critico (mobili, pannello non critico)'
+    label   = 'No critical damage (furniture, non-critical panel)'
   } else {
     outcome = 'critical_system'
-    label   = 'Sistema critico danneggiato (airlock, tubazione carburante, consolle)'
+    label   = 'Critical system hit (airlock, fuel line, command console)'
   }
 
   return { results: roll.results, modified, outcome, label }

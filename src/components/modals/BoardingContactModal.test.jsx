@@ -51,17 +51,17 @@ describe('BoardingContactModal — display', () => {
   it('shows all 6 entry method buttons', () => {
     setupBoarding()
     render(<BoardingContactModal />)
-    expect(screen.getAllByText(/Airlock \(cooperativo\)/i).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/Airlock \(forzato\)/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Airlock \(cooperative\)/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Airlock \(forced\)/i).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/Breaching Tube/i).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/Forced Linkage/i).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/Taglio scafo/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Hull Cut/i).length).toBeGreaterThan(0)
   })
 
-  it('shows rotation and forced linkage toggle buttons', () => {
+  it('shows tumbling and forced linkage toggle buttons', () => {
     setupBoarding()
     render(<BoardingContactModal />)
-    expect(screen.getAllByText(/Rotazione/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Tumbling/i).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/Forced Linkage/i).length).toBeGreaterThan(0)
   })
 })
@@ -74,28 +74,26 @@ describe('BoardingContactModal — actions', () => {
     expect(useBattleStore.getState().boardings.find((b) => b.id === boarding.id).contactMethod).toBe('breaching_tube')
   })
 
-  it('toggling rotation updates store', () => {
+  it('toggling tumbling updates store', () => {
     const { boarding } = setupBoarding()
     render(<BoardingContactModal />)
-    // The rotation toggle button contains "Rotazione" — first match is the toggle button
-    fireEvent.click(screen.getAllByText(/Rotazione/i)[0])
+    fireEvent.click(screen.getAllByText(/Tumbling/i)[0])
     expect(useBattleStore.getState().boardings.find((b) => b.id === boarding.id).defenderRotating).toBe(true)
   })
 
   it('toggling forced linkage updates store', () => {
     const { boarding } = setupBoarding()
     render(<BoardingContactModal />)
-    // "Forced Linkage" appears in both the entry method list and the toggle button
-    // The toggle button is the last occurrence (after the entry method list)
+    // "Forced Linkage" appears in entry method list and toggle button — click last
     const buttons = screen.getAllByText(/Forced Linkage/i)
     fireEvent.click(buttons[buttons.length - 1])
     expect(useBattleStore.getState().boardings.find((b) => b.id === boarding.id).forcedLinkage).toBe(true)
   })
 
-  it('AVANZA AL CONFLITTO advances phase and closes modal', () => {
+  it('ADVANCE TO CONFLICT advances phase and closes modal', () => {
     const { boarding } = setupBoarding()
     render(<BoardingContactModal />)
-    fireEvent.click(screen.getByText(/AVANZA AL CONFLITTO/i))
+    fireEvent.click(screen.getByText(/ADVANCE TO CONFLICT/i))
     expect(useBattleStore.getState().boardings.find((b) => b.id === boarding.id).phase).toBe('conflict')
     expect(useUiStore.getState().activeModal).toBeNull()
   })
@@ -105,7 +103,6 @@ describe('BoardingContactModal — actions', () => {
     useBattleStore.getState().setContactMethod(boarding.id, 'hull_cut')
     expect(useBattleStore.getState().boardings[0].contactMethod).toBe('hull_cut')
     render(<BoardingContactModal />)
-    // "Taglio scafo" appears at minimum in the entry method list
-    expect(screen.getAllByText(/Taglio scafo/i).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(/Hull Cut/i).length).toBeGreaterThanOrEqual(1)
   })
 })

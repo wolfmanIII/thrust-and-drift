@@ -52,38 +52,38 @@ describe('BoardingConflictModal — display', () => {
   it('shows 3 objective buttons', () => {
     setupConflict()
     render(<BoardingConflictModal />)
-    expect(screen.getByText(/Ponte/i)).toBeInTheDocument()
+    expect(screen.getByText(/Bridge/i)).toBeInTheDocument()
     expect(screen.getByText(/Engineering/i)).toBeInTheDocument()
-    expect(screen.getByText(/Torrette/i)).toBeInTheDocument()
+    expect(screen.getByText(/Turrets/i)).toBeInTheDocument()
   })
 
   it('shows stacking and missed-shot roll buttons', () => {
     setupConflict()
     render(<BoardingConflictModal />)
-    expect(screen.getByText(/TIRA STACKING/i)).toBeInTheDocument()
-    expect(screen.getByText(/TIRA COLPO MANCATO/i)).toBeInTheDocument()
+    expect(screen.getByText(/ROLL STACKING/i)).toBeInTheDocument()
+    expect(screen.getByText(/ROLL MISSED SHOT/i)).toBeInTheDocument()
   })
 
   it('shows weapon DM reminder', () => {
     setupConflict()
     render(<BoardingConflictModal />)
-    expect(screen.getByText(/Fucili −2/i)).toBeInTheDocument()
+    expect(screen.getByText(/Rifles −2/i)).toBeInTheDocument()
   })
 })
 
 describe('BoardingConflictModal — actions', () => {
-  it('clicking Ponte marks bridge conquered in store', () => {
+  it('clicking Bridge marks bridge conquered in store', () => {
     const { bid } = setupConflict()
     render(<BoardingConflictModal />)
-    fireEvent.click(screen.getByText(/Ponte/i))
+    fireEvent.click(screen.getByText(/Bridge/i))
     expect(useBattleStore.getState().boardings.find((b) => b.id === bid).objectives.bridge).toBe(true)
   })
 
-  it('clicking bridge again un-conquers it', () => {
+  it('clicking Bridge again un-conquers it', () => {
     const { bid } = setupConflict()
     render(<BoardingConflictModal />)
-    fireEvent.click(screen.getByText(/Ponte/i))
-    fireEvent.click(screen.getByText(/Ponte/i))
+    fireEvent.click(screen.getByText(/Bridge/i))
+    fireEvent.click(screen.getByText(/Bridge/i))
     expect(useBattleStore.getState().boardings.find((b) => b.id === bid).objectives.bridge).toBe(false)
   })
 
@@ -93,34 +93,32 @@ describe('BoardingConflictModal — actions', () => {
     useBattleStore.getState().setObjective(bid, 'engineering', true)
     useBattleStore.getState().setObjective(bid, 'turrets', true)
     render(<BoardingConflictModal />)
-    expect(screen.getByText(/NAVE PRESA/i)).toBeInTheDocument()
+    expect(screen.getByText(/SHIP TAKEN/i)).toBeInTheDocument()
   })
 
-  it('TIRA STACKING renders a result', () => {
+  it('ROLL STACKING renders a result', () => {
     setupConflict()
     render(<BoardingConflictModal />)
-    fireEvent.click(screen.getByText(/TIRA STACKING/i))
-    // Result badge appears: "Successo" or "Fallimento"
+    fireEvent.click(screen.getByText(/ROLL STACKING/i))
     const hasResult =
-      screen.queryByText(/Successo/i) !== null ||
-      screen.queryByText(/Fallimento/i) !== null
+      screen.queryByText(/Success/i) !== null ||
+      screen.queryByText(/Failure/i) !== null
     expect(hasResult).toBe(true)
   })
 
-  it('TIRA COLPO MANCATO renders a result label', () => {
+  it('ROLL MISSED SHOT renders a result label', () => {
     setupConflict()
     render(<BoardingConflictModal />)
-    fireEvent.click(screen.getByText(/TIRA COLPO MANCATO/i))
-    // Result includes one of the outcome labels
-    const labels = ['ATTACCANTE', 'DIFENSORE', 'Sistema', 'Nessun', 'critico']
+    fireEvent.click(screen.getByText(/ROLL MISSED SHOT/i))
+    const labels = ['ATTACKER', 'DEFENDER', 'Minor system', 'No critical', 'Critical system']
     const found = labels.some((l) => screen.queryAllByText(new RegExp(l, 'i')).length > 0)
     expect(found).toBe(true)
   })
 
-  it('FINE CONFLITTO advances to security and closes modal', () => {
+  it('END CONFLICT advances to security and closes modal', () => {
     const { bid } = setupConflict()
     render(<BoardingConflictModal />)
-    fireEvent.click(screen.getByText(/FINE CONFLITTO/i))
+    fireEvent.click(screen.getByText(/END CONFLICT/i))
     expect(useBattleStore.getState().boardings.find((b) => b.id === bid).phase).toBe('security')
     expect(useUiStore.getState().activeModal).toBeNull()
   })

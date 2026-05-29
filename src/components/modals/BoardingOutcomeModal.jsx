@@ -1,5 +1,5 @@
 /**
- * BoardingOutcomeModal — Fase 4: Sicurezza.
+ * BoardingOutcomeModal — Phase 4: Security.
  * GM chooses the boarding outcome; if attacker wins, optionally transfers the
  * defender's faction to match the attacker.
  * @see boarding-system-design.md §3.4, §5.4
@@ -14,20 +14,20 @@ import { useUiStore }     from '../../store/uiStore.js'
 const OUTCOMES = [
   {
     key:   'attacker_wins',
-    label: 'Attaccante vince',
-    desc:  'La squadra di abbordaggio controlla la nave. Equipaggio nemico eliminato/catturato.',
+    label: 'Attacker wins',
+    desc:  'Boarding party controls the ship. Enemy crew eliminated or captured.',
     color: 'emerald',
   },
   {
     key:   'defender_wins',
-    label: 'Difensore respinge',
-    desc:  'I boarder sono stati eliminati, catturati o respinti. Nave difesa.',
+    label: 'Defender repels',
+    desc:  'Boarders have been eliminated, captured, or repelled. Ship defended.',
     color: 'red',
   },
   {
     key:   'ship_destroyed',
-    label: 'Nave distrutta',
-    desc:  'La nave bersaglio è stata distrutta durante il conflitto interno (danni sistemi critici).',
+    label: 'Ship destroyed',
+    desc:  'Target ship destroyed during the internal conflict (critical system damage).',
     color: 'amber',
   },
 ]
@@ -60,14 +60,14 @@ export function BoardingOutcomeModal() {
   function handleResolve() {
     if (!selectedOutcome) return
     resolveBoarding(boarding.id, selectedOutcome)
-    if (selectedOutcome === 'attacker_wins' && transferFaction) {
-      useBattleStore.getState().updateShipFaction?.(defender.id, attacker.faction)
+    if (selectedOutcome === 'attacker_wins' && transferFaction && typeof updateShipFaction === 'function') {
+      updateShipFaction(defender.id, attacker.faction)
     }
     closeModal()
   }
 
   return (
-    <Modal title="⚔ SICUREZZA — ESITO ABBORDAGGIO" onClose={closeModal}>
+    <Modal title="⚔ SECURITY — BOARDING OUTCOME" onClose={closeModal}>
       <div className="space-y-4 min-w-80">
 
         {/* Ships banner */}
@@ -76,7 +76,7 @@ export function BoardingOutcomeModal() {
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: attacker.color }} />
             <span className="text-slate-200 font-mono text-xs font-bold truncate">{attacker.profile.name}</span>
           </div>
-          <span className="text-amber-400 font-mono text-xs shrink-0">⚔ ESITO</span>
+          <span className="text-amber-400 font-mono text-xs shrink-0">⚔ OUTCOME</span>
           <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
             <span className="text-slate-200 font-mono text-xs font-bold truncate">{defender.profile.name}</span>
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: defender.color }} />
@@ -86,9 +86,9 @@ export function BoardingOutcomeModal() {
         {/* Objectives summary */}
         {Object.entries(boarding.objectives).some(([, v]) => v) && (
           <div className="bg-slate-900/40 rounded px-3 py-2">
-            <p className="text-slate-500 font-mono text-[10px] uppercase mb-1.5">Obiettivi conquistati</p>
+            <p className="text-slate-500 font-mono text-[10px] uppercase mb-1.5">Captured objectives</p>
             <div className="flex gap-3">
-              {[['bridge', 'Ponte'], ['engineering', 'Engineering'], ['turrets', 'Torrette']].map(([k, l]) => (
+              {[['bridge', 'Bridge'], ['engineering', 'Engineering'], ['turrets', 'Turrets']].map(([k, l]) => (
                 <span key={k} className={`font-mono text-xs ${boarding.objectives[k] ? 'text-emerald-400' : 'text-slate-600'}`}>
                   {boarding.objectives[k] ? '✓' : '○'} {l}
                 </span>
@@ -99,7 +99,7 @@ export function BoardingOutcomeModal() {
 
         {/* Outcome selection */}
         <div className="space-y-1.5">
-          <p className="text-slate-500 font-mono text-xs uppercase">Scegli esito</p>
+          <p className="text-slate-500 font-mono text-xs uppercase">Choose outcome</p>
           {OUTCOMES.map((o) => (
             <button
               key={o.key}
@@ -124,9 +124,9 @@ export function BoardingOutcomeModal() {
         </div>
 
         {/* Faction transfer option — only when attacker wins */}
-        {selectedOutcome === 'attacker_wins' && typeof useBattleStore.getState().updateShipFaction === 'function' && (
+        {selectedOutcome === 'attacker_wins' && (
           <div className="bg-slate-800/60 rounded px-3 py-2.5 space-y-1.5">
-            <p className="text-slate-400 font-mono text-xs uppercase font-bold">Cambio fazione nave catturata</p>
+            <p className="text-slate-400 font-mono text-xs uppercase font-bold">Faction transfer — captured ship</p>
             <label className="flex items-center gap-2 text-slate-300 font-mono text-xs cursor-pointer">
               <input
                 type="checkbox"
@@ -134,13 +134,13 @@ export function BoardingOutcomeModal() {
                 onChange={(e) => setTransferFaction(e.target.checked)}
                 className="accent-[--neon-cyan]"
               />
-              Trasferisci {defender.profile.name} alla fazione{' '}
+              Transfer {defender.profile.name} to faction{' '}
               <span className={FACTION_COLORS[attacker.faction] ?? 'text-slate-400'}>
                 {attacker.faction.toUpperCase()}
               </span>
             </label>
             <p className="text-slate-600 font-mono text-[10px]">
-              Equipaggio nemico rimosso — nave sotto controllo attaccante.
+              Enemy crew removed — ship under attacker control.
             </p>
           </div>
         )}
@@ -151,7 +151,7 @@ export function BoardingOutcomeModal() {
           disabled={!selectedOutcome}
           className="w-full py-2 bg-[--neon-cyan]/10 hover:bg-[--neon-cyan]/20 disabled:opacity-40 disabled:cursor-not-allowed border border-[--neon-cyan] text-[--neon-cyan] font-mono text-xs rounded transition-colors"
         >
-          CONFERMA ESITO
+          CONFIRM OUTCOME
         </button>
 
       </div>

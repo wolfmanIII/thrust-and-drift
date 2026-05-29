@@ -1,7 +1,7 @@
 /**
- * BoardingContactModal — Fase 2: Contatto.
+ * BoardingContactModal — Phase 2: Contact.
  * GM selects the entry method, toggles rotation/forced-linkage modifiers,
- * rolls the contact check (if required), and advances to Conflitto.
+ * rolls the contact check (if required), and advances to Conflict.
  * @see boarding-system-design.md §3.2, §5.2
  * @see HG 2022 pp.127–130
  */
@@ -40,29 +40,29 @@ function CutTracker({ boarding, onDamage }) {
 
   return (
     <div className="bg-slate-800/60 rounded px-3 py-2.5 space-y-2.5">
-      <p className="text-slate-400 font-mono text-xs uppercase font-bold">Taglio scafo</p>
+      <p className="text-slate-400 font-mono text-xs uppercase font-bold">Hull Cut</p>
 
       {/* Component selector */}
       <div className="flex gap-2">
-        {['portello', 'airlock', 'scafo'].map((c) => (
+        {[['portello', 'HATCH'], ['airlock', 'AIRLOCK'], ['scafo', 'HULL']].map(([k, lbl]) => (
           <button
-            key={c}
-            onClick={() => setComponent(c)}
+            key={k}
+            onClick={() => setComponent(k)}
             className={`flex-1 py-1 font-mono text-xs rounded border transition-colors ${
-              component === c
+              component === k
                 ? 'bg-[--neon-cyan]/10 border-[--neon-cyan] text-[--neon-cyan]'
                 : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-400'
             }`}
           >
-            {c.toUpperCase()}
+            {lbl}
           </button>
         ))}
       </div>
 
       <p className="text-slate-500 font-mono text-xs">
-        Resilienza blocco: <span className="text-slate-300">{res.block}</span>
+        Block resilience: <span className="text-slate-300">{res.block}</span>
         {' / '}
-        breccia: <span className="text-slate-300">{res.breach}</span>
+        breach: <span className="text-slate-300">{res.breach}</span>
         {isArmored && <span className="text-amber-400 ml-1">(armored)</span>}
       </p>
 
@@ -98,7 +98,7 @@ function CutTracker({ boarding, onDamage }) {
         </div>
         {dice && (
           <div className="text-right">
-            <p className="text-slate-400 font-mono text-xs">Effetto {effect >= 0 ? '+' : ''}{effect}</p>
+            <p className="text-slate-400 font-mono text-xs">Effect {effect >= 0 ? '+' : ''}{effect}</p>
             <p className="text-[--neon-cyan] font-mono text-sm font-bold">−{dmg} res</p>
           </div>
         )}
@@ -109,17 +109,17 @@ function CutTracker({ boarding, onDamage }) {
           onClick={() => onDamage(dmg)}
           className="w-full py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-mono text-xs rounded transition-colors"
         >
-          APPLICA DANNO
+          APPLY DAMAGE
         </button>
       )}
 
       <p className="text-slate-500 font-mono text-xs">
-        Progresso: <span className="text-slate-300">{boarding.hullDamageSoFar ?? 0}</span> / {res.breach} (breccia)
+        Progress: <span className="text-slate-300">{boarding.hullDamageSoFar ?? 0}</span> / {res.breach} (breach)
         {(boarding.hullDamageSoFar ?? 0) >= res.block && (boarding.hullDamageSoFar ?? 0) < res.breach && (
-          <span className="text-amber-400 ml-2">ACCESSO BLOCCATO — continua per breccia</span>
+          <span className="text-amber-400 ml-2">ACCESS BLOCKED — continue for breach</span>
         )}
         {(boarding.hullDamageSoFar ?? 0) >= res.breach && (
-          <span className="text-emerald-400 ml-2">✓ BRECCIA PRATICABILE</span>
+          <span className="text-emerald-400 ml-2">✓ BREACH ACHIEVED</span>
         )}
       </p>
     </div>
@@ -139,7 +139,6 @@ export function BoardingContactModal() {
   } = useBattleStore()
 
   const [dice, setDice] = useState(null)
-  const [hullDamage, setHullDamage] = useState(0)
 
   const isOpen = activeModal === 'boarding-contact'
   if (!isOpen) return null
@@ -153,13 +152,11 @@ export function BoardingContactModal() {
   const defender = ships.find((s) => s.id === boarding.defenderId)
   if (!attacker || !defender) return null
 
-  const method  = ENTRY_METHODS[boarding.contactMethod]
+  const method    = ENTRY_METHODS[boarding.contactMethod]
   const contactDM = getContactDM(boarding)
   const needsRoll = method && method.check !== null && boarding.contactMethod !== 'hull_cut'
 
   function handleApplyCutDamage(dmg) {
-    // Update hull damage progress locally for display — full state in store on resolve
-    setHullDamage((prev) => prev + dmg)
     useBattleStore.setState((s) => ({
       boardings: s.boardings.map((b) =>
         b.id !== boarding.id ? b : { ...b, hullDamageSoFar: (b.hullDamageSoFar ?? 0) + dmg }
@@ -167,8 +164,8 @@ export function BoardingContactModal() {
     }))
   }
 
-  const difficulty = method?.difficulty ?? 8
-  const checkTotal = dice ? dice.total + contactDM : null
+  const difficulty  = method?.difficulty ?? 8
+  const checkTotal  = dice ? dice.total + contactDM : null
   const checkPassed = checkTotal !== null && checkTotal >= difficulty
 
   function handleAdvance() {
@@ -177,7 +174,7 @@ export function BoardingContactModal() {
   }
 
   return (
-    <Modal title="⚔ CONTATTO" onClose={closeModal}>
+    <Modal title="⚔ CONTACT" onClose={closeModal}>
       <div className="space-y-4 min-w-80">
 
         {/* Ships banner */}
@@ -195,7 +192,7 @@ export function BoardingContactModal() {
 
         {/* Entry method */}
         <div className="space-y-1.5">
-          <p className="text-slate-500 font-mono text-xs uppercase">Metodo ingresso</p>
+          <p className="text-slate-500 font-mono text-xs uppercase">Entry method</p>
           <div className="grid grid-cols-1 gap-1.5">
             {Object.entries(ENTRY_METHODS).map(([k, m]) => (
               <button
@@ -210,11 +207,11 @@ export function BoardingContactModal() {
                 <div className="flex-1">
                   <p className="font-bold">{m.label}</p>
                   <p className="text-slate-500 text-[10px]">
-                    {m.check ? `${m.check} (${m.difficulty}+)` : 'Nessun check'}
+                    {m.check ? `${m.check} (${m.difficulty}+)` : 'No check'}
                     {' · '}
                     {m.time}
                     {m.dm !== 0 && <span className="text-emerald-400"> · DM +{m.dm}</span>}
-                    {m.decompression && <span className="text-red-400"> · ⚠ decompressione</span>}
+                    {m.decompression && <span className="text-red-400"> · ⚠ decompression risk</span>}
                   </p>
                 </div>
               </button>
@@ -232,8 +229,8 @@ export function BoardingContactModal() {
                 : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-400'
             }`}
           >
-            {boarding.defenderRotating ? '↻ IN ROTAZIONE' : '↻ Rotazione'}
-            <span className="block text-[10px] text-slate-500">DM −1 Contatto</span>
+            {boarding.defenderRotating ? '↻ TUMBLING' : '↻ Tumbling'}
+            <span className="block text-[10px] text-slate-500">DM −1 Contact</span>
           </button>
           <button
             onClick={() => toggleForcedLinkage(boarding.id)}
@@ -243,15 +240,15 @@ export function BoardingContactModal() {
                 : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-400'
             }`}
           >
-            {boarding.forcedLinkage ? '🔗 LINKAGE ATTIVO' : '🔗 Forced Linkage'}
-            <span className="block text-[10px] text-slate-500">DM +2 Contatto</span>
+            {boarding.forcedLinkage ? '🔗 LINKAGE ACTIVE' : '🔗 Forced Linkage'}
+            <span className="block text-[10px] text-slate-500">DM +2 Contact</span>
           </button>
         </div>
 
         {/* DM summary */}
         {contactDM !== 0 && (
           <p className="text-center font-mono text-xs">
-            DM totale Contatto:{' '}
+            Total contact DM:{' '}
             <span className={contactDM > 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
               {contactDM > 0 ? '+' : ''}{contactDM}
             </span>
@@ -270,7 +267,7 @@ export function BoardingContactModal() {
                 <div className="text-right">
                   <p className="text-slate-500 font-mono text-xs">= {checkTotal}</p>
                   <p className={`font-mono text-xs font-bold ${checkPassed ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {checkPassed ? 'SUCCESSO' : 'FALLIMENTO'}
+                    {checkPassed ? 'SUCCESS' : 'FAILURE'}
                   </p>
                 </div>
               )}
@@ -292,7 +289,7 @@ export function BoardingContactModal() {
             onClick={handleAdvance}
             className="flex-1 py-2 bg-[--neon-cyan]/10 hover:bg-[--neon-cyan]/20 border border-[--neon-cyan] text-[--neon-cyan] font-mono text-xs rounded transition-colors"
           >
-            AVANZA AL CONFLITTO →
+            ADVANCE TO CONFLICT →
           </button>
         </div>
 

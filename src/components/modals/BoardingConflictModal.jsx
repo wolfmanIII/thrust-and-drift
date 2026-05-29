@@ -1,5 +1,5 @@
 /**
- * BoardingConflictModal — Fase 3: Conflitto.
+ * BoardingConflictModal — Phase 3: Conflict.
  * GM tracks 3 tactical objectives, rolls stacking checks, missed-shot table,
  * and advances to the outcome phase.
  * @see boarding-system-design.md §3.3, §5.3
@@ -17,9 +17,9 @@ import { rollStackingCheck, rollMissedShot } from '../../utils/boarding.js'
 // ---------------------------------------------------------------------------
 
 /**
- * @param {{ name: string, label: string, desc: string, conquered: boolean, onChange: (v: boolean) => void }} props
+ * @param {{ label: string, desc: string, conquered: boolean, onChange: (v: boolean) => void }} props
  */
-function ObjectiveRow({ name, label, desc, conquered, onChange }) {
+function ObjectiveRow({ label, desc, conquered, onChange }) {
   return (
     <button
       onClick={() => onChange(!conquered)}
@@ -39,7 +39,7 @@ function ObjectiveRow({ name, label, desc, conquered, onChange }) {
         <p className="text-slate-500 font-mono text-[10px]">{desc}</p>
       </div>
       <span className={`font-mono text-xs shrink-0 ${conquered ? 'text-emerald-400' : 'text-slate-600'}`}>
-        {conquered ? 'CONQUISTATO' : 'CONTESO'}
+        {conquered ? 'CAPTURED' : 'CONTESTED'}
       </span>
     </button>
   )
@@ -54,7 +54,7 @@ function RollResult({ result }) {
   return (
     <div className="bg-slate-900/60 rounded px-3 py-2 space-y-1">
       <p className="text-slate-500 font-mono text-[10px]">
-        Dado: [{result.results.join(', ')}] → {result.modified ?? result.total}
+        Dice: [{result.results.join(', ')}] → {result.modified ?? result.total}
       </p>
       <p className={`font-mono text-xs font-bold ${
         result.outcome === 'critical_system' ? 'text-red-400' :
@@ -73,9 +73,9 @@ function RollResult({ result }) {
 // ---------------------------------------------------------------------------
 
 const OBJECTIVES = [
-  { key: 'bridge',      label: 'Ponte',      desc: 'Controllo remoto tutti i sistemi' },
-  { key: 'engineering', label: 'Engineering', desc: 'Propulsione, reattore, supporto vitale' },
-  { key: 'turrets',     label: 'Torrette',   desc: 'Sistemi d\'arma' },
+  { key: 'bridge',      label: 'Bridge',      desc: 'Remote control of all systems' },
+  { key: 'engineering', label: 'Engineering', desc: 'Propulsion, reactor, life support' },
+  { key: 'turrets',     label: 'Turrets',     desc: 'Weapon systems' },
 ]
 
 export function BoardingConflictModal() {
@@ -100,22 +100,13 @@ export function BoardingConflictModal() {
 
   const allConquered = OBJECTIVES.every((o) => boarding.objectives[o.key])
 
-  function handleStack() {
-    setStackResult(rollStackingCheck())
-  }
-
-  function handleMissedShot() {
-    const res = rollMissedShot(armoredBulkhead)
-    setMissedResult(res)
-  }
-
   function handleAdvance() {
     advanceBoardingPhase(boarding.id)
     closeModal()
   }
 
   return (
-    <Modal title="⚔ CONFLITTO" onClose={closeModal}>
+    <Modal title="⚔ CONFLICT" onClose={closeModal}>
       <div className="space-y-4 min-w-80">
 
         {/* Ships banner */}
@@ -124,7 +115,7 @@ export function BoardingConflictModal() {
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: attacker.color }} />
             <span className="text-slate-200 font-mono text-xs font-bold truncate">{attacker.profile.name}</span>
           </div>
-          <span className="text-red-400 font-mono text-xs shrink-0">⚔ CONFLITTO</span>
+          <span className="text-red-400 font-mono text-xs shrink-0">⚔ CONFLICT</span>
           <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
             <span className="text-slate-200 font-mono text-xs font-bold truncate">{defender.profile.name}</span>
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: defender.color }} />
@@ -133,11 +124,10 @@ export function BoardingConflictModal() {
 
         {/* Tactical objectives */}
         <div className="space-y-1.5">
-          <p className="text-slate-500 font-mono text-xs uppercase">Obiettivi tattici</p>
+          <p className="text-slate-500 font-mono text-xs uppercase">Tactical objectives</p>
           {OBJECTIVES.map((o) => (
             <ObjectiveRow
               key={o.key}
-              name={o.key}
               label={o.label}
               desc={o.desc}
               conquered={boarding.objectives[o.key]}
@@ -146,7 +136,7 @@ export function BoardingConflictModal() {
           ))}
           {allConquered && (
             <p className="text-center text-emerald-400 font-mono text-xs py-1 font-bold">
-              ✓ NAVE PRESA — tutti gli obiettivi conquistati
+              ✓ SHIP TAKEN — all objectives captured
             </p>
           )}
         </div>
@@ -154,25 +144,25 @@ export function BoardingConflictModal() {
         {/* Stacking check */}
         <div className="bg-slate-800/60 rounded px-3 py-2.5 space-y-2">
           <p className="text-slate-400 font-mono text-xs uppercase font-bold">
-            Stacking — mirare bersaglio non-primo
+            Stacking — targeting non-first combatant
           </p>
           <p className="text-slate-500 font-mono text-[10px]">
-            Roll 2D ≥ 10, altrimenti primo della fila diventa bersaglio. (HG p.131)
+            Roll 2D ≥ 10, else first in line becomes the target. (HG p.131)
           </p>
           <button
-            onClick={handleStack}
+            onClick={() => setStackResult(rollStackingCheck())}
             className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-slate-200 font-mono text-xs rounded transition-colors"
           >
-            TIRA STACKING
+            ROLL STACKING
           </button>
           {stackResult && (
             <RollResult result={{
               results: stackResult.results,
-              total: stackResult.total,
+              total:   stackResult.total,
               outcome: stackResult.success ? 'success' : 'fail',
-              label: stackResult.success
-                ? `✓ Successo (${stackResult.total}) — puoi mirare al bersaglio scelto`
-                : `✗ Fallimento (${stackResult.total}) — il primo della fila diventa bersaglio`,
+              label:   stackResult.success
+                ? `✓ Success (${stackResult.total}) — target your chosen combatant`
+                : `✗ Failure (${stackResult.total}) — first in line becomes the target`,
             }} />
           )}
         </div>
@@ -180,10 +170,10 @@ export function BoardingConflictModal() {
         {/* Missed shot table */}
         <div className="bg-slate-800/60 rounded px-3 py-2.5 space-y-2">
           <p className="text-slate-400 font-mono text-xs uppercase font-bold">
-            Colpo mancato — dove finisce il proiettile
+            Missed shot — where does the bullet go?
           </p>
           <p className="text-slate-500 font-mono text-[10px]">
-            Ogni attacco che manca tira 2D su questa tabella. (HG p.132)
+            Every missed attack rolls 2D on this table. (HG p.132)
           </p>
           <label className="flex items-center gap-2 text-slate-400 font-mono text-xs cursor-pointer">
             <input
@@ -192,21 +182,21 @@ export function BoardingConflictModal() {
               onChange={(e) => setArmoredBulkhead(e.target.checked)}
               className="accent-[--neon-cyan]"
             />
-            Paratia corazzata (DM −1)
+            Armored bulkhead (DM −1)
           </label>
           <button
-            onClick={handleMissedShot}
+            onClick={() => setMissedResult(rollMissedShot(armoredBulkhead))}
             className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-slate-200 font-mono text-xs rounded transition-colors"
           >
-            TIRA COLPO MANCATO
+            ROLL MISSED SHOT
           </button>
           {missedResult && <RollResult result={missedResult} />}
         </div>
 
         {/* Weapon DM reminder */}
         <div className="bg-slate-900/40 rounded px-3 py-2">
-          <p className="text-slate-500 font-mono text-[10px] uppercase mb-1">DM armi in spazi stretti</p>
-          <p className="text-slate-400 font-mono text-xs">Fucili −2 · Armi pesanti −4 · Granate → 6D+</p>
+          <p className="text-slate-500 font-mono text-[10px] uppercase mb-1">Weapon DM in tight spaces</p>
+          <p className="text-slate-400 font-mono text-xs">Rifles −2 · Heavy weapons −4 · Grenades → 6D+</p>
         </div>
 
         {/* Advance to security */}
@@ -214,7 +204,7 @@ export function BoardingConflictModal() {
           onClick={handleAdvance}
           className="w-full py-2 bg-[--neon-cyan]/10 hover:bg-[--neon-cyan]/20 border border-[--neon-cyan] text-[--neon-cyan] font-mono text-xs rounded transition-colors"
         >
-          FINE CONFLITTO — AVANZA A SICUREZZA →
+          END CONFLICT — ADVANCE TO SECURITY →
         </button>
 
       </div>
