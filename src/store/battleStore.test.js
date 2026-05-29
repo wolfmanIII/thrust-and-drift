@@ -536,6 +536,24 @@ describe('rollAllInitiative', () => {
     useBattleStore.getState().rollAllInitiative()
     expect(useBattleStore.getState().ships[0].initiativeBonusNextRound).toBe(0)
   })
+
+  it('reads pilot skill from crew array format', () => {
+    const store = useBattleStore.getState()
+    // Low: crew array, pilot 0 — High: crew array, pilot 4
+    store.addShip(makeProfile({ id: 'p1', name: 'Low',  thrust: 1, crew: [{ id: 'c1', name: 'Pilot', skills: { pilot: 0 } }] }), { q: 0, r: 0 }, 'players', '#0f0')
+    store.addShip(makeProfile({ id: 'p2', name: 'High', thrust: 6, crew: [{ id: 'c2', name: 'Pilot', skills: { pilot: 4 } }] }), { q: 1, r: 0 }, 'npc',     '#f00')
+    useBattleStore.getState().rollAllInitiative()
+    const order      = useBattleStore.getState().initiativeOrder
+    const ships      = useBattleStore.getState().ships
+    const initiatives = order.map((id) => ships.find((s) => s.id === id).initiative)
+    expect(initiatives[0]).toBeGreaterThanOrEqual(initiatives[1])
+  })
+
+  it('does not crash with empty crew array', () => {
+    useBattleStore.getState().addShip(makeProfile({ crew: [] }), { q: 0, r: 0 }, 'players', '#fff')
+    expect(() => useBattleStore.getState().rollAllInitiative()).not.toThrow()
+    expect(useBattleStore.getState().ships[0].initiative).toBeGreaterThan(0)
+  })
 })
 
 // === THRUST ===
