@@ -168,3 +168,45 @@ describe('DogfightRoundModal — result phase', () => {
     expect(screen.getByText(/FINE DOGFIGHT/)).toBeInTheDocument()
   })
 })
+
+describe('DogfightRoundModal — escape check phase', () => {
+  // Viper thrust=4, Fighter thrust=3 — Fighter can't auto-escape (3 ≤ 4)
+
+  function declareFleeForFighter() {
+    // Ships rendered in insertion order: Viper first, Fighter second
+    const rimaneButtons = screen.getAllByText('RIMANE')
+    fireEvent.click(rimaneButtons[1])            // Fighter → FUGGE
+    fireEvent.click(screen.getByText(/CONFERMA FUGA/))
+  }
+
+  it('shows escape check section when fleeing ship lacks thrust advantage', () => {
+    setupDogfight()
+    render(<DogfightRoundModal />)
+    declareFleeForFighter()
+    expect(screen.getByText(/check inseguimento/i)).toBeInTheDocument()
+    expect(screen.getByText('Fuggitivo')).toBeInTheDocument()
+    expect(screen.getByText(/Inseg\./)).toBeInTheDocument()
+  })
+
+  it('CONFERMA CHECK FUGA disabled until flee and pursuer dice both entered', () => {
+    setupDogfight()
+    const { container } = render(<DogfightRoundModal />)
+    declareFleeForFighter()
+    expect(screen.getByText(/CONFERMA CHECK FUGA/)).toBeDisabled()
+    const inputs = container.querySelectorAll('input[type="number"]')
+    enterDicePair(inputs, 0, 3, 3)                   // flee dice only
+    expect(screen.getByText(/CONFERMA CHECK FUGA/)).toBeDisabled()
+    enterDicePair(inputs, 1, 2, 2)                   // pursuer dice
+    expect(screen.getByText(/CONFERMA CHECK FUGA/)).not.toBeDisabled()
+  })
+
+  it('shows live result preview (FUGA RIUSCITA or CATTURATO) when both dice entered', () => {
+    setupDogfight()
+    const { container } = render(<DogfightRoundModal />)
+    declareFleeForFighter()
+    const inputs = container.querySelectorAll('input[type="number"]')
+    enterDicePair(inputs, 0, 6, 6)    // flee max roll → large total
+    enterDicePair(inputs, 1, 1, 1)    // pursuer min roll → small total
+    expect(screen.getByText(/FUGA RIUSCITA|CATTURATO/)).toBeInTheDocument()
+  })
+})

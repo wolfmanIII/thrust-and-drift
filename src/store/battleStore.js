@@ -798,10 +798,11 @@ const useBattleStore = create((set, get) => {
   advanceDogfightMicroRound: wh(
     (groupId) => !!get().dogfights.find((g) => g.id === groupId && g.active),
     (groupId, checkResults) => {
-      const { round, phase } = get()
+      const { round, phase, ships } = get()
       const group = get().dogfights.find((g) => g.id === groupId)
       const { winnerId, margin, tied } = resolveDogfightChecks(checkResults)
       const nextMicroRound = group.microRound + 1
+      const winnerName = tied ? null : (ships.find((s) => s.id === winnerId)?.profile.name ?? winnerId)
 
       set((s) => ({
         dogfights: s.dogfights.map((g) =>
@@ -816,7 +817,7 @@ const useBattleStore = create((set, get) => {
           round, phase, type: 'action',
           message: tied
             ? `⚔ Dogfight micro-round ${group.microRound}: tie — no positional advantage.`
-            : `⚔ Dogfight micro-round ${group.microRound}: ${get().ships.find((s) => s.id === winnerId)?.profile.name ?? winnerId} wins (+${margin}).`,
+            : `⚔ Dogfight micro-round ${group.microRound}: ${winnerName} wins (+${margin}).`,
         })],
       }))
 

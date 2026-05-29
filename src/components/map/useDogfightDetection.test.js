@@ -1,9 +1,87 @@
-import { describe, it, expect } from 'vitest'
-import { detectDogfightGroups } from './useDogfightDetection.js'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { renderHook, act } from '@testing-library/react'
+import { detectDogfightGroups, useDogfightDetection } from './useDogfightDetection.js'
+import { useBattleStore } from '../../store/battleStore.js'
 
 function ship(id, q, r, faction, inDogfight = null) {
   return { id, position: { q, r }, faction, inDogfight }
 }
+
+// ── useDogfightDetection hook ────────────────────────────────────────────────
+
+describe('useDogfightDetection hook', () => {
+  function setHostileShipsInSameHex() {
+    useBattleStore.setState({
+      ships: [
+        { id: 's1', faction: 'players', position: { q: 0, r: 0 }, inDogfight: null, profile: { name: 'A', thrust: 4, tonnage: 100, crew: [] } },
+        { id: 's2', faction: 'npc',     position: { q: 0, r: 0 }, inDogfight: null, profile: { name: 'B', thrust: 4, tonnage: 100, crew: [] } },
+      ],
+    })
+  }
+
+  beforeEach(() => {
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ phase: 'movement', round: 1 })
+  })
+
+  it('fires detectedGroups on movement→attack in vectorial mode', () => {
+    setHostileShipsInSameHex()
+    const { result } = renderHook(() => useDogfightDetection())
+    act(() => { useBattleStore.setState({ phase: 'attack' }) })
+    expect(result.current.detectedGroups).toHaveLength(1)
+  })
+
+  it('does not fire in non-vectorial (initiative) mode', () => {
+    setHostileShipsInSameHex()
+    useBattleStore.setState({ combatMode: 'initiative' })
+    const { result } = renderHook(() => useDogfightDetection())
+    act(() => { useBattleStore.setState({ phase: 'attack' }) })
+    expect(result.current.detectedGroups).toHaveLength(0)
+  })
+
+  it('does not re-detect in the same round after undo+redo of phase transition', () => {
+    setHostileShipsInSameHex()
+    const { result } = renderHook(() => useDogfightDetection())
+
+    // Initial detection
+    act(() => { useBattleStore.setState({ phase: 'attack' }) })
+    expect(result.current.detectedGroups).toHaveLength(1)
+
+    // GM dismisses modal
+    act(() => { result.current.clearDetected() })
+    expect(result.current.detectedGroups).toHaveLength(0)
+
+    // Undo back to movement, then re-advance — same round
+    act(() => { useBattleStore.setState({ phase: 'movement' }) })
+    act(() => { useBattleStore.setState({ phase: 'attack' }) })
+
+    expect(result.current.detectedGroups).toHaveLength(0)
+  })
+
+  it('fires again after clearDetected when round increments', () => {
+    setHostileShipsInSameHex()
+    const { result } = renderHook(() => useDogfightDetection())
+
+    act(() => { useBattleStore.setState({ phase: 'attack' }) })
+    act(() => { result.current.clearDetected() })
+
+    // New round
+    act(() => { useBattleStore.setState({ phase: 'movement', round: 2 }) })
+    act(() => { useBattleStore.setState({ phase: 'attack' }) })
+
+    expect(result.current.detectedGroups).toHaveLength(1)
+  })
+
+  it('clearDetected resets detectedGroups to empty', () => {
+    setHostileShipsInSameHex()
+    const { result } = renderHook(() => useDogfightDetection())
+    act(() => { useBattleStore.setState({ phase: 'attack' }) })
+    act(() => { result.current.clearDetected() })
+    expect(result.current.detectedGroups).toHaveLength(0)
+  })
+})
+
+// ── detectDogfightGroups pure function ───────────────────────────────────────
 
 describe('detectDogfightGroups', () => {
   it('returns empty when no ships', () =>

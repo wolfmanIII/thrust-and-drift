@@ -51,9 +51,14 @@ export function useDogfightDetection() {
   const phase      = useBattleStore((s) => s.phase)
   const ships      = useBattleStore((s) => s.ships)
   const combatMode = useBattleStore((s) => s.combatMode)
+  const round      = useBattleStore((s) => s.round)
 
-  const prevPhaseRef = useRef(phase)
+  const prevPhaseRef      = useRef(phase)
+  const shipsRef          = useRef(ships)
+  const lastDetectedRound = useRef(-1)
   const [detectedGroups, setDetectedGroups] = useState([])
+
+  useEffect(() => { shipsRef.current = ships }, [ships])
 
   useEffect(() => {
     const prevPhase = prevPhaseRef.current
@@ -61,10 +66,15 @@ export function useDogfightDetection() {
 
     if (prevPhase !== 'movement' || phase !== 'attack') return
     if (combatMode !== 'vectorial') return
+    // One detection per round — undo+redo of the phase transition must not re-open the modal
+    if (round === lastDetectedRound.current) return
 
-    const groups = detectDogfightGroups(ships)
-    if (groups.length > 0) setDetectedGroups(groups)
-  }, [phase, ships, combatMode])
+    const groups = detectDogfightGroups(shipsRef.current)
+    if (groups.length > 0) {
+      lastDetectedRound.current = round
+      setDetectedGroups(groups)
+    }
+  }, [phase, combatMode, round])
 
   return {
     detectedGroups,

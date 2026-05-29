@@ -77,7 +77,9 @@ export function DogfightNotificationModal({ groups, onDone }) {
   const [outcome, setOutcome]         = useState(null)   // 'dogfight' | 'shortrange'
   const [pursuitData, setPursuitData] = useState(null)   // computed check result
 
-  const group      = groups[groupIdx]
+  const safeIdx    = Math.min(groupIdx, groups.length - 1)
+  const group      = groups[safeIdx]
+  if (!group) return null   // groups became empty (e.g. after undo)
   const groupShips = group.shipIds
     .map((id) => ships.find((s) => s.id === id))
     .filter(Boolean)

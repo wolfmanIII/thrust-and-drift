@@ -133,6 +133,13 @@ describe('DogfightNotificationModal — mixed intent → pursuit check', () => {
   })
 })
 
+describe('DogfightNotificationModal — safety guards', () => {
+  it('renders null when groups is empty (e.g. after undo)', () => {
+    const { container } = render(<DogfightNotificationModal groups={[]} onDone={() => {}} />)
+    expect(container.firstChild).toBeNull()
+  })
+})
+
 describe('DogfightNotificationModal — multiple groups', () => {
   it('shows group counter in title for multiple groups', () => {
     const { a, b } = setupTwoShips()

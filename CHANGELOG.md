@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.1] — 2026-05-29
+
+### Fixed
+- **DogfightNotificationModal** — crash when `groups` prop shrinks (e.g. mid-undo) while `groupIdx` is stale; added `safeIdx` clamp and `if (!group) return null` guard
+- **useDogfightDetection** — undo + redo of the movement→attack phase transition re-opened an already-processed dogfight notification modal; detection is now gated per-round via `lastDetectedRound` ref; ships read via ref to remove `ships` as a trigger dependency
+- **battleStore `advanceDogfightMicroRound`** — `get().ships.find()` was called inside `set()` updater; winner name now extracted before `set()`, consistent with surrounding patterns
+- **DogfightRoundModal escape check** — live preview (`EscapeCheckRow`) and commit handler (`handleEscapeCheckConfirm`) used separate inline DM formulas; extracted shared `escapeCheckTotals` pure function as single source of truth
+
+### Tests
+- 488 tests (up from 479) — +1 DogfightNotificationModal (empty groups guard), +5 useDogfightDetection hook (round guard, clearDetected, non-vectorial mode), +3 DogfightRoundModal escape check phase (reachable, button state, live preview)
+
+---
+
 ## [1.4.0] — 2026-05-29
 
 ### Added

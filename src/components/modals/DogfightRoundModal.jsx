@@ -80,30 +80,61 @@ function ShipCheckRow({ ship, dms, dice, onDice }) {
 }
 
 /**
+ * Compute escape check totals via rollDogfightPilot — single source of truth for
+ * both the live preview (EscapeCheckRow) and the commit handler (handleEscapeCheckConfirm).
+ * // MgT2e CRB p.138 §3.1
+ * @returns {{ fleeTotal: number, pursuerTotal: number, escaped: boolean|null } | null}
+ */
+function escapeCheckTotals(ship, pursuer, fleeDice, pursuerDice) {
+  if (!fleeDice) return null
+  const freeThrust = (s) => Math.max(0, (s.profile.thrust ?? 0) - (s.thrustUsedThisRound ?? 0))
+  const fleeResult = rollDogfightPilot({
+    pilotSkill:   getCrewSkill(ship.profile.crew, 'pilot'),
+    tonnage:      ship.profile.tonnage,
+    thrustDM:     freeThrust(ship),
+    diceOverride: fleeDice,
+  })
+  if (!pursuer) {
+    return { fleeTotal: fleeResult.total, pursuerTotal: 0, escaped: true }
+  }
+  if (!pursuerDice) {
+    // Flee total known, pursuer roll not yet entered — partial result (no verdict yet)
+    return { fleeTotal: fleeResult.total, pursuerTotal: null, escaped: null }
+  }
+  const pursuerResult = rollDogfightPilot({
+    pilotSkill:   getCrewSkill(pursuer.profile.crew, 'pilot'),
+    tonnage:      pursuer.profile.tonnage,
+    thrustDM:     freeThrust(pursuer),
+    diceOverride: pursuerDice,
+  })
+  return {
+    fleeTotal:    fleeResult.total,
+    pursuerTotal: pursuerResult.total,
+    escaped:      fleeResult.total > pursuerResult.total,
+  }
+}
+
+/**
  * One escape check row: fuggitivo dice + inseguitore dice, shows result live.
+ * Receives precomputed totals from the parent via escapeCheckTotals — no inline calculation.
  * // MgT2e CRB p.138 §3.1 — same pursuit formula as initial engagement
  */
-function EscapeCheckRow({ ship, pursuer, fleeRoll, pursuerRoll, onFleeRoll, onPursuerRoll }) {
-  const fleeDMs    = {
+function EscapeCheckRow({ ship, pursuer, totals, onFleeRoll, onPursuerRoll }) {
+  const freeThrust = (s) => Math.max(0, (s.profile.thrust ?? 0) - (s.thrustUsedThisRound ?? 0))
+  const fleeDMs = {
     pilot:   getCrewSkill(ship.profile.crew, 'pilot'),
     tonnage: getTonnageDM(ship.profile.tonnage),
-    thrust:  Math.max(0, (ship.profile.thrust ?? 0) - (ship.thrustUsedThisRound ?? 0)),
+    thrust:  freeThrust(ship),
   }
   const pursuerDMs = pursuer ? {
     pilot:   getCrewSkill(pursuer.profile.crew, 'pilot'),
     tonnage: getTonnageDM(pursuer.profile.tonnage),
-    thrust:  Math.max(0, (pursuer.profile.thrust ?? 0) - (pursuer.thrustUsedThisRound ?? 0)),
+    thrust:  freeThrust(pursuer),
   } : null
 
-  const fleeTotal = fleeRoll !== null
-    ? fleeRoll.total + fleeDMs.pilot + fleeDMs.tonnage + fleeDMs.thrust
-    : null
-  const pursuerTotal = pursuerRoll !== null && pursuerDMs
-    ? pursuerRoll.total + pursuerDMs.pilot + pursuerDMs.tonnage + pursuerDMs.thrust
-    : null
-
-  const resolved = fleeTotal !== null && pursuerTotal !== null
-    ? { escaped: fleeTotal > pursuerTotal, margin: Math.abs(fleeTotal - pursuerTotal) }
+  const { fleeTotal = null, pursuerTotal = null, escaped = null } = totals ?? {}
+  const resolved = escaped !== null
+    ? { escaped, margin: Math.abs((fleeTotal ?? 0) - (pursuerTotal ?? 0)) }
     : null
 
   return (
@@ -267,35 +298,9 @@ export function DogfightRoundModal() {
   const computeEscape = (ship) => {
     const d = escapeDice[ship.id]
     if (!d?.fleeRoll) return null
-    const fleeDMs = {
-      pilot:   getCrewSkill(ship.profile.crew, 'pilot'),
-      tonnage: getTonnageDM(ship.profile.tonnage),
-      thrust:  Math.max(0, (ship.profile.thrust ?? 0) - (ship.thrustUsedThisRound ?? 0)),
-    }
-    const r = rollDogfightPilot({
-      pilotSkill: fleeDMs.pilot,
-      tonnage:    ship.profile.tonnage,
-      thrustDM:   fleeDMs.thrust,
-      diceOverride: d.fleeRoll,
-    })
-    const fleeTotal = r.total
-
     const enemies = getEnemies(ship)
-    if (enemies.length === 0 || !d.pursuerRoll) return { escaped: true, fleeTotal, pursuerTotal: 0 }
-
-    const pursuer = bestPilot(enemies)
-    const pThrustFree = Math.max(0, (pursuer.profile.thrust ?? 0) - (pursuer.thrustUsedThisRound ?? 0))
-    const pr = rollDogfightPilot({
-      pilotSkill: getCrewSkill(pursuer.profile.crew, 'pilot'),
-      tonnage:    pursuer.profile.tonnage,
-      thrustDM:   pThrustFree,
-      diceOverride: d.pursuerRoll,
-    })
-    return {
-      escaped: fleeTotal > pr.total,
-      fleeTotal,
-      pursuerTotal: pr.total,
-    }
+    const pursuer = enemies.length > 0 ? bestPilot(enemies) : null
+    return escapeCheckTotals(ship, pursuer, d.fleeRoll, d.pursuerRoll)
   }
 
   const setEscapeDiceFor = (shipId, key, roll) =>
@@ -473,8 +478,7 @@ export function DogfightRoundModal() {
                     key={ship.id}
                     ship={ship}
                     pursuer={pursuer}
-                    fleeRoll={d.fleeRoll}
-                    pursuerRoll={d.pursuerRoll}
+                    totals={escapeCheckTotals(ship, pursuer, d.fleeRoll, d.pursuerRoll)}
                     onFleeRoll={(r) => setEscapeDiceFor(ship.id, 'fleeRoll', r)}
                     onPursuerRoll={(r) => setEscapeDiceFor(ship.id, 'pursuerRoll', r)}
                   />
