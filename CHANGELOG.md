@@ -6,6 +6,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.2] — 2026-05-29
+
+### Added
+- **Snapshot-based undo** — `⟲` button in HUD + `Ctrl+Z` / `Cmd+Z` shortcut restore the previous game state; stack capped at 20 entries; button disabled (dimmed) when stack is empty
+- `pushHistory()` / `undoLastAction()` in `battleStore` — all 19 user-facing actions push a snapshot before mutating; `_skipHistory` / `_skipThreshold` flags suppress push for internal recursive calls; `resetBattle` and `importBattleState` clear the stack
+
+### Tests
+- 370 tests (up from 355) — new suites: `pushHistory`/`undoLastAction` core behavior, 20-entry cap, `resetBattle` clears stack, `_skipThreshold`/`_skipHistory` flag suppression, `advancePhase→startNextRound` single-push invariant; HUD undo button disabled/enabled/click behavior
+
+---
+
 ## [1.3.1] — 2026-05-29
 
 ### Changed

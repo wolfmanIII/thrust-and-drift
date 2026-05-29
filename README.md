@@ -23,6 +23,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase |
 | **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals (200ms delay) |
 | **Battle log** | Timestamped event log with colour-coded entry types |
+| **Undo (Ctrl+Z)** | Snapshot-based undo — restores previous game state; 20-step stack; `⟲` button in HUD |
 | **Session save / resume** | Export session to JSON; resume flow shows a full preview before loading |
 | **Autosave** | IndexedDB autosave after every significant action; one-click restore on Dashboard |
 | **Error boundary** | Global React error boundary — catches crashes, shows recovery UI |
@@ -133,7 +134,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-287 tests across utils, Zustand stores, hooks, and UI components.
+370 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 

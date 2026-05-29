@@ -1029,6 +1029,22 @@ Funzionalità incluse nella prima versione funzionante:
 | Critical hits | lista sistemi colpiti con severità, se presenti |
 | Iniziativa | valore estratto nel round corrente |
 
+### 13.3b Versione 1.3.1 — Localizzazione UI ✅ COMPLETATA
+
+- Tutte le stringhe visibili tradotte in inglese (22 file); documentazione `doc/` invariata
+- Brand watermark (logo + "THRUST & DRIFT") in basso a destra sul canvas di battaglia
+- Battle Log collassato per impostazione predefinita
+
+### 13.3c Versione 1.3.2 — Undo ✅ COMPLETATA
+
+**Undo snapshot-based** — implementato:
+
+- `battleStore`: `undoStack[]` (max 20 entry), `pushHistory()`, `undoLastAction()` — tutte le 19 azioni user-facing chiamano `pushHistory` prima della mutazione
+- Flag `_skipHistory` su `addCriticalHit` e `_skipThreshold` su `applyDamage` impediscono doppio push nelle chiamate ricorsive interne
+- `resetBattle` e `importBattleState` azzerano lo stack
+- `HUD`: pulsante `⟲` (disabilitato/opaco se stack vuoto) + shortcut `Ctrl+Z` / `Cmd+Z` globale
+- 370 test (da 355) — nuove suite: comportamento core, cap 20, pulizia stack, flag di soppressione, invariante `advancePhase→startNextRound`, pulsante HUD
+
 ### 13.4 Versione 1.3 — Effetti Visivi Canvas
 
 Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`).  
