@@ -50,24 +50,24 @@ describe('ContextMenu — ship type', () => {
   it('shows attack menu item during attack phase', () => {
     useBattleStore.setState({ phase: 'attack' })
     render(<ContextMenu />)
-    expect(screen.getByText(/Attacca/)).toBeInTheDocument()
+    expect(screen.getByText(/Attack/)).toBeInTheDocument()
   })
 
   it('hides combat actions during setup phase', () => {
     render(<ContextMenu />)  // phase = 'setup' from resetBattle
-    expect(screen.queryByText(/Attacca/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/Applica Thrust/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/Azione equipaggio/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Attack/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Apply Thrust/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Crew Action/)).not.toBeInTheDocument()
   })
 
   it('shows thrust items in vectorial mode during acceleration phase', () => {
     useBattleStore.setState({ combatMode: 'vectorial', phase: 'acceleration' })
     render(<ContextMenu />)
-    expect(screen.getByText(/Applica Thrust/)).toBeInTheDocument()
-    expect(screen.getByText(/Dichiara Evasione/)).toBeInTheDocument()
+    expect(screen.getByText(/Apply Thrust/)).toBeInTheDocument()
+    expect(screen.getByText(/Declare Evasion/)).toBeInTheDocument()
   })
 
-  it('shows "Lancia Missili" when ship has Missile Rack (attack phase)', () => {
+  it('shows "Launch Missiles" when ship has Missile Rack (attack phase)', () => {
     useBattleStore.setState({
       phase: 'attack',
       ships: [makeShip({
@@ -80,25 +80,25 @@ describe('ContextMenu — ship type', () => {
       })],
     })
     render(<ContextMenu />)
-    expect(screen.getByText(/Lancia Missili/)).toBeInTheDocument()
+    expect(screen.getByText(/Launch Missiles/)).toBeInTheDocument()
   })
 
-  it('hides "Lancia Missili" when ship has no Missile Rack', () => {
+  it('hides "Launch Missiles" when ship has no Missile Rack', () => {
     useBattleStore.setState({ phase: 'attack' })
     render(<ContextMenu />)
-    expect(screen.queryByText(/Lancia Missili/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Launch Missiles/)).not.toBeInTheDocument()
   })
 
   it('hides thrust items in basic mode even during acceleration phase', () => {
     useBattleStore.setState({ combatMode: 'basic', phase: 'acceleration' })
     render(<ContextMenu />)
-    expect(screen.queryByText(/Applica Thrust/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/Dichiara Evasione/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Apply Thrust/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Declare Evasion/)).not.toBeInTheDocument()
   })
 
   it('remove option calls removeShip', () => {
     render(<ContextMenu />)
-    fireEvent.click(screen.getByText(/Rimuovi dalla battaglia/))
+    fireEvent.click(screen.getByText(/Remove from battle/))
     expect(useBattleStore.getState().ships).toHaveLength(0)
   })
 })
@@ -129,7 +129,7 @@ describe('ContextMenu — missile type', () => {
 
   it('remove option deletes missile', () => {
     render(<ContextMenu />)
-    fireEvent.click(screen.getByText(/Rimuovi salvo/))
+    fireEvent.click(screen.getByText(/Remove salvo/))
     expect(useBattleStore.getState().missiles).toHaveLength(0)
   })
 })
@@ -143,38 +143,38 @@ describe('ContextMenu — empty type', () => {
 
   it('shows add ship option', () => {
     render(<ContextMenu />)
-    expect(screen.getByText(/Aggiungi nave qui/)).toBeInTheDocument()
+    expect(screen.getByText(/Add ship here/)).toBeInTheDocument()
   })
 
   it('shows initiative roll option only during initiative phase', () => {
     useBattleStore.setState({ phase: 'initiative' })
     render(<ContextMenu />)
-    expect(screen.getByText(/Tira iniziativa/)).toBeInTheDocument()
+    expect(screen.getByText(/Roll initiative/)).toBeInTheDocument()
   })
 
   it('hides initiative roll option outside initiative phase', () => {
     useBattleStore.setState({ phase: 'setup' })
     render(<ContextMenu />)
-    expect(screen.queryByText(/Tira iniziativa/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Roll initiative/)).not.toBeInTheDocument()
   })
 
-  it('click Fase successiva calls advancePhase', () => {
+  it('click Next phase calls advancePhase', () => {
     useBattleStore.setState({ phase: 'setup' })
     render(<ContextMenu />)
-    fireEvent.click(screen.getByText(/Fase successiva/))
+    fireEvent.click(screen.getByText(/Next phase/))
     expect(useBattleStore.getState().phase).toBe('initiative')
   })
 
-  it('click Carica profili opens shipProfile modal', () => {
+  it('click Load profiles opens shipProfile modal', () => {
     render(<ContextMenu />)
-    fireEvent.click(screen.getByText(/Carica profili/))
+    fireEvent.click(screen.getByText(/Load profiles/))
     expect(useUiStore.getState().activeModal).toBe('shipProfile')
     expect(useUiStore.getState().modalPayload).toEqual({ mode: 'import' })
   })
 
-  it('click Salva profili opens shipProfile modal with export mode', () => {
+  it('click Save profiles opens shipProfile modal with export mode', () => {
     render(<ContextMenu />)
-    fireEvent.click(screen.getByText(/Salva profili/))
+    fireEvent.click(screen.getByText(/Save profiles/))
     expect(useUiStore.getState().modalPayload).toEqual({ mode: 'export' })
   })
 })

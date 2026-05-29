@@ -8,9 +8,10 @@ beforeEach(() => {
 })
 
 describe('BattleLog — empty state', () => {
-  it('shows empty message when log is empty', () => {
+  it('shows empty message when expanded', () => {
     render(<BattleLog />)
-    expect(screen.getByText('Nessun evento registrato.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /BATTLE LOG/ }))
+    expect(screen.getByText('No events recorded.')).toBeInTheDocument()
   })
 
   it('shows count (0) in header', () => {
@@ -27,13 +28,15 @@ describe('BattleLog — with entries', () => {
     )
   })
 
-  it('renders log entry message', () => {
+  it('renders log entry message when expanded', () => {
     render(<BattleLog />)
-    expect(screen.getByText(/Alpha aggiunta alla battaglia/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /BATTLE LOG/ }))
+    expect(screen.getByText(/Alpha added to battle/)).toBeInTheDocument()
   })
 
-  it('shows round prefix R1', () => {
+  it('shows round prefix R1 when expanded', () => {
     render(<BattleLog />)
+    fireEvent.click(screen.getByRole('button', { name: /BATTLE LOG/ }))
     expect(screen.getByText('R1')).toBeInTheDocument()
   })
 
@@ -44,42 +47,42 @@ describe('BattleLog — with entries', () => {
 })
 
 describe('BattleLog — collapse toggle', () => {
-  it('entries visible by default', () => {
+  it('entries hidden by default', () => {
     render(<BattleLog />)
-    expect(screen.getByText('Nessun evento registrato.')).toBeInTheDocument()
+    expect(screen.queryByText('No events recorded.')).not.toBeInTheDocument()
   })
 
-  it('entries hidden when collapsed', () => {
+  it('entries visible after expanding', () => {
     render(<BattleLog />)
-    fireEvent.click(screen.getByRole('button', { name: /LOG BATTAGLIA/ }))
-    expect(screen.queryByText('Nessun evento registrato.')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /BATTLE LOG/ }))
+    expect(screen.getByText('No events recorded.')).toBeInTheDocument()
   })
 
-  it('entries visible again after second click', () => {
+  it('entries hidden again after second click', () => {
     render(<BattleLog />)
-    const btn = screen.getByRole('button', { name: /LOG BATTAGLIA/ })
+    const btn = screen.getByRole('button', { name: /BATTLE LOG/ })
     fireEvent.click(btn)
     fireEvent.click(btn)
-    expect(screen.getByText('Nessun evento registrato.')).toBeInTheDocument()
+    expect(screen.queryByText('No events recorded.')).not.toBeInTheDocument()
   })
 
-  it('chevron flips on collapse', () => {
+  it('chevron flips on expand', () => {
     render(<BattleLog />)
-    expect(screen.getByText('▼')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: /LOG BATTAGLIA/ }))
     expect(screen.getByText('▲')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /BATTLE LOG/ }))
+    expect(screen.getByText('▼')).toBeInTheDocument()
   })
 })
 
 describe('BattleLog — clearLog', () => {
-  it('CANCELLA button clears log', () => {
+  it('CLEAR button clears log', () => {
     useBattleStore.getState().addShip(
       { id: 'p1', name: 'Alpha', hull: 10, thrust: 2, turrets: [], crew: { pilot: 1, gunner: 0 } },
       { q: 0, r: 0 }, 'players', '#0f0'
     )
     render(<BattleLog />)
     expect(useBattleStore.getState().log).toHaveLength(1)
-    fireEvent.click(screen.getByText('CANCELLA'))
+    fireEvent.click(screen.getByText('CLEAR'))
     expect(useBattleStore.getState().log).toHaveLength(0)
   })
 
@@ -89,7 +92,8 @@ describe('BattleLog — clearLog', () => {
       { q: 0, r: 0 }, 'players', '#0f0'
     )
     render(<BattleLog />)
-    fireEvent.click(screen.getByText('CANCELLA'))
-    expect(screen.getByText('Nessun evento registrato.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /BATTLE LOG/ }))
+    fireEvent.click(screen.getByText('CLEAR'))
+    expect(screen.getByText('No events recorded.')).toBeInTheDocument()
   })
 })

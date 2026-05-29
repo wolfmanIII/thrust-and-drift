@@ -33,7 +33,7 @@ describe('ErrorBoundary — normal operation', () => {
         <Bomb explode={false} />
       </ErrorBoundary>
     )
-    expect(screen.queryByText(/ERRORE CRITICO/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/CRITICAL ERROR/)).not.toBeInTheDocument()
   })
 })
 
@@ -44,7 +44,7 @@ describe('ErrorBoundary — error handling', () => {
         <Bomb explode={true} />
       </ErrorBoundary>
     )
-    expect(screen.getByText(/ERRORE CRITICO/)).toBeInTheDocument()
+    expect(screen.getByText(/CRITICAL ERROR/)).toBeInTheDocument()
   })
 
   it('displays the error message', () => {
@@ -62,7 +62,7 @@ describe('ErrorBoundary — error handling', () => {
         <Bomb explode={true} />
       </ErrorBoundary>
     )
-    expect(screen.getByText(/RICARICA PAGINA/)).toBeInTheDocument()
+    expect(screen.getByText(/RELOAD PAGE/)).toBeInTheDocument()
   })
 
   it('calls window.location.reload on button click', () => {
@@ -77,7 +77,7 @@ describe('ErrorBoundary — error handling', () => {
         <Bomb explode={true} />
       </ErrorBoundary>
     )
-    fireEvent.click(screen.getByText(/RICARICA PAGINA/))
+    fireEvent.click(screen.getByText(/RELOAD PAGE/))
     expect(reloadMock).toHaveBeenCalledOnce()
   })
 
