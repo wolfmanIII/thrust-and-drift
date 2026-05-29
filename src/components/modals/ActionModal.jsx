@@ -89,6 +89,7 @@ export function ActionModal() {
   const [targetShipId, setTargetShipId]         = useState(null)
   const [rollResult, setRollResult]             = useState(null)
   const [manualDice, setManualDice]             = useState(null)
+  const [skillOverride, setSkillOverride]       = useState(null)
 
   const isPlayer = ship.faction === 'players'
 
@@ -115,6 +116,7 @@ export function ActionModal() {
     setRollResult(null)
     setTargetShipId(null)
     setManualDice(null)
+    setSkillOverride(action.skillLevel)
   }
 
   const handleRoll = () => {
@@ -126,7 +128,7 @@ export function ActionModal() {
       result = { display: 'Automatic', success: true, effect: 0, finalTotal: 8 }
     } else {
       const roll = isPlayer ? manualDice : roll2D6()
-      const dm   = selectedAction.skillLevel
+      const dm   = skillOverride ?? selectedAction.skillLevel
       result = formatCheckResult(roll, dm, selectedAction.difficulty)
     }
 
@@ -288,6 +290,32 @@ export function ActionModal() {
               <p className="text-slate-500 font-mono text-xs leading-relaxed border-l-2 border-slate-700 pl-3">
                 {selectedAction.description}
               </p>
+            )}
+
+            {/* Skill level override — always shown when non-auto action selected */}
+            {selectedAction && selectedAction.difficulty !== 'auto' && (
+              <div className="flex items-center gap-2 bg-slate-800/60 rounded px-3 py-1.5">
+                <span className="text-slate-500 font-mono text-xs flex-1">Skill DM</span>
+                <input
+                  type="number"
+                  min={-3}
+                  max={5}
+                  value={skillOverride ?? selectedAction.skillLevel}
+                  onChange={(e) => setSkillOverride(Math.max(-3, Math.min(5, Number(e.target.value) || 0)))}
+                  className="w-12 bg-slate-700 border border-slate-600 text-[--neon-cyan] font-mono text-sm rounded text-center px-1 py-0.5 focus:outline-none focus:border-[--neon-cyan]/60"
+                  aria-label="Skill level override"
+                />
+                {skillOverride !== selectedAction.skillLevel && (
+                  <button
+                    type="button"
+                    onClick={() => setSkillOverride(selectedAction.skillLevel)}
+                    className="text-slate-600 hover:text-slate-400 font-mono text-xs transition-colors"
+                    title="Reset to base skill"
+                  >
+                    ↺
+                  </button>
+                )}
+              </div>
             )}
 
             {/* Player manual dice entry — shown when an action requiring a roll is selected */}
