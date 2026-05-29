@@ -18,8 +18,14 @@ import { hexDistance, hexAdd } from './hex.js'
  * @param {number} [tacticsEffect=0]  Effect of prior Tactics(naval) check
  * @returns {{ roll: object, total: number, breakdown: object }}
  */
-export function rollInitiative(pilotSkill, thrust, tacticsEffect = 0) {
-  const roll = roll2D6()
+/**
+ * @param {number} pilotSkill
+ * @param {number} thrust
+ * @param {number} [tacticsEffect=0]
+ * @param {{ results: number[], total: number }|null} [diceOverride]  Pre-rolled dice (player manual entry)
+ */
+export function rollInitiative(pilotSkill, thrust, tacticsEffect = 0, diceOverride = null) {
+  const roll = diceOverride ?? roll2D6()
   const total = roll.total + pilotSkill + thrust + tacticsEffect
   return {
     roll,
@@ -56,8 +62,9 @@ export function rollAttack({
   targetSizeDM,
   evasiveDM,
   sensorLockDM = 0,
+  diceOverride = null,
 }) {
-  const roll = roll2D6()
+  const roll = diceOverride ?? roll2D6()
   const total =
     roll.total +
     gunnerSkill +
