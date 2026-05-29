@@ -30,6 +30,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Error boundary** | Global React error boundary — catches crashes, shows recovery UI |
 | **Profile I/O** | Import/export ship profiles via JSON files |
 | **Safety modals** | Confirm before deleting profiles; confirm before leaving battle without saving |
+| **Legal footer** | Fixed Mongoose Publishing disclaimer on all screens; "About" modal with full Fair Use text |
 
 ---
 
@@ -177,7 +178,8 @@ src/
 │       ├── BattleLog.jsx       ← Collapsible event log
 │       ├── PhaseTracker.jsx    ← Initiative order display
 │       ├── Tooltip.jsx         ← Portal-based tooltip
-│       └── ErrorBoundary.jsx   ← Global React error boundary
+│       ├── ErrorBoundary.jsx   ← Global React error boundary
+│       └── LegalFooter.jsx     ← Fixed Mongoose Publishing disclaimer + About modal
 ├── data/
 │   ├── weapons.js              ← Weapon tables, traits, damage
 │   ├── rangeBands.js           ← Distance band thresholds (hex)

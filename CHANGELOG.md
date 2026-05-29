@@ -6,7 +6,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [1.3.8] — 2026-05-29
+## [1.3.9] — 2026-05-29
+
+### Added
+- **Legal footer** — fixed `h-7` bar on all screens (Dashboard + Battle); abbreviated Mongoose Publishing disclaimer; "About" link opens modal with full Fair Use disclaimer text per Mongoose Publishing policy (May 2025)
 
 ### Fixed
 - **HUD tooltips** — `position="bottom"` on all HUD buttons; horizontal clamp via `useLayoutEffect` prevents tooltip cutoff near left/right viewport edges
