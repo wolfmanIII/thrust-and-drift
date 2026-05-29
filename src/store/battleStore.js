@@ -278,15 +278,17 @@ const useBattleStore = create((set, get) => {
 
   /**
    * Roll initiative for all ships and sort the order.
-   * @param {Record<string, number>} [tacticsEffects]  Optional per-shipId tactics bonus
+   * @param {Record<string, number>} [tacticsEffects]   Optional per-shipId tactics bonus
+   * @param {Record<string, object>} [diceOverrides]    Pre-rolled dice per shipId (player manual entry)
    */
-  rollAllInitiative: wh((tacticsEffects = {}) => {
+  rollAllInitiative: wh((tacticsEffects = {}, diceOverrides = {}) => {
     const { ships, round } = get()
     const rolled = ships.map((ship) => {
       const result = rollInitiative(
         getCrewSkill(ship.profile.crew, 'pilot'),
         ship.profile.thrust,
         (tacticsEffects[ship.id] ?? 0) + (ship.initiativeBonusNextRound ?? 0),
+        diceOverrides[ship.id] ?? null,
       )
       return { id: ship.id, initiative: result.total, roll: result }
     })
