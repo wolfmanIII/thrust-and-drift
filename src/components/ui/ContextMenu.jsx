@@ -5,8 +5,9 @@
  */
 
 import { useEffect, useRef } from 'react'
-import { useUiStore } from '../../store/uiStore.js'
+import { useUiStore }    from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
+import { hexDistance }   from '../../utils/hex.js'
 
 // === SHARED PRIMITIVES ===
 
@@ -59,8 +60,16 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
   const removeShip = useBattleStore((s) => s.removeShip)
   const combatMode = useBattleStore((s) => s.combatMode)
   const phase      = useBattleStore((s) => s.phase)
+  const ships      = useBattleStore((s) => s.ships)
 
   const open = (modal, payload) => { openModal(modal, payload); close() }
+
+  const boardingTargets = ships.filter((t) => {
+    if (t.faction === ship.faction) return false
+    if (hexDistance(ship.position, t.position) > 1) return false
+    const mDriveDisabled = t.criticalHits?.some((c) => c.system === 'm-drive' && c.disabled)
+    return mDriveDisabled || ship.profile.thrust >= t.profile.thrust
+  })
 
   return (
     <MenuShell x={x} y={y} menuRef={menuRef}>
@@ -100,6 +109,21 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       {phase === 'actions' && (
         <>
           <MenuItem icon="⚡" label="Crew Action…" onClick={() => open('action', { shipId: targetId })} />
+          <MenuDivider />
+        </>
+      )}
+
+      {/* ── Boarding: available when adjacent to a valid enemy ───── */}
+      {boardingTargets.length > 0 && (
+        <>
+          {boardingTargets.map((t) => (
+            <MenuItem
+              key={t.id}
+              icon="⚔"
+              label={`Board ${t.profile.name}…`}
+              onClick={() => open('boarding-setup', { attackerId: targetId })}
+            />
+          ))}
           <MenuDivider />
         </>
       )}

@@ -25,6 +25,10 @@ import { MissileLaunchModal } from './components/modals/MissileLaunchModal.jsx'
 import { DogfightNotificationModal } from './components/modals/DogfightNotificationModal.jsx'
 import { DogfightRoundModal }        from './components/modals/DogfightRoundModal.jsx'
 import { PassingAttackModal }        from './components/modals/PassingAttackModal.jsx'
+import { BoardingSetupModal }    from './components/modals/BoardingSetupModal.jsx'
+import { BoardingContactModal }  from './components/modals/BoardingContactModal.jsx'
+import { BoardingConflictModal } from './components/modals/BoardingConflictModal.jsx'
+import { BoardingOutcomeModal }  from './components/modals/BoardingOutcomeModal.jsx'
 import { HelpScreen }      from './components/help/HelpScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
 import { useUiStore }      from './store/uiStore.js'
@@ -121,6 +125,12 @@ export function App() {
 
       {/* ── Passing encounter window ─────────────────────────────────── */}
       <PassingAttackModal />
+
+      {/* ── Boarding modals ──────────────────────────────────────────── */}
+      <BoardingSetupModal />
+      <BoardingContactModal />
+      <BoardingConflictModal />
+      <BoardingOutcomeModal />
 
       {/* ── Dogfight engagement notification ────────────────────────── */}
       {detectedGroups.length > 0 && (

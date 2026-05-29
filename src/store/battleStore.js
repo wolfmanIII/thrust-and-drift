@@ -1085,6 +1085,27 @@ const useBattleStore = create((set, get) => {
     },
   ),
 
+  /**
+   * Change a ship's faction (used after boarding outcome 'attacker_wins').
+   * @param {string} shipId
+   * @param {'players'|'npc'|'neutral'} newFaction
+   */
+  updateShipFaction: wh(
+    (shipId) => !!get().ships.find((s) => s.id === shipId),
+    (shipId, newFaction) => {
+      const { round, phase } = get()
+      set((s) => ({
+        ships: s.ships.map((sh) =>
+          sh.id !== shipId ? sh : { ...sh, faction: newFaction }
+        ),
+        log: [...s.log, makeLogEntry({
+          round, phase, type: 'system',
+          message: `⚔ ${s.ships.find((sh) => sh.id === shipId)?.profile.name ?? shipId} faction changed to ${newFaction}.`,
+        })],
+      }))
+    },
+  ),
+
   // === RESET ===
 
   /**

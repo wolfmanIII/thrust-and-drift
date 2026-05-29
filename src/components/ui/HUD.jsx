@@ -39,8 +39,10 @@ export function HUD() {
   const gotoScreen          = useUiStore((s) => s.gotoScreen)
   const openModal           = useUiStore((s) => s.openModal)
   const dogfights           = useBattleStore((s) => s.dogfights)
+  const boardings           = useBattleStore((s) => s.boardings)
 
-  const activeDogfights = dogfights.filter((g) => g.active)
+  const activeDogfights  = dogfights.filter((g) => g.active)
+  const activeBoardings  = boardings.filter((b) => b.outcome === null)
 
   const [showExitWarning, setShowExitWarning] = useState(false)
 
@@ -193,6 +195,37 @@ export function HUD() {
               className="w-full py-1 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors"
             >
               MICRO-ROUND {group.microRound} →
+            </button>
+          </div>
+        )
+      })}
+
+      {/* Boarding badges */}
+      {activeBoardings.map((boarding) => {
+        const attacker = ships.find((s) => s.id === boarding.attackerId)
+        const defender = ships.find((s) => s.id === boarding.defenderId)
+        const phaseLabel = { contact: 'CONTATTO', conflict: 'CONFLITTO', security: 'SICUREZZA' }[boarding.phase] ?? boarding.phase.toUpperCase()
+        const modalId = boarding.phase === 'contact'
+          ? 'boarding-contact'
+          : boarding.phase === 'conflict'
+            ? 'boarding-conflict'
+            : 'boarding-outcome'
+        return (
+          <div
+            key={boarding.id}
+            className="bg-slate-900/80 border border-red-500/30 rounded px-3 py-2 backdrop-blur-sm pointer-events-auto space-y-1.5 min-w-48"
+          >
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-red-400 font-mono text-xs font-bold shrink-0">⚔ BOARDING</span>
+              <span className="text-slate-500 font-mono text-xs truncate">
+                {attacker?.profile.name ?? '?'} → {defender?.profile.name ?? '?'}
+              </span>
+            </div>
+            <button
+              onClick={() => openModal(modalId, { boardingAttackerId: boarding.attackerId })}
+              className="w-full py-1 bg-red-500/10 border border-red-500/40 text-red-300 font-mono text-xs tracking-widest rounded hover:bg-red-500/20 transition-colors"
+            >
+              {phaseLabel} →
             </button>
           </div>
         )
