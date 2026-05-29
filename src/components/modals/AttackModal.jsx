@@ -15,6 +15,7 @@ import { rollDice, roll2D6 } from '../../utils/dice.js'
 import { getCriticalLocation, getCriticalEffect } from '../../data/criticalHits.js'
 import { useAttackSetup } from './useAttackSetup.js'
 import { emitEffect } from '../../utils/effectQueue.js'
+import { DiceInput } from '../forms/DiceInput.jsx'
 
 /** Weapons that fire a visible beam/ray toward the target. */
 const BEAM_WEAPONS = ['Pulse Laser', 'Beam Laser', 'Particle Beam', 'Railgun']
@@ -174,6 +175,7 @@ function AttackConfigStep({
  *   attackerName: string,
  *   targetName: string,
  *   weaponKey: string,
+ *   isPlayer: boolean,
  *   dmBreakdown: { gunnerSkill: number, weaponDM: number, rangeDM: number, sizeDM: number, evasiveDM: number, sensorLockDM: number, totalDM: number },
  *   attackResult: object|null,
  *   setAttackResult: Function,
@@ -183,11 +185,14 @@ function AttackConfigStep({
  */
 function AttackRollStep({
   attackerName, targetName, weaponKey,
+  isPlayer,
   dmBreakdown,
   attackResult, setAttackResult, onNext, onClose,
 }) {
   const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
-  const handleRoll = () => {
+  const [manualDice, setManualDice] = useState(() => roll2D6())
+
+  const handleRoll = (diceOverride = null) => {
     const result = rollAttack({
       gunnerSkill,
       dexDM: 0,
@@ -197,6 +202,7 @@ function AttackRollStep({
       targetSizeDM: sizeDM,
       evasiveDM,
       sensorLockDM,
+      diceOverride,
     })
     setAttackResult(result)
   }
@@ -209,12 +215,29 @@ function AttackRollStep({
         </div>
 
         {!attackResult ? (
-          <button
-            onClick={handleRoll}
-            className="w-full py-3 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-lg tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
-          >
-            🎲 ROLL 2D6
-          </button>
+          isPlayer ? (
+            /* Player: manual dice entry */
+            <div className="space-y-3">
+              <div className="flex items-center justify-center gap-2 bg-slate-800 rounded px-4 py-3">
+                <span className="text-slate-400 font-mono text-xs mr-2">2D6:</span>
+                <DiceInput value={manualDice} onChange={setManualDice} />
+              </div>
+              <button
+                onClick={() => handleRoll(manualDice)}
+                className="w-full py-3 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-lg tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+              >
+                CONFIRM ROLL
+              </button>
+            </div>
+          ) : (
+            /* NPC: auto-roll */
+            <button
+              onClick={() => handleRoll(null)}
+              className="w-full py-3 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-lg tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+            >
+              🎲 ROLL 2D6
+            </button>
+          )
         ) : (
           <div className="space-y-3">
             <div className="bg-slate-800 rounded p-4 text-center font-mono">
@@ -585,6 +608,7 @@ export function AttackModal() {
         attackerName={attacker.profile.name}
         targetName={target?.profile.name ?? '?'}
         weaponKey={weaponKey}
+        isPlayer={attacker.faction === 'players'}
         dmBreakdown={dmBreakdown}
         attackResult={attackResult}
         setAttackResult={setAttackResult}

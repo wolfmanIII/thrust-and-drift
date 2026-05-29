@@ -11,6 +11,7 @@ import { useBattleStore } from '../../store/battleStore.js'
 import { roll2D6, formatCheckResult } from '../../utils/dice.js'
 import { CREW_ACTIONS } from '../../data/crewActions.js'
 import { migrateCrew, CREW_SKILLS } from '../../utils/crew.js'
+import { DiceInput } from '../forms/DiceInput.jsx'
 
 /**
  * Apply the mechanical effect of a successful action to the battle state.
@@ -87,6 +88,9 @@ export function ActionModal() {
   const [selectedAction, setSelectedAction]     = useState(null)
   const [targetShipId, setTargetShipId]         = useState(null)
   const [rollResult, setRollResult]             = useState(null)
+  const [manualDice, setManualDice]             = useState(() => roll2D6())
+
+  const isPlayer = ship.faction === 'players'
 
   if (!ship) return null
 
@@ -110,6 +114,7 @@ export function ActionModal() {
     setSelectedAction(action)
     setRollResult(null)
     setTargetShipId(null)
+    setManualDice(roll2D6())
   }
 
   const handleRoll = () => {
@@ -120,7 +125,7 @@ export function ActionModal() {
     if (selectedAction.difficulty === 'auto') {
       result = { display: 'Automatic', success: true, effect: 0, finalTotal: 8 }
     } else {
-      const roll = roll2D6()
+      const roll = isPlayer ? manualDice : roll2D6()
       const dm   = selectedAction.skillLevel
       result = formatCheckResult(roll, dm, selectedAction.difficulty)
     }
@@ -283,12 +288,20 @@ export function ActionModal() {
               </p>
             )}
 
+            {/* Player manual dice entry — shown when an action requiring a roll is selected */}
+            {isPlayer && selectedAction && selectedAction.difficulty !== 'auto' && (
+              <div className="flex items-center gap-3 bg-slate-800 rounded px-3 py-2">
+                <span className="text-slate-500 font-mono text-xs">2D6:</span>
+                <DiceInput value={manualDice} onChange={setManualDice} />
+              </div>
+            )}
+
             <button
               onClick={handleRoll}
               disabled={!canRoll}
               className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              🎲 EXECUTE ACTION
+              {isPlayer && selectedAction?.difficulty !== 'auto' ? 'CONFIRM ROLL' : '🎲 EXECUTE ACTION'}
             </button>
           </>
         )}
