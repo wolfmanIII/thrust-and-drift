@@ -6,6 +6,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.1] — 2026-05-29
+
+### Changed
+- **UI completamente in inglese** — traduzione di tutte le stringhe visibili (22 file) da italiano a inglese; documentazione `doc/` invariata
+- **Brand watermark in battaglia** — logo + titolo "THRUST & DRIFT" in basso a destra sul canvas di combattimento
+- **Battle Log collassato di default** — il log parte chiuso per non oscurare la mappa al caricamento
+- **README** aggiornato per rispecchiare le nuove label inglesi dell'interfaccia
+
+---
+
 ## [1.3.0] — 2026-05-28
 
 ### Added
