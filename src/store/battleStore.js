@@ -125,6 +125,8 @@ const useBattleStore = create((set, get) => {
   missiles: [],
   /** @type {object[]} DogfightGroup array */
   dogfights: [],
+  /** @type {object[]} BoardingAction array */
+  boardings: [],
   /** @type {object[]} LogEntry array */
   log: [],
   /** @type {object[]} Transient passing encounters — cleared after movement phase resolution. */
@@ -144,11 +146,12 @@ const useBattleStore = create((set, get) => {
    * Called internally before every user-facing mutation.
    */
   pushHistory: () => {
-    const { ships, missiles, dogfights, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, round, phase, initiativeOrder, currentActorIndex } = get()
     const snapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
       dogfights: structuredClone(dogfights),
+      boardings: structuredClone(boardings),
       round,
       phase,
       initiativeOrder: [...initiativeOrder],
@@ -162,11 +165,12 @@ const useBattleStore = create((set, get) => {
   undoLastAction: () => {
     const { undoStack, redoStack, log } = get()
     if (undoStack.length === 0) return
-    const { ships, missiles, dogfights, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, round, phase, initiativeOrder, currentActorIndex } = get()
     const redoSnapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
       dogfights: structuredClone(dogfights),
+      boardings: structuredClone(boardings),
       round, phase,
       initiativeOrder: [...initiativeOrder],
       currentActorIndex,
@@ -186,11 +190,12 @@ const useBattleStore = create((set, get) => {
   redoLastAction: () => {
     const { redoStack, undoStack, log } = get()
     if (redoStack.length === 0) return
-    const { ships, missiles, dogfights, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, round, phase, initiativeOrder, currentActorIndex } = get()
     const undoSnapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
       dogfights: structuredClone(dogfights),
+      boardings: structuredClone(boardings),
       round, phase,
       initiativeOrder: [...initiativeOrder],
       currentActorIndex,
@@ -238,6 +243,7 @@ const useBattleStore = create((set, get) => {
       sensorLockDM: 0,
       turretsNeedingReload: 0,
       inDogfight: null,
+      inBoarding: null,
     }
     set((s) => ({
       ships: [...s.ships, instance],
@@ -912,6 +918,173 @@ const useBattleStore = create((set, get) => {
     }))
   },
 
+  // === BOARDING ===
+  // HG 2022 pp.125–135
+
+  /**
+   * Initiate a boarding action between two ships.
+   * Preconditions: distance ≤ 1, attacker thrust ≥ defender thrust (or defender M-Drive disabled).
+   * @param {string} attackerId
+   * @param {string} defenderId
+   */
+  startBoarding: wh(
+    (attackerId, defenderId) => {
+      const { ships } = get()
+      const attacker = ships.find((s) => s.id === attackerId)
+      const defender = ships.find((s) => s.id === defenderId)
+      return !!(attacker && defender && attacker.faction !== defender.faction)
+    },
+    (attackerId, defenderId) => {
+      const { round, phase } = get()
+      const id = uuidv7()
+      const boarding = {
+        id,
+        attackerId,
+        defenderId,
+        phase: 'contact',
+        contactMethod: null,
+        defenderRotating: false,
+        forcedLinkage: false,
+        hullResilience: null,
+        hullDamageSoFar: 0,
+        objectives: { bridge: false, engineering: false, turrets: false },
+        outcome: null,
+        log: [],
+      }
+      set((s) => ({
+        boardings: [...s.boardings, boarding],
+        ships: s.ships.map((sh) =>
+          sh.id === attackerId || sh.id === defenderId
+            ? { ...sh, inBoarding: id }
+            : sh
+        ),
+        log: [...s.log, makeLogEntry({
+          round, phase, type: 'system',
+          message: `⚔ Boarding initiated — ${s.ships.find((sh) => sh.id === attackerId)?.profile.name ?? attackerId} → ${s.ships.find((sh) => sh.id === defenderId)?.profile.name ?? defenderId}.`,
+        })],
+      }))
+    },
+  ),
+
+  /**
+   * Advance a boarding to the next phase.
+   * contact → conflict → security
+   * @param {string} boardingId
+   */
+  advanceBoardingPhase: wh(
+    (boardingId) => !!get().boardings.find((b) => b.id === boardingId && b.outcome === null),
+    (boardingId) => {
+      const { round, phase } = get()
+      const NEXT = { contact: 'conflict', conflict: 'security' }
+      set((s) => ({
+        boardings: s.boardings.map((b) =>
+          b.id !== boardingId ? b : { ...b, phase: NEXT[b.phase] ?? b.phase }
+        ),
+        log: [...s.log, makeLogEntry({
+          round, phase, type: 'system',
+          message: `⚔ Boarding phase advanced — ${NEXT[s.boardings.find((b) => b.id === boardingId)?.phase] ?? '?'}.`,
+        })],
+      }))
+    },
+  ),
+
+  /**
+   * Set the contact entry method for phase 2.
+   * @param {string} boardingId
+   * @param {string} method  key from ENTRY_METHODS in boarding.js
+   */
+  setContactMethod: wh(
+    (boardingId) => !!get().boardings.find((b) => b.id === boardingId && b.phase === 'contact'),
+    (boardingId, method) => {
+      set((s) => ({
+        boardings: s.boardings.map((b) =>
+          b.id !== boardingId ? b : { ...b, contactMethod: method }
+        ),
+      }))
+    },
+  ),
+
+  /**
+   * Toggle the defender's tumbling-rotation countermeasure (DM −1 to contact checks).
+   * @param {string} boardingId
+   */
+  toggleDefenderRotation: wh(
+    (boardingId) => !!get().boardings.find((b) => b.id === boardingId && b.phase === 'contact'),
+    (boardingId) => {
+      set((s) => ({
+        boardings: s.boardings.map((b) =>
+          b.id !== boardingId ? b : { ...b, defenderRotating: !b.defenderRotating }
+        ),
+      }))
+    },
+  ),
+
+  /**
+   * Toggle forced linkage apparatus (DM +2 to contact checks, locks defender movement).
+   * @param {string} boardingId
+   */
+  toggleForcedLinkage: wh(
+    (boardingId) => !!get().boardings.find((b) => b.id === boardingId && b.phase === 'contact'),
+    (boardingId) => {
+      set((s) => ({
+        boardings: s.boardings.map((b) =>
+          b.id !== boardingId ? b : { ...b, forcedLinkage: !b.forcedLinkage }
+        ),
+      }))
+    },
+  ),
+
+  /**
+   * Mark a tactical objective as conquered or not.
+   * @param {string} boardingId
+   * @param {'bridge'|'engineering'|'turrets'} objective
+   * @param {boolean} conquered
+   */
+  setObjective: wh(
+    (boardingId) => !!get().boardings.find((b) => b.id === boardingId && b.phase === 'conflict'),
+    (boardingId, objective, conquered) => {
+      const { round, phase } = get()
+      set((s) => ({
+        boardings: s.boardings.map((b) =>
+          b.id !== boardingId ? b : { ...b, objectives: { ...b.objectives, [objective]: conquered } }
+        ),
+        log: [...s.log, makeLogEntry({
+          round, phase, type: 'system',
+          message: `⚔ Objective ${objective} — ${conquered ? 'CAPTURED' : 'lost'}.`,
+        })],
+      }))
+    },
+  ),
+
+  /**
+   * Resolve a boarding action: set outcome, clear inBoarding on both ships.
+   * If outcome is 'attacker_wins', caller should call updateShipFaction separately if desired.
+   * @param {string} boardingId
+   * @param {'attacker_wins'|'defender_wins'|'ship_destroyed'} outcome
+   */
+  resolveBoarding: wh(
+    (boardingId) => !!get().boardings.find((b) => b.id === boardingId && b.outcome === null),
+    (boardingId, outcome) => {
+      const { round, phase } = get()
+      set((s) => {
+        const boarding = s.boardings.find((b) => b.id === boardingId)
+        const label = outcome === 'attacker_wins' ? 'ATTACKER WINS' : outcome === 'defender_wins' ? 'DEFENDER WINS' : 'SHIP DESTROYED'
+        return {
+          boardings: s.boardings.map((b) =>
+            b.id !== boardingId ? b : { ...b, outcome, phase: 'security' }
+          ),
+          ships: s.ships.map((sh) =>
+            sh.inBoarding === boardingId ? { ...sh, inBoarding: null } : sh
+          ),
+          log: [...s.log, makeLogEntry({
+            round, phase, type: 'system',
+            message: `⚔ Boarding resolved — ${label}. ${boarding ? `(${s.ships.find((sh) => sh.id === boarding.attackerId)?.profile.name ?? ''} → ${s.ships.find((sh) => sh.id === boarding.defenderId)?.profile.name ?? ''})` : ''}`,
+          })],
+        }
+      })
+    },
+  ),
+
   // === RESET ===
 
   /**
@@ -933,6 +1106,7 @@ const useBattleStore = create((set, get) => {
     ships: [],
     missiles: [],
     dogfights: [],
+    boardings: [],
     log: [],
     mapSettings: { scale: 1 },
     undoStack: [],
@@ -942,8 +1116,8 @@ const useBattleStore = create((set, get) => {
   // === IMPORT / EXPORT ===
 
   exportBattleState: () => {
-    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, log, mapSettings } = get()
-    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, log, mapSettings, savedAt: new Date().toISOString() })
+    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings } = get()
+    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, savedAt: new Date().toISOString() })
   },
 
   /**
@@ -963,6 +1137,7 @@ const useBattleStore = create((set, get) => {
       ships: battle.ships ?? [],
       missiles: battle.missiles ?? [],
       dogfights: battle.dogfights ?? [],
+      boardings: battle.boardings ?? [],
       log: battle.log ?? [],
       mapSettings: battle.mapSettings ?? { scale: 1 },
       undoStack: [],
