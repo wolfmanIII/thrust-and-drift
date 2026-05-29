@@ -20,6 +20,8 @@ const SECTIONS = [
   { id: 'crew',          label: 'Crew System' },
   { id: 'undo-redo',     label: 'Undo / Redo' },
   { id: 'save-resume',   label: 'Save & Resume' },
+  { id: 'dogfight',      label: 'Dogfight' },
+  { id: 'boarding',      label: 'Boarding' },
 ]
 
 function Section({ id, title, children }) {
@@ -346,6 +348,84 @@ export function HelpScreen() {
             <p>Ship profiles are separate from battle sessions. Use <span className="text-slate-200">↑ EXPORT</span> and <span className="text-slate-200">↓ IMPORT</span> in the profile panel to share or back up profiles independently.</p>
           </Sub>
           <Note>Clicking ⌂ in the HUD returns to the Dashboard. A confirmation modal warns that unsaved battle data will be lost — save first if you need to resume.</Note>
+        </Section>
+
+        {/* DOGFIGHT */}
+        <Section id="dogfight" title="Dogfight">
+          <p>
+            A dogfight is a close-range sub-system that activates when hostile ships occupy the same hex at the
+            end of the Movement phase. Combat shifts to 6-second micro-rounds. (MgT2e CRB p.138)
+          </p>
+
+          <Sub title="ENGAGEMENT">
+            <p>The <span className="text-slate-200">CONFIRM INTENTS</span> modal opens for each detected group. For each ship the GM declares YES (engage) or NO (avoid):</p>
+            <KV k="Both YES" v="Dogfight activates immediately." />
+            <KV k="Both NO" v="Ships treated as Short Range (distance 1) — no dogfight." />
+            <KV k="Mixed" v="Pursuit check required — see below." />
+          </Sub>
+
+          <Sub title="PURSUIT CHECK">
+            <p>Formula: <span className="text-slate-200">2D6 + Pilot + Tonnage DM + free Thrust</span></p>
+            <KV k="Free Thrust" v="Profile thrust − thrust used this round." />
+            <KV k="Tonnage DM" v="&lt;50t → 0; 50–99t → −1; 100–199t → −2; −1 per 100t above 100." />
+            <p>Pursuer total {'>'} evader total → dogfight. Otherwise → Short Range, no dogfight.</p>
+          </Sub>
+
+          <Sub title="MICRO-ROUND FLOW">
+            <p>Open the round from the <span className="text-slate-200">⚔ DOGFIGHT</span> badge in the HUD.</p>
+            <KV k="Step 1 — Escape" v="Declare which ships attempt to flee. Auto-escape if thrust advantage or enemies not pursuing. Otherwise, pursuit check." />
+            <KV k="Step 2 — Pilot check" v="2D6 + Pilot + Tonnage DM + Thrust + previous round bonus DM." />
+            <KV k="Step 3 — Result" v="Winner: +2 DM to attacks. Loser: −2 DM. Tie: fixed weapons cannot fire, turrets OK." />
+            <KV k="Step 4 — Advance" v="ADVANCE → MICRO-ROUND N+1/6. After round 6 the dogfight ends automatically." />
+          </Sub>
+
+          <Sub title="TOKEN VISUALS">
+            <p>Ships in a dogfight show a <span className="text-amber-400">pulsing amber ring</span> and ⚔ badge. Ghost position is hidden during dogfight.</p>
+          </Sub>
+
+          <Note>Ships that pass within Short range (≤ 2 hexes) along their trajectories without ending in the same hex trigger the Passing Encounter window instead — a quick fire opportunity before they separate.</Note>
+        </Section>
+
+        {/* BOARDING */}
+        <Section id="boarding" title="Boarding">
+          <p>
+            A boarding action initiates close-quarters combat inside the target ship. Resolves in 4 phases:
+            Approach → Contact → Conflict → Security. (HG 2022 pp.125–135)
+          </p>
+
+          <Sub title="TRIGGERING">
+            <p>Right-click the attacker ship → <span className="text-slate-200">⚔ Board [target]…</span></p>
+            <p>Visible only when: distance ≤ 1, attacker thrust ≥ target thrust (or target M-Drive disabled), different factions.</p>
+          </Sub>
+
+          <Sub title="PHASE 2 — CONTACT">
+            <p>Select the entry method in the <span className="text-slate-200">⚔ CONTACT</span> modal:</p>
+            <KV k="Airlock (cooperative)" v="No check — instant." />
+            <KV k="Airlock (forced)" v="Mechanic (STR) 14+ — 2D rounds + 1D to open." />
+            <KV k="Maintenance Hatch" v="Mechanic (STR) 12+ — 2D rounds. ⚠ Decompression risk." />
+            <KV k="Breaching Tube" v="No check — &lt; 2 min. No decompression." />
+            <KV k="Forced Linkage" v="Pilot (DEX) 8+ — DM +2 to all Contact checks. Locks defender movement." />
+            <KV k="Hull Cut" v="Mechanic (DEX) 8+/round — reduces component Resilience until breach. ⚠ Decompression risk." />
+            <p>Modifiers: <span className="text-red-400">↻ Tumbling</span> (DM −1) · <span className="text-emerald-400">🔗 Forced Linkage</span> (DM +2)</p>
+          </Sub>
+
+          <Sub title="PHASE 3 — CONFLICT">
+            <p>Track objectives in the <span className="text-slate-200">⚔ CONFLICT</span> modal:</p>
+            <KV k="Bridge" v="Remote control of all systems." />
+            <KV k="Engineering" v="Propulsion, reactor, life support." />
+            <KV k="Turrets" v="Weapon systems." />
+            <p>Tools: <span className="text-slate-200">ROLL STACKING</span> (2D ≥ 10 to target non-first combatant) · <span className="text-slate-200">ROLL MISSED SHOT</span> (2D table per missed attack).</p>
+            <p>Weapon DM in tight spaces: Rifles −2 · Heavy weapons −4 · Grenades → 6D+.</p>
+          </Sub>
+
+          <Sub title="PHASE 4 — SECURITY">
+            <p>Choose outcome in the <span className="text-slate-200">⚔ SECURITY</span> modal:</p>
+            <KV k="Attacker wins" v="Optional faction transfer — captured ship joins attacker's faction." />
+            <KV k="Defender repels" v="Boarders eliminated, captured, or driven off." />
+            <KV k="Ship destroyed" v="Target destroyed by internal damage during Conflict." />
+          </Sub>
+
+          <Note>Active boardings show a ⚔ BOARDING badge in the HUD. Click it to reopen the current phase modal. Ships in a boarding do not participate in the standard Attack phase.</Note>
         </Section>
 
       </main>
