@@ -15,6 +15,7 @@ import {
   pixelToHex,
   hexRound,
   getRangeBand,
+  segmentMinDistance,
   HEX_DIRECTIONS,
 } from './hex.js'
 
@@ -167,6 +168,52 @@ describe('hexToPixel / pixelToHex round-trip', () => {
 
 // === RANGE BANDS ===
 // // MgT2e CRB p.164
+
+// === segmentMinDistance ===
+// // Traveller Companion p.172 — Ships That Pass in the Night
+
+describe('segmentMinDistance', () => {
+  it('ships crossing head-on reach distance 0', () => {
+    // A: (0,0) → (4,0),  B: (4,0) → (0,0)  — they swap positions, minDist = 0
+    const d = segmentMinDistance({ q: 0, r: 0 }, { q: 4, r: 0 }, { q: 4, r: 0 }, { q: 0, r: 0 })
+    expect(d).toBe(0)
+  })
+
+  it('ships stationary at same position = 0', () => {
+    expect(segmentMinDistance({ q: 2, r: 1 }, { q: 2, r: 1 }, { q: 2, r: 1 }, { q: 2, r: 1 })).toBe(0)
+  })
+
+  it('ships moving in parallel lanes 3 hexes apart stay at 3', () => {
+    // A: (0,0) → (5,0),  B: (0,3) → (5,3) — lane separation stays constant
+    const d = segmentMinDistance({ q: 0, r: 0 }, { q: 5, r: 0 }, { q: 0, r: 3 }, { q: 5, r: 3 })
+    expect(d).toBe(3)
+  })
+
+  it('ships converging reach Short range (≤ 2)', () => {
+    // A starts far left and moves right; B starts far right and moves left
+    // They pass each other at t=0.5
+    const d = segmentMinDistance({ q: 0, r: 0 }, { q: 6, r: 0 }, { q: 6, r: 2 }, { q: 0, r: 2 })
+    expect(d).toBeLessThanOrEqual(2)
+  })
+
+  it('ships moving away from each other: min is the starting distance', () => {
+    // A at (0,0) moving further left; B at (3,0) moving further right
+    const d = segmentMinDistance({ q: 0, r: 0 }, { q: -3, r: 0 }, { q: 3, r: 0 }, { q: 6, r: 0 })
+    expect(d).toBe(3) // starting distance, monotonically increasing
+  })
+
+  it('ships already adjacent at start stay adjacent throughout = 1', () => {
+    // A: (0,0) → (3,0),  B: (1,0) → (4,0) — same direction, same speed, always 1 apart
+    const d = segmentMinDistance({ q: 0, r: 0 }, { q: 3, r: 0 }, { q: 1, r: 0 }, { q: 4, r: 0 })
+    expect(d).toBe(1)
+  })
+
+  it('is symmetric (swap A and B)', () => {
+    const a0 = { q: 0, r: 0 }, a1 = { q: 5, r: -2 }
+    const b0 = { q: 4, r: 1 }, b1 = { q: -1, r: 3 }
+    expect(segmentMinDistance(a0, a1, b0, b1)).toBe(segmentMinDistance(b0, b1, a0, a1))
+  })
+})
 
 describe('getRangeBand', () => {
   const CASES = [

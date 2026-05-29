@@ -8,6 +8,7 @@ import { create } from 'zustand'
 import { v7 as uuidv7 } from 'uuid'
 import { exportBattle, importBattle } from '../utils/io.js'
 import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount } from '../utils/combat.js'
+import { hexAdd, hexDistance, segmentMinDistance } from '../utils/hex.js'
 import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
 import { getCrewSkill } from '../utils/crew.js'
@@ -126,6 +127,8 @@ const useBattleStore = create((set, get) => {
   dogfights: [],
   /** @type {object[]} LogEntry array */
   log: [],
+  /** @type {object[]} Transient passing encounters — cleared after movement phase resolution. */
+  passingEncounters: [],
 
   mapSettings: { scale: 1 },
 
@@ -358,6 +361,28 @@ const useBattleStore = create((set, get) => {
   /** Move all ships and missiles by their current vector (movement phase). */
   resolveMovement: wh(() => {
     const { ships, missiles, round } = get()
+
+    // Detect "ships that pass in the night" before committing new positions.
+    // // Traveller Companion p.172 — ships passing within Short range during movement
+    const encounters = []
+    for (let i = 0; i < ships.length; i++) {
+      for (let j = i + 1; j < ships.length; j++) {
+        const a = ships[i]
+        const b = ships[j]
+        if (a.faction === b.faction) continue
+        if (a.inDogfight || b.inDogfight) continue
+        const a1 = hexAdd(a.position, a.vector)
+        const b1 = hexAdd(b.position, b.vector)
+        const minDist  = segmentMinDistance(a.position, a1, b.position, b1)
+        const finalDist = hexDistance(a1, b1)
+        // Only flag when they pass within Short range but don't end in the same hex
+        // (same-hex landings are handled by dogfight detection at movement→attack transition).
+        if (minDist <= 2 && finalDist > 0) {
+          encounters.push({ id: uuidv7(), shipAId: a.id, shipBId: b.id, minDistance: minDist })
+        }
+      }
+    }
+
     const movedShips = ships.map((sh) => ({
       ...sh,
       position: applyMovement(sh.position, sh.vector),
@@ -381,8 +406,14 @@ const useBattleStore = create((set, get) => {
       ships: movedShips,
       missiles: movedMissiles.filter((m) => m.thrustRemaining >= 0),
       log: [...s.log, ...entries],
+      passingEncounters: encounters,
     }))
   }),
+
+  /** Remove a single passing encounter by id (GM dismissed it via PassingAttackModal). */
+  dismissPassingEncounter: (id) => {
+    set((s) => ({ passingEncounters: s.passingEncounters.filter((e) => e.id !== id) }))
+  },
 
   // === DAMAGE ===
 

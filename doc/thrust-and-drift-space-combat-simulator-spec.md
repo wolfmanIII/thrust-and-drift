@@ -1141,7 +1141,26 @@ Tutti gli effetti sono puramente decorativi — non bloccano input, non modifica
 - Electronic warfare (jamming), evasive action avanzata
 - Vedi `dogfight-system-design.md`
 
-### 13.6 Versione 1.5 — Abbordaggio
+### 13.6 Versione 1.4.2 — Ships That Pass in the Night
+
+Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le traiettorie si avvicinano a distanza ≤ Short (≤ 2 hex) in qualche punto del percorso — anche se le posizioni finali sono distanti.
+
+**Meccanica** (spec §10.2, Traveller Companion p.172):
+
+- Calcolo della distanza minima tra i segmenti di traiettoria di due navi (posizione iniziale → posizione finale per ogni nave)
+- Se `minDistance ≤ 2` e le navi sono di fazioni ostili → finestra di fuoco temporanea
+- Il GM viene notificato via modal; può risolvere un attacco rapido (senza spostarsi dalla fase Movimento) oppure ignorare
+- L'attacco usa le normali regole AttackModal ma con range band calcolata sulla distanza minima, non sulla posizione finale
+- Le navi completano comunque il movimento dopo la risoluzione
+
+**Scope tecnico:**
+
+- `utils/hex.js` — `segmentMinDistance(a0, a1, b0, b1)`: distanza minima tra due segmenti hex
+- `battleStore` — `applyMovement` rileva le coppie "passing" e le espone come `passingEncounters[]` temporanei
+- `PassingAttackModal` — modal leggero: mostra coppia navi, range band del punto di minima distanza, pulsanti "ATTACK" / "SKIP"
+- Nessun nuovo store slice permanente — `passingEncounters` viene svuotato dopo la fase Movimento
+
+### 13.7 Versione 1.5 — Abbordaggio
 
 - 4 fasi: Approccio → Contatto → Conflitto → Sicurezza (HG 2022 pp.125–135)
 - Metodi ingresso: airlock, breaching tube, forced linkage, taglio scafo con resilienza per armatura

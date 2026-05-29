@@ -136,6 +136,48 @@ export function hexRound(hex) {
   return { q: rq, r: rr }
 }
 
+// === SEGMENT DISTANCE ===
+
+/**
+ * Minimum hex distance between two simultaneous linear paths over t ∈ [0,1].
+ * Models "ships that pass in the night": both ships move from their start to end
+ * positions at the same rate. Returns the closest approach in hex units.
+ * // Traveller Companion p.172 — simultaneous movement
+ *
+ * Uses analytic breakpoint search on cube coordinates: hexDist(t) =
+ * max(|dq(t)|, |dr(t)|, |ds(t)|) is piecewise-linear, so its minimum
+ * occurs at t=0, t=1, or where one component crosses zero.
+ *
+ * @param {{ q: number, r: number }} a0  Ship A start position
+ * @param {{ q: number, r: number }} a1  Ship A end position
+ * @param {{ q: number, r: number }} b0  Ship B start position
+ * @param {{ q: number, r: number }} b1  Ship B end position
+ * @returns {number}
+ */
+export function segmentMinDistance(a0, a1, b0, b1) {
+  const dq0 = a0.q - b0.q
+  const dr0 = a0.r - b0.r
+  const dvq = (a1.q - a0.q) - (b1.q - b0.q)
+  const dvr = (a1.r - a0.r) - (b1.r - b0.r)
+  // ds component: s = -q - r, so dvs = -(dvq + dvr)
+  const dvs = -(dvq + dvr)
+  const ds0 = -(dq0 + dr0)
+
+  const candidates = [0, 1]
+  if (dvq !== 0) candidates.push(-dq0 / dvq)
+  if (dvr !== 0) candidates.push(-dr0 / dvr)
+  if (dvs !== 0) candidates.push(-ds0 / dvs)
+
+  let minDist = Infinity
+  for (const t of candidates) {
+    if (t < 0 || t > 1) continue
+    const dq = dq0 + t * dvq
+    const dr = dr0 + t * dvr
+    minDist = Math.min(minDist, Math.max(Math.abs(dq), Math.abs(dr), Math.abs(dq + dr)))
+  }
+  return minDist
+}
+
 // === RANGE BANDS ===
 
 /**

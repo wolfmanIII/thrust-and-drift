@@ -652,6 +652,82 @@ describe('resolveMovement', () => {
     // thrustRemaining becomes -1 after decrement → filtered out
     expect(useBattleStore.getState().missiles.find(m => m.id === missileId)).toBeUndefined()
   })
+
+  // ── passing encounters ──────────────────────────────────────────────────
+
+  it('creates passing encounter when hostile ships cross within Short range', () => {
+    // A at (0,0) moving E×5; B at (5,1) moving W×5 — they converge to within 1 hex
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'B' }), { q: 5, r: 1 }, 'npc',     '#f00')
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().updateShip(a.id, { vector: { q: 5, r: 0 } })
+    useBattleStore.getState().updateShip(b.id, { vector: { q: -5, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    const encounters = useBattleStore.getState().passingEncounters
+    expect(encounters).toHaveLength(1)
+    expect(encounters[0].shipAId).toBe(a.id)
+    expect(encounters[0].shipBId).toBe(b.id)
+    expect(encounters[0].minDistance).toBeLessThanOrEqual(2)
+  })
+
+  it('does not create encounter for same-faction ships', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'players', '#fff')
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().updateShip(a.id, { vector: { q: 5, r: 0 } })
+    useBattleStore.getState().updateShip(b.id, { vector: { q: -5, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
+  })
+
+  it('does not create encounter when ships end in the same hex (dogfight territory)', () => {
+    // A at (0,0) with vector (2,0) → ends at (2,0)
+    // B at (4,0) with vector (-2,0) → ends at (2,0)
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 4, r: 0 }, 'npc',     '#f00')
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().updateShip(a.id, { vector: { q: 2, r: 0 } })
+    useBattleStore.getState().updateShip(b.id, { vector: { q: -2, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
+  })
+
+  it('does not create encounter for ships already in a dogfight', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 1 }, 'npc',     '#f00')
+    const [a, b] = useBattleStore.getState().ships
+    // Manually mark as in dogfight
+    useBattleStore.setState({
+      ships: useBattleStore.getState().ships.map((s) => ({ ...s, inDogfight: 'grp-x' })),
+    })
+    useBattleStore.getState().updateShip(a.id, { vector: { q: 5, r: 0 } })
+    useBattleStore.getState().updateShip(b.id, { vector: { q: -5, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
+  })
+})
+
+describe('dismissPassingEncounter', () => {
+  it('removes the encounter with the matching id', () => {
+    useBattleStore.setState({
+      passingEncounters: [
+        { id: 'e1', shipAId: 'a', shipBId: 'b', minDistance: 1 },
+        { id: 'e2', shipAId: 'c', shipBId: 'd', minDistance: 2 },
+      ],
+    })
+    useBattleStore.getState().dismissPassingEncounter('e1')
+    const encounters = useBattleStore.getState().passingEncounters
+    expect(encounters).toHaveLength(1)
+    expect(encounters[0].id).toBe('e2')
+  })
+
+  it('is a no-op for unknown id', () => {
+    useBattleStore.setState({
+      passingEncounters: [{ id: 'e1', shipAId: 'a', shipBId: 'b', minDistance: 1 }],
+    })
+    useBattleStore.getState().dismissPassingEncounter('nonexistent')
+    expect(useBattleStore.getState().passingEncounters).toHaveLength(1)
+  })
 })
 
 // === MISSILES ===

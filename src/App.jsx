@@ -24,6 +24,7 @@ import { EvasiveModal }       from './components/modals/EvasiveModal.jsx'
 import { MissileLaunchModal } from './components/modals/MissileLaunchModal.jsx'
 import { DogfightNotificationModal } from './components/modals/DogfightNotificationModal.jsx'
 import { DogfightRoundModal }        from './components/modals/DogfightRoundModal.jsx'
+import { PassingAttackModal }        from './components/modals/PassingAttackModal.jsx'
 import { HelpScreen }      from './components/help/HelpScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
 import { useUiStore }      from './store/uiStore.js'
@@ -117,6 +118,9 @@ export function App() {
           ✦ CLICK ON MAP TO PLACE — {pendingPlacement.profile.name}
         </div>
       )}
+
+      {/* ── Passing encounter window ─────────────────────────────────── */}
+      <PassingAttackModal />
 
       {/* ── Dogfight engagement notification ────────────────────────── */}
       {detectedGroups.length > 0 && (
