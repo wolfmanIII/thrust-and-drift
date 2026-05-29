@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import { useProfilesStore } from '../../store/profilesStore.js'
 import { WEAPON_IDS } from '../../data/weapons.js'
+import { CREW_SKILLS, blankCrewMember, migrateCrew } from '../../utils/crew.js'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -20,7 +21,7 @@ function blankForm() {
     armor: 0,
     thrust: 2,
     jump: 0,
-    crew: { pilot: 1, captain: 0, engineer: 0, gunner: 0, sensors: 0 },
+    crew: [],
     turrets: [],
   }
 }
@@ -28,6 +29,10 @@ function blankForm() {
 /** Initialise form state from an existing profile or from scratch. */
 function initForm(profile) {
   if (!profile) return blankForm()
+  const rawCrew = profile.crew ?? []
+  const crew = Array.isArray(rawCrew)
+    ? rawCrew.map((m) => ({ ...m, skills: { ...m.skills } }))
+    : migrateCrew(rawCrew)
   return {
     name:      profile.name      ?? '',
     shipClass: profile.shipClass ?? '',
@@ -36,7 +41,7 @@ function initForm(profile) {
     armor:     profile.armor     ?? 0,
     thrust:    profile.thrust    ?? 2,
     jump:      profile.jump      ?? 0,
-    crew: { pilot: 1, captain: 0, engineer: 0, gunner: 0, sensors: 0, ...profile.crew },
+    crew,
     turrets: (profile.turrets ?? []).map((t) => ({ ...t, weapons: [...t.weapons] })),
   }
 }
@@ -73,6 +78,54 @@ function TextField({ label, value, onChange, placeholder = '' }) {
         className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-[--neon-cyan]/60 placeholder:text-slate-600"
       />
     </label>
+  )
+}
+
+/**
+ * Crew member row: name field + compact skill inputs for each role.
+ * Skill value 0 means the member doesn't have that skill.
+ */
+function CrewMemberRow({ member, onChange, onRemove }) {
+  return (
+    <div className="bg-slate-800 rounded px-2.5 py-2 space-y-2">
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          value={member.name}
+          placeholder="Name"
+          onChange={(e) => onChange({ ...member, name: e.target.value })}
+          className="flex-1 bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-2 py-1 focus:outline-none focus:border-[--neon-cyan]/60 placeholder:text-slate-600"
+        />
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-slate-600 hover:text-red-400 font-mono text-xs transition-colors shrink-0"
+          aria-label="Remove crew member"
+        >
+          ⊗
+        </button>
+      </div>
+      <div className="grid grid-cols-5 gap-1.5">
+        {CREW_SKILLS.map((skill) => (
+          <label key={skill} className="flex flex-col gap-0.5">
+            <span className="font-mono text-[10px] text-slate-500 tracking-widest uppercase">
+              {skill.slice(0, 3).toUpperCase()}
+            </span>
+            <input
+              type="number"
+              min={0}
+              max={5}
+              value={member.skills[skill] ?? 0}
+              onChange={(e) => onChange({
+                ...member,
+                skills: { ...member.skills, [skill]: Math.max(0, Math.min(5, Number(e.target.value) || 0)) },
+              })}
+              className="w-full bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-1.5 py-1 focus:outline-none focus:border-[--neon-cyan]/60"
+            />
+          </label>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -150,7 +203,13 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
   // ── Field helpers ──────────────────────────────────────────────────────
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }))
-  const setCrew = (key, value) => setForm((f) => ({ ...f, crew: { ...f.crew, [key]: value } }))
+
+  const addCrewMember   = () => setForm((f) => ({ ...f, crew: [...f.crew, blankCrewMember()] }))
+  const removeCrewMember = (idx) => setForm((f) => ({ ...f, crew: f.crew.filter((_, i) => i !== idx) }))
+  const updateCrewMember = (idx, updated) => setForm((f) => ({
+    ...f,
+    crew: f.crew.map((m, i) => i === idx ? updated : m),
+  }))
 
   const addTurret = () => {
     const nextSlot = (form.turrets.at(-1)?.slot ?? 0) + 1
@@ -244,17 +303,32 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
           </div>
         </section>
 
-        {/* Crew */}
+        {/* Crew Manifest */}
         <section className="space-y-3">
-          <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase border-b border-slate-800 pb-1">
-            Crew (Skill Level)
-          </h3>
-          <div className="grid grid-cols-5 gap-3">
-            <NumField label="PILOT"    value={form.crew.pilot}    onChange={(v) => setCrew('pilot', v)}    min={0} max={5} />
-            <NumField label="CAPTAIN"  value={form.crew.captain}  onChange={(v) => setCrew('captain', v)}  min={0} max={5} />
-            <NumField label="ENGINEER" value={form.crew.engineer} onChange={(v) => setCrew('engineer', v)} min={0} max={5} />
-            <NumField label="GUNNER"   value={form.crew.gunner}   onChange={(v) => setCrew('gunner', v)}   min={0} max={5} />
-            <NumField label="SENSORS"  value={form.crew.sensors}  onChange={(v) => setCrew('sensors', v)}  min={0} max={5} />
+          <div className="flex items-center justify-between border-b border-slate-800 pb-1">
+            <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase">
+              Crew Manifest ({form.crew.length})
+            </h3>
+            <button
+              type="button"
+              onClick={addCrewMember}
+              className="text-[--neon-cyan] font-mono text-xs border border-[--neon-cyan]/30 rounded px-2 py-0.5 hover:bg-[--neon-cyan]/10 transition-colors"
+            >
+              + Add
+            </button>
+          </div>
+          {form.crew.length === 0 && (
+            <p className="text-slate-600 font-mono text-xs italic">No crew assigned.</p>
+          )}
+          <div className="space-y-2">
+            {form.crew.map((member, idx) => (
+              <CrewMemberRow
+                key={member.id}
+                member={member}
+                onChange={(updated) => updateCrewMember(idx, updated)}
+                onRemove={() => removeCrewMember(idx)}
+              />
+            ))}
           </div>
         </section>
 
