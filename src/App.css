@@ -50,25 +50,3 @@
   100%     { left: 130%; opacity: 0; }
 }
 
-/* ── Print / PDF export ──────────────────────────────────────────────────── */
-@media print {
-  /* Hide everything except the help content area */
-  .help-sidebar,
-  .help-actions,
-  .legal-footer {
-    display: none !important;
-  }
-
-  .help-content {
-    padding: 1rem;
-    color: #000;
-    background: #fff;
-    font-size: 11pt;
-    max-width: 100%;
-  }
-
-  /* Ensure sections don't break awkwardly across pages */
-  section {
-    break-inside: avoid;
-  }
-}

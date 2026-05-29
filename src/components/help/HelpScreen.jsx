@@ -96,12 +96,13 @@ export function HelpScreen() {
           ))}
         </nav>
         <div className="help-actions shrink-0 px-4 py-3 border-t border-slate-800 space-y-2">
-          <button
-            onClick={() => window.print()}
-            className="w-full py-2 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded hover:border-slate-500 hover:text-slate-200 transition-colors"
+          <a
+            href="/field-manual.pdf"
+            download="thrust-and-drift-field-manual.pdf"
+            className="block w-full py-2 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded hover:border-slate-500 hover:text-slate-200 transition-colors text-center"
           >
-            ⬇ EXPORT PDF
-          </button>
+            ⬇ DOWNLOAD PDF
+          </a>
           <button
             onClick={() => gotoScreen('dashboard')}
             className="w-full py-2 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded hover:border-slate-500 hover:text-slate-200 transition-colors"
