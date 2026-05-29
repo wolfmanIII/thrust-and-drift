@@ -55,14 +55,14 @@ export function BattleLog() {
             className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 transition-colors font-mono text-xs tracking-widest"
           >
             <span>{collapsed ? '▲' : '▼'}</span>
-            <span>LOG BATTAGLIA</span>
+            <span>BATTLE LOG</span>
             <span className="text-slate-600">({log.length})</span>
           </button>
           <button
             onClick={clearLog}
             className="ml-auto text-slate-600 hover:text-red-400 font-mono text-xs transition-colors"
           >
-            CANCELLA
+            CLEAR
           </button>
         </div>
 
