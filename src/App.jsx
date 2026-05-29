@@ -74,7 +74,7 @@ export function App() {
       <ContextMenu />
 
       {/* ── Brand watermark ──────────────────────────────────────────── */}
-      <div className="absolute bottom-9 right-3 z-20 pointer-events-none flex items-center gap-2 px-2 py-1">
+      <div className="absolute top-3 right-3 z-20 pointer-events-none flex items-center gap-2 px-2 py-1">
         <span className="font-display text-xs text-slate-300 tracking-widest leading-none">
           THRUST &amp; DRIFT
         </span>
