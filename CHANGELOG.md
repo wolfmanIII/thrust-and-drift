@@ -11,6 +11,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ### Added
 - **Skill DM override in ActionModal** — when a non-auto action is selected, a numeric input shows the crew member's base skill; GM can override for specialization checks (e.g. Engineer(M-Drive) 3 instead of generic Engineer 2); `↺` button resets to base; roll uses override value as DM
 
+### Tests
+- 406 tests (up from 403) — `rollInitiative` diceOverride bypasses random; `rollAttack` diceOverride bypasses random; `rollAllInitiative` diceOverrides map — specified ship uses manual dice, others auto-roll
+
 ---
 
 ## [1.3.6] — 2026-05-29

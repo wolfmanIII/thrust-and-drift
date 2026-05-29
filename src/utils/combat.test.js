@@ -295,6 +295,15 @@ describe('rollAttack', () => {
     const locked = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0, sensorLockDM: 2 })
     expect(locked.total).toBe(base.total + 2)
   })
+
+  it('diceOverride bypasses random — uses provided dice', () => {
+    const override = { results: [1, 2], total: 3 }
+    // gunner=2, all other DMs=0 → total = 3 + 2 = 5 — NOT 8+2=10 from mocked random
+    const r = rollAttack({ gunnerSkill: 2, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0, diceOverride: override })
+    expect(r.total).toBe(5)
+    expect(r.roll).toBe(override)
+    expect(r.hit).toBe(false)
+  })
 })
 
 // === ROLL INITIATIVE ===
@@ -316,5 +325,13 @@ describe('rollInitiative', () => {
   it('tacticsEffect defaults to 0', () => {
     const r = rollInitiative(1, 2)
     expect(r.total).toBe(8 + 1 + 2)
+  })
+
+  it('diceOverride bypasses random — uses provided dice', () => {
+    const override = { results: [2, 3], total: 5 }
+    const r = rollInitiative(1, 2, 0, override)
+    // 5 (manual) + 1 (pilot) + 2 (thrust) = 8 — NOT 8+1+2=11 from mocked random
+    expect(r.total).toBe(8)
+    expect(r.roll).toBe(override)
   })
 })

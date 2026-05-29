@@ -554,6 +554,19 @@ describe('rollAllInitiative', () => {
     expect(() => useBattleStore.getState().rollAllInitiative()).not.toThrow()
     expect(useBattleStore.getState().ships[0].initiative).toBeGreaterThan(0)
   })
+
+  it('diceOverrides map — specified ships use manual dice, others auto-roll', () => {
+    // Math.random mocked to 0.5 → auto-roll gives 4+4=8 per ship
+    const store = useBattleStore.getState()
+    store.addShip(makeProfile({ id: 'p1', name: 'Manual', thrust: 0, crew: { pilot: 0 } }), { q: 0, r: 0 }, 'players', '#0f0')
+    store.addShip(makeProfile({ id: 'p2', name: 'Auto',   thrust: 0, crew: { pilot: 0 } }), { q: 1, r: 0 }, 'npc',     '#f00')
+    const { id: manualId } = useBattleStore.getState().ships[0]
+    // Pass manual dice total=3 for ship0; ship1 gets auto-rolled (mock→8)
+    useBattleStore.getState().rollAllInitiative({}, { [manualId]: { results: [1, 2], total: 3 } })
+    const ships = useBattleStore.getState().ships
+    expect(ships.find((s) => s.id === manualId).initiative).toBe(3)  // 3 + pilot0 + thrust0
+    expect(ships.find((s) => s.id !== manualId).initiative).toBe(8)  // 8 + 0 + 0 from mock
+  })
 })
 
 // === THRUST ===
