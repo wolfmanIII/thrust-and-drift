@@ -27,7 +27,7 @@ const TYPE_PREFIX = {
 }
 
 export function BattleLog() {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
   const log    = useBattleStore((s) => s.log)
   const clearLog = useBattleStore((s) => s.clearLog)
   const listRef  = useRef(null)
