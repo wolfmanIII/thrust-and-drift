@@ -20,7 +20,7 @@ function blankForm() {
     armor: 0,
     thrust: 2,
     jump: 0,
-    crew: { pilot: 1, captain: 0, engineer: 0, gunner: 0 },
+    crew: { pilot: 1, captain: 0, engineer: 0, gunner: 0, sensors: 0 },
     turrets: [],
   }
 }
@@ -36,7 +36,7 @@ function initForm(profile) {
     armor:     profile.armor     ?? 0,
     thrust:    profile.thrust    ?? 2,
     jump:      profile.jump      ?? 0,
-    crew: { pilot: 1, captain: 0, engineer: 0, gunner: 0, ...profile.crew },
+    crew: { pilot: 1, captain: 0, engineer: 0, gunner: 0, sensors: 0, ...profile.crew },
     turrets: (profile.turrets ?? []).map((t) => ({ ...t, weapons: [...t.weapons] })),
   }
 }
@@ -249,11 +249,12 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
           <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase border-b border-slate-800 pb-1">
             Crew (Skill Level)
           </h3>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-5 gap-3">
             <NumField label="PILOT"    value={form.crew.pilot}    onChange={(v) => setCrew('pilot', v)}    min={0} max={5} />
             <NumField label="CAPTAIN"  value={form.crew.captain}  onChange={(v) => setCrew('captain', v)}  min={0} max={5} />
             <NumField label="ENGINEER" value={form.crew.engineer} onChange={(v) => setCrew('engineer', v)} min={0} max={5} />
             <NumField label="GUNNER"   value={form.crew.gunner}   onChange={(v) => setCrew('gunner', v)}   min={0} max={5} />
+            <NumField label="SENSORS"  value={form.crew.sensors}  onChange={(v) => setCrew('sensors', v)}  min={0} max={5} />
           </div>
         </section>
 

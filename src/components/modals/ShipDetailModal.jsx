@@ -67,6 +67,7 @@ export function ShipDetailModal() {
             <StatRow label="Captain" value={profile.crew?.captain || '—'} />
             <StatRow label="Engineer" value={profile.crew?.engineer || '—'} />
             <StatRow label="Gunner" value={profile.crew?.gunner || '—'} />
+            <StatRow label="Sensors" value={profile.crew?.sensors || '—'} />
           </Section>
 
           <Section title="Weapons">
