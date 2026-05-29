@@ -19,7 +19,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Tests
 
-- 509 tests (up from 488) — +7 `segmentMinDistance` (head-on cross, parallel lanes, stationary, converging, diverging, same speed, symmetry), +4 `resolveMovement` passing detection (hostile cross, same-faction, same-hex landing, in-dogfight exclusion), +2 `dismissPassingEncounter` (removes by id, no-op on unknown), +10 `PassingAttackModal` (null guard, stale auto-dismiss, ship names, range band, adjacent label, pending count, PASS, OPEN FIRE)
+- 510 tests (up from 488) — +7 `segmentMinDistance` (head-on cross, parallel lanes, stationary, converging, diverging, same speed, symmetry), +4 `resolveMovement` passing detection (hostile cross, same-faction, same-hex landing, in-dogfight exclusion), +2 `dismissPassingEncounter` (removes by id, no-op on unknown), +11 `PassingAttackModal` (null guard, stale auto-dismiss, ship names, range band, adjacent label, pending count, PASS, ship A fires with attacker payload, ship B fires with attacker payload)
 
 ---
 
