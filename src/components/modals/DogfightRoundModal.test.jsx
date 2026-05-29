@@ -91,51 +91,51 @@ describe('DogfightRoundModal — declare phase', () => {
     }))
     render(<DogfightRoundModal />)
     // Banner shows "+3" margin and winner name
-    expect(screen.getByText(/bonus al check corrente/)).toBeInTheDocument()
+    expect(screen.getByText(/bonus to current check/)).toBeInTheDocument()
   })
 
-  it('NESSUNA FUGA button advances to rolling phase', () => {
+  it('NO ESCAPE button advances to rolling phase', () => {
     setupDogfight()
     render(<DogfightRoundModal />)
-    fireEvent.click(screen.getByText(/NESSUNA FUGA/))
-    expect(screen.getByText(/CONFERMA CHECK/)).toBeInTheDocument()
+    fireEvent.click(screen.getByText(/NO ESCAPE/))
+    expect(screen.getByText(/CONFIRM CHECK/)).toBeInTheDocument()
   })
 })
 
 describe('DogfightRoundModal — rolling phase', () => {
-  it('CONFERMA CHECK disabled when dice not entered', () => {
+  it('CONFIRM CHECK disabled when dice not entered', () => {
     setupDogfight()
     render(<DogfightRoundModal />)
-    fireEvent.click(screen.getByText(/NESSUNA FUGA/))
-    expect(screen.getByText(/CONFERMA CHECK/)).toBeDisabled()
+    fireEvent.click(screen.getByText(/NO ESCAPE/))
+    expect(screen.getByText(/CONFIRM CHECK/)).toBeDisabled()
   })
 
-  it('CONFERMA CHECK enabled when all ships have dice', () => {
+  it('CONFIRM CHECK enabled when all ships have dice', () => {
     setupDogfight()
     const { container } = render(<DogfightRoundModal />)
-    fireEvent.click(screen.getByText(/NESSUNA FUGA/))
+    fireEvent.click(screen.getByText(/NO ESCAPE/))
     const inputs = container.querySelectorAll('input[type="number"]')
     // 2 ships × 2 dice inputs each = 4 inputs
     enterDicePair(inputs, 0, 3, 4)
     enterDicePair(inputs, 1, 5, 3)
-    expect(screen.getByText(/CONFERMA CHECK/)).not.toBeDisabled()
+    expect(screen.getByText(/CONFIRM CHECK/)).not.toBeDisabled()
   })
 })
 
 describe('DogfightRoundModal — result phase', () => {
   function navigateToResult(container) {
-    fireEvent.click(screen.getByText(/NESSUNA FUGA/))
+    fireEvent.click(screen.getByText(/NO ESCAPE/))
     const inputs = container.querySelectorAll('input[type="number"]')
     enterDicePair(inputs, 0, 3, 3)  // ship A: 6 + DMs
     enterDicePair(inputs, 1, 5, 5)  // ship B: 10 + DMs → likely wins
-    fireEvent.click(screen.getByText(/CONFERMA CHECK/))
+    fireEvent.click(screen.getByText(/CONFIRM CHECK/))
   }
 
   it('shows advance button after confirming check', () => {
     setupDogfight()
     const { container } = render(<DogfightRoundModal />)
     navigateToResult(container)
-    expect(screen.getByText(/AVANZA.*MICRO-ROUND 2\/6/)).toBeInTheDocument()
+    expect(screen.getByText(/ADVANCE.*MICRO-ROUND 2\/6/)).toBeInTheDocument()
   })
 
   it('shows attack DM labels', () => {
@@ -143,20 +143,20 @@ describe('DogfightRoundModal — result phase', () => {
     const { container } = render(<DogfightRoundModal />)
     navigateToResult(container)
     // Winner gets +2, loser gets -2
-    expect(screen.getByText(/Attacchi \+2/)).toBeInTheDocument()
-    expect(screen.getByText(/Attacchi -2/)).toBeInTheDocument()
+    expect(screen.getByText(/Attack DM \+2/)).toBeInTheDocument()
+    expect(screen.getByText(/Attack DM -2/)).toBeInTheDocument()
   })
 
   it('advance calls advanceDogfightMicroRound', () => {
     const { groupId } = setupDogfight()
     const { container } = render(<DogfightRoundModal />)
     navigateToResult(container)
-    fireEvent.click(screen.getByText(/AVANZA/))
+    fireEvent.click(screen.getByText(/ADVANCE/))
     const g = useBattleStore.getState().dogfights.find((x) => x.id === groupId)
     expect(g.microRound).toBe(2)
   })
 
-  it('shows FINE DOGFIGHT on last micro-round', () => {
+  it('shows END DOGFIGHT on last micro-round', () => {
     const { groupId } = setupDogfight()
     useBattleStore.setState((s) => ({
       dogfights: s.dogfights.map((g) =>
@@ -165,7 +165,7 @@ describe('DogfightRoundModal — result phase', () => {
     }))
     const { container } = render(<DogfightRoundModal />)
     navigateToResult(container)
-    expect(screen.getByText(/FINE DOGFIGHT/)).toBeInTheDocument()
+    expect(screen.getByText(/END DOGFIGHT/)).toBeInTheDocument()
   })
 })
 
@@ -174,30 +174,30 @@ describe('DogfightRoundModal — escape check phase', () => {
 
   function declareFleeForFighter() {
     // Ships rendered in insertion order: Viper first, Fighter second
-    const rimaneButtons = screen.getAllByText('RIMANE')
-    fireEvent.click(rimaneButtons[1])            // Fighter → FUGGE
-    fireEvent.click(screen.getByText(/CONFERMA FUGA/))
+    const rimaneButtons = screen.getAllByText('STAY')
+    fireEvent.click(rimaneButtons[1])            // Fighter → FLEE
+    fireEvent.click(screen.getByText(/CONFIRM ESCAPE/))
   }
 
   it('shows escape check section when fleeing ship lacks thrust advantage', () => {
     setupDogfight()
     render(<DogfightRoundModal />)
     declareFleeForFighter()
-    expect(screen.getByText(/check inseguimento/i)).toBeInTheDocument()
-    expect(screen.getByText('Fuggitivo')).toBeInTheDocument()
-    expect(screen.getByText(/Inseg\./)).toBeInTheDocument()
+    expect(screen.getAllByText(/Pursuit check/i).length).toBeGreaterThan(0)
+    expect(screen.getByText('Evader')).toBeInTheDocument()
+    expect(screen.getAllByText(/Pursuer/i).length).toBeGreaterThan(0)
   })
 
-  it('CONFERMA CHECK FUGA disabled until flee and pursuer dice both entered', () => {
+  it('CONFIRM PURSUIT CHECK disabled until flee and pursuer dice both entered', () => {
     setupDogfight()
     const { container } = render(<DogfightRoundModal />)
     declareFleeForFighter()
-    expect(screen.getByText(/CONFERMA CHECK FUGA/)).toBeDisabled()
+    expect(screen.getByText(/CONFIRM PURSUIT CHECK/)).toBeDisabled()
     const inputs = container.querySelectorAll('input[type="number"]')
     enterDicePair(inputs, 0, 3, 3)                   // flee dice only
-    expect(screen.getByText(/CONFERMA CHECK FUGA/)).toBeDisabled()
+    expect(screen.getByText(/CONFIRM PURSUIT CHECK/)).toBeDisabled()
     enterDicePair(inputs, 1, 2, 2)                   // pursuer dice
-    expect(screen.getByText(/CONFERMA CHECK FUGA/)).not.toBeDisabled()
+    expect(screen.getByText(/CONFIRM PURSUIT CHECK/)).not.toBeDisabled()
   })
 
   it('shows live result preview (FUGA RIUSCITA or CATTURATO) when both dice entered', () => {
@@ -207,6 +207,6 @@ describe('DogfightRoundModal — escape check phase', () => {
     const inputs = container.querySelectorAll('input[type="number"]')
     enterDicePair(inputs, 0, 6, 6)    // flee max roll → large total
     enterDicePair(inputs, 1, 1, 1)    // pursuer min roll → small total
-    expect(screen.getByText(/FUGA RIUSCITA|CATTURATO/)).toBeInTheDocument()
+    expect(screen.getByText(/ESCAPED|CAUGHT/)).toBeInTheDocument()
   })
 })

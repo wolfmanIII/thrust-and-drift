@@ -228,7 +228,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
                         : 'border-slate-600 text-slate-400 hover:border-slate-500 hover:text-slate-300'
                     }`}
                   >
-                    SÌ
+                    YES
                   </button>
                   <button
                     onClick={() => setIntent(ship.id, false)}
@@ -249,7 +249,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
               disabled={!allIntentsSet}
               className="w-full py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              VERIFICA INTENZIONI →
+              CONFIRM INTENTS →
             </button>
           </>
         )}
@@ -258,7 +258,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
         {phase === 'pursuit' && bestPursuer && bestEvader && (
           <>
             <p className="text-amber-400 font-mono text-xs tracking-wider uppercase">
-              Check inseguimento — una parte vuole evitare il contatto
+              Pursuit check — one party wants to avoid contact
             </p>
             <p className="text-slate-500 font-mono text-xs">
               Formula: 2D6 + Pilot + Tonnage DM + Thrust libero // MgT2e CRB p.138
@@ -266,14 +266,14 @@ export function DogfightNotificationModal({ groups, onDone }) {
 
             <div className="space-y-3">
               <PursuitRow
-                label="Inseguitore"
+                label="Pursuer"
                 ship={bestPursuer}
                 {...shipDMs(bestPursuer)}
                 dice={pursuitDice[bestPursuer.id] ?? null}
                 onDice={(d) => setPursuitDice((prev) => ({ ...prev, [bestPursuer.id]: d }))}
               />
               <PursuitRow
-                label="Fuggitivo"
+                label="Evader"
                 ship={bestEvader}
                 {...shipDMs(bestEvader)}
                 dice={pursuitDice[bestEvader.id] ?? null}
@@ -289,7 +289,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
                   : 'bg-slate-700/40 border-slate-600 text-slate-300'
               }`}>
                 {computedCheck.pursuerWins
-                  ? `INSEGUITORE VINCE (+${computedCheck.margin}) — DOGFIGHT ATTIVO`
+                  ? `PURSUER WINS (+${computedCheck.margin}) — DOGFIGHT ACTIVE`
                   : `FUGGITIVO EVADE (+${computedCheck.margin === 0 ? 0 : computedCheck.margin}) — SHORT RANGE`
                 }
               </div>
@@ -300,7 +300,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
               disabled={!computedCheck}
               className="w-full py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              CONFERMA CHECK →
+              CONFIRM CHECK →
             </button>
           </>
         )}
@@ -312,9 +312,9 @@ export function DogfightNotificationModal({ groups, onDone }) {
             {pursuitData && (
               <div className="text-slate-500 font-mono text-xs space-y-0.5">
                 <p>
-                  Inseguitore: <span className="text-slate-300">{pursuitData.pursuerTotal}</span>
+                  Pursuer: <span className="text-slate-300">{pursuitData.pursuerTotal}</span>
                   {' — '}
-                  Fuggitivo: <span className="text-slate-300">{pursuitData.evaderTotal}</span>
+                  Evader: <span className="text-slate-300">{pursuitData.evaderTotal}</span>
                 </p>
               </div>
             )}
@@ -325,8 +325,8 @@ export function DogfightNotificationModal({ groups, onDone }) {
                 : 'bg-slate-700/40 border-slate-600 text-slate-400'
             }`}>
               {outcome === 'dogfight'
-                ? '⚔ DOGFIGHT ATTIVO — combattimento ravvicinato iniziato.'
-                : '◦ SHORT RANGE — nessun ingaggio. Distanza effettiva: 1 hex.'
+                ? '⚔ DOGFIGHT ACTIVE — close-quarters combat engaged.'
+                : '◦ SHORT RANGE — no engagement. Effective distance: 1 hex.'
               }
             </div>
 
@@ -334,7 +334,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
               onClick={handleAdvance}
               className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
             >
-              {groupIdx + 1 < total ? `PROSSIMO CONTATTO (${groupIdx + 2}/${total}) →` : 'CONFERMA →'}
+              {groupIdx + 1 < total ? `NEXT CONTACT (${groupIdx + 2}/${total}) →` : 'CONFIRM →'}
             </button>
           </>
         )}

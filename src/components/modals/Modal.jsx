@@ -44,7 +44,7 @@ export function Modal({ title, onClose, children, width = 'max-w-lg' }) {
           <button
             onClick={onClose}
             className="text-slate-500 hover:text-slate-200 font-mono text-lg leading-none transition-colors"
-            aria-label="Chiudi"
+            aria-label="Close"
           >
             ×
           </button>

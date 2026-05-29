@@ -142,12 +142,12 @@ function EscapeCheckRow({ ship, pursuer, totals, onFleeRoll, onPursuerRoll }) {
       <div className="flex items-center gap-2">
         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
         <span className="text-slate-200 font-mono text-xs font-bold">{ship.profile.name}</span>
-        <span className="text-slate-500 font-mono text-xs">tenta la fuga</span>
+        <span className="text-slate-500 font-mono text-xs">attempts escape</span>
       </div>
 
-      {/* Fuggitivo row */}
+      {/* Evader row */}
       <div className="flex items-center gap-2 pl-2">
-        <span className="text-slate-500 font-mono text-xs w-20 shrink-0">Fuggitivo</span>
+        <span className="text-slate-500 font-mono text-xs w-20 shrink-0">Evader</span>
         <span className="text-slate-600 font-mono text-xs">
           P{fleeDMs.pilot >= 0 ? '+' : ''}{fleeDMs.pilot} / T{fleeDMs.tonnage >= 0 ? '+' : ''}{fleeDMs.tonnage} / Thr+{fleeDMs.thrust}
         </span>
@@ -159,12 +159,12 @@ function EscapeCheckRow({ ship, pursuer, totals, onFleeRoll, onPursuerRoll }) {
         </div>
       </div>
 
-      {/* Inseguitore row */}
+      {/* Pursuer row */}
       {pursuer && pursuerDMs && (
         <div className="flex items-center gap-2 pl-2">
           <span className="text-slate-500 font-mono text-xs w-20 shrink-0">
             <span className="w-2 h-2 rounded-full inline-block mr-1" style={{ backgroundColor: pursuer.color }} />
-            Inseg.
+            Pursuer
           </span>
           <span className="text-slate-600 font-mono text-xs">
             P{pursuerDMs.pilot >= 0 ? '+' : ''}{pursuerDMs.pilot} / T{pursuerDMs.tonnage >= 0 ? '+' : ''}{pursuerDMs.tonnage} / Thr+{pursuerDMs.thrust}
@@ -186,8 +186,8 @@ function EscapeCheckRow({ ship, pursuer, totals, onFleeRoll, onPursuerRoll }) {
             : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
         }`}>
           {resolved.escaped
-            ? `◦ FUGA RIUSCITA (+${resolved.margin}) — lascia il dogfight.`
-            : `⚔ CATTURATO (+${resolved.margin}) — rimane nel dogfight.`
+            ? `◦ ESCAPED (+${resolved.margin}) — leaves the dogfight.`
+            : `⚔ CAUGHT (+${resolved.margin}) — remains in dogfight.`
           }
         </div>
       )}
@@ -378,7 +378,7 @@ export function DogfightRoundModal() {
           <div className="bg-amber-500/10 border border-amber-500/20 rounded px-3 py-1.5 font-mono text-xs text-amber-400">
             ↑ Round {group.microRound - 1}:{' '}
             {ships.find((s) => s.id === group.roundWinnerId)?.profile.name ?? '—'}
-            {' '}+{group.roundWinnerMargin} — bonus al check corrente.
+            {' '}+{group.roundWinnerMargin} — bonus to current check.
           </div>
         )}
 
@@ -411,19 +411,19 @@ export function DogfightRoundModal() {
                             : 'border-slate-600 text-slate-500 hover:border-slate-500 hover:text-slate-300'
                         }`}
                       >
-                        {isFleeing ? '↩ FUGGE' : 'RIMANE'}
+                        {isFleeing ? '↩ FLEE' : 'STAY'}
                       </button>
                     </div>
                     {isFleeing && (
                       <div className="flex items-center gap-2 pl-4">
                         {thrustAdvantage ? (
                           <span className="text-slate-400 font-mono text-xs">
-                            ✓ Thrust superiore — fuga automatica
+                            ✓ Thrust advantage — automatic escape
                           </span>
                         ) : (
                           <>
                             <span className="text-amber-400/70 font-mono text-xs">
-                              {notPursued ? '✓ Nemici non inseguono — fuga automatica' : 'Check inseguimento necessario'}
+                              {notPursued ? '✓ Enemies not pursuing — automatic escape' : 'Pursuit check required'}
                             </span>
                             <button
                               onClick={() => toggleEnemiesNotPursuing(ship.id)}
@@ -433,7 +433,7 @@ export function DogfightRoundModal() {
                                   : 'border-slate-700 text-slate-600 hover:border-slate-500 hover:text-slate-400'
                               }`}
                             >
-                              {notPursued ? 'NON INSEGUONO ✓' : 'INSEGUONO?'}
+                              {notPursued ? 'NOT PURSUING ✓' : 'PURSUING?'}
                             </button>
                           </>
                         )}
@@ -448,14 +448,14 @@ export function DogfightRoundModal() {
                 onClick={() => { setFleeingIds(new Set()); setPhase('rolling') }}
                 className="flex-1 py-2 border border-slate-600 text-slate-400 font-mono text-xs tracking-widest rounded hover:border-slate-500 transition-colors"
               >
-                NESSUNA FUGA →
+                NO ESCAPE →
               </button>
               {fleeingIds.size > 0 && (
                 <button
                   onClick={handleDeclareConfirm}
                   className="flex-1 py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors"
                 >
-                  CONFERMA FUGA →
+                  CONFIRM ESCAPE →
                 </button>
               )}
             </div>
@@ -466,7 +466,7 @@ export function DogfightRoundModal() {
         {phase === 'escapeCheck' && (
           <>
             <p className="text-amber-400 font-mono text-xs tracking-wider uppercase">
-              Check inseguimento // §3.1 — 2D6 + Pilot + Tonnage + Thrust libero
+              Pursuit check // §3.1 — 2D6 + Pilot + Tonnage + free Thrust
             </p>
             <div className="space-y-3">
               {needsCheck.map((ship) => {
@@ -490,7 +490,7 @@ export function DogfightRoundModal() {
               disabled={!allEscapeChecksEntered}
               className="w-full py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              CONFERMA CHECK FUGA →
+              CONFIRM PURSUIT CHECK →
             </button>
           </>
         )}
@@ -510,8 +510,8 @@ export function DogfightRoundModal() {
                         : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
                     }`}>
                       {outcome.escaped
-                        ? `◦ ${ship?.profile.name ?? shipId} è fuggita (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
-                        : `⚔ ${ship?.profile.name ?? shipId} è rimasta nel dogfight (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
+                        ? `◦ ${ship?.profile.name ?? shipId} escaped (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
+                        : `⚔ ${ship?.profile.name ?? shipId} remained in dogfight (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
                       }
                     </div>
                   )
@@ -538,7 +538,7 @@ export function DogfightRoundModal() {
               disabled={!allRolled}
               className="w-full py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              CONFERMA CHECK →
+              CONFIRM CHECK →
             </button>
           </>
         )}
@@ -576,7 +576,7 @@ export function DogfightRoundModal() {
                       <span className={`font-mono text-xs font-bold w-24 text-right shrink-0 ${
                         isWinner ? 'text-amber-300' : 'text-rose-400'
                       }`}>
-                        Attacchi {attackDM > 0 ? '+' : ''}{attackDM}
+                        Attack DM {attackDM > 0 ? '+' : ''}{attackDM}
                       </span>
                     )}
                   </div>
@@ -590,14 +590,14 @@ export function DogfightRoundModal() {
                 : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
             }`}>
               {resolved.tied
-                ? '◦ PARITÀ — armi fisse non sparano; torrette OK. Nessun DM posizionale.'
-                : `⚔ ${ships.find((s) => s.id === resolved.winnerId)?.profile.name ?? '—'} domina (+${resolved.margin}). Vantaggio portato al prossimo round.`
+                ? '◦ TIE — fixed weapons cannot fire; turrets OK. No positional DM.'
+                : `⚔ ${ships.find((s) => s.id === resolved.winnerId)?.profile.name ?? '—'} leads (+${resolved.margin}). Advantage carries to the next round.`
               }
             </div>
 
             {!resolved.tied && (
               <p className="text-slate-500 font-mono text-xs">
-                Applica i DM attacco sopra all&apos;apertura del pannello Attacchi.
+                Apply the attack DMs above when opening the Attack panel.
               </p>
             )}
 
@@ -606,8 +606,8 @@ export function DogfightRoundModal() {
               className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
             >
               {isLastRound
-                ? 'FINE DOGFIGHT — CHIUDI ⚔'
-                : `AVANZA → MICRO-ROUND ${group.microRound + 1}/6`
+                ? 'END DOGFIGHT — CLOSE ⚔'
+                : `ADVANCE → MICRO-ROUND ${group.microRound + 1}/6`
               }
             </button>
           </>
