@@ -102,14 +102,27 @@ describe('PassingAttackModal — actions', () => {
     expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
   })
 
-  it('FIRES button dismisses encounter and opens attack modal', () => {
+  it('ship A FIRES button opens attack modal with ship A as attacker', () => {
     addShipToStore('Viper', 'players', 0, 0, '#0f0')
     addShipToStore('Fighter', 'npc', 5, 0, '#f00')
     injectEncounterByIndex(0, 1, 1)
     render(<PassingAttackModal />)
-    const fireButton = screen.getAllByText(/FIRES/)[0]
-    fireEvent.click(fireButton)
+    fireEvent.click(screen.getAllByText(/FIRES/)[0])
     expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
     expect(useUiStore.getState().activeModal).toBe('attack')
+    const shipAId = useBattleStore.getState().ships[0].id
+    expect(useUiStore.getState().modalPayload?.shipId).toBe(shipAId)
+  })
+
+  it('ship B FIRES button opens attack modal with ship B as attacker', () => {
+    addShipToStore('Viper', 'players', 0, 0, '#0f0')
+    addShipToStore('Fighter', 'npc', 5, 0, '#f00')
+    injectEncounterByIndex(0, 1, 1)
+    render(<PassingAttackModal />)
+    fireEvent.click(screen.getAllByText(/FIRES/)[1])
+    expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
+    expect(useUiStore.getState().activeModal).toBe('attack')
+    const shipBId = useBattleStore.getState().ships[1].id
+    expect(useUiStore.getState().modalPayload?.shipId).toBe(shipBId)
   })
 })
