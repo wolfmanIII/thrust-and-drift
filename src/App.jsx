@@ -74,7 +74,7 @@ export function App() {
       <ContextMenu />
 
       {/* ── Brand watermark ──────────────────────────────────────────── */}
-      <div className="absolute bottom-3 right-3 z-5 pointer-events-none flex items-center gap-1.5 opacity-30">
+      <div className="absolute bottom-10 right-3 z-20 pointer-events-none flex items-center gap-1.5 opacity-30">
         <img src={tdLogo} alt="" className="w-6 h-6" />
         <span className="font-display text-[10px] text-slate-400 tracking-widest leading-none">
           THRUST &amp; DRIFT
