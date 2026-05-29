@@ -1160,15 +1160,25 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - `PassingAttackModal` — mostra gli incontri uno alla volta; per ogni coppia il GM sceglie quale nave spara (apre `AttackModal` pre-configurato con `shipId`) oppure passa; il `rangeBand` visualizzato è quello della distanza minima
 - `passingEncounters` non è incluso negli snapshot undo/redo — è stato transitorio di UI
 
-### 13.7 Versione 1.5 — Abbordaggio
+### 13.7 Versione 1.5 — Abbordaggio ✅ COMPLETATA
 
-- 4 fasi: Approccio → Contatto → Conflitto → Sicurezza (HG 2022 pp.125–135)
-- Metodi ingresso: airlock, breaching tube, forced linkage, taglio scafo con resilienza per armatura
-- Stacking corridoi, colpi mancati (tabella 2D), obiettivi tattici (Ponte / Engineering / Torrette)
-- Cambio fazione nave catturata; modalità astratta rapida (CR p.175) per abbordaggi di routine
-- Vedi `boarding-system-design.md`
+4 fasi complete: Approccio → Contatto → Conflitto → Sicurezza (HG 2022 pp.125–135).
 
-### 13.7 Versione 2.0 — Future
+**Scope tecnico implementato:**
+
+- `utils/boarding.js` — `ENTRY_METHODS`, `CUT_TOOLS`, `getHullResilience(component, armor, armored)`, `cuttingDamage(toolKey, effect)`, `rollStackingCheck()`, `rollMissedShot(armoredBulkhead)`, `getContactDM(boarding)`, `getWeaponSpaceDM(weaponClass)`
+- `battleStore` — slice `boardings[]` incluso negli snapshot undo/redo; `inBoarding: null` su ShipInstance; 7 azioni: `startBoarding`, `advanceBoardingPhase`, `setContactMethod`, `toggleDefenderRotation`, `toggleForcedLinkage`, `setObjective`, `resolveBoarding`; `updateShipFaction`; export/import
+- `BoardingSetupModal` — selezione bersaglio con guard (distanza ≤ 1, thrust ≥ bersaglio o M-Drive disabilitato)
+- `BoardingContactModal` — picker metodo ingresso, toggle rotazione/forced-linkage, checker dadi per metodi con check, hull-cut tracker con resilienza per componente e armatura
+- `BoardingConflictModal` — 3 checkbox obiettivi tattici, roll stacking, missed-shot table con toggle paratia corazzata, reminder DM armi
+- `BoardingOutcomeModal` — picker esito, trasferimento fazione opzionale su attacker_wins
+- `ContextMenu` — voce "⚔ Board [target]…" condizionata a regole §2 boarding-system-design.md
+- `HUD` — badge ⚔ BOARDING per ogni boarding attivo, con link diretto alla fase corrente
+- Tutta la UI in inglese — nessuna stringa italiana nell'interfaccia
+
+**Scope escluso da v1.5:** abstract mode (CRB p.175) — rimandato a versione successiva.
+
+### 13.8 Versione 2.0 — Future
 
 - Scale mappa multiple con transizione
 - Asse Z opzionale (3D)

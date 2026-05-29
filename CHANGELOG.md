@@ -6,6 +6,31 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.5.0] — 2026-05-30
+
+### Added
+
+- **Boarding system** — full 4-phase boarding action: Contact → Conflict → Security (HG 2022 pp.125–135)
+  - `utils/boarding.js` — `ENTRY_METHODS` (6 methods with check/difficulty/time/DM), `CUT_TOOLS` (4 cutters), `getHullResilience(component, armor, armored)`, `cuttingDamage`, `rollStackingCheck`, `rollMissedShot(armoredBulkhead)`, `getContactDM`, `getWeaponSpaceDM`
+  - `battleStore` — `boardings[]` in state and undo/redo snapshots; `inBoarding: null` on ShipInstance; `startBoarding`, `advanceBoardingPhase`, `setContactMethod`, `toggleDefenderRotation`, `toggleForcedLinkage`, `setObjective`, `resolveBoarding`, `updateShipFaction`
+  - `BoardingSetupModal` — target selection with thrust/distance guards; opens contact modal on confirm
+  - `BoardingContactModal` — entry method picker (6 options), tumbling/forced-linkage toggles, dice check section, hull-cut tracker with per-component resilience + armor scaling
+  - `BoardingConflictModal` — Bridge / Engineering / Turrets objective checkboxes, stacking roll (2D ≥ 10), missed-shot table (2D, armored bulkhead toggle), weapon DM reminder
+  - `BoardingOutcomeModal` — attacker wins / defender repels / ship destroyed; optional faction transfer on capture
+  - `ContextMenu` — `⚔ Board [target]…` visible when adjacent + thrust ≥ defender (or M-Drive disabled)
+  - `HUD` — `⚔ BOARDING` badge per active boarding with phase label and direct modal link
+  - `App.jsx` — boarding modal layer wired
+
+### Fixed
+
+- **UI language** — all user-facing strings in DogfightRoundModal, DogfightNotificationModal, boarding modals, and Modal.jsx translated to English; zero Italian strings in the interface
+
+### Tests
+
+- 596 tests (up from 510) — +28 `boarding.js` utils, +17 `battleStore` boarding actions, +9 `BoardingSetupModal`, +10 `BoardingContactModal`, +12 `BoardingConflictModal`, +10 `BoardingOutcomeModal`
+
+---
+
 ## [1.4.2] — 2026-05-29
 
 ### Added

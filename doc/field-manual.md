@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.4.2** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.5.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -20,6 +20,7 @@
 12. [Undo / Redo](#12-undo--redo)
 13. [Save & Resume](#13-save--resume)
 14. [Dogfight](#14-dogfight)
+15. [Boarding](#15-boarding)
 
 ---
 
@@ -444,21 +445,21 @@ equals six micro-rounds of dogfight.
 ### 14.2 Engagement
 
 When the app detects a potential dogfight at the end of Movement, the
-**⚠ CONTATTO RAVVICINATO** modal opens.
+**CONFIRM INTENTS** modal opens.
 
 For each ship the GM declares:
 
 | Intent | Outcome |
 | ------ | ------- |
-| **Both SÌ** | Dogfight activates immediately |
+| **Both YES** | Dogfight activates immediately |
 | **Both NO** | Ships treated as Short Range (distance 1) — no dogfight |
 | **Mixed** | Pursuit check required (see §14.3) |
 
 ### 14.3 Pursuit Check
 
-Formula: **2D6 + Pilot + Tonnage DM + Thrust libero**
+Formula: **2D6 + Pilot + Tonnage DM + free Thrust**
 
-- **Thrust libero** = profile thrust − thrust used this round
+- **Free Thrust** = profile thrust − thrust used this round
 - **Tonnage DM**: <50t → 0; 50–99t → −1; 100–199t → −2; +−1 per 100t above 100
 
 If the pursuer's total exceeds the evader's total → dogfight activates.
@@ -475,21 +476,20 @@ Open the round from the **HUD dogfight tracker** (⚔ DOGFIGHT panel, top-left).
 At the start of each micro-round the GM may declare that a ship wants to flee.
 
 - If its thrust exceeds all enemy thrusts → **auto-escape**, no check needed.
-- If enemies choose not to pursue → **auto-escape** (toggle "NON INSEGUONO").
+- If enemies choose not to pursue → **auto-escape** (toggle "NOT PURSUING").
 - Otherwise → pursuit check (same formula as §14.3).
 
 #### Step 2 — Pilot check
 
-Each remaining ship rolls **2D6 + Pilot + Tonnage DM + Thrust + DM round
-precedente**.
+Each remaining ship rolls **2D6 + Pilot + Tonnage DM + Thrust + previous round bonus**.
 
 | DM | Source |
 | -- | ------ |
 | Pilot skill | `getCrewSkill(crew, 'pilot')` |
 | Tonnage DM | See §14.3 table |
 | Thrust | Profile thrust − thrust used this round |
-| Nemici extra | −(number of enemy ships − 1) when outnumbered |
-| Bonus round | Previous round winner's margin carries forward as a +DM |
+| Extra enemies | −(number of enemy ships − 1) when outnumbered |
+| Round bonus | Previous round winner's margin carries forward as a +DM |
 
 #### Step 3 — Result
 
@@ -503,7 +503,7 @@ Apply the attack DMs shown in the modal when opening the **Attack** panel.
 
 #### Step 4 — Advance
 
-Click **AVANZA → MICRO-ROUND N+1/6**. After micro-round 6 the dogfight ends
+Click **ADVANCE → MICRO-ROUND N+1/6**. After micro-round 6 the dogfight ends
 automatically and all ships return to normal combat flow.
 
 ### 14.5 Token Visuals
@@ -522,12 +522,121 @@ Conditions:
 ```text
 Auto-escape:  ship.thrust > max(enemy thrusts)
               OR enemies choose not to pursue
-Check:        2D6 + Pilot + Tonnage DM + Thrust libero  (same as §14.3)
-              fuggitivo total > inseguitore total → escaped
+Check:        2D6 + Pilot + Tonnage DM + free Thrust  (same as §14.3)
+              evader total > pursuer total → escaped
 ```
 
 On successful escape `inDogfight` is cleared; the ship re-enters normal combat
 from the next standard round.
+
+---
+
+## 15. Boarding
+
+> HG 2022 pp.125–135 — full 4-phase boarding system.
+
+Boarding is a sub-system that activates when an attacker moves adjacent to a target and meets the thrust requirement. Combat shifts from the hex map to the interior of the target ship.
+
+### 15.1 Triggering a Boarding Action
+
+Right-click the **attacker ship** and select **⚔ Board [target name]…**
+
+The option is visible only when:
+
+```text
+distance(attacker, target) ≤ 1  (Adjacent or Close)
+AND attacker.thrust ≥ target.thrust
+    OR target M-Drive critical is disabled
+AND different factions
+```
+
+The **Boarding Setup** modal opens. Select the target and confirm. The boarding moves immediately to Phase 2 — Contact.
+
+### 15.2 Phase 1 — Approach
+
+> Handled outside the app. The approach phase is the normal combat movement that brought the two ships together. The GM declares the boarding when conditions are met.
+
+**Voluntary boarding** (target cooperates): skip to Contact immediately.
+
+**Forced boarding**: if the target attempted to flee and failed (or is immobilised), proceed to Contact.
+
+### 15.3 Phase 2 — Contact
+
+The **⚔ CONTACT** modal opens. The GM selects the entry method:
+
+| Method | Check | Difficulty | Time | DM |
+|--------|-------|------------|------|----|
+| Airlock (cooperative) | None | — | Instant | — |
+| Airlock (forced) | Mechanic (STR) | 14+ | 2D rounds + 1D | — |
+| Maintenance Hatch | Mechanic (STR) | 12+ | 2D rounds | — ⚠ |
+| Breaching Tube | None | — | < 2 min | — |
+| Forced Linkage Apparatus | Pilot (DEX) | 8+ | Immediate | +2 |
+| Hull Cut | Mechanic (DEX) | 8+/round | Per round | — ⚠ |
+
+⚠ = decompression risk if compartment not evacuated.
+
+**Modifiers:**
+
+- **↻ Tumbling** — defender rotating the ship: DM −1 to all Contact checks
+- **🔗 Forced Linkage** — DM +2 to all Contact checks; defender cannot manoeuvre
+
+**Hull Cut tracker:** select component (Hatch / Airlock / Hull) and cutting tool, roll each round. Damage reduces component Resilience; breach achieved when damage ≥ breach threshold.
+
+When entry is secured, click **ADVANCE TO CONFLICT →**.
+
+### 15.4 Phase 3 — Conflict
+
+The **⚔ CONFLICT** modal tracks the boarding fight.
+
+**Tactical objectives** — check each when captured:
+
+| Objective | Effect when captured |
+|-----------|---------------------|
+| **Bridge** | Remote control of all ship systems disabled for enemy |
+| **Engineering** | Propulsion, reactor, life support under attacker control |
+| **Turrets** | Weapon systems under attacker control |
+
+The ship is considered taken when all three objectives are captured.
+
+**Combat tools:**
+
+- **ROLL STACKING** — roll 2D ≥ 10 to target a combatant beyond the first in a corridor (HG p.131)
+- **ROLL MISSED SHOT** — roll 2D on the missed-shot table for every attack that misses; optional **Armored bulkhead (DM −1)** toggle
+
+**Weapon DM in tight spaces:** Rifles −2 · Heavy weapons −4 · Grenades → automatic 6D+
+
+When the fight is resolved, click **END CONFLICT — ADVANCE TO SECURITY →**.
+
+### 15.5 Phase 4 — Security
+
+The **⚔ SECURITY — BOARDING OUTCOME** modal resolves the action.
+
+| Outcome | Effect |
+|---------|--------|
+| **Attacker wins** | Boarding party controls the ship; optional faction transfer |
+| **Defender repels** | Boarders eliminated, captured, or driven off |
+| **Ship destroyed** | Target destroyed by internal damage during conflict |
+
+If **Attacker wins** and faction transfer is enabled, the captured ship's faction changes to match the attacker. Enemy crew is removed from the roster.
+
+Click **CONFIRM OUTCOME** to close the boarding.
+
+### 15.6 HUD Indicator
+
+While a boarding is active, the HUD shows a **⚔ BOARDING** badge below the standard tracker:
+
+```
+⚔ BOARDING   [Attacker] → [Defender]   CONTACT →
+```
+
+Click the phase button to reopen the relevant modal at any time.
+
+### 15.7 Boarding and Normal Combat
+
+- Ships **inBoarding** do not participate in the standard Attack phase
+- A ship with **Forced Linkage active** cannot use thrust to manoeuvre
+- If the target is destroyed during Conflict, resolve with outcome **Ship destroyed**
+- Normal rounds continue in parallel — the GM can advance phases and resolve the boarding on its own timeline, as with dogfights
 
 ---
 

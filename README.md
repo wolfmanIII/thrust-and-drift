@@ -32,6 +32,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Safety modals** | Confirm before deleting profiles; confirm before leaving battle without saving |
 | **Legal footer** | Fixed Mongoose Publishing disclaimer on all screens; "About" modal with full Fair Use text |
 | **Dogfight system** | Close-range sub-system: 6 micro-rounds per standard round; Pilot opposed checks; tonnage/thrust/multi-enemy DMs; escape via thrust advantage or pursuit check; pulsing token visuals |
+| **Boarding system** | 4-phase boarding action (HG 2022): Contact → Conflict → Security; 6 entry methods incl. hull-cut tracker; stacking rolls; missed-shot table; Bridge/Engineering/Turrets objectives; optional faction transfer on capture; HUD badge per active boarding |
 
 ---
 
@@ -137,7 +138,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-510 tests across utils, Zustand stores, hooks, and UI components.
+596 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 
@@ -175,6 +176,11 @@ src/
 │   │   ├── InitiativeModal.jsx
 │   │   ├── DogfightNotificationModal.jsx ← Engagement intent + pursuit check
 │   │   ├── DogfightRoundModal.jsx        ← Micro-round resolution (escape + Pilot check)
+│   │   ├── PassingAttackModal.jsx        ← Passing encounter fire window
+│   │   ├── BoardingSetupModal.jsx        ← Target selection + boarding initiation
+│   │   ├── BoardingContactModal.jsx      ← Phase 2: entry method, hull-cut, modifiers
+│   │   ├── BoardingConflictModal.jsx     ← Phase 3: objectives, stacking, missed shot
+│   │   ├── BoardingOutcomeModal.jsx      ← Phase 4: outcome + faction transfer
 │   │   └── useAttackSetup.js   ← Hook: attack DM derivation
 │   └── ui/
 │       ├── ContextMenu.jsx     ← Right-click context menu
@@ -206,6 +212,7 @@ src/
     ├── io.js                   ← JSON import/export via File API
     ├── dice.js                 ← Dice rolling + result formatting
     ├── dogfight.js             ← Dogfight logic (tonnageDM, Pilot checks, escape)
+    ├── boarding.js             ← Boarding logic (entry methods, resilience, stacking, missed shot)
     └── db.js                   ← IndexedDB wrapper (openDB, get, put, delete)
 ```
 
