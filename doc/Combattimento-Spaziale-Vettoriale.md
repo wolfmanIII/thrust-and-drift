@@ -233,5 +233,6 @@ Per le mappe fisiche si consiglia matita per i vettori (cambiano ogni round). Pe
 - **Fuga:** Scappare è genuinamente difficile se il nemico ha Thrust simile e il vantaggio di inerzia iniziale. Al contrario, una nave che ha accumulato velocità nella direzione opposta può essere irraggiungibile.
 - **Missili vs. evasione:** Un missile con 10 round di Thrust può correggere la propria traiettoria per molti round. Una nave che accelera lateralmente può tentare di farglielo mancare, ma è una corsa contro il tempo.
 - **Transizione da CR:** Questo sistema è **pienamente compatibile** con tutte le altre regole del Combattimento Spaziale (armi, critical hit, riparazioni, EW). Sostituisce solo il sistema di movimento/bande di distanza.
+- **Critical Hits:** Le regole dei colpi critici (tabella posizioni, effetti per severità, Sustained Damage, Called Shots) si applicano invariate. Vedi `Combattimento-Spaziale.md` §6.5–6.7.
 
 ---
