@@ -78,6 +78,38 @@ const useBattleStore = create((set, get) => ({
 
   mapSettings: { scale: 1 },
 
+  /** @type {object[]} Undo history — snapshots of game state, capped at 20. */
+  undoStack: [],
+
+  // === UNDO ===
+
+  /**
+   * Snapshot current game state onto the undo stack (max 20 entries).
+   * Called internally before every user-facing mutation.
+   */
+  pushHistory: () => {
+    const { ships, missiles, log, round, phase, initiativeOrder, currentActorIndex } = get()
+    const snapshot = {
+      ships: structuredClone(ships),
+      missiles: structuredClone(missiles),
+      log: [...log],
+      round,
+      phase,
+      initiativeOrder: [...initiativeOrder],
+      currentActorIndex,
+    }
+    set((s) => ({ undoStack: [...s.undoStack, snapshot].slice(-20) }))
+  },
+
+  /** Restore the most recent snapshot from the undo stack. */
+  undoLastAction: () => {
+    const { undoStack } = get()
+    if (undoStack.length === 0) return
+    const stack = [...undoStack]
+    const snapshot = stack.pop()
+    set({ ...snapshot, undoStack: stack })
+  },
+
   // === SHIP MANAGEMENT ===
 
   /**
@@ -88,6 +120,7 @@ const useBattleStore = create((set, get) => ({
    * @param {string} color  CSS hex color
    */
   addShip: (profile, position, faction, color) => {
+    get().pushHistory()
     const instance = {
       id: uuidv7(),
       profileId: profile.id,
@@ -129,6 +162,7 @@ const useBattleStore = create((set, get) => ({
   removeShip: (shipId) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
+    get().pushHistory()
     set((s) => ({
       ships: s.ships.filter((sh) => sh.id !== shipId),
       missiles: s.missiles.filter((m) => m.launchedBy !== shipId && m.target !== shipId),
@@ -160,6 +194,7 @@ const useBattleStore = create((set, get) => ({
    * @param {Record<string, number>} [tacticsEffects]  Optional per-shipId tactics bonus
    */
   rollAllInitiative: (tacticsEffects = {}) => {
+    get().pushHistory()
     const { ships, round } = get()
     const rolled = ships.map((ship) => {
       const result = rollInitiative(
@@ -203,6 +238,7 @@ const useBattleStore = create((set, get) => ({
   applyShipThrust: (shipId, delta, cost) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
+    get().pushHistory()
     const newVector = applyThrust(ship.vector, delta)
     set((s) => ({
       ships: s.ships.map((sh) =>
@@ -225,6 +261,7 @@ const useBattleStore = create((set, get) => ({
 
   /** Move all ships and missiles by their current vector (movement phase). */
   resolveMovement: () => {
+    get().pushHistory()
     const { ships, missiles, round } = get()
     const movedShips = ships.map((sh) => ({
       ...sh,
@@ -267,6 +304,7 @@ const useBattleStore = create((set, get) => ({
   applyDamage: (shipId, damage, sourceLabel, _skipThreshold = false) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
+    if (!_skipThreshold) get().pushHistory()
     const prevHull    = ship.hullCurrent
     const hullCurrent = Math.max(0, prevHull - damage)
     get().updateShip(shipId, { hullCurrent })
@@ -300,7 +338,7 @@ const useBattleStore = create((set, get) => ({
         const effectiveSeverity = existing
           ? Math.max(1, Math.min(6, existing.severity + 1))
           : 1
-        get().addCriticalHit(shipId, { system: location, severity: effectiveSeverity })
+        get().addCriticalHit(shipId, { system: location, severity: effectiveSeverity }, { _skipHistory: true })
         const effect = getCriticalEffect(location, effectiveSeverity)
         if (effect?.mechanic === 'hull_extra_damage') {
           const extra = rollDice(effect.value, 6)
@@ -317,10 +355,12 @@ const useBattleStore = create((set, get) => ({
    * // MgT2e CRB p.169–170
    * @param {string} shipId
    * @param {{ system: string, severity: number }} crit  severity must be effective (post-stacking)
+   * @param {{ _skipHistory?: boolean }} [opts]
    */
-  addCriticalHit: (shipId, { system, severity }) => {
+  addCriticalHit: (shipId, { system, severity }, { _skipHistory = false } = {}) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
+    if (!_skipHistory) get().pushHistory()
 
     // Upsert: update existing entry for this system or append new one
     const existingIdx = ship.criticalHits.findIndex((c) => c.system === system)
@@ -358,6 +398,7 @@ const useBattleStore = create((set, get) => ({
    * @param {'Standard'|'Smart'|'Nuclear'|'Ortillery'} type
    */
   launchMissile: (launchedBy, target, count, position, vector, type = 'Standard') => {
+    get().pushHistory()
     const attacker = get().ships.find((s) => s.id === launchedBy)
     const missile = {
       id: uuidv7(),
@@ -394,6 +435,7 @@ const useBattleStore = create((set, get) => ({
 
   /** Advance to the next phase in sequence. Drives all transitions via PHASE_ORDER. */
   advancePhase: () => {
+    get().pushHistory()
     const { phase } = get()
     const idx = PHASE_ORDER.indexOf(phase)
     if (idx === -1 || idx === PHASE_ORDER.length - 1) {
@@ -416,6 +458,7 @@ const useBattleStore = create((set, get) => ({
 
   /** Mark the current actor as having acted; advance the actor index. */
   advanceActor: () => {
+    get().pushHistory()
     const { initiativeOrder, currentActorIndex } = get()
     const shipId = initiativeOrder[currentActorIndex]
     if (shipId) {
@@ -458,6 +501,7 @@ const useBattleStore = create((set, get) => ({
   declareEvasiveThrust: (shipId, amount) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
+    get().pushHistory()
     const maxEvasive = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0))
     const clamped = Math.max(0, Math.min(amount, maxEvasive))
     set((s) => ({
@@ -486,6 +530,7 @@ const useBattleStore = create((set, get) => ({
     const attacker = get().ships.find((s) => s.id === attackerId)
     const target = get().ships.find((s) => s.id === targetId)
     if (!attacker || !target) return
+    get().pushHistory()
     set((s) => ({
       ships: s.ships.map((sh) => {
         if (sh.id === attackerId) return { ...sh, sensorLockOn: targetId, sensorLockDM: Math.max(0, dmBonus) }
@@ -511,6 +556,7 @@ const useBattleStore = create((set, get) => ({
   clearSensorLock: (shipId) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship || !ship.sensorLockedBy) return
+    get().pushHistory()
     const attackerId = ship.sensorLockedBy
     set((s) => ({
       ships: s.ships.map((sh) => {
@@ -537,6 +583,7 @@ const useBattleStore = create((set, get) => ({
   repairCritical: (shipId) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship || ship.criticalHits.length === 0) return
+    get().pushHistory()
     const removed       = ship.criticalHits[0]
     const remainingCrits = ship.criticalHits.slice(1)
     const mDriveCrit    = remainingCrits.find((c) => c.system === 'M-Drive')
@@ -565,6 +612,7 @@ const useBattleStore = create((set, get) => ({
   applyInitiativeBonus: (shipId, bonus) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
+    get().pushHistory()
     const applied = Math.max(0, bonus)
     set((s) => ({
       ships: s.ships.map((sh) =>
@@ -590,6 +638,7 @@ const useBattleStore = create((set, get) => ({
   overloadDrive: (shipId, bonus) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
+    get().pushHistory()
     const applied = Math.max(0, bonus)
     set((s) => ({
       ships: s.ships.map((sh) =>
@@ -614,6 +663,7 @@ const useBattleStore = create((set, get) => ({
   reloadTurret: (shipId) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship || (ship.turretsNeedingReload ?? 0) === 0) return
+    get().pushHistory()
     set((s) => ({
       ships: s.ships.map((sh) =>
         sh.id === shipId ? { ...sh, turretsNeedingReload: Math.max(0, (sh.turretsNeedingReload ?? 0) - 1) } : sh
@@ -650,6 +700,7 @@ const useBattleStore = create((set, get) => ({
     missiles: [],
     log: [],
     mapSettings: { scale: 1 },
+    undoStack: [],
   }),
 
   // === IMPORT / EXPORT ===
@@ -677,6 +728,7 @@ const useBattleStore = create((set, get) => ({
       missiles: battle.missiles ?? [],
       log: battle.log ?? [],
       mapSettings: battle.mapSettings ?? { scale: 1 },
+      undoStack: [],
     })
   },
 

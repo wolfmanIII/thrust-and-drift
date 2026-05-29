@@ -3,7 +3,7 @@
  * Read-only display; phase advancement is via the button.
  */
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore } from '../../store/uiStore.js'
 import { Tooltip } from './Tooltip.jsx'
@@ -32,9 +32,26 @@ export function HUD() {
   const advanceActor        = useBattleStore((s) => s.advanceActor)
   const exportBattleState   = useBattleStore((s) => s.exportBattleState)
   const combatMode          = useBattleStore((s) => s.combatMode)
+  const undoLastAction      = useBattleStore((s) => s.undoLastAction)
+  const canUndo             = useBattleStore((s) => s.undoStack.length > 0)
   const gotoScreen          = useUiStore((s) => s.gotoScreen)
 
   const [showExitWarning, setShowExitWarning] = useState(false)
+
+  const handleUndo = useCallback(() => {
+    if (canUndo) undoLastAction()
+  }, [canUndo, undoLastAction])
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        handleUndo()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [handleUndo])
 
   const currentActorId = initiativeOrder[currentActorIndex] ?? null
   const currentActor   = ships.find((s) => s.id === currentActorId)
@@ -85,6 +102,15 @@ export function HUD() {
 
       {/* Battle utilities */}
       <div className="pointer-events-auto flex gap-1 mt-0.5">
+        <Tooltip label="Undo last action (Ctrl+Z)">
+          <button
+            onClick={handleUndo}
+            disabled={!canUndo}
+            className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:text-slate-300 hover:border-slate-500 disabled:hover:text-slate-500 disabled:hover:border-slate-700"
+          >
+            ⟲
+          </button>
+        </Tooltip>
         <Tooltip label="Save session to file">
           <button
             onClick={exportBattleState}
