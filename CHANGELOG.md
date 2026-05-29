@@ -6,6 +6,23 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.2] — 2026-05-29
+
+### Added
+
+- **Ships That Pass in the Night** — during the Movement phase, hostile ships that cross within Short range (≤ 2 hexes) along their simultaneous trajectories now trigger a `PassingAttackModal` before play continues (Traveller Companion p.172)
+  - `utils/hex.js` — `segmentMinDistance(a0, a1, b0, b1)`: analytic O(1) minimum hex distance between two simultaneous linear paths; breakpoint search on cube-coordinate components (dq, dr, ds)
+  - `battleStore` — `resolveMovement` detects hostile pairs crossing within Short range before committing new positions; stores results as transient `passingEncounters[]` (excluded: same-faction ships, ships already in a dogfight, ships ending in the same hex — those are handled by dogfight detection)
+  - `battleStore` — `dismissPassingEncounter(id)` removes a single encounter after GM resolution
+  - `PassingAttackModal` — sequential encounter window: shows ship pair, closest approach (hex count + range band); GM chooses which ship fires (opens `AttackModal` pre-configured) or passes the opportunity
+- **Spec §13.6** — `doc/thrust-and-drift-space-combat-simulator-spec.md` updated with v1.4.2 section (mechanic, scope, data shape)
+
+### Tests
+
+- 509 tests (up from 488) — +7 `segmentMinDistance` (head-on cross, parallel lanes, stationary, converging, diverging, same speed, symmetry), +4 `resolveMovement` passing detection (hostile cross, same-faction, same-hex landing, in-dogfight exclusion), +2 `dismissPassingEncounter` (removes by id, no-op on unknown), +10 `PassingAttackModal` (null guard, stale auto-dismiss, ship names, range band, adjacent label, pending count, PASS, OPEN FIRE)
+
+---
+
 ## [1.4.1] — 2026-05-29
 
 ### Fixed
