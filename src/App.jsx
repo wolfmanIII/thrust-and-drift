@@ -22,6 +22,7 @@ import { ShipProfileModal }   from './components/modals/ShipProfileModal.jsx'
 import { ThrustModal }        from './components/modals/ThrustModal.jsx'
 import { EvasiveModal }       from './components/modals/EvasiveModal.jsx'
 import { MissileLaunchModal } from './components/modals/MissileLaunchModal.jsx'
+import { HelpScreen }      from './components/help/HelpScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
 import { useUiStore }      from './store/uiStore.js'
 import { useBattleStore }  from './store/battleStore.js'
@@ -61,6 +62,17 @@ export function App() {
       <>
         <div className="h-[calc(100%-1.75rem)]">
           <Dashboard />
+        </div>
+        <LegalFooter />
+      </>
+    )
+  }
+
+  if (screen === 'help') {
+    return (
+      <>
+        <div className="h-[calc(100%-1.75rem)]">
+          <HelpScreen />
         </div>
         <LegalFooter />
       </>

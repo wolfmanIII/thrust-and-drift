@@ -17,12 +17,12 @@ const useUiStore = create((set) => ({
   // === SCREEN ===
   /**
    * Top-level application screen.
-   * 'dashboard' = pre-battle lobby; 'battle' = active combat map.
-   * @type {'dashboard'|'battle'}
+   * 'dashboard' = pre-battle lobby; 'battle' = active combat map; 'help' = field manual.
+   * @type {'dashboard'|'battle'|'help'}
    */
   screen: 'dashboard',
 
-  /** @param {'dashboard'|'battle'} screen */
+  /** @param {'dashboard'|'battle'|'help'} screen */
   gotoScreen: (screen) => set({ screen }),
 
   // === MODAL ===
