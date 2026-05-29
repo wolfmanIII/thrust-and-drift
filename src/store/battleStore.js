@@ -11,6 +11,7 @@ import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount }
 import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
 import { getCrewSkill } from '../utils/crew.js'
+import { resolveDogfightChecks } from '../utils/dogfight.js'
 
 /**
  * @typedef {'setup'|'initiative'|'acceleration'|'movement'|'attack'|'actions'|'end'} BattlePhase
@@ -121,6 +122,8 @@ const useBattleStore = create((set, get) => {
   ships: [],
   /** @type {object[]} MissileToken array */
   missiles: [],
+  /** @type {object[]} DogfightGroup array */
+  dogfights: [],
   /** @type {object[]} LogEntry array */
   log: [],
 
@@ -138,10 +141,11 @@ const useBattleStore = create((set, get) => {
    * Called internally before every user-facing mutation.
    */
   pushHistory: () => {
-    const { ships, missiles, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, round, phase, initiativeOrder, currentActorIndex } = get()
     const snapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
+      dogfights: structuredClone(dogfights),
       round,
       phase,
       initiativeOrder: [...initiativeOrder],
@@ -155,10 +159,11 @@ const useBattleStore = create((set, get) => {
   undoLastAction: () => {
     const { undoStack, redoStack, log } = get()
     if (undoStack.length === 0) return
-    const { ships, missiles, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, round, phase, initiativeOrder, currentActorIndex } = get()
     const redoSnapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
+      dogfights: structuredClone(dogfights),
       round, phase,
       initiativeOrder: [...initiativeOrder],
       currentActorIndex,
@@ -178,10 +183,11 @@ const useBattleStore = create((set, get) => {
   redoLastAction: () => {
     const { redoStack, undoStack, log } = get()
     if (redoStack.length === 0) return
-    const { ships, missiles, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, round, phase, initiativeOrder, currentActorIndex } = get()
     const undoSnapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
+      dogfights: structuredClone(dogfights),
       round, phase,
       initiativeOrder: [...initiativeOrder],
       currentActorIndex,
@@ -228,6 +234,7 @@ const useBattleStore = create((set, get) => {
       sensorLockedBy: null,
       sensorLockDM: 0,
       turretsNeedingReload: 0,
+      inDogfight: null,
     }
     set((s) => ({
       ships: [...s.ships, instance],
@@ -753,6 +760,126 @@ const useBattleStore = create((set, get) => {
     },
   ),
 
+  // === DOGFIGHT ===
+
+  /**
+   * Create a dogfight group and mark all participating ships.
+   * @param {string[]} shipIds  — must contain ≥ 2 IDs
+   */
+  startDogfight: wh((shipIds) => shipIds.length >= 2, (shipIds) => {
+    const { ships, round, phase } = get()
+    const group = {
+      id: uuidv7(),
+      shipIds: [...shipIds],
+      microRound: 1,
+      roundWinnerId: null,
+      roundWinnerMargin: 0,
+      active: true,
+    }
+    const names = shipIds.map((id) => ships.find((s) => s.id === id)?.profile.name ?? id).join(' ↔ ')
+    set((s) => ({
+      dogfights: [...s.dogfights, group],
+      ships: s.ships.map((sh) =>
+        shipIds.includes(sh.id) ? { ...sh, inDogfight: group.id } : sh
+      ),
+      log: [...s.log, makeLogEntry({
+        round, phase, type: 'action',
+        message: `⚔ Dogfight engaged: ${names}`,
+      })],
+    }))
+  }),
+
+  /**
+   * Record Pilot check results for a micro-round and advance the counter.
+   * Ends the dogfight group when micro-round 6 completes.
+   * @param {string} groupId
+   * @param {{ shipId: string, total: number }[]} checkResults
+   */
+  advanceDogfightMicroRound: wh(
+    (groupId) => !!get().dogfights.find((g) => g.id === groupId && g.active),
+    (groupId, checkResults) => {
+      const { round, phase } = get()
+      const group = get().dogfights.find((g) => g.id === groupId)
+      const { winnerId, margin, tied } = resolveDogfightChecks(checkResults)
+      const nextMicroRound = group.microRound + 1
+
+      set((s) => ({
+        dogfights: s.dogfights.map((g) =>
+          g.id !== groupId ? g : {
+            ...g,
+            microRound: nextMicroRound,
+            roundWinnerId: winnerId,
+            roundWinnerMargin: margin,
+          }
+        ),
+        log: [...s.log, makeLogEntry({
+          round, phase, type: 'action',
+          message: tied
+            ? `⚔ Dogfight micro-round ${group.microRound}: tie — no positional advantage.`
+            : `⚔ Dogfight micro-round ${group.microRound}: ${get().ships.find((s) => s.id === winnerId)?.profile.name ?? winnerId} wins (+${margin}).`,
+        })],
+      }))
+
+      if (nextMicroRound > 6) get().endDogfight(groupId)
+    },
+  ),
+
+  /**
+   * Remove a ship from its dogfight group. Ends the group if fewer than 2 ships remain.
+   * @param {string} shipId
+   * @param {string} groupId
+   */
+  escapeDogfight: wh(
+    (shipId, groupId) => {
+      const g = get().dogfights.find((g) => g.id === groupId)
+      return !!g && g.active && g.shipIds.includes(shipId)
+    },
+    (shipId, groupId) => {
+      const { round, phase, ships } = get()
+      const ship = ships.find((s) => s.id === shipId)
+      const group = get().dogfights.find((g) => g.id === groupId)
+      const remaining = group.shipIds.filter((id) => id !== shipId)
+
+      set((s) => ({
+        dogfights: s.dogfights.map((g) =>
+          g.id !== groupId ? g : { ...g, shipIds: remaining }
+        ),
+        ships: s.ships.map((sh) =>
+          sh.id === shipId ? { ...sh, inDogfight: null } : sh
+        ),
+        log: [...s.log, makeLogEntry({
+          round, phase, type: 'action',
+          message: `⚔ ${ship?.profile.name ?? shipId} escapes dogfight.`,
+          shipId,
+        })],
+      }))
+
+      if (remaining.length < 2) get().endDogfight(groupId)
+    },
+  ),
+
+  /**
+   * End a dogfight group: mark inactive, clear inDogfight on all ships.
+   * @param {string} groupId
+   */
+  endDogfight: (groupId) => {
+    const { round, phase } = get()
+    const group = get().dogfights.find((g) => g.id === groupId)
+    if (!group) return
+    set((s) => ({
+      dogfights: s.dogfights.map((g) =>
+        g.id !== groupId ? g : { ...g, active: false }
+      ),
+      ships: s.ships.map((sh) =>
+        sh.inDogfight === groupId ? { ...sh, inDogfight: null } : sh
+      ),
+      log: [...s.log, makeLogEntry({
+        round, phase, type: 'system',
+        message: `⚔ Dogfight ended.`,
+      })],
+    }))
+  },
+
   // === RESET ===
 
   /**
@@ -773,6 +900,7 @@ const useBattleStore = create((set, get) => {
     currentActorIndex: 0,
     ships: [],
     missiles: [],
+    dogfights: [],
     log: [],
     mapSettings: { scale: 1 },
     undoStack: [],
@@ -782,8 +910,8 @@ const useBattleStore = create((set, get) => {
   // === IMPORT / EXPORT ===
 
   exportBattleState: () => {
-    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, log, mapSettings } = get()
-    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, log, mapSettings, savedAt: new Date().toISOString() })
+    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, log, mapSettings } = get()
+    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, log, mapSettings, savedAt: new Date().toISOString() })
   },
 
   /**
@@ -802,6 +930,7 @@ const useBattleStore = create((set, get) => {
       currentActorIndex: battle.currentActorIndex ?? 0,
       ships: battle.ships ?? [],
       missiles: battle.missiles ?? [],
+      dogfights: battle.dogfights ?? [],
       log: battle.log ?? [],
       mapSettings: battle.mapSettings ?? { scale: 1 },
       undoStack: [],

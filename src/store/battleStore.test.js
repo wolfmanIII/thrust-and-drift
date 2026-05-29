@@ -1111,3 +1111,102 @@ describe('redoLastAction', () => {
     expect(useBattleStore.getState().ships).toHaveLength(2)
   })
 })
+
+// === DOGFIGHT ===
+
+describe('dogfight', () => {
+  function addTwo() {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'Viper' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'Fighter' }), { q: 0, r: 0 }, 'npc', '#f00')
+    const [a, b] = useBattleStore.getState().ships
+    return [a.id, b.id]
+  }
+
+  it('startDogfight creates group + sets inDogfight on ships', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startDogfight([a, b])
+    const { dogfights, ships } = useBattleStore.getState()
+    expect(dogfights).toHaveLength(1)
+    expect(dogfights[0].active).toBe(true)
+    expect(dogfights[0].microRound).toBe(1)
+    expect(ships.find((s) => s.id === a).inDogfight).toBe(dogfights[0].id)
+    expect(ships.find((s) => s.id === b).inDogfight).toBe(dogfights[0].id)
+  })
+
+  it('startDogfight no-ops with fewer than 2 ships', () => {
+    addTwo()
+    useBattleStore.getState().startDogfight(['p1'])
+    expect(useBattleStore.getState().dogfights).toHaveLength(0)
+  })
+
+  it('startDogfight appends log entry', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startDogfight([a, b])
+    const last = useBattleStore.getState().log.at(-1)
+    expect(last.message).toMatch(/⚔/)
+    expect(last.message).toMatch(/Viper/)
+  })
+
+  it('advanceDogfightMicroRound increments microRound and records winner', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startDogfight([a, b])
+    const gid = useBattleStore.getState().dogfights[0].id
+    useBattleStore.getState().advanceDogfightMicroRound(gid, [
+      { shipId: a, total: 12 },
+      { shipId: b, total: 8 },
+    ])
+    const g = useBattleStore.getState().dogfights[0]
+    expect(g.microRound).toBe(2)
+    expect(g.roundWinnerId).toBe(a)
+    expect(g.roundWinnerMargin).toBe(4)
+  })
+
+  it('advanceDogfightMicroRound ends dogfight after micro-round 6', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startDogfight([a, b])
+    const gid = useBattleStore.getState().dogfights[0].id
+    for (let i = 0; i < 6; i++) {
+      useBattleStore.getState().advanceDogfightMicroRound(gid, [
+        { shipId: a, total: 10 },
+        { shipId: b, total: 8 },
+      ])
+    }
+    const g = useBattleStore.getState().dogfights[0]
+    expect(g.active).toBe(false)
+    expect(useBattleStore.getState().ships.find((s) => s.id === a).inDogfight).toBeNull()
+  })
+
+  it('escapeDogfight clears inDogfight for escaping ship', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startDogfight([a, b])
+    const gid = useBattleStore.getState().dogfights[0].id
+    useBattleStore.getState().escapeDogfight(a, gid)
+    expect(useBattleStore.getState().ships.find((s) => s.id === a).inDogfight).toBeNull()
+  })
+
+  it('escapeDogfight ends group when fewer than 2 ships remain', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startDogfight([a, b])
+    const gid = useBattleStore.getState().dogfights[0].id
+    useBattleStore.getState().escapeDogfight(a, gid)
+    expect(useBattleStore.getState().dogfights[0].active).toBe(false)
+    expect(useBattleStore.getState().ships.find((s) => s.id === b).inDogfight).toBeNull()
+  })
+
+  it('endDogfight marks group inactive + clears all ships', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startDogfight([a, b])
+    const gid = useBattleStore.getState().dogfights[0].id
+    useBattleStore.getState().endDogfight(gid)
+    expect(useBattleStore.getState().dogfights[0].active).toBe(false)
+    expect(useBattleStore.getState().ships.find((s) => s.id === a).inDogfight).toBeNull()
+    expect(useBattleStore.getState().ships.find((s) => s.id === b).inDogfight).toBeNull()
+  })
+
+  it('resetBattle clears dogfights', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startDogfight([a, b])
+    useBattleStore.getState().resetBattle()
+    expect(useBattleStore.getState().dogfights).toHaveLength(0)
+  })
+})
