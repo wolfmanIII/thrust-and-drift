@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.3.9** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.4.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -19,6 +19,7 @@
 11. [Crew System](#11-crew-system)
 12. [Undo / Redo](#12-undo--redo)
 13. [Save & Resume](#13-save--resume)
+14. [Dogfight](#14-dogfight)
 
 ---
 
@@ -401,6 +402,112 @@ Ship profiles are separate from battle sessions. Use **↑ EXPORT** and
 > Clicking **⌂** in the HUD returns to the Dashboard. A confirmation modal
 > warns that unsaved battle data will be lost — save first if you need to
 > resume.
+
+---
+
+---
+
+## 14. Dogfight
+
+> MgT2e CRB p.138 — Vehicle Combat / Dogfighting rules adapted for space combat.
+
+### 14.1 What is a Dogfight?
+
+A **dogfight** is a close-range sub-system that activates automatically when two
+or more ships from different factions end the **Movement phase in the same hex**
+(vectorial mode only).
+
+Standard combat is suspended for the involved ships. Instead, the round
+subdivides into **6 micro-rounds** of 6 seconds each — one full standard round
+equals six micro-rounds of dogfight.
+
+### 14.2 Engagement
+
+When the app detects a potential dogfight at the end of Movement, the
+**⚠ CONTATTO RAVVICINATO** modal opens.
+
+For each ship the GM declares:
+
+| Intent | Outcome |
+| ------ | ------- |
+| **Both SÌ** | Dogfight activates immediately |
+| **Both NO** | Ships treated as Short Range (distance 1) — no dogfight |
+| **Mixed** | Pursuit check required (see §14.3) |
+
+### 14.3 Pursuit Check
+
+Formula: **2D6 + Pilot + Tonnage DM + Thrust libero**
+
+- **Thrust libero** = profile thrust − thrust used this round
+- **Tonnage DM**: <50t → 0; 50–99t → −1; 100–199t → −2; +−1 per 100t above 100
+
+If the pursuer's total exceeds the evader's total → dogfight activates.
+Otherwise → Short Range, no dogfight.
+
+Enter dice manually for each side. The app computes and compares totals live.
+
+### 14.4 Micro-Round Flow
+
+Open the round from the **HUD dogfight tracker** (⚔ DOGFIGHT panel, top-left).
+
+#### Step 1 — Declare escape (optional)
+
+At the start of each micro-round the GM may declare that a ship wants to flee.
+
+- If its thrust exceeds all enemy thrusts → **auto-escape**, no check needed.
+- If enemies choose not to pursue → **auto-escape** (toggle "NON INSEGUONO").
+- Otherwise → pursuit check (same formula as §14.3).
+
+#### Step 2 — Pilot check
+
+Each remaining ship rolls **2D6 + Pilot + Tonnage DM + Thrust + DM round
+precedente**.
+
+| DM | Source |
+| -- | ------ |
+| Pilot skill | `getCrewSkill(crew, 'pilot')` |
+| Tonnage DM | See §14.3 table |
+| Thrust | Profile thrust − thrust used this round |
+| Nemici extra | −(number of enemy ships − 1) when outnumbered |
+| Bonus round | Previous round winner's margin carries forward as a +DM |
+
+#### Step 3 — Result
+
+| Outcome | Effect |
+| ------- | ------ |
+| Winner | **+2 DM** to all attacks this micro-round; chooses enemy fire arc |
+| Loser | **−2 DM** to all attacks |
+| Tie | Fixed weapons cannot fire; turrets OK; no positional DM |
+
+Apply the attack DMs shown in the modal when opening the **Attack** panel.
+
+#### Step 4 — Advance
+
+Click **AVANZA → MICRO-ROUND N+1/6**. After micro-round 6 the dogfight ends
+automatically and all ships return to normal combat flow.
+
+### 14.5 Token Visuals
+
+Ships in a dogfight display:
+
+- **Pulsing amber ring** around the token
+- **⚔ badge** top-right of the token
+- Ghost position and velocity arrow are hidden (no movement during dogfight)
+
+### 14.6 Escape Mid-Dogfight
+
+Escape can be declared at the start of any micro-round (Step 1 above).
+Conditions:
+
+```text
+Auto-escape:  ship.thrust > max(enemy thrusts)
+              OR enemies choose not to pursue
+Check:        2D6 + Pilot + Tonnage DM + Thrust libero  (same as §14.3)
+              fuggitivo total > inseguitore total → escaped
+```
+
+On successful escape `inDogfight` is cleared; the ship re-enters normal combat
+from the next standard round.
 
 ---
 

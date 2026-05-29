@@ -31,6 +31,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Profile I/O** | Import/export ship profiles via JSON files |
 | **Safety modals** | Confirm before deleting profiles; confirm before leaving battle without saving |
 | **Legal footer** | Fixed Mongoose Publishing disclaimer on all screens; "About" modal with full Fair Use text |
+| **Dogfight system** | Close-range sub-system: 6 micro-rounds per standard round; Pilot opposed checks; tonnage/thrust/multi-enemy DMs; escape via thrust advantage or pursuit check; pulsing token visuals |
 
 ---
 
@@ -136,7 +137,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-406 tests across utils, Zustand stores, hooks, and UI components.
+452 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 
@@ -155,9 +156,10 @@ src/
 │   ├── map/
 │   │   ├── BattleMap.jsx       ← Canvas hex map
 │   │   ├── BasicBattleView.jsx ← Simplified view (basic combat mode)
-│   │   ├── useCanvasRenderer.js← Hex + token rendering hook
+│   │   ├── useCanvasRenderer.js← Hex + token rendering hook (rAF loop for dogfight pulse)
 │   │   ├── useMapInteraction.js← Pan, zoom, click, right-click hook
 │   │   ├── useShipHover.js     ← Hover detection + 200ms tooltip timer
+│   │   ├── useDogfightDetection.js ← Detects same-hex hostile ships post-movement
 │   │   ├── ShipTooltip.jsx     ← Ship hover tooltip panel (portal)
 │   │   └── tokenRenderers.js   ← Draw functions for ships and missiles
 │   ├── modals/
@@ -171,6 +173,8 @@ src/
 │   │   ├── ShipDetailModal.jsx
 │   │   ├── ActionModal.jsx
 │   │   ├── InitiativeModal.jsx
+│   │   ├── DogfightNotificationModal.jsx ← Engagement intent + pursuit check
+│   │   ├── DogfightRoundModal.jsx        ← Micro-round resolution (escape + Pilot check)
 │   │   └── useAttackSetup.js   ← Hook: attack DM derivation
 │   └── ui/
 │       ├── ContextMenu.jsx     ← Right-click context menu
@@ -201,6 +205,7 @@ src/
     ├── crew.js                 ← Crew array helpers (getCrewSkill, migrateCrew)
     ├── io.js                   ← JSON import/export via File API
     ├── dice.js                 ← Dice rolling + result formatting
+    ├── dogfight.js             ← Dogfight logic (tonnageDM, Pilot checks, escape)
     └── db.js                   ← IndexedDB wrapper (openDB, get, put, delete)
 ```
 

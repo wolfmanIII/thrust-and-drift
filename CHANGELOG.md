@@ -6,6 +6,23 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.0] — 2026-05-29
+
+### Added
+- **Dogfight system** — full sub-system for close-range ship combat (MgT2e CRB p.138)
+  - `utils/dogfight.js` — pure logic: `getTonnageDM`, `rollDogfightPilot`, `resolveDogfightChecks`, `dogfightAttackDM`, `canEscape`; 28 unit tests
+  - `battleStore` dogfight slice — `dogfights[]` state, `inDogfight` on ship instances, `startDogfight`, `advanceDogfightMicroRound`, `escapeDogfight`, `endDogfight`; undo/redo snapshots include dogfight state; 9 store tests
+  - `useDogfightDetection` — detects same-hex hostile ships at movement→attack transition; `detectDogfightGroups` pure function; 9 tests
+  - `DogfightNotificationModal` — GM declares each ship's intent (engage/evade); resolves pursuit check (§3.1) when intents differ; handles multiple groups sequentially
+  - `DogfightRoundModal` — full micro-round flow: escape declarations (thrust-advantage auto-escape + pursuit check §6.4), Pilot check dice per ship with all DMs (tonnage, thrust, nemici extra, bonus round precedente), winner resolution, attack DM display (+2/−2), advance counter up to micro-round 6
+  - **HUD dogfight tracker** — per-group panel showing micro-round progress, previous winner bonus, "MICRO-ROUND N →" button to open `DogfightRoundModal`
+  - **Canvas token visuals** — pulsing amber ring (rAF loop, ~0.67 Hz) + ⚔ badge on in-dogfight tokens; ghost position and velocity vector hidden for dogfight ships
+
+### Tests
+- 452 tests (up from 406) — 28 dogfight utils + 9 battleStore dogfight slice + 9 useDogfightDetection + 9 battleStore detection integration
+
+---
+
 ## [1.3.9] — 2026-05-29
 
 ### Added
