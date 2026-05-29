@@ -6,6 +6,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.6] — 2026-05-29
+
+### Added
+- **Player manual dice entry** — ships with `faction === 'players'` always roll their own dice; NPC ships auto-roll as before
+- **`DiceInput` component** (`src/components/forms/DiceInput.jsx`) — two die inputs (1–6) + running total + 🎲 auto-roll button; reusable across modals
+- **InitiativeModal** — player ships show `DiceInput` with editable pre-rolled values; NPC ships shown as "auto" placeholders; initiative preview total (2D6 + Pilot + Thrust) updates live; REROLL resets player dice
+- **AttackModal** — `AttackRollStep` shows `DiceInput` + "CONFIRM ROLL" for player attackers; NPC attackers keep auto-roll button
+- **ActionModal** — `DiceInput` shown above EXECUTE for player ships (non-auto actions); dice reset on each action selection; button label changes to "CONFIRM ROLL"
+
+### Changed
+- `rollInitiative` / `rollAttack` in `combat.js` — accept optional `diceOverride` param (backwards-compatible)
+- `rollAllInitiative` in `battleStore` — accepts `diceOverrides: { [shipId]: { results, total } }` map; `undefined` entries auto-roll as before
+
+---
+
 ## [1.3.5] — 2026-05-29
 
 ### Changed
