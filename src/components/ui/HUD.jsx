@@ -37,6 +37,10 @@ export function HUD() {
   const canUndo             = useBattleStore((s) => s.undoStack.length > 0)
   const canRedo             = useBattleStore((s) => s.redoStack.length > 0)
   const gotoScreen          = useUiStore((s) => s.gotoScreen)
+  const openModal           = useUiStore((s) => s.openModal)
+  const dogfights           = useBattleStore((s) => s.dogfights)
+
+  const activeDogfights = dogfights.filter((g) => g.active)
 
   const [showExitWarning, setShowExitWarning] = useState(false)
 
@@ -151,6 +155,48 @@ export function HUD() {
           </button>
         </Tooltip>
       </div>
+
+      {/* ── Dogfight trackers ──────────────────────────────────────── */}
+      {activeDogfights.map((group, idx) => {
+        const groupShips = group.shipIds
+          .map((id) => ships.find((s) => s.id === id))
+          .filter(Boolean)
+        const winnerShip = group.roundWinnerId
+          ? ships.find((s) => s.id === group.roundWinnerId)
+          : null
+        return (
+          <div
+            key={group.id}
+            className="bg-slate-900/80 border border-amber-500/30 rounded px-3 py-2 backdrop-blur-sm pointer-events-auto space-y-1.5 min-w-48"
+          >
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-amber-400 font-mono text-xs font-bold shrink-0">
+                ⚔ DOGFIGHT {idx + 1}
+              </span>
+              <span className="text-slate-500 font-mono text-xs truncate">
+                {groupShips.map((s) => s.profile.name).join(' ↔ ')}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-400 font-mono text-xs">
+              <span>Micro-round {group.microRound}/6</span>
+              {winnerShip && (
+                <>
+                  <span className="text-slate-600">│</span>
+                  <span className="text-amber-300 truncate">
+                    ↑ {winnerShip.profile.name} +{group.roundWinnerMargin}
+                  </span>
+                </>
+              )}
+            </div>
+            <button
+              onClick={() => openModal('dogfightRound', { groupId: group.id })}
+              className="w-full py-1 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors"
+            >
+              MICRO-ROUND {group.microRound} →
+            </button>
+          </div>
+        )
+      })}
 
       {showExitWarning && (
         <Modal title="ABANDON SESSION" onClose={() => setShowExitWarning(false)} width="max-w-sm">
