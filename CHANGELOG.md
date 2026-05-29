@@ -6,6 +6,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.3] — 2026-05-29
+
+### Changed
+- **`startNextRound` contract explicit** — extracted `buildNextRoundState()` pure function; `advancePhase` calls it directly instead of delegating to `startNextRound`, eliminating the implicit "never call standalone" invariant; `startNextRound` now pushes history and is safe to call independently
+- **Log append-only on undo** — log excluded from undo snapshots; `undoLastAction` appends a `↩ Undo — restored to Round N, PHASE` entry instead of rolling back the log
+
+### Tests
+- 373 tests (up from 370) — new: log not rolled back on undo, `↩ Undo` entry appended, `startNextRound` direct call pushes history
+
+---
+
 ## [1.3.2] — 2026-05-29
 
 ### Added

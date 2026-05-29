@@ -1045,6 +1045,16 @@ Funzionalità incluse nella prima versione funzionante:
 - `HUD`: pulsante `⟲` (disabilitato/opaco se stack vuoto) + shortcut `Ctrl+Z` / `Cmd+Z` globale
 - 370 test (da 355) — nuove suite: comportamento core, cap 20, pulizia stack, flag di soppressione, invariante `advancePhase→startNextRound`, pulsante HUD
 
+### 13.3d Versione 1.3.3 — Undo refactor ✅ COMPLETATA
+
+**Contract esplicito e log append-only:**
+
+- `buildNextRoundState(s)` — funzione pura estratta fuori dallo store; condivisa da `startNextRound` e `advancePhase`; elimina l'invariante implicita "startNextRound non deve mai essere chiamata standalone"
+- `startNextRound` pubblico ora chiama `pushHistory()` autonomamente — sicuro da invocare direttamente
+- `advancePhase` usa `buildNextRoundState` direttamente al posto di delegare a `startNextRound` — nessun doppio push
+- Log escluso dagli snapshot undo; `undoLastAction` appende entry `↩ Undo — restored to Round N, PHASE` invece di rollback
+- 373 test (da 370)
+
 ### 13.4 Versione 1.3 — Effetti Visivi Canvas
 
 Animazioni non bloccanti su Canvas (layer sopra i token, `requestAnimationFrame`).  
