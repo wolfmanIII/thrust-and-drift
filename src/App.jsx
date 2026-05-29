@@ -23,6 +23,7 @@ import { ThrustModal }        from './components/modals/ThrustModal.jsx'
 import { EvasiveModal }       from './components/modals/EvasiveModal.jsx'
 import { MissileLaunchModal } from './components/modals/MissileLaunchModal.jsx'
 import { DogfightNotificationModal } from './components/modals/DogfightNotificationModal.jsx'
+import { DogfightRoundModal }        from './components/modals/DogfightRoundModal.jsx'
 import { HelpScreen }      from './components/help/HelpScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
 import { useUiStore }      from './store/uiStore.js'
@@ -40,6 +41,7 @@ const MODAL_MAP = {
   addShip:       AddShipModal,
   attack:        AttackModal,
   action:        ActionModal,
+  dogfightRound: DogfightRoundModal,
   evasive:       EvasiveModal,
   initiative:    InitiativeModal,
   missileLaunch: MissileLaunchModal,
