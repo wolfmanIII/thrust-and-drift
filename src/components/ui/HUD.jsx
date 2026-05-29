@@ -112,7 +112,7 @@ export function HUD() {
 
       {/* Battle utilities */}
       <div className="pointer-events-auto flex gap-1 mt-0.5">
-        <Tooltip label="Undo last action (Ctrl+Z)">
+        <Tooltip label="Undo last action (Ctrl+Z)" position="bottom">
           <button
             onClick={handleUndo}
             disabled={!canUndo}
@@ -122,7 +122,7 @@ export function HUD() {
             ⟲
           </button>
         </Tooltip>
-        <Tooltip label="Redo last action (Ctrl+Y)">
+        <Tooltip label="Redo last action (Ctrl+Y)" position="bottom">
           <button
             onClick={handleRedo}
             disabled={!canRedo}
@@ -132,7 +132,7 @@ export function HUD() {
             ↷
           </button>
         </Tooltip>
-        <Tooltip label="Save session to file">
+        <Tooltip label="Save session to file" position="bottom">
           <button
             onClick={exportBattleState}
             className="flex-1 bg-slate-800/80 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
@@ -140,7 +140,7 @@ export function HUD() {
             💾 SAVE
           </button>
         </Tooltip>
-        <Tooltip label="Return to main menu">
+        <Tooltip label="Return to main menu" position="bottom">
           <button
             onClick={() => setShowExitWarning(true)}
             className="bg-slate-800/80 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
