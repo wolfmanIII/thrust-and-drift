@@ -9,6 +9,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ## [1.3.9] — 2026-05-29
 
 ### Added
+- **Field Manual screen** — new `help` screen accessible from Dashboard → 📖 FIELD MANUAL; sidebar TOC + scrollable content covering all phases, crew system, undo/redo, save/resume; `⬇ DOWNLOAD PDF` button links to `/field-manual.pdf`
+- **Field Manual PDF** — `doc/field-manual.md` (markdownlint-clean) + `public/field-manual.pdf` for in-app download
 - **Legal footer** — fixed `h-7` bar on all screens (Dashboard + Battle); abbreviated Mongoose Publishing disclaimer; "About" link opens modal with full Fair Use disclaimer text per Mongoose Publishing policy (May 2025)
 
 ### Fixed

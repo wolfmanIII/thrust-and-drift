@@ -180,6 +180,8 @@ src/
 │       ├── Tooltip.jsx         ← Portal-based tooltip
 │       ├── ErrorBoundary.jsx   ← Global React error boundary
 │       └── LegalFooter.jsx     ← Fixed Mongoose Publishing disclaimer + About modal
+├── help/
+│   └── HelpScreen.jsx          ← Full-screen field manual (sidebar TOC + PDF download)
 ├── data/
 │   ├── weapons.js              ← Weapon tables, traits, damage
 │   ├── rangeBands.js           ← Distance band thresholds (hex)
