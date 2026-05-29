@@ -106,6 +106,7 @@ export function HUD() {
           <button
             onClick={handleUndo}
             disabled={!canUndo}
+            aria-label="Undo last action (Ctrl+Z)"
             className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:text-slate-300 hover:border-slate-500 disabled:hover:text-slate-500 disabled:hover:border-slate-700"
           >
             ⟲

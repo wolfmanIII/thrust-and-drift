@@ -95,3 +95,32 @@ describe('HUD — current actor', () => {
     expect(useBattleStore.getState().currentActorIndex).toBe(1)
   })
 })
+
+describe('HUD — undo button', () => {
+  it('undo button disabled when undoStack is empty', () => {
+    render(<HUD />)
+    const btn = screen.getByRole('button', { name: /Undo last action/ })
+    expect(btn).toBeDisabled()
+  })
+
+  it('undo button enabled when undoStack has entries', () => {
+    useBattleStore.getState().addShip(
+      { id: 'p1', name: 'Viper', hull: 10, thrust: 4, turrets: [], crew: { pilot: 2, gunner: 1 } },
+      { q: 0, r: 0 }, 'players', '#0f0'
+    )
+    render(<HUD />)
+    const btn = screen.getByRole('button', { name: /Undo last action/ })
+    expect(btn).not.toBeDisabled()
+  })
+
+  it('clicking undo restores previous state', () => {
+    useBattleStore.getState().addShip(
+      { id: 'p1', name: 'Viper', hull: 10, thrust: 4, turrets: [], crew: { pilot: 2, gunner: 1 } },
+      { q: 0, r: 0 }, 'players', '#0f0'
+    )
+    expect(useBattleStore.getState().ships).toHaveLength(1)
+    render(<HUD />)
+    fireEvent.click(screen.getByRole('button', { name: /Undo last action/ }))
+    expect(useBattleStore.getState().ships).toHaveLength(0)
+  })
+})

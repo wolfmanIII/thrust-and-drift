@@ -857,3 +857,111 @@ describe('clearLog', () => {
     expect(useBattleStore.getState().log).toHaveLength(0)
   })
 })
+
+// === UNDO SYSTEM ===
+
+describe('pushHistory / undoLastAction', () => {
+  it('pushHistory snapshots current state onto undoStack', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    expect(useBattleStore.getState().undoStack).toHaveLength(1)
+  })
+
+  it('undoLastAction restores previous state', () => {
+    const store = useBattleStore.getState()
+    store.addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    expect(useBattleStore.getState().ships).toHaveLength(1)
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().ships).toHaveLength(0)
+  })
+
+  it('undoLastAction pops the stack', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    expect(useBattleStore.getState().undoStack).toHaveLength(1)
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().undoStack).toHaveLength(0)
+  })
+
+  it('undoLastAction is no-op when stack is empty', () => {
+    expect(useBattleStore.getState().undoStack).toHaveLength(0)
+    expect(() => useBattleStore.getState().undoLastAction()).not.toThrow()
+    expect(useBattleStore.getState().ships).toHaveLength(0)
+  })
+
+  it('multiple undos walk back through history', () => {
+    const store = useBattleStore.getState()
+    store.addShip(makeProfile({ id: 'p1', name: 'Alpha' }), { q: 0, r: 0 }, 'players', '#0f0')
+    store.addShip(makeProfile({ id: 'p2', name: 'Beta'  }), { q: 1, r: 0 }, 'players', '#00f')
+    expect(useBattleStore.getState().ships).toHaveLength(2)
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().ships).toHaveLength(1)
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().ships).toHaveLength(0)
+  })
+
+  it('stack is capped at 20 entries', () => {
+    const store = useBattleStore.getState()
+    // pushHistory 21 times via addShip; first snapshot is lost
+    store.addShip(makeProfile({ id: 'p0', name: 'S0' }), { q: 0, r: 0 }, 'players', '#0f0')
+    for (let i = 1; i <= 20; i++) {
+      useBattleStore.getState().addShip(
+        makeProfile({ id: `p${i}`, name: `S${i}` }),
+        { q: i, r: 0 }, 'players', '#0f0'
+      )
+    }
+    expect(useBattleStore.getState().undoStack).toHaveLength(20)
+  })
+
+  it('resetBattle clears undoStack', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    expect(useBattleStore.getState().undoStack).toHaveLength(1)
+    useBattleStore.getState().resetBattle()
+    expect(useBattleStore.getState().undoStack).toHaveLength(0)
+  })
+})
+
+describe('undo — history suppression flags', () => {
+  it('applyDamage with _skipThreshold=true does not push history', () => {
+    const store = useBattleStore.getState()
+    store.addShip(makeProfile({ hull: 20 }), { q: 0, r: 0 }, 'players', '#0f0')
+    const { id } = useBattleStore.getState().ships[0]
+    const stackBefore = useBattleStore.getState().undoStack.length
+    // internal recursive call — _skipThreshold=true
+    useBattleStore.getState().applyDamage(id, 2, 'test', true)
+    expect(useBattleStore.getState().undoStack).toHaveLength(stackBefore)
+  })
+
+  it('applyDamage without flag pushes history', () => {
+    const store = useBattleStore.getState()
+    store.addShip(makeProfile({ hull: 20 }), { q: 0, r: 0 }, 'players', '#0f0')
+    const { id } = useBattleStore.getState().ships[0]
+    const stackBefore = useBattleStore.getState().undoStack.length
+    useBattleStore.getState().applyDamage(id, 2, 'test')
+    expect(useBattleStore.getState().undoStack).toHaveLength(stackBefore + 1)
+  })
+
+  it('addCriticalHit with _skipHistory=true does not push history', () => {
+    const store = useBattleStore.getState()
+    store.addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    const { id } = useBattleStore.getState().ships[0]
+    const stackBefore = useBattleStore.getState().undoStack.length
+    useBattleStore.getState().addCriticalHit(id, { system: 'Hull', severity: 1 }, { _skipHistory: true })
+    expect(useBattleStore.getState().undoStack).toHaveLength(stackBefore)
+  })
+
+  it('addCriticalHit without flag pushes history', () => {
+    const store = useBattleStore.getState()
+    store.addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    const { id } = useBattleStore.getState().ships[0]
+    const stackBefore = useBattleStore.getState().undoStack.length
+    useBattleStore.getState().addCriticalHit(id, { system: 'Hull', severity: 1 })
+    expect(useBattleStore.getState().undoStack).toHaveLength(stackBefore + 1)
+  })
+
+  it('advancePhase → startNextRound pushes only one snapshot', () => {
+    // Advance to end phase so advancePhase triggers startNextRound
+    useBattleStore.setState({ phase: 'end' })
+    const stackBefore = useBattleStore.getState().undoStack.length
+    useBattleStore.getState().advancePhase()
+    expect(useBattleStore.getState().undoStack).toHaveLength(stackBefore + 1)
+  })
+})
