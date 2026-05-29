@@ -22,6 +22,7 @@ import { ShipProfileModal }   from './components/modals/ShipProfileModal.jsx'
 import { ThrustModal }        from './components/modals/ThrustModal.jsx'
 import { EvasiveModal }       from './components/modals/EvasiveModal.jsx'
 import { MissileLaunchModal } from './components/modals/MissileLaunchModal.jsx'
+import { LegalFooter }     from './components/ui/LegalFooter.jsx'
 import { useUiStore }      from './store/uiStore.js'
 import { useBattleStore }  from './store/battleStore.js'
 import { useAutosave }     from './hooks/useAutosave.js'
@@ -56,7 +57,12 @@ export function App() {
   const ActiveModal = activeModal ? (MODAL_MAP[activeModal] ?? null) : null
 
   if (screen === 'dashboard') {
-    return <Dashboard />
+    return (
+      <>
+        <Dashboard />
+        <LegalFooter />
+      </>
+    )
   }
 
   return (
@@ -94,6 +100,9 @@ export function App() {
 
       {/* ── Modal layer ──────────────────────────────────────────────── */}
       {ActiveModal && <ActiveModal />}
+
+      {/* ── Legal footer ─────────────────────────────────────────────── */}
+      <LegalFooter />
     </div>
   )
 }
