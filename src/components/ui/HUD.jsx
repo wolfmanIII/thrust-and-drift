@@ -112,26 +112,28 @@ export function HUD() {
 
       {/* Battle utilities */}
       <div className="pointer-events-auto flex gap-1 mt-0.5">
-        <Tooltip label="Undo last action (Ctrl+Z)" position="bottom">
-          <button
-            onClick={handleUndo}
-            disabled={!canUndo}
-            aria-label="Undo last action (Ctrl+Z)"
-            className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:text-slate-300 hover:border-slate-500 disabled:hover:text-slate-500 disabled:hover:border-slate-700"
-          >
-            ⟲
-          </button>
-        </Tooltip>
-        <Tooltip label="Redo last action (Ctrl+Y)" position="bottom">
-          <button
-            onClick={handleRedo}
-            disabled={!canRedo}
-            aria-label="Redo last action (Ctrl+Y)"
-            className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:text-slate-300 hover:border-slate-500 disabled:hover:text-slate-500 disabled:hover:border-slate-700"
-          >
-            ↷
-          </button>
-        </Tooltip>
+        {canUndo && (
+          <Tooltip label="Undo last action (Ctrl+Z)" position="bottom">
+            <button
+              onClick={handleUndo}
+              aria-label="Undo last action (Ctrl+Z)"
+              className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-500 hover:text-slate-300 hover:border-slate-500"
+            >
+              ⟲
+            </button>
+          </Tooltip>
+        )}
+        {canRedo && (
+          <Tooltip label="Redo last action (Ctrl+Y)" position="bottom">
+            <button
+              onClick={handleRedo}
+              aria-label="Redo last action (Ctrl+Y)"
+              className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-500 hover:text-slate-300 hover:border-slate-500"
+            >
+              ↷
+            </button>
+          </Tooltip>
+        )}
         <Tooltip label="Save session to file" position="bottom">
           <button
             onClick={exportBattleState}

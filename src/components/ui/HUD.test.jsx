@@ -97,20 +97,18 @@ describe('HUD — current actor', () => {
 })
 
 describe('HUD — undo button', () => {
-  it('undo button disabled when undoStack is empty', () => {
+  it('undo button not rendered when undoStack is empty', () => {
     render(<HUD />)
-    const btn = screen.getByRole('button', { name: /Undo last action/ })
-    expect(btn).toBeDisabled()
+    expect(screen.queryByRole('button', { name: /Undo last action/ })).not.toBeInTheDocument()
   })
 
-  it('undo button enabled when undoStack has entries', () => {
+  it('undo button rendered when undoStack has entries', () => {
     useBattleStore.getState().addShip(
       { id: 'p1', name: 'Viper', hull: 10, thrust: 4, turrets: [], crew: { pilot: 2, gunner: 1 } },
       { q: 0, r: 0 }, 'players', '#0f0'
     )
     render(<HUD />)
-    const btn = screen.getByRole('button', { name: /Undo last action/ })
-    expect(btn).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /Undo last action/ })).toBeInTheDocument()
   })
 
   it('clicking undo restores previous state', () => {
@@ -126,21 +124,19 @@ describe('HUD — undo button', () => {
 })
 
 describe('HUD — redo button', () => {
-  it('redo button disabled when redoStack is empty', () => {
+  it('redo button not rendered when redoStack is empty', () => {
     render(<HUD />)
-    const btn = screen.getByRole('button', { name: /Redo last action/ })
-    expect(btn).toBeDisabled()
+    expect(screen.queryByRole('button', { name: /Redo last action/ })).not.toBeInTheDocument()
   })
 
-  it('redo button enabled after undo', () => {
+  it('redo button rendered after undo', () => {
     useBattleStore.getState().addShip(
       { id: 'p1', name: 'Viper', hull: 10, thrust: 4, turrets: [], crew: { pilot: 2, gunner: 1 } },
       { q: 0, r: 0 }, 'players', '#0f0'
     )
     useBattleStore.getState().undoLastAction()
     render(<HUD />)
-    const btn = screen.getByRole('button', { name: /Redo last action/ })
-    expect(btn).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /Redo last action/ })).toBeInTheDocument()
   })
 
   it('clicking redo restores undone state', () => {
