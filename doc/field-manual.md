@@ -1,7 +1,3 @@
-<!-- markdownlint-disable-file MD041 -->
-
-![Thrust & Drift Logo](../src/assets/TD-logo-transparent.png)
-
 # Thrust & Drift — Field Manual
 
 **Version 1.3.9** · Mongoose Traveller 2e Space Combat Simulator
