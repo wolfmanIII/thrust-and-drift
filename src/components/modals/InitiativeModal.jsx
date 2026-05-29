@@ -1,6 +1,6 @@
 /**
  * InitiativeModal — roll initiative for all ships.
- * Player ships: manual dice entry (physical dice). NPC ships: auto-rolled.
+ * Player ships: manual dice entry (physical or opt-in auto-roll). NPC ships: auto-rolled on confirm.
  * // MgT2e CRB p.160 — Initiative
  */
 
@@ -8,18 +8,8 @@ import { useState } from 'react'
 import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
-import { roll2D6 } from '../../utils/dice.js'
 import { getCrewSkill } from '../../utils/crew.js'
 import { DiceInput } from '../forms/DiceInput.jsx'
-
-/** Build the initial playerDice map — pre-roll for all player-faction ships. */
-function initPlayerDice(ships) {
-  const map = {}
-  for (const ship of ships) {
-    if (ship.faction === 'players') map[ship.id] = roll2D6()
-  }
-  return map
-}
 
 export function InitiativeModal() {
   const closeModal        = useUiStore((s) => s.closeModal)
@@ -27,9 +17,14 @@ export function InitiativeModal() {
   const ships             = useBattleStore((s) => s.ships)
   const initiativeOrder   = useBattleStore((s) => s.initiativeOrder)
 
-  // Manual dice for player ships only; NPC ships auto-roll inside rollAllInitiative.
-  const [playerDice, setPlayerDice] = useState(() => initPlayerDice(ships))
-  const [confirmed, setConfirmed]   = useState(false)
+  // Manual dice per player ship: null = not yet rolled.
+  const [playerDice, setPlayerDice]   = useState(() => {
+    const map = {}
+    ships.filter((s) => s.faction === 'players').forEach((s) => { map[s.id] = null })
+    return map
+  })
+  const [rerollCount, setRerollCount] = useState(0)
+  const [confirmed, setConfirmed]     = useState(false)
 
   const playerShips = ships.filter((s) => s.faction === 'players')
   const npcShips    = ships.filter((s) => s.faction !== 'players')
@@ -37,17 +32,21 @@ export function InitiativeModal() {
   const setShipDice = (shipId, dice) =>
     setPlayerDice((prev) => ({ ...prev, [shipId]: dice }))
 
+  const allEntered = playerShips.every((s) => playerDice[s.id] !== null)
+
   const handleConfirm = () => {
     rollAllInitiative({}, playerDice)
     setConfirmed(true)
   }
 
   const handleReroll = () => {
-    setPlayerDice(initPlayerDice(ships))
+    const map = {}
+    playerShips.forEach((s) => { map[s.id] = null })
+    setPlayerDice(map)
+    setRerollCount((c) => c + 1)
     setConfirmed(false)
   }
 
-  /** Preview initiative total for a player ship given current dice. */
   const previewTotal = (ship) => {
     const dice = playerDice[ship.id]
     if (!dice) return '?'
@@ -67,7 +66,7 @@ export function InitiativeModal() {
             {playerShips.length > 0 && (
               <div>
                 <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">
-                  Player Ships — enter dice
+                  Player Ships — roll dice
                 </p>
                 <div className="space-y-1.5">
                   {playerShips.map((ship) => (
@@ -75,19 +74,17 @@ export function InitiativeModal() {
                       key={ship.id}
                       className="flex items-center gap-2 bg-slate-800 rounded px-3 py-2"
                     >
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: ship.color }}
-                      />
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
                       <span className="text-slate-300 font-mono text-xs flex-1 min-w-0 truncate">
                         {ship.profile.name}
                       </span>
                       <DiceInput
-                        value={playerDice[ship.id] ?? roll2D6()}
+                        key={`${ship.id}-${rerollCount}`}
+                        value={null}
                         onChange={(d) => setShipDice(ship.id, d)}
                       />
                       <span className="text-slate-600 font-mono text-xs">→</span>
-                      <span className="text-[--neon-cyan] font-mono text-sm font-bold w-6 text-right">
+                      <span className={`font-mono text-sm font-bold w-6 text-right ${previewTotal(ship) === '?' ? 'text-slate-600' : 'text-[--neon-cyan]'}`}>
                         {previewTotal(ship)}
                       </span>
                     </div>
@@ -108,10 +105,7 @@ export function InitiativeModal() {
                       key={ship.id}
                       className="flex items-center gap-3 bg-slate-800/50 rounded px-3 py-1.5"
                     >
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: ship.color }}
-                      />
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
                       <span className="text-slate-500 font-mono text-xs flex-1 min-w-0 truncate">
                         {ship.profile.name}
                       </span>
@@ -124,9 +118,10 @@ export function InitiativeModal() {
 
             <button
               onClick={handleConfirm}
-              className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+              disabled={!allEntered}
+              className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              CONFIRM →
+              {allEntered ? 'CONFIRM →' : `WAITING — ${playerShips.filter((s) => !playerDice[s.id]).length} ship(s) not rolled`}
             </button>
           </>
         ) : (
@@ -138,21 +133,11 @@ export function InitiativeModal() {
                 const ship = ships.find((s) => s.id === id)
                 if (!ship) return null
                 return (
-                  <li
-                    key={id}
-                    className="flex items-center gap-3 bg-slate-800 rounded px-3 py-1.5"
-                  >
+                  <li key={id} className="flex items-center gap-3 bg-slate-800 rounded px-3 py-1.5">
                     <span className="text-slate-500 font-mono text-xs w-4">{idx + 1}.</span>
-                    <span
-                      className="w-2.5 h-2.5 rounded-full shrink-0"
-                      style={{ backgroundColor: ship.color }}
-                    />
-                    <span className="text-slate-200 font-mono text-xs flex-1 truncate">
-                      {ship.profile.name}
-                    </span>
-                    <span className="text-[--neon-cyan] font-mono text-sm font-bold">
-                      {ship.initiative}
-                    </span>
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
+                    <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.profile.name}</span>
+                    <span className="text-[--neon-cyan] font-mono text-sm font-bold">{ship.initiative}</span>
                   </li>
                 )
               })}

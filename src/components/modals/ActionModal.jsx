@@ -88,7 +88,7 @@ export function ActionModal() {
   const [selectedAction, setSelectedAction]     = useState(null)
   const [targetShipId, setTargetShipId]         = useState(null)
   const [rollResult, setRollResult]             = useState(null)
-  const [manualDice, setManualDice]             = useState(() => roll2D6())
+  const [manualDice, setManualDice]             = useState(null)
 
   const isPlayer = ship.faction === 'players'
 
@@ -114,7 +114,7 @@ export function ActionModal() {
     setSelectedAction(action)
     setRollResult(null)
     setTargetShipId(null)
-    setManualDice(roll2D6())
+    setManualDice(null)
   }
 
   const handleRoll = () => {
@@ -140,7 +140,9 @@ export function ActionModal() {
     }
   }
 
-  const canRoll = selectedAction && (!selectedAction.requiresTarget || targetShipId)
+  const canRoll = selectedAction &&
+    (!selectedAction.requiresTarget || targetShipId) &&
+    !(isPlayer && selectedAction.difficulty !== 'auto' && !manualDice)
 
   return (
     <Modal title={`Actions — ${ship.profile.name}`} onClose={closeModal}>
@@ -292,7 +294,11 @@ export function ActionModal() {
             {isPlayer && selectedAction && selectedAction.difficulty !== 'auto' && (
               <div className="flex items-center gap-3 bg-slate-800 rounded px-3 py-2">
                 <span className="text-slate-500 font-mono text-xs">2D6:</span>
-                <DiceInput value={manualDice} onChange={setManualDice} />
+                <DiceInput
+                  key={selectedAction.id}
+                  value={null}
+                  onChange={setManualDice}
+                />
               </div>
             )}
 

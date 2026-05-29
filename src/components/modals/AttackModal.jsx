@@ -190,7 +190,7 @@ function AttackRollStep({
   attackResult, setAttackResult, onNext, onClose,
 }) {
   const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
-  const [manualDice, setManualDice] = useState(() => roll2D6())
+  const [manualDice, setManualDice] = useState(null)
 
   const handleRoll = (diceOverride = null) => {
     const result = rollAttack({
@@ -220,11 +220,12 @@ function AttackRollStep({
             <div className="space-y-3">
               <div className="flex items-center justify-center gap-2 bg-slate-800 rounded px-4 py-3">
                 <span className="text-slate-400 font-mono text-xs mr-2">2D6:</span>
-                <DiceInput value={manualDice} onChange={setManualDice} />
+                <DiceInput value={null} onChange={setManualDice} />
               </div>
               <button
                 onClick={() => handleRoll(manualDice)}
-                className="w-full py-3 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-lg tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+                disabled={!manualDice}
+                className="w-full py-3 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-lg tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 CONFIRM ROLL
               </button>
