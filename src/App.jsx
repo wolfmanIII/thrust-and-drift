@@ -5,7 +5,6 @@
  * modal layer. Modal dispatch uses MODAL_MAP lookup (OCP).
  */
 
-import tdLogo                 from './assets/TD-logo-transparent.png'
 import { Dashboard }          from './components/dashboard/Dashboard.jsx'
 import { BattleMap }          from './components/map/BattleMap.jsx'
 import { BasicBattleView }    from './components/map/BasicBattleView.jsx'
@@ -72,14 +71,6 @@ export function App() {
 
       {/* ── Context menu ─────────────────────────────────────────────── */}
       <ContextMenu />
-
-      {/* ── Brand watermark ──────────────────────────────────────────── */}
-      <div className="absolute bottom-10 right-3 z-20 pointer-events-none flex items-center gap-1.5 opacity-30">
-        <img src={tdLogo} alt="" className="w-6 h-6" />
-        <span className="font-display text-[10px] text-slate-400 tracking-widest leading-none">
-          THRUST &amp; DRIFT
-        </span>
-      </div>
 
       {/* ── Placement mode banner ────────────────────────────────────── */}
       {pendingPlacement && (

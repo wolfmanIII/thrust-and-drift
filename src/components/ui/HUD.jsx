@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react'
+import tdLogo from '../../assets/TD-logo-transparent.png'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore } from '../../store/uiStore.js'
 import { Tooltip } from './Tooltip.jsx'
@@ -82,6 +83,14 @@ export function HUD() {
           NEXT PHASE ⟶
         </button>
       )}
+
+      {/* Brand */}
+      <div className="flex items-center gap-1.5 mt-1 px-0.5 pointer-events-none opacity-40">
+        <img src={tdLogo} alt="" className="w-5 h-5" />
+        <span className="font-display text-[9px] text-slate-400 tracking-widest leading-none">
+          THRUST &amp; DRIFT
+        </span>
+      </div>
 
       {/* Battle utilities */}
       <div className="pointer-events-auto flex gap-1 mt-0.5">
