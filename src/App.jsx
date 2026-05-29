@@ -22,11 +22,13 @@ import { ShipProfileModal }   from './components/modals/ShipProfileModal.jsx'
 import { ThrustModal }        from './components/modals/ThrustModal.jsx'
 import { EvasiveModal }       from './components/modals/EvasiveModal.jsx'
 import { MissileLaunchModal } from './components/modals/MissileLaunchModal.jsx'
+import { DogfightNotificationModal } from './components/modals/DogfightNotificationModal.jsx'
 import { HelpScreen }      from './components/help/HelpScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
 import { useUiStore }      from './store/uiStore.js'
 import { useBattleStore }  from './store/battleStore.js'
 import { useAutosave }     from './hooks/useAutosave.js'
+import { useDogfightDetection } from './components/map/useDogfightDetection.js'
 import './App.css'
 
 /**
@@ -53,6 +55,8 @@ export function App() {
   const activeModal      = useUiStore((s) => s.activeModal)
   const pendingPlacement = useUiStore((s) => s.pendingPlacement)
   const combatMode       = useBattleStore((s) => s.combatMode)
+
+  const { detectedGroups, clearDetected } = useDogfightDetection()
 
   /** @type {React.ComponentType|null} */
   const ActiveModal = activeModal ? (MODAL_MAP[activeModal] ?? null) : null
@@ -110,6 +114,11 @@ export function App() {
         >
           ✦ CLICK ON MAP TO PLACE — {pendingPlacement.profile.name}
         </div>
+      )}
+
+      {/* ── Dogfight engagement notification ────────────────────────── */}
+      {detectedGroups.length > 0 && (
+        <DogfightNotificationModal groups={detectedGroups} onDone={clearDetected} />
       )}
 
       {/* ── Modal layer ──────────────────────────────────────────────── */}
