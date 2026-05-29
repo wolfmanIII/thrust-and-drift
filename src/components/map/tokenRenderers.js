@@ -64,14 +64,27 @@ function vectorToPixelDirection(vector, hexSize) {
 /**
  * Draw a ship token at its pixel center.
  * @param {CanvasRenderingContext2D} ctx
- * @param {object} ship  ShipInstance
- * @param {number} cx    Pixel center X
- * @param {number} cy    Pixel center Y
+ * @param {object} ship       ShipInstance
+ * @param {number} cx         Pixel center X
+ * @param {number} cy         Pixel center Y
  * @param {boolean} selected  Whether this ship is currently selected
+ * @param {number} [timestamp=0]  rAF timestamp in ms — drives dogfight pulse animation
  */
-export function drawShipToken(ctx, ship, cx, cy, selected) {
+export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
   const { color, profile, hullCurrent } = ship
   const hullFraction = profile.hull > 0 ? hullCurrent / profile.hull : 0
+  const inDogfight   = ship.inDogfight !== null && ship.inDogfight !== undefined
+
+  // Dogfight pulsing ring (drawn before selection ring so selection stays on top)
+  if (inDogfight) {
+    // Oscillates between alpha 0.4 and 1.0 at ~0.67 Hz (≈1.5 s per cycle)
+    const pulse = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(timestamp * 0.0042))
+    ctx.beginPath()
+    ctx.arc(cx, cy, TOKEN_RADIUS + 7, 0, Math.PI * 2)
+    ctx.strokeStyle = `rgba(251, 191, 36, ${pulse})`   // amber-400
+    ctx.lineWidth = 2.5
+    ctx.stroke()
+  }
 
   // Selection ring
   if (selected) {
@@ -116,6 +129,15 @@ export function drawShipToken(ctx, ship, cx, cy, selected) {
   ctx.arc(cx + TOKEN_RADIUS * 0.65, cy + TOKEN_RADIUS * 0.65, 4, 0, Math.PI * 2)
   ctx.fillStyle = factionColor
   ctx.fill()
+
+  // Dogfight ⚔ badge (top-right of token)
+  if (inDogfight) {
+    ctx.font = 'bold 10px monospace'
+    ctx.fillStyle = '#fbbf24'   // amber-400
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('⚔', cx + TOKEN_RADIUS * 0.7, cy - TOKEN_RADIUS * 0.7)
+  }
 }
 
 /**

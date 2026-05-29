@@ -5,7 +5,7 @@
  * // Spec §9 — Rendering Canvas layer order
  */
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import { hexToPixel, hexAdd } from '../../utils/hex.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore } from '../../store/uiStore.js'
@@ -93,6 +93,11 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
   const missiles = useBattleStore((s) => s.missiles)
   const selectedShipId = useUiStore((s) => s.selectedShipId)
 
+  /** rAF timestamp in ms — used for dogfight pulse animation. */
+  const timestampRef = useRef(0)
+
+  const hasActiveDogfight = ships.some((s) => s.inDogfight !== null)
+
   const render = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -110,15 +115,17 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
     const oy = offset.current.y
     const size = HEX_SIZE * z
 
-    // --- Layer 3: Ghost positions (predicted next movement) ---
+    // --- Layer 3: Ghost positions (predicted next movement) — skip for dogfight ships ---
     for (const ship of ships) {
+      if (ship.inDogfight !== null) continue
       const next = hexAdd(ship.position, ship.vector)
       const { x: gx, y: gy } = hexToPixel(next.q, next.r, size, ox, oy)
       drawGhostToken(ctx, ship, gx, gy)
     }
 
-    // --- Layer 4: Vector arrows ---
+    // --- Layer 4: Vector arrows — skip for dogfight ships (no movement during dogfight) ---
     for (const ship of ships) {
+      if (ship.inDogfight !== null) continue
       const { x: cx, y: cy } = hexToPixel(ship.position.q, ship.position.r, size, ox, oy)
       drawVectorArrow(ctx, ship, cx, cy, size)
     }
@@ -132,10 +139,10 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
     // --- Layer 6 + 7: Ship tokens + labels ---
     for (const ship of ships) {
       const { x: cx, y: cy } = hexToPixel(ship.position.q, ship.position.r, size, ox, oy)
-      drawShipToken(ctx, ship, cx, cy, ship.id === selectedShipId)
+      drawShipToken(ctx, ship, cx, cy, ship.id === selectedShipId, timestampRef.current)
       drawShipLabel(ctx, ship, cx, cy)
     }
-  }, [canvasRef, ships, missiles, selectedShipId, offset, zoom])
+  }, [canvasRef, ships, missiles, selectedShipId, offset, zoom, timestampRef])
 
   // Render on state changes
   useEffect(() => {
@@ -163,6 +170,19 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
     observer.observe(canvas)
     return () => observer.disconnect()
   }, [canvasRef, render])
+
+  // rAF animation loop — active only when ships are in dogfight (drives pulse ring)
+  useEffect(() => {
+    if (!hasActiveDogfight) return
+    let frameId
+    const loop = (ts) => {
+      timestampRef.current = ts
+      render()
+      frameId = requestAnimationFrame(loop)
+    }
+    frameId = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(frameId)
+  }, [render, hasActiveDogfight, timestampRef])
 }
 
 export { HEX_SIZE }
