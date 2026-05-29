@@ -37,6 +37,33 @@ function computeThrustPenalty(mDriveCrit, maxThrust) {
 const PHASE_ORDER = ['setup', 'initiative', 'acceleration', 'movement', 'attack', 'actions', 'end']
 
 /**
+ * Compute next-round state patch: increments round, resets per-round ship fields, appends log entry.
+ * Pure function — shared by startNextRound and advancePhase to prevent double-push on round transition.
+ * @param {object} s  Current Zustand state slice
+ * @returns {object} State patch
+ */
+function buildNextRoundState(s) {
+  return {
+    round: s.round + 1,
+    phase: 'initiative',
+    currentActorIndex: 0,
+    ships: s.ships.map((sh) => ({
+      ...sh,
+      thrustUsedThisRound: 0,
+      thrustBonusThisRound: 0,
+      hasActedThisPhase: false,
+      evasiveThrust: 0,
+    })),
+    log: [...s.log, makeLogEntry({
+      round: s.round + 1,
+      phase: 'initiative',
+      type: 'system',
+      message: `Round ${s.round + 1} begins.`,
+    })],
+  }
+}
+
+/**
  * Create a new log entry.
  * @param {object} params
  * @returns {object}
@@ -88,11 +115,10 @@ const useBattleStore = create((set, get) => ({
    * Called internally before every user-facing mutation.
    */
   pushHistory: () => {
-    const { ships, missiles, log, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, round, phase, initiativeOrder, currentActorIndex } = get()
     const snapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
-      log: [...log],
       round,
       phase,
       initiativeOrder: [...initiativeOrder],
@@ -101,13 +127,19 @@ const useBattleStore = create((set, get) => ({
     set((s) => ({ undoStack: [...s.undoStack, snapshot].slice(-20) }))
   },
 
-  /** Restore the most recent snapshot from the undo stack. */
+  /** Restore the most recent snapshot; log is append-only and receives a ↩ entry. */
   undoLastAction: () => {
-    const { undoStack } = get()
+    const { undoStack, log } = get()
     if (undoStack.length === 0) return
     const stack = [...undoStack]
     const snapshot = stack.pop()
-    set({ ...snapshot, undoStack: stack })
+    const undoEntry = makeLogEntry({
+      round: snapshot.round,
+      phase: snapshot.phase,
+      type: 'system',
+      message: `↩ Undo — restored to Round ${snapshot.round}, ${snapshot.phase.toUpperCase()}.`,
+    })
+    set({ ...snapshot, undoStack: stack, log: [...log, undoEntry] })
   },
 
   // === SHIP MANAGEMENT ===
@@ -439,7 +471,7 @@ const useBattleStore = create((set, get) => ({
     const { phase } = get()
     const idx = PHASE_ORDER.indexOf(phase)
     if (idx === -1 || idx === PHASE_ORDER.length - 1) {
-      get().startNextRound()
+      set((s) => buildNextRoundState(s))
       return
     }
     const nextPhase = PHASE_ORDER[idx + 1]
@@ -469,24 +501,8 @@ const useBattleStore = create((set, get) => ({
 
   /** Reset all round-scoped state and increment round counter. */
   startNextRound: () => {
-    set((s) => ({
-      round: s.round + 1,
-      phase: 'initiative',
-      currentActorIndex: 0,
-      ships: s.ships.map((sh) => ({
-        ...sh,
-        thrustUsedThisRound: 0,
-        thrustBonusThisRound: 0,
-        hasActedThisPhase: false,
-        evasiveThrust: 0,
-      })),
-      log: [...s.log, makeLogEntry({
-        round: s.round + 1,
-        phase: 'initiative',
-        type: 'system',
-        message: `Round ${s.round + 1} begins.`,
-      })],
-    }))
+    get().pushHistory()
+    set((s) => buildNextRoundState(s))
   },
 
   // === CREW ACTION EFFECTS ===

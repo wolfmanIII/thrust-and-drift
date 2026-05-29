@@ -917,6 +917,23 @@ describe('pushHistory / undoLastAction', () => {
     useBattleStore.getState().resetBattle()
     expect(useBattleStore.getState().undoStack).toHaveLength(0)
   })
+
+  it('undoLastAction does not rollback log entries', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    const logLenAfterAdd = useBattleStore.getState().log.length
+    useBattleStore.getState().undoLastAction()
+    // log grows (undo entry appended), never shrinks
+    expect(useBattleStore.getState().log.length).toBeGreaterThan(logLenAfterAdd)
+  })
+
+  it('undoLastAction appends ↩ Undo log entry', () => {
+    useBattleStore.setState({ round: 2, phase: 'attack' })
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().undoLastAction()
+    const last = useBattleStore.getState().log.at(-1)
+    expect(last.type).toBe('system')
+    expect(last.message).toMatch(/↩ Undo/)
+  })
 })
 
 describe('undo — history suppression flags', () => {
@@ -962,6 +979,13 @@ describe('undo — history suppression flags', () => {
     useBattleStore.setState({ phase: 'end' })
     const stackBefore = useBattleStore.getState().undoStack.length
     useBattleStore.getState().advancePhase()
+    expect(useBattleStore.getState().undoStack).toHaveLength(stackBefore + 1)
+  })
+
+  it('startNextRound called directly pushes history', () => {
+    useBattleStore.setState({ round: 1, phase: 'end' })
+    const stackBefore = useBattleStore.getState().undoStack.length
+    useBattleStore.getState().startNextRound()
     expect(useBattleStore.getState().undoStack).toHaveLength(stackBefore + 1)
   })
 })
