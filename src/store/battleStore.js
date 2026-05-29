@@ -59,7 +59,7 @@ const useBattleStore = create((set, get) => ({
 
   /** @type {string} */
   id: uuidv7(),
-  name: 'Nuova Battaglia',
+  name: 'New Battle',
   round: 1,
   /** @type {'vectorial'|'basic'} */
   combatMode: 'vectorial',
@@ -116,7 +116,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'system',
-        message: `${profile.name} aggiunta alla battaglia come ${faction}.`,
+        message: `${profile.name} added to battle as ${faction}.`,
         shipId: instance.id,
       })],
     }))
@@ -137,7 +137,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'system',
-        message: `${ship.profile.name} rimossa dalla battaglia.`,
+        message: `${ship.profile.name} removed from battle.`,
       })],
     }))
   },
@@ -175,7 +175,7 @@ const useBattleStore = create((set, get) => ({
       round,
       phase: 'initiative',
       type: 'system',
-      message: `Iniziativa ${get().ships.find(s => s.id === r.id)?.profile.name}: ${r.initiative}`,
+      message: `Initiative ${get().ships.find(s => s.id === r.id)?.profile.name}: ${r.initiative}`,
       shipId: r.id,
       details: r.roll,
     }))
@@ -214,7 +214,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'move',
-        message: `${ship.profile.name} applica Thrust Δ(${delta.q},${delta.r}). Vettore: (${newVector.q},${newVector.r}).`,
+        message: `${ship.profile.name} applies Thrust Δ(${delta.q},${delta.r}). Vector: (${newVector.q},${newVector.r}).`,
         shipId,
         details: { delta, newVector, cost },
       })],
@@ -240,7 +240,7 @@ const useBattleStore = create((set, get) => ({
       round,
       phase: 'movement',
       type: 'move',
-      message: `${sh.profile.name} si sposta in (${sh.position.q},${sh.position.r}).`,
+      message: `${sh.profile.name} moves to (${sh.position.q},${sh.position.r}).`,
       shipId: sh.id,
       details: { position: sh.position, vector: sh.vector },
     }))
@@ -275,7 +275,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'damage',
-        message: `${ship.profile.name} subisce ${damage} danno da ${sourceLabel}. Hull: ${hullCurrent}/${ship.profile.hull}.`,
+        message: `${ship.profile.name} takes ${damage} damage from ${sourceLabel}. Hull: ${hullCurrent}/${ship.profile.hull}.`,
         shipId,
         details: { damage, hullCurrent, hullMax: ship.profile.hull },
       })],
@@ -295,7 +295,7 @@ const useBattleStore = create((set, get) => ({
       if ((existing?.severity ?? 0) >= 6) {
         // Max severity — apply 6D extra damage instead (CRB p.169)
         const extra = rollDice(6, 6)
-        get().applyDamage(shipId, extra.total, `Critico ${location} (Sev. max — soglia)`, true)
+        get().applyDamage(shipId, extra.total, `Critical ${location} (Sev. max — threshold)`, true)
       } else {
         const effectiveSeverity = existing
           ? Math.max(1, Math.min(6, existing.severity + 1))
@@ -304,7 +304,7 @@ const useBattleStore = create((set, get) => ({
         const effect = getCriticalEffect(location, effectiveSeverity)
         if (effect?.mechanic === 'hull_extra_damage') {
           const extra = rollDice(effect.value, 6)
-          get().applyDamage(shipId, extra.total, `Critico Hull Sev.${effectiveSeverity} (soglia)`, true)
+          get().applyDamage(shipId, extra.total, `Critical Hull Sev.${effectiveSeverity} (threshold)`, true)
         }
       }
     }
@@ -339,7 +339,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'damage',
-        message: `${ship.profile.name}: Colpo critico su ${system} (Severità ${severity}).`,
+        message: `${ship.profile.name}: Critical hit on ${system} (Severity ${severity}).`,
         shipId,
         details: { system, severity },
       })],
@@ -378,7 +378,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'attack',
-        message: `${attacker?.profile.name ?? '?'} lancia ${count} missile/i (${type}).`,
+        message: `${attacker?.profile.name ?? '?'} launches ${count} missile(s) (${type}).`,
         shipId: launchedBy,
         details: missile,
       })],
@@ -409,7 +409,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: nextPhase,
         type: 'system',
-        message: `Inizio fase: ${nextPhase.toUpperCase()}.`,
+        message: `Phase start: ${nextPhase.toUpperCase()}.`,
       })],
     }))
   },
@@ -441,7 +441,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round + 1,
         phase: 'initiative',
         type: 'system',
-        message: `Inizio Round ${s.round + 1}.`,
+        message: `Round ${s.round + 1} begins.`,
       })],
     }))
   },
@@ -468,7 +468,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'action',
-        message: `${ship.profile.name} dichiara ${clamped} thrust evasivo (DM -${ship.profile.crew?.pilot ?? 0} × ${clamped} agli attaccanti).`,
+        message: `${ship.profile.name} declares ${clamped} evasive thrust (DM -${ship.profile.crew?.pilot ?? 0} × ${clamped} to attackers).`,
         shipId,
       })],
     }))
@@ -496,7 +496,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'action',
-        message: `${attacker.profile.name}: Sensor Lock su ${target.profile.name} (DM +${Math.max(0, dmBonus)} agli attacchi).`,
+        message: `${attacker.profile.name}: Sensor Lock on ${target.profile.name} (DM +${Math.max(0, dmBonus)} to attacks).`,
         shipId: attackerId,
       })],
     }))
@@ -522,7 +522,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'action',
-        message: `${ship.profile.name}: Electronic Warfare — sensor lock rimosso.`,
+        message: `${ship.profile.name}: Electronic Warfare — sensor lock removed.`,
         shipId,
       })],
     }))
@@ -549,7 +549,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'action',
-        message: `${ship.profile.name}: ${removed.system} riparato (Sev. ${removed.severity} rimossa).`,
+        message: `${ship.profile.name}: ${removed.system} repaired (Sev. ${removed.severity} removed).`,
         shipId,
       })],
     }))
@@ -574,7 +574,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'action',
-        message: `${ship.profile.name}: Iniziativa migliorata di +${applied} al prossimo round.`,
+        message: `${ship.profile.name}: Initiative improved by +${applied} next round.`,
         shipId,
       })],
     }))
@@ -599,7 +599,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'action',
-        message: `${ship.profile.name}: M-Drive in overload — +${applied} Thrust questo round.`,
+        message: `${ship.profile.name}: M-Drive overloaded — +${applied} Thrust this round.`,
         shipId,
       })],
     }))
@@ -622,7 +622,7 @@ const useBattleStore = create((set, get) => ({
         round: s.round,
         phase: s.phase,
         type: 'action',
-        message: `${ship.profile.name}: torretta missilistica ricaricata.`,
+        message: `${ship.profile.name}: missile turret reloaded.`,
         shipId,
       })],
     }))
@@ -640,7 +640,7 @@ const useBattleStore = create((set, get) => ({
    */
   resetBattle: (mode = 'vectorial') => set({
     id: uuidv7(),
-    name: 'Nuova Battaglia',
+    name: 'New Battle',
     round: 1,
     combatMode: mode,
     phase: 'setup',
@@ -667,7 +667,7 @@ const useBattleStore = create((set, get) => ({
     const battle = await importBattle(file)
     set({
       id: battle.id ?? uuidv7(),
-      name: battle.name ?? 'Battaglia importata',
+      name: battle.name ?? 'Imported Battle',
       round: battle.round ?? 1,
       combatMode: battle.combatMode ?? 'vectorial',
       phase: battle.phase ?? 'setup',

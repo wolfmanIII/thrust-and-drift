@@ -98,7 +98,7 @@ export function ActionModal() {
 
     setRollResult(result)
     addLogEntry(
-      `${ship.profile.name}: ${selectedAction.label} — ${result.display} (${result.success ? 'SUCCESSO' : 'FALLITO'})`
+      `${ship.profile.name}: ${selectedAction.label} — ${result.display} (${result.success ? 'SUCCESS' : 'FAILED'})`
     )
 
     if (result.success) {
@@ -110,14 +110,14 @@ export function ActionModal() {
     (!selectedAction.requiresTarget || targetShipId)
 
   return (
-    <Modal title={`Azioni — ${ship.profile.name}`} onClose={closeModal}>
+    <Modal title={`Actions — ${ship.profile.name}`} onClose={closeModal}>
       <div className="space-y-4">
         {/* Action list */}
         {!rollResult && (
           <>
             <div className="space-y-1">
               {availableActions.length === 0 && (
-                <p className="text-slate-600 font-mono text-xs italic">Nessuna azione disponibile.</p>
+                <p className="text-slate-600 font-mono text-xs italic">No actions available.</p>
               )}
               {availableActions.map((action) => (
                 <button
@@ -131,7 +131,7 @@ export function ActionModal() {
                 >
                   <span className="font-bold">{action.label}</span>
                   <span className="text-slate-500 ml-2">
-                    {action.difficulty === 'auto' ? 'Automatico' : `Target ${action.difficulty}+`}
+                    {action.difficulty === 'auto' ? 'Automatic' : `Target ${action.difficulty}+`}
                     {' · '}Skill {action.skillLevel}
                   </span>
                 </button>
@@ -141,10 +141,10 @@ export function ActionModal() {
             {/* Target selector — shown only for actions that require a target */}
             {selectedAction?.requiresTarget && (
               <div>
-                <p className="text-slate-500 font-mono text-xs mb-1.5">Bersaglio</p>
+                <p className="text-slate-500 font-mono text-xs mb-1.5">Target</p>
                 <div className="space-y-0.5">
                   {otherShips.length === 0 && (
-                    <p className="text-slate-600 font-mono text-xs italic">Nessuna nave disponibile.</p>
+                    <p className="text-slate-600 font-mono text-xs italic">No ships available.</p>
                   )}
                   {otherShips.map((s) => (
                     <button
@@ -159,7 +159,7 @@ export function ActionModal() {
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
                       {s.profile.name}
                       {s.sensorLockedBy === ship.id && (
-                        <span className="ml-auto text-[--neon-cyan] text-xs">🔒 già in lock</span>
+                        <span className="ml-auto text-[--neon-cyan] text-xs">🔒 locked</span>
                       )}
                     </button>
                   ))}
@@ -178,7 +178,7 @@ export function ActionModal() {
               disabled={!canRoll}
               className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              🎲 ESEGUI AZIONE
+              🎲 EXECUTE ACTION
             </button>
           </>
         )}
@@ -195,19 +195,19 @@ export function ActionModal() {
               rollResult.success ? 'bg-green-950/40 text-green-400' : 'bg-red-950/40 text-red-400'
             }`}>
               {rollResult.success
-                ? `SUCCESSO — Effetto +${rollResult.effect}`
-                : `FALLITO — Effetto ${rollResult.effect}`}
+                ? `SUCCESS — Effect +${rollResult.effect}`
+                : `FAILED — Effect ${rollResult.effect}`}
             </div>
 
             {/* Effect description */}
             {rollResult.success && selectedAction && (
               <p className="text-slate-400 font-mono text-xs text-center">
-                {selectedAction.id === 'sensor_lock'        && `Sensor lock acquisito su ${ships.find(s => s.id === targetShipId)?.profile.name ?? '?'}.`}
-                {selectedAction.id === 'electronic_warfare' && 'Sensor lock nemico rimosso.'}
-                {selectedAction.id === 'repair_system'      && 'Colpo critico rimosso.'}
-                {selectedAction.id === 'improve_initiative' && `+${rollResult.effect} all'iniziativa del prossimo round.`}
-                {selectedAction.id === 'overload_drive'     && `+${rollResult.effect} Thrust disponibile questo round.`}
-                {selectedAction.id === 'reload_turret'      && 'Torretta ricaricata.'}
+                {selectedAction.id === 'sensor_lock'        && `Sensor lock acquired on ${ships.find(s => s.id === targetShipId)?.profile.name ?? '?'}.`}
+                {selectedAction.id === 'electronic_warfare' && 'Enemy sensor lock removed.'}
+                {selectedAction.id === 'repair_system'      && 'Critical hit removed.'}
+                {selectedAction.id === 'improve_initiative' && `+${rollResult.effect} to initiative next round.`}
+                {selectedAction.id === 'overload_drive'     && `+${rollResult.effect} Thrust available this round.`}
+                {selectedAction.id === 'reload_turret'      && 'Turret reloaded.'}
               </p>
             )}
 
@@ -216,13 +216,13 @@ export function ActionModal() {
                 onClick={() => { setRollResult(null); setTargetShipId(null) }}
                 className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500"
               >
-                ALTRA AZIONE
+                ANOTHER ACTION
               </button>
               <button
                 onClick={closeModal}
                 className="flex-1 py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs rounded hover:bg-[--neon-cyan]/20"
               >
-                CHIUDI
+                CLOSE
               </button>
             </div>
           </div>

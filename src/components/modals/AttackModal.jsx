@@ -61,14 +61,14 @@ function AttackConfigStep({
 }) {
   const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
   return (
-    <Modal title="Attacco" onClose={onClose}>
+    <Modal title="Attack" onClose={onClose}>
       <div className="space-y-4">
         {/* Weapon select */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">Arma</p>
+          <p className="text-slate-500 font-mono text-xs mb-1.5">Weapon</p>
           <div className="flex flex-col gap-1">
             {availableWeapons.length === 0 && (
-              <p className="text-slate-600 font-mono text-xs italic">Nessuna arma offensiva disponibile.</p>
+              <p className="text-slate-600 font-mono text-xs italic">No offensive weapons available.</p>
             )}
             {availableWeapons.map((w) => (
               <button
@@ -85,7 +85,7 @@ function AttackConfigStep({
                   <span className="ml-2 text-slate-600">
                     DM {WEAPONS[w].attackDM >= 0 ? `+${WEAPONS[w].attackDM}` : WEAPONS[w].attackDM}
                     {' · '}
-                    {WEAPONS[w].damageDice}D danno
+                    {WEAPONS[w].damageDice}D dmg
                   </span>
                 )}
               </button>
@@ -95,7 +95,7 @@ function AttackConfigStep({
 
         {/* Target select */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">Bersaglio</p>
+          <p className="text-slate-500 font-mono text-xs mb-1.5">Target</p>
           <div className="flex flex-col gap-1">
             {enemies.map((e) => (
               <button
@@ -120,7 +120,7 @@ function AttackConfigStep({
         {/* Range band selector — basic mode only */}
         {combatMode === 'basic' && target && (
           <div>
-            <p className="text-slate-500 font-mono text-xs mb-1.5">Distanza</p>
+            <p className="text-slate-500 font-mono text-xs mb-1.5">Range</p>
             <div className="grid grid-cols-3 gap-1">
               {RANGE_BANDS.map(({ label }) => (
                 <button
@@ -142,15 +142,15 @@ function AttackConfigStep({
         {/* DM summary */}
         {weapon && target && (
           <div className="bg-slate-800 rounded p-3 font-mono text-xs space-y-0.5">
-            <p className="text-slate-400 mb-2">Riepilogo DM (target: 8+)</p>
-            <DmRow label="Artigliere" value={gunnerSkill} />
-            <DmRow label={`Arma (${weaponKey})`} value={weapon.attackDM} />
-            <DmRow label={`Distanza (${rangeBand})`} value={rangeDM} />
-            <DmRow label="Dimensione bersaglio" value={sizeDM} />
-            {evasiveDM !== 0 && <DmRow label="Evasione" value={evasiveDM} />}
+            <p className="text-slate-400 mb-2">DM Summary (target: 8+)</p>
+            <DmRow label="Gunner" value={gunnerSkill} />
+            <DmRow label={`Weapon (${weaponKey})`} value={weapon.attackDM} />
+            <DmRow label={`Range (${rangeBand})`} value={rangeDM} />
+            <DmRow label="Target size" value={sizeDM} />
+            {evasiveDM !== 0 && <DmRow label="Evasion" value={evasiveDM} />}
             {sensorLockDM !== 0 && <DmRow label="Sensor Lock" value={sensorLockDM} />}
             <div className="border-t border-slate-700 mt-1 pt-1">
-              <DmRow label="Totale DM" value={totalDM} highlight />
+              <DmRow label="Total DM" value={totalDM} highlight />
             </div>
           </div>
         )}
@@ -160,7 +160,7 @@ function AttackConfigStep({
           disabled={!weapon || !target || (combatMode === 'basic' && !manualRangeBand)}
           className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          LANCIA ATTACCO →
+          ROLL ATTACK →
         </button>
       </div>
     </Modal>
@@ -202,7 +202,7 @@ function AttackRollStep({
   }
 
   return (
-    <Modal title="Tiro di Attacco" onClose={onClose}>
+    <Modal title="Attack Roll" onClose={onClose}>
       <div className="space-y-4">
         <div className="text-center font-mono text-xs text-slate-400">
           {attackerName} → {targetName} con {weaponKey}
@@ -213,7 +213,7 @@ function AttackRollStep({
             onClick={handleRoll}
             className="w-full py-3 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-lg tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
           >
-            🎲 LANCIA 2D6
+            🎲 ROLL 2D6
           </button>
         ) : (
           <div className="space-y-3">
@@ -240,13 +240,13 @@ function AttackRollStep({
               attackResult.hit ? 'bg-green-950/40 text-green-400' : 'bg-red-950/40 text-red-400'
             }`}>
               {attackResult.hit
-                ? `COLPITO! Effetto: +${attackResult.effect}`
-                : 'MANCATO'}
+                ? `HIT! Effect: +${attackResult.effect}`
+                : 'MISS'}
             </div>
 
             {isCriticalHit(attackResult.effect) && (
               <p className="text-orange-400 font-mono text-xs text-center">
-                ⚠ COLPO CRITICO (Effetto {attackResult.effect} ≥ 6)
+                ⚠ CRITICAL HIT (Effect {attackResult.effect} ≥ 6)
               </p>
             )}
 
@@ -255,21 +255,21 @@ function AttackRollStep({
                 onClick={() => setAttackResult(null)}
                 className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500"
               >
-                RIRUOTA
+                REROLL
               </button>
               {attackResult.hit ? (
                 <button
                   onClick={onNext}
                   className="flex-1 py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs rounded hover:bg-[--neon-cyan]/20"
                 >
-                  CALCOLA DANNO →
+                  CALCULATE DAMAGE →
                 </button>
               ) : (
                 <button
                   onClick={onClose}
                   className="flex-1 py-2 border border-slate-600 text-slate-300 font-mono text-xs rounded hover:border-slate-400"
                 >
-                  CHIUDI
+                  CLOSE
                 </button>
               )}
             </div>
@@ -301,10 +301,10 @@ function AttackDamageStep({ damageDice, effectBonus, armor, damageResult, setDam
   }
 
   return (
-    <Modal title="Danno" onClose={onClose}>
+    <Modal title="Damage" onClose={onClose}>
       <div className="space-y-4">
         <div className="text-center font-mono text-xs text-slate-400">
-          {damageDice}D + Effetto ({effectBonus}) − Armatura ({armor})
+          {damageDice}D + Effect ({effectBonus}) − Armour ({armor})
         </div>
 
         {!damageResult ? (
@@ -312,16 +312,16 @@ function AttackDamageStep({ damageDice, effectBonus, armor, damageResult, setDam
             onClick={handleDamageRoll}
             className="w-full py-3 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-lg tracking-widest rounded hover:bg-red-900/40 transition-colors"
           >
-            🎲 LANCIA DANNO
+            🎲 ROLL DAMAGE
           </button>
         ) : (
           <div className="space-y-3">
             <div className="bg-slate-800 rounded p-4 text-center font-mono text-xs">
               <p className="text-slate-400">
-                [{damageResult.roll.results.join('+')}] + {effectBonus} − {armor} armatura
+                [{damageResult.roll.results.join('+')}] + {effectBonus} − {armor} armour
               </p>
               <p className="text-red-400 font-bold text-2xl mt-1">{damageResult.total}</p>
-              <p className="text-slate-500">danno applicato</p>
+              <p className="text-slate-500">damage dealt</p>
             </div>
 
             <div className="flex gap-2">
@@ -329,13 +329,13 @@ function AttackDamageStep({ damageDice, effectBonus, armor, damageResult, setDam
                 onClick={() => setDamageResult(null)}
                 className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500"
               >
-                RIRUOTA
+                REROLL
               </button>
               <button
                 onClick={onApply}
                 className="flex-1 py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-xs rounded hover:bg-red-900/40"
               >
-                APPLICA DANNO
+                APPLY DAMAGE
               </button>
             </div>
           </div>
@@ -390,10 +390,10 @@ function AttackCriticalStep({
   }
 
   return (
-    <Modal title="Colpo Critico" onClose={onClose}>
+    <Modal title="Critical Hit" onClose={onClose}>
       <div className="space-y-4">
         <div className="text-center font-mono text-xs text-orange-400">
-          ⚠ Effetto {attackEffect} ≥ 6 — Critico su {targetName}
+          ⚠ Effect {attackEffect} ≥ 6 — Critical on {targetName}
         </div>
 
         {!critRoll ? (
@@ -401,7 +401,7 @@ function AttackCriticalStep({
             onClick={handleLocationRoll}
             className="w-full py-3 bg-orange-900/30 border border-orange-700/50 text-orange-400 font-mono text-lg tracking-widest rounded hover:bg-orange-900/40 transition-colors"
           >
-            🎲 TIRA POSIZIONE (2D6)
+            🎲 ROLL LOCATION (2D6)
           </button>
         ) : (
           <div className="space-y-3">
@@ -420,13 +420,13 @@ function AttackCriticalStep({
               <p className="text-orange-400 font-bold text-sm">{location}</p>
               {isMaxSeverity ? (
                 <p className="text-red-400 text-xs mt-1">
-                  SEVERITÀ MASSIMA — 6D danno aggiuntivo
+                  MAX SEVERITY — 6D extra damage
                 </p>
               ) : (
                 <p className="text-slate-400 text-xs mt-1">
-                  Severità {effectiveSeverity}
+                  Severity {effectiveSeverity}
                   {existingCrit && (
-                    <span className="text-slate-500"> (era {existingCrit.severity}, stacking)</span>
+                    <span className="text-slate-500"> (was {existingCrit.severity}, stacking)</span>
                   )}
                 </p>
               )}
@@ -445,12 +445,12 @@ function AttackCriticalStep({
                 onClick={handleExtraRoll}
                 className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors"
               >
-                🎲 TIRA {extraDice}D DANNO EXTRA
+                🎲 ROLL {extraDice}D EXTRA DAMAGE
               </button>
             )}
             {needsExtraRoll && extraDamageResult !== null && (
               <div className="bg-slate-800 rounded p-2 text-center font-mono text-xs">
-                Danno extra:{' '}
+                Extra damage:{' '}
                 <span className="text-red-400 font-bold text-xl">{extraDamageResult}</span>
               </div>
             )}
@@ -460,14 +460,14 @@ function AttackCriticalStep({
                 onClick={() => { setCritRoll(null); setExtraDamageResult(null) }}
                 className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500"
               >
-                RIRUOTA
+                REROLL
               </button>
               <button
                 onClick={onApply}
                 disabled={!canApply}
                 className="flex-1 py-2 bg-orange-900/30 border border-orange-700/50 text-orange-400 font-mono text-xs rounded hover:bg-orange-900/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                APPLICA CRITICO
+                APPLY CRITICAL
               </button>
             </div>
           </div>
@@ -501,7 +501,7 @@ export function AttackModal() {
 
   const handleApplyDamage = () => {
     if (!damageResult || !target) return
-    applyDamage(target.id, damageResult.total, `${weaponKey} di ${attacker.profile.name}`)
+    applyDamage(target.id, damageResult.total, `${weaponKey} from ${attacker.profile.name}`)
 
     if (attackResult?.hit) {
       if (BEAM_WEAPONS.includes(weaponKey)) {
@@ -545,12 +545,12 @@ export function AttackModal() {
 
     if (isMaxSeverity) {
       if (extraDamageResult !== null) {
-        applyDamage(target.id, extraDamageResult, `Critico ${location} (Sev. max)`)
+        applyDamage(target.id, extraDamageResult, `Critical ${location} (Sev. max)`)
       }
     } else {
       addCriticalHit(target.id, { system: location, severity: effectiveSeverity })
       if (effect?.mechanic === 'hull_extra_damage' && extraDamageResult !== null) {
-        applyDamage(target.id, extraDamageResult, `Critico Hull (Sev. ${effectiveSeverity})`)
+        applyDamage(target.id, extraDamageResult, `Critical Hull (Sev. ${effectiveSeverity})`)
       }
     }
     closeModal()

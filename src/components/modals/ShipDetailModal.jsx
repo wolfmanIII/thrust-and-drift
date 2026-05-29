@@ -42,40 +42,40 @@ export function ShipDetailModal() {
       <div className="grid grid-cols-2 gap-4 text-sm">
         {/* Left column */}
         <div className="space-y-3">
-          <Section title="Struttura">
+          <Section title="Structure">
             <StatRow label="Hull" value={`${hullCurrent}/${profile.hull} (${hullPct}%)`} />
-            <StatRow label="Armatura" value={profile.armor} />
-            <StatRow label="Tonnellaggio" value={profile.tonnage ? `${profile.tonnage}t` : null} />
+            <StatRow label="Armour" value={profile.armor} />
+            <StatRow label="Tonnage" value={profile.tonnage ? `${profile.tonnage}t` : null} />
           </Section>
 
-          <Section title="Propulsione">
+          <Section title="Propulsion">
             <StatRow label="Thrust" value={profile.thrust} />
             <StatRow label="Jump" value={profile.jump || '—'} />
-            <StatRow label="Vettore" value={`(${vector.q}, ${vector.r})`} />
+            <StatRow label="Vector" value={`(${vector.q}, ${vector.r})`} />
           </Section>
 
-          <Section title="Round corrente">
-            <StatRow label="Iniziativa" value={initiative} />
-            <StatRow label="Evasione" value={`${evasiveThrust} thrust`} />
+          <Section title="Current Round">
+            <StatRow label="Initiative" value={initiative} />
+            <StatRow label="Evasion" value={`${evasiveThrust} thrust`} />
           </Section>
         </div>
 
         {/* Right column */}
         <div className="space-y-3">
-          <Section title="Equipaggio">
-            <StatRow label="Pilota" value={profile.crew?.pilot} />
-            <StatRow label="Capitano" value={profile.crew?.captain || '—'} />
-            <StatRow label="Ingegnere" value={profile.crew?.engineer || '—'} />
-            <StatRow label="Artigliere" value={profile.crew?.gunner || '—'} />
+          <Section title="Crew">
+            <StatRow label="Pilot" value={profile.crew?.pilot} />
+            <StatRow label="Captain" value={profile.crew?.captain || '—'} />
+            <StatRow label="Engineer" value={profile.crew?.engineer || '—'} />
+            <StatRow label="Gunner" value={profile.crew?.gunner || '—'} />
           </Section>
 
-          <Section title="Armi">
+          <Section title="Weapons">
             {(profile.turrets ?? []).length === 0 && (
-              <p className="text-slate-600 font-mono text-xs italic">Nessuna</p>
+              <p className="text-slate-600 font-mono text-xs italic">None</p>
             )}
             {(profile.turrets ?? []).map((t) => (
               <div key={t.slot} className="py-0.5">
-                <span className="text-slate-500 font-mono text-xs">Torretta {t.slot}: </span>
+                <span className="text-slate-500 font-mono text-xs">Turret {t.slot}: </span>
                 <span className="text-slate-300 font-mono text-xs">
                   {t.weapons.join(', ')}
                 </span>
@@ -84,7 +84,7 @@ export function ShipDetailModal() {
           </Section>
 
           {criticalHits.length > 0 && (
-            <Section title="Colpi critici">
+            <Section title="Critical Hits">
               {criticalHits.map((c, i) => (
                 <div key={i} className="py-0.5">
                   <span className="text-red-400 font-mono text-xs">

@@ -87,7 +87,7 @@ export function BasicBattleView() {
       {ships.length === 0 && (
         <div className="flex items-center justify-center h-full">
           <p className="font-mono text-slate-600 text-sm tracking-widest">
-            Nessuna nave — tasto destro per aggiungere
+            No ships — right-click to add
           </p>
         </div>
       )}

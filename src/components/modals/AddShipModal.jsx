@@ -49,12 +49,12 @@ export function AddShipModal() {
   }
 
   return (
-    <Modal title="Aggiungi Nave" onClose={closeModal}>
+    <Modal title="Add Ship" onClose={closeModal}>
       <div className="space-y-4">
         {/* Search */}
         <input
           type="text"
-          placeholder="Cerca profilo…"
+          placeholder="Search profile…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-[--neon-cyan]/60"
@@ -63,7 +63,7 @@ export function AddShipModal() {
         {/* Profile list */}
         <div className="max-h-40 overflow-y-auto space-y-0.5 border border-slate-700 rounded">
           {filtered.length === 0 && (
-            <p className="text-slate-600 font-mono text-xs italic px-3 py-2">Nessun profilo trovato.</p>
+            <p className="text-slate-600 font-mono text-xs italic px-3 py-2">No profiles found.</p>
           )}
           {filtered.map((p) => (
             <button
@@ -83,7 +83,7 @@ export function AddShipModal() {
 
         {/* Faction */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">Fazione</p>
+          <p className="text-slate-500 font-mono text-xs mb-1.5">Faction</p>
           <div className="flex gap-2">
             {FACTIONS.map((f) => (
               <button
@@ -103,7 +103,7 @@ export function AddShipModal() {
 
         {/* Color */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">Colore token</p>
+          <p className="text-slate-500 font-mono text-xs mb-1.5">Token color</p>
           <div className="flex gap-2 flex-wrap">
             {PRESET_COLORS.map((c) => (
               <button
@@ -124,7 +124,7 @@ export function AddShipModal() {
           disabled={!selectedProfile}
           className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {initialHex ? 'POSIZIONA NAVE' : 'SELEZIONA HEX SULLA MAPPA →'}
+          {initialHex ? 'PLACE SHIP' : 'SELECT HEX ON MAP →'}
         </button>
       </div>
     </Modal>

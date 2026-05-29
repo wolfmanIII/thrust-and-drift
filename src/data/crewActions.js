@@ -8,10 +8,10 @@ export const CREW_ACTIONS = {
   captain: [
     {
       id: 'improve_initiative',
-      label: 'Migliora Iniziativa',
+      label: 'Improve Initiative',
       difficulty: 8,
       skill: 'captain',
-      description: "Leadership check. Successo: +Effect all'iniziativa del round successivo. // MgT2e CRB p.166",
+      description: "Leadership check. Success: +Effect to initiative next round. // MgT2e CRB p.166",
     },
   ],
   engineer: [
@@ -20,14 +20,14 @@ export const CREW_ACTIONS = {
       label: 'Overload M-Drive',
       difficulty: 8,
       skill: 'engineer',
-      description: 'Engineer check. Successo: +Effect al Thrust per questo round. // MgT2e CRB p.167',
+      description: 'Engineer check. Success: +Effect Thrust this round. // MgT2e CRB p.167',
     },
     {
       id: 'repair_system',
-      label: 'Ripara Sistema',
+      label: 'Repair System',
       difficulty: 8,
       skill: 'engineer',
-      description: 'Engineer check. Successo: rimuove 1 colpo critico. // MgT2e CRB p.167',
+      description: 'Engineer check. Success: removes 1 critical hit. // MgT2e CRB p.167',
     },
   ],
   sensors: [
@@ -37,23 +37,23 @@ export const CREW_ACTIONS = {
       difficulty: 8,
       skill: 'sensors',
       requiresTarget: true,
-      description: 'Electronics(sensors) check. Successo: +Effect DM agli attacchi contro il bersaglio. // MgT2e CRB p.167',
+      description: 'Electronics(sensors) check. Success: +Effect DM to attacks against target. // MgT2e CRB p.167',
     },
     {
       id: 'electronic_warfare',
       label: 'Electronic Warfare',
       difficulty: 8,
       skill: 'sensors',
-      description: 'Electronics check. Successo: nega sensor lock nemico. // MgT2e CRB p.167',
+      description: 'Electronics check. Success: negates enemy sensor lock. // MgT2e CRB p.167',
     },
   ],
   gunner: [
     {
       id: 'reload_turret',
-      label: 'Ricarica Torretta',
+      label: 'Reload Turret',
       difficulty: 'auto',
       skill: 'gunner',
-      description: 'Automatico. Ricarica 1 torretta missili. // MgT2e CRB p.167',
+      description: 'Automatic. Reloads 1 missile turret. // MgT2e CRB p.167',
     },
   ],
 }

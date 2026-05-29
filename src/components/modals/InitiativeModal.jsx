@@ -24,10 +24,10 @@ export function InitiativeModal() {
   const shipMap = Object.fromEntries(ships.map((s) => [s.id, s]))
 
   return (
-    <Modal title="Tiro Iniziativa" onClose={closeModal}>
+    <Modal title="Initiative Roll" onClose={closeModal}>
       <div className="space-y-4">
         <p className="text-slate-400 font-mono text-xs">
-          Formula: 2D6 + Pilota + Thrust // MgT2e CRB p.160
+          Formula: 2D6 + Pilot + Thrust // MgT2e CRB p.160
         </p>
 
         {/* Roll button */}
@@ -36,11 +36,11 @@ export function InitiativeModal() {
             onClick={handleRoll}
             className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
           >
-            🎲 LANCIA INIZIATIVA
+            🎲 ROLL INITIATIVE
           </button>
         ) : (
           <div className="space-y-1">
-            <p className="text-slate-400 font-mono text-xs mb-2">Ordine iniziativa:</p>
+            <p className="text-slate-400 font-mono text-xs mb-2">Initiative order:</p>
             <ol className="space-y-1">
               {initiativeOrder.map((id, idx) => {
                 const ship = shipMap[id]
@@ -70,13 +70,13 @@ export function InitiativeModal() {
                 onClick={handleRoll}
                 className="flex-1 py-1.5 border border-slate-600 text-slate-400 font-mono text-xs rounded hover:border-slate-500 transition-colors"
               >
-                RIPETI
+                REROLL
               </button>
               <button
                 onClick={closeModal}
                 className="flex-1 py-1.5 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs rounded hover:bg-[--neon-cyan]/20 transition-colors"
               >
-                CONFERMA →
+                CONFIRM →
               </button>
             </div>
           </div>

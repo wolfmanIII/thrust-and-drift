@@ -71,7 +71,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
         <p className="font-mono text-xs text-slate-400">
           Hull {ship.hullCurrent}/{ship.profile.hull}
           {ship.evasiveThrust > 0 && (
-            <span className="ml-2 text-sky-400">· Evasione {ship.evasiveThrust}</span>
+            <span className="ml-2 text-sky-400">· Evasion {ship.evasiveThrust}</span>
           )}
         </p>
       </div>
@@ -79,8 +79,8 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       {/* ── Acceleration: thrust + evasion (vectorial only) ──────── */}
       {phase === 'acceleration' && combatMode === 'vectorial' && (
         <>
-          <MenuItem icon="🚀" label="Applica Thrust"    onClick={() => open('thrust',  { shipId: targetId })} />
-          <MenuItem icon="🛡" label="Dichiara Evasione" onClick={() => open('evasive', { shipId: targetId })} />
+          <MenuItem icon="🚀" label="Apply Thrust"     onClick={() => open('thrust',  { shipId: targetId })} />
+          <MenuItem icon="🛡" label="Declare Evasion" onClick={() => open('evasive', { shipId: targetId })} />
           <MenuDivider />
         </>
       )}
@@ -88,9 +88,9 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       {/* ── Attack: weapons + missiles ────────────────────────────── */}
       {phase === 'attack' && (
         <>
-          <MenuItem icon="🎯" label="Attacca…"          onClick={() => open('attack',        { shipId: targetId })} />
+          <MenuItem icon="🎯" label="Attack…"           onClick={() => open('attack',        { shipId: targetId })} />
           {hasMissileRack(ship) && (
-            <MenuItem icon="🚀" label="Lancia Missili…" onClick={() => open('missileLaunch', { shipId: targetId })} />
+            <MenuItem icon="🚀" label="Launch Missiles…" onClick={() => open('missileLaunch', { shipId: targetId })} />
           )}
           <MenuDivider />
         </>
@@ -99,15 +99,15 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       {/* ── Actions: crew actions ─────────────────────────────────── */}
       {phase === 'actions' && (
         <>
-          <MenuItem icon="⚡" label="Azione equipaggio…" onClick={() => open('action', { shipId: targetId })} />
+          <MenuItem icon="⚡" label="Crew Action…" onClick={() => open('action', { shipId: targetId })} />
           <MenuDivider />
         </>
       )}
 
       {/* ── Always available ──────────────────────────────────────── */}
-      <MenuItem icon="📊" label="Scheda nave"              onClick={() => open('shipDetail', { shipId: targetId })} />
+      <MenuItem icon="📊" label="Ship Sheet"           onClick={() => open('shipDetail', { shipId: targetId })} />
       <MenuDivider />
-      <MenuItem icon="🗑" label="Rimuovi dalla battaglia" danger onClick={() => { removeShip(targetId); close() }} />
+      <MenuItem icon="🗑" label="Remove from battle" danger onClick={() => { removeShip(targetId); close() }} />
 
     </MenuShell>
   )
@@ -126,18 +126,18 @@ function MissileContextMenu({ x, y, menuRef, missile, targetId, close }) {
     <MenuShell x={x} y={y} menuRef={menuRef}>
       <div className="px-3 py-1.5 bg-slate-800 border-b border-slate-700">
         <p className="font-mono text-xs text-yellow-400 font-bold">
-          Salvo — {missile?.count ?? '?'} missili ({missile?.type ?? 'Standard'})
+          Salvo — {missile?.count ?? '?'} missiles ({missile?.type ?? 'Standard'})
         </p>
         <p className="font-mono text-xs text-slate-400">
           {launchedBy?.profile.name ?? '?'} → {target?.profile.name ?? '?'}
         </p>
         <p className="font-mono text-xs text-slate-500">
-          Thrust rimanente: {missile?.thrustRemaining ?? '?'}/10
+          Thrust remaining: {missile?.thrustRemaining ?? '?'}/10
         </p>
       </div>
       <MenuItem
         icon="🗑"
-        label="Rimuovi salvo"
+        label="Remove salvo"
         danger
         onClick={() => { removeMissile(targetId); close() }}
       />
@@ -155,18 +155,18 @@ function EmptyContextMenu({ x, y, menuRef, hex, close }) {
 
   return (
     <MenuShell x={x} y={y} menuRef={menuRef}>
-      <MenuItem icon="➕" label="Aggiungi nave qui"  onClick={() => { openModal('addShip',     { hex }); close() }} />
+      <MenuItem icon="➕" label="Add ship here"    onClick={() => { openModal('addShip',     { hex }); close() }} />
       <MenuDivider />
-      <MenuItem icon="📂" label="Carica profili"     onClick={() => { openModal('shipProfile', { mode: 'import' }); close() }} />
-      <MenuItem icon="💾" label="Salva profili"      onClick={() => { openModal('shipProfile', { mode: 'export' }); close() }} />
+      <MenuItem icon="📂" label="Load profiles"    onClick={() => { openModal('shipProfile', { mode: 'import' }); close() }} />
+      <MenuItem icon="💾" label="Save profiles"    onClick={() => { openModal('shipProfile', { mode: 'export' }); close() }} />
       <MenuDivider />
       {phase === 'initiative' && (
         <>
-          <MenuItem icon="🎲" label="Tira iniziativa (tutti)" onClick={() => { rollAllInitiative(); close() }} />
+          <MenuItem icon="🎲" label="Roll initiative (all)" onClick={() => { rollAllInitiative(); close() }} />
           <MenuDivider />
         </>
       )}
-      <MenuItem icon="🔄" label="Fase successiva"   onClick={() => { advancePhase(); close() }} />
+      <MenuItem icon="🔄" label="Next phase"       onClick={() => { advancePhase(); close() }} />
     </MenuShell>
   )
 }

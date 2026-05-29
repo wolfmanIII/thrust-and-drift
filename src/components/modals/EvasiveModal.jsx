@@ -33,27 +33,27 @@ export function EvasiveModal() {
   }
 
   return (
-    <Modal title={`Evasione — ${ship.profile.name}`} onClose={closeModal}>
+    <Modal title={`Evasion — ${ship.profile.name}`} onClose={closeModal}>
       <div className="space-y-4">
         <p className="text-slate-400 font-mono text-xs leading-relaxed">
-          Ogni punto di thrust evasivo applica −{pilotSkill} DM (abilità Pilota)
-          agli attacchi ricevuti questo round. // MgT2e CRB p.166
+          Each evasive thrust point applies −{pilotSkill} DM (Pilot skill)
+          to attacks received this round. // MgT2e CRB p.166
         </p>
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-2 text-center font-mono text-xs">
           <div className="bg-slate-800 rounded p-2">
-            <p className="text-slate-500 mb-0.5">Thrust disp.</p>
+            <p className="text-slate-500 mb-0.5">Thrust avail.</p>
             <p className="text-slate-200 font-bold">{maxEvasive}</p>
           </div>
           <div className="bg-slate-800 rounded p-2">
-            <p className="text-slate-500 mb-0.5">Abilità Pilota</p>
+            <p className="text-slate-500 mb-0.5">Pilot Skill</p>
             <p className="text-slate-200 font-bold">{pilotSkill}</p>
           </div>
           <div className={`rounded p-2 transition-colors ${
             amount > 0 ? 'bg-[--neon-cyan]/10 border border-[--neon-cyan]/30' : 'bg-slate-800'
           }`}>
-            <p className="text-slate-500 mb-0.5">DM attaccanti</p>
+            <p className="text-slate-500 mb-0.5">Attacker DM</p>
             <p className={`font-bold ${amount > 0 ? 'text-[--neon-cyan]' : 'text-slate-400'}`}>
               {totalDM === 0 ? '—' : totalDM}
             </p>
@@ -63,7 +63,7 @@ export function EvasiveModal() {
         {/* Slider */}
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs font-mono text-slate-400">
-            <span>Thrust evasivo</span>
+            <span>Evasive thrust</span>
             <span className={amount > maxEvasive ? 'text-red-400' : 'text-[--neon-cyan]'}>
               {amount} / {maxEvasive}
             </span>
@@ -78,14 +78,14 @@ export function EvasiveModal() {
             className="w-full accent-sky-400 disabled:opacity-40"
           />
           <div className="flex justify-between text-xs font-mono text-slate-700">
-            <span>0 — nessuna evasione</span>
-            <span>{maxEvasive} — massima evasione</span>
+            <span>0 — no evasion</span>
+            <span>{maxEvasive} — max evasion</span>
           </div>
         </div>
 
         {maxEvasive === 0 && (
           <p className="text-slate-600 font-mono text-xs text-center">
-            Nessun thrust disponibile.
+            No thrust available.
           </p>
         )}
 
@@ -94,14 +94,14 @@ export function EvasiveModal() {
             onClick={closeModal}
             className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500 transition-colors"
           >
-            ANNULLA
+            CANCEL
           </button>
           <button
             onClick={handleConfirm}
             disabled={maxEvasive === 0}
             className="flex-1 py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            DICHIARA EVASIONE
+            DECLARE EVASION
           </button>
         </div>
       </div>

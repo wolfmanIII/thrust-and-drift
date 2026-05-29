@@ -70,7 +70,7 @@ export function BattleLog() {
         {!collapsed && (
           <div ref={listRef} className="flex-1 overflow-y-auto px-3 py-1 space-y-px">
             {visible.length === 0 && (
-              <p className="text-slate-600 font-mono text-xs italic">Nessun evento registrato.</p>
+              <p className="text-slate-600 font-mono text-xs italic">No events recorded.</p>
             )}
             {visible.map((entry) => (
               <div key={entry.id} className="flex items-start gap-2 font-mono text-xs leading-relaxed">

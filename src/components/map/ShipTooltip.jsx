@@ -9,7 +9,7 @@ import { useUiStore }    from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { hexMagnitude }  from '../../utils/hex.js'
 
-const FACTION_LABEL = { players: 'GIOCATORI', npc: 'NPC', neutral: 'NEUTRALI' }
+const FACTION_LABEL = { players: 'PLAYERS', npc: 'NPC', neutral: 'NEUTRAL' }
 const FACTION_COLOR = { players: '#22d3ee', npc: '#f87171', neutral: '#94a3b8' }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -93,18 +93,18 @@ export function ShipTooltip() {
         </div>
 
         <StatRow
-          label="Vettore"
+          label="Vector"
           value={`(${ship.vector.q}, ${ship.vector.r})  |v|: ${vectorMag}`}
         />
         <StatRow
           label="Thrust"
-          value={`${thrustAvail} disp. / ${ship.profile.thrust} max`}
+          value={`${thrustAvail} avail. / ${ship.profile.thrust} max`}
         />
         {ship.evasiveThrust > 0 && (
-          <StatRow label="Evasione" value={`${ship.evasiveThrust} EVA`} accent />
+          <StatRow label="Evasion" value={`${ship.evasiveThrust} EVA`} accent />
         )}
         {ship.initiative > 0 && (
-          <StatRow label="Iniziativa" value={ship.initiative} />
+          <StatRow label="Initiative" value={ship.initiative} />
         )}
         {ship.sensorLockOn && (
           <StatRow label="Sensor Lock" value="attivo" accent />

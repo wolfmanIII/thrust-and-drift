@@ -47,19 +47,19 @@ export function MissileLaunchModal() {
   }
 
   return (
-    <Modal title={`Lancio Missili — ${attacker.profile.name}`} onClose={closeModal}>
+    <Modal title={`Missile Launch — ${attacker.profile.name}`} onClose={closeModal}>
       <div className="space-y-4">
         <p className="text-slate-400 font-mono text-xs">
-          Torrette Missile Rack: <span className="text-[--neon-cyan]">{rackCount}</span>
-          {' · '}Il salvo eredita il vettore corrente della nave.
+          Missile Rack turrets: <span className="text-[--neon-cyan]">{rackCount}</span>
+          {' · '}Salvo inherits the ship&apos;s current vector.
         </p>
 
         {/* Target */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">Bersaglio</p>
+          <p className="text-slate-500 font-mono text-xs mb-1.5">Target</p>
           <div className="space-y-0.5">
             {enemies.length === 0 && (
-              <p className="text-slate-600 font-mono text-xs italic">Nessuna nave in campo.</p>
+              <p className="text-slate-600 font-mono text-xs italic">No ships on the field.</p>
             )}
             {enemies.map((e) => (
               <button
@@ -81,7 +81,7 @@ export function MissileLaunchModal() {
         {/* Missile count */}
         <div>
           <p className="text-slate-500 font-mono text-xs mb-1.5">
-            Missili nel salvo (1–12)
+            Missiles in salvo (1–12)
           </p>
           <div className="flex items-center gap-3">
             <button
@@ -100,7 +100,7 @@ export function MissileLaunchModal() {
               +
             </button>
             <span className="text-slate-600 font-mono text-xs ml-2">
-              missili · vettore ({attacker.vector.q}, {attacker.vector.r})
+              missiles · vector ({attacker.vector.q}, {attacker.vector.r})
             </span>
           </div>
         </div>
@@ -110,14 +110,14 @@ export function MissileLaunchModal() {
             onClick={closeModal}
             className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500 transition-colors"
           >
-            ANNULLA
+            CANCEL
           </button>
           <button
             onClick={handleLaunch}
             disabled={!targetId}
             className="flex-1 py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-xs tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            🚀 LANCIA SALVO
+            🚀 LAUNCH SALVO
           </button>
         </div>
       </div>

@@ -74,7 +74,7 @@ export function exportProfiles(profiles) {
 export async function importProfiles(file) {
   const data = await parseJSONFile(file, 'ship-profiles')
   if (!Array.isArray(data.profiles)) {
-    throw new Error('File non valido: campo "profiles" mancante o non è un array.')
+    throw new Error('Invalid file: "profiles" field missing or not an array.')
   }
   return data.profiles
 }

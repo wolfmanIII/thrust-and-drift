@@ -48,7 +48,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
       {/* Panel header */}
       <div className="px-4 py-3 border-b border-slate-700 shrink-0 bg-slate-900">
         <h2 className="font-display text-xs text-[--neon-cyan] tracking-widest uppercase">
-          Profili Nave
+          Ship Profiles
           <span className="ml-2 text-slate-500">({profiles.length})</span>
         </h2>
       </div>
@@ -57,7 +57,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
       <div className="px-4 pt-3 pb-2 shrink-0">
         <input
           type="text"
-          placeholder="Cerca profilo…"
+          placeholder="Search profile…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-[--neon-cyan]/60 placeholder:text-slate-600"
@@ -68,7 +68,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
       <div className="flex-1 overflow-y-auto px-2 space-y-0.5 py-1">
         {filtered.length === 0 && (
           <p className="text-slate-600 font-mono text-xs italic px-2 py-2">
-            {filter ? 'Nessun risultato.' : 'Nessun profilo. Creane uno.'}
+            {filter ? 'No results.' : 'No profiles. Create one.'}
           </p>
         )}
         {filtered.map((p) => (
@@ -92,9 +92,9 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
             </div>
             {/* Action buttons — visible on hover or when editing */}
             <div className={`flex gap-1 shrink-0 ${editingId === p.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
-              <ActionIcon label="✎" title="Modifica" onClick={() => onEdit(p.id)} dim="text-[--neon-cyan]" />
-              <ActionIcon label="⧉" title="Duplica"  onClick={() => duplicateProfile(p.id)} />
-              <ActionIcon label="⊗" title="Elimina"  onClick={() => setConfirmDeleteId(p.id)} dim="hover:text-red-400" />
+              <ActionIcon label="✎" title="Edit"      onClick={() => onEdit(p.id)} dim="text-[--neon-cyan]" />
+              <ActionIcon label="⧉" title="Duplicate" onClick={() => duplicateProfile(p.id)} />
+              <ActionIcon label="⊗" title="Delete"    onClick={() => setConfirmDeleteId(p.id)} dim="hover:text-red-400" />
             </div>
           </div>
         ))}
@@ -111,7 +111,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
           onClick={onNew}
           className="w-full py-1.5 bg-[--neon-cyan]/10 border border-[--neon-cyan]/30 text-[--neon-cyan] font-display text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
         >
-          + NUOVO PROFILO
+          + NEW PROFILE
         </button>
         <button
           onClick={onCatalog}
@@ -121,7 +121,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
               : 'border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-300'
           }`}
         >
-          📖 CATALOGO UFFICIALE
+          📖 OFFICIAL CATALOG
         </button>
         <div className="flex gap-2">
           <input
@@ -135,13 +135,13 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
             onClick={() => fileInputRef.current?.click()}
             className="flex-1 py-1 border border-slate-700 text-slate-400 font-display text-xs rounded hover:border-slate-500 transition-colors"
           >
-            ↓ IMPORTA
+            ↓ IMPORT
           </button>
           <button
             onClick={exportAll}
             className="flex-1 py-1 border border-slate-700 text-slate-400 font-display text-xs rounded hover:border-slate-500 transition-colors"
           >
-            ↑ ESPORTA
+            ↑ EXPORT
           </button>
         </div>
       </div>
@@ -149,26 +149,26 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
       {confirmDeleteId && (() => {
         const target = profiles.find((p) => p.id === confirmDeleteId)
         return (
-          <Modal title="ELIMINA PROFILO" onClose={() => setConfirmDeleteId(null)} width="max-w-sm">
+          <Modal title="DELETE PROFILE" onClose={() => setConfirmDeleteId(null)} width="max-w-sm">
             <div className="space-y-4">
               <p className="font-mono text-sm text-slate-300 leading-relaxed">
-                Eliminare il profilo <span className="text-[--neon-cyan] font-bold">{target?.name}</span>?
+                Delete profile <span className="text-[--neon-cyan] font-bold">{target?.name}</span>?
               </p>
               <p className="font-mono text-xs text-slate-500">
-                Operazione irreversibile. Il profilo non potrà essere recuperato.
+                This action is irreversible. The profile cannot be recovered.
               </p>
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={() => { deleteProfile(confirmDeleteId); setConfirmDeleteId(null) }}
                   className="flex-1 py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-display text-xs tracking-widest rounded hover:bg-red-900/50 transition-colors"
                 >
-                  ELIMINA
+                  DELETE
                 </button>
                 <button
                   onClick={() => setConfirmDeleteId(null)}
                   className="flex-1 py-2 border border-slate-600 text-slate-300 font-display text-xs tracking-widest rounded hover:border-slate-400 transition-colors"
                 >
-                  ANNULLA
+                  CANCEL
                 </button>
               </div>
             </div>
@@ -207,8 +207,8 @@ function StatusLine({ label, value, active = true }) {
 }
 
 const PHASE_LABELS = {
-  setup: 'SETUP', initiative: 'INIZIATIVA', acceleration: 'ACCELERAZIONE',
-  movement: 'MOVIMENTO', attack: 'ATTACCO', actions: 'AZIONI', end: 'FINE ROUND',
+  setup: 'SETUP', initiative: 'INITIATIVE', acceleration: 'ACCELERATION',
+  movement: 'MOVEMENT', attack: 'ATTACK', actions: 'ACTIONS', end: 'END OF ROUND',
 }
 
 /** Left column: mode selector + action buttons. */
@@ -217,24 +217,24 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
     <div className="border-r border-slate-800 flex flex-col overflow-hidden">
 
       <div className="px-5 py-3 border-b border-slate-800 shrink-0">
-        <p className="font-display text-xs text-slate-500 tracking-widest">// CONSOLE OPERATIVA</p>
+        <p className="font-display text-xs text-slate-500 tracking-widest">// OPERATIONS CONSOLE</p>
       </div>
 
       <div className="px-5 py-3 space-y-1.5 border-b border-slate-800 shrink-0">
-        <StatusLine label="NAVIGAZIONE"  value="ATTIVA"  />
-        <StatusLine label="SENSORI"      value="ONLINE"  />
-        <StatusLine label="ARMAMENTI"    value="PRONTI"  />
-        <StatusLine label="DATI MISSIONE" value="IN ATTESA" active={false} />
+        <StatusLine label="NAVIGATION"    value="ACTIVE"   />
+        <StatusLine label="SENSORS"       value="ONLINE"   />
+        <StatusLine label="ARMAMENTS"     value="READY"    />
+        <StatusLine label="MISSION DATA"  value="STANDBY" active={false} />
       </div>
 
       <div className="flex-1 px-5 py-5 space-y-5 overflow-y-auto">
 
         <div>
-          <p className="font-display text-xs text-slate-600 tracking-widest mb-2">MODALITÀ COMBATTIMENTO</p>
+          <p className="font-display text-xs text-slate-600 tracking-widest mb-2">COMBAT MODE</p>
           <div className="grid grid-cols-2 gap-1 p-1 bg-slate-900/60 border border-slate-800 rounded-lg">
             {[
-              { value: 'vectorial', label: 'VETTORIALE', sub: 'Hex + vettori' },
-              { value: 'basic',     label: 'BASE',       sub: 'Bande distanza' },
+              { value: 'vectorial', label: 'VECTORIAL', sub: 'Hex + vectors' },
+              { value: 'basic',     label: 'BASIC',     sub: 'Range bands'  },
             ].map(({ value, label, sub }) => (
               <button
                 key={value}
@@ -253,7 +253,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
         </div>
 
         <div>
-          <p className="font-display text-xs text-slate-600 tracking-widest mb-2">AZIONI</p>
+          <p className="font-display text-xs text-slate-600 tracking-widest mb-2">ACTIONS</p>
           <div className="space-y-2">
 
             {autosave && (
@@ -262,9 +262,9 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
                 className="w-full py-3.5 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-display text-xs tracking-widest rounded-lg hover:bg-[--neon-cyan]/20 transition-colors text-left px-4"
               >
                 <span className="text-base block mb-0.5 text-center">↺</span>
-                <span className="block text-center">RIPRENDI AUTOSALVATAGGIO</span>
+                <span className="block text-center">RESUME AUTOSAVE</span>
                 <span className="block font-mono text-[--neon-cyan]/50 mt-1 normal-case tracking-normal font-normal text-xs text-center">
-                  Round {autosave.round} — {PHASE_LABELS[autosave.phase] ?? autosave.phase?.toUpperCase()} — {autosave.shipCount} nav{autosave.shipCount === 1 ? 'e' : 'i'}
+                  Round {autosave.round} — {PHASE_LABELS[autosave.phase] ?? autosave.phase?.toUpperCase()} — {autosave.shipCount} ship{autosave.shipCount === 1 ? '' : 's'}
                 </span>
                 <span className="block font-mono text-slate-600 mt-0.5 normal-case tracking-normal font-normal text-xs text-center">
                   {autosave.savedAt}
@@ -281,9 +281,9 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
               }`}
             >
               <span className="text-base block mb-0.5">▶</span>
-              NUOVA SESSIONE
+              NEW SESSION
               <span className="block font-mono text-slate-500 mt-0.5 normal-case tracking-normal font-normal text-xs">
-                Avvia da zero
+                Start fresh
               </span>
             </button>
 
@@ -293,9 +293,9 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
               className="w-full py-3 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded-lg hover:border-slate-500 hover:text-slate-300 transition-colors disabled:opacity-40"
             >
               <span className="text-sm block mb-0.5">{loading ? '⌛' : '↓'}</span>
-              {loading ? 'CARICAMENTO…' : 'RIPRENDI DA FILE'}
+              {loading ? 'LOADING…' : 'RESUME FROM FILE'}
               <span className="block font-mono text-slate-600 mt-0.5 normal-case tracking-normal font-normal text-xs">
-                Carica da file .json
+                Load from .json file
               </span>
             </button>
           </div>
@@ -308,7 +308,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
 
       <div className="shrink-0 px-5 py-3 border-t border-slate-800">
         <p className="font-mono text-xs text-slate-500 leading-relaxed">
-          Aggiungi profili nel pannello a sinistra prima di iniziare.
+          Add profiles in the left panel before starting.
         </p>
       </div>
     </div>
@@ -346,19 +346,19 @@ function TacticalDisplayIdle() {
 
         <div className="px-6 py-3 border-b border-slate-800/60 shrink-0 flex items-center gap-3">
           <span className="w-1.5 h-1.5 rounded-full bg-slate-600 shrink-0" />
-          <span className="font-display text-xs text-slate-500 tracking-widest">DISPLAY TATTICO</span>
+          <span className="font-display text-xs text-slate-500 tracking-widest">TACTICAL DISPLAY</span>
           <div className="flex-1 h-px bg-slate-800" />
           <span className="font-display text-xs text-slate-600 tracking-widest">STANDBY</span>
         </div>
 
         <div className="px-6 py-3 border-b border-slate-800/60 shrink-0 grid grid-cols-2 gap-x-8 gap-y-1">
           {[
-            { k: 'PROTOCOLLO', v: 'MgT2E/VCS-1.0' },
-            { k: 'MODALITÀ',   v: '—' },
-            { k: 'ROUND',      v: '—' },
-            { k: 'FASE',       v: '—' },
-            { k: 'NAVI',       v: '—' },
-            { k: 'MISSILI',    v: '—' },
+            { k: 'PROTOCOL', v: 'MgT2E/VCS-1.0' },
+            { k: 'MODE',     v: '—' },
+            { k: 'ROUND',    v: '—' },
+            { k: 'PHASE',    v: '—' },
+            { k: 'SHIPS',    v: '—' },
+            { k: 'MISSILES', v: '—' },
           ].map(({ k, v }) => (
             <div key={k} className="flex justify-between gap-2">
               <span className="font-mono text-xs text-slate-600">{k}</span>
@@ -371,9 +371,9 @@ function TacticalDisplayIdle() {
           <div className="text-center space-y-5">
             <TargetReticle />
             <div className="space-y-1">
-              <p className="font-display text-xs text-slate-500 tracking-widest">NESSUN DATO MISSIONE</p>
-              <p className="font-mono text-xs text-slate-600">Avvia una nuova sessione</p>
-              <p className="font-mono text-xs text-slate-600">o carica una sessione precedente</p>
+              <p className="font-display text-xs text-slate-500 tracking-widest">NO MISSION DATA</p>
+              <p className="font-mono text-xs text-slate-600">Start a new session</p>
+              <p className="font-mono text-xs text-slate-600">or load a previous session</p>
             </div>
           </div>
         </div>
@@ -425,7 +425,7 @@ function ShipPreviewRow({ ship }) {
 function SessionPreview({ data, onConfirm, onCancel, loading }) {
   const { name, round, phase, combatMode, ships = [], missiles = [], _exportedAt, _filename } = data
 
-  const FACTION_LABELS = { players: 'GIOCATORI', npc: 'NPC', neutral: 'NEUTRALI' }
+  const FACTION_LABELS = { players: 'PLAYERS', npc: 'NPC', neutral: 'NEUTRAL' }
   const FACTION_COLORS = { players: 'text-[--neon-cyan]', npc: 'text-red-400', neutral: 'text-slate-400' }
 
   const byFaction = ships.reduce((acc, ship) => {
@@ -435,7 +435,7 @@ function SessionPreview({ data, onConfirm, onCancel, loading }) {
     return acc
   }, {})
 
-  const savedAt = _exportedAt ? new Date(_exportedAt).toLocaleString('it-IT') : '—'
+  const savedAt = _exportedAt ? new Date(_exportedAt).toLocaleString('en-GB') : '—'
 
   return (
     <div className="relative flex flex-col h-full overflow-hidden">
@@ -447,7 +447,7 @@ function SessionPreview({ data, onConfirm, onCancel, loading }) {
 
         <div className="px-6 py-3 border-b border-amber-900/40 shrink-0 flex items-center gap-3 bg-amber-950/10">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
-          <span className="font-display text-xs text-amber-500/80 tracking-widest">MISSIONE IDENTIFICATA</span>
+          <span className="font-display text-xs text-amber-500/80 tracking-widest">MISSION IDENTIFIED</span>
           <div className="flex-1 h-px bg-amber-900/40" />
         </div>
 
@@ -455,16 +455,16 @@ function SessionPreview({ data, onConfirm, onCancel, loading }) {
           <DataField label="DESIGNAZIONE" value={name} />
           <DataField label="FILE" value={_filename} small />
           <DataField label="ROUND" value={round} accent />
-          <DataField label="FASE" value={PHASE_LABELS[phase] ?? phase?.toUpperCase()} />
-          <DataField label="MODALITÀ" value={combatMode === 'vectorial' ? 'VETTORIALE' : 'BASE'} />
-          <DataField label="NAVI / MISSILI" value={`${ships.length} / ${missiles.length}`} />
-          <DataField label="SALVATO IL" value={savedAt} small />
+          <DataField label="PHASE" value={PHASE_LABELS[phase] ?? phase?.toUpperCase()} />
+          <DataField label="MODE" value={combatMode === 'vectorial' ? 'VECTORIAL' : 'BASIC'} />
+          <DataField label="SHIPS / MISSILES" value={`${ships.length} / ${missiles.length}`} />
+          <DataField label="SAVED AT" value={savedAt} small />
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          <p className="font-display text-xs text-slate-600 tracking-widest mb-3">ROSTER NAVI</p>
+          <p className="font-display text-xs text-slate-600 tracking-widest mb-3">SHIP ROSTER</p>
           {ships.length === 0 && (
-            <p className="font-mono text-xs text-slate-700">Nessuna nave registrata.</p>
+            <p className="font-mono text-xs text-slate-700">No ships on record.</p>
           )}
           {Object.entries(byFaction).map(([faction, factionShips]) => (
             <div key={faction} className="mb-4">
@@ -484,14 +484,14 @@ function SessionPreview({ data, onConfirm, onCancel, loading }) {
             disabled={loading}
             className="w-full py-3 bg-amber-600/20 border border-amber-500/40 text-amber-400 font-display text-sm tracking-widest rounded-lg hover:bg-amber-600/30 transition-colors disabled:opacity-40"
           >
-            {loading ? 'CARICAMENTO…' : '▶  CARICA E INIZIA'}
+            {loading ? 'LOADING…' : '▶  LOAD AND START'}
           </button>
           <button
             onClick={onCancel}
             disabled={loading}
             className="w-full py-2 border border-slate-700 text-slate-500 font-display text-xs tracking-widest rounded-lg hover:border-slate-600 hover:text-slate-400 transition-colors disabled:opacity-40"
           >
-            ANNULLA
+            CANCEL
           </button>
         </div>
       </div>
@@ -521,7 +521,7 @@ function SessionPanel() {
         phase:     saved.phase ?? 'setup',
         shipCount: saved.ships.length,
         savedAt:   saved.savedAt
-          ? new Date(saved.savedAt).toLocaleString('it-IT')
+          ? new Date(saved.savedAt).toLocaleString('en-GB')
           : '—',
       })
     }).catch(() => {})
@@ -544,7 +544,7 @@ function SessionPanel() {
     try {
       const text = await file.text()
       const json = JSON.parse(text)
-      if (json?.type !== 'battle-state' || !json.battle) throw new Error('File non valido: tipo errato o campo "battle" mancante.')
+      if (json?.type !== 'battle-state' || !json.battle) throw new Error('Invalid file: wrong type or missing "battle" field.')
       setPendingFile(file)
       setPendingData({ ...json.battle, _exportedAt: json.exportedAt, _filename: file.name })
     } catch (err) {

@@ -81,7 +81,7 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
   return (
     <div className="flex flex-wrap items-center gap-1.5 bg-slate-800 rounded px-2 py-1.5">
       <span className="text-slate-500 font-mono text-xs shrink-0 w-16">
-        Torretta {turret.slot}
+        Turret {turret.slot}
       </span>
 
       {/* Weapon chips */}
@@ -95,7 +95,7 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
             type="button"
             onClick={() => onRemoveWeapon(slotIdx, wIdx)}
             className="text-slate-500 hover:text-red-400 leading-none transition-colors"
-            aria-label={`Rimuovi ${w}`}
+            aria-label={`Remove ${w}`}
           >
             ×
           </button>
@@ -108,7 +108,7 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
         onChange={(e) => { onAddWeapon(slotIdx, e.target.value); e.target.value = '' }}
         className="bg-slate-700 border border-slate-600 text-slate-400 font-mono text-xs rounded px-1.5 py-0.5 focus:outline-none focus:border-[--neon-cyan]/60 cursor-pointer"
       >
-        <option value="">+ arma</option>
+        <option value="">+ weapon</option>
         {WEAPON_IDS.map((w) => (
           <option key={w} value={w}>{w}</option>
         ))}
@@ -119,9 +119,9 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
         type="button"
         onClick={() => onRemoveTurret(slotIdx)}
         className="ml-auto text-slate-600 hover:text-red-400 font-mono text-xs transition-colors"
-        aria-label="Rimuovi torretta"
+        aria-label="Remove turret"
       >
-        ⊗ torretta
+        ⊗ turret
       </button>
     </div>
   )
@@ -183,7 +183,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
   // ── Save ───────────────────────────────────────────────────────────────
 
   const handleSave = () => {
-    if (!form.name.trim()) { setError('Il nome è obbligatorio.'); return }
+    if (!form.name.trim()) { setError('Name is required.'); return }
     setError(null)
     if (isNew) {
       addProfile({ ...form, name: form.name.trim() })
@@ -200,7 +200,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
       {/* Form header */}
       <div className="px-5 py-3 border-b border-slate-800 shrink-0">
         <h2 className="font-mono text-xs text-slate-400 tracking-widest uppercase">
-          {isNew ? '+ NUOVO PROFILO' : `MODIFICA — ${existing?.name ?? ''}`}
+          {isNew ? '+ NEW PROFILE' : `EDIT — ${existing?.name ?? ''}`}
         </h2>
       </div>
 
@@ -210,7 +210,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
         {/* Basic info */}
         <section className="space-y-3">
           <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase border-b border-slate-800 pb-1">
-            Identificazione
+            Identification
           </h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
@@ -218,27 +218,27 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
                 label="NOME *"
                 value={form.name}
                 onChange={(v) => set('name', v)}
-                placeholder="es. Far Trader"
+                placeholder="e.g. Far Trader"
               />
             </div>
             <TextField
               label="CLASSE"
               value={form.shipClass}
               onChange={(v) => set('shipClass', v)}
-              placeholder="es. Type A"
+              placeholder="e.g. Type A"
             />
-            <NumField label="TONNELLAGGIO" value={form.tonnage} onChange={(v) => set('tonnage', v)} min={1} max={100000} />
+            <NumField label="TONNAGE"      value={form.tonnage} onChange={(v) => set('tonnage', v)} min={1} max={100000} />
           </div>
         </section>
 
         {/* Combat stats */}
         <section className="space-y-3">
           <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase border-b border-slate-800 pb-1">
-            Statistiche Combattimento
+            Combat Stats
           </h3>
           <div className="grid grid-cols-4 gap-3">
             <NumField label="HULL"    value={form.hull}   onChange={(v) => set('hull', v)}   min={1} max={9999} />
-            <NumField label="ARMATURA" value={form.armor} onChange={(v) => set('armor', v)}  min={0} max={20} />
+            <NumField label="ARMOUR"   value={form.armor} onChange={(v) => set('armor', v)}  min={0} max={20} />
             <NumField label="THRUST"  value={form.thrust} onChange={(v) => set('thrust', v)} min={1} max={9} />
             <NumField label="JUMP"    value={form.jump}   onChange={(v) => set('jump', v)}   min={0} max={6} />
           </div>
@@ -247,13 +247,13 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
         {/* Crew */}
         <section className="space-y-3">
           <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase border-b border-slate-800 pb-1">
-            Equipaggio (Livello Skill)
+            Crew (Skill Level)
           </h3>
           <div className="grid grid-cols-4 gap-3">
-            <NumField label="PILOTA"      value={form.crew.pilot}    onChange={(v) => setCrew('pilot', v)}    min={0} max={5} />
-            <NumField label="CAPITANO"    value={form.crew.captain}  onChange={(v) => setCrew('captain', v)}  min={0} max={5} />
-            <NumField label="INGEGNERE"   value={form.crew.engineer} onChange={(v) => setCrew('engineer', v)} min={0} max={5} />
-            <NumField label="ARTIGLIERE"  value={form.crew.gunner}   onChange={(v) => setCrew('gunner', v)}   min={0} max={5} />
+            <NumField label="PILOT"    value={form.crew.pilot}    onChange={(v) => setCrew('pilot', v)}    min={0} max={5} />
+            <NumField label="CAPTAIN"  value={form.crew.captain}  onChange={(v) => setCrew('captain', v)}  min={0} max={5} />
+            <NumField label="ENGINEER" value={form.crew.engineer} onChange={(v) => setCrew('engineer', v)} min={0} max={5} />
+            <NumField label="GUNNER"   value={form.crew.gunner}   onChange={(v) => setCrew('gunner', v)}   min={0} max={5} />
           </div>
         </section>
 
@@ -261,18 +261,18 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
         <section className="space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800 pb-1">
             <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase">
-              Torrette ({form.turrets.length})
+              Turrets ({form.turrets.length})
             </h3>
             <button
               type="button"
               onClick={addTurret}
               className="text-[--neon-cyan] font-mono text-xs border border-[--neon-cyan]/30 rounded px-2 py-0.5 hover:bg-[--neon-cyan]/10 transition-colors"
             >
-              + Aggiungi
+              + Add
             </button>
           </div>
           {form.turrets.length === 0 && (
-            <p className="text-slate-600 font-mono text-xs italic">Nessuna torretta.</p>
+            <p className="text-slate-600 font-mono text-xs italic">No turrets.</p>
           )}
           <div className="space-y-1.5">
             {form.turrets.map((t, idx) => (
@@ -301,14 +301,14 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
             onClick={onCancel}
             className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500 transition-colors"
           >
-            ANNULLA
+            CANCEL
           </button>
           <button
             type="button"
             onClick={handleSave}
             className="flex-1 py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
           >
-            {isNew ? '+ CREA PROFILO' : '✓ SALVA MODIFICHE'}
+            {isNew ? '+ CREATE PROFILE' : '✓ SAVE CHANGES'}
           </button>
         </div>
       </div>

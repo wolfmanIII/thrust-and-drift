@@ -22,11 +22,11 @@ export function ShipProfileModal() {
   const [loading, setLoading] = useState(false)
 
   const mode = modalPayload?.mode ?? 'export'
-  const title = mode === 'import' ? 'Carica Profili' : 'Salva Profili'
+  const title = mode === 'import' ? 'Load Profiles' : 'Save Profiles'
 
   const handleExport = () => {
     exportAll()
-    setStatus({ type: 'ok', message: `${profiles.length} profili esportati.` })
+    setStatus({ type: 'ok', message: `${profiles.length} profiles exported.` })
   }
 
   const handleImport = async (e) => {
@@ -38,7 +38,7 @@ export function ShipProfileModal() {
       const { added, skipped } = await importFromFile(file)
       setStatus({
         type: 'ok',
-        message: `Import completato: ${added} aggiunti, ${skipped} già presenti.`,
+        message: `Import complete: ${added} added, ${skipped} already present.`,
       })
     } catch (err) {
       setStatus({ type: 'error', message: err.message })
@@ -53,8 +53,8 @@ export function ShipProfileModal() {
       <div className="space-y-4">
         <p className="text-slate-400 font-mono text-xs">
           {mode === 'import'
-            ? 'Seleziona un file JSON esportato da questa applicazione.'
-            : `${profiles.length} profili attualmente in memoria.`}
+            ? 'Select a JSON file exported from this application.'
+            : `${profiles.length} profiles currently in memory.`}
         </p>
 
         {mode === 'export' && (
@@ -62,7 +62,7 @@ export function ShipProfileModal() {
             onClick={handleExport}
             className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
           >
-            💾 ESPORTA JSON
+            💾 EXPORT JSON
           </button>
         )}
 
@@ -80,7 +80,7 @@ export function ShipProfileModal() {
               disabled={loading}
               className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40"
             >
-              {loading ? 'CARICAMENTO…' : '📂 SELEZIONA FILE'}
+              {loading ? 'LOADING…' : '📂 SELECT FILE'}
             </button>
           </>
         )}
@@ -97,7 +97,7 @@ export function ShipProfileModal() {
           onClick={closeModal}
           className="w-full py-1.5 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500 transition-colors"
         >
-          CHIUDI
+          CLOSE
         </button>
       </div>
     </Modal>

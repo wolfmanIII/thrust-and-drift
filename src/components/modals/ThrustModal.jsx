@@ -59,7 +59,7 @@ export function ThrustModal() {
         {/* Thrust availability bar */}
         <div>
           <div className="flex justify-between text-xs font-mono text-slate-400 mb-1">
-            <span>Thrust disponibile</span>
+            <span>Thrust available</span>
             <span className={cost > thrustAvailable ? 'text-red-400' : 'text-[--neon-cyan]'}>
               {cost} / {thrustAvailable}
             </span>
@@ -75,12 +75,12 @@ export function ThrustModal() {
         {/* Vector display */}
         <div className="grid grid-cols-3 gap-2 text-center font-mono text-xs">
           <div className="bg-slate-800 rounded p-2">
-            <p className="text-slate-500 text-xs mb-1">Vettore attuale</p>
+            <p className="text-slate-500 text-xs mb-1">Current vector</p>
             <p className="text-slate-200">({ship.vector.q}, {ship.vector.r})</p>
           </div>
           <div className="flex items-center justify-center text-slate-600 text-lg">→</div>
           <div className={`rounded p-2 ${isValid ? 'bg-slate-800' : 'bg-red-950/40 border border-red-700/50'}`}>
-            <p className="text-slate-500 text-xs mb-1">Nuovo vettore</p>
+            <p className="text-slate-500 text-xs mb-1">New vector</p>
             <p className={isValid ? 'text-[--neon-cyan]' : 'text-red-400'}>
               ({newVector.q}, {newVector.r})
             </p>
@@ -142,7 +142,7 @@ export function ThrustModal() {
         {/* Error */}
         {!isValid && cost > 0 && (
           <p className="text-red-400 font-mono text-xs text-center">
-            ⚠ Thrust insufficiente ({cost} richiesto, {thrustAvailable} disponibile)
+            ⚠ Insufficient thrust ({cost} required, {thrustAvailable} available)
           </p>
         )}
 
@@ -152,14 +152,14 @@ export function ThrustModal() {
             onClick={closeModal}
             className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500 transition-colors"
           >
-            ANNULLA
+            CANCEL
           </button>
           <button
             onClick={handleConfirm}
             disabled={!isValid || cost === 0}
             className="flex-1 py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            APPLICA THRUST
+            APPLY THRUST
           </button>
         </div>
       </div>

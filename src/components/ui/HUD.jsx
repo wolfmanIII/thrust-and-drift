@@ -14,12 +14,12 @@ const ACTOR_TURN_PHASES = new Set(['acceleration', 'attack', 'actions'])
 
 const PHASE_LABELS = {
   setup:        'SETUP',
-  initiative:   'INIZIATIVA',
-  acceleration: 'ACCELERAZIONE',
-  movement:     'MOVIMENTO',
-  attack:       'ATTACCO',
-  actions:      'AZIONI',
-  end:          'FINE ROUND',
+  initiative:   'INITIATIVE',
+  acceleration: 'ACCELERATION',
+  movement:     'MOVEMENT',
+  attack:       'ATTACK',
+  actions:      'ACTIONS',
+  end:          'END OF ROUND',
 }
 
 export function HUD() {
@@ -63,12 +63,12 @@ export function HUD() {
           <span className="text-slate-200 font-mono text-xs truncate max-w-32">
             {currentActor.profile.name}
           </span>
-          <span className="text-slate-500 text-xs">({actorsLeft} rimasti)</span>
+          <span className="text-slate-500 text-xs">({actorsLeft} left)</span>
           <button
             onClick={advanceActor}
             className="ml-1 text-[--neon-cyan] font-display text-xs border border-[--neon-cyan]/40 rounded px-1.5 py-0.5 hover:bg-[--neon-cyan]/10 transition-colors"
           >
-            AVANTI →
+            NEXT →
           </button>
         </div>
       )}
@@ -79,21 +79,21 @@ export function HUD() {
           onClick={advancePhase}
           className="pointer-events-auto bg-slate-800/80 border border-slate-600 hover:border-[--neon-cyan]/60 text-slate-300 hover:text-[--neon-cyan] font-mono text-xs tracking-widest rounded px-3 py-1.5 backdrop-blur-sm transition-colors text-left"
         >
-          FASE SUCCESSIVA ⟶
+          NEXT PHASE ⟶
         </button>
       )}
 
       {/* Battle utilities */}
       <div className="pointer-events-auto flex gap-1 mt-0.5">
-        <Tooltip label="Salva sessione su file">
+        <Tooltip label="Save session to file">
           <button
             onClick={exportBattleState}
             className="flex-1 bg-slate-800/80 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
           >
-            💾 SALVA
+            💾 SAVE
           </button>
         </Tooltip>
-        <Tooltip label="Torna al menu principale">
+        <Tooltip label="Return to main menu">
           <button
             onClick={() => setShowExitWarning(true)}
             className="bg-slate-800/80 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
@@ -104,26 +104,26 @@ export function HUD() {
       </div>
 
       {showExitWarning && (
-        <Modal title="ABBANDONA SESSIONE" onClose={() => setShowExitWarning(false)} width="max-w-sm">
+        <Modal title="ABANDON SESSION" onClose={() => setShowExitWarning(false)} width="max-w-sm">
           <div className="space-y-4">
             <p className="font-mono text-sm text-slate-300 leading-relaxed">
-              I dati non salvati andranno perduti.
+              Unsaved data will be lost.
             </p>
             <p className="font-mono text-xs text-slate-500">
-              Salva la sessione prima di uscire per riprendere in seguito.
+              Save the session before leaving to resume later.
             </p>
             <div className="flex gap-2 pt-1">
               <button
                 onClick={() => { setShowExitWarning(false); gotoScreen('dashboard') }}
                 className="flex-1 py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-display text-xs tracking-widest rounded hover:bg-red-900/50 transition-colors"
               >
-                ESCI SENZA SALVARE
+                EXIT WITHOUT SAVING
               </button>
               <button
                 onClick={() => setShowExitWarning(false)}
                 className="flex-1 py-2 border border-slate-600 text-slate-300 font-display text-xs tracking-widest rounded hover:border-slate-400 transition-colors"
               >
-                ANNULLA
+                CANCEL
               </button>
             </div>
           </div>
