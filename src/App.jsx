@@ -54,6 +54,18 @@ const MODAL_MAP = {
   legend:        LegendModal,
 }
 
+function LegendButton() {
+  const openModal = useUiStore((s) => s.openModal)
+  return (
+    <button
+      onClick={() => openModal('legend')}
+      className="absolute top-3 right-3 z-10 bg-slate-900/80 border border-slate-700 rounded backdrop-blur-sm px-2.5 py-1 font-mono text-xs text-slate-400 hover:text-(--neon-cyan) hover:border-slate-500 transition-colors"
+    >
+      📖 Legend
+    </button>
+  )
+}
+
 export function App() {
   useAutosave()
 
@@ -97,6 +109,7 @@ export function App() {
 
       {/* ── HUD overlays ─────────────────────────────────────────────── */}
       <HUD />
+      <LegendButton />
       <PhaseTracker />
       <BattleLog />
 

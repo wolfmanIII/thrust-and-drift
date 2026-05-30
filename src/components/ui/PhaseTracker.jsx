@@ -21,7 +21,7 @@ export function PhaseTracker() {
   const shipMap = Object.fromEntries(ships.map((s) => [s.id, s]))
 
   return (
-    <div className="absolute top-3 right-3 z-10 w-48">
+    <div className="absolute top-10 right-3 z-10 w-48">
       <div className="bg-slate-900/80 border border-slate-700 rounded backdrop-blur-sm overflow-hidden">
         {/* Header */}
         <button
