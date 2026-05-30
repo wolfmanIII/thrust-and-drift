@@ -24,7 +24,7 @@ export function ThrustModal() {
 
   if (!ship) return null
 
-  const thrustAvailable = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0))
+  const thrustAvailable = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.evasiveThrust ?? 0) - (ship.thrustPenalty ?? 0))
   const cost = hexDistance({ q: 0, r: 0 }, delta)
   const isValid = isValidThrustDelta(delta, thrustAvailable)
   const newVector = hexAdd(ship.vector, delta)
