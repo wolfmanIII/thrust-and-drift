@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.5.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.6.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -285,6 +285,31 @@ remaining thrust.
 
 Acquired via the Sensors crew action. Grants a +DM to attacks against the
 locked target. Shown as an **animated cyan ring** on the locked ship.
+
+### 9.7 Weapon Range Limits
+
+Each weapon has a **maximum range band** beyond which it cannot fire
+*(MgT2e CRB p. 167: "cannot attack targets beyond listed Range Band")*.
+
+| Weapon | Max Range |
+| ------ | --------- |
+| Railgun | Short |
+| Beam Laser | Medium |
+| Pulse Laser | Long |
+| Particle Barbette | Very Long |
+| Particle Beam | Very Long |
+| Missile Rack | Special (no cap) |
+| Sandcaster | Special (no cap) |
+
+When a target is beyond a weapon's max range:
+
+- An **OUT OF RANGE** label appears on the weapon button in the Config step.
+- If that weapon is selected, the error is shown above the roll button.
+- **ROLL ATTACK is disabled** — the shot cannot proceed until a valid weapon
+  or a closer target is chosen.
+
+"Special" weapons (missiles, sandcasters) have no hard range cap and are
+never blocked by this rule.
 
 ---
 
