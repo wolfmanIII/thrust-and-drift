@@ -611,7 +611,7 @@ export function AttackModal() {
         })
       }
       emitEffect('impact_burst', {
-        duration:  500,
+        duration: 2500,
         hex:       target.position,
         shipColor: target.color,
       })
@@ -637,7 +637,7 @@ export function AttackModal() {
     const effect = getCriticalEffect(location, isMaxSeverity ? 6 : effectiveSeverity)
 
     emitEffect('critical_flash', {
-      duration: 600,
+      duration: 2500,
       hex:    target.position,
       system: location,
     })

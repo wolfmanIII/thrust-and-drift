@@ -163,7 +163,7 @@ export function useCanvasEffects({ effectsCanvasRef, offset, zoom }) {
           prev.position.r !== missile.position.r)
       ) {
         emitEffect('missile_trail', {
-          duration: 380,
+          duration: 2500,
           fromHex: prev.position,
           toHex:   missile.position,
         })

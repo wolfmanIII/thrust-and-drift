@@ -43,7 +43,7 @@ export function ThrustModal() {
     if (!isValid || cost === 0) { closeModal(); return }
     applyShipThrust(ship.id, delta, cost)
     emitEffect('thrust_plume', {
-      duration:  400,
+      duration: 2500,
       hex:       ship.position,
       delta,
       shipColor: ship.color,
