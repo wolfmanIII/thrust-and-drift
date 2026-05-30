@@ -17,6 +17,8 @@ import {
   getThresholdCriticalCount,
   rollAttack,
   rollInitiative,
+  RANGE_ORDER,
+  isOutOfRange,
 } from './combat.js'
 
 // === RANGE DMs ===
@@ -333,5 +335,54 @@ describe('rollInitiative', () => {
     // 5 (manual) + 1 (pilot) + 2 (thrust) = 8 — NOT 8+1+2=11 from mocked random
     expect(r.total).toBe(8)
     expect(r.roll).toBe(override)
+  })
+})
+
+// === RANGE_ORDER / isOutOfRange ===
+// // MgT2e CRB p.167 — "cannot attack targets beyond listed Range Band"
+
+describe('RANGE_ORDER', () => {
+  it('contains all 6 app range bands in order', () => {
+    expect(RANGE_ORDER).toEqual(['Adjacent', 'Short', 'Medium', 'Long', 'Very Long', 'Distant'])
+  })
+})
+
+describe('isOutOfRange', () => {
+  it('returns false when Special maxRange', () => {
+    expect(isOutOfRange('Special', 'Distant')).toBe(false)
+  })
+
+  it('returns false when at maxRange band', () => {
+    expect(isOutOfRange('Long', 'Long')).toBe(false)
+  })
+
+  it('returns false when closer than maxRange', () => {
+    expect(isOutOfRange('Long', 'Short')).toBe(false)
+    expect(isOutOfRange('Long', 'Adjacent')).toBe(false)
+  })
+
+  it('returns true when beyond maxRange — Railgun at Medium', () => {
+    expect(isOutOfRange('Short', 'Medium')).toBe(true)
+  })
+
+  it('returns true when beyond maxRange — Beam Laser at Long', () => {
+    expect(isOutOfRange('Medium', 'Long')).toBe(true)
+  })
+
+  it('returns true when beyond maxRange — Pulse Laser at Very Long', () => {
+    expect(isOutOfRange('Long', 'Very Long')).toBe(true)
+  })
+
+  it('returns false for Particle Beam at Very Long (its maxRange)', () => {
+    expect(isOutOfRange('Very Long', 'Very Long')).toBe(false)
+  })
+
+  it('returns true for Particle Beam at Distant', () => {
+    expect(isOutOfRange('Very Long', 'Distant')).toBe(true)
+  })
+
+  it('returns false when maxRange is null/undefined', () => {
+    expect(isOutOfRange(null, 'Long')).toBe(false)
+    expect(isOutOfRange(undefined, 'Long')).toBe(false)
   })
 })

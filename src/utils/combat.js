@@ -95,6 +95,26 @@ export function rollAttack({
 }
 
 /**
+ * Ordered range bands from closest to furthest.
+ * // MgT2e CRB p.165 — Range Bands table
+ * @type {string[]}
+ */
+export const RANGE_ORDER = ['Adjacent', 'Short', 'Medium', 'Long', 'Very Long', 'Distant']
+
+/**
+ * Return true if currentRangeBand is beyond a weapon's maxRange.
+ * 'Special' maxRange (missiles, sandcaster) is never out of range.
+ * // MgT2e CRB p.167 — "cannot attack targets beyond listed Range Band"
+ * @param {string} maxRange        Weapon's maximum range band
+ * @param {string} currentRangeBand  Actual range band to the target
+ * @returns {boolean}
+ */
+export function isOutOfRange(maxRange, currentRangeBand) {
+  if (!maxRange || maxRange === 'Special') return false
+  return RANGE_ORDER.indexOf(currentRangeBand) > RANGE_ORDER.indexOf(maxRange)
+}
+
+/**
  * Get the attack DM for a given range band.
  * // MgT2e CRB p.164 — Range Band DMs table
  * @param {string} rangeBand
