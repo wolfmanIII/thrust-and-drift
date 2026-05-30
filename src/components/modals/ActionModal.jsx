@@ -91,9 +91,9 @@ export function ActionModal() {
   const [manualDice, setManualDice]             = useState(null)
   const [skillOverride, setSkillOverride]       = useState(null)
 
-  const isPlayer = ship.faction === 'players'
-
   if (!ship) return null
+
+  const isPlayer = ship.faction === 'players'
 
   // Normalise to array — handles legacy {pilot:N,...} saves
   const crewArray = Array.isArray(ship.profile.crew)
