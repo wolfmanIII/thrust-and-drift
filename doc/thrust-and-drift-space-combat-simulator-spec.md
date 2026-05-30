@@ -1178,7 +1178,19 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 
 **Scope escluso da v1.5:** abstract mode (CRB p.175) — rimandato a versione successiva.
 
-### 13.8 Versione 2.0 — Future
+### 13.8 Versione 1.6 — Range Massimo Armi ✅ COMPLETATA
+
+**Problema:** le armi sparavano a qualsiasi distanza. CRB p.167 specifica esplicitamente che ogni arma ha un range massimo oltre il quale non può sparare.
+
+**Scope tecnico implementato:**
+
+- `data/weapons.js` — campo `maxRange` su ogni arma (CRB p.167–168, HG p.28); fix dati errati: Missile Rack 2D→4D, Railgun 4D→2D, Railgun traits `['AP']`→`['AP 4']`, Particle Beam traits rimosso `'AP'` erroneo (solo la barbette ha AP)
+- `utils/combat.js` — `RANGE_ORDER` array, `isOutOfRange(maxRange, rangeBand)` funzione pura
+- `useAttackSetup.js` — espone `outOfRange: boolean`
+- `AttackModal` — badge `OUT OF RANGE` per arma; messaggio esplicativo range/distanza; ROLL ATTACK disabilitato se fuori portata
+- 606 test (da 596) — +10 test `isOutOfRange`/`RANGE_ORDER`
+
+### 13.10 Versione 2.0 — Future
 
 - Scale mappa multiple con transizione
 - Asse Z opzionale (3D)

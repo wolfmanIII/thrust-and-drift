@@ -6,6 +6,30 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.6.0] — 2026-05-30
+
+### Added
+
+- **Weapon max range enforcement** — each weapon now has a `maxRange` field; the Attack Modal shows an `OUT OF RANGE` badge on weapons that cannot reach the target and disables the ROLL ATTACK button (CRB p.167: "cannot attack targets beyond listed Range Band")
+  - `weapons.js` — `maxRange` field on all weapons: Pulse Laser `Long`, Beam Laser `Medium`, Particle Beam `Very Long`, Railgun `Short`, Missile Rack / Sandcaster `Special` (no hard cap)
+  - `combat.js` — `RANGE_ORDER` array, `isOutOfRange(maxRange, currentRangeBand)` pure util
+  - `useAttackSetup.js` — exposes `outOfRange: boolean` for selected weapon
+  - `AttackModal` — per-weapon `OUT OF RANGE` badge in weapon list; range explanation line; ROLL ATTACK disabled when out of range
+
+### Fixed
+
+- **Weapon data corrections** (HG p.28, CRB p.168):
+  - Missile Rack `damageDice` 2 → 4
+  - Railgun `damageDice` 4 → 2
+  - Railgun `traits` `['AP']` → `['AP 4']`
+  - Particle Beam `traits` removed erroneous `'AP'` (turret version has no AP; only Particle Barbette does)
+
+### Tests
+
+- 606 tests (up from 596) — +10 `isOutOfRange` / `RANGE_ORDER` in `combat.test.js`
+
+---
+
 ## [1.5.0] — 2026-05-30
 
 ### Added
