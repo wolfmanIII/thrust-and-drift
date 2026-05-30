@@ -99,7 +99,7 @@ export function HUD() {
           <span className="text-slate-200 font-mono text-xs truncate max-w-32">
             {currentActor.profile.name}
           </span>
-          <span className="text-slate-500 text-xs">({actorsLeft} left)</span>
+          <span className="text-slate-500 text-xs">{currentActorIndex + 1}/{initiativeOrder.length}</span>
           <button
             onClick={advanceActor}
             className="ml-1 text-(--neon-cyan) font-display text-xs border border-(--neon-cyan)/40 rounded px-1.5 py-0.5 hover:bg-(--neon-cyan)/10 transition-colors"
