@@ -71,15 +71,15 @@ export function AddShipModal() {
               <button
                 key={p.id}
                 onClick={() => setSelectedProfileId(p.id)}
-                className={`w-full text-left px-3 py-1.5 font-mono text-xs transition-colors flex items-center gap-2 ${
+                className={`w-full text-left px-3 py-1.5 font-mono text-xs transition-colors flex items-center gap-2 border-l-2 ${
                   isSelected
-                    ? 'bg-[--neon-cyan]/15 text-[--neon-cyan] border-l-2 border-[--neon-cyan]'
-                    : 'text-slate-300 hover:bg-slate-800 border-l-2 border-transparent'
+                    ? 'bg-sky-950 text-sky-200 border-sky-400'
+                    : 'text-slate-300 hover:bg-slate-800 border-transparent'
                 }`}
               >
-                <span className={`w-3 shrink-0 text-center ${isSelected ? 'text-[--neon-cyan]' : 'text-transparent'}`}>▶</span>
+                <span className={`w-3 shrink-0 text-center ${isSelected ? 'text-sky-400' : 'text-transparent'}`}>▶</span>
                 <span className="font-bold">{p.name}</span>
-                {p.shipClass && <span className={`ml-1 ${isSelected ? 'text-[--neon-cyan]/60' : 'text-slate-500'}`}>{p.shipClass}</span>}
+                {p.shipClass && <span className={`ml-1 ${isSelected ? 'text-sky-400/60' : 'text-slate-500'}`}>{p.shipClass}</span>}
               </button>
             )
           })}
