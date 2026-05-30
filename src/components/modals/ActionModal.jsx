@@ -77,8 +77,9 @@ function SkillBadges({ skills }) {
 export function ActionModal() {
   const closeModal   = useUiStore((s) => s.closeModal)
   const modalPayload = useUiStore((s) => s.modalPayload)
-  const ships        = useBattleStore((s) => s.ships)
-  const addLogEntry  = useBattleStore((s) => s.addLogEntry)
+  const ships               = useBattleStore((s) => s.ships)
+  const addLogEntry         = useBattleStore((s) => s.addLogEntry)
+  const markCrewMemberUsed  = useBattleStore((s) => s.markCrewMemberUsed)
 
   const applyEffect  = useActionEffects()
 
@@ -102,6 +103,9 @@ export function ActionModal() {
       ? ship.profile.crew
       : migrateCrew(ship.profile.crew ?? {}),
   [ship.id])
+
+  const usedCrewMembers = ship.usedCrewMembers ?? []
+  const availableCrew   = crewArray.filter((m) => !usedCrewMembers.includes(m.id))
 
   const selectedMember = crewArray.find((m) => m.id === selectedMemberId) ?? null
   const memberActions  = selectedMember ? getActionsForMember(selectedMember) : []
@@ -135,6 +139,7 @@ export function ActionModal() {
       result = formatCheckResult(roll, dm, selectedAction.difficulty)
     }
 
+    if (selectedMember) markCrewMemberUsed(ship.id, selectedMember.id)
     setRollResult(result)
     addLogEntry(
       `${ship.profile.name} / ${selectedMember?.name ?? '?'}: ${selectedAction.label} — ${result.display} (${result.success ? 'SUCCESS' : 'FAILED'})`
@@ -210,8 +215,11 @@ export function ActionModal() {
               {crewArray.length === 0 && (
                 <p className="text-slate-600 font-mono text-xs italic">No crew assigned to this ship.</p>
               )}
+              {crewArray.length > 0 && availableCrew.length === 0 && (
+                <p className="text-slate-600 font-mono text-xs italic">All crew members have already acted this round.</p>
+              )}
               <div className="space-y-1 max-h-40 overflow-y-auto">
-                {crewArray.map((member) => (
+                {availableCrew.map((member) => (
                   <button
                     key={member.id}
                     onClick={() => handleSelectMember(member)}

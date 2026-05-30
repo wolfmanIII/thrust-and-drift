@@ -49,6 +49,13 @@ function MenuShell({ x, y, menuRef, children }) {
 
 // === SHIP CONTEXT ===
 
+/** Returns true if at least one crew member hasn't acted this round. */
+function hasAvailableCrewMember(ship) {
+  const used = ship.usedCrewMembers ?? []
+  const crew = Array.isArray(ship.profile.crew) ? ship.profile.crew : []
+  return crew.some((m) => !used.includes(m.id))
+}
+
 /** Returns true if the ship has at least one offensive turret that hasn't fired this round. */
 function hasUnfiredOffensiveTurret(ship) {
   const fired = ship.firedTurrets ?? []
@@ -120,7 +127,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       )}
 
       {/* ── Actions: crew actions ─────────────────────────────────── */}
-      {phase === 'actions' && isCurrentActor && (
+      {phase === 'actions' && isCurrentActor && hasAvailableCrewMember(ship) && (
         <>
           <MenuItem icon="⚡" label="Crew Action…" onClick={() => open('action', { shipId: targetId })} />
           <MenuDivider />

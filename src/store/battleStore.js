@@ -57,6 +57,7 @@ function buildNextRoundState(s) {
       hasActedThisPhase: false,
       evasiveThrust: 0,
       firedTurrets: [],
+      usedCrewMembers: [],
     })),
     log: [...s.log, makeLogEntry({
       round: s.round + 1,
@@ -240,6 +241,7 @@ const useBattleStore = create((set, get) => {
       hasActedThisPhase: false,
       evasiveThrust: 0,
       firedTurrets: [],
+      usedCrewMembers: [],
       sensorLockOn: null,
       sensorLockedBy: null,
       sensorLockDM: 0,
@@ -376,6 +378,19 @@ const useBattleStore = create((set, get) => {
         ships: s.ships.map((sh) =>
           sh.id === shipId
             ? { ...sh, firedTurrets: [...new Set([...(sh.firedTurrets ?? []), turretSlot])] }
+            : sh
+        ),
+      }))
+    },
+  ),
+
+  markCrewMemberUsed: wh(
+    (shipId) => !!get().ships.find((s) => s.id === shipId),
+    (shipId, memberId) => {
+      set((s) => ({
+        ships: s.ships.map((sh) =>
+          sh.id === shipId
+            ? { ...sh, usedCrewMembers: [...new Set([...(sh.usedCrewMembers ?? []), memberId])] }
             : sh
         ),
       }))
@@ -599,7 +614,8 @@ const useBattleStore = create((set, get) => {
       ships: s.ships.map((sh) => ({
         ...sh,
         hasActedThisPhase: false,
-        ...(nextPhase === 'attack' ? { firedTurrets: [] } : {}),
+        ...(nextPhase === 'attack'   ? { firedTurrets: [] }     : {}),
+        ...(nextPhase === 'actions' ? { usedCrewMembers: [] }  : {}),
       })),
       log: [...s.log, makeLogEntry({
         round: s.round,
