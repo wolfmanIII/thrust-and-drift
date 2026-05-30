@@ -18,6 +18,7 @@ import {
   drawThrustPlume,
   drawCriticalFlash,
   drawMissileTrail,
+  drawMissileLaunch,
   drawChaff,
   drawSensorLockRing,
   drawEvasiveAura,
@@ -67,6 +68,11 @@ function renderOneshotEffect(ctx, effect, t, size, ox, oy) {
     }
     case 'missile_trail': {
       drawMissileTrail(ctx, hpx(effect.fromHex), hpx(effect.toHex), t)
+      break
+    }
+    case 'missile_launch': {
+      const { x: cx, y: cy } = hpx(effect.hex)
+      drawMissileLaunch(ctx, cx, cy, t)
       break
     }
     case 'chaff': {

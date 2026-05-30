@@ -664,6 +664,7 @@ export function AttackModal() {
     if (!target) return
     launchMissile(attacker.id, target.id, missileCount, attacker.position, attacker.vector, 'Standard')
     if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
+    emitEffect('missile_launch', { duration: 520, hex: attacker.position })
     closeModal()
   }
 

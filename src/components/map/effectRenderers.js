@@ -250,6 +250,68 @@ export function drawChaff(ctx, cx, cy, t) {
   ctx.restore()
 }
 
+/**
+ * Expanding burst + radiating sparks at the launching ship token on missile launch.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} cx
+ * @param {number} cy
+ * @param {number} t
+ */
+export function drawMissileLaunch(ctx, cx, cy, t) {
+  const alpha = Math.pow(1 - t, 1.4)
+  if (alpha <= 0) return
+
+  ctx.save()
+  ctx.globalAlpha = alpha
+
+  // Expanding ring
+  ctx.shadowColor = '#f97316'
+  ctx.shadowBlur  = lerp(16, 2, t)
+  ctx.strokeStyle = '#fb923c'
+  ctx.lineWidth   = lerp(3, 0.5, t)
+  ctx.setLineDash([])
+  ctx.beginPath()
+  ctx.arc(cx, cy, lerp(TOKEN_RADIUS, TOKEN_RADIUS + 42, t), 0, Math.PI * 2)
+  ctx.stroke()
+
+  // 6 spark trails radiating outward
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2
+    const r0 = lerp(TOKEN_RADIUS, TOKEN_RADIUS + 22, Math.min(t * 2.2, 1))
+    const r1 = r0 + lerp(12, 3, t)
+    ctx.strokeStyle = i % 2 === 0 ? '#fbbf24' : '#fb923c'
+    ctx.lineWidth   = lerp(2, 0.5, t)
+    ctx.shadowBlur  = lerp(8, 0, t)
+    ctx.beginPath()
+    ctx.moveTo(cx + Math.cos(angle) * r0, cy + Math.sin(angle) * r0)
+    ctx.lineTo(cx + Math.cos(angle) * r1, cy + Math.sin(angle) * r1)
+    ctx.stroke()
+  }
+
+  // Central flash on early frames
+  if (t < 0.3) {
+    ctx.globalAlpha = (1 - t / 0.3) * 0.4
+    ctx.fillStyle   = '#fbbf24'
+    ctx.beginPath()
+    ctx.arc(cx, cy, TOKEN_RADIUS * (1 - t * 0.8), 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  // "LAUNCH" label, fades in first half
+  if (t < 0.45) {
+    ctx.globalAlpha    = (1 - t / 0.45) * alpha
+    ctx.shadowColor    = '#f97316'
+    ctx.shadowBlur     = 8
+    ctx.font           = 'bold 10px monospace'
+    ctx.fillStyle      = '#fed7aa'
+    ctx.textAlign      = 'center'
+    ctx.textBaseline   = 'bottom'
+    ctx.fillText('LAUNCH', cx, cy - TOKEN_RADIUS - 8)
+  }
+
+  ctx.restore()
+}
+
 // ─── PERSISTENT EFFECTS ──────────────────────────────────────────────────────
 
 /**
