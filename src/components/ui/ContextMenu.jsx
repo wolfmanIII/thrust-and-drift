@@ -204,6 +204,8 @@ function EmptyContextMenu({ x, y, menuRef, hex, close }) {
       <MenuItem icon="📂" label="Load profiles"    onClick={() => { openModal('shipProfile', { mode: 'import' }); close() }} />
       <MenuItem icon="💾" label="Save profiles"    onClick={() => { openModal('shipProfile', { mode: 'export' }); close() }} />
       <MenuDivider />
+      <MenuItem icon="📖" label="Legend"           onClick={() => { openModal('legend'); close() }} />
+      <MenuDivider />
       {phase === 'initiative' && (
         <>
           <MenuItem icon="🎲" label="Roll Initiative…" onClick={() => { openModal('initiative'); close() }} />

@@ -601,25 +601,24 @@ export function AttackModal() {
     if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
     applyDamage(target.id, damageResult.total, `${weaponKey} from ${attacker.profile.name}`)
 
-    if (attackResult?.hit) {
-      if (BEAM_WEAPONS.includes(weaponKey)) {
-        emitEffect('laser_ray', {
-          duration: 2500,
-          fromHex:    attacker.position,
-          toHex:      target.position,
-          weaponType: weaponKey,
-        })
-      }
-      emitEffect('impact_burst', {
-        duration: 2500,
-        hex:       target.position,
-        shipColor: target.color,
-      })
-    }
-
-    if (isCriticalHit(attackResult?.effect ?? 0)) {
+    if (damageResult.total > 0 && isCriticalHit(attackResult?.effect ?? 0)) {
       setStep('critical')
     } else {
+      if (attackResult?.hit) {
+        if (BEAM_WEAPONS.includes(weaponKey)) {
+          emitEffect('laser_ray', {
+            duration: 2500,
+            fromHex:    attacker.position,
+            toHex:      target.position,
+            weaponType: weaponKey,
+          })
+        }
+        emitEffect('impact_burst', {
+          duration: 2500,
+          hex:       target.position,
+          shipColor: target.color,
+        })
+      }
       closeModal()
     }
   }
@@ -636,6 +635,19 @@ export function AttackModal() {
       : attackSeverity
     const effect = getCriticalEffect(location, isMaxSeverity ? 6 : effectiveSeverity)
 
+    if (BEAM_WEAPONS.includes(weaponKey)) {
+      emitEffect('laser_ray', {
+        duration: 2500,
+        fromHex:    attacker.position,
+        toHex:      target.position,
+        weaponType: weaponKey,
+      })
+    }
+    emitEffect('impact_burst', {
+      duration: 2500,
+      hex:       target.position,
+      shipColor: target.color,
+    })
     emitEffect('critical_flash', {
       duration: 2500,
       hex:    target.position,
@@ -657,6 +669,14 @@ export function AttackModal() {
 
   const handleMissClose = () => {
     if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
+    if (target && BEAM_WEAPONS.includes(weaponKey)) {
+      emitEffect('laser_ray', {
+        duration: 2500,
+        fromHex:    attacker.position,
+        toHex:      target.position,
+        weaponType: weaponKey,
+      })
+    }
     closeModal()
   }
 

@@ -27,6 +27,7 @@ import { BoardingSetupModal }    from './components/modals/BoardingSetupModal.js
 import { BoardingContactModal }  from './components/modals/BoardingContactModal.jsx'
 import { BoardingConflictModal } from './components/modals/BoardingConflictModal.jsx'
 import { BoardingOutcomeModal }  from './components/modals/BoardingOutcomeModal.jsx'
+import { LegendModal }     from './components/modals/LegendModal.jsx'
 import { HelpScreen }      from './components/help/HelpScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
 import { useUiStore }      from './store/uiStore.js'
@@ -50,6 +51,7 @@ const MODAL_MAP = {
   shipDetail:    ShipDetailModal,
   shipProfile:   ShipProfileModal,
   thrust:        ThrustModal,
+  legend:        LegendModal,
 }
 
 export function App() {
