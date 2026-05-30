@@ -105,7 +105,7 @@ The battle map is a **flat-top hex grid**. All interaction is mouse-driven.
 
 ### 3.1 Legend
 
-Right-click any **empty hex** → **Legend** to open the visual reference panel.
+Click **📖 Legend** (fixed button, top-right of the battle screen) to open the visual reference panel. Also accessible via right-click any **empty hex** → **Legend**.
 
 | Category | Symbols |
 | -------- | ------- |

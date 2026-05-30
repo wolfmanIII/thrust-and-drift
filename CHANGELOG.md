@@ -10,7 +10,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- **Legend modal** — right-click empty hex → *Legend*; 2-column reference panel (`max-w-2xl`) with 40px SVG icons covering: tokens (player/enemy/neutral ship, missile salvo), beam weapons (Pulse Laser, Beam Laser, Particle Beam, Railgun with weapon-specific colours), hit effects (impact burst, critical flash), movement effects (thrust plume, missile launch, missile trail), persistent indicators (sensor lock, evasive aura, dogfight alert, missile exhausted)
+- **Legend modal** — always-visible `📖 Legend` button fixed top-right of the battle screen (also accessible via right-click empty hex → *Legend*); 2-column reference panel (`max-w-2xl`) with 40px SVG icons covering: tokens (player/enemy/neutral ship, missile salvo), beam weapons (Pulse Laser, Beam Laser, Particle Beam, Railgun with weapon-specific colours), hit effects (impact burst, critical flash), movement effects (thrust plume, missile launch, missile trail), persistent indicators (sensor lock, evasive aura, dogfight alert, missile exhausted)
 
 ### Fixed
 

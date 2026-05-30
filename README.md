@@ -35,7 +35,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Dogfight system** | Close-range sub-system: 6 micro-rounds per standard round; Pilot opposed checks; tonnage/thrust/multi-enemy DMs; escape via thrust advantage or pursuit check; pulsing token visuals |
 | **Boarding system** | 4-phase boarding action (HG 2022): Contact → Conflict → Security; 6 entry methods incl. hull-cut tracker; stacking rolls; missed-shot table; Bridge/Engineering/Turrets objectives; optional faction transfer on capture; HUD badge per active boarding |
 | **Weapon range enforcement** | Each weapon has a maximum range band (CRB p.167); Attack Modal shows OUT OF RANGE badge and blocks firing beyond a weapon's listed range |
-| **Legend modal** | Right-click empty hex → *Legend*; 2-column visual reference for all tokens, beam weapon colours, hit/movement effects, and persistent indicators |
+| **Legend modal** | Always-visible `📖 Legend` button fixed top-right; also in right-click empty hex menu; 2-column visual reference for all tokens, beam weapon colours, hit/movement effects, and persistent indicators |
 
 ---
 
