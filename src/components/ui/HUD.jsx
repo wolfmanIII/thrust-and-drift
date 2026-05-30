@@ -81,12 +81,12 @@ export function HUD() {
     <div className="absolute top-3 left-3 z-10 flex flex-col gap-1 items-start pointer-events-none">
       {/* Round + phase badge */}
       <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-700 rounded px-3 py-1.5 backdrop-blur-sm">
+        <img src={tdLogo} alt="" className="w-5 h-5" />
+        <span className="text-slate-600 text-xs">│</span>
         <span className="text-slate-400 text-xs font-display tracking-widest">ROUND</span>
         <span className="text-[--neon-cyan] font-mono font-bold text-lg leading-none">{round}</span>
         <span className="text-slate-600 text-xs">│</span>
         <span className="text-slate-200 font-display text-xs tracking-widest">{phaseLabel}</span>
-        <span className="text-slate-600 text-xs">│</span>
-        <img src={tdLogo} alt="" className="w-5 h-5" />
       </div>
 
       {/* Current actor */}
