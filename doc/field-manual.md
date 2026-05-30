@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.7.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.7.1** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -102,6 +102,18 @@ The battle map is a **flat-top hex grid**. All interaction is mouse-driven.
 > Only options valid for the current phase are shown — and in the Acceleration,
 > Attack, and Actions phases, combat actions are shown only for the ship whose
 > turn it currently is. Right-clicking another ship shows "Not this ship's turn".
+
+### 3.1 Legend
+
+Right-click any **empty hex** → **Legend** to open the visual reference panel.
+
+| Category | Symbols |
+| -------- | ------- |
+| **Tokens** | Player ship (cyan), enemy ship (red), neutral (grey), missile salvo (yellow — count + thrust shown) |
+| **Beam weapons** | Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange) |
+| **Hit effects** | Impact burst (expanding sparks on target), Critical flash (red ring + label) |
+| **Movement effects** | Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line) |
+| **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔ + red ring), Missile exhausted (×) |
 
 ---
 
@@ -267,8 +279,15 @@ Damage is applied to the target's hull.
 
 ### 9.4 Attack Modal — Step 4: Critical Hit
 
-Triggered automatically when Effect ≥ 6, or when damage crosses a 10% hull
-threshold (Sustained Damage rule, *MgT2e CRB p. 169*).
+Triggered automatically when **Effect ≥ 6 AND damage penetrates armour**
+*(MgT2e CRB p.168: "it causes damage rather than just bouncing off armour")*, or
+when damage crosses a 10% hull threshold (Sustained Damage rule, *MgT2e CRB p. 169*).
+
+> If the weapon's damage is fully absorbed by armour (`damage − armour ≤ 0`),
+> no critical step opens even if the attack Effect is 6 or higher.
+
+Visual effects (beam ray, impact burst, critical flash) all appear together
+when the critical step closes, so they are visible on the canvas.
 
 | Field | Description |
 | ----- | ----------- |

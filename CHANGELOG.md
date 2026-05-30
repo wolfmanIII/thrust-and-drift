@@ -6,6 +6,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.7.1] — 2026-05-31
+
+### Added
+
+- **Legend modal** — right-click empty hex → *Legend*; 2-column reference panel (`max-w-2xl`) with 40px SVG icons covering: tokens (player/enemy/neutral ship, missile salvo), beam weapons (Pulse Laser, Beam Laser, Particle Beam, Railgun with weapon-specific colours), hit effects (impact burst, critical flash), movement effects (thrust plume, missile launch, missile trail), persistent indicators (sensor lock, evasive aura, dogfight alert, missile exhausted)
+
+### Fixed
+
+- **Critical hit gate** — critical step now only triggers when `damageResult.total > 0`; per CRB p.168 *"it causes damage rather than just bouncing off armour"* — attacks fully blocked by armour no longer incorrectly open the critical resolution step
+- **Beam effects on miss** — `laser_ray` now emitted in `handleMissClose` so the beam fires visually even when the attack roll fails; no `impact_burst` on miss (no hit registered)
+- **Effects visibility on critical hit** — `laser_ray`, `impact_burst`, and `critical_flash` are all emitted together in `handleApplyCritical` (after full critical resolution), so they are visible on the canvas when the modal closes; previously `laser_ray`/`impact_burst` fired mid-modal during the damage step and were obscured by the critical resolution step that followed
+
+---
+
 ## [1.7.0] — 2026-05-30
 
 ### Added
