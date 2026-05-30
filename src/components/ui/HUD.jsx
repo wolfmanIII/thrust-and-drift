@@ -86,7 +86,7 @@ export function HUD() {
         <span className="text-slate-600 text-xs">│</span>
         <span className="text-slate-200 font-display text-xs tracking-widest">{phaseLabel}</span>
         <span className="text-slate-600 text-xs">│</span>
-        <img src={tdLogo} alt="" className="w-5 h-5 opacity-60" />
+        <img src={tdLogo} alt="" className="w-5 h-5" />
       </div>
 
       {/* Current actor */}
