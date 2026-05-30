@@ -48,8 +48,8 @@ describe('ContextMenu — ship type', () => {
     expect(screen.getByText(/Hull 10\/10/)).toBeInTheDocument()
   })
 
-  it('shows attack menu item during attack phase', () => {
-    useBattleStore.setState({ phase: 'attack' })
+  it('shows attack menu item during attack phase when it is this ship\'s turn', () => {
+    useBattleStore.setState({ phase: 'attack', initiativeOrder: ['ship-1'], currentActorIndex: 0 })
     render(<ContextMenu />)
     expect(screen.getByText(/Attack/)).toBeInTheDocument()
   })
@@ -61,8 +61,8 @@ describe('ContextMenu — ship type', () => {
     expect(screen.queryByText(/Crew Action/)).not.toBeInTheDocument()
   })
 
-  it('shows thrust items in vectorial mode during acceleration phase', () => {
-    useBattleStore.setState({ combatMode: 'vectorial', phase: 'acceleration' })
+  it('shows thrust items in vectorial mode during acceleration phase when it is this ship\'s turn', () => {
+    useBattleStore.setState({ combatMode: 'vectorial', phase: 'acceleration', initiativeOrder: ['ship-1'], currentActorIndex: 0 })
     render(<ContextMenu />)
     expect(screen.getByText(/Apply Thrust/)).toBeInTheDocument()
     expect(screen.getByText(/Declare Evasion/)).toBeInTheDocument()

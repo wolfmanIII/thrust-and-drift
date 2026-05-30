@@ -58,12 +58,21 @@ function hasUnfiredOffensiveTurret(ship) {
     .some((w) => !DEFENSIVE_WEAPONS.includes(w))
 }
 
+/** Phases where only the current initiative actor may act. */
+const INITIATIVE_GATED_PHASES = ['acceleration', 'attack', 'actions']
+
 function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
-  const openModal  = useUiStore((s) => s.openModal)
-  const removeShip = useBattleStore((s) => s.removeShip)
-  const combatMode = useBattleStore((s) => s.combatMode)
-  const phase      = useBattleStore((s) => s.phase)
-  const ships      = useBattleStore((s) => s.ships)
+  const openModal        = useUiStore((s) => s.openModal)
+  const removeShip       = useBattleStore((s) => s.removeShip)
+  const combatMode       = useBattleStore((s) => s.combatMode)
+  const phase            = useBattleStore((s) => s.phase)
+  const ships            = useBattleStore((s) => s.ships)
+  const initiativeOrder  = useBattleStore((s) => s.initiativeOrder)
+  const currentActorIndex = useBattleStore((s) => s.currentActorIndex)
+
+  const actorOrder     = phase === 'acceleration' ? [...initiativeOrder].reverse() : initiativeOrder
+  const currentActorId = actorOrder[currentActorIndex] ?? null
+  const isCurrentActor = !INITIATIVE_GATED_PHASES.includes(phase) || targetId === currentActorId
 
   const open = (modal, payload) => { openModal(modal, payload); close() }
 
@@ -86,10 +95,13 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
             <span className="ml-2 text-sky-400">· Evasion {ship.evasiveThrust}</span>
           )}
         </p>
+        {INITIATIVE_GATED_PHASES.includes(phase) && !isCurrentActor && (
+          <p className="font-mono text-xs text-slate-600 mt-0.5">Not this ship&apos;s turn</p>
+        )}
       </div>
 
       {/* ── Acceleration: thrust + evasion (vectorial only) ──────── */}
-      {phase === 'acceleration' && combatMode === 'vectorial' && (
+      {phase === 'acceleration' && combatMode === 'vectorial' && isCurrentActor && (
         <>
           <MenuItem icon="🚀" label="Apply Thrust"     onClick={() => open('thrust',  { shipId: targetId })} />
           <MenuItem icon="🛡" label="Declare Evasion" onClick={() => open('evasive', { shipId: targetId })} />
@@ -97,8 +109,8 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
         </>
       )}
 
-      {/* ── Attack: weapons + missiles ────────────────────────────── */}
-      {phase === 'attack' && (
+      {/* ── Attack: weapons ───────────────────────────────────────── */}
+      {phase === 'attack' && isCurrentActor && (
         <>
           {hasUnfiredOffensiveTurret(ship) && (
             <MenuItem icon="🎯" label="Attack…" onClick={() => open('attack', { shipId: targetId })} />
@@ -108,15 +120,15 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       )}
 
       {/* ── Actions: crew actions ─────────────────────────────────── */}
-      {phase === 'actions' && (
+      {phase === 'actions' && isCurrentActor && (
         <>
           <MenuItem icon="⚡" label="Crew Action…" onClick={() => open('action', { shipId: targetId })} />
           <MenuDivider />
         </>
       )}
 
-      {/* ── Boarding: available when adjacent to a valid enemy ───── */}
-      {boardingTargets.length > 0 && (
+      {/* ── Boarding: only on current actor's turn ────────────────── */}
+      {isCurrentActor && boardingTargets.length > 0 && (
         <>
           {boardingTargets.map((t) => (
             <MenuItem
