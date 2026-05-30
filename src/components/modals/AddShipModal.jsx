@@ -65,20 +65,24 @@ export function AddShipModal() {
           {filtered.length === 0 && (
             <p className="text-slate-600 font-mono text-xs italic px-3 py-2">No profiles found.</p>
           )}
-          {filtered.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setSelectedProfileId(p.id)}
-              className={`w-full text-left px-3 py-1.5 font-mono text-xs transition-colors ${
-                p.id === selectedProfileId
-                  ? 'bg-[--neon-cyan]/10 text-[--neon-cyan]'
-                  : 'text-slate-300 hover:bg-slate-800'
-              }`}
-            >
-              <span className="font-bold">{p.name}</span>
-              {p.shipClass && <span className="text-slate-500 ml-2">{p.shipClass}</span>}
-            </button>
-          ))}
+          {filtered.map((p) => {
+            const isSelected = p.id === selectedProfileId
+            return (
+              <button
+                key={p.id}
+                onClick={() => setSelectedProfileId(p.id)}
+                className={`w-full text-left px-3 py-1.5 font-mono text-xs transition-colors flex items-center gap-2 ${
+                  isSelected
+                    ? 'bg-[--neon-cyan]/15 text-[--neon-cyan] border-l-2 border-[--neon-cyan]'
+                    : 'text-slate-300 hover:bg-slate-800 border-l-2 border-transparent'
+                }`}
+              >
+                <span className={`w-3 shrink-0 text-center ${isSelected ? 'text-[--neon-cyan]' : 'text-transparent'}`}>▶</span>
+                <span className="font-bold">{p.name}</span>
+                {p.shipClass && <span className={`ml-1 ${isSelected ? 'text-[--neon-cyan]/60' : 'text-slate-500'}`}>{p.shipClass}</span>}
+              </button>
+            )
+          })}
         </div>
 
         {/* Faction */}
