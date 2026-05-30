@@ -565,7 +565,7 @@ The **Boarding Setup** modal opens. Select the target and confirm. The boarding 
 The **⚔ CONTACT** modal opens. The GM selects the entry method:
 
 | Method | Check | Difficulty | Time | DM |
-|--------|-------|------------|------|----|
+| -------- | ------- | ------------ | ------ | ---- |
 | Airlock (cooperative) | None | — | Instant | — |
 | Airlock (forced) | Mechanic (STR) | 14+ | 2D rounds + 1D | — |
 | Maintenance Hatch | Mechanic (STR) | 12+ | 2D rounds | — ⚠ |
@@ -591,7 +591,7 @@ The **⚔ CONFLICT** modal tracks the boarding fight.
 **Tactical objectives** — check each when captured:
 
 | Objective | Effect when captured |
-|-----------|---------------------|
+| ----------- | --------------------- |
 | **Bridge** | Remote control of all ship systems disabled for enemy |
 | **Engineering** | Propulsion, reactor, life support under attacker control |
 | **Turrets** | Weapon systems under attacker control |
@@ -612,7 +612,7 @@ When the fight is resolved, click **END CONFLICT — ADVANCE TO SECURITY →**.
 The **⚔ SECURITY — BOARDING OUTCOME** modal resolves the action.
 
 | Outcome | Effect |
-|---------|--------|
+| --------- | -------- |
 | **Attacker wins** | Boarding party controls the ship; optional faction transfer |
 | **Defender repels** | Boarders eliminated, captured, or driven off |
 | **Ship destroyed** | Target destroyed by internal damage during conflict |
@@ -625,7 +625,7 @@ Click **CONFIRM OUTCOME** to close the boarding.
 
 While a boarding is active, the HUD shows a **⚔ BOARDING** badge below the standard tracker:
 
-```
+```text
 ⚔ BOARDING   [Attacker] → [Defender]   CONTACT →
 ```
 
