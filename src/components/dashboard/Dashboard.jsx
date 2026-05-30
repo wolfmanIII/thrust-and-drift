@@ -257,25 +257,18 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
           <div className="space-y-2">
 
             {autosave && (
-              <div className="space-y-1">
+              <div className="flex gap-1">
                 <button
                   onClick={onResumeAutosave}
-                  className="w-full py-3.5 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-display text-xs tracking-widest rounded-lg hover:bg-(--neon-cyan)/20 transition-colors text-left px-4"
+                  className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-display text-xs tracking-widest rounded-lg hover:bg-(--neon-cyan)/20 transition-colors"
                 >
-                  <span className="text-base block mb-0.5 text-center">↺</span>
-                  <span className="block text-center">RESUME AUTOSAVE</span>
-                  <span className="block font-mono text-(--neon-cyan)/50 mt-1 normal-case tracking-normal font-normal text-xs text-center">
-                    Round {autosave.round} — {PHASE_LABELS[autosave.phase] ?? autosave.phase?.toUpperCase()} — {autosave.ships.length} ship{autosave.ships.length === 1 ? '' : 's'}
-                  </span>
-                  <span className="block font-mono text-slate-600 mt-0.5 normal-case tracking-normal font-normal text-xs text-center">
-                    {autosave.savedAt ? new Date(autosave.savedAt).toLocaleString('en-GB') : '—'}
-                  </span>
+                  ↺ RESUME
                 </button>
                 <button
                   onClick={onClearAutosave}
-                  className="w-full py-1.5 border border-red-900/50 text-red-600 font-mono text-xs rounded-lg hover:border-red-700/60 hover:text-red-500 transition-colors"
+                  className="py-2 px-3 border border-red-900/50 text-red-600 font-mono text-xs rounded-lg hover:border-red-700/60 hover:text-red-500 transition-colors"
                 >
-                  ✕ CLEAR AUTOSAVE
+                  ✕
                 </button>
               </div>
             )}
