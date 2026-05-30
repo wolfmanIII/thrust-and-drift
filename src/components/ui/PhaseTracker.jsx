@@ -11,10 +11,13 @@ export function PhaseTracker() {
 
   const initiativeOrder   = useBattleStore((s) => s.initiativeOrder)
   const currentActorIndex = useBattleStore((s) => s.currentActorIndex)
+  const phase             = useBattleStore((s) => s.phase)
   const ships             = useBattleStore((s) => s.ships)
 
   if (initiativeOrder.length === 0) return null
 
+  // Acceleration uses reverse initiative order (CRB p.161)
+  const displayOrder = phase === 'acceleration' ? [...initiativeOrder].reverse() : initiativeOrder
   const shipMap = Object.fromEntries(ships.map((s) => [s.id, s]))
 
   return (
@@ -32,7 +35,7 @@ export function PhaseTracker() {
         {/* List */}
         {!collapsed && (
           <ul className="border-t border-slate-700/50">
-            {initiativeOrder.map((id, idx) => {
+            {displayOrder.map((id, idx) => {
               const ship = shipMap[id]
               if (!ship) return null
               const isActive = idx === currentActorIndex

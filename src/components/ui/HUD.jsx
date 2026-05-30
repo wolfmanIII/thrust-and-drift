@@ -70,9 +70,10 @@ export function HUD() {
     return () => window.removeEventListener('keydown', onKey)
   }, [handleUndo, handleRedo])
 
-  const currentActorId = initiativeOrder[currentActorIndex] ?? null
+  // Acceleration uses reverse initiative order (CRB p.161: lowest acts first)
+  const actorOrder     = phase === 'acceleration' ? [...initiativeOrder].reverse() : initiativeOrder
+  const currentActorId = actorOrder[currentActorIndex] ?? null
   const currentActor   = ships.find((s) => s.id === currentActorId)
-  const actorsLeft     = initiativeOrder.length - currentActorIndex
 
   const phaseLabel = PHASE_LABELS[phase] ?? phase.toUpperCase()
   const showActorControl = ACTOR_TURN_PHASES.has(phase)
