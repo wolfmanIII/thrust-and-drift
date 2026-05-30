@@ -604,7 +604,7 @@ export function AttackModal() {
     if (attackResult?.hit) {
       if (BEAM_WEAPONS.includes(weaponKey)) {
         emitEffect('laser_ray', {
-          duration: 300,
+          duration: 1500,
           fromHex:    attacker.position,
           toHex:      target.position,
           weaponType: weaponKey,

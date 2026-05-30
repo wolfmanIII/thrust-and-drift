@@ -39,19 +39,47 @@ const LASER_GLOW = {
 export function drawLaserRay(ctx, fromPx, toPx, weaponType, t) {
   const color = LASER_COLORS[weaponType] ?? '#7dd3fc'
   const glow  = LASER_GLOW[weaponType]  ?? '#0ea5e9'
-  const alpha = Math.pow(1 - t, 1.5)
+  // Hold full brightness for first 30%, then fade
+  const alpha = t < 0.3 ? 1 : Math.pow(1 - (t - 0.3) / 0.7, 1.8)
 
   ctx.save()
-  ctx.globalAlpha = alpha
+
+  // Outer glow pass — wide soft halo
+  ctx.globalAlpha = alpha * 0.35
   ctx.shadowColor = glow
-  ctx.shadowBlur  = lerp(12, 4, t)
-  ctx.strokeStyle = color
-  ctx.lineWidth   = lerp(3, 0.5, t)
+  ctx.shadowBlur  = lerp(28, 6, t)
+  ctx.strokeStyle = glow
+  ctx.lineWidth   = lerp(10, 2, t)
   ctx.setLineDash([])
   ctx.beginPath()
   ctx.moveTo(fromPx.x, fromPx.y)
   ctx.lineTo(toPx.x, toPx.y)
   ctx.stroke()
+
+  // Core beam — bright and sharp
+  ctx.globalAlpha = alpha
+  ctx.shadowColor = glow
+  ctx.shadowBlur  = lerp(16, 4, t)
+  ctx.strokeStyle = color
+  ctx.lineWidth   = lerp(3.5, 0.8, t)
+  ctx.beginPath()
+  ctx.moveTo(fromPx.x, fromPx.y)
+  ctx.lineTo(toPx.x, toPx.y)
+  ctx.stroke()
+
+  // White-hot center line on early frames
+  if (t < 0.4) {
+    const coreAlpha = (1 - t / 0.4) * alpha
+    ctx.globalAlpha = coreAlpha
+    ctx.shadowBlur  = 4
+    ctx.strokeStyle = '#ffffff'
+    ctx.lineWidth   = lerp(1.5, 0, t / 0.4)
+    ctx.beginPath()
+    ctx.moveTo(fromPx.x, fromPx.y)
+    ctx.lineTo(toPx.x, toPx.y)
+    ctx.stroke()
+  }
+
   ctx.restore()
 }
 
