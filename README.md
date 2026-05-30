@@ -16,17 +16,18 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Vectorial movement** | Ships have velocity vectors; thrust modifies them |
 | **Ship profiles** | Full CRUD — create, edit, duplicate, delete (with confirmation) |
 | **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
-| **Attack resolution** | 3-step flow: weapon/target config → 2D6 roll → damage |
+| **Attack resolution** | 4-step flow: weapon/target config → 2D6 roll → damage → critical; per-turret firing limit (CRB p.164) — each turret fires once per round, slot badge (T1, T2…) shown in weapon list |
+| **Missile launch** | Missile Rack selectable directly in Attack modal — count stepper + 🚀 LAUNCH SALVO (no DM roll); salvo token inherits launcher vector |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in; NPC ships auto-roll |
 | **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action |
 | **Initiative** | 2D6 + Pilot + Thrust; player ships manual entry, NPC auto-rolled |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
-| **Phase-gated menu** | Right-click actions shown only when valid for the current phase |
+| **Phase-gated menu** | Right-click actions shown only when valid for the current phase AND when it is that ship's turn (initiative order enforced in Acceleration, Attack, Actions phases) |
 | **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals (200ms delay) |
 | **Battle log** | Timestamped event log with colour-coded entry types |
 | **Undo/Redo (Ctrl+Z / Ctrl+Y)** | Snapshot-based undo/redo — 20-step stacks; `⟲` `↷` buttons in HUD; new action clears redo |
 | **Session save / resume** | Export session to JSON; resume flow shows a full preview before loading |
-| **Autosave** | IndexedDB autosave after every significant action; one-click restore on Dashboard |
+| **Autosave** | IndexedDB autosave after every significant action; Dashboard shows full roster preview from autosave; one-click restore or clear |
 | **Error boundary** | Global React error boundary — catches crashes, shows recovery UI |
 | **Profile I/O** | Import/export ship profiles via JSON files |
 | **Safety modals** | Confirm before deleting profiles; confirm before leaving battle without saving |
@@ -72,7 +73,7 @@ A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 
 ### 2 — Start or resume a session
 
-- **↺ RESUME AUTOSAVE** — if an autosaved session exists in IndexedDB, this button appears with round, phase, and ship count. Click to resume instantly.
+- **↺ RESUME / ✕** — if an autosaved session exists, a compact row appears. `↺ RESUME` restores instantly; `✕` clears the IndexedDB record. The right panel shows the full saved roster (round, phase, ships by faction with hull bars).
 - **▶ NEW SESSION** — resets battle state and enters the combat map
 - **↓ RESUME FROM FILE** — load a `.json` file; a preview screen shows round, phase, and ship roster before confirming
 
@@ -81,10 +82,10 @@ A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 **Right-click any hex** to open the context menu:
 
 - Empty hex → **Add ship here**
-- Ship hex → actions valid for the **current phase** only:
-  - *Acceleration*: Apply Thrust, Declare Evasion
-  - *Attack*: Attack, Launch Missiles
-  - *Actions*: Crew Action
+- Ship hex → actions valid for the **current phase** AND **current actor** only:
+  - *Acceleration*: Apply Thrust, Declare Evasion (current actor only)
+  - *Attack*: Attack (current actor only; disappears when all turrets fired)
+  - *Actions*: Crew Action (current actor only)
   - *Always*: Ship Sheet, Remove from battle
 
 **Left-click a ship** to select it.
@@ -103,7 +104,7 @@ The HUD (top-left) shows the current round and phase.
 | **Initiative** | Open right-click menu → roll initiative via modal |
 | **Acceleration** | Each ship in turn: right-click → Thrust |
 | **Movement** | Click **NEXT PHASE** — all ships move by their vector |
-| **Attack** | Each ship in turn: right-click → Attack |
+| **Attack** | Each ship in turn: right-click → Attack (select weapon/turret; Missile Rack shows count stepper + LAUNCH SALVO) |
 | **Actions** | Each ship in turn: right-click → Crew Action |
 | **End of Round** | Click **NEXT PHASE** to start the next round |
 
@@ -139,7 +140,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-606 tests across utils, Zustand stores, hooks, and UI components.
+605 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 

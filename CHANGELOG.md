@@ -6,6 +6,44 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.7.0] — 2026-05-30
+
+### Added
+
+- **Per-turret firing limit** (CRB p.164) — each turret fires once per round
+  - `firedTurrets: number[]` on every ship instance; `markTurretFired(shipId, turretSlot)` store action
+  - Attack modal weapon list shows turret slot badge (`T1`, `T2`…) and filters out already-fired turrets
+  - "Attack…" in context menu gated behind `hasUnfiredOffensiveTurret(ship)` — disappears when all offensive turrets have fired
+  - `firedTurrets` reset on every entry into the Attack phase and at round start via `buildNextRoundState`
+- **Missile launch unified into Attack modal** — Missile Rack now appears in the Attack weapon list with a count stepper (1–12) and `🚀 LAUNCH SALVO →` button; no 2D6 roll or DM sheet required; "Launch Missiles…" context menu item and `MissileLaunchModal` removed from modal dispatch
+- **`missile_launch` canvas effect** — expanding orange ring + 6 radial sparks + "LAUNCH" label; 1400ms; emitted on every salvo launch
+- **Initiative order enforcement** — context menu shows combat actions (Apply Thrust, Attack, Crew Action, Boarding) only to the ship whose turn it is; all other ships show "Not this ship's turn" subtitle in header. Gated phases: `acceleration`, `attack`, `actions`. Reverse order in Acceleration is correctly applied
+- **Dashboard — Clear autosave** — `✕` button deletes `battle/current` key from IndexedDB; appears in a compact row alongside `↺ RESUME`
+- **Dashboard — Tactical Display autosave view** — when an autosave exists (and no file is being previewed), the right panel shows the full saved session: round, phase, mode, ship/missile count, and a ship roster by faction with name + hull bar
+
+### Fixed
+
+- **Movement phase resolution** — `resolveMovement()` was fully implemented in `battleStore` but never called from `advancePhase`; ships were never moving during the Movement phase
+- **Ghost tokens phase scope** — ghost tokens (next-position preview) were rendered in all phases; now only visible during Acceleration where the preview is meaningful
+- **Reverse initiative order in Acceleration** — HUD actor tracking and PhaseTracker display now both use `[...initiativeOrder].reverse()` during Acceleration phase (CRB p.161: lowest initiative acts first)
+- **InitiativeModal unreachable** — modal was registered in `App.jsx` MODAL_MAP but `openModal('initiative')` was never called from anywhere; `EmptyContextMenu` now correctly opens it
+- **HUD actor counter** — ambiguous "N left" label replaced with "N/M" positional format (e.g. "2/4")
+- **HUD initiative CTA** — `🎲 ROLL INITIATIVE →` call-to-action button added for Initiative phase when `initiativeOrder` is empty
+- **Evasive thrust double-spending** — `ThrustModal` now subtracts `evasiveThrust` from the available thrust pool alongside `thrustUsedThisRound`; was possible to declare evasion then apply more thrust than available
+- **AddShipModal selection invisible** — selected profile row now shows `bg-sky-950` highlight + `▶` prefix; was visually indistinguishable from hover state
+- **HUD brand logo** — was rendering with `opacity-60`; restored to full opacity; moved to first position in round/phase badge
+
+### Changed
+
+- **`laser_ray` effect** — duration 300ms → 1500ms; three-layer rendering pass: outer glow halo (28px blur, 35% alpha) + sharp core beam (3.5px) + white-hot center line (visible first 40%); holds full brightness for the first 30% of duration before fading
+- **Dashboard autosave controls** — RESUME AUTOSAVE + CLEAR compacted into a single horizontal row (`↺ RESUME` flex-1 + `✕` icon button); details shown in the Tactical Display panel instead
+
+### Tests
+
+- 605 tests (−1 from 606) — removed "shows Launch Missiles when ship has Missile Rack" (feature removed); replaced with "hides Attack when all turrets are Sandcasters"; updated phase-gating tests to include `initiativeOrder`/`currentActorIndex` state
+
+---
+
 ## [1.6.0] — 2026-05-30
 
 ### Added

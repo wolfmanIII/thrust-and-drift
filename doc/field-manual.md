@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.6.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.7.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -14,7 +14,7 @@
 6. [Initiative Phase](#6-initiative-phase)
 7. [Acceleration Phase](#7-acceleration-phase)
 8. [Movement Phase](#8-movement-phase)
-9. [Attack Phase](#9-attack-phase)
+9. [Attack Phase](#9-attack-phase) — includes §9.5 per-turret limit, §9.6 missile launch
 10. [Actions Phase — Crew](#10-actions-phase--crew)
 11. [Crew System](#11-crew-system)
 12. [Undo / Redo](#12-undo--redo)
@@ -67,7 +67,8 @@ The right panel lists all saved ship profiles.
 | Control | Action |
 | ------- | ------ |
 | **COMBAT MODE** | Toggle between Vectorial and Basic before starting. |
-| **↺ RESUME AUTOSAVE** | Appears when an autosaved session is found. Shows round, phase, ship count, and timestamp. Click to restore instantly. |
+| **↺ RESUME** | Appears when an autosaved session is found. Click to restore instantly. The right panel shows the full saved roster (round, phase, ships by faction with hull bars). |
+| **✕** | Clears the autosave from IndexedDB. Appears next to ↺ RESUME. |
 | **▶ NEW SESSION** | Clears any existing battle state and enters the combat map. |
 | **↓ RESUME FROM FILE** | Load a previously saved `.json` session. A preview screen shows the full roster before you confirm. |
 | **📖 FIELD MANUAL** | Opens this manual inside the app. |
@@ -97,9 +98,10 @@ The battle map is a **flat-top hex grid**. All interaction is mouse-driven.
 | **Left-click token** | Select the ship (highlights it). |
 | **Right-click hex** | Open context menu — actions depend on the hex content and the current phase. |
 
-> **Note:** Context menu actions are phase-gated. Only options valid for the
-> current phase are shown. You cannot apply thrust during the Attack phase,
-> for example.
+> **Note:** Context menu actions are phase-gated **and initiative-gated**.
+> Only options valid for the current phase are shown — and in the Acceleration,
+> Attack, and Actions phases, combat actions are shown only for the ship whose
+> turn it currently is. Right-clicking another ship shows "Not this ship's turn".
 
 ---
 
@@ -274,19 +276,38 @@ threshold (Sustained Damage rule, *MgT2e CRB p. 169*).
 | **Severity** | Effect − 5, clamped 1–6. Stacks with existing criticals on the same system. |
 | **M-Drive** | Sev 1 = no penalty. Sev 2–4 = −1 thrust/round. Sev 5–6 = thrust reduced to 0. |
 
-### 9.5 Launching Missiles
+### 9.5 Per-Turret Firing Limit
 
-Right-click ship → **Launch Missiles** (Attack phase only). Select weapon and
-target. The missile salvo spawns as a token inheriting the launcher's velocity.
-Each round in the Movement phase it advances toward the target using its
-remaining thrust.
+Each turret may fire **once per round** *(CRB p.164)*.
 
-### 9.6 Sensor Lock
+The Attack modal weapon list shows only turrets that have not yet fired this
+round, identified by their slot number (`T1`, `T2`…). Once all offensive turrets
+have fired, the **Attack…** option disappears from the context menu until the
+next Attack phase or the start of a new round.
+
+### 9.6 Launching Missiles
+
+Missile Racks are selected directly in the Attack modal alongside other weapons.
+Select the `Missile Rack` entry in the weapon list, then:
+
+1. Select the **target** ship.
+2. Adjust the **missile count** (1–12) using the `−` / `+` stepper.
+3. Click **🚀 LAUNCH SALVO →** — no dice roll required.
+
+The salvo spawns as a missile token on the map, inheriting the launching ship's
+current velocity. Each round in the Movement phase it advances toward the target
+using its remaining thrust. A **LAUNCH** burst animation plays on the launching
+ship's hex.
+
+> The launching turret is marked as fired. Missile Rack entries disappear from
+> the Attack weapon list after launch, consistent with the per-turret limit.
+
+### 9.7 Sensor Lock
 
 Acquired via the Sensors crew action. Grants a +DM to attacks against the
 locked target. Shown as an **animated cyan ring** on the locked ship.
 
-### 9.7 Weapon Range Limits
+### 9.8 Weapon Range Limits
 
 Each weapon has a **maximum range band** beyond which it cannot fire
 *(MgT2e CRB p. 167: "cannot attack targets beyond listed Range Band")*.
