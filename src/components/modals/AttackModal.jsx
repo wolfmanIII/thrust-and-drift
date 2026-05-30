@@ -10,7 +10,7 @@ import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS } from '../../data/weapons.js'
 import { RANGE_BANDS } from '../../data/rangeBands.js'
-import { rollAttack, isCriticalHit, getCriticalSeverity } from '../../utils/combat.js'
+import { rollAttack, isCriticalHit, getCriticalSeverity, isOutOfRange } from '../../utils/combat.js'
 import { rollDice, roll2D6 } from '../../utils/dice.js'
 import { getCriticalLocation, getCriticalEffect } from '../../data/criticalHits.js'
 import { useAttackSetup } from './useAttackSetup.js'
@@ -58,6 +58,7 @@ function AttackConfigStep({
   weaponKey, setWeaponKey, targetId, setTargetId,
   target, weapon, rangeBand, distance, dmBreakdown,
   combatMode, manualRangeBand, setManualRangeBand,
+  outOfRange,
   onNext, onClose,
 }) {
   const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
@@ -71,26 +72,37 @@ function AttackConfigStep({
             {availableWeapons.length === 0 && (
               <p className="text-slate-600 font-mono text-xs italic">No offensive weapons available.</p>
             )}
-            {availableWeapons.map((w) => (
-              <button
-                key={w}
-                onClick={() => setWeaponKey(w)}
-                className={`text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
-                  weaponKey === w
-                    ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
-                    : 'border-slate-700 text-slate-400 hover:border-slate-500'
-                }`}
-              >
-                {w}
-                {WEAPONS[w] && (
-                  <span className="ml-2 text-slate-600">
-                    DM {WEAPONS[w].attackDM >= 0 ? `+${WEAPONS[w].attackDM}` : WEAPONS[w].attackDM}
-                    {' · '}
-                    {WEAPONS[w].damageDice}D dmg
+            {availableWeapons.map((w) => {
+              const wDef = WEAPONS[w]
+              const wOutOfRange = target && wDef ? isOutOfRange(wDef.maxRange, rangeBand) : false
+              return (
+                <button
+                  key={w}
+                  onClick={() => setWeaponKey(w)}
+                  className={`text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
+                    weaponKey === w
+                      ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                      : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                  }`}
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <span>{w}</span>
+                    {wOutOfRange && (
+                      <span className="text-red-500 font-bold tracking-widest">OUT OF RANGE</span>
+                    )}
                   </span>
-                )}
-              </button>
-            ))}
+                  {wDef && (
+                    <span className="text-slate-600">
+                      DM {wDef.attackDM >= 0 ? `+${wDef.attackDM}` : wDef.attackDM}
+                      {' · '}
+                      {wDef.damageDice}D dmg
+                      {' · '}
+                      max {wDef.maxRange}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -156,9 +168,14 @@ function AttackConfigStep({
           </div>
         )}
 
+        {outOfRange && weapon && (
+          <p className="text-red-500 font-mono text-xs text-center">
+            {weapon.label} max range: {weapon.maxRange} — target is at {rangeBand}
+          </p>
+        )}
         <button
           onClick={onNext}
-          disabled={!weapon || !target || (combatMode === 'basic' && !manualRangeBand)}
+          disabled={!weapon || !target || outOfRange || (combatMode === 'basic' && !manualRangeBand)}
           className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           ROLL ATTACK →
@@ -518,7 +535,7 @@ export function AttackModal() {
   const [critRoll, setCritRoll]               = useState(null)
   const [extraDamageResult, setExtraDamageResult] = useState(null)
 
-  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, combatMode, dmBreakdown } =
+  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, combatMode, outOfRange, dmBreakdown } =
     useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand)
 
   if (!attacker) return null
@@ -596,6 +613,7 @@ export function AttackModal() {
         combatMode={combatMode}
         manualRangeBand={manualRangeBand}
         setManualRangeBand={setManualRangeBand}
+        outOfRange={outOfRange}
         dmBreakdown={dmBreakdown}
         onNext={() => setStep('roll')}
         onClose={closeModal}

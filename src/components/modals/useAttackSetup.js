@@ -7,7 +7,7 @@
 import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS, DEFENSIVE_WEAPONS } from '../../data/weapons.js'
 import { hexDistance, getRangeBand } from '../../utils/hex.js'
-import { getRangeDM, getTargetSizeDM, getEvasiveDM } from '../../utils/combat.js'
+import { getRangeDM, getTargetSizeDM, getEvasiveDM, isOutOfRange } from '../../utils/combat.js'
 import { getCrewSkill } from '../../utils/crew.js'
 
 /**
@@ -24,6 +24,7 @@ import { getCrewSkill } from '../../utils/crew.js'
  *   distance:         number|null,
  *   rangeBand:        string,
  *   combatMode:       'vectorial'|'basic',
+ *   outOfRange:   boolean,
  *   dmBreakdown: {
  *     gunnerSkill:  number,
  *     weaponDM:     number,
@@ -62,6 +63,7 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const gunnerSkill = getCrewSkill(attacker?.profile.crew, 'gunner')
   const weaponDM    = weapon?.attackDM ?? 0
   const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + evasiveDM + sensorLockDM
+  const outOfRange  = weapon ? isOutOfRange(weapon.maxRange, rangeBand) : false
 
   return {
     attacker,
@@ -72,6 +74,7 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     distance,
     rangeBand,
     combatMode,
+    outOfRange,
     dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM },
   }
 }
