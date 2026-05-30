@@ -36,10 +36,10 @@ export function Modal({ title, onClose, children, width = 'max-w-lg' }) {
       <div
         ref={panelRef}
         tabIndex={-1}
-        className={`relative w-full ${width} mx-4 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl outline-none`}
+        className={`relative w-full ${width} mx-4 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl outline-none max-h-[90vh] flex flex-col`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0">
           <h2 className="font-mono text-sm text-(--neon-cyan) tracking-widest uppercase">{title}</h2>
           <button
             onClick={onClose}
@@ -51,7 +51,7 @@ export function Modal({ title, onClose, children, width = 'max-w-lg' }) {
         </div>
 
         {/* Body */}
-        <div className="px-4 py-4">
+        <div className="px-4 py-4 overflow-y-auto">
           {children}
         </div>
       </div>
