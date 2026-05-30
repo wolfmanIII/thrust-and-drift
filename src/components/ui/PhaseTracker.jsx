@@ -47,7 +47,7 @@ export function PhaseTracker() {
                     style={{ backgroundColor: ship.color }}
                   />
                   <span
-                    className={`font-mono text-xs truncate ${isActive ? 'text-[--neon-cyan]' : 'text-slate-400'}`}
+                    className={`font-mono text-xs truncate ${isActive ? 'text-(--neon-cyan)' : 'text-slate-400'}`}
                   >
                     {ship.profile.name}
                   </span>

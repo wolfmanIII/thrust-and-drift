@@ -60,13 +60,13 @@ export function ThrustModal() {
         <div>
           <div className="flex justify-between text-xs font-mono text-slate-400 mb-1">
             <span>Thrust available</span>
-            <span className={cost > thrustAvailable ? 'text-red-400' : 'text-[--neon-cyan]'}>
+            <span className={cost > thrustAvailable ? 'text-red-400' : 'text-(--neon-cyan)'}>
               {cost} / {thrustAvailable}
             </span>
           </div>
           <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${isValid ? 'bg-[--neon-cyan]' : 'bg-red-500'}`}
+              className={`h-full rounded-full transition-all ${isValid ? 'bg-(--neon-cyan)' : 'bg-red-500'}`}
               style={{ width: `${Math.min(100, thrustAvailable > 0 ? (cost / thrustAvailable) * 100 : 0)}%` }}
             />
           </div>
@@ -81,7 +81,7 @@ export function ThrustModal() {
           <div className="flex items-center justify-center text-slate-600 text-lg">→</div>
           <div className={`rounded p-2 ${isValid ? 'bg-slate-800' : 'bg-red-950/40 border border-red-700/50'}`}>
             <p className="text-slate-500 text-xs mb-1">New vector</p>
-            <p className={isValid ? 'text-[--neon-cyan]' : 'text-red-400'}>
+            <p className={isValid ? 'text-(--neon-cyan)' : 'text-red-400'}>
               ({newVector.q}, {newVector.r})
             </p>
           </div>
@@ -125,7 +125,7 @@ export function ThrustModal() {
               type="number"
               value={delta.q}
               onChange={(e) => setDelta((d) => ({ ...d, q: parseInt(e.target.value) || 0 }))}
-              className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-[--neon-cyan]/60"
+              className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
             />
           </label>
           <label className="space-y-1">
@@ -134,7 +134,7 @@ export function ThrustModal() {
               type="number"
               value={delta.r}
               onChange={(e) => setDelta((d) => ({ ...d, r: parseInt(e.target.value) || 0 }))}
-              className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-[--neon-cyan]/60"
+              className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
             />
           </label>
         </div>
@@ -157,7 +157,7 @@ export function ThrustModal() {
           <button
             onClick={handleConfirm}
             disabled={!isValid || cost === 0}
-            className="flex-1 py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             APPLY THRUST
           </button>
@@ -171,7 +171,7 @@ function DirButton({ label, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-12 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono text-xs rounded hover:border-[--neon-cyan]/60 hover:text-[--neon-cyan] transition-colors"
+      className="w-12 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono text-xs rounded hover:border-(--neon-cyan)/60 hover:text-(--neon-cyan) transition-colors"
     >
       {label}
     </button>

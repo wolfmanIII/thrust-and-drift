@@ -188,7 +188,7 @@ export function ActionModal() {
               </button>
               <button
                 onClick={closeModal}
-                className="flex-1 py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs rounded hover:bg-[--neon-cyan]/20"
+                className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs rounded hover:bg-(--neon-cyan)/20"
               >
                 CLOSE
               </button>
@@ -214,7 +214,7 @@ export function ActionModal() {
                     onClick={() => handleSelectMember(member)}
                     className={`w-full text-left px-3 py-2 rounded font-mono text-xs border transition-colors ${
                       selectedMemberId === member.id
-                        ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                        ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
                         : 'border-slate-700 text-slate-300 hover:border-slate-500'
                     }`}
                   >
@@ -241,7 +241,7 @@ export function ActionModal() {
                       onClick={() => handleSelectAction(action)}
                       className={`w-full text-left px-3 py-2 rounded font-mono text-xs border transition-colors ${
                         selectedAction?.id === action.id
-                          ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                          ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
                           : 'border-slate-700 text-slate-300 hover:border-slate-500'
                       }`}
                     >
@@ -270,14 +270,14 @@ export function ActionModal() {
                       onClick={() => setTargetShipId(s.id)}
                       className={`w-full flex items-center gap-2 text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
                         targetShipId === s.id
-                          ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                          ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
                           : 'border-slate-700 text-slate-400 hover:border-slate-500'
                       }`}
                     >
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
                       {s.profile.name}
                       {s.sensorLockedBy === ship.id && (
-                        <span className="ml-auto text-[--neon-cyan] text-xs">🔒 locked</span>
+                        <span className="ml-auto text-(--neon-cyan) text-xs">🔒 locked</span>
                       )}
                     </button>
                   ))}
@@ -302,7 +302,7 @@ export function ActionModal() {
                   max={5}
                   value={skillOverride ?? selectedAction.skillLevel}
                   onChange={(e) => setSkillOverride(Math.max(-3, Math.min(5, Number(e.target.value) || 0)))}
-                  className="w-12 bg-slate-700 border border-slate-600 text-[--neon-cyan] font-mono text-sm rounded text-center px-1 py-0.5 focus:outline-none focus:border-[--neon-cyan]/60"
+                  className="w-12 bg-slate-700 border border-slate-600 text-(--neon-cyan) font-mono text-sm rounded text-center px-1 py-0.5 focus:outline-none focus:border-(--neon-cyan)/60"
                   aria-label="Skill level override"
                 />
                 {skillOverride !== selectedAction.skillLevel && (
@@ -333,7 +333,7 @@ export function ActionModal() {
             <button
               onClick={handleRoll}
               disabled={!canRoll}
-              className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isPlayer && selectedAction?.difficulty !== 'auto' ? 'CONFIRM ROLL' : '🎲 EXECUTE ACTION'}
             </button>

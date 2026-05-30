@@ -50,7 +50,7 @@ export function MissileLaunchModal() {
     <Modal title={`Missile Launch — ${attacker.profile.name}`} onClose={closeModal}>
       <div className="space-y-4">
         <p className="text-slate-400 font-mono text-xs">
-          Missile Rack turrets: <span className="text-[--neon-cyan]">{rackCount}</span>
+          Missile Rack turrets: <span className="text-(--neon-cyan)">{rackCount}</span>
           {' · '}Salvo inherits the ship&apos;s current vector.
         </p>
 
@@ -67,7 +67,7 @@ export function MissileLaunchModal() {
                 onClick={() => setTargetId(e.id)}
                 className={`w-full flex items-center gap-2 text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
                   targetId === e.id
-                    ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                    ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
                     : 'border-slate-700 text-slate-400 hover:border-slate-500'
                 }`}
               >
@@ -90,7 +90,7 @@ export function MissileLaunchModal() {
             >
               −
             </button>
-            <span className="text-[--neon-cyan] font-mono font-bold text-xl w-8 text-center">
+            <span className="text-(--neon-cyan) font-mono font-bold text-xl w-8 text-center">
               {count}
             </span>
             <button

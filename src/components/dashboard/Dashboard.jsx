@@ -47,7 +47,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
     <div className="flex flex-col h-full">
       {/* Panel header */}
       <div className="px-4 py-3 border-b border-slate-700 shrink-0 bg-slate-900">
-        <h2 className="font-display text-xs text-[--neon-cyan] tracking-widest uppercase">
+        <h2 className="font-display text-xs text-(--neon-cyan) tracking-widest uppercase">
           Ship Profiles
           <span className="ml-2 text-slate-500">({profiles.length})</span>
         </h2>
@@ -60,7 +60,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
           placeholder="Search profile…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-[--neon-cyan]/60 placeholder:text-slate-600"
+          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-600"
         />
       </div>
 
@@ -76,13 +76,13 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
             key={p.id}
             className={`group flex items-center gap-2 px-2 py-2 rounded transition-colors ${
               editingId === p.id
-                ? 'bg-[--neon-cyan]/10 border border-[--neon-cyan]/30'
+                ? 'bg-(--neon-cyan)/10 border border-(--neon-cyan)/30'
                 : 'border border-transparent hover:bg-slate-800'
             }`}
           >
             <div className="flex-1 min-w-0">
               <p className={`font-mono text-xs font-bold truncate ${
-                editingId === p.id ? 'text-[--neon-cyan]' : 'text-slate-200'
+                editingId === p.id ? 'text-(--neon-cyan)' : 'text-slate-200'
               }`}>
                 {p.name}
               </p>
@@ -92,7 +92,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
             </div>
             {/* Action buttons — visible on hover or when editing */}
             <div className={`flex gap-1 shrink-0 ${editingId === p.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
-              <ActionIcon label="✎" title="Edit"      onClick={() => onEdit(p.id)} dim="text-[--neon-cyan]" />
+              <ActionIcon label="✎" title="Edit"      onClick={() => onEdit(p.id)} dim="text-(--neon-cyan)" />
               <ActionIcon label="⧉" title="Duplicate" onClick={() => duplicateProfile(p.id)} />
               <ActionIcon label="⊗" title="Delete"    onClick={() => setConfirmDeleteId(p.id)} dim="hover:text-red-400" />
             </div>
@@ -109,7 +109,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
         )}
         <button
           onClick={onNew}
-          className="w-full py-1.5 bg-[--neon-cyan]/10 border border-[--neon-cyan]/30 text-[--neon-cyan] font-display text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+          className="w-full py-1.5 bg-(--neon-cyan)/10 border border-(--neon-cyan)/30 text-(--neon-cyan) font-display text-xs tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors"
         >
           + NEW PROFILE
         </button>
@@ -152,7 +152,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
           <Modal title="DELETE PROFILE" onClose={() => setConfirmDeleteId(null)} width="max-w-sm">
             <div className="space-y-4">
               <p className="font-mono text-sm text-slate-300 leading-relaxed">
-                Delete profile <span className="text-[--neon-cyan] font-bold">{target?.name}</span>?
+                Delete profile <span className="text-(--neon-cyan) font-bold">{target?.name}</span>?
               </p>
               <p className="font-mono text-xs text-slate-500">
                 This action is irreversible. The profile cannot be recovered.
@@ -199,9 +199,9 @@ function ActionIcon({ label, title, onClick, dim = '' }) {
 function StatusLine({ label, value, active = true }) {
   return (
     <div className="flex items-center gap-2">
-      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${active ? 'bg-[--neon-cyan] animate-pulse' : 'bg-slate-700'}`} />
+      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${active ? 'bg-(--neon-cyan) animate-pulse' : 'bg-slate-700'}`} />
       <span className="font-mono text-xs text-slate-600 flex-1">{label}</span>
-      <span className={`font-mono text-xs ${active ? 'text-[--neon-cyan]/60' : 'text-slate-500'}`}>{value}</span>
+      <span className={`font-mono text-xs ${active ? 'text-(--neon-cyan)/60' : 'text-slate-500'}`}>{value}</span>
     </div>
   )
 }
@@ -241,7 +241,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
                 onClick={() => onModeChange(value)}
                 className={`py-2 px-2 rounded font-display text-xs tracking-widest transition-colors text-center ${
                   mode === value
-                    ? 'bg-[--neon-cyan]/15 border border-[--neon-cyan]/40 text-[--neon-cyan]'
+                    ? 'bg-(--neon-cyan)/15 border border-(--neon-cyan)/40 text-(--neon-cyan)'
                     : 'text-slate-500 hover:text-slate-300'
                 }`}
               >
@@ -259,11 +259,11 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
             {autosave && (
               <button
                 onClick={onResumeAutosave}
-                className="w-full py-3.5 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-display text-xs tracking-widest rounded-lg hover:bg-[--neon-cyan]/20 transition-colors text-left px-4"
+                className="w-full py-3.5 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-display text-xs tracking-widest rounded-lg hover:bg-(--neon-cyan)/20 transition-colors text-left px-4"
               >
                 <span className="text-base block mb-0.5 text-center">↺</span>
                 <span className="block text-center">RESUME AUTOSAVE</span>
-                <span className="block font-mono text-[--neon-cyan]/50 mt-1 normal-case tracking-normal font-normal text-xs text-center">
+                <span className="block font-mono text-(--neon-cyan)/50 mt-1 normal-case tracking-normal font-normal text-xs text-center">
                   Round {autosave.round} — {PHASE_LABELS[autosave.phase] ?? autosave.phase?.toUpperCase()} — {autosave.shipCount} ship{autosave.shipCount === 1 ? '' : 's'}
                 </span>
                 <span className="block font-mono text-slate-600 mt-0.5 normal-case tracking-normal font-normal text-xs text-center">
@@ -277,7 +277,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
               className={`w-full py-3.5 border font-display text-xs tracking-widest rounded-lg transition-colors ${
                 autosave
                   ? 'border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-300'
-                  : 'bg-[--neon-cyan]/10 border-[--neon-cyan]/40 text-[--neon-cyan] hover:bg-[--neon-cyan]/20'
+                  : 'bg-(--neon-cyan)/10 border-(--neon-cyan)/40 text-(--neon-cyan) hover:bg-(--neon-cyan)/20'
               }`}
             >
               <span className="text-base block mb-0.5">▶</span>
@@ -406,7 +406,7 @@ function DataField({ label, value, accent = false, small = false }) {
   return (
     <div>
       <p className="font-display text-xs text-slate-600 tracking-widest leading-none mb-0.5">{label}</p>
-      <p className={`font-mono truncate ${small ? 'text-xs' : 'text-sm'} ${accent ? 'text-[--neon-cyan] font-bold' : 'text-slate-300'}`}>
+      <p className={`font-mono truncate ${small ? 'text-xs' : 'text-sm'} ${accent ? 'text-(--neon-cyan) font-bold' : 'text-slate-300'}`}>
         {value ?? '—'}
       </p>
     </div>
@@ -437,7 +437,7 @@ function SessionPreview({ data, onConfirm, onCancel, loading }) {
   const { name, round, phase, combatMode, ships = [], missiles = [], _exportedAt, _filename } = data
 
   const FACTION_LABELS = { players: 'PLAYERS', npc: 'NPC', neutral: 'NEUTRAL' }
-  const FACTION_COLORS = { players: 'text-[--neon-cyan]', npc: 'text-red-400', neutral: 'text-slate-400' }
+  const FACTION_COLORS = { players: 'text-(--neon-cyan)', npc: 'text-red-400', neutral: 'text-slate-400' }
 
   const byFaction = ships.reduce((acc, ship) => {
     const f = ship.faction ?? 'neutral'
@@ -664,7 +664,7 @@ export function Dashboard() {
             <div className="logo-shimmer" />
           </div>
           <div className="flex flex-col gap-0.5">
-            <h1 className="font-display font-bold text-[--neon-cyan] tracking-widest text-2xl leading-tight">
+            <h1 className="font-display font-bold text-(--neon-cyan) tracking-widest text-2xl leading-tight">
               <i>THRUST &amp; DRIFT</i>
             </h1>
             <span className="font-display text-xs text-slate-500 tracking-widest">

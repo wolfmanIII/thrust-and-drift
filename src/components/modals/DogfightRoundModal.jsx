@@ -72,7 +72,7 @@ function ShipCheckRow({ ship, dms, dice, onDice }) {
       <div className="flex items-center gap-3">
         <DiceInput value={null} onChange={onDice} />
         {total !== null && (
-          <span className="text-[--neon-cyan] font-mono text-sm font-bold">= {total}</span>
+          <span className="text-(--neon-cyan) font-mono text-sm font-bold">= {total}</span>
         )}
       </div>
     </div>
@@ -154,7 +154,7 @@ function EscapeCheckRow({ ship, pursuer, totals, onFleeRoll, onPursuerRoll }) {
         <div className="ml-auto flex items-center gap-2">
           <DiceInput value={null} onChange={onFleeRoll} />
           {fleeTotal !== null && (
-            <span className="text-[--neon-cyan] font-mono text-sm font-bold w-6 text-right">{fleeTotal}</span>
+            <span className="text-(--neon-cyan) font-mono text-sm font-bold w-6 text-right">{fleeTotal}</span>
           )}
         </div>
       </div>
@@ -172,7 +172,7 @@ function EscapeCheckRow({ ship, pursuer, totals, onFleeRoll, onPursuerRoll }) {
           <div className="ml-auto flex items-center gap-2">
             <DiceInput value={null} onChange={onPursuerRoll} />
             {pursuerTotal !== null && (
-              <span className="text-[--neon-cyan] font-mono text-sm font-bold w-6 text-right">{pursuerTotal}</span>
+              <span className="text-(--neon-cyan) font-mono text-sm font-bold w-6 text-right">{pursuerTotal}</span>
             )}
           </div>
         </div>
@@ -569,7 +569,7 @@ export function DogfightRoundModal() {
                     }`}>
                       {ship.profile.name}
                     </span>
-                    <span className="text-[--neon-cyan] font-mono text-sm font-bold w-8 text-right">
+                    <span className="text-(--neon-cyan) font-mono text-sm font-bold w-8 text-right">
                       {total}
                     </span>
                     {!resolved.tied && (
@@ -603,7 +603,7 @@ export function DogfightRoundModal() {
 
             <button
               onClick={handleAdvance}
-              className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+              className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors"
             >
               {isLastRound
                 ? 'END DOGFIGHT — CLOSE ⚔'

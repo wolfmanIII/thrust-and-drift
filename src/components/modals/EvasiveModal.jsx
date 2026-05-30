@@ -52,10 +52,10 @@ export function EvasiveModal() {
             <p className="text-slate-200 font-bold">{pilotSkill}</p>
           </div>
           <div className={`rounded p-2 transition-colors ${
-            amount > 0 ? 'bg-[--neon-cyan]/10 border border-[--neon-cyan]/30' : 'bg-slate-800'
+            amount > 0 ? 'bg-(--neon-cyan)/10 border border-(--neon-cyan)/30' : 'bg-slate-800'
           }`}>
             <p className="text-slate-500 mb-0.5">Attacker DM</p>
-            <p className={`font-bold ${amount > 0 ? 'text-[--neon-cyan]' : 'text-slate-400'}`}>
+            <p className={`font-bold ${amount > 0 ? 'text-(--neon-cyan)' : 'text-slate-400'}`}>
               {totalDM === 0 ? '—' : totalDM}
             </p>
           </div>
@@ -65,7 +65,7 @@ export function EvasiveModal() {
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs font-mono text-slate-400">
             <span>Evasive thrust</span>
-            <span className={amount > maxEvasive ? 'text-red-400' : 'text-[--neon-cyan]'}>
+            <span className={amount > maxEvasive ? 'text-red-400' : 'text-(--neon-cyan)'}>
               {amount} / {maxEvasive}
             </span>
           </div>
@@ -100,7 +100,7 @@ export function EvasiveModal() {
           <button
             onClick={handleConfirm}
             disabled={maxEvasive === 0}
-            className="flex-1 py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             DECLARE EVASION
           </button>

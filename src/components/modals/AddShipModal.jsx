@@ -57,7 +57,7 @@ export function AddShipModal() {
           placeholder="Search profile…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-[--neon-cyan]/60"
+          className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-(--neon-cyan)/60"
         />
 
         {/* Profile list */}
@@ -95,7 +95,7 @@ export function AddShipModal() {
                 onClick={() => { setFaction(f.id); setColor(f.color) }}
                 className={`flex-1 py-1.5 font-mono text-xs rounded border transition-colors ${
                   faction === f.id
-                    ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                    ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
                     : 'border-slate-700 text-slate-400 hover:border-slate-500'
                 }`}
               >
@@ -126,7 +126,7 @@ export function AddShipModal() {
         <button
           onClick={handleConfirm}
           disabled={!selectedProfile}
-          className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {initialHex ? 'PLACE SHIP' : 'SELECT HEX ON MAP →'}
         </button>

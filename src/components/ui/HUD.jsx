@@ -84,7 +84,7 @@ export function HUD() {
         <img src={tdLogo} alt="" className="w-5 h-5" />
         <span className="text-slate-600 text-xs">│</span>
         <span className="text-slate-400 text-xs font-display tracking-widest">ROUND</span>
-        <span className="text-[--neon-cyan] font-mono font-bold text-lg leading-none">{round}</span>
+        <span className="text-(--neon-cyan) font-mono font-bold text-lg leading-none">{round}</span>
         <span className="text-slate-600 text-xs">│</span>
         <span className="text-slate-200 font-display text-xs tracking-widest">{phaseLabel}</span>
       </div>
@@ -102,7 +102,7 @@ export function HUD() {
           <span className="text-slate-500 text-xs">({actorsLeft} left)</span>
           <button
             onClick={advanceActor}
-            className="ml-1 text-[--neon-cyan] font-display text-xs border border-[--neon-cyan]/40 rounded px-1.5 py-0.5 hover:bg-[--neon-cyan]/10 transition-colors"
+            className="ml-1 text-(--neon-cyan) font-display text-xs border border-(--neon-cyan)/40 rounded px-1.5 py-0.5 hover:bg-(--neon-cyan)/10 transition-colors"
           >
             NEXT →
           </button>
@@ -113,7 +113,7 @@ export function HUD() {
       {phase === 'initiative' && initiativeOrder.length === 0 && (
         <button
           onClick={() => openModal('initiative')}
-          className="pointer-events-auto bg-[--neon-cyan]/10 border border-[--neon-cyan]/50 hover:bg-[--neon-cyan]/20 text-[--neon-cyan] font-mono text-xs tracking-widest rounded px-3 py-1.5 backdrop-blur-sm transition-colors"
+          className="pointer-events-auto bg-(--neon-cyan)/10 border border-(--neon-cyan)/50 hover:bg-(--neon-cyan)/20 text-(--neon-cyan) font-mono text-xs tracking-widest rounded px-3 py-1.5 backdrop-blur-sm transition-colors"
         >
           🎲 ROLL INITIATIVE →
         </button>
@@ -123,7 +123,7 @@ export function HUD() {
       {(combatMode === 'vectorial' || phase !== 'movement') && (
         <button
           onClick={advancePhase}
-          className="pointer-events-auto bg-slate-800/80 border border-slate-600 hover:border-[--neon-cyan]/60 text-slate-300 hover:text-[--neon-cyan] font-mono text-xs tracking-widest rounded px-3 py-1.5 backdrop-blur-sm transition-colors text-left"
+          className="pointer-events-auto bg-slate-800/80 border border-slate-600 hover:border-(--neon-cyan)/60 text-slate-300 hover:text-(--neon-cyan) font-mono text-xs tracking-widest rounded px-3 py-1.5 backdrop-blur-sm transition-colors text-left"
         >
           NEXT PHASE ⟶
         </button>

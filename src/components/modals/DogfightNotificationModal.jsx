@@ -46,7 +46,7 @@ function PursuitRow({ label, ship, pilotSkill, tonnageDM, thrustFree, dice, onDi
       <div className="flex items-center gap-3">
         <DiceInput value={null} onChange={onDice} />
         {previewTotal !== null && (
-          <span className="text-[--neon-cyan] font-mono text-sm font-bold">= {previewTotal}</span>
+          <span className="text-(--neon-cyan) font-mono text-sm font-bold">= {previewTotal}</span>
         )}
       </div>
     </div>
@@ -332,7 +332,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
 
             <button
               onClick={handleAdvance}
-              className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+              className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors"
             >
               {groupIdx + 1 < total ? `NEXT CONTACT (${groupIdx + 2}/${total}) →` : 'CONFIRM →'}
             </button>

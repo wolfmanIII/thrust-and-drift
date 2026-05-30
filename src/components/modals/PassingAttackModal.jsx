@@ -46,7 +46,7 @@ export function PassingAttackModal() {
 
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-[--neon-cyan] tracking-widest text-sm">
+          <h2 className="font-display text-(--neon-cyan) tracking-widest text-sm">
             ✦ PASSING ENCOUNTER
           </h2>
           {remaining > 1 && (
@@ -83,7 +83,7 @@ export function PassingAttackModal() {
               ? 'ADJACENT'
               : `${encounter.minDistance} HEX${encounter.minDistance !== 1 ? 'ES' : ''}`}
           </div>
-          <div className="font-mono text-xs text-[--neon-cyan] tracking-widest">
+          <div className="font-mono text-xs text-(--neon-cyan) tracking-widest">
             {rangeBand.toUpperCase()}
           </div>
         </div>

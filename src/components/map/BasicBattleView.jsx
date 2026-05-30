@@ -67,7 +67,7 @@ const FACTION_LABELS = {
 }
 
 const FACTION_COLORS = {
-  players: 'text-[--neon-cyan] border-[--neon-cyan]/30',
+  players: 'text-(--neon-cyan) border-(--neon-cyan)/30',
   npc:     'text-red-400 border-red-400/30',
   neutral: 'text-slate-400 border-slate-600',
 }

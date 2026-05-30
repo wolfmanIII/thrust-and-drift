@@ -23,7 +23,7 @@ export function LegalFooter() {
         <Modal title="ABOUT — THRUST & DRIFT" onClose={() => setShowAbout(false)} width="max-w-lg">
           <div className="space-y-4 font-mono text-xs text-slate-300 leading-relaxed">
             <p>
-              <span className="text-[--neon-cyan] font-bold">Thrust &amp; Drift</span> is a free, non-commercial
+              <span className="text-(--neon-cyan) font-bold">Thrust &amp; Drift</span> is a free, non-commercial
               browser tool for playing Mongoose Traveller 2nd Edition space combat at the table.
             </p>
             <p>

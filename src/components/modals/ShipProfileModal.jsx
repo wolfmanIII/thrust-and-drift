@@ -60,7 +60,7 @@ export function ShipProfileModal() {
         {mode === 'export' && (
           <button
             onClick={handleExport}
-            className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+            className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors"
           >
             💾 EXPORT JSON
           </button>
@@ -78,7 +78,7 @@ export function ShipProfileModal() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={loading}
-              className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40"
+              className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40"
             >
               {loading ? 'LOADING…' : '📂 SELECT FILE'}
             </button>

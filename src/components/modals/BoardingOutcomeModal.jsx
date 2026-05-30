@@ -132,7 +132,7 @@ export function BoardingOutcomeModal() {
                 type="checkbox"
                 checked={transferFaction}
                 onChange={(e) => setTransferFaction(e.target.checked)}
-                className="accent-[--neon-cyan]"
+                className="accent-(--neon-cyan)"
               />
               Transfer {defender.profile.name} to faction{' '}
               <span className={FACTION_COLORS[attacker.faction] ?? 'text-slate-400'}>
@@ -149,7 +149,7 @@ export function BoardingOutcomeModal() {
         <button
           onClick={handleResolve}
           disabled={!selectedOutcome}
-          className="w-full py-2 bg-[--neon-cyan]/10 hover:bg-[--neon-cyan]/20 disabled:opacity-40 disabled:cursor-not-allowed border border-[--neon-cyan] text-[--neon-cyan] font-mono text-xs rounded transition-colors"
+          className="w-full py-2 bg-(--neon-cyan)/10 hover:bg-(--neon-cyan)/20 disabled:opacity-40 disabled:cursor-not-allowed border border-(--neon-cyan) text-(--neon-cyan) font-mono text-xs rounded transition-colors"
         >
           CONFIRM OUTCOME
         </button>

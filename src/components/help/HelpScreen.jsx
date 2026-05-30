@@ -27,7 +27,7 @@ const SECTIONS = [
 function Section({ id, title, children }) {
   return (
     <section id={id} className="scroll-mt-4 space-y-3">
-      <h2 className="font-display text-[--neon-cyan] tracking-widest text-sm border-b border-slate-800 pb-1">
+      <h2 className="font-display text-(--neon-cyan) tracking-widest text-sm border-b border-slate-800 pb-1">
         {title}
       </h2>
       <div className="space-y-3 font-mono text-xs text-slate-300 leading-relaxed">
@@ -51,7 +51,7 @@ function Sub({ title, children }) {
 function KV({ k, v }) {
   return (
     <div className="flex gap-2">
-      <span className="text-[--neon-cyan] shrink-0 w-28">{k}</span>
+      <span className="text-(--neon-cyan) shrink-0 w-28">{k}</span>
       <span className="text-slate-400">{v}</span>
     </div>
   )
@@ -80,7 +80,7 @@ export function HelpScreen() {
       {/* ── Sidebar TOC ───────────────────────────────────────────────── */}
       <aside className="help-sidebar w-52 shrink-0 border-r border-slate-800 flex flex-col overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-800 shrink-0">
-          <p className="font-display text-xs text-[--neon-cyan] tracking-widest">// FIELD MANUAL</p>
+          <p className="font-display text-xs text-(--neon-cyan) tracking-widest">// FIELD MANUAL</p>
         </div>
         <nav className="flex-1 overflow-y-auto py-2">
           {SECTIONS.map(({ id, label }) => (
@@ -89,7 +89,7 @@ export function HelpScreen() {
               onClick={() => scrollTo(id)}
               className={`w-full text-left px-4 py-1.5 font-mono text-xs transition-colors ${
                 active === id
-                  ? 'text-[--neon-cyan] bg-[--neon-cyan]/5'
+                  ? 'text-(--neon-cyan) bg-(--neon-cyan)/5'
                   : 'text-slate-500 hover:text-slate-300'
               }`}
             >
@@ -120,7 +120,7 @@ export function HelpScreen() {
         {/* OVERVIEW */}
         <Section id="overview" title="Overview">
           <p>
-            <span className="text-[--neon-cyan] font-bold">Thrust &amp; Drift</span> is a browser-based
+            <span className="text-(--neon-cyan) font-bold">Thrust &amp; Drift</span> is a browser-based
             Virtual Tabletop tool for running Mongoose Traveller 2nd Edition space combat at the table.
             It is GM-operated and designed for shared-screen play — one person drives, everyone watches.
           </p>
@@ -339,10 +339,10 @@ export function HelpScreen() {
             <p>On next visit, the <span className="text-slate-200">↺ RESUME AUTOSAVE</span> button appears on the Dashboard with round, phase, and ship count.</p>
           </Sub>
           <Sub title="MANUAL SAVE">
-            <p>Click <span className="text-slate-200">💾 SAVE</span> in the HUD at any time to download the full session as a <code className="text-[--neon-cyan]">.json</code> file.</p>
+            <p>Click <span className="text-slate-200">💾 SAVE</span> in the HUD at any time to download the full session as a <code className="text-(--neon-cyan)">.json</code> file.</p>
           </Sub>
           <Sub title="RESUME FROM FILE">
-            <p>On the Dashboard, click <span className="text-slate-200">↓ RESUME FROM FILE</span> and select your saved <code className="text-[--neon-cyan]">.json</code> file. A preview screen shows the full roster (name, faction, hull, position) before you confirm loading.</p>
+            <p>On the Dashboard, click <span className="text-slate-200">↓ RESUME FROM FILE</span> and select your saved <code className="text-(--neon-cyan)">.json</code> file. A preview screen shows the full roster (name, faction, hull, position) before you confirm loading.</p>
           </Sub>
           <Sub title="PROFILE EXPORT / IMPORT">
             <p>Ship profiles are separate from battle sessions. Use <span className="text-slate-200">↑ EXPORT</span> and <span className="text-slate-200">↓ IMPORT</span> in the profile panel to share or back up profiles independently.</p>

@@ -40,7 +40,7 @@ export function Modal({ title, onClose, children, width = 'max-w-lg' }) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-          <h2 className="font-mono text-sm text-[--neon-cyan] tracking-widest uppercase">{title}</h2>
+          <h2 className="font-mono text-sm text-(--neon-cyan) tracking-widest uppercase">{title}</h2>
           <button
             onClick={onClose}
             className="text-slate-500 hover:text-slate-200 font-mono text-lg leading-none transition-colors"

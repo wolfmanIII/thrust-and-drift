@@ -117,7 +117,7 @@ function ShipRow({ entry, added, onAdd }) {
         ) : (
           <button
             onClick={() => onAdd(entry)}
-            className="px-2 py-1 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-[--neon-cyan]/50 hover:text-[--neon-cyan] transition-colors whitespace-nowrap"
+            className="px-2 py-1 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-(--neon-cyan)/50 hover:text-(--neon-cyan) transition-colors whitespace-nowrap"
           >
             + Profile
           </button>
@@ -193,7 +193,7 @@ export function CatalogPanel() {
               onClick={() => setActiveCategory(id)}
               className={`px-2 py-0.5 font-mono text-xs rounded transition-colors ${
                 activeCategory === id
-                  ? 'bg-[--neon-cyan]/15 border border-[--neon-cyan]/40 text-[--neon-cyan]'
+                  ? 'bg-(--neon-cyan)/15 border border-(--neon-cyan)/40 text-(--neon-cyan)'
                   : 'border border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-400'
               }`}
             >
@@ -210,7 +210,7 @@ export function CatalogPanel() {
           placeholder="Search ship…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-[--neon-cyan]/60 placeholder:text-slate-600"
+          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-600"
         />
       </div>
 

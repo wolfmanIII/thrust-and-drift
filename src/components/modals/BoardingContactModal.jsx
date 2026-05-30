@@ -50,7 +50,7 @@ function CutTracker({ boarding, onDamage }) {
             onClick={() => setComponent(k)}
             className={`flex-1 py-1 font-mono text-xs rounded border transition-colors ${
               component === k
-                ? 'bg-[--neon-cyan]/10 border-[--neon-cyan] text-[--neon-cyan]'
+                ? 'bg-(--neon-cyan)/10 border-(--neon-cyan) text-(--neon-cyan)'
                 : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-400'
             }`}
           >
@@ -74,7 +74,7 @@ function CutTracker({ boarding, onDamage }) {
             onClick={() => setToolKey(k)}
             className={`py-1 px-2 font-mono text-xs rounded border transition-colors text-left ${
               toolKey === k
-                ? 'bg-[--neon-cyan]/10 border-[--neon-cyan] text-[--neon-cyan]'
+                ? 'bg-(--neon-cyan)/10 border-(--neon-cyan) text-(--neon-cyan)'
                 : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-400'
             }`}
           >
@@ -99,7 +99,7 @@ function CutTracker({ boarding, onDamage }) {
         {dice && (
           <div className="text-right">
             <p className="text-slate-400 font-mono text-xs">Effect {effect >= 0 ? '+' : ''}{effect}</p>
-            <p className="text-[--neon-cyan] font-mono text-sm font-bold">−{dmg} res</p>
+            <p className="text-(--neon-cyan) font-mono text-sm font-bold">−{dmg} res</p>
           </div>
         )}
       </div>
@@ -200,7 +200,7 @@ export function BoardingContactModal() {
                 onClick={() => setContactMethod(boarding.id, k)}
                 className={`flex items-start gap-2 px-3 py-2 rounded border font-mono text-xs text-left transition-colors ${
                   boarding.contactMethod === k
-                    ? 'bg-[--neon-cyan]/10 border-[--neon-cyan] text-[--neon-cyan]'
+                    ? 'bg-(--neon-cyan)/10 border-(--neon-cyan) text-(--neon-cyan)'
                     : 'bg-slate-800 border-slate-600 text-slate-300 hover:border-slate-400'
                 }`}
               >
@@ -287,7 +287,7 @@ export function BoardingContactModal() {
         <div className="flex gap-2 pt-1">
           <button
             onClick={handleAdvance}
-            className="flex-1 py-2 bg-[--neon-cyan]/10 hover:bg-[--neon-cyan]/20 border border-[--neon-cyan] text-[--neon-cyan] font-mono text-xs rounded transition-colors"
+            className="flex-1 py-2 bg-(--neon-cyan)/10 hover:bg-(--neon-cyan)/20 border border-(--neon-cyan) text-(--neon-cyan) font-mono text-xs rounded transition-colors"
           >
             ADVANCE TO CONFLICT →
           </button>

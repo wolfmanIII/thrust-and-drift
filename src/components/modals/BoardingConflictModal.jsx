@@ -180,7 +180,7 @@ export function BoardingConflictModal() {
               type="checkbox"
               checked={armoredBulkhead}
               onChange={(e) => setArmoredBulkhead(e.target.checked)}
-              className="accent-[--neon-cyan]"
+              className="accent-(--neon-cyan)"
             />
             Armored bulkhead (DM −1)
           </label>
@@ -202,7 +202,7 @@ export function BoardingConflictModal() {
         {/* Advance to security */}
         <button
           onClick={handleAdvance}
-          className="w-full py-2 bg-[--neon-cyan]/10 hover:bg-[--neon-cyan]/20 border border-[--neon-cyan] text-[--neon-cyan] font-mono text-xs rounded transition-colors"
+          className="w-full py-2 bg-(--neon-cyan)/10 hover:bg-(--neon-cyan)/20 border border-(--neon-cyan) text-(--neon-cyan) font-mono text-xs rounded transition-colors"
         >
           END CONFLICT — ADVANCE TO SECURITY →
         </button>

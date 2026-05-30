@@ -74,7 +74,7 @@ export function BoardingSetupModal() {
               <button
                 key={t.id}
                 onClick={() => handleConfirm(t.id)}
-                className="w-full flex items-center gap-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-[--neon-cyan] rounded px-3 py-2.5 transition-colors text-left"
+                className="w-full flex items-center gap-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-(--neon-cyan) rounded px-3 py-2.5 transition-colors text-left"
               >
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: t.color }} />
                 <div className="flex-1 min-w-0">
@@ -85,7 +85,7 @@ export function BoardingSetupModal() {
                     {t.faction.toUpperCase()}
                   </p>
                 </div>
-                <span className="text-[--neon-cyan] font-mono text-xs shrink-0">BOARD →</span>
+                <span className="text-(--neon-cyan) font-mono text-xs shrink-0">BOARD →</span>
               </button>
             ))}
           </div>

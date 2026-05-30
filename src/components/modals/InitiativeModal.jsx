@@ -84,7 +84,7 @@ export function InitiativeModal() {
                         onChange={(d) => setShipDice(ship.id, d)}
                       />
                       <span className="text-slate-600 font-mono text-xs">→</span>
-                      <span className={`font-mono text-sm font-bold w-6 text-right ${previewTotal(ship) === '?' ? 'text-slate-600' : 'text-[--neon-cyan]'}`}>
+                      <span className={`font-mono text-sm font-bold w-6 text-right ${previewTotal(ship) === '?' ? 'text-slate-600' : 'text-(--neon-cyan)'}`}>
                         {previewTotal(ship)}
                       </span>
                     </div>
@@ -119,7 +119,7 @@ export function InitiativeModal() {
             <button
               onClick={handleConfirm}
               disabled={!allEntered}
-              className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {allEntered ? 'CONFIRM →' : `WAITING — ${playerShips.filter((s) => !playerDice[s.id]).length} ship(s) not rolled`}
             </button>
@@ -137,7 +137,7 @@ export function InitiativeModal() {
                     <span className="text-slate-500 font-mono text-xs w-4">{idx + 1}.</span>
                     <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
                     <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.profile.name}</span>
-                    <span className="text-[--neon-cyan] font-mono text-sm font-bold">{ship.initiative}</span>
+                    <span className="text-(--neon-cyan) font-mono text-sm font-bold">{ship.initiative}</span>
                   </li>
                 )
               })}
@@ -151,7 +151,7 @@ export function InitiativeModal() {
               </button>
               <button
                 onClick={closeModal}
-                className="flex-1 py-1.5 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs rounded hover:bg-[--neon-cyan]/20 transition-colors"
+                className="flex-1 py-1.5 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs rounded hover:bg-(--neon-cyan)/20 transition-colors"
               >
                 CONFIRM →
               </button>

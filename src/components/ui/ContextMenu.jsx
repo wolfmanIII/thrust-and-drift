@@ -76,7 +76,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
 
       {/* ── Header ────────────────────────────────────────────────── */}
       <div className="px-3 py-1.5 bg-slate-800 border-b border-slate-700">
-        <p className="font-mono text-xs text-[--neon-cyan] font-bold truncate">{ship.profile.name}</p>
+        <p className="font-mono text-xs text-(--neon-cyan) font-bold truncate">{ship.profile.name}</p>
         <p className="font-mono text-xs text-slate-400">
           Hull {ship.hullCurrent}/{ship.profile.hull}
           {ship.evasiveThrust > 0 && (

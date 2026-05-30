@@ -59,7 +59,7 @@ function NumField({ label, value, onChange, min = 0, max = 99 }) {
         max={max}
         value={value}
         onChange={(e) => onChange(Math.max(min, Math.min(max, Number(e.target.value) || 0)))}
-        className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-[--neon-cyan]/60"
+        className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
       />
     </label>
   )
@@ -75,7 +75,7 @@ function TextField({ label, value, onChange, placeholder = '' }) {
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-[--neon-cyan]/60 placeholder:text-slate-600"
+        className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-600"
       />
     </label>
   )
@@ -94,7 +94,7 @@ function CrewMemberRow({ member, onChange, onRemove }) {
           value={member.name}
           placeholder="Name"
           onChange={(e) => onChange({ ...member, name: e.target.value })}
-          className="flex-1 bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-2 py-1 focus:outline-none focus:border-[--neon-cyan]/60 placeholder:text-slate-600"
+          className="flex-1 bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-600"
         />
         <button
           type="button"
@@ -120,7 +120,7 @@ function CrewMemberRow({ member, onChange, onRemove }) {
                 ...member,
                 skills: { ...member.skills, [skill]: Math.max(0, Math.min(5, Number(e.target.value) || 0)) },
               })}
-              className="w-full bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-1.5 py-1 focus:outline-none focus:border-[--neon-cyan]/60"
+              className="w-full bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-1.5 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
             />
           </label>
         ))}
@@ -159,7 +159,7 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
       <select
         value=""
         onChange={(e) => { onAddWeapon(slotIdx, e.target.value); e.target.value = '' }}
-        className="bg-slate-700 border border-slate-600 text-slate-400 font-mono text-xs rounded px-1.5 py-0.5 focus:outline-none focus:border-[--neon-cyan]/60 cursor-pointer"
+        className="bg-slate-700 border border-slate-600 text-slate-400 font-mono text-xs rounded px-1.5 py-0.5 focus:outline-none focus:border-(--neon-cyan)/60 cursor-pointer"
       >
         <option value="">+ weapon</option>
         {WEAPON_IDS.map((w) => (
@@ -312,7 +312,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
             <button
               type="button"
               onClick={addCrewMember}
-              className="text-[--neon-cyan] font-mono text-xs border border-[--neon-cyan]/30 rounded px-2 py-0.5 hover:bg-[--neon-cyan]/10 transition-colors"
+              className="text-(--neon-cyan) font-mono text-xs border border-(--neon-cyan)/30 rounded px-2 py-0.5 hover:bg-(--neon-cyan)/10 transition-colors"
             >
               + Add
             </button>
@@ -341,7 +341,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
             <button
               type="button"
               onClick={addTurret}
-              className="text-[--neon-cyan] font-mono text-xs border border-[--neon-cyan]/30 rounded px-2 py-0.5 hover:bg-[--neon-cyan]/10 transition-colors"
+              className="text-(--neon-cyan) font-mono text-xs border border-(--neon-cyan)/30 rounded px-2 py-0.5 hover:bg-(--neon-cyan)/10 transition-colors"
             >
               + Add
             </button>
@@ -381,7 +381,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
           <button
             type="button"
             onClick={handleSave}
-            className="flex-1 py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+            className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors"
           >
             {isNew ? '+ CREATE PROFILE' : '✓ SAVE CHANGES'}
           </button>

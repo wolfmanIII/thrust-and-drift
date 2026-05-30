@@ -42,7 +42,7 @@ export function DiceInput({ value, onChange }) {
   const r2 = parseInt(d2, 10)
   const total = (r1 >= 1 && r1 <= 6 && r2 >= 1 && r2 <= 6) ? r1 + r2 : '?'
 
-  const inputClass = 'w-9 bg-slate-700 border border-slate-600 text-slate-200 font-mono text-sm rounded text-center px-1 py-0.5 focus:outline-none focus:border-[--neon-cyan]/60'
+  const inputClass = 'w-9 bg-slate-700 border border-slate-600 text-slate-200 font-mono text-sm rounded text-center px-1 py-0.5 focus:outline-none focus:border-(--neon-cyan)/60'
 
   return (
     <div className="flex items-center gap-1.5">
@@ -55,13 +55,13 @@ export function DiceInput({ value, onChange }) {
         type="number" min={1} max={6} value={d2} placeholder="—"
         onChange={handleD2} className={inputClass} aria-label="Die 2"
       />
-      <span className={`font-mono text-sm font-bold w-5 text-center ${total === '?' ? 'text-slate-600' : 'text-[--neon-cyan]'}`}>
+      <span className={`font-mono text-sm font-bold w-5 text-center ${total === '?' ? 'text-slate-600' : 'text-(--neon-cyan)'}`}>
         {total}
       </span>
       <button
         type="button"
         onClick={handleAutoRoll}
-        className="text-slate-500 hover:text-[--neon-cyan] font-mono text-sm transition-colors leading-none"
+        className="text-slate-500 hover:text-(--neon-cyan) font-mono text-sm transition-colors leading-none"
         title="Auto-roll"
         aria-label="Auto-roll dice"
       >

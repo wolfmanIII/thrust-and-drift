@@ -27,7 +27,7 @@ const BEAM_WEAPONS = ['Pulse Laser', 'Beam Laser', 'Particle Beam', 'Railgun']
 function DmRow({ label, value, highlight = false }) {
   const sign = value >= 0 ? '+' : ''
   return (
-    <div className={`flex justify-between ${highlight ? 'text-[--neon-cyan] font-bold' : 'text-slate-400'}`}>
+    <div className={`flex justify-between ${highlight ? 'text-(--neon-cyan) font-bold' : 'text-slate-400'}`}>
       <span>{label}</span>
       <span>{sign}{value}</span>
     </div>
@@ -81,7 +81,7 @@ function AttackConfigStep({
                   onClick={() => setWeaponKey(w)}
                   className={`text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
                     weaponKey === w
-                      ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                      ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
                       : 'border-slate-700 text-slate-400 hover:border-slate-500'
                   }`}
                 >
@@ -116,7 +116,7 @@ function AttackConfigStep({
                 onClick={() => setTargetId(e.id)}
                 className={`flex items-center gap-2 text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
                   targetId === e.id
-                    ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                    ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
                     : 'border-slate-700 text-slate-400 hover:border-slate-500'
                 }`}
               >
@@ -141,7 +141,7 @@ function AttackConfigStep({
                   onClick={() => setManualRangeBand(label)}
                   className={`px-2 py-1 rounded font-mono text-xs border transition-colors ${
                     (manualRangeBand ?? 'Medium') === label
-                      ? 'border-[--neon-cyan]/60 bg-[--neon-cyan]/10 text-[--neon-cyan]'
+                      ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
                       : 'border-slate-700 text-slate-400 hover:border-slate-500'
                   }`}
                 >
@@ -176,7 +176,7 @@ function AttackConfigStep({
         <button
           onClick={onNext}
           disabled={!weapon || !target || outOfRange || (combatMode === 'basic' && !manualRangeBand)}
-          className="w-full py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-sm tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           ROLL ATTACK →
         </button>
@@ -242,7 +242,7 @@ function AttackRollStep({
               <button
                 onClick={() => handleRoll(manualDice)}
                 disabled={!manualDice}
-                className="w-full py-3 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-lg tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-lg tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 CONFIRM ROLL
               </button>
@@ -251,7 +251,7 @@ function AttackRollStep({
             /* NPC: auto-roll */
             <button
               onClick={() => handleRoll(null)}
-              className="w-full py-3 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-lg tracking-widest rounded hover:bg-[--neon-cyan]/20 transition-colors"
+              className="w-full py-3 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-lg tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors"
             >
               🎲 ROLL 2D6
             </button>
@@ -301,7 +301,7 @@ function AttackRollStep({
               {attackResult.hit ? (
                 <button
                   onClick={onNext}
-                  className="flex-1 py-2 bg-[--neon-cyan]/10 border border-[--neon-cyan]/40 text-[--neon-cyan] font-mono text-xs rounded hover:bg-[--neon-cyan]/20"
+                  className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs rounded hover:bg-(--neon-cyan)/20"
                 >
                   CALCULATE DAMAGE →
                 </button>
