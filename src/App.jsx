@@ -104,8 +104,8 @@ export function App() {
       {/* ── Context menu ─────────────────────────────────────────────── */}
       <ContextMenu />
 
-      {/* ── Brand watermark ──────────────────────────────────────────── */}
-      <div className="absolute bottom-10 right-3 z-10 pointer-events-none flex items-center gap-2 px-2 py-1">
+      {/* ── Brand watermark — right-56 keeps it left of the PhaseTracker (w-48 + right-3) */}
+      <div className="absolute top-3 right-56 z-10 pointer-events-none flex items-center gap-2 px-2 py-1">
         <span className="font-display text-xs text-slate-300 tracking-widest leading-none">
           THRUST &amp; DRIFT
         </span>
