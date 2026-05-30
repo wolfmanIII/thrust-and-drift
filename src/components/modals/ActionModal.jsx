@@ -4,7 +4,7 @@
  * // MgT2e CRB p.166–167 — Crew Actions
  */
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
@@ -95,10 +95,13 @@ export function ActionModal() {
 
   const isPlayer = ship.faction === 'players'
 
-  // Normalise to array — handles legacy {pilot:N,...} saves
-  const crewArray = Array.isArray(ship.profile.crew)
-    ? ship.profile.crew
-    : migrateCrew(ship.profile.crew ?? {})
+  // Memoised — migrateCrew calls uuidv7() so must not run on every render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const crewArray = useMemo(() =>
+    Array.isArray(ship.profile.crew)
+      ? ship.profile.crew
+      : migrateCrew(ship.profile.crew ?? {}),
+  [ship.id])
 
   const selectedMember = crewArray.find((m) => m.id === selectedMemberId) ?? null
   const memberActions  = selectedMember ? getActionsForMember(selectedMember) : []
