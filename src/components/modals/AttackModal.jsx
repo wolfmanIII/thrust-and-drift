@@ -604,7 +604,7 @@ export function AttackModal() {
     if (attackResult?.hit) {
       if (BEAM_WEAPONS.includes(weaponKey)) {
         emitEffect('laser_ray', {
-          duration: 1500,
+          duration: 2500,
           fromHex:    attacker.position,
           toHex:      target.position,
           weaponType: weaponKey,
@@ -664,7 +664,7 @@ export function AttackModal() {
     if (!target) return
     launchMissile(attacker.id, target.id, missileCount, attacker.position, attacker.vector, 'Standard')
     if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
-    emitEffect('missile_launch', { duration: 1400, hex: attacker.position })
+    emitEffect('missile_launch', { duration: 2500, hex: attacker.position })
     closeModal()
   }
 
