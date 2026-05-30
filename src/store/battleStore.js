@@ -56,6 +56,7 @@ function buildNextRoundState(s) {
       thrustBonusThisRound: 0,
       hasActedThisPhase: false,
       evasiveThrust: 0,
+      firedTurrets: [],
     })),
     log: [...s.log, makeLogEntry({
       round: s.round + 1,
@@ -238,6 +239,7 @@ const useBattleStore = create((set, get) => {
       initiativeBonusNextRound: 0,
       hasActedThisPhase: false,
       evasiveThrust: 0,
+      firedTurrets: [],
       sensorLockOn: null,
       sensorLockedBy: null,
       sensorLockDM: 0,
@@ -358,6 +360,24 @@ const useBattleStore = create((set, get) => {
           shipId,
           details: { delta, newVector, cost },
         })],
+      }))
+    },
+  ),
+
+  /**
+   * Mark a turret as having fired this round. Called by AttackModal on attack confirmation.
+   * @param {string} shipId
+   * @param {number} turretSlot
+   */
+  markTurretFired: wh(
+    (shipId) => !!get().ships.find((s) => s.id === shipId),
+    (shipId, turretSlot) => {
+      set((s) => ({
+        ships: s.ships.map((sh) =>
+          sh.id === shipId
+            ? { ...sh, firedTurrets: [...new Set([...(sh.firedTurrets ?? []), turretSlot])] }
+            : sh
+        ),
       }))
     },
   ),
@@ -576,7 +596,11 @@ const useBattleStore = create((set, get) => {
     set((s) => ({
       phase: nextPhase,
       currentActorIndex: 0,
-      ships: s.ships.map((sh) => ({ ...sh, hasActedThisPhase: false })),
+      ships: s.ships.map((sh) => ({
+        ...sh,
+        hasActedThisPhase: false,
+        ...(nextPhase === 'attack' ? { firedTurrets: [] } : {}),
+      })),
       log: [...s.log, makeLogEntry({
         round: s.round,
         phase: nextPhase,

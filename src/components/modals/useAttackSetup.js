@@ -20,7 +20,7 @@ import { getCrewSkill } from '../../utils/crew.js'
  *   enemies:          object[],
  *   target:           object|undefined,
  *   weapon:           object|null,
- *   availableWeapons: string[],
+ *   availableWeapons: { weaponName: string, turretSlot: number }[],
  *   distance:         number|null,
  *   rangeBand:        string,
  *   combatMode:       'vectorial'|'basic',
@@ -45,10 +45,14 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const target   = ships.find((s) => s.id === targetId)
   const weapon  = weaponKey ? (WEAPONS[weaponKey] ?? null) : null
 
+  // One entry per unfired turret×weapon — no deduplication (CRB p.164: each turret fires once)
+  const firedTurrets     = attacker?.firedTurrets ?? []
   const availableWeapons = (attacker?.profile.turrets ?? [])
-    .flatMap((t) => t.weapons)
-    .filter((w) => !DEFENSIVE_WEAPONS.includes(w))
-    .filter((v, i, a) => a.indexOf(v) === i)
+    .filter((t) => !firedTurrets.includes(t.slot))
+    .flatMap((t) => t.weapons
+      .filter((w) => !DEFENSIVE_WEAPONS.includes(w))
+      .map((w) => ({ weaponName: w, turretSlot: t.slot }))
+    )
 
   const distance  = combatMode === 'vectorial' && target && attacker
     ? hexDistance(attacker.position, target.position)

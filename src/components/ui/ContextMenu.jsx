@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react'
 import { useUiStore }    from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { hexDistance }   from '../../utils/hex.js'
+import { DEFENSIVE_WEAPONS } from '../../data/weapons.js'
 
 // === SHARED PRIMITIVES ===
 
@@ -55,6 +56,15 @@ function hasMissileRack(ship) {
     .includes('Missile Rack')
 }
 
+/** Returns true if the ship has at least one offensive turret that hasn't fired this round. */
+function hasUnfiredOffensiveTurret(ship) {
+  const fired = ship.firedTurrets ?? []
+  return (ship.profile.turrets ?? [])
+    .filter((t) => !fired.includes(t.slot))
+    .flatMap((t) => t.weapons)
+    .some((w) => !DEFENSIVE_WEAPONS.includes(w))
+}
+
 function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
   const openModal  = useUiStore((s) => s.openModal)
   const removeShip = useBattleStore((s) => s.removeShip)
@@ -97,7 +107,9 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       {/* ── Attack: weapons + missiles ────────────────────────────── */}
       {phase === 'attack' && (
         <>
-          <MenuItem icon="🎯" label="Attack…"           onClick={() => open('attack',        { shipId: targetId })} />
+          {hasUnfiredOffensiveTurret(ship) && (
+            <MenuItem icon="🎯" label="Attack…"           onClick={() => open('attack',        { shipId: targetId })} />
+          )}
           {hasMissileRack(ship) && (
             <MenuItem icon="🚀" label="Launch Missiles…" onClick={() => open('missileLaunch', { shipId: targetId })} />
           )}

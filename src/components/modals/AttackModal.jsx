@@ -39,9 +39,10 @@ function DmRow({ label, value, highlight = false }) {
 /**
  * @param {{
  *   enemies: object[],
- *   availableWeapons: string[],
+ *   availableWeapons: { weaponName: string, turretSlot: number }[],
  *   weaponKey: string,
- *   setWeaponKey: Function,
+ *   selectedTurretSlot: number|null,
+ *   setWeaponSelection: Function,
  *   targetId: string,
  *   setTargetId: Function,
  *   target: object|undefined,
@@ -55,7 +56,7 @@ function DmRow({ label, value, highlight = false }) {
  */
 function AttackConfigStep({
   enemies, availableWeapons,
-  weaponKey, setWeaponKey, targetId, setTargetId,
+  weaponKey, selectedTurretSlot, setWeaponSelection, targetId, setTargetId,
   target, weapon, rangeBand, distance, dmBreakdown,
   combatMode, manualRangeBand, setManualRangeBand,
   outOfRange,
@@ -73,20 +74,24 @@ function AttackConfigStep({
               <p className="text-slate-600 font-mono text-xs italic">No offensive weapons available.</p>
             )}
             {availableWeapons.map((w) => {
-              const wDef = WEAPONS[w]
+              const wDef = WEAPONS[w.weaponName]
               const wOutOfRange = target && wDef ? isOutOfRange(wDef.maxRange, rangeBand) : false
+              const isSelected  = weaponKey === w.weaponName && selectedTurretSlot === w.turretSlot
               return (
                 <button
-                  key={w}
-                  onClick={() => setWeaponKey(w)}
+                  key={`${w.turretSlot}-${w.weaponName}`}
+                  onClick={() => setWeaponSelection(w.weaponName, w.turretSlot)}
                   className={`text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
-                    weaponKey === w
+                    isSelected
                       ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
                       : 'border-slate-700 text-slate-400 hover:border-slate-500'
                   }`}
                 >
                   <span className="flex items-center justify-between gap-2">
-                    <span>{w}</span>
+                    <span>
+                      <span className="text-slate-600 mr-1.5">T{w.turretSlot}</span>
+                      {w.weaponName}
+                    </span>
                     {wOutOfRange && (
                       <span className="text-red-500 font-bold tracking-widest">OUT OF RANGE</span>
                     )}
@@ -204,7 +209,7 @@ function AttackRollStep({
   attackerName, targetName, weaponKey,
   isPlayer,
   dmBreakdown,
-  attackResult, setAttackResult, onNext, onClose,
+  attackResult, setAttackResult, onNext, onClose, onMissClose,
 }) {
   const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
   const [manualDice, setManualDice] = useState(null)
@@ -307,7 +312,7 @@ function AttackRollStep({
                 </button>
               ) : (
                 <button
-                  onClick={onClose}
+                  onClick={onMissClose ?? onClose}
                   className="flex-1 py-2 border border-slate-600 text-slate-300 font-mono text-xs rounded hover:border-slate-400"
                 >
                   CLOSE
@@ -521,19 +526,23 @@ function AttackCriticalStep({
 // ── Root component — owns state, computes derived DMs ────────────────────
 
 export function AttackModal() {
-  const closeModal     = useUiStore((s) => s.closeModal)
-  const modalPayload   = useUiStore((s) => s.modalPayload)
-  const applyDamage    = useBattleStore((s) => s.applyDamage)
-  const addCriticalHit = useBattleStore((s) => s.addCriticalHit)
+  const closeModal       = useUiStore((s) => s.closeModal)
+  const modalPayload     = useUiStore((s) => s.modalPayload)
+  const applyDamage      = useBattleStore((s) => s.applyDamage)
+  const addCriticalHit   = useBattleStore((s) => s.addCriticalHit)
+  const markTurretFired  = useBattleStore((s) => s.markTurretFired)
 
-  const [step, setStep]                 = useState('config')
-  const [targetId, setTargetId]         = useState('')
-  const [weaponKey, setWeaponKey]       = useState('')
+  const [step, setStep]                       = useState('config')
+  const [targetId, setTargetId]               = useState('')
+  const [weaponKey, setWeaponKey]             = useState('')
+  const [selectedTurretSlot, setSelectedTurretSlot] = useState(null)
   const [attackResult, setAttackResult]       = useState(null)
   const [damageResult, setDamageResult]       = useState(null)
   const [manualRangeBand, setManualRangeBand] = useState(null)
   const [critRoll, setCritRoll]               = useState(null)
   const [extraDamageResult, setExtraDamageResult] = useState(null)
+
+  const setWeaponSelection = (name, turretSlot) => { setWeaponKey(name); setSelectedTurretSlot(turretSlot) }
 
   const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, combatMode, outOfRange, dmBreakdown } =
     useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand)
@@ -542,6 +551,7 @@ export function AttackModal() {
 
   const handleApplyDamage = () => {
     if (!damageResult || !target) return
+    if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
     applyDamage(target.id, damageResult.total, `${weaponKey} from ${attacker.profile.name}`)
 
     if (attackResult?.hit) {
@@ -569,6 +579,7 @@ export function AttackModal() {
 
   const handleApplyCritical = () => {
     if (!critRoll || !target) return
+    if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
     const location       = getCriticalLocation(critRoll.total)
     const attackSeverity = getCriticalSeverity(attackResult.effect)
     const existingCrit   = target.criticalHits.find((c) => c.system === location)
@@ -597,13 +608,19 @@ export function AttackModal() {
     closeModal()
   }
 
+  const handleMissClose = () => {
+    if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
+    closeModal()
+  }
+
   if (step === 'config') {
     return (
       <AttackConfigStep
         enemies={enemies}
         availableWeapons={availableWeapons}
         weaponKey={weaponKey}
-        setWeaponKey={setWeaponKey}
+        selectedTurretSlot={selectedTurretSlot}
+        setWeaponSelection={setWeaponSelection}
         targetId={targetId}
         setTargetId={setTargetId}
         target={target}
@@ -633,6 +650,7 @@ export function AttackModal() {
         setAttackResult={setAttackResult}
         onNext={() => setStep('damage')}
         onClose={closeModal}
+        onMissClose={handleMissClose}
       />
     )
   }
