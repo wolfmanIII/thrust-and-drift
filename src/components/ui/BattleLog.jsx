@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useBattleStore } from '../../store/battleStore.js'
-import tdLogo from '../../assets/TD-logo-transparent.png'
 
 const MAX_VISIBLE = 60
 
@@ -59,13 +58,9 @@ export function BattleLog() {
             <span>BATTLE LOG</span>
             <span className="text-slate-600">({log.length})</span>
           </button>
-          <div className="ml-auto flex items-center gap-2 pointer-events-none">
-            <span className="font-display text-xs text-slate-600 tracking-widest leading-none">THRUST &amp; DRIFT</span>
-            <img src={tdLogo} alt="" className="w-5 h-5 opacity-50" />
-          </div>
           <button
             onClick={clearLog}
-            className="text-slate-600 hover:text-red-400 font-mono text-xs transition-colors"
+            className="ml-auto text-slate-600 hover:text-red-400 font-mono text-xs transition-colors"
           >
             CLEAR
           </button>
