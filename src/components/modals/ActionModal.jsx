@@ -207,7 +207,7 @@ export function ActionModal() {
               {crewArray.length === 0 && (
                 <p className="text-slate-600 font-mono text-xs italic">No crew assigned to this ship.</p>
               )}
-              <div className="space-y-1">
+              <div className="space-y-1 max-h-40 overflow-y-auto">
                 {crewArray.map((member) => (
                   <button
                     key={member.id}
@@ -234,7 +234,7 @@ export function ActionModal() {
                 {memberActions.length === 0 && (
                   <p className="text-slate-600 font-mono text-xs italic">No actions available for this crew member.</p>
                 )}
-                <div className="space-y-1">
+                <div className="space-y-1 max-h-40 overflow-y-auto">
                   {memberActions.map((action) => (
                     <button
                       key={action.id}
