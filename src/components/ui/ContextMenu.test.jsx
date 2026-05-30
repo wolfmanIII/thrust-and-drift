@@ -68,26 +68,20 @@ describe('ContextMenu — ship type', () => {
     expect(screen.getByText(/Declare Evasion/)).toBeInTheDocument()
   })
 
-  it('shows "Launch Missiles" when ship has Missile Rack (attack phase)', () => {
+  it('hides Attack when all turrets are Sandcasters (defensive only)', () => {
     useBattleStore.setState({
       phase: 'attack',
       ships: [makeShip({
         id: 'ship-1',
         profile: {
           name: 'Viper', hull: 10,
-          turrets: [{ weapons: ['Missile Rack'] }],
+          turrets: [{ slot: 1, weapons: ['Sandcaster'] }],
           crew: { pilot: 2 },
         },
       })],
     })
     render(<ContextMenu />)
-    expect(screen.getByText(/Launch Missiles/)).toBeInTheDocument()
-  })
-
-  it('hides "Launch Missiles" when ship has no Missile Rack', () => {
-    useBattleStore.setState({ phase: 'attack' })
-    render(<ContextMenu />)
-    expect(screen.queryByText(/Launch Missiles/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Attack/)).not.toBeInTheDocument()
   })
 
   it('hides thrust items in basic mode even during acceleration phase', () => {

@@ -49,13 +49,6 @@ function MenuShell({ x, y, menuRef, children }) {
 
 // === SHIP CONTEXT ===
 
-/** Returns true if the ship has at least one Missile Rack. */
-function hasMissileRack(ship) {
-  return (ship.profile.turrets ?? [])
-    .flatMap((t) => t.weapons)
-    .includes('Missile Rack')
-}
-
 /** Returns true if the ship has at least one offensive turret that hasn't fired this round. */
 function hasUnfiredOffensiveTurret(ship) {
   const fired = ship.firedTurrets ?? []
@@ -108,10 +101,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       {phase === 'attack' && (
         <>
           {hasUnfiredOffensiveTurret(ship) && (
-            <MenuItem icon="🎯" label="Attack…"           onClick={() => open('attack',        { shipId: targetId })} />
-          )}
-          {hasMissileRack(ship) && (
-            <MenuItem icon="🚀" label="Launch Missiles…" onClick={() => open('missileLaunch', { shipId: targetId })} />
+            <MenuItem icon="🎯" label="Attack…" onClick={() => open('attack', { shipId: targetId })} />
           )}
           <MenuDivider />
         </>

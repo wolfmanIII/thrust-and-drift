@@ -50,6 +50,9 @@ function DmRow({ label, value, highlight = false }) {
  *   rangeBand: string,
  *   distance: number,
  *   dmBreakdown: object,
+ *   isMissile: boolean,
+ *   missileCount: number,
+ *   setMissileCount: Function,
  *   onNext: Function,
  *   onClose: Function,
  * }} props
@@ -60,6 +63,7 @@ function AttackConfigStep({
   target, weapon, rangeBand, distance, dmBreakdown,
   combatMode, manualRangeBand, setManualRangeBand,
   outOfRange,
+  isMissile, missileCount, setMissileCount,
   onNext, onClose,
 }) {
   const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
@@ -98,11 +102,12 @@ function AttackConfigStep({
                   </span>
                   {wDef && (
                     <span className="text-slate-600">
-                      DM {wDef.attackDM >= 0 ? `+${wDef.attackDM}` : wDef.attackDM}
-                      {' · '}
-                      {wDef.damageDice}D dmg
-                      {' · '}
-                      max {wDef.maxRange}
+                      {w.weaponName === 'Missile Rack' ? 'Guided · 4D dmg/missile · Special' : (
+                        <>
+                          DM {wDef.attackDM >= 0 ? `+${wDef.attackDM}` : wDef.attackDM}
+                          {' · '}{wDef.damageDice}D dmg{' · '}max {wDef.maxRange}
+                        </>
+                      )}
                     </span>
                   )}
                 </button>
@@ -135,8 +140,35 @@ function AttackConfigStep({
           </div>
         </div>
 
-        {/* Range band selector — basic mode only */}
-        {combatMode === 'basic' && target && (
+        {/* Missile count — only for Missile Rack */}
+        {isMissile && (
+          <div>
+            <p className="text-slate-500 font-mono text-xs mb-1.5">Missiles in salvo (1–12)</p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setMissileCount((c) => Math.max(1, c - 1))}
+                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors"
+              >
+                −
+              </button>
+              <span className="text-(--neon-cyan) font-mono font-bold text-xl w-8 text-center">
+                {missileCount}
+              </span>
+              <button
+                onClick={() => setMissileCount((c) => Math.min(12, c + 1))}
+                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors"
+              >
+                +
+              </button>
+              <span className="text-slate-600 font-mono text-xs ml-2">
+                missiles · guided munitions
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Range band selector — basic mode, non-missile weapons only */}
+        {!isMissile && combatMode === 'basic' && target && (
           <div>
             <p className="text-slate-500 font-mono text-xs mb-1.5">Range</p>
             <div className="grid grid-cols-3 gap-1">
@@ -157,8 +189,8 @@ function AttackConfigStep({
           </div>
         )}
 
-        {/* DM summary */}
-        {weapon && target && (
+        {/* DM summary — non-missile weapons only */}
+        {!isMissile && weapon && target && (
           <div className="bg-slate-800 rounded p-3 font-mono text-xs space-y-0.5">
             <p className="text-slate-400 mb-2">DM Summary (target: 8+)</p>
             <DmRow label="Gunner" value={gunnerSkill} />
@@ -173,18 +205,29 @@ function AttackConfigStep({
           </div>
         )}
 
-        {outOfRange && weapon && (
+        {!isMissile && outOfRange && weapon && (
           <p className="text-red-500 font-mono text-xs text-center">
             {weapon.label} max range: {weapon.maxRange} — target is at {rangeBand}
           </p>
         )}
-        <button
-          onClick={onNext}
-          disabled={!weapon || !target || outOfRange || (combatMode === 'basic' && !manualRangeBand)}
-          className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          ROLL ATTACK →
-        </button>
+
+        {isMissile ? (
+          <button
+            onClick={onNext}
+            disabled={!weapon || !target}
+            className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            🚀 LAUNCH SALVO →
+          </button>
+        ) : (
+          <button
+            onClick={onNext}
+            disabled={!weapon || !target || outOfRange || (combatMode === 'basic' && !manualRangeBand)}
+            className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            ROLL ATTACK →
+          </button>
+        )}
       </div>
     </Modal>
   )
@@ -531,6 +574,7 @@ export function AttackModal() {
   const applyDamage      = useBattleStore((s) => s.applyDamage)
   const addCriticalHit   = useBattleStore((s) => s.addCriticalHit)
   const markTurretFired  = useBattleStore((s) => s.markTurretFired)
+  const launchMissile    = useBattleStore((s) => s.launchMissile)
 
   const [step, setStep]                       = useState('config')
   const [targetId, setTargetId]               = useState('')
@@ -541,6 +585,9 @@ export function AttackModal() {
   const [manualRangeBand, setManualRangeBand] = useState(null)
   const [critRoll, setCritRoll]               = useState(null)
   const [extraDamageResult, setExtraDamageResult] = useState(null)
+  const [missileCount, setMissileCount]       = useState(1)
+
+  const isMissile = weaponKey === 'Missile Rack'
 
   const setWeaponSelection = (name, turretSlot) => { setWeaponKey(name); setSelectedTurretSlot(turretSlot) }
 
@@ -613,6 +660,13 @@ export function AttackModal() {
     closeModal()
   }
 
+  const handleLaunchMissile = () => {
+    if (!target) return
+    launchMissile(attacker.id, target.id, missileCount, attacker.position, attacker.vector, 'Standard')
+    if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
+    closeModal()
+  }
+
   if (step === 'config') {
     return (
       <AttackConfigStep
@@ -632,7 +686,10 @@ export function AttackModal() {
         setManualRangeBand={setManualRangeBand}
         outOfRange={outOfRange}
         dmBreakdown={dmBreakdown}
-        onNext={() => setStep('roll')}
+        isMissile={isMissile}
+        missileCount={missileCount}
+        setMissileCount={setMissileCount}
+        onNext={isMissile ? handleLaunchMissile : () => setStep('roll')}
         onClose={closeModal}
       />
     )
