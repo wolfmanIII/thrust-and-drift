@@ -584,6 +584,9 @@ const useBattleStore = create((set, get) => {
         message: `Phase start: ${nextPhase.toUpperCase()}.`,
       })],
     }))
+    if (nextPhase === 'movement') {
+      get().resolveMovement()
+    }
   }),
 
   /** Mark the current actor as having acted; advance the actor index. */
