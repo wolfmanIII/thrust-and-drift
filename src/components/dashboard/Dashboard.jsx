@@ -265,10 +265,10 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
                   <span className="text-base block mb-0.5 text-center">↺</span>
                   <span className="block text-center">RESUME AUTOSAVE</span>
                   <span className="block font-mono text-(--neon-cyan)/50 mt-1 normal-case tracking-normal font-normal text-xs text-center">
-                    Round {autosave.round} — {PHASE_LABELS[autosave.phase] ?? autosave.phase?.toUpperCase()} — {autosave.shipCount} ship{autosave.shipCount === 1 ? '' : 's'}
+                    Round {autosave.round} — {PHASE_LABELS[autosave.phase] ?? autosave.phase?.toUpperCase()} — {autosave.ships.length} ship{autosave.ships.length === 1 ? '' : 's'}
                   </span>
                   <span className="block font-mono text-slate-600 mt-0.5 normal-case tracking-normal font-normal text-xs text-center">
-                    {autosave.savedAt}
+                    {autosave.savedAt ? new Date(autosave.savedAt).toLocaleString('en-GB') : '—'}
                   </span>
                 </button>
                 <button
@@ -409,6 +409,91 @@ function TacticalDisplayIdle() {
   )
 }
 
+/** Right column shown when an autosave exists but no file is pending. */
+function TacticalDisplayAutosave({ autosave }) {
+  const { round, phase, combatMode, ships = [], missiles = [], name, savedAt } = autosave
+
+  const FACTION_LABELS = { players: 'PLAYERS', npc: 'NPC', neutral: 'NEUTRAL' }
+  const FACTION_COLORS = { players: 'text-(--neon-cyan)', npc: 'text-red-400', neutral: 'text-slate-400' }
+
+  const byFaction = ships.reduce((acc, ship) => {
+    const f = ship.faction ?? 'neutral'
+    if (!acc[f]) acc[f] = []
+    acc[f].push(ship)
+    return acc
+  }, {})
+
+  const savedAtFormatted = savedAt ? new Date(savedAt).toLocaleString('en-GB') : '—'
+
+  return (
+    <div className="relative flex flex-col h-full overflow-hidden bg-slate-950">
+      <div
+        className="absolute inset-0 pointer-events-none opacity-25"
+        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(15,23,42,0.5) 3px, rgba(15,23,42,0.5) 4px)' }}
+      />
+      <div className="relative z-10 flex flex-col h-full">
+
+        <div className="px-6 py-3 border-b border-(--neon-cyan)/20 shrink-0 flex items-center gap-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-(--neon-cyan) animate-pulse shrink-0" />
+          <span className="font-display text-xs text-(--neon-cyan)/70 tracking-widest">TACTICAL DISPLAY</span>
+          <div className="flex-1 h-px bg-(--neon-cyan)/10" />
+          <span className="font-display text-xs text-(--neon-cyan)/40 tracking-widest">AUTOSAVE</span>
+        </div>
+
+        <div className="px-6 py-3 border-b border-slate-800/60 shrink-0 grid grid-cols-2 gap-x-8 gap-y-1">
+          {[
+            { k: 'PROTOCOL',  v: 'MgT2E/VCS-1.0' },
+            { k: 'MODE',      v: combatMode === 'vectorial' ? 'VECTORIAL' : 'BASIC' },
+            { k: 'ROUND',     v: round },
+            { k: 'PHASE',     v: PHASE_LABELS[phase] ?? phase?.toUpperCase() ?? '—' },
+            { k: 'SHIPS',     v: ships.length },
+            { k: 'MISSILES',  v: missiles.length },
+          ].map(({ k, v }) => (
+            <div key={k} className="flex justify-between gap-2">
+              <span className="font-mono text-xs text-slate-600">{k}</span>
+              <span className="font-mono text-xs text-(--neon-cyan)/70">{v}</span>
+            </div>
+          ))}
+        </div>
+
+        {name && (
+          <div className="px-6 py-2 border-b border-slate-800/40 shrink-0">
+            <span className="font-mono text-xs text-slate-600">SESSION </span>
+            <span className="font-mono text-xs text-slate-300">{name}</span>
+            <span className="font-mono text-xs text-slate-600 ml-3">SAVED </span>
+            <span className="font-mono text-xs text-slate-500">{savedAtFormatted}</span>
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <p className="font-display text-xs text-slate-600 tracking-widest mb-3">SHIP ROSTER</p>
+          {ships.length === 0 && (
+            <p className="font-mono text-xs text-slate-700">No ships on record.</p>
+          )}
+          {Object.entries(byFaction).map(([faction, factionShips]) => (
+            <div key={faction} className="mb-4">
+              <p className={`font-display text-xs tracking-widest mb-2 ${FACTION_COLORS[faction] ?? 'text-slate-400'}`}>
+                {FACTION_LABELS[faction] ?? faction.toUpperCase()} · {factionShips.length}
+              </p>
+              <div className="space-y-1.5">
+                {factionShips.map((ship) => <ShipPreviewRow key={ship.id} ship={ship} />)}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="shrink-0 px-6 py-2 border-t border-slate-800/60">
+          <div className="flex justify-between font-mono text-xs text-slate-600">
+            <span>SYS:ONLINE</span>
+            <span>RESUME OR CLEAR VIA LEFT PANEL</span>
+            <span>MONGOOSE TRAVELLER 2E</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /** Labeled data readout for session preview. */
 function DataField({ label, value, accent = false, small = false }) {
   return (
@@ -531,18 +616,11 @@ function SessionPanel() {
   const [pendingData, setPendingData]  = useState(null)
   const [autosave, setAutosave]        = useState(null)
 
-  // Read autosave metadata from IndexedDB on mount
+  // Read full autosave data from IndexedDB on mount
   useEffect(() => {
     dbGet(STORE_BATTLE, 'current').then((saved) => {
       if (!saved || !Array.isArray(saved.ships) || saved.ships.length === 0) return
-      setAutosave({
-        round:     saved.round ?? 1,
-        phase:     saved.phase ?? 'setup',
-        shipCount: saved.ships.length,
-        savedAt:   saved.savedAt
-          ? new Date(saved.savedAt).toLocaleString('en-GB')
-          : '—',
-      })
+      setAutosave(saved)
     }).catch(() => {})
   }, [])
 
@@ -621,6 +699,8 @@ function SessionPanel() {
           onCancel={handleCancelPreview}
           loading={loading}
         />
+      ) : autosave ? (
+        <TacticalDisplayAutosave autosave={autosave} />
       ) : (
         <TacticalDisplayIdle />
       )}
