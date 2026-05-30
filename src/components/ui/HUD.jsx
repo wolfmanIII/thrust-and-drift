@@ -106,6 +106,16 @@ export function HUD() {
         </div>
       )}
 
+      {/* Initiative roll call-to-action */}
+      {phase === 'initiative' && initiativeOrder.length === 0 && (
+        <button
+          onClick={() => openModal('initiative')}
+          className="pointer-events-auto bg-[--neon-cyan]/10 border border-[--neon-cyan]/50 hover:bg-[--neon-cyan]/20 text-[--neon-cyan] font-mono text-xs tracking-widest rounded px-3 py-1.5 backdrop-blur-sm transition-colors"
+        >
+          🎲 ROLL INITIATIVE →
+        </button>
+      )}
+
       {/* Phase advance — skip movement phase in basic mode (no vectors) */}
       {(combatMode === 'vectorial' || phase !== 'movement') && (
         <button

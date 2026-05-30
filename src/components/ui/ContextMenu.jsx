@@ -172,10 +172,9 @@ function MissileContextMenu({ x, y, menuRef, missile, targetId, close }) {
 // === EMPTY CELL CONTEXT ===
 
 function EmptyContextMenu({ x, y, menuRef, hex, close }) {
-  const openModal         = useUiStore((s) => s.openModal)
-  const advancePhase      = useBattleStore((s) => s.advancePhase)
-  const rollAllInitiative = useBattleStore((s) => s.rollAllInitiative)
-  const phase             = useBattleStore((s) => s.phase)
+  const openModal    = useUiStore((s) => s.openModal)
+  const advancePhase = useBattleStore((s) => s.advancePhase)
+  const phase        = useBattleStore((s) => s.phase)
 
   return (
     <MenuShell x={x} y={y} menuRef={menuRef}>
@@ -186,7 +185,7 @@ function EmptyContextMenu({ x, y, menuRef, hex, close }) {
       <MenuDivider />
       {phase === 'initiative' && (
         <>
-          <MenuItem icon="🎲" label="Roll initiative (all)" onClick={() => { rollAllInitiative(); close() }} />
+          <MenuItem icon="🎲" label="Roll Initiative…" onClick={() => { openModal('initiative'); close() }} />
           <MenuDivider />
         </>
       )}

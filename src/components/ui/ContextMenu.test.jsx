@@ -149,13 +149,13 @@ describe('ContextMenu — empty type', () => {
   it('shows initiative roll option only during initiative phase', () => {
     useBattleStore.setState({ phase: 'initiative' })
     render(<ContextMenu />)
-    expect(screen.getByText(/Roll initiative/)).toBeInTheDocument()
+    expect(screen.getByText(/Roll Initiative/)).toBeInTheDocument()
   })
 
   it('hides initiative roll option outside initiative phase', () => {
     useBattleStore.setState({ phase: 'setup' })
     render(<ContextMenu />)
-    expect(screen.queryByText(/Roll initiative/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Roll Initiative/)).not.toBeInTheDocument()
   })
 
   it('click Next phase calls advancePhase', () => {

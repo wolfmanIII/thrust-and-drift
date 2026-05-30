@@ -25,7 +25,7 @@ export function PhaseTracker() {
           onClick={() => setCollapsed((c) => !c)}
           className="w-full flex items-center justify-between px-3 py-1.5 text-slate-400 hover:text-slate-200 transition-colors"
         >
-          <span className="font-display text-xs tracking-widest">INIZIATIVA</span>
+          <span className="font-display text-xs tracking-widest">INITIATIVE</span>
           <span className="text-xs">{collapsed ? '▼' : '▲'}</span>
         </button>
 
