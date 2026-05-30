@@ -89,8 +89,9 @@ function drawGrid(ctx, width, height, offset, zoom) {
  * }} params
  */
 export function useCanvasRenderer({ canvasRef, offset, zoom }) {
-  const ships = useBattleStore((s) => s.ships)
+  const ships   = useBattleStore((s) => s.ships)
   const missiles = useBattleStore((s) => s.missiles)
+  const phase   = useBattleStore((s) => s.phase)
   const selectedShipId = useUiStore((s) => s.selectedShipId)
 
   /** rAF timestamp in ms — used for dogfight pulse animation. */
@@ -115,12 +116,14 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
     const oy = offset.current.y
     const size = HEX_SIZE * z
 
-    // --- Layer 3: Ghost positions (predicted next movement) — skip for dogfight ships ---
-    for (const ship of ships) {
-      if (ship.inDogfight !== null) continue
-      const next = hexAdd(ship.position, ship.vector)
-      const { x: gx, y: gy } = hexToPixel(next.q, next.r, size, ox, oy)
-      drawGhostToken(ctx, ship, gx, gy)
+    // --- Layer 3: Ghost positions — only during acceleration (thrust preview) ---
+    if (phase === 'acceleration') {
+      for (const ship of ships) {
+        if (ship.inDogfight !== null) continue
+        const next = hexAdd(ship.position, ship.vector)
+        const { x: gx, y: gy } = hexToPixel(next.q, next.r, size, ox, oy)
+        drawGhostToken(ctx, ship, gx, gy)
+      }
     }
 
     // --- Layer 4: Vector arrows — skip for dogfight ships (no movement during dogfight) ---
