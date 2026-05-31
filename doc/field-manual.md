@@ -14,7 +14,7 @@
 6. [Initiative Phase](#6-initiative-phase)
 7. [Acceleration Phase](#7-acceleration-phase)
 8. [Movement Phase](#8-movement-phase)
-9. [Attack Phase](#9-attack-phase) — includes §9.5 per-turret limit, §9.6 missile launch
+9. [Attack Phase](#9-attack-phase) — includes §9.5 per-turret limit, §9.6 missile launch, §9.9 reactions
 10. [Actions Phase — Crew](#10-actions-phase--crew)
 11. [Crew System](#11-crew-system)
 12. [Undo / Redo](#12-undo--redo)
@@ -126,7 +126,7 @@ round and phase. Click **NEXT PHASE ⟶** to advance.
 | ----- | ------------ |
 | **SETUP** | Place ships on the map via right-click → *Add ship here*. |
 | **INITIATIVE** | Roll initiative for all ships. Sets the acting order for the round. |
-| **ACCELERATION** | Each ship applies thrust and optionally declares evasive action. |
+| **ACCELERATION** | Each ship applies thrust to its velocity vector. |
 | **MOVEMENT** | All ships move simultaneously according to their velocity vectors. *(Vectorial mode only — skipped in Basic mode.)* |
 | **ATTACK** | Each ship in initiative order may attack or launch missiles. |
 | **ACTIONS** | Each ship in initiative order; each crew member may perform one action. |
@@ -202,14 +202,11 @@ of the delta cannot exceed the ship's available thrust
 A **ghost token** on the map previews where the ship will be next round if it
 maintains its current velocity after this thrust.
 
-### 7.2 Evasive Action
+### 7.2 Note
 
-Right-click ship → **Declare Evasion**. Allocate thrust points to evasion.
-These points are deducted from the available thrust for movement.
-
-**Evasive DM:** `−(Pilot skill × evasive thrust points)` *(MgT2e CRB p. 166)*
-
-A **pulsing yellow aura** on the token indicates active evasion.
+Full thrust is available for movement. Evasive Action is a **Reaction** declared
+during the Attack phase — not pre-allocated here *(CRB p.171)*.
+See §9.9 Reactions below.
 
 ---
 
@@ -349,6 +346,25 @@ When a target is beyond a weapon's max range:
 
 "Special" weapons (missiles, sandcasters) have no hard range cap and are
 never blocked by this rule.
+
+### 9.9 Reactions
+
+Reactions are declared by the **defender** during the Attack phase, just before
+the attack roll *(MgT2e CRB p.171)*. The app shows a **🛡 Reactions** panel
+in the Attack Config step as soon as a weapon and target are selected.
+
+Each point of unspent Thrust (after movement) can be used once as a reaction.
+Reactions accumulate across attacks in the same round — a pulsing amber aura
+on the token shows when a ship has used reactions this round.
+
+| Reaction | Availability | Mechanic |
+| -------- | ------------ | -------- |
+| **Evasive Action** | All attacks | Use stepper to allocate thrust. Each point applies −Pilot DM to this attack. Roll committed when advancing to the roll step. |
+| **Point Defence** | Missile attacks only; target must have an unfired laser turret | Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Turret marked fired immediately. |
+| **Disperse Sand** | Laser (Pulse/Beam) attacks only; target must have an unfired sandcaster turret | Gunner (turret) check 2D6 + Gunner. On success: +1D+Effect added to armour for this attack only. Turret marked fired immediately. |
+
+> If Point Defence destroys all missiles (count reaches 0), the attack does not
+> proceed — click **MARK FIRED & CLOSE** to mark the attacker's turret and close.
 
 ---
 
