@@ -187,7 +187,7 @@ export function HelpScreen() {
             {[
               ['SETUP',        'Place ships on the map via right-click → Add ship here.'],
               ['INITIATIVE',   'Roll initiative for all ships. Sets the acting order for the round.'],
-              ['ACCELERATION', 'Each ship applies thrust and optionally declares evasive action.'],
+              ['ACCELERATION', 'Each ship applies thrust to its velocity vector.'],
               ['MOVEMENT',     'All ships move simultaneously according to their velocity vectors. (Vectorial mode only — this phase is skipped in Basic mode.)'],
               ['ATTACK',       'Each ship in initiative order may attack or launch missiles.'],
               ['ACTIONS',      'Each ship in initiative order may perform one crew action.'],
@@ -225,24 +225,19 @@ export function HelpScreen() {
             <KV k="🎲 button" v="Opt-in auto-roll — fills the dice fields for that ship if the player prefers the computer to roll." />
           </Sub>
           <Sub title="TACTICS BONUS">
-            <p>If the Captain performs a Tactics check in the Actions phase of the previous round, the Effect is carried forward as a DM to next round's initiative roll. The modal has a field to enter this bonus before rolling.</p>
+            <p>If the Captain uses <span className="text-slate-200">Improve Initiative</span> in the previous Actions phase, the Effect is stored on the ship and added automatically to its next initiative roll.</p>
           </Sub>
           <Note>The Phase Tracker (right side of screen) shows the initiative order with the current actor highlighted.</Note>
         </Section>
 
         {/* ACCELERATION */}
         <Section id="acceleration" title="Acceleration Phase">
-          <p>Each ship in initiative order adjusts its velocity vector and optionally declares evasive action.</p>
+          <p>Each ship in reverse initiative order adjusts its velocity vector.</p>
 
           <Sub title="APPLYING THRUST">
             <p>Right-click ship → <span className="text-slate-200">Apply Thrust</span>.</p>
-            <p>The Thrust Modal shows the current velocity vector and a hex direction pad. Enter a delta-V (Δq / Δr) or click the direction buttons. The total magnitude of the delta cannot exceed the ship's available thrust (base thrust minus any M-Drive critical penalties).</p>
+            <p>The Thrust Modal shows the current velocity vector and a hex direction pad. Enter a delta-V (Δq / Δr) or click the direction buttons. The total magnitude cannot exceed the ship's available thrust (base thrust minus any M-Drive critical penalties).</p>
             <p>A ghost token on the map previews where the ship will be next round if it keeps its current velocity after this thrust.</p>
-          </Sub>
-
-          <Sub title="EVASIVE ACTION">
-            <p>Right-click ship → <span className="text-slate-200">Declare Evasion</span>. Allocate thrust points to evasion. These points are deducted from available thrust.</p>
-            <p>Evasive DM applied to incoming attacks = <span className="text-slate-200">−(Pilot skill × evasive thrust)</span> (MgT2e CRB p.166). A pulsing yellow aura on the token indicates active evasion.</p>
           </Sub>
         </Section>
 

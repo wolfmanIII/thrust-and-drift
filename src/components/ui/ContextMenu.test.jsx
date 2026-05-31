@@ -65,7 +65,7 @@ describe('ContextMenu — ship type', () => {
     useBattleStore.setState({ combatMode: 'vectorial', phase: 'acceleration', initiativeOrder: ['ship-1'], currentActorIndex: 0 })
     render(<ContextMenu />)
     expect(screen.getByText(/Apply Thrust/)).toBeInTheDocument()
-    expect(screen.getByText(/Declare Evasion/)).toBeInTheDocument()
+    expect(screen.queryByText(/Declare Evasion/)).not.toBeInTheDocument()
   })
 
   it('hides Attack when all turrets are Sandcasters (defensive only)', () => {

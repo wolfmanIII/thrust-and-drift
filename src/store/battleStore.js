@@ -647,27 +647,36 @@ const useBattleStore = create((set, get) => {
   // === CREW ACTION EFFECTS ===
 
   /**
-   * Declare evasive thrust. Stored as DM penalty against attackers this round.
-   * Amount is clamped to remaining available thrust.
-   * // MgT2e CRB p.166 — Evasive Action
+   * Spend thrust as a Reaction (Evasive Action) during the Attack phase.
+   * Each point grants −Pilot DM to one incoming attack. Accumulates per round;
+   * resets to 0 at start of each new round via buildNextRoundState.
+   * // MgT2e CRB p.171 — Evasive Action (Reaction)
    * @param {string} shipId
-   * @param {number} amount
+   * @param {number} amount  Thrust points to spend (clamped to remaining available)
    */
-  declareEvasiveThrust: wh(
+  spendReactionThrust: wh(
     (shipId) => !!get().ships.find((s) => s.id === shipId),
     (shipId, amount) => {
       const ship = get().ships.find((s) => s.id === shipId)
-      const maxEvasive = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0))
-      const clamped = Math.max(0, Math.min(amount, maxEvasive))
+      const spent = ship.evasiveThrust ?? 0
+      const maxReaction = Math.max(0,
+        ship.profile.thrust + (ship.thrustBonusThisRound ?? 0)
+        - ship.thrustUsedThisRound
+        - (ship.thrustPenalty ?? 0)
+        - spent
+      )
+      const clamped = Math.max(0, Math.min(amount, maxReaction))
+      if (clamped === 0) return
+      const pilotSkill = getCrewSkill(ship.profile.crew, 'pilot')
       set((s) => ({
         ships: s.ships.map((sh) =>
-          sh.id === shipId ? { ...sh, evasiveThrust: clamped } : sh
+          sh.id === shipId ? { ...sh, evasiveThrust: spent + clamped } : sh
         ),
         log: [...s.log, makeLogEntry({
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${ship.profile.name} declares ${clamped} evasive thrust (DM -${getCrewSkill(ship.profile.crew, 'pilot')} × ${clamped} to attackers).`,
+          message: `${ship.profile.name} Evasive Action: ${clamped} thrust — DM −${pilotSkill * clamped} to this attack (CRB p.171).`,
           shipId,
         })],
       }))

@@ -19,7 +19,6 @@ import { InitiativeModal } from './components/modals/InitiativeModal.jsx'
 import { ShipDetailModal } from './components/modals/ShipDetailModal.jsx'
 import { ShipProfileModal }   from './components/modals/ShipProfileModal.jsx'
 import { ThrustModal }        from './components/modals/ThrustModal.jsx'
-import { EvasiveModal }       from './components/modals/EvasiveModal.jsx'
 import { DogfightNotificationModal } from './components/modals/DogfightNotificationModal.jsx'
 import { DogfightRoundModal }        from './components/modals/DogfightRoundModal.jsx'
 import { PassingAttackModal }        from './components/modals/PassingAttackModal.jsx'
@@ -46,7 +45,6 @@ const MODAL_MAP = {
   attack:        AttackModal,
   action:        ActionModal,
   dogfightRound: DogfightRoundModal,
-  evasive:       EvasiveModal,
   initiative:    InitiativeModal,
   shipDetail:    ShipDetailModal,
   shipProfile:   ShipProfileModal,

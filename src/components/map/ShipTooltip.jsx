@@ -101,7 +101,7 @@ export function ShipTooltip() {
           value={`${thrustAvail} avail. / ${ship.profile.thrust} max`}
         />
         {ship.evasiveThrust > 0 && (
-          <StatRow label="Evasion" value={`${ship.evasiveThrust} EVA`} accent />
+          <StatRow label="Evading" value={`${ship.evasiveThrust} thrust used`} accent />
         )}
         {ship.initiative > 0 && (
           <StatRow label="Initiative" value={ship.initiative} />

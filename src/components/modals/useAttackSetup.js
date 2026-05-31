@@ -7,7 +7,7 @@
 import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS, DEFENSIVE_WEAPONS } from '../../data/weapons.js'
 import { hexDistance, getRangeBand } from '../../utils/hex.js'
-import { getRangeDM, getTargetSizeDM, getEvasiveDM, isOutOfRange } from '../../utils/combat.js'
+import { getRangeDM, getTargetSizeDM, isOutOfRange } from '../../utils/combat.js'
 import { getCrewSkill } from '../../utils/crew.js'
 
 /**
@@ -30,7 +30,7 @@ import { getCrewSkill } from '../../utils/crew.js'
  *     weaponDM:     number,
  *     rangeDM:      number,
  *     sizeDM:       number,
- *     evasiveDM:    number,
+ *     evasiveDM:    number,   // always 0 here; set dynamically by Reactions in AttackModal
  *     sensorLockDM: number,
  *     totalDM:      number,
  *   },
@@ -62,11 +62,11 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     : (manualRangeBand ?? 'Medium')
   const rangeDM   = getRangeDM(rangeBand)
   const sizeDM      = target ? getTargetSizeDM(target.profile.tonnage ?? 0) : 0
-  const evasiveDM   = target ? getEvasiveDM(getCrewSkill(attacker?.profile.crew, 'pilot'), target.evasiveThrust) : 0
+  // evasiveDM is 0 here — computed dynamically in AttackModal from Reactions (CRB p.171)
   const sensorLockDM = attacker?.sensorLockOn === targetId ? (attacker.sensorLockDM ?? 0) : 0
   const gunnerSkill = getCrewSkill(attacker?.profile.crew, 'gunner')
   const weaponDM    = weapon?.attackDM ?? 0
-  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + evasiveDM + sensorLockDM
+  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM
   const outOfRange  = weapon ? isOutOfRange(weapon.maxRange, rangeBand) : false
 
   return {
@@ -79,6 +79,6 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     rangeBand,
     combatMode,
     outOfRange,
-    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM },
+    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, totalDM },
   }
 }

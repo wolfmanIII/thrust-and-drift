@@ -57,7 +57,7 @@ export function ShipDetailModal() {
 
           <Section title="Current Round">
             <StatRow label="Initiative" value={initiative} />
-            <StatRow label="Evasion" value={`${evasiveThrust} thrust`} />
+            <StatRow label="Evading" value={evasiveThrust > 0 ? `${evasiveThrust} thrust used` : '—'} />
           </Section>
         </div>
 

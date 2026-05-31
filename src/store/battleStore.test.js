@@ -391,41 +391,58 @@ describe('startNextRound', () => {
 
 // === CREW ACTIONS ===
 
-describe('declareEvasiveThrust', () => {
-  it('sets evasiveThrust on ship', () => {
+describe('spendReactionThrust', () => {
+  it('increments evasiveThrust on ship', () => {
     useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().declareEvasiveThrust(id, 2)
+    useBattleStore.getState().spendReactionThrust(id, 2)
     expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(2)
   })
 
-  it('clamps to available thrust', () => {
-    // thrust=4, thrustUsedThisRound=3 → max=1
+  it('accumulates across multiple reactions', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().spendReactionThrust(id, 1)
+    useBattleStore.getState().spendReactionThrust(id, 1)
+    expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(2)
+  })
+
+  it('clamps to remaining available thrust', () => {
+    // thrust=4, thrustUsedThisRound=3 → max reaction=1
     useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().updateShip(id, { thrustUsedThisRound: 3 })
-    useBattleStore.getState().declareEvasiveThrust(id, 4)
+    useBattleStore.getState().spendReactionThrust(id, 4)
     expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(1)
   })
 
-  it('clamps negative amount to 0', () => {
+  it('clamps negative amount to 0 (no-op)', () => {
     useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().declareEvasiveThrust(id, -5)
+    useBattleStore.getState().spendReactionThrust(id, -5)
     expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(0)
   })
 
-  it('thrustPenalty reduces maximum evasive thrust', () => {
-    // thrust=4, penalty=2 → max evasive = 2
+  it('thrustPenalty reduces available reaction thrust', () => {
+    // thrust=4, penalty=2 → max=2
     useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().updateShip(id, { thrustPenalty: 2 })
-    useBattleStore.getState().declareEvasiveThrust(id, 4)
+    useBattleStore.getState().spendReactionThrust(id, 4)
     expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(2)
   })
 
+  it('already-spent reactions reduce available pool', () => {
+    // thrust=4, evasiveThrust=2 already spent → max remaining=2
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { evasiveThrust: 2 })
+    useBattleStore.getState().spendReactionThrust(id, 4)
+    expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(4)
+  })
+
   it('unknown shipId is no-op', () => {
-    expect(() => useBattleStore.getState().declareEvasiveThrust('ghost', 2)).not.toThrow()
+    expect(() => useBattleStore.getState().spendReactionThrust('ghost', 2)).not.toThrow()
   })
 })
 
