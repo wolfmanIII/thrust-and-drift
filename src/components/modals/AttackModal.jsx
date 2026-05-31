@@ -42,14 +42,17 @@ function DmRow({ label, value, highlight = false }) {
 /**
  * Defender reactions UI: Evasive Action, Point Defence, Disperse Sand.
  * Shown in AttackConfigStep before the action button.
+ * Player-controlled defending ships enter physical dice manually (CRB p.171).
  * // MgT2e CRB p.171 — Reactions
  */
 function ReactionsPanel({
-  target, weaponKey, isMissile,
+  target, weaponKey, isMissile, isPlayerTarget,
   reactionEvasion, setReactionEvasion, availableThrust, targetPilotSkill,
   pdTurrets, pdTurretSlot, setPdTurretSlot, pdResult, onPdRoll,
   sandTurrets, sandTurretSlot, setSandTurretSlot, sandResult, onSandRoll,
 }) {
+  const [pdManualDice, setPdManualDice]     = useState(null)
+  const [sandManualDice, setSandManualDice] = useState(null)
   const laserAttack = LASER_TYPES.includes(weaponKey)
   const evasionDM   = -(targetPilotSkill * reactionEvasion)
 
@@ -110,13 +113,21 @@ function ReactionsPanel({
             </div>
           )}
           {!pdResult ? (
-            <button
-              onClick={onPdRoll}
-              disabled={pdTurrets.length > 1 && !pdTurretSlot}
-              className="w-full py-1.5 bg-amber-900/20 border border-amber-700/50 text-amber-400 font-mono text-xs rounded hover:bg-amber-900/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              🎲 ROLL POINT DEFENCE
-            </button>
+            <div className="space-y-1.5">
+              {isPlayerTarget && (
+                <div className="flex items-center gap-2 bg-slate-800/60 rounded px-3 py-1.5">
+                  <span className="text-slate-500 font-mono text-xs">2D6:</span>
+                  <DiceInput value={null} onChange={setPdManualDice} />
+                </div>
+              )}
+              <button
+                onClick={() => onPdRoll(isPlayerTarget ? pdManualDice : null)}
+                disabled={(pdTurrets.length > 1 && !pdTurretSlot) || (isPlayerTarget && !pdManualDice)}
+                className="w-full py-1.5 bg-amber-900/20 border border-amber-700/50 text-amber-400 font-mono text-xs rounded hover:bg-amber-900/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isPlayerTarget ? 'CONFIRM POINT DEFENCE' : '🎲 ROLL POINT DEFENCE'}
+              </button>
+            </div>
           ) : (
             <div className={`rounded p-2 font-mono text-xs ${pdResult.missilesRemoved > 0 ? 'bg-green-950/30 text-green-400' : 'bg-slate-800 text-slate-400'}`}>
               T{pdResult.turretSlot} · Total {pdResult.total} · Effect {pdResult.effect >= 0 ? `+${pdResult.effect}` : pdResult.effect}
@@ -153,13 +164,21 @@ function ReactionsPanel({
             </div>
           )}
           {!sandResult ? (
-            <button
-              onClick={onSandRoll}
-              disabled={sandTurrets.length > 1 && !sandTurretSlot}
-              className="w-full py-1.5 bg-amber-900/20 border border-amber-700/50 text-amber-400 font-mono text-xs rounded hover:bg-amber-900/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              🎲 ROLL DISPERSE SAND
-            </button>
+            <div className="space-y-1.5">
+              {isPlayerTarget && (
+                <div className="flex items-center gap-2 bg-slate-800/60 rounded px-3 py-1.5">
+                  <span className="text-slate-500 font-mono text-xs">2D6:</span>
+                  <DiceInput value={null} onChange={setSandManualDice} />
+                </div>
+              )}
+              <button
+                onClick={() => onSandRoll(isPlayerTarget ? sandManualDice : null)}
+                disabled={(sandTurrets.length > 1 && !sandTurretSlot) || (isPlayerTarget && !sandManualDice)}
+                className="w-full py-1.5 bg-amber-900/20 border border-amber-700/50 text-amber-400 font-mono text-xs rounded hover:bg-amber-900/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isPlayerTarget ? 'CONFIRM DISPERSE SAND' : '🎲 ROLL DISPERSE SAND'}
+              </button>
+            </div>
           ) : (
             <div className={`rounded p-2 font-mono text-xs ${sandResult.success ? 'bg-sky-950/30 text-sky-400' : 'bg-slate-800 text-slate-400'}`}>
               Total {sandResult.total} · Effect {sandResult.effect >= 0 ? `+${sandResult.effect}` : sandResult.effect}
@@ -358,6 +377,7 @@ function AttackConfigStep({
             target={target}
             weaponKey={weaponKey}
             isMissile={isMissile}
+            isPlayerTarget={target?.faction === 'players'}
             reactionEvasion={reactions.evasion}
             setReactionEvasion={reactions.setEvasion}
             availableThrust={reactions.availableThrust}
@@ -562,32 +582,67 @@ function AttackRollStep({
  *   onClose: Function,
  * }} props
  */
-function AttackDamageStep({ damageDice, effectBonus, armor, damageResult, setDamageResult, onApply, onClose }) {
-  const handleDamageRoll = () => {
+function AttackDamageStep({ damageDice, effectBonus, armor, isPlayer, damageResult, setDamageResult, onApply, onClose }) {
+  const [manualRaw, setManualRaw] = useState('')
+
+  const handleAutoRoll = () => {
     const roll  = rollDice(damageDice, 6)
     const total = Math.max(0, roll.total + effectBonus - armor)
     setDamageResult({ roll, total, effectBonus, armor })
+  }
+
+  const handleManualConfirm = () => {
+    const raw   = Number(manualRaw)
+    if (!raw && raw !== 0) return
+    const total = Math.max(0, raw + effectBonus - armor)
+    setDamageResult({ roll: { results: [], total: raw }, total, effectBonus, armor })
   }
 
   return (
     <Modal title="Damage" onClose={onClose}>
       <div className="space-y-4">
         <div className="text-center font-mono text-xs text-slate-400">
-          {damageDice}D + Effect ({effectBonus}) − Armour ({armor})
+          {damageDice}D + Effect ({effectBonus >= 0 ? `+${effectBonus}` : effectBonus}) − Armour ({armor})
         </div>
 
         {!damageResult ? (
-          <button
-            onClick={handleDamageRoll}
-            className="w-full py-3 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-lg tracking-widest rounded hover:bg-red-900/40 transition-colors"
-          >
-            🎲 ROLL DAMAGE
-          </button>
+          isPlayer ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 bg-slate-800 rounded px-4 py-3">
+                <span className="text-slate-400 font-mono text-xs">{damageDice}D6 total:</span>
+                <input
+                  type="number"
+                  min={damageDice}
+                  max={damageDice * 6}
+                  value={manualRaw}
+                  onChange={(e) => setManualRaw(e.target.value)}
+                  className="w-20 bg-slate-700 border border-slate-600 text-(--neon-cyan) font-mono text-lg rounded text-center px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
+                  placeholder="—"
+                />
+              </div>
+              <button
+                onClick={handleManualConfirm}
+                disabled={manualRaw === '' || isNaN(Number(manualRaw))}
+                className="w-full py-3 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-lg tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                CONFIRM DAMAGE
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleAutoRoll}
+              className="w-full py-3 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-lg tracking-widest rounded hover:bg-red-900/40 transition-colors"
+            >
+              🎲 ROLL DAMAGE
+            </button>
+          )
         ) : (
           <div className="space-y-3">
             <div className="bg-slate-800 rounded p-4 text-center font-mono text-xs">
               <p className="text-slate-400">
-                [{damageResult.roll.results.join('+')}] + {effectBonus} − {armor} armour
+                {isPlayer
+                  ? `${damageResult.roll.total} (entered) + ${effectBonus} − ${armor} armour`
+                  : `[${damageResult.roll.results.join('+')}] + ${effectBonus} − ${armor} armour`}
               </p>
               <p className="text-red-400 font-bold text-2xl mt-1">{damageResult.total}</p>
               <p className="text-slate-500">damage dealt</p>
@@ -595,10 +650,10 @@ function AttackDamageStep({ damageDice, effectBonus, armor, damageResult, setDam
 
             <div className="flex gap-2">
               <button
-                onClick={() => setDamageResult(null)}
+                onClick={() => { setDamageResult(null); setManualRaw('') }}
                 className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500"
               >
-                REROLL
+                {isPlayer ? 'RE-ENTER' : 'REROLL'}
               </button>
               <button
                 onClick={onApply}
@@ -630,10 +685,13 @@ function AttackDamageStep({ damageDice, effectBonus, armor, damageResult, setDam
  * }} props
  */
 function AttackCriticalStep({
-  targetName, attackEffect, targetCrits,
+  targetName, attackEffect, targetCrits, isPlayer,
   critRoll, setCritRoll, extraDamageResult, setExtraDamageResult,
   onApply, onClose,
 }) {
+  const [manualLocation, setManualLocation] = useState(null)
+  const [manualExtra, setManualExtra]       = useState('')
+
   const attackSeverity = getCriticalSeverity(attackEffect)
   const location = critRoll ? getCriticalLocation(critRoll.total) : null
   const existingCrit = location ? targetCrits.find((c) => c.system === location) : null
@@ -644,18 +702,23 @@ function AttackCriticalStep({
     : attackSeverity
 
   const effect = location ? getCriticalEffect(location, isMaxSeverity ? 6 : effectiveSeverity) : null
-  // Max severity overflows as 6D extra damage; hull_extra_damage needs player roll
   const extraDice = isMaxSeverity ? 6 : (effect?.mechanic === 'hull_extra_damage' ? effect.value : null)
   const needsExtraRoll = extraDice !== null
   const canApply = critRoll !== null && (!needsExtraRoll || extraDamageResult !== null)
 
-  const handleLocationRoll = () => {
-    setCritRoll(roll2D6())
+  const handleLocationRoll = (diceOverride = null) => {
+    setCritRoll(diceOverride ?? roll2D6())
     setExtraDamageResult(null)
+    setManualExtra('')
   }
 
   const handleExtraRoll = () => {
-    setExtraDamageResult(rollDice(extraDice, 6).total)
+    if (isPlayer) {
+      const v = Number(manualExtra)
+      if (!isNaN(v) && manualExtra !== '') setExtraDamageResult(v)
+    } else {
+      setExtraDamageResult(rollDice(extraDice, 6).total)
+    }
   }
 
   return (
@@ -666,12 +729,28 @@ function AttackCriticalStep({
         </div>
 
         {!critRoll ? (
-          <button
-            onClick={handleLocationRoll}
-            className="w-full py-3 bg-orange-900/30 border border-orange-700/50 text-orange-400 font-mono text-lg tracking-widest rounded hover:bg-orange-900/40 transition-colors"
-          >
-            🎲 ROLL LOCATION (2D6)
-          </button>
+          isPlayer ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-center gap-2 bg-slate-800 rounded px-4 py-3">
+                <span className="text-slate-400 font-mono text-xs mr-2">2D6 location:</span>
+                <DiceInput value={null} onChange={setManualLocation} />
+              </div>
+              <button
+                onClick={() => handleLocationRoll(manualLocation)}
+                disabled={!manualLocation}
+                className="w-full py-3 bg-orange-900/30 border border-orange-700/50 text-orange-400 font-mono text-lg tracking-widest rounded hover:bg-orange-900/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                CONFIRM LOCATION
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => handleLocationRoll(null)}
+              className="w-full py-3 bg-orange-900/30 border border-orange-700/50 text-orange-400 font-mono text-lg tracking-widest rounded hover:bg-orange-900/40 transition-colors"
+            >
+              🎲 ROLL LOCATION (2D6)
+            </button>
+          )
         ) : (
           <div className="space-y-3">
             {/* Location dice */}
@@ -710,12 +789,36 @@ function AttackCriticalStep({
 
             {/* Extra damage roll (hull crit or max-severity overflow) */}
             {needsExtraRoll && extraDamageResult === null && (
-              <button
-                onClick={handleExtraRoll}
-                className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors"
-              >
-                🎲 ROLL {extraDice}D EXTRA DAMAGE
-              </button>
+              isPlayer ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 bg-slate-800 rounded px-3 py-2">
+                    <span className="text-slate-400 font-mono text-xs">{extraDice}D6 total:</span>
+                    <input
+                      type="number"
+                      min={extraDice}
+                      max={extraDice * 6}
+                      value={manualExtra}
+                      onChange={(e) => setManualExtra(e.target.value)}
+                      className="w-20 bg-slate-700 border border-slate-600 text-red-400 font-mono text-lg rounded text-center px-2 py-1 focus:outline-none focus:border-red-500/60"
+                      placeholder="—"
+                    />
+                  </div>
+                  <button
+                    onClick={handleExtraRoll}
+                    disabled={manualExtra === '' || isNaN(Number(manualExtra))}
+                    className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    CONFIRM {extraDice}D EXTRA DAMAGE
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleExtraRoll}
+                  className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors"
+                >
+                  🎲 ROLL {extraDice}D EXTRA DAMAGE
+                </button>
+              )
             )}
             {needsExtraRoll && extraDamageResult !== null && (
               <div className="bg-slate-800 rounded p-2 text-center font-mono text-xs">
@@ -827,13 +930,13 @@ export function AttackModal() {
   const sandBonusArmor = sandResult?.success ? (sandResult.bonusArmor ?? 0) : 0
 
   // ── Reaction handlers ─────────────────────────────────────────────────
-  const handlePdRoll = () => {
+  const handlePdRoll = (diceOverride = null) => {
     const slot = pdTurretSlot ?? targetPdTurrets[0]?.slot
     if (!slot || !target) return
     const turret    = target.profile.turrets?.find((t) => t.slot === slot)
     const laserBonus = Math.max(0, (turret?.weapons?.filter((w) => LASER_PD.includes(w)).length ?? 0) - 1)
     const gunner    = getCrewSkill(target.profile.crew, 'gunner')
-    const rollResult = roll2D6()
+    const rollResult = diceOverride ?? roll2D6()
     const total     = rollResult.total + gunner + laserBonus
     const effect    = total - 8
     const removed   = Math.max(0, effect)
@@ -844,11 +947,11 @@ export function AttackModal() {
     addLogEntry(`${target.profile.name} Point Defence (T${slot}): total ${total}, Effect ${effect >= 0 ? `+${effect}` : effect} — ${removed} missile${removed !== 1 ? 's' : ''} destroyed.`)
   }
 
-  const handleSandRoll = () => {
+  const handleSandRoll = (diceOverride = null) => {
     const slot = sandTurretSlot ?? targetSandTurrets[0]?.slot
     if (!slot || !target) return
     const gunner    = getCrewSkill(target.profile.crew, 'gunner')
-    const rollResult = roll2D6()
+    const rollResult = diceOverride ?? roll2D6()
     const total     = rollResult.total + gunner
     const effect    = total - 8
     const success   = effect >= 0
@@ -1030,6 +1133,7 @@ export function AttackModal() {
         targetName={target?.profile.name ?? '?'}
         attackEffect={attackResult?.effect ?? 6}
         targetCrits={target?.criticalHits ?? []}
+        isPlayer={attacker.faction === 'players'}
         critRoll={critRoll}
         setCritRoll={setCritRoll}
         extraDamageResult={extraDamageResult}
@@ -1045,6 +1149,7 @@ export function AttackModal() {
       damageDice={weapon?.damageDice ?? 1}
       effectBonus={attackResult?.effect ?? 0}
       armor={(target?.profile.armor ?? 0) + sandBonusArmor}
+      isPlayer={attacker.faction === 'players'}
       damageResult={damageResult}
       setDamageResult={setDamageResult}
       onApply={handleApplyDamage}
