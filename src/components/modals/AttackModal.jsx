@@ -54,7 +54,8 @@ function ReactionsPanel({
   const [pdManualDice, setPdManualDice]     = useState(null)
   const [sandManualDice, setSandManualDice] = useState(null)
   const laserAttack = LASER_TYPES.includes(weaponKey)
-  const evasionDM   = -(targetPilotSkill * reactionEvasion)
+  // CRB p.171: 1 thrust → dodge 1 attack; DM fixed = −pilotSkill
+  const canEvade    = availableThrust >= 1 && targetPilotSkill > 0
 
   return (
     <div className="border border-amber-700/40 rounded p-3 space-y-3 bg-amber-950/10">
@@ -62,30 +63,29 @@ function ReactionsPanel({
         🛡 {target.profile.name} — Reactions
       </p>
 
-      {/* Evasive Action — always shown */}
+      {/* Evasive Action — 1 thrust, DM fixed = −pilotSkill (CRB p.171) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between font-mono text-xs text-slate-500">
           <span>Evasive Action <span className="text-slate-700">(CRB p.171)</span></span>
           <span>Pilot {targetPilotSkill} · {availableThrust} thrust avail.</span>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setReactionEvasion(Math.max(0, reactionEvasion - 1))}
-            disabled={reactionEvasion === 0}
-            className="w-7 h-7 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          >−</button>
-          <span className={`flex-1 text-center font-mono text-sm font-bold ${reactionEvasion > 0 ? 'text-amber-400' : 'text-slate-600'}`}>
-            {reactionEvasion} / {availableThrust}
-          </span>
-          <button
-            onClick={() => setReactionEvasion(Math.min(availableThrust, reactionEvasion + 1))}
-            disabled={reactionEvasion >= availableThrust}
-            className="w-7 h-7 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          >+</button>
-          <span className={`w-20 text-right font-mono text-xs ${reactionEvasion > 0 ? 'text-amber-400' : 'text-slate-600'}`}>
-            {reactionEvasion > 0 ? `DM ${evasionDM}` : 'no evasion'}
-          </span>
-        </div>
+        <button
+          onClick={() => setReactionEvasion(!reactionEvasion)}
+          disabled={!canEvade && !reactionEvasion}
+          className={`w-full py-1.5 rounded font-mono text-xs border transition-colors ${
+            reactionEvasion
+              ? 'border-amber-500/60 bg-amber-900/30 text-amber-400'
+              : 'border-slate-700 text-slate-400 hover:border-slate-500'
+          } disabled:opacity-30 disabled:cursor-not-allowed`}
+        >
+          {reactionEvasion
+            ? `✓ EVADING — DM −${targetPilotSkill} to this attack · 1 thrust`
+            : availableThrust < 1
+              ? 'NO THRUST — cannot evade'
+              : targetPilotSkill === 0
+                ? 'PILOT 0 — evasion has no effect'
+                : `EVADE (1 thrust → DM −${targetPilotSkill})`}
+        </button>
       </div>
 
       {/* Point Defence — missile attacks + target has laser turret */}
@@ -873,7 +873,7 @@ export function AttackModal() {
   const [missileCount, setMissileCount]       = useState(1)
 
   // Reaction state (CRB p.171)
-  const [reactionEvasion, setReactionEvasion] = useState(0)
+  const [reactionEvasion, setReactionEvasion] = useState(false)
   const [pdTurretSlot, setPdTurretSlot]       = useState(null)
   const [pdResult, setPdResult]               = useState(null)
   const [sandTurretSlot, setSandTurretSlot]   = useState(null)
@@ -882,7 +882,7 @@ export function AttackModal() {
   const isMissile = weaponKey === 'Missile Rack'
 
   const resetReactions = () => {
-    setReactionEvasion(0); setPdTurretSlot(null); setPdResult(null)
+    setReactionEvasion(false); setPdTurretSlot(null); setPdResult(null)
     setSandTurretSlot(null); setSandResult(null)
   }
 
@@ -921,7 +921,8 @@ export function AttackModal() {
     .map((t) => ({ slot: t.slot }))
   : []
 
-  const dynamicEvasiveDM = -(targetPilotSkill * reactionEvasion)
+  // CRB p.171: each evasion costs 1 thrust, DM = −pilotSkill (fixed, not multiplied by thrust)
+  const dynamicEvasiveDM = reactionEvasion ? -targetPilotSkill : 0
   const augmentedDmBreakdown = {
     ...dmBreakdown,
     evasiveDM: dynamicEvasiveDM,
@@ -964,7 +965,7 @@ export function AttackModal() {
   }
 
   const handleAdvanceToRoll = () => {
-    if (reactionEvasion > 0 && target) spendReactionThrust(target.id, reactionEvasion)
+    if (reactionEvasion && target) spendReactionThrust(target.id, 1)
     setStep('roll')
   }
 

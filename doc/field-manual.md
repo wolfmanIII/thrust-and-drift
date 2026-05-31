@@ -359,7 +359,7 @@ on the token shows when a ship has used reactions this round.
 
 | Reaction | Availability | Mechanic |
 | -------- | ------------ | -------- |
-| **Evasive Action** | All attacks | Use stepper to allocate thrust. Each point applies −Pilot DM to this attack. Roll committed when advancing to the roll step. |
+| **Evasive Action** | All attacks | Toggle button: spend **1 thrust** to dodge this attack. The attack suffers **DM −Pilot skill** (fixed — not multiplied). *(CRB p.171)* |
 | **Point Defence** | Missile attacks only; target must have an unfired laser turret | Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Turret marked fired immediately. |
 | **Disperse Sand** | Laser (Pulse/Beam) attacks only; target must have an unfired sandcaster turret | Gunner (turret) check 2D6 + Gunner. On success: +1D+Effect added to armour for this attack only. Turret marked fired immediately. |
 
