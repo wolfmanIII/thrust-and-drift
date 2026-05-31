@@ -6,6 +6,46 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.8.0] — 2026-05-31
+
+### Added
+
+- **Reactions system** (CRB p.171) — defender can react before each incoming attack roll; panel shown in Attack Modal Step 1 (Config) once weapon + target are selected:
+  - **Evasive Action (Pilot)** — toggle button: spend 1 thrust to dodge the current attack; the attack suffers DM −Pilot skill (fixed, per CRB p.171 — "attack suffers a negative DM equal to the pilot's skill"); disabled when no thrust remains or Pilot skill = 0; thrust spent via `spendReactionThrust` store action on advancing to Roll step; accumulates across multiple attacks in the same round
+  - **Point Defence (Gunner)** — missile attacks only; target must have an unfired laser turret; Gunner (turret) check 2D6 + Gunner; multi-laser bonus DM+1 (2 lasers) / DM+2 (3 lasers); Effect removes that many missiles from the salvo; turret marked fired immediately; if all missiles intercepted, "MARK FIRED & CLOSE" path skips attack resolution
+  - **Disperse Sand (Gunner)** — Pulse/Beam Laser attacks only; target must have an unfired sandcaster turret; Gunner (turret) check 2D6 + Gunner; on success: rolls 1D+Effect and adds it to armour for this attack only (`sandBonusArmor` passed to damage step)
+- **Manual dice entry for player ship defenders** — player-controlled ships enter physical 2D6 for Point Defence and Disperse Sand rolls (DiceInput component); NPC defenders auto-roll unchanged
+- **Manual dice entry for all player ship roll steps** — extended across all attack resolution steps: damage roll (raw ND6 numeric input), critical location (DiceInput 2D6), extra crit damage (ND6 numeric input); NPC ships auto-roll unchanged in all steps
+- **`spendReactionThrust` store action** — replaces removed `declareEvasiveThrust`; accumulates `evasiveThrust` per round; clamped to remaining available thrust; logs evasion with effect DM
+
+### Fixed
+
+- **Evasive Action formula** (CRB p.171) — previous implementation used `-(pilotSkill × thrustPoints)` (a stepper 0–N); correct RAW is 1 thrust spent per attack dodged with a fixed DM of −pilotSkill; replaced stepper with toggle button
+- **Evasive Action phase** — moved from Acceleration phase (pre-declared) to Attack phase (Reaction); removed `EvasiveModal.jsx` and "Declare Evasion" context menu item from Acceleration; `firedTurrets` and `evasiveThrust` both reset at round start via `buildNextRoundState`
+
+### Changed
+
+- **`augmentedDmBreakdown`** — `evasiveDM` computed dynamically in `AttackModal` from live `reactionEvasion` state (not from stored ship state); `useAttackSetup` sets `evasiveDM: 0` in static breakdown
+- **DM breakdown display** — evasion row shown only when active (`evasiveDM !== 0`)
+
+### Removed
+
+- `EvasiveModal.jsx` — deleted; Evasive Action is now handled in the Reactions panel within `AttackModal`
+- "Declare Evasion" context menu item (Acceleration phase)
+
+### Tests
+
+- 609 tests (unchanged count — existing tests updated: `spendReactionThrust` suite replaces `declareEvasiveThrust`; ContextMenu test asserts "Declare Evasion" is NOT in document)
+
+### Docs
+
+- `doc/field-manual.md` — §9.9 Reactions table updated (Evasive Action: toggle mechanic, 1 thrust, DM −Pilot skill)
+- `doc/Combattimento-Spaziale.md` — Evasive Action moved from §5.2.3 (Manoeuvre phase) to new §7.1 (Reactions); §7 renumbered; PD → §7.3, Sand → §7.4
+- `doc/thrust-and-drift-space-combat-simulator-spec.md` — `EvasiveModal.jsx` removed from structure; context menu updated; `evasiveDM` comment fixed; §14.3 rewritten
+- `src/components/help/HelpScreen.jsx` — Acceleration note added; Reactions sub-section in Attack; Actions list corrected (removed INSPIRE/COORDINATE/AID GUNNERS/DAMAGE CONTROL)
+
+---
+
 ## [1.7.1] — 2026-05-31
 
 ### Added

@@ -17,6 +17,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Ship profiles** | Full CRUD — create, edit, duplicate, delete (with confirmation) |
 | **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
 | **Attack resolution** | 4-step flow: weapon/target config → 2D6 roll → damage → critical; per-turret firing limit (CRB p.164) — each turret fires once per round, slot badge (T1, T2…) shown in weapon list |
+| **Reactions (CRB p.171)** | Defender reacts before each attack roll: Evasive Action (1 thrust → DM −Pilot skill), Point Defence (laser turret → Gunner check, removes missiles), Disperse Sand (sandcaster turret → Gunner check, +1D+Effect armour vs laser); player ships enter physical dice manually |
 | **Missile launch** | Missile Rack selectable directly in Attack modal — count stepper + 🚀 LAUNCH SALVO (no DM roll); salvo token inherits launcher vector |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in; NPC ships auto-roll |
 | **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action |
@@ -84,7 +85,7 @@ A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 
 - Empty hex → **Add ship here**
 - Ship hex → actions valid for the **current phase** AND **current actor** only:
-  - *Acceleration*: Apply Thrust, Declare Evasion (current actor only)
+  - *Acceleration*: Apply Thrust (current actor only)
   - *Attack*: Attack (current actor only; disappears when all turrets fired)
   - *Actions*: Crew Action (current actor only)
   - *Always*: Ship Sheet, Remove from battle
@@ -141,7 +142,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-605 tests across utils, Zustand stores, hooks, and UI components.
+609 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 
@@ -171,8 +172,7 @@ src/
 │   │   ├── ShipProfileModal.jsx
 │   │   ├── AddShipModal.jsx
 │   │   ├── ThrustModal.jsx
-│   │   ├── EvasiveModal.jsx
-│   │   ├── AttackModal.jsx
+│   │   ├── AttackModal.jsx     ← Attack resolution + Reactions panel (CRB p.171)
 │   │   ├── MissileLaunchModal.jsx
 │   │   ├── ShipDetailModal.jsx
 │   │   ├── ActionModal.jsx
