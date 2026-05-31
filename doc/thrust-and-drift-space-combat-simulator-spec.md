@@ -96,8 +96,7 @@ thrust-and-drift/
     │   │   ├── ShipProfileModal.jsx   ← Crea/modifica profilo nave (modale)
     │   │   ├── AddShipModal.jsx       ← Sceglie profilo da aggiungere in battaglia
     │   │   ├── ThrustModal.jsx        ← Applica Thrust con preview mappa
-    │   │   ├── EvasiveModal.jsx       ← Dichiara thrust evasivo
-    │   │   ├── AttackModal.jsx        ← Risolve attacco con calcolo DM
+    │   │   ├── AttackModal.jsx        ← Risolve attacco con calcolo DM (+ pannello Reactions)
     │   │   ├── MissileLaunchModal.jsx ← Lancia salvo missili
     │   │   ├── ShipDetailModal.jsx    ← Scheda completa nave
     │   │   ├── ActionModal.jsx        ← Azioni fase Actions (engineer, ecc.)
@@ -479,7 +478,7 @@ function rollAttack({
   rangeDM,        // calcolato da getRangeDM()
   weaponDM,       // Pulse Laser +2, Beam Laser +4, ecc.
   targetSizeDM,   // +1 per ogni 1000 ton bersaglio (max +6)
-  evasiveDM,      // negativo: - (pilot skill × thrust evasivo)
+  evasiveDM,      // negativo: - (pilot skill) fisso — 1 thrust speso per attacco (CRB p.171)
 }) {
   const roll = rollDice(2, 6)
   const total = roll + gunnerSkill + dexDM + aidGunnersDM
@@ -634,7 +633,6 @@ Appare al right-click su un token nave. Le azioni visibili dipendono dalla **fas
 │ [Nome Nave] — Hull: 18/22    │  ← sempre visibile
 │ ─────────────────────────── │
 │ 🚀 Applica Thrust            │  ← solo fase: acceleration (vectorial)
-│ 🛡 Dichiara Evasione         │  ← solo fase: acceleration (vectorial)
 │ ─────────────────────────── │
 │ 🎯 Attacca...                │  ← solo fase: attack
 │ 🚀 Lancia Missili...         │  ← solo fase: attack + ha Missile Rack
@@ -1219,13 +1217,16 @@ hexDistance({q:0, r:0}, thrustDelta) <= thrustAvailable
 
 ### 14.3 Evasive Action
 
-Il Thrust riservato all'evasione non viene speso per cambiare vettore. Rimane "in tasca" come DM negativo agli attacchi nemici:
+L'Evasive Action è una **Reaction** dichiarata durante la Fase di Attacco, non pre-dichiarata in Accelerazione *(CRB p.171)*.
 
 ```text
-DM evasione = -(pilot_skill) per ogni punto di thrust evasivo dichiarato
+Costo:   1 thrust point per attacco schivato
+DM:      -(pilot_skill)  — fisso, non moltiplicato per il thrust
+Fonte:   thrust non usato per il movimento in questo round
+Reset:   evasiveThrust si azzera a inizio round successivo
 ```
 
-Il giocatore dichiara quanti thrust riserva all'evasione prima degli attacchi. Non può cambiare il valore dopo che un attacco è stato dichiarato contro di lui.
+Il pannello Reactions appare in AttackModal (Step 1 Config) non appena arma e bersaglio sono selezionati. Il difensore usa un toggle (non uno stepper): o spende 1 thrust per schivare quell'attacco, o non lo fa. Più attacchi nello stesso round possono essere schivati spendendo 1 thrust ciascuno, fino ad esaurimento.
 
 ### 14.4 Missili — Meccanica
 

@@ -239,6 +239,7 @@ export function HelpScreen() {
             <p>The Thrust Modal shows the current velocity vector and a hex direction pad. Enter a delta-V (Δq / Δr) or click the direction buttons. The total magnitude cannot exceed the ship's available thrust (base thrust minus any M-Drive critical penalties).</p>
             <p>A ghost token on the map previews where the ship will be next round if it keeps its current velocity after this thrust.</p>
           </Sub>
+          <Note>Full thrust is available for movement. Evasive Action is a Reaction declared during the Attack phase — not pre-allocated here (CRB p.171). See the Attack Phase section below.</Note>
         </Section>
 
         {/* MOVEMENT */}
@@ -255,7 +256,15 @@ export function HelpScreen() {
           <Sub title="ATTACK MODAL — STEP 1: CONFIG">
             <KV k="Weapon" v="Select which turret/weapon to fire." />
             <KV k="Target" v="Select the target ship." />
-            <KV k="DM Breakdown" v="The modal shows all applicable DMs: range band, gunner skill, evasion, sensor lock, weapon trait, target size, aid gunners." />
+            <KV k="DM Breakdown" v="The modal shows all applicable DMs: gunner skill, weapon trait, range band, target size, evasion DM (when active), sensor lock DM (when active)." />
+          </Sub>
+
+          <Sub title="REACTIONS (CRB p.171)">
+            <p>The defender can declare Reactions in Step 1 before the attack roll.</p>
+            <KV k="Evasive Action" v="Toggle: spend 1 thrust to dodge this attack. The attack suffers DM −Pilot skill (fixed). Button disabled if no thrust remains or Pilot skill is 0." />
+            <KV k="Point Defence" v="Missile attacks only. Gunner (turret) check — Effect removes that many missiles from the salvo. Turret marked fired." />
+            <KV k="Disperse Sand" v="Laser attacks only. Gunner (turret) check — on success adds 1D+Effect to armour for this attack only. Turret marked fired." />
+            <p className="text-slate-600 italic text-xs">Player-controlled defending ships enter physical dice manually for PD and Sand rolls.</p>
           </Sub>
 
           <Sub title="ATTACK MODAL — STEP 2: ROLL">
@@ -266,18 +275,18 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="ATTACK MODAL — STEP 3: DAMAGE">
-            <p>On a hit, roll damage dice for the weapon. Enter or confirm the damage roll. Damage is applied to the target's hull.</p>
+            <p>On a hit, roll damage dice for the weapon. Player ships enter the raw dice total manually; NPC ships auto-roll. Damage is applied to the target's hull.</p>
           </Sub>
 
           <Sub title="ATTACK MODAL — STEP 4: CRITICAL HIT">
-            <p>Triggered automatically when effect ≥ 6, or when damage crosses a 10% hull threshold (Sustained Damage rule, MgT2e CRB p.169).</p>
+            <p>Triggered when effect ≥ 6 and damage penetrates armour, or when damage crosses a 10% hull threshold (Sustained Damage, MgT2e CRB p.169).</p>
             <KV k="Location" v="2D6 roll on the location table (Hull, M-Drive, J-Drive, Power Plant, Weapons, Sensors, Bridge, Fuel, Cargo, Crew, Computer)." />
             <KV k="Severity" v="Effect − 5, clamped 1–6. Stacks with existing criticals on the same system." />
-            <KV k="M-Drive" v="Severity 1 = no thrust penalty. Sev 2–4 = −1 thrust/round. Sev 5–6 = thrust reduced to 0." />
+            <KV k="M-Drive" v="Sev 1 = no penalty. Sev 2–4 = −1 thrust/round. Sev 5–6 = thrust reduced to 0." />
           </Sub>
 
           <Sub title="LAUNCHING MISSILES">
-            <p>Right-click ship → <span className="text-slate-200">Launch Missiles</span> (Attack phase only). Select weapon and target. The missile salvo spawns as a token inheriting the launcher's velocity. Each round in the Movement phase it advances toward the target using its remaining thrust.</p>
+            <p>In the Attack modal, select <span className="text-slate-200">Missile Rack</span> from the weapon list, choose a target, adjust salvo count (1–12), then click Launch. The salvo spawns as a token inheriting the launcher's velocity. No dice roll required at launch.</p>
           </Sub>
 
           <Sub title="SENSOR LOCK">
@@ -299,13 +308,13 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="AVAILABLE ACTIONS">
-            <KV k="Captain" v="TACTICS — 2D6 + Leadership; effect carried as initiative DM next round. INSPIRE — morale boost (descriptive). COORDINATE — aid another crew member's action." />
-            <KV k="Engineer" v="OVERLOAD DRIVE — push thrust beyond rated maximum for one round (risk of damage). REPAIR SYSTEM — attempt to repair a critical hit. DAMAGE CONTROL — reduce hull damage." />
-            <KV k="Gunner" v="RELOAD — reload a weapon that requires it. AID GUNNERS — provide a DM bonus to the next attack roll." />
-            <KV k="Sensors" v="SENSOR LOCK — Electronics(sensors) check; grants attack DM vs locked target. ELECTRONIC WARFARE — attempt to break an enemy sensor lock." />
+            <KV k="Captain" v="IMPROVE INITIATIVE — 2D6 + Leadership (8+). Effect added to this ship's initiative roll next round (CRB p.166)." />
+            <KV k="Engineer" v="OVERLOAD M-DRIVE — 2D6 + Engineer (8+). +Effect Thrust available this round (CRB p.167). REPAIR SYSTEM — 2D6 + Engineer (8+). Removes 1 critical hit (CRB p.167)." />
+            <KV k="Gunner" v="RELOAD TURRET — Automatic, no roll. Reloads 1 missile turret (CRB p.167)." />
+            <KV k="Sensors" v="SENSOR LOCK — 2D6 + Electronics (8+). +Effect DM to attacks vs locked target (CRB p.167). ELECTRONIC WARFARE — 2D6 + Electronics (8+). Removes an enemy sensor lock (CRB p.167)." />
           </Sub>
 
-          <Note>Auto actions (like some Captain actions) resolve immediately without a dice roll. Others require a 2D6 check and show dice input for player ships.</Note>
+          <Note>Player ships show empty dice inputs for all non-automatic rolls. NPC ships have a 🎲 auto-roll button. After each action, click ANOTHER ACTION to act with a second crew member or CLOSE to exit.</Note>
         </Section>
 
         {/* CREW SYSTEM */}
