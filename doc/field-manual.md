@@ -129,7 +129,7 @@ round and phase. Click **NEXT PHASE ⟶** to advance.
 | **ACCELERATION** | Each ship applies thrust and optionally declares evasive action. |
 | **MOVEMENT** | All ships move simultaneously according to their velocity vectors. *(Vectorial mode only — skipped in Basic mode.)* |
 | **ATTACK** | Each ship in initiative order may attack or launch missiles. |
-| **ACTIONS** | Each ship in initiative order may perform one crew action. |
+| **ACTIONS** | Each ship in initiative order; each crew member may perform one action. |
 | **END OF ROUND** | Round counter increments. Click NEXT PHASE to begin the next round. |
 
 ---
@@ -174,11 +174,11 @@ Right-click any hex → **Roll Initiative**. The modal shows all ships.
 | **NPC ships** | Auto-rolled on confirm. Shown as *🎲 auto* in the modal. |
 | **🎲 button** | Opt-in auto-roll — fills the dice fields for that ship if the player prefers the app to roll. |
 
-### 6.2 Tactics Bonus
+### 6.2 Initiative Bonus
 
-If the Captain performs a Tactics check in the Actions phase of the previous
-round, the Effect is carried forward as a DM to the next round's initiative
-roll. The modal has a field to enter this bonus before rolling.
+If the Captain uses **Improve Initiative** in the Actions phase of the previous
+round, the Effect is stored on the ship and added automatically to its next
+initiative roll — no manual input required.
 
 > The Phase Tracker (right side of screen) shows the initiative order with the
 > current actor highlighted.
@@ -253,13 +253,12 @@ Each ship in initiative order may make one attack or launch a missile salvo.
 Select the weapon to fire and the target ship. The modal shows a full DM
 breakdown:
 
-- Range band DM
 - Gunner skill DM
-- Evasive action DM
-- Sensor lock DM
 - Weapon trait DM
+- Range band DM
 - Target size DM
-- Aid Gunners DM
+- Evasion DM *(shown only when active)*
+- Sensor Lock DM *(shown only when active)*
 
 ### 9.2 Attack Modal — Step 2: Roll
 
@@ -392,7 +391,7 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 
 > A skill level of 0 in a role grants **no actions** for that role.
 > Skills with level ≥ 1 unlock the role's full action list.
-
+>
 > **NPC ships** resolve all non-automatic rolls automatically when the GM
 > clicks 🎲 EXECUTE ACTION.
 
