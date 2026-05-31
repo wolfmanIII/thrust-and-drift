@@ -104,7 +104,7 @@ Una nave può spendere Thrust su più round per scalare distanze maggiori.
 
 ### 5.2 Manovre di Combattimento
 
-Il Thrust non usato per il movimento può essere usato per le manovre seguenti. Ogni manovra (eccetto Evasive Action) può essere tentata **una sola volta per round**.
+Il Thrust non usato per il movimento può essere usato per le manovre seguenti. Ogni manovra può essere tentata **una sola volta per round**.
 
 #### 5.2.1 Aid Gunners
 
@@ -124,12 +124,6 @@ Il pilota si posiziona lungo un vettore di attacco ottimale per assistere i gunn
 #### 5.2.2 Docking
 
 Il pilota esegue un **Pilot check**. Se la nave nemica non vuole essere attraccata, i due piloti eseguono check contrapposti — la nave che tenta l'attracco subisce **DM −2**. Se l'attracco va a buon fine, sono possibili azioni di abbordaggio.
-
-#### 5.2.3 Evasive Action
-
-Ogni punto di **Thrust rimasto inutilizzato** (dopo movimento e altre manovre) può essere usato per schivare **un** attacco in arrivo. Per ogni schivata dichiarata, l'attaccante subisce un **DM**[^1] **negativo pari al livello di Pilot skill del pilota**.
-
-> Esempio: pilota con Pilot 2 e 3 Thrust disponibili → può schivare fino a 3 attacchi separati; ogni attaccante colpisce con DM −2.
 
 ---
 
@@ -264,9 +258,19 @@ Una nave a distanza **Short o inferiore** può tentare un colpo mirato con armi 
 
 ## 7. Reactions
 
-Le reazioni possono essere eseguite solo dai membri dell'equipaggio nel ruolo specifico. L'Evasive Action (Pilot) viene dichiarata durante la Fase di Manovra.
+Le reazioni si dichiarano **durante la Fase di Attacco**, in risposta a un attacco in arrivo. Possono essere eseguite solo dai membri dell'equipaggio nel ruolo specifico. *(MgT2e CRB p.171)*
 
-### 7.1 Point Defence (Gunner)
+### 7.1 Evasive Action (Pilot)
+
+Il pilota dedica **1 punto di Thrust inutilizzato** (non speso nel movimento) per schivare **un** attacco in arrivo. Quell'attacco subisce un **DM negativo pari al livello di Pilot skill del pilota** (fisso — non si moltiplica per il Thrust speso).
+
+- Costa sempre **1 thrust** per attacco schivato
+- Ogni punto di Thrust non usato nel movimento può essere usato una volta per schivare un attacco separato
+- Il Thrust speso per evasione si accumula sul token: si azzera all'inizio del round successivo
+
+> Esempio: pilota con Pilot 2 e 3 Thrust disponibili → può schivare fino a 3 attacchi separati (1 thrust ciascuno); ogni attaccante colpisce con DM −2.
+
+### 7.3 Point Defence (Gunner)
 
 Un gunner con una torretta a laser (Pulse o Beam) può intercettare missili in arrivo. L'arma usata per Point Defence **non può attaccare** nello stesso round (e viceversa).
 
@@ -281,7 +285,7 @@ Il gunner esegue un check **Gunner(turret)** (Average 8+):
 
 **L'Effetto del check** indica il numero di missili eliminati dalla salva.
 
-### 7.2 Disperse Sand (Gunner)
+### 7.4 Disperse Sand (Gunner)
 
 Un gunner con una torretta che monta sandcaster può bloccare attacchi laser. Ogni uso del Disperse Sand **consuma un canister di sand**.
 
@@ -354,7 +358,7 @@ Il pilota può tentare di aumentare la distanza dalla salva, scalando un range b
 
 #### 8.3.3 Point Defence (Gunner)
 
-Vedi sezione 7.1.
+Vedi sezione 7.3.
 
 ### 8.4 Missili e Bersagli
 
