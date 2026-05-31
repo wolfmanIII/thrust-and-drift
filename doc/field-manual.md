@@ -355,13 +355,20 @@ never blocked by this rule.
 
 ## 10. Actions Phase — Crew
 
-Each ship in initiative order may perform one crew action.
+Each **crew member** may perform one action per round *(MgT2e CRB p.171)*.
+A ship with multiple crew members can use each of them once — the modal stays
+open after each roll so the GM can chain actions until all crew have acted.
 
-Right-click ship → **Crew Action**. The modal has three steps:
+Right-click ship → **Crew Action**. Steps:
 
-1. **Pick a crew member** — only members with relevant skills are shown.
-2. **Pick an action** — filtered to the member's skill set.
-3. **Roll** — if required (see below).
+1. **Crew member** — only members who have not yet acted this round are listed.
+   Already-used members are hidden until the next round.
+2. **Action** — the list shows only actions that match the member's skills.
+3. **Target** *(Sensor Lock only)* — select the ship to lock.
+4. **Roll** — enter 2D6 for player ships; NPC ships have a 🎲 auto-roll button.
+
+After the roll the modal shows the result (SUCCESS / FAILED + Effect).
+Click **ANOTHER ACTION** to act with a second crew member, or **CLOSE** to exit.
 
 ### 10.1 Skill DM Override
 
@@ -370,41 +377,24 @@ DM. The GM can override this value for specialisations
 (e.g. Engineer(M-Drive) 3 vs. generic Engineer 2).
 The **↺** button resets to the base skill level.
 
-### 10.2 Available Actions by Role
+### 10.2 Available Actions
 
-#### Captain
+All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 
-| Action | Effect |
-| ------ | ------ |
-| **TACTICS** | 2D6 + Leadership; Effect carried as initiative DM next round. |
-| **INSPIRE** | Morale boost (descriptive, no roll). |
-| **COORDINATE** | Aid another crew member's next action. |
+| Role | Action | Difficulty | Effect on success |
+| ---- | ------ | ---------- | ----------------- |
+| **Captain** | **Improve Initiative** | 8+ (Leadership) | +Effect added to this ship's initiative roll next round *(CRB p.166)* |
+| **Engineer** | **Overload M-Drive** | 8+ (Engineer) | +Effect Thrust available this round *(CRB p.167)* |
+| **Engineer** | **Repair System** | 8+ (Engineer) | Removes 1 critical hit from this ship *(CRB p.167)* |
+| **Gunner** | **Reload Turret** | Automatic | Reloads 1 missile turret; no roll required *(CRB p.167)* |
+| **Sensors** | **Sensor Lock** | 8+ (Electronics) | +Effect DM to all attacks against the selected target *(CRB p.167)* |
+| **Sensors** | **Electronic Warfare** | 8+ (Electronics) | Removes an enemy sensor lock from this ship *(CRB p.167)* |
 
-#### Engineer
+> A skill level of 0 in a role grants **no actions** for that role.
+> Skills with level ≥ 1 unlock the role's full action list.
 
-| Action | Effect |
-| ------ | ------ |
-| **OVERLOAD DRIVE** | Push thrust beyond rated maximum for one round (risk of damage). |
-| **REPAIR SYSTEM** | Attempt to repair a critical hit on a specific system. |
-| **DAMAGE CONTROL** | Reduce hull damage. |
-
-#### Gunner
-
-| Action | Effect |
-| ------ | ------ |
-| **RELOAD** | Reload a weapon that requires it. |
-| **AID GUNNERS** | Provide a DM bonus to the next attack roll. |
-
-#### Sensors Operator
-
-| Action | Effect |
-| ------ | ------ |
-| **SENSOR LOCK** | Electronics(sensors) check; grants attack DM vs. locked target. |
-| **ELECTRONIC WARFARE** | Attempt to break an enemy sensor lock. |
-
-> **Note:** Auto actions (some Captain actions) resolve immediately without a
-> dice roll. Others require a 2D6 check. Player ships show dice input fields;
-> NPC ships auto-roll.
+> **NPC ships** resolve all non-automatic rolls automatically when the GM
+> clicks 🎲 EXECUTE ACTION.
 
 ---
 
@@ -416,11 +406,11 @@ Ships have a list of **named crew members**, each with individual skill ratings.
 
 | Abbrev | Skill | Used for |
 | ------ | ----- | -------- |
-| **PLT** | Pilot | Initiative, evasion, thrust checks |
-| **CPT** | Captain | Tactics, inspire, coordinate actions |
-| **ENG** | Engineer | Drive overload, repair, damage control |
-| **GNR** | Gunner | Attack DM, reload, aid gunners |
-| **SEN** | Sensors | Sensor lock, electronic warfare |
+| **PLT** | Pilot | Initiative roll, evasion DM, dogfight/pursuit checks |
+| **CPT** | Captain | Improve Initiative action |
+| **ENG** | Engineer | Overload M-Drive action, Repair System action |
+| **GNR** | Gunner | Attack DM, Reload Turret action |
+| **SEN** | Sensors | Sensor Lock action, Electronic Warfare action |
 
 Skill levels range from **0 to 5**.
 
