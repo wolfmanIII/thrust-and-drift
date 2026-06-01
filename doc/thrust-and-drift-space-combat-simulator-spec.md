@@ -121,7 +121,7 @@ thrust-and-drift/
     ├── utils/
     │   ├── hex.js                     ← Matematica esagonale (flat-top)
     │   ├── combat.js                  ← Calcoli combattimento (DM, danni, range band)
-    │   ├── crew.js                    ← Helper equipaggio array (getCrewSkill, migrateCrew, blankCrewMember)
+    │   ├── crew.js                    ← Helper equipaggio array (getCrewSkill, getEffectiveSkill, getAssignedSkill, buildDefaultAssignments, migrateCrew, blankCrewMember)
     │   ├── io.js                      ← Import/export JSON via File API
     │   ├── dice.js                    ← Lancio dadi e formattazione risultati
     │   └── db.js                      ← Wrapper IndexedDB (openDB, dbGet, dbPut, dbDelete)
@@ -143,7 +143,7 @@ Suite Vitest collocata accanto ai file sorgente (`*.test.js` / `*.test.jsx`):
 | `utils/hex.test.js` | `hex.js` — coordinate, distanza, pixel↔hex, range band |
 | `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco |
 | `utils/dice.test.js` | `dice.js` — rollDice, formatDiceResults, formatCheckResult |
-| `utils/crew.test.js` | `crew.js` — getCrewSkill (array/legacy/edge), migrateCrew, blankCrewMember |
+| `utils/crew.test.js` | `crew.js` — getCrewSkill, getEffectiveSkill, getAssignedSkill, buildDefaultAssignments, migrateCrew, blankCrewMember |
 | `store/battleStore.test.js` | battleStore — tutte le azioni, export/import |
 | `store/profilesStore.test.js` | profilesStore — CRUD, import/export |
 | `store/uiStore.test.js` | uiStore — screen, modal, selection, contextMenu |
