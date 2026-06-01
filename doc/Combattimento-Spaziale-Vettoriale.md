@@ -49,7 +49,7 @@ Ogni punto di Thrust applicato in una direzione = +1 alla componente vettoriale 
 Ogni round dura **6 minuti** di gioco (come da combattimento spaziale standard).
 
 | Fase | Ordine | Descrizione |
-|---|---|---|
+| --- | --- | --- |
 | **1. Accelerazione** | Iniziativa **inversa** | Ogni nave dichiara e applica il Thrust al proprio vettore |
 | **2. Movimento** | Simultaneo | Tutte le navi si muovono del proprio vettore attuale |
 | **3. Attacco e Azioni** | Come da CR | Attacchi, EW, riparazioni, ecc. |
@@ -78,7 +78,7 @@ Questa è la differenza fondamentale rispetto al sistema Core Rulebook:
 **Esempio:** nave con Thrust 2 che accelera verso Est per 2 round, poi mantiene la velocità, poi frena.
 
 | Round | Thrust applicato | Vettore risultante | Spazi percorsi quel round |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 | +2 Est | (2, 0) | 2 |
 | 2 | +2 Est | (4, 0) | 4 |
 | 3 | nessuno | (4, 0) | 4 |
@@ -102,7 +102,7 @@ Al round 2 la nave percorre **4 spazi** pur avendo Thrust 2 — perché ha accum
 Il Thrust disponibile si distribuisce **liberamente** tra le due componenti X e Y (positivo o negativo). Esempi per una nave con Thrust 4:
 
 | Manovra | Thrust X | Thrust Y | Vettore finale (da fermo) |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Accelerare verso Est | +4 | 0 | (4, 0) |
 | Verso Nord-Ovest | −2 | +2 | (−2, +2) |
 | Est con deriva Nord | +3 | +1 | (3, 1) |
@@ -128,7 +128,7 @@ Il Thrust totale disponibile si distribuisce tra tutte e tre le componenti. Il m
 La distanza tra le navi determina le bande di distanza, calcolate in caselle (distanza euclidea).
 
 | Banda | Distanza in Caselle |
-|---|---|
+| --- | --- |
 | Adjacent / Close | 0 (stessa casella) |
 | Short | 1–2 |
 | Medium | 3–15 |
@@ -145,7 +145,7 @@ La distanza tra le navi determina le bande di distanza, calcolate in caselle (di
 Per scenari che iniziano a grande distanza (100 diametri pianeta, gigante gassoso, ecc.) è impraticabile mantenere la scala 1:1. Si usano scale maggiorate, che allungano anche la durata del round.
 
 | Scala | Larghezza Casella | Durata Round | Uso consigliato |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | ×1 | 648 km | 6 minuti | Orbita, combattimento ravvicinato |
 | ×10 | 6.480 km | 24 minuti | Satellite orbitale, 100 diametri per mondi piccoli |
 | ×100 | 64.800 km | 96 minuti | 100 diametri per mondi grandi, navi veloci |
