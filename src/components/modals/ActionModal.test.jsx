@@ -11,7 +11,7 @@ const SHIP = {
     turrets: [{ slot: 1, weapons: ['Beam Laser'] }],
     crew: [
       { id: 'crew-1', name: 'Gunner', skills: { gunner: 4 } },
-      { id: 'crew-2', name: 'Captain', skills: { captain: 2 } },
+      { id: 'crew-2', name: 'Captain', skills: { leadership: 2 } },
     ],
   },
   faction: 'npc',

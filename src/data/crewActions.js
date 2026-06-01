@@ -5,12 +5,12 @@
  */
 
 export const CREW_ACTIONS = {
-  captain: [
+  leadership: [
     {
       id: 'improve_initiative',
       label: 'Improve Initiative',
       difficulty: 8,
-      skill: 'captain',
+      skill: 'leadership',
       description: "Leadership check. Success: +Effect to initiative next round. // MgT2e CRB p.166",
     },
   ],

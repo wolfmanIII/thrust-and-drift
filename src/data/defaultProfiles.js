@@ -125,7 +125,7 @@ export const DEFAULT_PROFILES = [
     ],
     crew: [
       cm('Pilot', { pilot: 2 }),
-      cm('Captain', { captain: 1 }),
+      cm('Captain', { leadership: 1, tactics: 1 }),
       cm('Chief Engineer', { engineer: 2 }),
       cm('Gunner', { gunner: 2 }),
       cm('Sensors Officer', { sensors: 1 }),

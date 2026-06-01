@@ -6,8 +6,8 @@ import { describe, it, expect } from 'vitest'
 import { getCrewSkill, migrateCrew, blankCrewMember, CREW_SKILLS } from './crew.js'
 
 describe('CREW_SKILLS', () => {
-  it('contains the 5 expected roles', () => {
-    expect(CREW_SKILLS).toEqual(['pilot', 'captain', 'engineer', 'gunner', 'sensors'])
+  it('contains the 6 expected roles', () => {
+    expect(CREW_SKILLS).toEqual(['pilot', 'leadership', 'tactics', 'engineer', 'gunner', 'sensors'])
   })
 })
 
@@ -41,7 +41,7 @@ describe('getCrewSkill — array format', () => {
   })
 
   it('returns 0 when no member has the skill', () => {
-    expect(getCrewSkill(crew, 'captain')).toBe(0)
+    expect(getCrewSkill(crew, 'leadership')).toBe(0)
   })
 
   it('returns max when multiple members share the same skill', () => {
@@ -66,12 +66,23 @@ describe('getCrewSkill — legacy object format (backwards compat)', () => {
   })
 
   it('returns 0 for missing key', () => {
-    expect(getCrewSkill(legacy, 'captain')).toBe(0)
+    expect(getCrewSkill(legacy, 'leadership')).toBe(0)
   })
 
   it('returns 0 for null/undefined crew', () => {
     expect(getCrewSkill(null, 'pilot')).toBe(0)
     expect(getCrewSkill(undefined, 'pilot')).toBe(0)
+  })
+})
+
+describe('getCrewSkill — backward compat (captain → leadership)', () => {
+  it('reads captain key as leadership from legacy object', () => {
+    expect(getCrewSkill({ captain: 2 }, 'leadership')).toBe(2)
+  })
+
+  it('reads captain key as leadership from new array format', () => {
+    const crew = [{ id: '1', name: 'Captain', skills: { captain: 2 } }]
+    expect(getCrewSkill(crew, 'leadership')).toBe(2)
   })
 })
 
@@ -101,5 +112,13 @@ describe('migrateCrew', () => {
   it('returns the input unchanged when already an array', () => {
     const arr = [{ id: 'x', name: 'A', skills: {} }]
     expect(migrateCrew(arr)).toBe(arr)
+  })
+
+  it('remaps legacy captain key to leadership', () => {
+    const result = migrateCrew({ captain: 2, pilot: 1 })
+    const leadership = result.find((m) => m.skills.leadership !== undefined)
+    expect(leadership).toBeDefined()
+    expect(leadership.skills.leadership).toBe(2)
+    expect(result.find((m) => m.skills.captain !== undefined)).toBeUndefined()
   })
 })
