@@ -32,7 +32,7 @@ Il computer di bordo, se dotato dei software appropriati, può coprire alcuni ru
 Prima di entrare in combattimento è necessario stabilire la distanza tra le navi coinvolte.
 
 | Range Band | Distanza |
-|---|---|
+| --- | --- |
 | Adjacent | 1 km o meno |
 | Close | 1–10 km |
 | Short | 11–1.250 km |
@@ -67,7 +67,7 @@ Il capitano può eseguire un check **Tactics(Naval)** all'inizio del combattimen
 
 ### 4.2 Initiative check
 
-**2D6 + Pilot skill + Ship Thrust [+ effetto Tactics(Naval)]**
+Formula: **2D6 + Pilot skill + Ship Thrust [+ effetto Tactics(Naval)]**
 
 Chi ha il punteggio più alto agisce per primo. In caso di parità, va prima la nave con il **Thrust più alto**.
 
@@ -86,7 +86,7 @@ In ordine di iniziativa, ogni nave alloca il proprio **Thrust** tra movimento e 
 Il pilota decide se avvicinarsi o allontanarsi da navi nemiche. La tabella indica il Thrust necessario per scalare di **un** range band:
 
 | Range Band | Distanza | Thrust Richiesto | Esempio |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Adjacent | 1 km o meno | 1 | Navi agganciate |
 | Close | 1–10 km | 1 | Navi vicine / dogfight |
 | Short | 11–1.250 km | 2 | Stessa orbita |
@@ -110,10 +110,10 @@ Il Thrust non usato per il movimento può essere usato per le manovre seguenti. 
 
 Il pilota si posiziona lungo un vettore di attacco ottimale per assistere i gunner. Esegue un **Pilot check** per avviare una task chain con i propri gunner.
 
-**Task Chain**
+#### Task Chain
 
 | Risultato del check precedente | DM al check successivo |
-|---|---|
+| --- | --- |
 | Fallito con Effetto −6 o peggio | −3 |
 | Fallito con Effetto −2 a −5 | −2 |
 | Fallito con Effetto −1 | −1 |
@@ -135,12 +135,12 @@ Terminata la fase di manovra, in ordine di iniziativa ogni nave può lanciare at
 
 ### 6.1 Tiro di Attacco
 
-**2D6 + Gunner(specializzazione) + DM DEX + DM Aid Gunners + DM Range + DM Arma + DM Dimensione Bersaglio − DM Evasive Action**
+Formula: **2D6 + Gunner(specializzazione) + DM DEX + DM Aid Gunners + DM Range + DM Arma + DM Dimensione Bersaglio − DM Evasive Action**
 
 #### Modificatori Comuni
 
 | Bonus | DM | Penalità | DM |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Short Range | +1 | Long Range | −2 |
 | Pulse Laser | +2 | Very Long Range | −4 |
 | Beam Laser | +4 | Distant Range | −6 |
@@ -151,7 +151,7 @@ Terminata la fase di manovra, in ordine di iniziativa ogni nave può lanciare at
 ### 6.2 Spacecraft Damage Scale
 
 | Attaccante → Bersaglio | DM per colpire | Danno |
-|---|---|---|
+| --- | --- | --- |
 | Arma Ground → Ground target | +0 | ×1 |
 | Arma Ground → Spacecraft target | +2 | ÷10 |
 | Arma Spacecraft → Ground target | −2 | ×10 |
@@ -176,7 +176,7 @@ I Missili **non** beneficiano di questo bonus (vedi sezione 8).
 #### 6.3.2 Spacecraft Scale Weapons
 
 | Arma | TL | Gittata | Danno | Ton | Costo | Tratti |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | Beam Laser | 10 | Medium | 1D | — | MCr0.5 | — |
 | Missile Rack | 7 | Special | 4D | — | MCr0.75 | Smart |
 | Missile (nucleare) | — | Special | 1DD | — | — | Radiation, Smart |
@@ -198,16 +198,14 @@ Quando lo Hull raggiunge 0, la nave è **inattiva**: nessuna energia, nessun sup
 
 Un attacco che va a segno con **Effetto 6 o più** e causa danno infligge un **colpo critico** a un sistema vitale.
 
-**Severity = Effetto dell'attacco − 5**
-
-*(Effetto 6 → Severity 1; Effetto 7 → Severity 2; ecc.)*
+Severity = Effetto dell'attacco − 5 (Effetto 6 → Severity 1; Effetto 7 → Severity 2; ecc.)
 
 Tira **2D** per determinare il sistema colpito:
 
-**Critical Hit Location**
+#### Critical Hit Location
 
 | 2D | Sistema |
-|---|---|
+| --- | --- |
 | 2 | Sensors |
 | 3 | Power Plant |
 | 4 | Fuel |
@@ -224,10 +222,10 @@ Tira **2D** per determinare il sistema colpito:
 
 Se un sistema subisce un secondo colpo critico alla stessa posizione, la nuova Severity è pari al **massimo tra** la Severity del nuovo colpo **e** quella precedente **+1**, applicando immediatamente i nuovi effetti. Una posizione a Severity 6 non può più subire colpi critici: ogni nuovo colpo critico su quella posizione infligge invece **6D danni extra** allo Hull (ignorando l'Armatura).
 
-**Critical Hit Effects**
+#### Critical Hit Effects
 
 | Posizione | Severity 1 | Severity 2 | Severity 3 | Severity 4 | Severity 5 | Severity 6 |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | Sensors | Tutti i check sui sensori subiscono DM−2 | Sensori inattivi oltre Medium range | Sensori inattivi oltre Short range | Sensori inattivi oltre Close range | Sensori inattivi oltre Adjacent range | Sensori disabilitati |
 | Power Plant | Potenza ridotta del 10% | Potenza ridotta del 10% | Potenza ridotta del 50% | Potenza ridotta a 0 | Hull Severity +1. Potenza ridotta a 0 | Hull Severity +1D. Potenza ridotta a 0 |
 | Fuel | Perdita 1D ton/ora | Perdita 1D ton/round | Perdita 1D×10% del carburante | Serbatoio distrutto | Serbatoio distrutto, Hull Severity +1 | Serbatoio distrutto, Hull Severity +1D |
@@ -278,7 +276,7 @@ Il Point Defence si può tentare **una volta per round**, solo quando una salva 
 
 Il gunner esegue un check **Gunner(turret)** (Average 8+):
 
-**2D6 + Gunner(turret) + DM DEX [+ DM torretta]**
+Formula: **2D6 + Gunner(turret) + DM DEX [+ DM torretta]**
 
 - Torretta con 2 laser dello stesso tipo: **DM +1**
 - Torretta con 3 laser dello stesso tipo: **DM +2**
@@ -291,7 +289,7 @@ Un gunner con una torretta che monta sandcaster può bloccare attacchi laser. Og
 
 Il gunner esegue un check **Gunner(turret)** (Average 8+):
 
-**2D6 + Gunner(turret) + DM DEX**
+Formula: **2D6 + Gunner(turret) + DM DEX**
 
 Se il check ha successo, per quell'attacco laser l'armatura della nave aumenta di **1D + Effetto del check** [+ 1 per ogni sandcaster aggiuntivo].
 
@@ -309,10 +307,10 @@ I missili usati contro bersagli a distanza **Adjacent o Close** perdono il tratt
 
 I missili vengono lanciati in **salve**: tutti i missili di una nave contro un singolo bersaglio nello stesso round formano una salva. Thrust effettivo della salva: **10**.
 
-**Missile Flight**
+#### Missile Flight
 
 | Distanza | Round all'impatto |
-|---|---|
+| --- | --- |
 | Medium o inferiore | Immediato |
 | Long | 1 |
 | Very Long | 4 |
@@ -345,7 +343,7 @@ Contro una salva di missili in arrivo sono disponibili tre contromisure:
 
 Check **Difficult (10+) Electronics(sensors)**:
 
-**2D6 + Electronics(sensors) + DM INT**
+Formula: **2D6 + Electronics(sensors) + DM INT**
 
 **L'Effetto del check** indica il numero di missili eliminati dalla salva.
 
@@ -364,7 +362,7 @@ Vedi sezione 7.3.
 
 Quando la salva raggiunge il bersaglio, esegue il tiro di attacco. Non si usano la Gunner skill né i modificatori di distanza standard:
 
-**2D6 + [numero di missili nella salva] [− 2 se lanciati da Distant]**
+Formula: **2D6 + [numero di missili nella salva] [− 2 se lanciati da Distant]**
 
 - Il bersaglio può dichiarare **Evasive Action** normalmente
 - I missili hanno quasi sempre il tratto **Smart**: si usa il TL del missile o della nave che spara, il maggiore dei due
@@ -373,7 +371,7 @@ Quando la salva raggiunge il bersaglio, esegue il tiro di attacco. Non si usano 
 
 Se il tiro di attacco ha successo, tira il danno di **un singolo missile** (4D) e sottrai l'Armatura. **Non aggiungere l'Effetto al danno.** Moltiplica invece il risultato per l'Effetto del tiro di attacco.
 
-**Danno finale = (4D − Armatura) × Effetto**
+Formula: **Danno finale = (4D − Armatura) × Effetto**
 
 > L'Effetto **non può superare il numero di missili rimasti nella salva** al momento dell'impatto.
 
@@ -393,10 +391,10 @@ Il dogfighting è **automatico** se due navi ostili si trovano a distanza Close 
 
 All'inizio di ogni round, i piloti di entrambe le navi eseguono **Pilot check contrapposti** con i seguenti modificatori:
 
-**Dogfighting Modifiers**
+#### Dogfighting Modifiers
 
 | Condizione | Modificatore |
-|---|---|
+| --- | --- |
 | Nave da 50 ton o più | −1 |
 | Nave da 100 ton o più | −2 |
 | Per ogni 100 ton oltre le 100 ton | −1 aggiuntivo |
@@ -453,7 +451,7 @@ Il salto in combattimento segue le regole normali (Core Rulebook p. 157), ma i c
 
 L'ingegnere porta fuori linea alcuni sistemi per liberare energia ad altri. Check **Engineer(power)** (1 round, EDU):
 
-**2D6 + Engineer(power) + DM EDU**
+Formula: **2D6 + Engineer(power) + DM EDU**
 
 Se il check ha successo, l'ingegnere può spegnere qualsiasi numero di sistemi, liberando la loro quota di alimentazione. Riportarli online richiede un round aggiuntivo.
 
@@ -461,7 +459,7 @@ Se il check ha successo, l'ingegnere può spegnere qualsiasi numero di sistemi, 
 
 Sovraccaricando il motore di manovra, l'ingegnere guadagna Thrust extra. Check **Difficult (10+) Engineer(m-drive)** (1 round, INT):
 
-**2D6 + Engineer(m-drive) + DM INT**
+Formula: **2D6 + Engineer(m-drive) + DM INT**
 
 - Successo: Thrust della nave **+1** per il round successivo
 - Effetto −6 o peggio: il motore di manovra subisce un **colpo critico con Severity 1**
@@ -471,7 +469,7 @@ Sovraccaricando il motore di manovra, l'ingegnere guadagna Thrust extra. Check *
 
 Sovraccaricando il generatore di energia, l'ingegnere aumenta la potenza disponibile. Check **Difficult (10+) Engineer(power)** (1 round, INT):
 
-**2D6 + Engineer(power) + DM INT**
+Formula: **2D6 + Engineer(power) + DM INT**
 
 - Successo: Power della nave **+10%** per il round successivo
 - Effetto −6 o peggio: il generatore subisce un **colpo critico con Severity 1**
@@ -481,7 +479,7 @@ Sovraccaricando il generatore di energia, l'ingegnere aumenta la potenza disponi
 
 L'ingegnere tenta una riparazione rapida di un sistema colpito da un colpo critico. Check **Average (8+) Engineer(sistema colpito)** (1 round, INT o EDU):
 
-**2D6 + Engineer(sistema colpito) + DM INT o EDU − Severity del sistema**
+Formula: **2D6 + Engineer(sistema colpito) + DM INT o EDU − Severity del sistema**
 
 - DM **cumulativo +1** per ogni round consecutivo dedicato alla stessa riparazione
 - Se il sistema subisce un **nuovo colpo critico** alla stessa posizione durante la riparazione, si ricomincia da capo (DM accumulato azzerato)
@@ -496,7 +494,7 @@ Ricarica una torretta con missile rack o sandcaster (1 round). Una torretta in r
 
 Il sensor operator ottiene un aggancio migliorato su un bersaglio nemico. Check **Electronics(sensors)** (Average 8+, INT):
 
-**2D6 + Electronics(sensors) + DM INT**
+Formula: **2D6 + Electronics(sensors) + DM INT**
 
 Se il check ha successo, tutti gli attacchi della nave contro quel bersaglio ottengono **DM +2** finché il sensor lock non viene interrotto (vedi Electronic Warfare).
 
@@ -506,13 +504,13 @@ Il sensor operator può tentare due tipi di guerra elettronica:
 
 **Disturbo Comunicazioni (Jamming):** check contrapposto **Electronics(comms)** contro il sensor operator della nave nemica.
 
-**2D6 + Electronics(comms) + DM INT**
+Formula: **2D6 + Electronics(comms) + DM INT**
 
 Se vince, le comunicazioni della nave nemica vengono disturbate.
 
 **Rompere un Sensor Lock:** check contrapposto **Electronics(sensors)** contro il sensor operator della nave nemica.
 
-**2D6 + Electronics(sensors) + DM INT**
+Formula: **2D6 + Electronics(sensors) + DM INT**
 
 Se vince, il sensor lock attivo sul bersaglio viene interrotto.
 
@@ -533,7 +531,7 @@ Qualsiasi membro dell'equipaggio può cambiare ruolo, perdendo tutte le proprie 
 ### 11.1 Sensor Target
 
 | Range | Visual | Thermal | EM | Active Radar/Lidar | Passive Radar/Lidar | NAS | Densitometer |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | Adjacent | Full | Full | Full | Full | Limited | Full | Full |
 | Close | Full | Full | Full | Full | Limited | Limited | Full |
 | Short | Full | Full | Full | Limited | Minimal | Minimal | Limited |
@@ -545,11 +543,9 @@ Qualsiasi membro dell'equipaggio può cambiare ruolo, perdendo tutte le proprie 
 ### 11.2 Sensor Detail
 
 | Dettaglio | Visual | Thermal | EM | Active Radar/Lidar | NAS | Densitometer |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | Full | Dettagli fini | Gradienti di temperatura fini, sorgenti di calore individuali sull'esterno | Sistemi individuali | Dettagli fini | Attività cerebrale individuale | Dettagli fini |
 | Limited | Forma e struttura | Zone calde/fredde | Sorgenti EM potenti | Forma e struttura | Livello di attività | Struttura interna |
 | Minimal | Profilo di base | Caldo/freddo generale | Presenza o assenza di attività | Profilo di base | Presenza o assenza di attività | Struttura esterna |
 
 ---
-
-[^1]: **DM** (*Dice Modifier*) è un modificatore che si somma o sottrae al risultato dei dadi. Può essere fisso (es. DM +1 per Short Range) oppure derivato da una caratteristica del personaggio. Il **DM di una caratteristica** dipende dal suo valore numerico secondo questa tabella: 0 → DM −3 · 1–2 → DM −2 · 3–5 → DM −1 · 6–8 → DM 0 · 9–11 → DM +1 · 12–14 → DM +2 · 15+ → DM +3. Esempio: DEX 10 dà DM +1, STR 5 dà DM −1.
