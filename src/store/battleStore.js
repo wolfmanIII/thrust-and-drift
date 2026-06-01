@@ -304,10 +304,19 @@ const useBattleStore = create((set, get) => {
   rollAllInitiative: wh((tacticsEffects = {}, diceOverrides = {}) => {
     const { ships, round } = get()
     const rolled = ships.map((ship) => {
+      // NPC ships with Tactics skill auto-roll their Tactics check; player effects come from tacticsEffects map.
+      let tacticsBonus = tacticsEffects[ship.id] ?? 0
+      if (!(ship.id in tacticsEffects) && ship.faction !== 'players') {
+        const tacticsSkill = getCrewSkill(ship.profile.crew, 'tactics')
+        if (tacticsSkill > 0) {
+          const tacticsRoll = roll2D6()
+          tacticsBonus = tacticsRoll.total + tacticsSkill - 8
+        }
+      }
       const result = rollInitiative(
         getCrewSkill(ship.profile.crew, 'pilot'),
         ship.profile.thrust,
-        (tacticsEffects[ship.id] ?? 0) + (ship.initiativeBonusNextRound ?? 0),
+        tacticsBonus + (ship.initiativeBonusNextRound ?? 0),
         diceOverrides[ship.id] ?? null,
       )
       return { id: ship.id, initiative: result.total, roll: result }

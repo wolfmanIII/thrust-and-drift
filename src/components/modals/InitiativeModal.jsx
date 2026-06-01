@@ -1,6 +1,7 @@
 /**
  * InitiativeModal — roll initiative for all ships.
- * Player ships: manual dice entry (physical or opt-in auto-roll). NPC ships: auto-rolled on confirm.
+ * Player ships: manual dice entry. NPC ships: auto-rolled on confirm.
+ * Tactics(naval) check is optional — Effect added to initiative if entered.
  * // MgT2e CRB p.160 — Initiative
  */
 
@@ -17,10 +18,18 @@ export function InitiativeModal() {
   const ships             = useBattleStore((s) => s.ships)
   const initiativeOrder   = useBattleStore((s) => s.initiativeOrder)
 
-  // Manual dice per player ship: null = not yet rolled.
+  // Manual initiative dice per player ship: null = not yet rolled.
   const [playerDice, setPlayerDice]   = useState(() => {
     const map = {}
     ships.filter((s) => s.faction === 'players').forEach((s) => { map[s.id] = null })
+    return map
+  })
+  // Optional Tactics(naval) check dice per player ship (only ships with tactics > 0).
+  const [tacticsDice, setTacticsDice] = useState(() => {
+    const map = {}
+    ships
+      .filter((s) => s.faction === 'players' && getCrewSkill(s.profile.crew, 'tactics') > 0)
+      .forEach((s) => { map[s.id] = null })
     return map
   })
   const [rerollCount, setRerollCount] = useState(0)
@@ -29,35 +38,53 @@ export function InitiativeModal() {
   const playerShips = ships.filter((s) => s.faction === 'players')
   const npcShips    = ships.filter((s) => s.faction !== 'players')
 
-  const setShipDice = (shipId, dice) =>
-    setPlayerDice((prev) => ({ ...prev, [shipId]: dice }))
+  const setShipDice    = (shipId, dice) => setPlayerDice((prev) => ({ ...prev, [shipId]: dice }))
+  const setShipTactics = (shipId, dice) => setTacticsDice((prev) => ({ ...prev, [shipId]: dice }))
+
+  /** Tactics Effect = 2D6 + tactics skill − 8 (CRB p.160). */
+  const tacticsEffect = (ship) => {
+    const dice = tacticsDice[ship.id]
+    if (!dice) return 0
+    return dice.total + getCrewSkill(ship.profile.crew, 'tactics') - 8
+  }
 
   const allEntered = playerShips.every((s) => playerDice[s.id] !== null)
-
-  const handleConfirm = () => {
-    rollAllInitiative({}, playerDice)
-    setConfirmed(true)
-  }
-
-  const handleReroll = () => {
-    const map = {}
-    playerShips.forEach((s) => { map[s.id] = null })
-    setPlayerDice(map)
-    setRerollCount((c) => c + 1)
-    setConfirmed(false)
-  }
 
   const previewTotal = (ship) => {
     const dice = playerDice[ship.id]
     if (!dice) return '?'
-    return dice.total + getCrewSkill(ship.profile.crew, 'pilot') + ship.profile.thrust
+    return dice.total + getCrewSkill(ship.profile.crew, 'pilot') + ship.profile.thrust + tacticsEffect(ship)
+  }
+
+  const handleConfirm = () => {
+    // Build tactics effects map for all ships (player entries + NPC auto via store).
+    const playerTacticsEffects = {}
+    playerShips.forEach((ship) => {
+      const effect = tacticsEffect(ship)
+      if (effect !== 0) playerTacticsEffects[ship.id] = effect
+    })
+    rollAllInitiative(playerTacticsEffects, playerDice)
+    setConfirmed(true)
+  }
+
+  const handleReroll = () => {
+    const diceMap = {}
+    playerShips.forEach((s) => { diceMap[s.id] = null })
+    const tacticsMap = {}
+    playerShips
+      .filter((s) => getCrewSkill(s.profile.crew, 'tactics') > 0)
+      .forEach((s) => { tacticsMap[s.id] = null })
+    setPlayerDice(diceMap)
+    setTacticsDice(tacticsMap)
+    setRerollCount((c) => c + 1)
+    setConfirmed(false)
   }
 
   return (
     <Modal title="Initiative Roll" onClose={closeModal}>
       <div className="space-y-4">
         <p className="text-slate-400 font-mono text-xs">
-          Formula: 2D6 + Pilot + Thrust // MgT2e CRB p.160
+          Formula: 2D6 + Pilot + Thrust [+ Tactics Effect] // MgT2e CRB p.160
         </p>
 
         {!confirmed ? (
@@ -68,27 +95,49 @@ export function InitiativeModal() {
                 <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">
                   Player Ships — roll dice
                 </p>
-                <div className="space-y-1.5">
-                  {playerShips.map((ship) => (
-                    <div
-                      key={ship.id}
-                      className="flex items-center gap-2 bg-slate-800 rounded px-3 py-2"
-                    >
-                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
-                      <span className="text-slate-300 font-mono text-xs flex-1 min-w-0 truncate">
-                        {ship.profile.name}
-                      </span>
-                      <DiceInput
-                        key={`${ship.id}-${rerollCount}`}
-                        value={null}
-                        onChange={(d) => setShipDice(ship.id, d)}
-                      />
-                      <span className="text-slate-600 font-mono text-xs">→</span>
-                      <span className={`font-mono text-sm font-bold w-6 text-right ${previewTotal(ship) === '?' ? 'text-slate-600' : 'text-(--neon-cyan)'}`}>
-                        {previewTotal(ship)}
-                      </span>
-                    </div>
-                  ))}
+                <div className="space-y-2">
+                  {playerShips.map((ship) => {
+                    const tacticsSkill = getCrewSkill(ship.profile.crew, 'tactics')
+                    const effect       = tacticsEffect(ship)
+                    return (
+                      <div key={ship.id} className="bg-slate-800 rounded px-3 py-2 space-y-1.5">
+                        {/* Initiative row */}
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
+                          <span className="text-slate-300 font-mono text-xs flex-1 min-w-0 truncate">
+                            {ship.profile.name}
+                          </span>
+                          <DiceInput
+                            key={`init-${ship.id}-${rerollCount}`}
+                            value={null}
+                            onChange={(d) => setShipDice(ship.id, d)}
+                          />
+                          <span className="text-slate-600 font-mono text-xs">→</span>
+                          <span className={`font-mono text-sm font-bold w-6 text-right ${previewTotal(ship) === '?' ? 'text-slate-600' : 'text-(--neon-cyan)'}`}>
+                            {previewTotal(ship)}
+                          </span>
+                        </div>
+                        {/* Tactics check row — only if captain has Tactics skill */}
+                        {tacticsSkill > 0 && (
+                          <div className="flex items-center gap-2 pl-4 border-l border-slate-700">
+                            <span className="text-slate-500 font-mono text-xs w-24 shrink-0">
+                              Tactics {tacticsSkill} (opt.)
+                            </span>
+                            <DiceInput
+                              key={`tac-${ship.id}-${rerollCount}`}
+                              value={null}
+                              onChange={(d) => setShipTactics(ship.id, d)}
+                            />
+                            {tacticsDice[ship.id] && (
+                              <span className={`font-mono text-xs font-bold ${effect >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                Effect {effect >= 0 ? '+' : ''}{effect}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -100,18 +149,23 @@ export function InitiativeModal() {
                   NPC Ships — auto
                 </p>
                 <div className="space-y-1">
-                  {npcShips.map((ship) => (
-                    <div
-                      key={ship.id}
-                      className="flex items-center gap-3 bg-slate-800/50 rounded px-3 py-1.5"
-                    >
-                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
-                      <span className="text-slate-500 font-mono text-xs flex-1 min-w-0 truncate">
-                        {ship.profile.name}
-                      </span>
-                      <span className="text-slate-700 font-mono text-xs">🎲 auto</span>
-                    </div>
-                  ))}
+                  {npcShips.map((ship) => {
+                    const tacticsSkill = getCrewSkill(ship.profile.crew, 'tactics')
+                    return (
+                      <div
+                        key={ship.id}
+                        className="flex items-center gap-3 bg-slate-800/50 rounded px-3 py-1.5"
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
+                        <span className="text-slate-500 font-mono text-xs flex-1 min-w-0 truncate">
+                          {ship.profile.name}
+                        </span>
+                        <span className="text-slate-700 font-mono text-xs">
+                          🎲 auto{tacticsSkill > 0 ? ` + tactics ${tacticsSkill}` : ''}
+                        </span>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}
