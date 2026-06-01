@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
-import { getCrewSkill } from '../../utils/crew.js'
+import { getEffectiveSkill } from '../../utils/crew.js'
 import { DiceInput } from '../forms/DiceInput.jsx'
 
 export function InitiativeModal() {
@@ -28,7 +28,7 @@ export function InitiativeModal() {
   const [tacticsDice, setTacticsDice] = useState(() => {
     const map = {}
     ships
-      .filter((s) => s.faction === 'players' && getCrewSkill(s.profile.crew, 'tactics') > 0)
+      .filter((s) => s.faction === 'players' && getEffectiveSkill(s.profile.crew, s.crewAssignments, 'tactics') > 0)
       .forEach((s) => { map[s.id] = null })
     return map
   })
@@ -45,7 +45,7 @@ export function InitiativeModal() {
   const tacticsEffect = (ship) => {
     const dice = tacticsDice[ship.id]
     if (!dice) return 0
-    return dice.total + getCrewSkill(ship.profile.crew, 'tactics') - 8
+    return dice.total + getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'tactics') - 8
   }
 
   const allEntered = playerShips.every((s) => playerDice[s.id] !== null)
@@ -53,7 +53,7 @@ export function InitiativeModal() {
   const previewTotal = (ship) => {
     const dice = playerDice[ship.id]
     if (!dice) return '?'
-    return dice.total + getCrewSkill(ship.profile.crew, 'pilot') + ship.profile.thrust + tacticsEffect(ship)
+    return dice.total + getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot') + ship.profile.thrust + tacticsEffect(ship)
   }
 
   const handleConfirm = () => {
@@ -72,7 +72,7 @@ export function InitiativeModal() {
     playerShips.forEach((s) => { diceMap[s.id] = null })
     const tacticsMap = {}
     playerShips
-      .filter((s) => getCrewSkill(s.profile.crew, 'tactics') > 0)
+      .filter((s) => getEffectiveSkill(s.profile.crew, s.crewAssignments, 'tactics') > 0)
       .forEach((s) => { tacticsMap[s.id] = null })
     setPlayerDice(diceMap)
     setTacticsDice(tacticsMap)
@@ -97,7 +97,7 @@ export function InitiativeModal() {
                 </p>
                 <div className="space-y-2">
                   {playerShips.map((ship) => {
-                    const tacticsSkill = getCrewSkill(ship.profile.crew, 'tactics')
+                    const tacticsSkill = getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'tactics')
                     const effect       = tacticsEffect(ship)
                     return (
                       <div key={ship.id} className="bg-slate-800 rounded px-3 py-2 space-y-1.5">
@@ -150,7 +150,7 @@ export function InitiativeModal() {
                 </p>
                 <div className="space-y-1">
                   {npcShips.map((ship) => {
-                    const tacticsSkill = getCrewSkill(ship.profile.crew, 'tactics')
+                    const tacticsSkill = getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'tactics')
                     return (
                       <div
                         key={ship.id}

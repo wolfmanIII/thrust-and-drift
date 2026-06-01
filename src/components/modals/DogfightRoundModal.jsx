@@ -10,7 +10,7 @@ import { Modal } from './Modal.jsx'
 import { DiceInput } from '../forms/DiceInput.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
-import { getCrewSkill } from '../../utils/crew.js'
+import { getEffectiveSkill } from '../../utils/crew.js'
 import {
   getTonnageDM,
   rollDogfightPilot,
@@ -26,7 +26,7 @@ import {
  * // MgT2e CRB p.138 §6.1
  */
 function computeShipDMs(ship, groupShips, group) {
-  const pilotSkill    = getCrewSkill(ship.profile.crew, 'pilot')
+  const pilotSkill    = getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot')
   const tonnageDM     = getTonnageDM(ship.profile.tonnage)
   const thrustDM      = Math.max(0, (ship.profile.thrust ?? 0) - (ship.thrustUsedThisRound ?? 0))
   const enemies       = groupShips.filter((s) => s.faction !== ship.faction)
@@ -38,8 +38,8 @@ function computeShipDMs(ship, groupShips, group) {
 /** Best pilot among a list of ships (for representative checks). */
 function bestPilot(shipList) {
   return shipList.reduce((best, s) => {
-    const sk = getCrewSkill(s.profile.crew, 'pilot')
-    return !best || sk > getCrewSkill(best.profile.crew, 'pilot') ? s : best
+    const sk = getEffectiveSkill(s.profile.crew, s.crewAssignments, 'pilot')
+    return !best || sk > getEffectiveSkill(best.profile.crew, best.crewAssignments, 'pilot') ? s : best
   }, null)
 }
 
@@ -89,7 +89,7 @@ function escapeCheckTotals(ship, pursuer, fleeDice, pursuerDice) {
   if (!fleeDice) return null
   const freeThrust = (s) => Math.max(0, (s.profile.thrust ?? 0) - (s.thrustUsedThisRound ?? 0))
   const fleeResult = rollDogfightPilot({
-    pilotSkill:   getCrewSkill(ship.profile.crew, 'pilot'),
+    pilotSkill:   getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot'),
     tonnage:      ship.profile.tonnage,
     thrustDM:     freeThrust(ship),
     diceOverride: fleeDice,
@@ -102,7 +102,7 @@ function escapeCheckTotals(ship, pursuer, fleeDice, pursuerDice) {
     return { fleeTotal: fleeResult.total, pursuerTotal: null, escaped: null }
   }
   const pursuerResult = rollDogfightPilot({
-    pilotSkill:   getCrewSkill(pursuer.profile.crew, 'pilot'),
+    pilotSkill:   getEffectiveSkill(pursuer.profile.crew, pursuer.crewAssignments, 'pilot'),
     tonnage:      pursuer.profile.tonnage,
     thrustDM:     freeThrust(pursuer),
     diceOverride: pursuerDice,
@@ -122,12 +122,12 @@ function escapeCheckTotals(ship, pursuer, fleeDice, pursuerDice) {
 function EscapeCheckRow({ ship, pursuer, totals, onFleeRoll, onPursuerRoll }) {
   const freeThrust = (s) => Math.max(0, (s.profile.thrust ?? 0) - (s.thrustUsedThisRound ?? 0))
   const fleeDMs = {
-    pilot:   getCrewSkill(ship.profile.crew, 'pilot'),
+    pilot:   getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot'),
     tonnage: getTonnageDM(ship.profile.tonnage),
     thrust:  freeThrust(ship),
   }
   const pursuerDMs = pursuer ? {
-    pilot:   getCrewSkill(pursuer.profile.crew, 'pilot'),
+    pilot:   getEffectiveSkill(pursuer.profile.crew, pursuer.crewAssignments, 'pilot'),
     tonnage: getTonnageDM(pursuer.profile.tonnage),
     thrust:  freeThrust(pursuer),
   } : null

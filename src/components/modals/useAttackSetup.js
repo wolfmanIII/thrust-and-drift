@@ -8,13 +8,14 @@ import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS, DEFENSIVE_WEAPONS } from '../../data/weapons.js'
 import { hexDistance, getRangeBand } from '../../utils/hex.js'
 import { getRangeDM, getTargetSizeDM, isOutOfRange } from '../../utils/combat.js'
-import { getCrewSkill } from '../../utils/crew.js'
+import { getEffectiveSkill } from '../../utils/crew.js'
 
 /**
  * @param {string|null} attackerShipId   ID of the attacking ship
  * @param {string}      targetId         ID of the selected target ship
  * @param {string}      weaponKey        Weapon type key (e.g. 'Pulse Laser')
  * @param {string|null} [manualRangeBand] Override range band (basic combat mode)
+ * @param {number|null} [turretSlot]     Selected turret slot (used to derive per-turret gunner skill)
  * @returns {{
  *   attacker:         object|undefined,
  *   enemies:          object[],
@@ -36,7 +37,7 @@ import { getCrewSkill } from '../../utils/crew.js'
  *   },
  * }}
  */
-export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeBand = null) {
+export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeBand = null, turretSlot = null) {
   const ships      = useBattleStore((s) => s.ships)
   const combatMode = useBattleStore((s) => s.combatMode)
 
@@ -46,9 +47,15 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const weapon  = weaponKey ? (WEAPONS[weaponKey] ?? null) : null
 
   // One entry per unfired turret×weapon — no deduplication (CRB p.164: each turret fires once)
+  // When crewAssignments are set, turrets without an assigned gunner cannot fire.
   const firedTurrets     = attacker?.firedTurrets ?? []
+  const assignments      = attacker?.crewAssignments ?? null
   const availableWeapons = (attacker?.profile.turrets ?? [])
-    .filter((t) => !firedTurrets.includes(t.slot))
+    .filter((t) => {
+      if (firedTurrets.includes(t.slot)) return false
+      if (assignments && (assignments.gunners?.[t.slot] ?? null) === null) return false
+      return true
+    })
     .flatMap((t) => t.weapons
       .filter((w) => !DEFENSIVE_WEAPONS.includes(w))
       .map((w) => ({ weaponName: w, turretSlot: t.slot }))
@@ -64,7 +71,7 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const sizeDM      = target ? getTargetSizeDM(target.profile.tonnage ?? 0) : 0
   // evasiveDM is 0 here — computed dynamically in AttackModal from Reactions (CRB p.171)
   const sensorLockDM = attacker?.sensorLockOn === targetId ? (attacker.sensorLockDM ?? 0) : 0
-  const gunnerSkill = getCrewSkill(attacker?.profile.crew, 'gunner')
+  const gunnerSkill = getEffectiveSkill(attacker?.profile.crew, assignments, 'gunner', turretSlot)
   const weaponDM    = weapon?.attackDM ?? 0
   const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM
   const outOfRange  = weapon ? isOutOfRange(weapon.maxRange, rangeBand) : false

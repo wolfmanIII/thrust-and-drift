@@ -11,7 +11,7 @@ import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount }
 import { hexAdd, hexDistance, segmentMinDistance } from '../utils/hex.js'
 import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
-import { getCrewSkill } from '../utils/crew.js'
+import { getCrewSkill, getEffectiveSkill, buildDefaultAssignments } from '../utils/crew.js'
 import { resolveDogfightChecks } from '../utils/dogfight.js'
 
 /**
@@ -248,6 +248,7 @@ const useBattleStore = create((set, get) => {
       turretsNeedingReload: 0,
       inDogfight: null,
       inBoarding: null,
+      crewAssignments: buildDefaultAssignments(profile.crew, profile.turrets),
     }
     set((s) => ({
       ships: [...s.ships, instance],
@@ -294,6 +295,17 @@ const useBattleStore = create((set, get) => {
     }))
   },
 
+  /**
+   * Set crew role assignments for a ship instance.
+   * @param {string} shipId
+   * @param {object} assignments  { pilot, leadership, tactics, engineer, sensors, gunners: { [slot]: memberId } }
+   */
+  setCrewAssignments: (shipId, assignments) => {
+    set((s) => ({
+      ships: s.ships.map((sh) => sh.id === shipId ? { ...sh, crewAssignments: assignments } : sh),
+    }))
+  },
+
   // === INITIATIVE ===
 
   /**
@@ -307,14 +319,14 @@ const useBattleStore = create((set, get) => {
       // NPC ships with Tactics skill auto-roll their Tactics check; player effects come from tacticsEffects map.
       let tacticsBonus = tacticsEffects[ship.id] ?? 0
       if (!(ship.id in tacticsEffects) && ship.faction !== 'players') {
-        const tacticsSkill = getCrewSkill(ship.profile.crew, 'tactics')
+        const tacticsSkill = getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'tactics')
         if (tacticsSkill > 0) {
           const tacticsRoll = roll2D6()
           tacticsBonus = tacticsRoll.total + tacticsSkill - 8
         }
       }
       const result = rollInitiative(
-        getCrewSkill(ship.profile.crew, 'pilot'),
+        getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot'),
         ship.profile.thrust,
         tacticsBonus + (ship.initiativeBonusNextRound ?? 0),
         diceOverrides[ship.id] ?? null,
@@ -676,7 +688,7 @@ const useBattleStore = create((set, get) => {
       )
       const clamped = Math.max(0, Math.min(amount, maxReaction))
       if (clamped === 0) return
-      const pilotSkill = getCrewSkill(ship.profile.crew, 'pilot')
+      const pilotSkill = getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot')
       set((s) => ({
         ships: s.ships.map((sh) =>
           sh.id === shipId ? { ...sh, evasiveThrust: spent + clamped } : sh

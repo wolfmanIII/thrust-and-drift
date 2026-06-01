@@ -26,7 +26,8 @@ import { BoardingSetupModal }    from './components/modals/BoardingSetupModal.js
 import { BoardingContactModal }  from './components/modals/BoardingContactModal.jsx'
 import { BoardingConflictModal } from './components/modals/BoardingConflictModal.jsx'
 import { BoardingOutcomeModal }  from './components/modals/BoardingOutcomeModal.jsx'
-import { LegendModal }     from './components/modals/LegendModal.jsx'
+import { LegendModal }            from './components/modals/LegendModal.jsx'
+import { CrewAssignmentModal }   from './components/modals/CrewAssignmentModal.jsx'
 import { HelpScreen }      from './components/help/HelpScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
 import { useUiStore }      from './store/uiStore.js'
@@ -48,8 +49,9 @@ const MODAL_MAP = {
   initiative:    InitiativeModal,
   shipDetail:    ShipDetailModal,
   shipProfile:   ShipProfileModal,
-  thrust:        ThrustModal,
-  legend:        LegendModal,
+  thrust:          ThrustModal,
+  legend:          LegendModal,
+  crewAssignment:  CrewAssignmentModal,
 }
 
 function LegendButton() {

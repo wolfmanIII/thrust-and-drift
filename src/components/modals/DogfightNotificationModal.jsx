@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react'
 import { Modal } from './Modal.jsx'
 import { DiceInput } from '../forms/DiceInput.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
-import { getCrewSkill } from '../../utils/crew.js'
+import { getEffectiveSkill } from '../../utils/crew.js'
 import { getTonnageDM, rollDogfightPilot } from '../../utils/dogfight.js'
 
 // ── Sub-component: single-ship pursuit-check row ───────────────────────────
@@ -104,15 +104,15 @@ export function DogfightNotificationModal({ groups, onDone }) {
   // Best representative per side (highest pilot skill → best check odds)
   const bestOf = (list) =>
     list.reduce((best, s) => {
-      const sk = getCrewSkill(s.profile.crew, 'pilot')
-      return !best || sk > getCrewSkill(best.profile.crew, 'pilot') ? s : best
+      const sk = getEffectiveSkill(s.profile.crew, s.crewAssignments, 'pilot')
+      return !best || sk > getEffectiveSkill(best.profile.crew, best.crewAssignments, 'pilot') ? s : best
     }, null)
   const bestPursuer = bestOf(pursuers)
   const bestEvader  = bestOf(evaders)
 
   // DM helpers
   const shipDMs = (ship) => ({
-    pilotSkill: getCrewSkill(ship.profile.crew, 'pilot'),
+    pilotSkill: getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot'),
     tonnageDM:  getTonnageDM(ship.profile.tonnage),
     thrustFree: Math.max(0, (ship.profile.thrust ?? 0) - (ship.thrustUsedThisRound ?? 0)),
   })

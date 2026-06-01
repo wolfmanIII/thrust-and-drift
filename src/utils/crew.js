@@ -39,6 +39,66 @@ export function getCrewSkill(crew, skill) {
 }
 
 /**
+ * Build a default crew assignments object from a named crew array and turret list.
+ * Each non-gunner role gets the highest-skilled member; each turret slot gets the best gunner.
+ * Returns null for legacy object crew (no named members to assign from).
+ * @param {object[]|object} crew
+ * @param {object[]} [turrets]
+ * @returns {object|null}
+ */
+export function buildDefaultAssignments(crew, turrets = []) {
+  if (!Array.isArray(crew) || crew.length === 0) return null
+  const NON_GUNNER = ['pilot', 'leadership', 'tactics', 'engineer', 'sensors']
+  const assignments = { gunners: {} }
+  for (const role of NON_GUNNER) {
+    const best = crew.reduce((prev, m) =>
+      (m.skills?.[role] ?? 0) > (prev?.skills?.[role] ?? 0) ? m : prev, null)
+    assignments[role] = (best && (best.skills?.[role] ?? 0) > 0) ? best.id : null
+  }
+  for (const turret of (turrets ?? [])) {
+    const best = crew.reduce((prev, m) =>
+      (m.skills?.gunner ?? 0) > (prev?.skills?.gunner ?? 0) ? m : prev, null)
+    assignments.gunners[turret.slot] = (best && (best.skills?.gunner ?? 0) > 0) ? best.id : null
+  }
+  return assignments
+}
+
+/**
+ * Get the skill level of the crew member assigned to a specific role.
+ * Returns 0 if the role is unassigned or the member lacks the skill.
+ * For 'gunner', pass the turret slot number.
+ * @param {object[]} crew
+ * @param {object} assignments
+ * @param {string} skill
+ * @param {number|null} [turretSlot]
+ * @returns {number}
+ */
+export function getAssignedSkill(crew, assignments, skill, turretSlot = null) {
+  if (!Array.isArray(crew) || !assignments) return 0
+  const memberId = skill === 'gunner'
+    ? (assignments.gunners?.[turretSlot] ?? null)
+    : (assignments[skill] ?? null)
+  if (!memberId) return 0
+  const member = crew.find((m) => m.id === memberId)
+  return member?.skills?.[skill] ?? 0
+}
+
+/**
+ * Get the effective skill level for a role, using crew assignments when set.
+ * Falls back to getCrewSkill (max across all members) when assignments is null —
+ * preserving backward-compat for legacy ships and sessions without assignments.
+ * @param {object[]|object} crew
+ * @param {object|null} assignments
+ * @param {string} skill
+ * @param {number|null} [turretSlot]  Required for 'gunner' when using assignments
+ * @returns {number}
+ */
+export function getEffectiveSkill(crew, assignments, skill, turretSlot = null) {
+  if (assignments == null) return getCrewSkill(crew, skill)
+  return getAssignedSkill(crew, assignments, skill, turretSlot)
+}
+
+/**
  * Convert legacy crew object `{pilot: N, engineer: N, ...}` to crew array.
  * Each non-zero skill becomes a separate crew member named after the role.
  * @param {object} legacy

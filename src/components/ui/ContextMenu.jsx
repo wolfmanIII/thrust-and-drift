@@ -149,6 +149,9 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       )}
 
       {/* ── Always available ──────────────────────────────────────── */}
+      {Array.isArray(ship.profile.crew) && ship.profile.crew.length > 0 && (
+        <MenuItem icon="👥" label="Assign Crew…" onClick={() => open('crewAssignment', { shipId: targetId })} />
+      )}
       <MenuItem icon="📊" label="Ship Sheet"           onClick={() => open('shipDetail', { shipId: targetId })} />
       <MenuDivider />
       <MenuItem icon="🗑" label="Remove from battle" danger onClick={() => { removeShip(targetId); close() }} />

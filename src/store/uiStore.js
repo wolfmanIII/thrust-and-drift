@@ -6,7 +6,7 @@
 import { create } from 'zustand'
 
 /**
- * @typedef {'shipProfile'|'addShip'|'thrust'|'attack'|'shipDetail'|'action'|'initiative'|'dogfightRound'|null} ModalId
+ * @typedef {'shipProfile'|'addShip'|'thrust'|'attack'|'shipDetail'|'action'|'initiative'|'dogfightRound'|'crewAssignment'|null} ModalId
  */
 
 /**

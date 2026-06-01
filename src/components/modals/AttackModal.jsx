@@ -16,7 +16,7 @@ import { getCriticalLocation, getCriticalEffect } from '../../data/criticalHits.
 import { useAttackSetup } from './useAttackSetup.js'
 import { emitEffect } from '../../utils/effectQueue.js'
 import { DiceInput } from '../forms/DiceInput.jsx'
-import { getCrewSkill } from '../../utils/crew.js'
+import { getEffectiveSkill } from '../../utils/crew.js'
 
 /** Weapons that fire a visible beam/ray toward the target. */
 const BEAM_WEAPONS = ['Pulse Laser', 'Beam Laser', 'Particle Beam', 'Railgun']
@@ -892,12 +892,12 @@ export function AttackModal() {
   const handleTargetChange = (id) => { setTargetId(id); resetReactions() }
 
   const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, combatMode, outOfRange, dmBreakdown } =
-    useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand)
+    useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand, selectedTurretSlot)
 
   if (!attacker) return null
 
   // ── Reaction-derived values ────────────────────────────────────────────
-  const targetPilotSkill = target ? getCrewSkill(target.profile.crew, 'pilot') : 0
+  const targetPilotSkill = target ? getEffectiveSkill(target.profile.crew, target.crewAssignments, 'pilot') : 0
   const availableReactionThrust = target ? Math.max(0,
     target.profile.thrust + (target.thrustBonusThisRound ?? 0)
     - target.thrustUsedThisRound
@@ -936,7 +936,7 @@ export function AttackModal() {
     if (!slot || !target) return
     const turret    = target.profile.turrets?.find((t) => t.slot === slot)
     const laserBonus = Math.max(0, (turret?.weapons?.filter((w) => LASER_PD.includes(w)).length ?? 0) - 1)
-    const gunner    = getCrewSkill(target.profile.crew, 'gunner')
+    const gunner    = getEffectiveSkill(target.profile.crew, target.crewAssignments, 'gunner', slot)
     const rollResult = diceOverride ?? roll2D6()
     const total     = rollResult.total + gunner + laserBonus
     const effect    = total - 8
@@ -951,7 +951,7 @@ export function AttackModal() {
   const handleSandRoll = (diceOverride = null) => {
     const slot = sandTurretSlot ?? targetSandTurrets[0]?.slot
     if (!slot || !target) return
-    const gunner    = getCrewSkill(target.profile.crew, 'gunner')
+    const gunner    = getEffectiveSkill(target.profile.crew, target.crewAssignments, 'gunner', slot)
     const rollResult = diceOverride ?? roll2D6()
     const total     = rollResult.total + gunner
     const effect    = total - 8
