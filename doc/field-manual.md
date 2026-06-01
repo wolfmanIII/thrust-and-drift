@@ -147,6 +147,9 @@ Right-click any empty hex → **Add ship here**. A modal opens where you select:
   auto-roll behaviour.
 - **Color** — token display colour.
 
+After placing, right-click the ship token → **Assign Crew…** to review or
+adjust which crew member covers each role and turret (see [§ 11.3](#113-crew-role-assignments)).
+
 ### 5.2 Removing a Ship
 
 Right-click a ship token → **Remove from battle**. Available in all phases.
@@ -439,14 +442,38 @@ Skill levels range from **0 to 5**.
 ### 11.2 Multi-Skill Members
 
 One crew member can hold **multiple skills**. A solo pilot/gunner on a fighter
-has both Pilot 2 and Gunner 2 on the same crew entry. The app resolves the
-highest relevant skill for each action automatically.
+has both Pilot 2 and Gunner 2 on the same crew entry.
 
-### 11.3 Editing Crew
+### 11.3 Crew Role Assignments
+
+Before battle, each role slot must be filled by an assigned crew member.
+Roles are **optional** — an unassigned role contributes **0 skill** (no bonus).
+
+Right-click any ship token → **Assign Crew…** to open the assignment modal.
+
+| Role slot | Effect if unassigned |
+| --------- | -------------------- |
+| Pilot | Initiative roll, evasion DM, dogfight use skill 0 |
+| Leadership | Improve Initiative action not available |
+| Tactics | No Tactics(naval) check at initiative |
+| Engineer | Engineer actions use skill 0 |
+| Gunner (T1, T2…) | That turret **cannot fire** this session |
+| Sensors | Sensors actions use skill 0 |
+
+A crew member can be assigned to multiple slots (e.g., the same person as both
+Pilot and Gunner T1 on a light fighter).
+
+When a ship is placed on the map the app auto-assigns the best-skilled member
+per role as a starting point. The GM can adjust at any time before or during
+combat.
+
+> **NPC ships** without explicit crew assignments fall back to the highest skill
+> across all crew members (backward-compatible behaviour preserved).
+
+### 11.4 Editing Crew
 
 In the ship profile form, use **+ ADD CREW** to add a member and **⊗** to
-remove one. Each row has a name field and five compact skill inputs (PLT / CPT
-/ ENG / GNR / SEN).
+remove one. Each row has a name field and compact skill inputs.
 
 > Legacy profiles using the old flat object format (`{pilot: 2, gunner: 1}`)
 > are automatically migrated to the named array format when loaded in the form.

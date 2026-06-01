@@ -6,6 +6,30 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.9.0] — 2026-06-01
+
+### Added
+
+- **Crew role assignments** — before battle the GM assigns each named crew member to a specific role slot (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner T1…Tn). Only the assigned member's skill applies; unassigned roles contribute 0.
+  - Right-click any ship token → **Assign Crew…** opens `CrewAssignmentModal`
+  - Ships auto-populate assignments on placement (best-skilled member per role)
+  - Assignments are stored in battle state (`crewAssignments` field on each ship instance) and persist across save/resume
+- **Turret gating** — turrets without an assigned gunner are excluded from `availableWeapons` and cannot fire; shown as blocked in AttackModal
+- **Per-turret gunner skill** — attack DM, Point Defence, and Disperse Sand rolls use the gunner assigned to the specific turret slot, not the global max
+- **`getEffectiveSkill` utility** — routes through assignment when set, falls back to max-scan (`getCrewSkill`) for ships without explicit assignments (NPC fallback / backward-compat)
+- **`buildDefaultAssignments` / `getAssignedSkill`** — crew.js helpers for building and reading assignment objects
+
+### Tests
+
+- 626 tests (+14: buildDefaultAssignments, getAssignedSkill, getEffectiveSkill)
+
+### Docs
+
+- field-manual §11.3: Crew Role Assignments; §11.4 renumbers from 11.3
+- field-manual §5.1: note on post-placement Assign Crew workflow
+
+---
+
 ## [1.8.1] — 2026-06-01
 
 ### Changed

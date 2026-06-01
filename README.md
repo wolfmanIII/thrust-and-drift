@@ -20,6 +20,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Reactions (CRB p.171)** | Defender reacts before each attack roll: Evasive Action (1 thrust → DM −Pilot skill), Point Defence (laser turret → Gunner check, removes missiles), Disperse Sand (sandcaster turret → Gunner check, +1D+Effect armour vs laser); player ships enter physical dice manually |
 | **Missile launch** | Missile Rack selectable directly in Attack modal — count stepper + 🚀 LAUNCH SALVO (no DM roll); salvo token inherits launcher vector |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in; NPC ships auto-roll |
+| **Crew assignments** | Right-click → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner T1…Tn); unassigned roles contribute 0; turrets without a gunner cannot fire |
 | **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action |
 | **Initiative** | 2D6 + Pilot + Thrust [+ Tactics Effect]; optional Tactics(naval) check (CRB p.160); player ships manual entry, NPC auto-rolled |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
@@ -142,7 +143,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-612 tests across utils, Zustand stores, hooks, and UI components.
+626 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 
