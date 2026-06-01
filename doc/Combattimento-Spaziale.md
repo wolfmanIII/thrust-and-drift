@@ -7,7 +7,7 @@
 Prima di ingaggiare un combattimento tra navi spaziali è fondamentale stabilire i ruoli dell'equipaggio. **Una sola persona può ricoprire il ruolo di pilota e una sola può ricoprire il ruolo di capitano.** Gli altri ruoli possono essere ricoperti da più membri dell'equipaggio. I membri possono cambiare ruolo durante il combattimento (vedi sezione **Reassignment**).
 
 - **Pilot** → responsabile dello spostamento e delle manovre della nave
-- **Captain** → comanda la nave, può eseguire Tactics(naval) e Leadership check
+- **Captain** → comanda la nave; usa **Tactics(naval)** per il DM all'iniziativa e **Leadership** per la Improve Initiative action
 - **Engineer** → responsabile dei motori (J-Drive, M-Drive), del generatore di potenza (Power Plant) e della gestione dei danni
 - **Sensor Operator** → responsabile dei dispositivi di guerra elettronica e della tracciatura delle navi nemiche
 - **Turret Gunner** → operatore delle armi sulle torrette; ogni torretta richiede il suo gunner

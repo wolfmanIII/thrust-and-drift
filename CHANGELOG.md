@@ -6,6 +6,27 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.8.1] — 2026-06-01
+
+### Changed
+
+- **Crew skill model** — `captain` skill key split into `leadership` (Actions phase: Improve Initiative) and `tactics` (Initiative phase: Tactics(naval) check). Both are first-class skill fields in the profile form alongside Pilot, Engineer, Gunner, Sensors.
+- **Initiative modal** — ships with Tactics ≥ 1 show an optional secondary dice row (2D6 + Tactics − 8 = Effect, can be negative). NPC ships with Tactics > 0 auto-roll their Tactics check on confirm.
+- **Backward compatibility** — saved sessions with `captain` skill key are read transparently as `leadership` (both array and legacy object formats). `migrateCrew` remaps pre-split legacy crew objects.
+
+### Tests
+
+- 612 tests (+3: CREW_SKILLS shape, backward-compat `captain → leadership` in array and legacy formats, `migrateCrew` remaps captain key)
+
+### Docs
+
+- field-manual §11.1: Leadership (LDR) and Tactics (TAC) replace Captain (CPT)
+- field-manual §6.1.1: Tactics(naval) check documented
+- HelpScreen: skill list and crew form updated
+- Combattimento-Spaziale §1 Captain description updated
+
+---
+
 ## [1.8.0] — 2026-05-31
 
 ### Added

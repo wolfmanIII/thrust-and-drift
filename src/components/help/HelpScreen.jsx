@@ -162,7 +162,7 @@ export function HelpScreen() {
             <KV k="Name / Tonnage" v="Display name and hull size (affects target size DM)." />
             <KV k="Hull / Thrust" v="Max hull points and base manoeuvre drive rating." />
             <KV k="Turrets" v="Add weapon turrets — type, damage dice, range band, special traits." />
-            <KV k="Crew" v="Add named crew members, each with individual skill levels (Pilot, Captain, Engineer, Gunner, Sensors 0–5). One crew member can hold multiple skills — useful for single-seat fighters." />
+            <KV k="Crew" v="Add named crew members, each with individual skill levels (Pilot, Leadership, Tactics, Engineer, Gunner, Sensors 0–5). One crew member can hold multiple skills — useful for single-seat fighters." />
           </Sub>
         </Section>
 
@@ -308,7 +308,7 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="AVAILABLE ACTIONS">
-            <KV k="Captain" v="IMPROVE INITIATIVE — 2D6 + Leadership (8+). Effect added to this ship's initiative roll next round (CRB p.166)." />
+            <KV k="Captain (Leadership)" v="IMPROVE INITIATIVE — 2D6 + Leadership (8+). Effect added to this ship's initiative roll next round (CRB p.166)." />
             <KV k="Engineer" v="OVERLOAD M-DRIVE — 2D6 + Engineer (8+). +Effect Thrust available this round (CRB p.167). REPAIR SYSTEM — 2D6 + Engineer (8+). Removes 1 critical hit (CRB p.167)." />
             <KV k="Gunner" v="RELOAD TURRET — Automatic, no roll. Reloads 1 missile turret (CRB p.167)." />
             <KV k="Sensors" v="SENSOR LOCK — 2D6 + Electronics (8+). +Effect DM to attacks vs locked target (CRB p.167). ELECTRONIC WARFARE — 2D6 + Electronics (8+). Removes an enemy sensor lock (CRB p.167)." />
@@ -321,8 +321,8 @@ export function HelpScreen() {
         <Section id="crew" title="Crew System">
           <p>Ships have a list of named crew members, each with individual skill ratings.</p>
           <KV k="Multi-skill" v="One crew member can hold multiple skills. A solo pilot/gunner on a fighter has both Pilot 2 and Gunner 2 on the same entry." />
-          <KV k="Skills" v="Pilot (0–5), Captain (0–5), Engineer (0–5), Gunner (0–5), Sensors (0–5)." />
-          <KV k="Abbrevs" v="PLT / CPT / ENG / GNR / SEN in the profile form." />
+          <KV k="Skills" v="Pilot (0–5), Leadership (0–5), Tactics (0–5), Engineer (0–5), Gunner (0–5), Sensors (0–5)." />
+          <KV k="Abbrevs" v="PLT / LDR / TAC / ENG / GNR / SEN in the profile form." />
           <p>Crew is defined in the ship profile form. Add members with <span className="text-slate-200">+ ADD CREW</span>, remove with <span className="text-slate-200">⊗</span>. Each row has a name field and five compact skill inputs.</p>
           <Note>Legacy profiles (flat crew object format) are automatically migrated to the named array format when loaded in the form.</Note>
         </Section>

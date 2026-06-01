@@ -21,7 +21,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Missile launch** | Missile Rack selectable directly in Attack modal — count stepper + 🚀 LAUNCH SALVO (no DM roll); salvo token inherits launcher vector |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in; NPC ships auto-roll |
 | **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action |
-| **Initiative** | 2D6 + Pilot + Thrust; player ships manual entry, NPC auto-rolled |
+| **Initiative** | 2D6 + Pilot + Thrust [+ Tactics Effect]; optional Tactics(naval) check (CRB p.160); player ships manual entry, NPC auto-rolled |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase AND when it is that ship's turn (initiative order enforced in Acceleration, Attack, Actions phases) |
 | **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals (200ms delay) |
@@ -142,7 +142,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-609 tests across utils, Zustand stores, hooks, and UI components.
+612 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 

@@ -174,6 +174,12 @@ Right-click any hex → **Roll Initiative**. The modal shows all ships.
 | **NPC ships** | Auto-rolled on confirm. Shown as *🎲 auto* in the modal. |
 | **🎲 button** | Opt-in auto-roll — fills the dice fields for that ship if the player prefers the app to roll. |
 
+### 6.1.1 Tactics(Naval) Check (optional)
+
+If the captain has **Tactics ≥ 1**, an optional secondary dice row appears under the initiative row. The captain may roll 2D6 + Tactics — the Effect (total − 8, can be negative) is added to the initiative total. This check is optional; leaving it blank applies no bonus.
+
+NPC ships with Tactics > 0 auto-roll their Tactics check on confirm.
+
 ### 6.2 Initiative Bonus
 
 If the Captain uses **Improve Initiative** in the Actions phase of the previous
@@ -422,7 +428,8 @@ Ships have a list of **named crew members**, each with individual skill ratings.
 | Abbrev | Skill | Used for |
 | ------ | ----- | -------- |
 | **PLT** | Pilot | Initiative roll, evasion DM, dogfight/pursuit checks |
-| **CPT** | Captain | Improve Initiative action |
+| **LDR** | Leadership | Improve Initiative action (Actions phase) |
+| **TAC** | Tactics | Initiative DM at start of battle (Initiative phase) |
 | **ENG** | Engineer | Overload M-Drive action, Repair System action |
 | **GNR** | Gunner | Attack DM, Reload Turret action |
 | **SEN** | Sensors | Sensor Lock action, Electronic Warfare action |
