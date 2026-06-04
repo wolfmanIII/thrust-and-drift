@@ -6,6 +6,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.9.2] — 2026-06-04
+
+### Fixed
+
+- **Triple turret cap** — turret weapon list in the profile form now caps at 3 weapons (triple turret, CRB p.163); `+ weapon` dropdown disappears at 3 and is replaced by a `triple turret` label
+- **Turret remove button** — `⊗ turret` (dark, no tooltip) replaced with `✕` (`text-slate-400`) + `Tooltip` component, consistent with the crew manifest remove button
+
+---
+
 ## [1.9.1] — 2026-06-04
 
 ### Changed

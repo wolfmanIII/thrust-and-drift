@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.9.1** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.9.2** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -81,7 +81,7 @@ Each profile stores the ship's stats and named crew members.
 | ----- | ----------- |
 | **Name / Tonnage** | Display name and hull size (affects target size DM). |
 | **Hull / Thrust** | Max hull points and base manoeuvre drive rating. |
-| **Turrets** | Add weapon turrets: type, damage dice, range band, and special traits. |
+| **Turrets** | Add weapon turrets: type, damage dice, range band, and special traits. Maximum 3 weapons per turret (triple turret, CRB p.163). |
 | **Crew** | Named crew members, each with individual skill levels (see [§ 11](#11-crew-system)). |
 
 ---
