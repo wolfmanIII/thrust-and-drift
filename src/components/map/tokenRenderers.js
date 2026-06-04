@@ -9,12 +9,6 @@ import { hexToPixel, hexMagnitude } from '../../utils/hex.js'
 
 // === CONSTANTS ===
 
-/** Faction color lookup — keyed by faction id. */
-const FACTION_COLORS = {
-  players: '#60a5fa',
-  npc:     '#f87171',
-  neutral: '#a3a3a3',
-}
 
 const TOKEN_RADIUS = 18
 const VECTOR_ARROW_HEAD = 7
@@ -181,13 +175,6 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
   ctx.fill()
 
   ctx.restore()
-
-  // Faction indicator dot — fixed canvas-space position (bottom-right of bounding box)
-  const factionColor = FACTION_COLORS[ship.faction] ?? FACTION_COLORS.neutral
-  ctx.beginPath()
-  ctx.arc(cx + TOKEN_RADIUS * 0.65, cy + TOKEN_RADIUS * 0.65, 4, 0, Math.PI * 2)
-  ctx.fillStyle = factionColor
-  ctx.fill()
 
   // Dogfight ⚔ badge — fixed canvas-space position (top-right)
   if (inDogfight) {
