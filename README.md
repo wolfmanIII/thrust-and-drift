@@ -20,7 +20,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Reactions (CRB p.171)** | Defender reacts before each attack roll: Evasive Action (1 thrust → DM −Pilot skill), Point Defence (laser turret → Gunner check, removes missiles), Disperse Sand (sandcaster turret → Gunner check, +1D+Effect armour vs laser); player ships enter physical dice manually |
 | **Missile launch** | Missile Rack selectable directly in Attack modal — count stepper + 🚀 LAUNCH SALVO (no DM roll); salvo token inherits launcher vector |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in; NPC ships auto-roll |
-| **Crew assignments** | Right-click → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner T1…Tn); unassigned roles contribute 0; turrets without a gunner cannot fire |
+| **Crew assignments** | Right-click any ship → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner T1…Tn); unassigned roles contribute 0; turrets without a gunner cannot fire |
 | **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action |
 | **Initiative** | 2D6 + Pilot + Thrust [+ Tactics Effect]; optional Tactics(naval) check (CRB p.160); player ships manual entry, NPC auto-rolled |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
@@ -34,6 +34,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Profile I/O** | Import/export ship profiles via JSON files |
 | **Safety modals** | Confirm before deleting profiles; confirm before leaving battle without saving |
 | **Legal footer** | Fixed Mongoose Publishing disclaimer on all screens; "About" modal with full Fair Use text |
+| **Ship tokens** | Swept-wing silhouette polygon; rotates to face velocity direction; HP arc (green→yellow→red); selection ring; cockpit + fuselage highlights; dogfight pulsing amber ring + ⚔ badge |
 | **Dogfight system** | Close-range sub-system: 6 micro-rounds per standard round; Pilot opposed checks; tonnage/thrust/multi-enemy DMs; escape via thrust advantage or pursuit check; pulsing token visuals |
 | **Boarding system** | 4-phase boarding action (HG 2022): Contact → Conflict → Security; 6 entry methods incl. hull-cut tracker; stacking rolls; missed-shot table; Bridge/Engineering/Turrets objectives; optional faction transfer on capture; HUD badge per active boarding |
 | **Weapon range enforcement** | Each weapon has a maximum range band (CRB p.167); Attack Modal shows OUT OF RANGE badge and blocks firing beyond a weapon's listed range |

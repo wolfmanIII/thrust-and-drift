@@ -6,6 +6,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.9.1] — 2026-06-04
+
+### Changed
+
+- **Ship token visual** — replaced filled circle + initial letter with a swept-wing silhouette polygon (14-point path: pointed nose, visible fuselage, delta wings, twin engine pods with V-notch tail); token rotates to face the velocity vector direction; stationary ships point up by default
+- **Token details** — cockpit highlight (teardrop) and fuselage center stripe added as overlay shapes; faction indicator dot removed
+- **Ghost token** — same swept-wing polygon and rotation as the main token (previously a plain semi-transparent circle)
+- **Default profiles** — crew member names replaced with proper Traveller-flavored character names (e.g. Mira Vasquez, Cmdr. Vikram Solari, Ren Takahata) instead of role labels ("Pilot", "Gunner")
+- **Scout/Courier crew** — `sensors: 1` added to Dex Rallahan (pilot/sensor dual-skill)
+- **Patrol Cruiser crew** — Asha Reyes gains `sensors: 1`; now has 2 gunners (Brenn Okoro + Asha Reyes) for both turret slots
+
+### Fixed
+
+- **"Assign Crew…" context menu** — voce sempre visibile su qualsiasi nave (rimossa condizione `crew.length > 0`); il modal gestisce il caso crew vuota con messaggio esplicativo
+- **Crew manifest remove button** — `⊗` (quasi invisibile, `text-slate-600`) sostituito con `✕` (`text-slate-400`) + `Tooltip` component su hover
+
+---
+
 ## [1.9.0] — 2026-06-01
 
 ### Added
