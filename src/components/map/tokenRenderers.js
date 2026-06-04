@@ -44,25 +44,27 @@ function computeShipRotation(vector) {
 /**
  * Trace the ship silhouette path in local coordinates (nose pointing up = -y,
  * centered at origin). Does NOT fill or stroke — call those after.
- * Shape fits within TOKEN_RADIUS; 12-point polygon: narrow neck, swept delta
- * wings, wing notch, twin tail fins with V-notch.
+ * Shape: visible fuselage (±25% r), swept delta wings at midpoint, twin
+ * engine pods at tail with V-notch.
  * @param {CanvasRenderingContext2D} ctx
  */
 function traceShipBody(ctx) {
   const r = TOKEN_RADIUS
   ctx.beginPath()
-  ctx.moveTo(0,           -r * 0.95)  // nose tip
-  ctx.lineTo( r * 0.18,  -r * 0.62)  // right neck top
-  ctx.lineTo( r * 0.18,  -r * 0.18)  // right neck bottom / wing root
-  ctx.lineTo( r * 0.94,   r * 0.28)  // right wing tip
-  ctx.lineTo( r * 0.42,   r * 0.52)  // right wing notch
-  ctx.lineTo( r * 0.28,   r * 0.90)  // right tail fin
-  ctx.lineTo(0,            r * 0.70)  // tail V-notch center
-  ctx.lineTo(-r * 0.28,   r * 0.90)  // left tail fin
-  ctx.lineTo(-r * 0.42,   r * 0.52)  // left wing notch
-  ctx.lineTo(-r * 0.94,   r * 0.28)  // left wing tip
-  ctx.lineTo(-r * 0.18,  -r * 0.18)  // left neck bottom / wing root
-  ctx.lineTo(-r * 0.18,  -r * 0.62)  // left neck top
+  ctx.moveTo(0,            -r * 0.97)  // nose tip
+  ctx.lineTo( r * 0.25,   -r * 0.58)  // right shoulder
+  ctx.lineTo( r * 0.25,    r * 0.02)  // right fuselage (midpoint, wing root)
+  ctx.lineTo( r * 0.90,    r * 0.38)  // right wing tip
+  ctx.lineTo( r * 0.38,    r * 0.55)  // right wing trailing notch
+  ctx.lineTo( r * 0.38,    r * 0.70)  // right tail section
+  ctx.lineTo( r * 0.16,    r * 0.95)  // right engine pod
+  ctx.lineTo(0,             r * 0.78)  // tail V-notch
+  ctx.lineTo(-r * 0.16,    r * 0.95)  // left engine pod
+  ctx.lineTo(-r * 0.38,    r * 0.70)  // left tail section
+  ctx.lineTo(-r * 0.38,    r * 0.55)  // left wing trailing notch
+  ctx.lineTo(-r * 0.90,    r * 0.38)  // left wing tip
+  ctx.lineTo(-r * 0.25,    r * 0.02)  // left fuselage (midpoint)
+  ctx.lineTo(-r * 0.25,   -r * 0.58)  // left shoulder
   ctx.closePath()
 }
 
@@ -159,13 +161,23 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
   ctx.lineWidth = 1
   ctx.stroke()
 
-  // Cockpit — teardrop highlight in neck/nose area
+  // Fuselage center stripe
   const r2 = TOKEN_RADIUS
   ctx.beginPath()
-  ctx.moveTo(0, -r2 * 0.85)
-  ctx.bezierCurveTo( r2 * 0.10, -r2 * 0.70,  r2 * 0.10, -r2 * 0.38, 0, -r2 * 0.28)
-  ctx.bezierCurveTo(-r2 * 0.10, -r2 * 0.38, -r2 * 0.10, -r2 * 0.70, 0, -r2 * 0.85)
-  ctx.fillStyle = 'rgba(255,255,255,0.28)'
+  ctx.moveTo(0,          -r2 * 0.90)
+  ctx.lineTo( r2 * 0.09, -r2 * 0.52)
+  ctx.lineTo( r2 * 0.09,  r2 * 0.50)
+  ctx.lineTo(0,           r2 * 0.68)
+  ctx.lineTo(-r2 * 0.09,  r2 * 0.50)
+  ctx.lineTo(-r2 * 0.09, -r2 * 0.52)
+  ctx.closePath()
+  ctx.fillStyle = 'rgba(255,255,255,0.14)'
+  ctx.fill()
+
+  // Cockpit dot (just below nose tip)
+  ctx.beginPath()
+  ctx.arc(0, -r2 * 0.62, r2 * 0.13, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.32)'
   ctx.fill()
 
   ctx.restore()
