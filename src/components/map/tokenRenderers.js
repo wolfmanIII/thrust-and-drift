@@ -44,23 +44,25 @@ function computeShipRotation(vector) {
 /**
  * Trace the ship silhouette path in local coordinates (nose pointing up = -y,
  * centered at origin). Does NOT fill or stroke — call those after.
- * Shape fits within TOKEN_RADIUS; swept-wing fighter profile.
+ * Shape fits within TOKEN_RADIUS; 12-point polygon: narrow neck, swept delta
+ * wings, wing notch, twin tail fins with V-notch.
  * @param {CanvasRenderingContext2D} ctx
  */
 function traceShipBody(ctx) {
   const r = TOKEN_RADIUS
   ctx.beginPath()
-  ctx.moveTo(0, -r)
-  // Right shoulder → wing tip (swept leading edge)
-  ctx.bezierCurveTo( r * 0.22, -r * 0.72,  r * 0.88, -r * 0.20,  r * 0.88,  r * 0.08)
-  ctx.lineTo( r * 0.52,  r * 0.44)   // wing trailing notch
-  ctx.lineTo( r * 0.35,  r * 0.80)   // tail corner right
-  ctx.lineTo(0,          r * 0.88)   // tail center
-  ctx.lineTo(-r * 0.35,  r * 0.80)   // tail corner left
-  ctx.lineTo(-r * 0.52,  r * 0.44)   // wing trailing notch
-  ctx.lineTo(-r * 0.88,  r * 0.08)   // left wing tip
-  // Left wing tip → nose (swept leading edge)
-  ctx.bezierCurveTo(-r * 0.88, -r * 0.20, -r * 0.22, -r * 0.72, 0, -r)
+  ctx.moveTo(0,           -r * 0.95)  // nose tip
+  ctx.lineTo( r * 0.18,  -r * 0.62)  // right neck top
+  ctx.lineTo( r * 0.18,  -r * 0.18)  // right neck bottom / wing root
+  ctx.lineTo( r * 0.94,   r * 0.28)  // right wing tip
+  ctx.lineTo( r * 0.42,   r * 0.52)  // right wing notch
+  ctx.lineTo( r * 0.28,   r * 0.90)  // right tail fin
+  ctx.lineTo(0,            r * 0.70)  // tail V-notch center
+  ctx.lineTo(-r * 0.28,   r * 0.90)  // left tail fin
+  ctx.lineTo(-r * 0.42,   r * 0.52)  // left wing notch
+  ctx.lineTo(-r * 0.94,   r * 0.28)  // left wing tip
+  ctx.lineTo(-r * 0.18,  -r * 0.18)  // left neck bottom / wing root
+  ctx.lineTo(-r * 0.18,  -r * 0.62)  // left neck top
   ctx.closePath()
 }
 
@@ -157,10 +159,13 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
   ctx.lineWidth = 1
   ctx.stroke()
 
-  // Cockpit highlight — ellipse in nose area
+  // Cockpit — teardrop highlight in neck/nose area
+  const r2 = TOKEN_RADIUS
   ctx.beginPath()
-  ctx.ellipse(0, -TOKEN_RADIUS * 0.38, TOKEN_RADIUS * 0.18, TOKEN_RADIUS * 0.28, 0, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.18)'
+  ctx.moveTo(0, -r2 * 0.85)
+  ctx.bezierCurveTo( r2 * 0.10, -r2 * 0.70,  r2 * 0.10, -r2 * 0.38, 0, -r2 * 0.28)
+  ctx.bezierCurveTo(-r2 * 0.10, -r2 * 0.38, -r2 * 0.10, -r2 * 0.70, 0, -r2 * 0.85)
+  ctx.fillStyle = 'rgba(255,255,255,0.28)'
   ctx.fill()
 
   ctx.restore()
