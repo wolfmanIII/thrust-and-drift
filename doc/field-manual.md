@@ -484,7 +484,7 @@ scenario. Changes take effect the next time the ship is placed in battle.
 
 > **Example:** Replace *Cass Oduya (Gunner 1)* on the Free Trader with your
 > player character's name and actual Gunner skill before the session starts.
-
+>
 > Legacy profiles using the old flat object format (`{pilot: 2, gunner: 1}`)
 > are automatically migrated to the named array format when loaded in the form.
 
