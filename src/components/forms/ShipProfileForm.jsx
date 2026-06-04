@@ -171,14 +171,16 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
       </select>
 
       {/* Remove turret */}
-      <button
-        type="button"
-        onClick={() => onRemoveTurret(slotIdx)}
-        className="ml-auto text-slate-600 hover:text-red-400 font-mono text-xs transition-colors"
-        aria-label="Remove turret"
-      >
-        ⊗ turret
-      </button>
+      <Tooltip label="Remove turret" position="top">
+        <button
+          type="button"
+          onClick={() => onRemoveTurret(slotIdx)}
+          className="ml-auto text-slate-400 hover:text-red-400 font-mono text-sm leading-none transition-colors px-1"
+          aria-label="Remove turret"
+        >
+          ✕
+        </button>
+      </Tooltip>
     </div>
   )
 }
