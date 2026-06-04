@@ -323,7 +323,8 @@ export function HelpScreen() {
           <KV k="Multi-skill" v="One crew member can hold multiple skills. A solo pilot/gunner on a fighter has both Pilot 2 and Gunner 2 on the same entry." />
           <KV k="Skills" v="Pilot (0–5), Leadership (0–5), Tactics (0–5), Engineer (0–5), Gunner (0–5), Sensors (0–5)." />
           <KV k="Abbrevs" v="PLT / LDR / TAC / ENG / GNR / SEN in the profile form." />
-          <p>Crew is defined in the ship profile form. Add members with <span className="text-slate-200">+ ADD CREW</span>, remove with <span className="text-slate-200">⊗</span>. Each row has a name field and skill inputs.</p>
+          <p>Crew is defined in the ship profile form. Add members with <span className="text-slate-200">+ ADD CREW</span>, remove with <span className="text-slate-200">✕</span>. Each row has a name field and skill inputs.</p>
+          <p className="text-slate-400 text-xs">Default profiles and catalog ships come with pre-generated crew. These are fully editable — open the profile on the Dashboard → <span className="text-slate-200">✎ Edit</span> → <span className="text-slate-200">Crew Manifest</span> to rename members, adjust skill levels, or replace them with your player characters before the session starts.</p>
           <KV k="Role assignments" v="Right-click ship → Assign Crew… to assign each crew member to a specific role slot (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner T1…Tn). An unassigned role contributes 0 skill — no bonus applied." />
           <KV k="Turret gating" v="Turrets without an assigned gunner cannot fire. The gunner's skill DM used for each attack and reaction is the one assigned to that specific turret slot." />
           <KV k="Auto-assign" v="When a ship is placed on the map the app pre-fills assignments with the best-skilled member per role. The GM can adjust at any time." />
