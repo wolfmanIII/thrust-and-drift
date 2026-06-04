@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { useProfilesStore } from '../../store/profilesStore.js'
 import { WEAPON_IDS } from '../../data/weapons.js'
 import { CREW_SKILLS, blankCrewMember, migrateCrew } from '../../utils/crew.js'
+import { Tooltip } from '../ui/Tooltip.jsx'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -96,15 +97,16 @@ function CrewMemberRow({ member, onChange, onRemove }) {
           onChange={(e) => onChange({ ...member, name: e.target.value })}
           className="flex-1 bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-600"
         />
-        <button
-          type="button"
-          onClick={onRemove}
-          title="Remove crew member"
-          className="text-slate-400 hover:text-red-400 font-mono text-sm leading-none transition-colors shrink-0 px-1"
-          aria-label="Remove crew member"
-        >
-          ✕
-        </button>
+        <Tooltip label="Remove crew member" position="top">
+          <button
+            type="button"
+            onClick={onRemove}
+            className="text-slate-400 hover:text-red-400 font-mono text-sm leading-none transition-colors shrink-0 px-1"
+            aria-label="Remove crew member"
+          >
+            ✕
+          </button>
+        </Tooltip>
       </div>
       <div className="grid grid-cols-5 gap-1.5">
         {CREW_SKILLS.map((skill) => (
