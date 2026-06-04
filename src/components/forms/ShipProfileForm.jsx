@@ -158,17 +158,22 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
         </span>
       ))}
 
-      {/* Add weapon */}
-      <select
-        value=""
-        onChange={(e) => { onAddWeapon(slotIdx, e.target.value); e.target.value = '' }}
-        className="bg-slate-700 border border-slate-600 text-slate-400 font-mono text-xs rounded px-1.5 py-0.5 focus:outline-none focus:border-(--neon-cyan)/60 cursor-pointer"
-      >
-        <option value="">+ weapon</option>
-        {WEAPON_IDS.map((w) => (
-          <option key={w} value={w}>{w}</option>
-        ))}
-      </select>
+      {/* Add weapon — max 3 per turret (triple turret, CRB p.163) */}
+      {turret.weapons.length < 3 && (
+        <select
+          value=""
+          onChange={(e) => { onAddWeapon(slotIdx, e.target.value); e.target.value = '' }}
+          className="bg-slate-700 border border-slate-600 text-slate-400 font-mono text-xs rounded px-1.5 py-0.5 focus:outline-none focus:border-(--neon-cyan)/60 cursor-pointer"
+        >
+          <option value="">+ weapon</option>
+          {WEAPON_IDS.map((w) => (
+            <option key={w} value={w}>{w}</option>
+          ))}
+        </select>
+      )}
+      {turret.weapons.length >= 3 && (
+        <span className="text-slate-600 font-mono text-xs italic">triple turret</span>
+      )}
 
       {/* Remove turret */}
       <Tooltip label="Remove turret" position="top">
