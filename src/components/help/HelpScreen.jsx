@@ -161,7 +161,7 @@ export function HelpScreen() {
             <p>Each profile stores the ship's stats and named crew members.</p>
             <KV k="Name / Tonnage" v="Display name and hull size (affects target size DM)." />
             <KV k="Hull / Thrust" v="Max hull points and base manoeuvre drive rating." />
-            <KV k="Turrets" v="Add weapon turrets — type, damage dice, range band, special traits." />
+            <KV k="Turrets" v="Add weapon turrets — type, damage dice, range band, special traits. Maximum 3 weapons per turret (triple turret, CRB p.163)." />
             <KV k="Crew" v="Add named crew members, each with individual skill levels (Pilot, Leadership, Tactics, Engineer, Gunner, Sensors 0–5). One crew member can hold multiple skills — useful for single-seat fighters." />
           </Sub>
         </Section>
