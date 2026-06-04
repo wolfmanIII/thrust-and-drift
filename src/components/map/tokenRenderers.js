@@ -20,11 +20,49 @@ const TOKEN_RADIUS = 18
 const VECTOR_ARROW_HEAD = 7
 const HP_BAR_RADIUS = TOKEN_RADIUS + 5
 const LABEL_FONT = 'bold 11px monospace'
-const INITIAL_FONT = 'bold 13px monospace'
 const GHOST_ALPHA = 0.35
 const MISSILE_RADIUS = 8
 
 // === HELPERS ===
+
+/**
+ * Compute canvas rotation angle so a ship token faces its velocity direction.
+ * Nose of the shape points up (-y) at rotation 0; adding π/2 aligns it with
+ * the atan2 angle convention used by canvas (0 = right, +CW).
+ * Returns 0 (pointing up) when vector is stationary.
+ * @param {{ q: number, r: number }} vector
+ * @returns {number} Radians
+ */
+function computeShipRotation(vector) {
+  if (vector.q === 0 && vector.r === 0) return 0
+  // Flat-top hex pixel direction (proportional; no size/offset needed)
+  const vx = 1.5 * vector.q
+  const vy = Math.sqrt(3) * (0.5 * vector.q + vector.r)
+  return Math.atan2(vy, vx) + Math.PI / 2
+}
+
+/**
+ * Trace the ship silhouette path in local coordinates (nose pointing up = -y,
+ * centered at origin). Does NOT fill or stroke — call those after.
+ * Shape fits within TOKEN_RADIUS; swept-wing fighter profile.
+ * @param {CanvasRenderingContext2D} ctx
+ */
+function traceShipBody(ctx) {
+  const r = TOKEN_RADIUS
+  ctx.beginPath()
+  ctx.moveTo(0, -r)
+  // Right shoulder → wing tip (swept leading edge)
+  ctx.bezierCurveTo( r * 0.22, -r * 0.72,  r * 0.88, -r * 0.20,  r * 0.88,  r * 0.08)
+  ctx.lineTo( r * 0.52,  r * 0.44)   // wing trailing notch
+  ctx.lineTo( r * 0.35,  r * 0.80)   // tail corner right
+  ctx.lineTo(0,          r * 0.88)   // tail center
+  ctx.lineTo(-r * 0.35,  r * 0.80)   // tail corner left
+  ctx.lineTo(-r * 0.52,  r * 0.44)   // wing trailing notch
+  ctx.lineTo(-r * 0.88,  r * 0.08)   // left wing tip
+  // Left wing tip → nose (swept leading edge)
+  ctx.bezierCurveTo(-r * 0.88, -r * 0.20, -r * 0.22, -r * 0.72, 0, -r)
+  ctx.closePath()
+}
 
 /**
  * Draw an arrowhead at (x, y) pointing in direction (dx, dy).
@@ -74,8 +112,9 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
   const { color, profile, hullCurrent } = ship
   const hullFraction = profile.hull > 0 ? hullCurrent / profile.hull : 0
   const inDogfight   = ship.inDogfight !== null && ship.inDogfight !== undefined
+  const rotation     = computeShipRotation(ship.vector)
 
-  // Dogfight pulsing ring (drawn before selection ring so selection stays on top)
+  // Dogfight pulsing ring — circular, drawn before selection ring
   if (inDogfight) {
     // Oscillates between alpha 0.4 and 1.0 at ~0.67 Hz (≈1.5 s per cycle)
     const pulse = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(timestamp * 0.0042))
@@ -86,7 +125,7 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
     ctx.stroke()
   }
 
-  // Selection ring
+  // Selection ring — circular
   if (selected) {
     ctx.beginPath()
     ctx.arc(cx, cy, TOKEN_RADIUS + 4, 0, Math.PI * 2)
@@ -97,7 +136,7 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
     ctx.setLineDash([])
   }
 
-  // HP bar (arc around token, green→yellow→red)
+  // HP arc — circular (green→yellow→red)
   const hpColor = hullFraction > 0.6 ? '#4ade80' : hullFraction > 0.3 ? '#facc15' : '#f87171'
   const hpAngle = Math.PI * 2 * hullFraction
   ctx.beginPath()
@@ -106,31 +145,34 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
   ctx.lineWidth = 3
   ctx.stroke()
 
-  // Token body
-  ctx.beginPath()
-  ctx.arc(cx, cy, TOKEN_RADIUS, 0, Math.PI * 2)
+  // Ship body — rotated to face velocity direction
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.rotate(rotation)
+
+  traceShipBody(ctx)
   ctx.fillStyle = color
   ctx.fill()
   ctx.strokeStyle = 'rgba(255,255,255,0.3)'
   ctx.lineWidth = 1
   ctx.stroke()
 
-  // Initial letter
-  const initial = (profile.name ?? '?')[0].toUpperCase()
-  ctx.font = INITIAL_FONT
-  ctx.fillStyle = '#ffffff'
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  ctx.fillText(initial, cx, cy)
+  // Cockpit highlight — ellipse in nose area
+  ctx.beginPath()
+  ctx.ellipse(0, -TOKEN_RADIUS * 0.38, TOKEN_RADIUS * 0.18, TOKEN_RADIUS * 0.28, 0, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.18)'
+  ctx.fill()
 
-  // Faction indicator dot (bottom-right)
+  ctx.restore()
+
+  // Faction indicator dot — fixed canvas-space position (bottom-right of bounding box)
   const factionColor = FACTION_COLORS[ship.faction] ?? FACTION_COLORS.neutral
   ctx.beginPath()
   ctx.arc(cx + TOKEN_RADIUS * 0.65, cy + TOKEN_RADIUS * 0.65, 4, 0, Math.PI * 2)
   ctx.fillStyle = factionColor
   ctx.fill()
 
-  // Dogfight ⚔ badge (top-right of token)
+  // Dogfight ⚔ badge — fixed canvas-space position (top-right)
   if (inDogfight) {
     ctx.font = 'bold 10px monospace'
     ctx.fillStyle = '#fbbf24'   // amber-400
@@ -194,17 +236,19 @@ export function drawVectorArrow(ctx, ship, cx, cy, hexSize) {
  * @param {number} cy  Ghost pixel center Y
  */
 export function drawGhostToken(ctx, ship, cx, cy) {
+  const rotation = computeShipRotation(ship.vector)
+  ctx.save()
   ctx.globalAlpha = GHOST_ALPHA
-  ctx.beginPath()
-  ctx.arc(cx, cy, TOKEN_RADIUS, 0, Math.PI * 2)
+  ctx.translate(cx, cy)
+  ctx.rotate(rotation)
+  traceShipBody(ctx)
   ctx.fillStyle = ship.color
   ctx.fill()
   ctx.strokeStyle = '#7dd3fc'
   ctx.lineWidth = 1
   ctx.setLineDash([3, 3])
   ctx.stroke()
-  ctx.setLineDash([])
-  ctx.globalAlpha = 1
+  ctx.restore()
 }
 
 // === MISSILE TOKEN ===
