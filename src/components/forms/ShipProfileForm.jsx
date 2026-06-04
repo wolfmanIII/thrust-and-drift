@@ -99,10 +99,11 @@ function CrewMemberRow({ member, onChange, onRemove }) {
         <button
           type="button"
           onClick={onRemove}
-          className="text-slate-600 hover:text-red-400 font-mono text-xs transition-colors shrink-0"
+          title="Remove crew member"
+          className="text-slate-400 hover:text-red-400 font-mono text-sm leading-none transition-colors shrink-0 px-1"
           aria-label="Remove crew member"
         >
-          ⊗
+          ✕
         </button>
       </div>
       <div className="grid grid-cols-5 gap-1.5">
