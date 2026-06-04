@@ -472,8 +472,18 @@ combat.
 
 ### 11.4 Editing Crew
 
-In the ship profile form, use **+ ADD CREW** to add a member and **⊗** to
+In the ship profile form, use **+ ADD CREW** to add a member and **✕** to
 remove one. Each row has a name field and compact skill inputs.
+
+Default profiles (Free Trader, Scout, Patrol Cruiser…) and catalog ships
+(High Guard 2022 catalog) come with pre-generated crew — names and skill levels
+chosen as a reasonable starting point. **These are fully editable**: open the
+profile in the Dashboard → **✎ Edit** → **Crew Manifest** to rename members,
+adjust skill levels, add specialists, or remove crew that doesn't fit the
+scenario. Changes take effect the next time the ship is placed in battle.
+
+> **Example:** Replace *Cass Oduya (Gunner 1)* on the Free Trader with your
+> player character's name and actual Gunner skill before the session starts.
 
 > Legacy profiles using the old flat object format (`{pilot: 2, gunner: 1}`)
 > are automatically migrated to the named array format when loaded in the form.
