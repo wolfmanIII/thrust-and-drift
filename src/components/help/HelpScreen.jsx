@@ -174,7 +174,15 @@ export function HelpScreen() {
           <KV k="Double-click" v="Centre the map on that hex." />
           <KV k="Left-click token" v="Select the ship (highlights it)." />
           <KV k="Right-click hex" v="Open context menu — actions depend on what is in the hex and the current phase." />
-          <Note>Context menu actions are phase-gated: only valid options for the current phase are shown. You cannot apply thrust during the Attack phase, for example.</Note>
+          <Note>Context menu actions are phase-gated and initiative-gated. Only options valid for the current phase are shown — and in the Acceleration, Attack, and Actions phases, combat actions are shown only for the ship whose turn it currently is. Right-clicking another ship shows "Not this ship's turn".</Note>
+          <Sub title="LEGEND">
+            <p>Click <span className="text-slate-200">📖 Legend</span> (fixed button, top-right of the battle screen) to open the visual reference panel. Also accessible via right-click any empty hex → Legend.</p>
+            <KV k="Tokens" v="Ship silhouette (swept-wing polygon, rotates to face velocity); HP arc (green/yellow/red); missile salvo (yellow — count + thrust shown)." />
+            <KV k="Beam weapons" v="Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange)." />
+            <KV k="Hit effects" v="Impact burst (expanding sparks on target), Critical flash (red ring + label)." />
+            <KV k="Movement effects" v="Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line)." />
+            <KV k="Persistent indicators" v="Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔ + amber ring), Missile exhausted (×)." />
+          </Sub>
         </Section>
 
         {/* PHASE FLOW */}
@@ -206,6 +214,7 @@ export function HelpScreen() {
             <KV k="Profile" v="Which saved ship profile to use." />
             <KV k="Faction" v="Players, Allies, Enemies, Neutral — affects token colour and auto-roll behaviour." />
             <KV k="Color" v="Token display colour." />
+            <p>After placing, right-click the ship token → <span className="text-slate-200">Assign Crew…</span> to review or adjust which crew member covers each role and turret (see Crew System below).</p>
           </Sub>
           <Sub title="REMOVING A SHIP">
             <p>Right-click a ship token → <span className="text-slate-200">Remove from battle</span>. This is available in all phases.</p>
@@ -224,8 +233,12 @@ export function HelpScreen() {
             <KV k="NPC ships" v="Auto-rolled on confirm. Shown as '🎲 auto' in the modal." />
             <KV k="🎲 button" v="Opt-in auto-roll — fills the dice fields for that ship if the player prefers the computer to roll." />
           </Sub>
-          <Sub title="TACTICS BONUS">
-            <p>If the Captain uses <span className="text-slate-200">Improve Initiative</span> in the previous Actions phase, the Effect is stored on the ship and added automatically to its next initiative roll.</p>
+          <Sub title="TACTICS(NAVAL) CHECK (optional)">
+            <p>If the assigned Tactics crew member has <span className="text-slate-200">Tactics ≥ 1</span>, an optional secondary dice row appears. Roll 2D6 + Tactics — the Effect (total − 8, can be negative) is added to the initiative total. Leaving it blank applies no bonus.</p>
+            <p>NPC ships with Tactics &gt; 0 auto-roll their Tactics check on confirm.</p>
+          </Sub>
+          <Sub title="INITIATIVE BONUS (previous round)">
+            <p>If the Captain uses <span className="text-slate-200">Improve Initiative</span> in the previous Actions phase, the Effect is stored on the ship and added automatically to its next initiative roll — no manual input required.</p>
           </Sub>
           <Note>The Phase Tracker (right side of screen) shows the initiative order with the current actor highlighted.</Note>
         </Section>
@@ -246,6 +259,13 @@ export function HelpScreen() {
         <Section id="movement" title="Movement Phase">
           <p>Vectorial mode only. All ships move simultaneously — no player input required.</p>
           <p>Click <span className="text-slate-200">NEXT PHASE ⟶</span> to execute movement. Each ship's position advances by its current velocity vector.</p>
+          <Sub title="SHIPS THAT PASS IN THE NIGHT">
+            <p>If two hostile ships cross within <span className="text-slate-200">Short range (≤ 2 hexes)</span> during movement — even if their final positions are far apart — the system detects the closest approach and opens the <span className="text-slate-200">Passing Encounter</span> window.</p>
+            <KV k="[Ship A] FIRES" v="Opens the Attack Modal pre-configured for that attacker." />
+            <KV k="[Ship B] FIRES" v="Opens the Attack Modal pre-configured for that attacker." />
+            <KV k="PASS" v="Skip the opportunity with no attack." />
+            <p>Multiple encounters resolve sequentially. Ships ending in the same hex trigger the Dogfight system instead.</p>
+          </Sub>
           <Note>In Basic mode this phase is skipped automatically.</Note>
         </Section>
 
@@ -289,6 +309,19 @@ export function HelpScreen() {
             <p>In the Attack modal, select <span className="text-slate-200">Missile Rack</span> from the weapon list, choose a target, adjust salvo count (1–12), then click Launch. The salvo spawns as a token inheriting the launcher's velocity. No dice roll required at launch.</p>
           </Sub>
 
+          <Sub title="PER-TURRET FIRING LIMIT">
+            <p>Each turret may fire <span className="text-slate-200">once per round</span> (CRB p.164). The weapon list shows only unfired turrets, identified by slot badge (T1, T2…). Once all offensive turrets have fired, the Attack… option disappears from the context menu.</p>
+          </Sub>
+
+          <Sub title="WEAPON RANGE LIMITS">
+            <p>Each weapon has a maximum range band beyond which it cannot fire (CRB p.167). An <span className="text-red-400">OUT OF RANGE</span> badge appears on blocked weapons; the ROLL ATTACK button is disabled.</p>
+            <KV k="Railgun" v="Short" />
+            <KV k="Beam Laser" v="Medium" />
+            <KV k="Pulse Laser" v="Long" />
+            <KV k="Particle Beam / Barbette" v="Very Long" />
+            <KV k="Missile Rack / Sandcaster" v="Special (no cap)" />
+          </Sub>
+
           <Sub title="SENSOR LOCK">
             <p>Acquired via the Sensors crew action. Grants a +DM to attacks against the locked target. Shown as an animated cyan ring on the locked ship.</p>
           </Sub>
@@ -320,16 +353,34 @@ export function HelpScreen() {
         {/* CREW SYSTEM */}
         <Section id="crew" title="Crew System">
           <p>Ships have a list of named crew members, each with individual skill ratings.</p>
-          <KV k="Multi-skill" v="One crew member can hold multiple skills. A solo pilot/gunner on a fighter has both Pilot 2 and Gunner 2 on the same entry." />
-          <KV k="Skills" v="Pilot (0–5), Leadership (0–5), Tactics (0–5), Engineer (0–5), Gunner (0–5), Sensors (0–5)." />
-          <KV k="Abbrevs" v="PLT / LDR / TAC / ENG / GNR / SEN in the profile form." />
-          <p>Crew is defined in the ship profile form. Add members with <span className="text-slate-200">+ ADD CREW</span>, remove with <span className="text-slate-200">✕</span>. Each row has a name field and skill inputs.</p>
-          <p className="text-slate-400 text-xs">Default profiles and catalog ships come with pre-generated crew. These are fully editable — open the profile on the Dashboard → <span className="text-slate-200">✎ Edit</span> → <span className="text-slate-200">Crew Manifest</span> to rename members, adjust skill levels, or replace them with your player characters before the session starts.</p>
-          <KV k="Role assignments" v="Right-click ship → Assign Crew… to assign each crew member to a specific role slot (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner T1…Tn). An unassigned role contributes 0 skill — no bonus applied." />
-          <KV k="Turret gating" v="Turrets without an assigned gunner cannot fire. The gunner's skill DM used for each attack and reaction is the one assigned to that specific turret slot." />
-          <KV k="Auto-assign" v="When a ship is placed on the map the app pre-fills assignments with the best-skilled member per role. The GM can adjust at any time." />
-          <Note>NPC ships without explicit assignments fall back to the highest skill across all crew members (backward-compatible).</Note>
-          <Note>Legacy profiles (flat crew object format) are automatically migrated to the named array format when loaded in the form.</Note>
+
+          <Sub title="SKILLS">
+            <KV k="PLT — Pilot" v="Initiative roll, evasion DM, dogfight/pursuit checks." />
+            <KV k="LDR — Leadership" v="Improve Initiative action (Actions phase)." />
+            <KV k="TAC — Tactics" v="Initiative DM at start of battle (Initiative phase)." />
+            <KV k="ENG — Engineer" v="Overload M-Drive action, Repair System action." />
+            <KV k="GNR — Gunner" v="Attack DM, Reload Turret action." />
+            <KV k="SEN — Sensors" v="Sensor Lock action, Electronic Warfare action." />
+            <p>Skill levels range from 0 to 5. One crew member can hold multiple skills — e.g. a solo pilot/gunner on a fighter.</p>
+          </Sub>
+
+          <Sub title="ROLE ASSIGNMENTS">
+            <p>Right-click ship → <span className="text-slate-200">Assign Crew…</span> to assign each member to a role slot. An unassigned role contributes 0 skill.</p>
+            <KV k="Pilot" v="Initiative roll, evasion DM, dogfight — uses skill 0 if unassigned." />
+            <KV k="Leadership" v="Improve Initiative action not available if unassigned." />
+            <KV k="Tactics" v="No Tactics(naval) check at initiative if unassigned." />
+            <KV k="Engineer" v="Engineer actions use skill 0 if unassigned." />
+            <KV k="Gunner (T1, T2…)" v="That turret cannot fire if unassigned." />
+            <KV k="Sensors" v="Sensors actions use skill 0 if unassigned." />
+            <p>A crew member can be assigned to multiple slots (e.g. same person as Pilot and Gunner T1). When placed on the map the app auto-assigns the best-skilled member per role — adjust at any time.</p>
+          </Sub>
+
+          <Sub title="EDITING CREW">
+            <p>Crew is defined in the ship profile form. Add members with <span className="text-slate-200">+ ADD CREW</span>, remove with <span className="text-slate-200">✕</span>. Each row has a name field and skill inputs.</p>
+            <p>Default profiles and catalog ships come with pre-generated crew. These are fully editable — Dashboard → <span className="text-slate-200">✎ Edit</span> → <span className="text-slate-200">Crew Manifest</span> to rename members, adjust skill levels, or replace them with your player characters before the session starts.</p>
+          </Sub>
+
+          <Note>NPC ships without explicit assignments fall back to the highest skill across all crew members (backward-compatible). Legacy profiles (flat crew object format) are automatically migrated to the named array format when loaded in the form.</Note>
         </Section>
 
         {/* UNDO / REDO */}
