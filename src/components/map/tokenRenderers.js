@@ -38,27 +38,37 @@ function computeShipRotation(vector) {
 /**
  * Trace the ship silhouette path in local coordinates (nose pointing up = -y,
  * centered at origin). Does NOT fill or stroke — call those after.
- * Shape: visible fuselage (±25% r), swept delta wings at midpoint, twin
- * engine pods at tail with V-notch.
+ * Shape: narrow nose, swept delta wings with protruding tip "guns", inner
+ * trailing notch, twin engine pods with central exhaust V.
  * @param {CanvasRenderingContext2D} ctx
  */
 function traceShipBody(ctx) {
-  const r = TOKEN_RADIUS
+  const size = TOKEN_RADIUS
+
   ctx.beginPath()
-  ctx.moveTo(0,            -r * 0.97)  // nose tip
-  ctx.lineTo( r * 0.25,   -r * 0.58)  // right shoulder
-  ctx.lineTo( r * 0.25,    r * 0.02)  // right fuselage (midpoint, wing root)
-  ctx.lineTo( r * 0.90,    r * 0.38)  // right wing tip
-  ctx.lineTo( r * 0.38,    r * 0.55)  // right wing trailing notch
-  ctx.lineTo( r * 0.38,    r * 0.70)  // right tail section
-  ctx.lineTo( r * 0.16,    r * 0.95)  // right engine pod
-  ctx.lineTo(0,             r * 0.78)  // tail V-notch
-  ctx.lineTo(-r * 0.16,    r * 0.95)  // left engine pod
-  ctx.lineTo(-r * 0.38,    r * 0.70)  // left tail section
-  ctx.lineTo(-r * 0.38,    r * 0.55)  // left wing trailing notch
-  ctx.lineTo(-r * 0.90,    r * 0.38)  // left wing tip
-  ctx.lineTo(-r * 0.25,    r * 0.02)  // left fuselage (midpoint)
-  ctx.lineTo(-r * 0.25,   -r * 0.58)  // left shoulder
+
+  ctx.moveTo(0, -size)                    // nose tip
+
+  // right side
+  ctx.lineTo(size * 0.15, -size * 0.7)   // right nose edge
+  ctx.lineTo(size * 0.3,  -size * 0.1)   // right wing root
+  ctx.lineTo(size * 0.8,   size * 0.4)   // right wing leading edge
+  ctx.lineTo(size * 0.85,  size * 0.8)   // right wing tip (gun mount)
+  ctx.lineTo(size * 0.6,   size * 0.9)   // right wing trailing base
+  ctx.lineTo(size * 0.3,   size * 0.5)   // right inner notch
+  ctx.lineTo(size * 0.25,  size * 0.95)  // right engine pod
+
+  ctx.lineTo(0,            size * 0.85)  // central exhaust
+
+  // left side (mirrored)
+  ctx.lineTo(-size * 0.25, size * 0.95)  // left engine pod
+  ctx.lineTo(-size * 0.3,  size * 0.5)   // left inner notch
+  ctx.lineTo(-size * 0.6,  size * 0.9)   // left wing trailing base
+  ctx.lineTo(-size * 0.85, size * 0.8)   // left wing tip (gun mount)
+  ctx.lineTo(-size * 0.8,  size * 0.4)   // left wing leading edge
+  ctx.lineTo(-size * 0.3, -size * 0.1)   // left wing root
+  ctx.lineTo(-size * 0.15, -size * 0.7)  // left nose edge
+
   ctx.closePath()
 }
 
