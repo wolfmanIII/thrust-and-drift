@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { importProfiles, importBattle } from './io.js'
+import { importProfiles, importBattle, parseBattleFile } from './io.js'
 
 // Helper: build a mock File from a plain object (or raw string for malformed JSON)
 function makeFile(content) {
@@ -133,5 +133,42 @@ describe('importBattle', () => {
   it('throws when file.text() rejects', async () => {
     const file = { text: () => Promise.reject(new Error('permission denied')) }
     await expect(importBattle(file)).rejects.toThrow('Cannot read file: permission denied')
+  })
+})
+
+// ── parseBattleFile ───────────────────────────────────────────────────────────
+
+describe('parseBattleFile', () => {
+  it('returns full wrapper including exportedAt and version', async () => {
+    const payload = battlePayload()
+    const file = makeFile(payload)
+    const result = await parseBattleFile(file)
+    expect(result.battle).toEqual({ round: 3, ships: [] })
+    expect(result.type).toBe('battle-state')
+    expect(result.version).toBe('1.0')
+    expect(typeof result.exportedAt).toBe('string')
+  })
+
+  it('battle field accessible at result.battle', async () => {
+    const file = makeFile(battlePayload({ battle: { round: 7, ships: ['x'] } }))
+    const result = await parseBattleFile(file)
+    expect(result.battle).toEqual({ round: 7, ships: ['x'] })
+  })
+
+  it('throws on malformed JSON', async () => {
+    const file = makeFile('{bad}')
+    await expect(parseBattleFile(file)).rejects.toThrow('Invalid file: malformed JSON')
+  })
+
+  it('throws on wrong type tag', async () => {
+    const file = makeFile(battlePayload({ type: 'ship-profiles' }))
+    await expect(parseBattleFile(file)).rejects.toThrow('Invalid file: wrong type')
+  })
+
+  it('throws when battle field is absent', async () => {
+    const payload = battlePayload()
+    delete payload.battle
+    const file = makeFile(payload)
+    await expect(parseBattleFile(file)).rejects.toThrow('"battle" field missing or not an object')
   })
 })

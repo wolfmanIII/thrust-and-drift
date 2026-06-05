@@ -96,13 +96,25 @@ export function exportBattle(battle) {
 /**
  * Import a battle state from a File object.
  * @param {File} file
- * @returns {Promise<object>}
+ * @returns {Promise<object>}  The battle object only
  * @throws {Error} If the file is not a valid battle export
  */
 export async function importBattle(file) {
+  const data = await parseBattleFile(file)
+  return data.battle
+}
+
+/**
+ * Parse and validate a battle file, returning the full wrapper object.
+ * Use this when the caller also needs metadata (exportedAt, version).
+ * @param {File} file
+ * @returns {Promise<{ version: string, type: string, exportedAt: string, battle: object }>}
+ * @throws {Error} If the file is not a valid battle export
+ */
+export async function parseBattleFile(file) {
   const data = await parseJSONFile(file, 'battle-state')
   if (!data.battle || typeof data.battle !== 'object') {
     throw new Error('Invalid file: "battle" field missing or not an object.')
   }
-  return data.battle
+  return data
 }
