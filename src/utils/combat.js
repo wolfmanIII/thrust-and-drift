@@ -200,15 +200,15 @@ export function applyMovement(currentPosition, currentVector) {
 /**
  * Calculate the evasive action DM imposed on attackers.
  * The pilot declares N thrust points reserved for evasion.
- * Each point applies -(pilotSkill) as DM to attackers.
- * // MgT2e CRB p.166 — Evasive Action
+ * DM is fixed at −pilotSkill per dodged attack; thrust determines how many attacks can be dodged, not the magnitude.
+ * // MgT2e CRB p.171 — Evasive Action: "DM negativo pari al livello di Pilot skill del pilota (fisso — non si moltiplica per il Thrust speso)"
  * @param {number} pilotSkill
- * @param {number} evasiveThrust  Thrust points declared for evasion
- * @returns {number}  Negative DM to apply to attackers
+ * @param {number} evasiveThrust  Thrust points declared for evasion (≥1 = evasion active)
+ * @returns {number}  Negative DM to apply to a single dodged attack
  */
 export function getEvasiveDM(pilotSkill, evasiveThrust) {
   if (evasiveThrust <= 0 || pilotSkill === 0) return 0
-  return -(pilotSkill * evasiveThrust)
+  return -pilotSkill
 }
 
 // === CRITICAL HITS ===

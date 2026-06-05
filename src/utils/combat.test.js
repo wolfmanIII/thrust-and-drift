@@ -155,10 +155,11 @@ describe('getEvasiveDM', () => {
     expect(getEvasiveDM(0, 4)).toBe(0)
   })
 
-  it('pilot × thrust, negated', () => {
-    expect(getEvasiveDM(2, 3)).toBe(-6)
-    expect(getEvasiveDM(3, 2)).toBe(-6)
-    expect(getEvasiveDM(1, 5)).toBe(-5)
+  it('DM = −pilotSkill fixed, thrust does not multiply', () => {
+    expect(getEvasiveDM(2, 3)).toBe(-2)
+    expect(getEvasiveDM(3, 2)).toBe(-3)
+    expect(getEvasiveDM(1, 5)).toBe(-1)
+    expect(getEvasiveDM(4, 1)).toBe(-4)
   })
 })
 
