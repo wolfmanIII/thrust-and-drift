@@ -109,7 +109,7 @@ Click **📖 Legend** (fixed button, top-right of the battle screen) to open the
 
 | Category | Symbols |
 | -------- | ------- |
-| **Tokens** | Ship silhouette (delta-wing polygon — pointed nose, swept wings with gun-mount tips, twin engine pods, central exhaust notch; rotates to face velocity direction); HP arc (green/yellow/red); missile salvo (yellow — count + thrust shown) |
+| **Tokens** | Ship silhouette (delta-wing polygon — pointed nose, swept wings with gun-mount tips, twin engine pods, central exhaust notch; rotates to face velocity direction); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — rotates to face velocity direction; count + thrust arc shown) |
 | **Beam weapons** | Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange) |
 | **Hit effects** | Impact burst (expanding sparks on target), Critical flash (red ring + label) |
 | **Movement effects** | Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line) |
