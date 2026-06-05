@@ -20,7 +20,7 @@ function Section({ title, children }) {
 
 function Row({ icon, label, description }) {
   return (
-    <div className="flex items-center gap-3 min-h-[44px]">
+    <div className="flex items-center gap-3 min-h-11">
       <div className="w-12 flex justify-center items-center shrink-0">{icon}</div>
       <div className="min-w-0">
         <p className="font-mono text-xs text-slate-200 font-bold leading-tight">{label}</p>
