@@ -25,6 +25,7 @@ function ShipCard({ ship }) {
 
   const handleContextMenu = useCallback((e) => {
     e.preventDefault()
+    e.stopPropagation()
     const rect = cardRef.current?.getBoundingClientRect()
     showContextMenu({ x: rect ? rect.left : e.clientX, y: rect ? rect.bottom + 4 : e.clientY, type: 'ship', targetId: ship.id })
   }, [ship.id, showContextMenu])
@@ -77,7 +78,6 @@ export function BasicBattleView() {
   const showContextMenu = useUiStore((s) => s.showContextMenu)
 
   const handleContainerContextMenu = useCallback((e) => {
-    if (e.target !== e.currentTarget) return
     e.preventDefault()
     showContextMenu({ x: e.clientX, y: e.clientY, type: 'empty', hex: null })
   }, [showContextMenu])
