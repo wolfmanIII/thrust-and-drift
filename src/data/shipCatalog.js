@@ -845,10 +845,10 @@ export const SHIP_CATALOG = [
  * @type {Array<{ id: string, label: string }>}
  */
 export const CATALOG_CATEGORIES = [
-  { id: 'all',          label: 'TUTTE'        },
+  { id: 'all',          label: 'ALL'          },
   { id: 'small-craft',  label: 'SMALL CRAFT'  },
-  { id: 'scout',        label: 'ESPLORATORI'  },
-  { id: 'civilian',     label: 'CIVILI'       },
-  { id: 'military',     label: 'MILITARI'     },
-  { id: 'paramilitary', label: 'PARAMILITARI' },
+  { id: 'scout',        label: 'SCOUTS'       },
+  { id: 'civilian',     label: 'CIVILIAN'     },
+  { id: 'military',     label: 'MILITARY'     },
+  { id: 'paramilitary', label: 'PARAMILITARY' },
 ]

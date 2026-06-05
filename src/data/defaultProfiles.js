@@ -1,7 +1,7 @@
 /**
  * Default ship profiles for quick-start gameplay.
  * // MgT2e CRB — Ship Design section
- * // Spec §12 — Profili Nave Predefiniti
+ * // Spec §12 — Default Ship Profiles
  */
 
 import { v7 as uuidv7 } from 'uuid'
@@ -90,7 +90,7 @@ export const DEFAULT_PROFILES = [
   }),
 
   makeProfile({
-    name: 'Fighter Leggero',
+    name: 'Light Fighter',
     shipClass: 'Light Fighter',
     description: 'High-maneuverability attack craft. Short operational range.',
     tonnage: 10,

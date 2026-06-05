@@ -29,7 +29,7 @@ import {
 function CutTracker({ boarding, onDamage }) {
   const [toolKey, setToolKey]     = useState('rescue')
   const [dice, setDice]           = useState(null)
-  const [component, setComponent] = useState('portello')
+  const [component, setComponent] = useState('hatch')
 
   const armorValue = boarding._defenderArmor ?? 0
   const isArmored  = armorValue > 0
@@ -44,7 +44,7 @@ function CutTracker({ boarding, onDamage }) {
 
       {/* Component selector */}
       <div className="flex gap-2">
-        {[['portello', 'HATCH'], ['airlock', 'AIRLOCK'], ['scafo', 'HULL']].map(([k, lbl]) => (
+        {[['hatch', 'HATCH'], ['airlock', 'AIRLOCK'], ['hull', 'HULL']].map(([k, lbl]) => (
           <button
             key={k}
             onClick={() => setComponent(k)}

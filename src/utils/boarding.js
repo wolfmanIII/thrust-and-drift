@@ -8,7 +8,7 @@
 import { roll2D6 } from './dice.js'
 
 // ---------------------------------------------------------------------------
-// Entry methods — Fase 2 Contatto
+// Entry methods — Phase 2 Contact
 // HG 2022 pp.127–130
 // ---------------------------------------------------------------------------
 
@@ -65,7 +65,7 @@ export const ENTRY_METHODS = {
 }
 
 // ---------------------------------------------------------------------------
-// Cutting tools — Fase 2 Taglio scafo
+// Cutting tools — Phase 2 Hull Cut
 // HG 2022 p.129 (tabella strumenti da taglio)
 // ---------------------------------------------------------------------------
 
@@ -78,21 +78,21 @@ export const CUT_TOOLS = {
 }
 
 // ---------------------------------------------------------------------------
-// Hull resilience — Fase 2 Taglio scafo
-// HG 2022 p.130 (tabella Resilienza componenti nave)
+// Hull resilience — Phase 2 Hull Cut
+// HG 2022 p.130 (ship component resilience table)
 // ---------------------------------------------------------------------------
 
 /**
  * Returns block (deny access) and breach (passable hole) resilience values
  * for a hull component, adjusted for ship armor.
- * @param {'portello'|'airlock'|'scafo'} component
+ * @param {'hatch'|'airlock'|'hull'} component
  * @param {number} armor
  * @param {boolean} [armored=false]  true if component has armor plating
  * @returns {{ block: number, breach: number }}
  */
 export function getHullResilience(component, armor, armored = false) {
   switch (component) {
-    case 'portello':
+    case 'hatch':
       return armored
         ? { block: 6  + armor,       breach: 25  + armor }
         : { block: 4,                breach: 15 }
@@ -100,7 +100,7 @@ export function getHullResilience(component, armor, armored = false) {
       return armored
         ? { block: 10 + armor,       breach: 35  + armor }
         : { block: 6,                breach: 25 }
-    case 'scafo':
+    case 'hull':
       return armored
         ? { block: 100 + armor * 10, breach: 400 + armor * 20 }
         : { block: 50,               breach: 250 }
@@ -122,7 +122,7 @@ export function cuttingDamage(toolKey, effect) {
 }
 
 // ---------------------------------------------------------------------------
-// Stacking check — Fase 3 Conflitto
+// Stacking check — Phase 3 Conflict
 // HG 2022 p.131
 // ---------------------------------------------------------------------------
 
@@ -136,7 +136,7 @@ export function rollStackingCheck() {
 }
 
 // ---------------------------------------------------------------------------
-// Missed shot table — Fase 3 Conflitto
+// Missed shot table — Phase 3 Conflict
 // HG 2022 p.132
 // ---------------------------------------------------------------------------
 
@@ -176,7 +176,7 @@ export function rollMissedShot(armoredBulkhead = false) {
 }
 
 // ---------------------------------------------------------------------------
-// Boarding DM helpers — Fase 2 + 3
+// Boarding DM helpers — Phase 2 + 3
 // HG 2022 pp.128–131
 // ---------------------------------------------------------------------------
 

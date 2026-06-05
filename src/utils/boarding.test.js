@@ -19,12 +19,12 @@ import {
 // ---------------------------------------------------------------------------
 
 describe('getHullResilience', () => {
-  it('portello unarmored', () => {
-    expect(getHullResilience('portello', 0, false)).toEqual({ block: 4, breach: 15 })
+  it('hatch unarmored', () => {
+    expect(getHullResilience('hatch', 0, false)).toEqual({ block: 4, breach: 15 })
   })
 
-  it('portello armored (armor=4)', () => {
-    expect(getHullResilience('portello', 4, true)).toEqual({ block: 10, breach: 29 })
+  it('hatch armored (armor=4)', () => {
+    expect(getHullResilience('hatch', 4, true)).toEqual({ block: 10, breach: 29 })
   })
 
   it('airlock unarmored', () => {
@@ -35,15 +35,15 @@ describe('getHullResilience', () => {
     expect(getHullResilience('airlock', 3, true)).toEqual({ block: 13, breach: 38 })
   })
 
-  it('scafo unarmored', () => {
-    expect(getHullResilience('scafo', 0, false)).toEqual({ block: 50, breach: 250 })
+  it('hull unarmored', () => {
+    expect(getHullResilience('hull', 0, false)).toEqual({ block: 50, breach: 250 })
   })
 
-  it('scafo armored (armor=5)', () => {
-    expect(getHullResilience('scafo', 5, true)).toEqual({ block: 150, breach: 500 })
+  it('hull armored (armor=5)', () => {
+    expect(getHullResilience('hull', 5, true)).toEqual({ block: 150, breach: 500 })
   })
 
-  it('unknown component falls back to portello unarmored', () => {
+  it('unknown component falls back to hatch unarmored', () => {
     expect(getHullResilience('unknown', 0, false)).toEqual({ block: 4, breach: 15 })
   })
 })
