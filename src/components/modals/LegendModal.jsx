@@ -192,7 +192,7 @@ function DogfightIcon() {
   return (
     <svg width="40" height="40" viewBox="0 0 40 40">
       <circle cx="20" cy="20" r="16" fill="none" stroke="#f87171" strokeWidth="2" strokeOpacity="0.5" />
-      <text x="20" y="26" textAnchor="middle" fontSize="16" fill="#f87171">⚔</text>
+      <text x="20" y="27" textAnchor="middle" fontSize="22" fill="#f87171">⚔</text>
     </svg>
   )
 }

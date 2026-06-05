@@ -188,7 +188,7 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
 
   // Dogfight ⚔ badge — fixed canvas-space position (top-right)
   if (inDogfight) {
-    ctx.font = 'bold 16px monospace'
+    ctx.font = 'bold 22px monospace'
     ctx.fillStyle = '#fbbf24'   // amber-400
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
