@@ -15,6 +15,7 @@ import { useProfileImport } from './useProfileImport.js'
 import { Tooltip }          from '../ui/Tooltip.jsx'
 import { Modal }            from '../modals/Modal.jsx'
 import { dbGet, dbDelete, STORE_BATTLE } from '../../utils/db.js'
+import { parseBattleFile } from '../../utils/io.js'
 
 // ── Left panel: profiles list ─────────────────────────────────────────────
 
@@ -549,7 +550,7 @@ function SessionPreview({ data, onConfirm, onCancel, loading }) {
         </div>
 
         <div className="px-6 py-4 grid grid-cols-2 gap-x-6 gap-y-3 border-b border-slate-800 shrink-0">
-          <DataField label="DESIGNAZIONE" value={name} />
+          <DataField label="SESSION" value={name} />
           <DataField label="FILE" value={_filename} small />
           <DataField label="ROUND" value={round} accent />
           <DataField label="PHASE" value={PHASE_LABELS[phase] ?? phase?.toUpperCase()} />
@@ -637,11 +638,9 @@ function SessionPanel() {
     if (!file) return
     setError(null)
     try {
-      const text = await file.text()
-      const json = JSON.parse(text)
-      if (json?.type !== 'battle-state' || !json.battle) throw new Error('Invalid file: wrong type or missing "battle" field.')
+      const wrapper = await parseBattleFile(file)
       setPendingFile(file)
-      setPendingData({ ...json.battle, _exportedAt: json.exportedAt, _filename: file.name })
+      setPendingData({ ...wrapper.battle, _exportedAt: wrapper.exportedAt, _filename: file.name })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -761,7 +760,7 @@ export function Dashboard() {
               SPACE COMBAT SIMULATOR
             </span>
           </div>
-          <span className="ml-auto text-slate-700 font-mono text-xs">v1.5.0</span>
+          <span className="ml-auto text-slate-700 font-mono text-xs">v1.9.3</span>
         </header>
 
         <main className="flex-1 overflow-hidden">
