@@ -268,30 +268,50 @@ export function drawGhostToken(ctx, ship, cx, cy) {
 // === MISSILE TOKEN ===
 
 /**
- * Draw a missile salvo token.
+ * Trace a single missile silhouette at local offset (ox, oy) relative to (cx, cy).
+ * Nose points up (-y). Width ±1.5, total height 8px.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} cx  Token center X
+ * @param {number} cy  Token center Y
+ * @param {number} ox  Horizontal offset
+ * @param {number} oy  Vertical offset
+ */
+function traceMissileShape(ctx, cx, cy, ox, oy) {
+  const x = cx + ox, y = cy + oy
+  ctx.beginPath()
+  ctx.moveTo(x,        y - 4.5)  // nose tip
+  ctx.lineTo(x + 1.3,  y - 2)    // right shoulder
+  ctx.lineTo(x + 1.5,  y + 3.5)  // right tail
+  ctx.lineTo(x - 1.5,  y + 3.5)  // left tail
+  ctx.lineTo(x - 1.3,  y - 2)    // left shoulder
+  ctx.closePath()
+}
+
+/**
+ * Draw a missile salvo token — three staggered missile silhouettes.
  * @param {CanvasRenderingContext2D} ctx
  * @param {object} missile  MissileToken
  * @param {number} cx
  * @param {number} cy
  */
 export function drawMissileToken(ctx, missile, cx, cy) {
-  // Outer ring
-  ctx.beginPath()
-  ctx.arc(cx, cy, MISSILE_RADIUS, 0, Math.PI * 2)
+  const OFFSETS = [[-3.5, 1.5], [0, -1.5], [3.5, 1.5]]
+
+  // Fill all three bodies first, then stroke (avoids overlap artefacts)
   ctx.fillStyle = '#fbbf24'
-  ctx.fill()
+  OFFSETS.forEach(([ox, oy]) => { traceMissileShape(ctx, cx, cy, ox, oy); ctx.fill() })
   ctx.strokeStyle = '#92400e'
-  ctx.lineWidth = 1.5
-  ctx.stroke()
+  ctx.lineWidth = 0.8
+  OFFSETS.forEach(([ox, oy]) => { traceMissileShape(ctx, cx, cy, ox, oy); ctx.stroke() })
 
-  // Count label
-  ctx.font = 'bold 8px monospace'
-  ctx.fillStyle = '#1c1917'
+  // Count label below cluster
+  ctx.font = 'bold 7px monospace'
+  ctx.fillStyle = '#fbbf24'
   ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  ctx.fillText(String(missile.count), cx, cy)
+  ctx.textBaseline = 'top'
+  ctx.fillText(`×${missile.count}`, cx, cy + 6)
 
-  // Thrust remaining indicator (small arc)
+  // Thrust remaining indicator (arc)
   const thrustFraction = missile.thrustRemaining / 10
   ctx.beginPath()
   ctx.arc(cx, cy, MISSILE_RADIUS + 3, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * thrustFraction)

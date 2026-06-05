@@ -67,12 +67,27 @@ function ShipIcon({ color }) {
   )
 }
 
-function MissileDot() {
+function MissileIcon() {
+  // Three staggered missiles — mirrors drawMissileToken offsets, scaled ×3.5 for 40×44 viewBox
+  const scale = 3.5
+  const cx = 20, cy = 19
+  const offsets = [[-3.5, 1.5], [0, -1.5], [3.5, 1.5]]
+  const missilePoints = offsets.map(([ox, oy]) => {
+    const x = cx + ox * scale, y = cy + oy * scale
+    return [
+      `${x},${y - 4.5 * scale}`,
+      `${x + 1.3 * scale},${y - 2 * scale}`,
+      `${x + 1.5 * scale},${y + 3.5 * scale}`,
+      `${x - 1.5 * scale},${y + 3.5 * scale}`,
+      `${x - 1.3 * scale},${y - 2 * scale}`,
+    ].join(' ')
+  })
   return (
-    <svg width="40" height="40" viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="10" fill="#facc15" fillOpacity="0.2" stroke="#facc15" strokeWidth="1.5" />
-      <circle cx="20" cy="20" r="4"  fill="#facc15" />
-      <text x="20" y="36" textAnchor="middle" fontSize="8" fill="#facc15" fontFamily="monospace">×3</text>
+    <svg width="40" height="44" viewBox="0 0 40 44">
+      {missilePoints.map((pts, i) => (
+        <polygon key={i} points={pts} fill="#fbbf24" fillOpacity="0.85" stroke="#92400e" strokeWidth="0.8" />
+      ))}
+      <text x="20" y="42" textAnchor="middle" fontSize="8" fill="#fbbf24" fontFamily="monospace">×N</text>
     </svg>
   )
 }
@@ -213,7 +228,7 @@ export function LegendModal() {
             <Row icon={<ShipIcon color="#22d3ee" />}  label="Player ship"   description="cyan — current faction" />
             <Row icon={<ShipIcon color="#f87171" />}  label="Enemy ship"    description="red — hostile faction" />
             <Row icon={<ShipIcon color="#a3a3a3" />}  label="Neutral ship"  description="grey" />
-            <Row icon={<MissileDot />}               label="Missile salvo" description="count + thrust remaining shown" />
+            <Row icon={<MissileIcon />}              label="Missile salvo" description="count + thrust remaining shown" />
           </Section>
 
           <Section title="Beam weapons">
