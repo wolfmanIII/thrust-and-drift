@@ -6,6 +6,30 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.9.5] — 2026-06-05
+
+### Added
+
+- **Missile token rotation** — `drawMissileToken` now applies `computeShipRotation(missile.vector)` via `ctx.save/translate/rotate/restore`; the three missile silhouettes face the velocity direction, consistent with ship token behaviour. Count label and thrust arc remain in canvas-space (unrotated).
+
+### Fixed
+
+- **Autosave** — `extractBattleSnapshot` and the IndexedDB restore block were missing `dogfights`, `boardings`, and `rangeBands`; a basic mode session reloaded from autosave would reset all range bands to Very Long and lose active dogfight/boarding state. JSON file export (`exportBattleState`) was already complete.
+- **Field manual version** — bumped header from 1.9.3 to 1.9.4 to match `package.json`.
+
+### Docs
+
+- `doc/field-manual.md` §3.2: BasicBattleView — ship cards by faction, DISTANCES panel, ▼/▲ quick controls, right-click background, Very Long default placement
+- `doc/field-manual.md` §7.3: BasicManoeuvreModal — Approach/Flee, thrust sliders, bidirectional approach, APPLY MANOEUVRE vs GM SET, thrust cost table (CRB p.161)
+- `doc/field-manual.md` §8: note that manoeuvre declarations happen in the Acceleration phase (not Movement)
+- `HelpScreen.jsx`: BASIC MODE VIEW sub-section under Map Controls; MANOEUVRE (BASIC MODE) sub-section under Acceleration
+
+### Tests
+
+- 668 tests (+2) — autosave: `dogfights`, `boardings`, `rangeBands` included in snapshot; restore from IndexedDB restores all three fields
+
+---
+
 ## [1.9.4] — 2026-06-05
 
 ### Added

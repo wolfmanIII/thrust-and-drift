@@ -18,7 +18,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
 | **Attack resolution** | 4-step flow: weapon/target config → 2D6 roll → damage → critical; per-turret firing limit (CRB p.164) — each turret fires once per round, slot badge (T1, T2…) shown in weapon list |
 | **Reactions (CRB p.171)** | Defender reacts before each attack roll: Evasive Action (1 thrust → DM −Pilot skill), Point Defence (laser turret → Gunner check, removes missiles), Disperse Sand (sandcaster turret → Gunner check, +1D+Effect armour vs laser); player ships enter physical dice manually |
-| **Missile launch** | Missile Rack selectable directly in Attack modal — count stepper + 🚀 LAUNCH SALVO (no DM roll); salvo token inherits launcher vector |
+| **Missile launch** | Missile Rack selectable directly in Attack modal — count stepper + 🚀 LAUNCH SALVO (no DM roll); salvo token inherits launcher vector; rotates to face velocity direction |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in; NPC ships auto-roll |
 | **Crew assignments** | Right-click any ship → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner T1…Tn); unassigned roles contribute 0; turrets without a gunner cannot fire |
 | **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action |
@@ -29,7 +29,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Battle log** | Timestamped event log with colour-coded entry types |
 | **Undo/Redo (Ctrl+Z / Ctrl+Y)** | Snapshot-based undo/redo — 20-step stacks; `⟲` `↷` buttons in HUD; new action clears redo |
 | **Session save / resume** | Export session to JSON; resume flow shows a full preview before loading |
-| **Autosave** | IndexedDB autosave after every significant action; Dashboard shows full roster preview from autosave; one-click restore or clear |
+| **Autosave** | IndexedDB autosave after every significant action — persists ships, missiles, dogfights, boardings, range bands, and log; Dashboard shows full roster preview; one-click restore or clear |
 | **Error boundary** | Global React error boundary — catches crashes, shows recovery UI |
 | **Profile I/O** | Import/export ship profiles via JSON files |
 | **Safety modals** | Confirm before deleting profiles; confirm before leaving battle without saving |
@@ -145,7 +145,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-666 tests across utils, Zustand stores, hooks, and UI components.
+668 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 
