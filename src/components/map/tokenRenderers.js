@@ -268,8 +268,8 @@ export function drawGhostToken(ctx, ship, cx, cy) {
 // === MISSILE TOKEN ===
 
 /**
- * Trace a single missile silhouette at local offset (ox, oy) relative to (cx, cy).
- * Nose points up (-y). Width ±1.5, total height 8px.
+ * Trace a single missile silhouette at offset (ox, oy) from (cx, cy).
+ * Nose points up (-y). Slim body (r=0.9px) with rounded nose via arc.
  * @param {CanvasRenderingContext2D} ctx
  * @param {number} cx  Token center X
  * @param {number} cy  Token center Y
@@ -278,12 +278,12 @@ export function drawGhostToken(ctx, ship, cx, cy) {
  */
 function traceMissileShape(ctx, cx, cy, ox, oy) {
   const x = cx + ox, y = cy + oy
+  const r = 0.9   // body half-width = nose radius
   ctx.beginPath()
-  ctx.moveTo(x,        y - 4.5)  // nose tip
-  ctx.lineTo(x + 1.3,  y - 2)    // right shoulder
-  ctx.lineTo(x + 1.5,  y + 3.5)  // right tail
-  ctx.lineTo(x - 1.5,  y + 3.5)  // left tail
-  ctx.lineTo(x - 1.3,  y - 2)    // left shoulder
+  ctx.moveTo(x - r, y + 4.5)         // left tail
+  ctx.lineTo(x - r, y - 3)           // left body up
+  ctx.arc(x, y - 3, r, Math.PI, 0)   // rounded nose (clockwise = curves upward)
+  ctx.lineTo(x + r, y + 4.5)         // right body down
   ctx.closePath()
 }
 
@@ -295,7 +295,7 @@ function traceMissileShape(ctx, cx, cy, ox, oy) {
  * @param {number} cy
  */
 export function drawMissileToken(ctx, missile, cx, cy) {
-  const OFFSETS = [[-3.5, 1.5], [0, -1.5], [3.5, 1.5]]
+  const OFFSETS = [[-3, 1.5], [0, -1.5], [3, 1.5]]
 
   // Fill all three bodies first, then stroke (avoids overlap artefacts)
   ctx.fillStyle = '#fbbf24'
