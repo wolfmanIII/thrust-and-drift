@@ -34,11 +34,35 @@ function Row({ icon, label, description }) {
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
-function ShipDot({ color }) {
+function ShipIcon({ color }) {
+  // Mirrors traceShipBody() — size=18, centered at (20, 21) in a 40×42 viewBox
+  const s = 18, cx = 20, cy = 21
+  const pts = [
+    [0,     -1   ],
+    [0.15,  -0.7 ],
+    [0.3,   -0.1 ],
+    [0.8,    0.4 ],
+    [0.85,   0.8 ],
+    [0.6,    0.9 ],
+    [0.3,    0.5 ],
+    [0.25,   0.95],
+    [0,      0.85],
+    [-0.25,  0.95],
+    [-0.3,   0.5 ],
+    [-0.6,   0.9 ],
+    [-0.85,  0.8 ],
+    [-0.8,   0.4 ],
+    [-0.3,  -0.1 ],
+    [-0.15, -0.7 ],
+  ].map(([dx, dy]) => `${cx + dx * s},${cy + dy * s}`).join(' ')
+  const stripe = [
+    [0, -0.90], [0.09, -0.52], [0.09, 0.50], [0, 0.68], [-0.09, 0.50], [-0.09, -0.52],
+  ].map(([dx, dy]) => `${cx + dx * s},${cy + dy * s}`).join(' ')
   return (
-    <svg width="40" height="40" viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="15" fill={color} fillOpacity="0.2" stroke={color} strokeWidth="2" />
-      <circle cx="20" cy="20" r="6"  fill={color} />
+    <svg width="40" height="42" viewBox="0 0 40 42">
+      <polygon points={pts}    fill={color} fillOpacity="0.85" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
+      <polygon points={stripe} fill="rgba(255,255,255,0.14)" />
+      <circle cx={cx} cy={cy - s * 0.62} r={s * 0.13} fill="rgba(255,255,255,0.32)" />
     </svg>
   )
 }
@@ -186,9 +210,9 @@ export function LegendModal() {
         <div className="space-y-5">
 
           <Section title="Tokens">
-            <Row icon={<ShipDot color="#22d3ee" />}  label="Player ship"   description="cyan — current faction" />
-            <Row icon={<ShipDot color="#f87171" />}  label="Enemy ship"    description="red — hostile faction" />
-            <Row icon={<ShipDot color="#a3a3a3" />}  label="Neutral ship"  description="grey" />
+            <Row icon={<ShipIcon color="#22d3ee" />}  label="Player ship"   description="cyan — current faction" />
+            <Row icon={<ShipIcon color="#f87171" />}  label="Enemy ship"    description="red — hostile faction" />
+            <Row icon={<ShipIcon color="#a3a3a3" />}  label="Neutral ship"  description="grey" />
             <Row icon={<MissileDot />}               label="Missile salvo" description="count + thrust remaining shown" />
           </Section>
 
