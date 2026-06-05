@@ -177,7 +177,7 @@ export function HelpScreen() {
           <Note>Context menu actions are phase-gated and initiative-gated. Only options valid for the current phase are shown — and in the Acceleration, Attack, and Actions phases, combat actions are shown only for the ship whose turn it currently is. Right-clicking another ship shows "Not this ship's turn".</Note>
           <Sub title="LEGEND">
             <p>Click <span className="text-slate-200">📖 Legend</span> (fixed button, top-right of the battle screen) to open the visual reference panel. Also accessible via right-click any empty hex → Legend.</p>
-            <KV k="Tokens" v="Ship silhouette (swept-wing polygon, rotates to face velocity); HP arc (green/yellow/red); missile salvo (yellow — count + thrust shown)." />
+            <KV k="Tokens" v="Ship silhouette (delta-wing polygon — pointed nose, swept wings with gun-mount tips, twin engine pods, central exhaust notch; rotates to face velocity direction); HP arc (green/yellow/red); missile salvo (yellow — count + thrust shown)." />
             <KV k="Beam weapons" v="Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange)." />
             <KV k="Hit effects" v="Impact burst (expanding sparks on target), Critical flash (red ring + label)." />
             <KV k="Movement effects" v="Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line)." />
