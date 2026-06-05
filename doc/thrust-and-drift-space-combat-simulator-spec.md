@@ -154,6 +154,7 @@ Suite Vitest collocata accanto ai file sorgente (`*.test.js` / `*.test.jsx`):
 | `components/ui/ErrorBoundary.test.jsx` | ErrorBoundary — render normale, catch errore, reload |
 | `hooks/useAutosave.test.js` | useAutosave — restore mount, autosave su cambio significativo |
 | `utils/db.test.js` | db.js — dbGet/dbPut/dbDelete, store isolati, fake-indexeddb |
+| `utils/io.test.js` | io.js — importProfiles, importBattle: file valido, JSON malformato, tipo errato, campi mancanti, file.text() rejection |
 
 ```bash
 npm test               # esegui tutti i test
@@ -989,6 +990,7 @@ Funzionalità incluse nella prima versione funzionante:
 - ✅ Pulsante "Riprendi Autosalvataggio" in Dashboard con round/fase/navi/timestamp
 - ✅ Error boundary globale — cattura crash render, mostra UI recovery con pulsante ricarica
 - ✅ `utils/db.js` — wrapper IndexedDB testato con fake-indexeddb (285 test totali)
+- ✅ `utils/io.js` — import/export JSON testato con mock File (644 test totali)
 
 ### 13.2 Versione 1.1 — Persistenza e Resilienza ✅ COMPLETATA
 

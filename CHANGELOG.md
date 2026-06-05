@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.9.3] — 2026-06-05
+
+### Fixed
+
+- **`io.js` error strings** — remaining Italian error messages in `parseJSONFile`, `importProfiles`, and `importBattle` translated to English (`"Impossibile leggere il file"` → `"Cannot read file"`, etc.)
+
+### Tests
+
+- 644 tests (+18) — new `io.test.js` suite covering `importProfiles` and `importBattle`: valid file, empty profiles array, malformed JSON, unexpected JSON structure (null / array root), wrong type tag, missing `type` field, missing/non-array `profiles`, missing/non-object `battle`, and `file.text()` rejection
+
+---
+
 ## [1.9.2] — 2026-06-04
 
 ### Fixed
