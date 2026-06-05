@@ -175,6 +175,15 @@ export function HelpScreen() {
           <KV k="Left-click token" v="Select the ship (highlights it)." />
           <KV k="Right-click hex" v="Open context menu — actions depend on what is in the hex and the current phase." />
           <Note>Context menu actions are phase-gated and initiative-gated. Only options valid for the current phase are shown — and in the Acceleration, Attack, and Actions phases, combat actions are shown only for the ship whose turn it currently is. Right-clicking another ship shows "Not this ship's turn".</Note>
+
+          <Sub title="BASIC MODE VIEW">
+            <p>In Basic mode there is no hex map. Ships appear as cards grouped by faction.</p>
+            <KV k="Ship card" v="Shows name, hull bar, initiative, and active criticals. Right-click a card to open its context menu." />
+            <KV k="DISTANCES panel" v="Lists every cross-faction pair with its current range band. ▼ / ▲ buttons adjust the band directly (GM override — no thrust spent)." />
+            <p>Right-click anywhere in the background to open the global context menu (Roll Initiative, Add ship here).</p>
+            <Note>Ships are placed at Very Long range by default when added to a basic mode session.</Note>
+          </Sub>
+
           <Sub title="LEGEND">
             <p>Click <span className="text-slate-200">📖 Legend</span> (fixed button, top-right of the battle screen) to open the visual reference panel. Also accessible via right-click any empty hex → Legend.</p>
             <KV k="Tokens" v="Ship silhouette (delta-wing polygon — pointed nose, swept wings with gun-mount tips, twin engine pods, central exhaust notch; rotates to face velocity direction); HP arc (green/yellow/red); missile salvo (yellow — count + thrust shown)." />
@@ -253,6 +262,16 @@ export function HelpScreen() {
             <p>A ghost token on the map previews where the ship will be next round if it keeps its current velocity after this thrust.</p>
           </Sub>
           <Note>Full thrust is available for movement. Evasive Action is a Reaction declared during the Attack phase — not pre-allocated here (CRB p.171). See the Attack Phase section below.</Note>
+
+          <Sub title="MANOEUVRE (BASIC MODE)">
+            <p>In Basic mode, <span className="text-slate-200">Apply Thrust</span> is replaced by <span className="text-slate-200">Manoeuvre…</span> in the context menu.</p>
+            <p>The modal changes the range band between the moving ship and a selected enemy. Pick direction, assign thrust with the sliders, then confirm:</p>
+            <KV k="▼ Approach" v="Both ships can contribute thrust (sums together) to meet the band threshold." />
+            <KV k="▲ Flee" v="Only the fleeing ship's thrust counts." />
+            <KV k="APPLY MANOEUVRE" v="Spends thrust and moves the band one step if the threshold is met." />
+            <KV k="GM SET" v="Override — sets the result band without spending any thrust." />
+            <p className="text-slate-500">Thrust thresholds per band (CRB p.161): Adjacent 1 · Short 2 · Medium 5 · Long 10 · Very Long 25 · Distant 50.</p>
+          </Sub>
         </Section>
 
         {/* MOVEMENT */}

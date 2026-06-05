@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.9.3** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.9.4** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -115,6 +115,22 @@ Click **📖 Legend** (fixed button, top-right of the battle screen) to open the
 | **Movement effects** | Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line) |
 | **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔ + red ring), Missile exhausted (×) |
 
+### 3.2 Basic Mode View
+
+In **Basic** mode there is no hex map. The screen shows **ship cards** grouped
+by faction.
+
+| Element | Description |
+| ------- | ----------- |
+| **Ship card** | Displays name, hull bar, hull / max hull, initiative, and any active critical hits. Right-click a card to open the context menu for that ship. |
+| **DISTANCES panel** | Appears above the ship list. Lists every cross-faction pair with its current range band. Use **▼** (closer) / **▲** (further) to adjust a band directly — GM override, no thrust spent. |
+
+Right-click anywhere in the background (not on a card) to open the global
+context menu (Roll Initiative, Add ship here).
+
+Ships are placed at **Very Long** range by default when added to a basic mode
+session.
+
 ---
 
 ## 4. Phase Flow
@@ -217,6 +233,33 @@ Full thrust is available for movement. Evasive Action is a **Reaction** declared
 during the Attack phase — not pre-allocated here *(CRB p.171)*.
 See §9.9 Reactions below.
 
+### 7.3 Manoeuvre (Basic Mode)
+
+In Basic mode, **Apply Thrust** is replaced by **Manoeuvre…** in the context menu.
+Right-click a ship → **Manoeuvre…** during the Acceleration phase.
+
+The modal changes the range band between the moving ship and one enemy:
+
+| Control | Description |
+| ------- | ----------- |
+| **Target** | Select which enemy ship this manoeuvre targets. |
+| **▼ Approach / ▲ Flee** | Direction of movement. |
+| **Thrust sliders** | Thrust committed by each ship. On Approach, the target may also contribute thrust (both sides sum). On Flee, only the fleeing ship's thrust counts. |
+| **APPLY MANOEUVRE** | Confirm and spend thrust — range band changes by one step if combined thrust meets the threshold. |
+| **GM SET** | Override: sets the result band directly without spending thrust. |
+
+The threshold to change one band step depends on the current band
+*(MgT2e CRB p.161)*:
+
+| Current band | Thrust required |
+| ------------ | --------------- |
+| Adjacent | 1 |
+| Short | 2 |
+| Medium | 5 |
+| Long | 10 |
+| Very Long | 25 |
+| Distant | 50 |
+
 ---
 
 ## 8. Movement Phase
@@ -252,7 +295,8 @@ when all are dismissed.
 > **Note:** Ships that end in the same hex trigger the **Dogfight** system
 > instead and are handled at the movement → attack phase transition.
 
-In Basic mode this phase is skipped automatically.
+In Basic mode this phase is skipped automatically — range band changes are
+declared during the **Acceleration phase** via the Manoeuvre modal (§7.3).
 
 ---
 
