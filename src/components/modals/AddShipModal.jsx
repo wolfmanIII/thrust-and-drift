@@ -21,9 +21,10 @@ export function AddShipModal() {
   const startPlacement = useUiStore((s) => s.startPlacement)
   const addShip        = useBattleStore((s) => s.addShip)
   const combatMode     = useBattleStore((s) => s.combatMode)
+  const ships          = useBattleStore((s) => s.ships)
   const profiles       = useProfilesStore((s) => s.profiles)
 
-  const initialHex = modalPayload?.hex ?? null
+  const initialHex  = modalPayload?.hex ?? null
   const isBasicMode = combatMode === 'basic'
 
   const [selectedProfileId, setSelectedProfileId] = useState(profiles[0]?.id ?? null)
@@ -43,8 +44,10 @@ export function AddShipModal() {
       addShip(selectedProfile, initialHex, faction, color)
       closeModal()
     } else if (isBasicMode) {
-      // Basic mode has no hex map — position is irrelevant, use origin
-      addShip(selectedProfile, { q: 0, r: 0 }, faction, color)
+      // Basic mode has no hex map — spread ships 25 hex apart so distance-based
+      // guards (boarding, range bands) don't fire spuriously. CRB p.160: default
+      // starting range is Short; 25 hex = Long is a safe neutral starting distance.
+      addShip(selectedProfile, { q: ships.length * 25, r: 0 }, faction, color)
       closeModal()
     } else {
       // Vectorial mode: enter placement mode — user clicks a hex cell
