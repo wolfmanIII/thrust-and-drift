@@ -214,19 +214,23 @@ export function LegendModal() {
 
   return (
     <Modal title="Legend" onClose={closeModal} width="max-w-2xl">
+      <p className="mb-4 px-3 py-2 rounded border border-sky-800/50 bg-sky-950/40 font-mono text-xs text-sky-400">
+        Canvas visuals (tokens, beams, effects) — <span className="font-bold">vectorial mode only</span>.
+        In basic mode ships appear as cards; no map is rendered.
+      </p>
       <div className="grid grid-cols-2 gap-x-6 gap-y-5">
 
         {/* Left column */}
         <div className="space-y-5">
 
-          <Section title="Tokens">
+          <Section title="Tokens — vectorial mode">
             <Row icon={<ShipIcon color="#22d3ee" />}  label="Player ship"   description="cyan — current faction" />
             <Row icon={<ShipIcon color="#f87171" />}  label="Enemy ship"    description="red — hostile faction" />
             <Row icon={<ShipIcon color="#a3a3a3" />}  label="Neutral ship"  description="grey" />
             <Row icon={<MissileIcon />}              label="Missile salvo" description="count + thrust remaining shown" />
           </Section>
 
-          <Section title="Beam weapons">
+          <Section title="Beam weapons — vectorial mode">
             <Row icon={<BeamLine color="#7dd3fc" />} label="Pulse Laser"   />
             <Row icon={<BeamLine color="#38bdf8" />} label="Beam Laser"    />
             <Row icon={<BeamLine color="#c084fc" />} label="Particle Beam" />
@@ -238,18 +242,18 @@ export function LegendModal() {
         {/* Right column */}
         <div className="space-y-5">
 
-          <Section title="Hit effects">
+          <Section title="Hit effects — vectorial mode">
             <Row icon={<BurstIcon color="#fb923c" />} label="Impact burst"   description="hit registered on target" />
             <Row icon={<CritFlashIcon />}             label="Critical flash"  description="critical system hit applied" />
           </Section>
 
-          <Section title="Movement effects">
+          <Section title="Movement effects — vectorial mode">
             <Row icon={<PlumeIcon />}         label="Thrust plume"   description="delta-v applied this phase" />
             <Row icon={<MissileLaunchIcon />} label="Missile launch" description="salvo deployed from ship" />
             <Row icon={<MissileTrailIcon />}  label="Missile trail"  description="salvo in flight" />
           </Section>
 
-          <Section title="Persistent indicators">
+          <Section title="Persistent indicators — vectorial mode">
             <Row icon={<SensorLockIcon />}   label="Sensor lock"       description="dashed line + ring on target" />
             <Row icon={<EvasiveAuraIcon />}  label="Evasive manoeuvre" description="evasion declared this phase" />
             <Row icon={<DogfightIcon />}     label="Dogfight"          description="two+ ships share a hex" />
