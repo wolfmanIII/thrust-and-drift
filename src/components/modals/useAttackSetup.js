@@ -24,6 +24,7 @@ import { getEffectiveSkill } from '../../utils/crew.js'
  *   availableWeapons: { weaponName: string, turretSlot: number }[],
  *   distance:         number|null,
  *   rangeBand:        string,
+ *   storedBand:       string|null,
  *   combatMode:       'vectorial'|'basic',
  *   outOfRange:   boolean,
  *   dmBreakdown: {
@@ -40,6 +41,7 @@ import { getEffectiveSkill } from '../../utils/crew.js'
 export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeBand = null, turretSlot = null) {
   const ships      = useBattleStore((s) => s.ships)
   const combatMode = useBattleStore((s) => s.combatMode)
+  const rangeBands = useBattleStore((s) => s.rangeBands)
 
   const attacker = ships.find((s) => s.id === attackerShipId)
   const enemies  = ships.filter((s) => s.id !== attackerShipId)
@@ -64,9 +66,13 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const distance  = combatMode === 'vectorial' && target && attacker
     ? hexDistance(attacker.position, target.position)
     : null
+
+  const storedBand = combatMode === 'basic' && attacker && target
+    ? rangeBands[[attacker.id, target.id].sort().join('_')] ?? null
+    : null
   const rangeBand = combatMode === 'vectorial'
     ? getRangeBand(distance ?? 0)
-    : (manualRangeBand ?? 'Medium')
+    : (storedBand ?? manualRangeBand ?? 'Medium')
   const rangeDM   = getRangeDM(rangeBand)
   const sizeDM      = target ? getTargetSizeDM(target.profile.tonnage ?? 0) : 0
   // evasiveDM is 0 here — computed dynamically in AttackModal from Reactions (CRB p.171)
@@ -84,6 +90,7 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     availableWeapons,
     distance,
     rangeBand,
+    storedBand,
     combatMode,
     outOfRange,
     dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, totalDM },

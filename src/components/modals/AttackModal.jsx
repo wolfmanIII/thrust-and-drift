@@ -220,7 +220,7 @@ function AttackConfigStep({
   enemies, availableWeapons,
   weaponKey, selectedTurretSlot, setWeaponSelection, targetId, setTargetId,
   target, weapon, rangeBand, distance, dmBreakdown,
-  combatMode, manualRangeBand, setManualRangeBand,
+  combatMode, storedBand, manualRangeBand, setManualRangeBand,
   outOfRange,
   isMissile, missileCount, setMissileCount,
   reactions,
@@ -327,10 +327,10 @@ function AttackConfigStep({
           </div>
         )}
 
-        {/* Range band selector — basic mode, non-missile weapons only */}
-        {!isMissile && combatMode === 'basic' && target && (
+        {/* Range band selector — basic mode, non-missile, no stored band */}
+        {!isMissile && combatMode === 'basic' && target && !storedBand && (
           <div>
-            <p className="text-slate-500 font-mono text-xs mb-1.5">Range</p>
+            <p className="text-slate-500 font-mono text-xs mb-1.5">Range (manual — set via Manoeuvre phase)</p>
             <div className="grid grid-cols-3 gap-1">
               {RANGE_BANDS.map(({ label }) => (
                 <button
@@ -346,6 +346,13 @@ function AttackConfigStep({
                 </button>
               ))}
             </div>
+          </div>
+        )}
+        {/* Range band from store — basic mode, shown as read-only */}
+        {!isMissile && combatMode === 'basic' && target && storedBand && (
+          <div className="flex items-center justify-between bg-slate-800/60 rounded px-3 py-1.5">
+            <span className="font-mono text-xs text-slate-500">Range (from Manoeuvre phase)</span>
+            <span className="font-mono text-xs text-yellow-400">{storedBand}</span>
           </div>
         )}
 
@@ -422,7 +429,7 @@ function AttackConfigStep({
         ) : (
           <button
             onClick={onNext}
-            disabled={!weapon || !target || outOfRange || (combatMode === 'basic' && !manualRangeBand)}
+            disabled={!weapon || !target || outOfRange || (combatMode === 'basic' && !storedBand && !manualRangeBand)}
             className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ROLL ATTACK →
@@ -891,7 +898,7 @@ export function AttackModal() {
   }
   const handleTargetChange = (id) => { setTargetId(id); resetReactions() }
 
-  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, combatMode, outOfRange, dmBreakdown } =
+  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, storedBand, combatMode, outOfRange, dmBreakdown } =
     useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand, selectedTurretSlot)
 
   if (!attacker) return null
@@ -1082,6 +1089,7 @@ export function AttackModal() {
         rangeBand={rangeBand}
         distance={distance}
         combatMode={combatMode}
+        storedBand={storedBand}
         manualRangeBand={manualRangeBand}
         setManualRangeBand={setManualRangeBand}
         outOfRange={outOfRange}

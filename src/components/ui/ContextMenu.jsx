@@ -107,10 +107,16 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
         )}
       </div>
 
-      {/* ── Acceleration: thrust + evasion (vectorial only) ──────── */}
+      {/* ── Acceleration: thrust (vectorial) or range band change (basic) ── */}
       {phase === 'acceleration' && combatMode === 'vectorial' && isCurrentActor && (
         <>
           <MenuItem icon="🚀" label="Apply Thrust" onClick={() => open('thrust', { shipId: targetId })} />
+          <MenuDivider />
+        </>
+      )}
+      {phase === 'acceleration' && combatMode === 'basic' && isCurrentActor && (
+        <>
+          <MenuItem icon="🧭" label="Manoeuvre…" onClick={() => open('basicManoeuvre', { shipId: targetId })} />
           <MenuDivider />
         </>
       )}

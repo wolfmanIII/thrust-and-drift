@@ -5,9 +5,10 @@
  * // MgT2e CRB pp.160–168
  */
 
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useMemo } from 'react'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore }     from '../../store/uiStore.js'
+import { RANGE_BAND_ORDER } from '../../data/rangeBands.js'
 
 function HullBar({ current, max }) {
   const pct = max > 0 ? Math.max(0, current / max) : 0
@@ -73,8 +74,39 @@ const FACTION_COLORS = {
   neutral: 'text-slate-400 border-slate-600',
 }
 
+function RangeBandRow({ ship1, ship2, band, onSet }) {
+  const openModal = useUiStore((s) => s.openModal)
+  const idx = RANGE_BAND_ORDER.indexOf(band)
+  return (
+    <div className="flex items-center gap-2 py-1">
+      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ship1.color }} />
+      <span className="font-mono text-xs text-slate-300 truncate">{ship1.profile.name}</span>
+      <span className="text-slate-600 mx-1">↔</span>
+      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ship2.color }} />
+      <span className="font-mono text-xs text-slate-300 truncate">{ship2.profile.name}</span>
+      <span className="ml-auto font-mono text-xs text-yellow-400 shrink-0">{band}</span>
+      <div className="flex gap-1 shrink-0">
+        <button
+          disabled={idx <= 0}
+          onClick={() => onSet(RANGE_BAND_ORDER[idx - 1])}
+          title="Closer"
+          className="w-5 h-5 flex items-center justify-center border border-slate-700 text-slate-400 rounded text-xs hover:border-slate-500 hover:text-slate-200 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+        >▼</button>
+        <button
+          disabled={idx >= RANGE_BAND_ORDER.length - 1}
+          onClick={() => onSet(RANGE_BAND_ORDER[idx + 1])}
+          title="Further"
+          className="w-5 h-5 flex items-center justify-center border border-slate-700 text-slate-400 rounded text-xs hover:border-slate-500 hover:text-slate-200 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+        >▲</button>
+      </div>
+    </div>
+  )
+}
+
 export function BasicBattleView() {
-  const ships          = useBattleStore((s) => s.ships)
+  const ships           = useBattleStore((s) => s.ships)
+  const rangeBands      = useBattleStore((s) => s.rangeBands)
+  const setRangeBand    = useBattleStore((s) => s.setRangeBand)
   const showContextMenu = useUiStore((s) => s.showContextMenu)
 
   const handleContainerContextMenu = useCallback((e) => {
@@ -89,6 +121,23 @@ export function BasicBattleView() {
     return acc
   }, {})
 
+  // Build list of tracked ship pairs (cross-faction only)
+  const trackedPairs = useMemo(() => {
+    const pairs = []
+    const seen = new Set()
+    for (const s1 of ships) {
+      for (const s2 of ships) {
+        if (s1.id === s2.id || s1.faction === s2.faction) continue
+        const key = [s1.id, s2.id].sort().join('_')
+        if (seen.has(key)) continue
+        seen.add(key)
+        const band = rangeBands[key]
+        if (band) pairs.push({ s1, s2, band, key })
+      }
+    }
+    return pairs
+  }, [ships, rangeBands])
+
   return (
     <div className="w-full h-full overflow-y-auto p-6" onContextMenu={handleContainerContextMenu}>
       {ships.length === 0 && (
@@ -99,6 +148,28 @@ export function BasicBattleView() {
         </div>
       )}
       <div className="max-w-4xl mx-auto space-y-6">
+
+        {/* Range bands matrix */}
+        {trackedPairs.length > 0 && (
+          <div>
+            <h2 className="font-display text-xs tracking-widest mb-3 pb-1.5 border-b text-slate-400 border-slate-700">
+              DISTANCES
+            </h2>
+            <div className="divide-y divide-slate-800">
+              {trackedPairs.map(({ s1, s2, band, key }) => (
+                <RangeBandRow
+                  key={key}
+                  ship1={s1}
+                  ship2={s2}
+                  band={band}
+                  onSet={(newBand) => setRangeBand(s1.id, s2.id, newBand)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Ships by faction */}
         {Object.entries(byFaction).map(([faction, factionShips]) => (
           <div key={faction}>
             <h2 className={`font-display text-xs tracking-widest mb-3 pb-1.5 border-b ${FACTION_COLORS[faction] ?? FACTION_COLORS.neutral}`}>

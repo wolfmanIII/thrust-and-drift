@@ -13,6 +13,10 @@ import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
 import { getCrewSkill, getEffectiveSkill, buildDefaultAssignments } from '../utils/crew.js'
 import { resolveDogfightChecks } from '../utils/dogfight.js'
+import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST } from '../data/rangeBands.js'
+
+/** Canonical sort key for a ship pair — order-independent. */
+function pairKey(id1, id2) { return [id1, id2].sort().join('_') }
 
 /**
  * @typedef {'setup'|'initiative'|'acceleration'|'movement'|'attack'|'actions'|'end'} BattlePhase
@@ -136,6 +140,9 @@ const useBattleStore = create((set, get) => {
 
   mapSettings: { scale: 1 },
 
+  /** @type {Record<string, string>} Range band per ship pair (basic mode only). Key: pairKey(id1, id2). */
+  rangeBands: {},
+
   /** @type {object[]} Undo history — snapshots of game state, capped at 20. */
   undoStack: [],
   /** @type {object[]} Redo history — populated by undoLastAction, cleared on any new action. */
@@ -250,8 +257,18 @@ const useBattleStore = create((set, get) => {
       inBoarding: null,
       crewAssignments: buildDefaultAssignments(profile.crew, profile.turrets),
     }
+    const { ships: existing, combatMode } = get()
+    const newRangeBands = {}
+    if (combatMode === 'basic') {
+      for (const ex of existing) {
+        if (ex.faction !== faction) {
+          newRangeBands[pairKey(instance.id, ex.id)] = 'Very Long'
+        }
+      }
+    }
     set((s) => ({
       ships: [...s.ships, instance],
+      rangeBands: { ...s.rangeBands, ...newRangeBands },
       log: [...s.log, makeLogEntry({
         round: s.round,
         phase: s.phase,
@@ -274,13 +291,16 @@ const useBattleStore = create((set, get) => {
         ships: s.ships.filter((sh) => sh.id !== shipId),
         missiles: s.missiles.filter((m) => m.launchedBy !== shipId && m.target !== shipId),
         initiativeOrder: s.initiativeOrder.filter((id) => id !== shipId),
+        rangeBands: Object.fromEntries(
+          Object.entries(s.rangeBands).filter(([k]) => !k.split('_').includes(shipId))
+        ),
         log: [...s.log, makeLogEntry({
-        round: s.round,
-        phase: s.phase,
-        type: 'system',
-        message: `${ship.profile.name} removed from battle.`,
-      })],
-    }))
+          round: s.round,
+          phase: s.phase,
+          type: 'system',
+          message: `${ship.profile.name} removed from battle.`,
+        })],
+      }))
     },
   ),
 
@@ -629,10 +649,11 @@ const useBattleStore = create((set, get) => {
       return
     }
     let nextPhase = PHASE_ORDER[idx + 1]
-    // Basic mode has no acceleration or movement phases — skip both.
-    // CRB pp.160–168: initiative → attack → actions → end.
+    // Basic mode has no hex map — skip only the movement phase (vector resolution).
+    // Acceleration (manoeuvre) still happens: pilots allocate thrust to range band changes.
+    // CRB §5: initiative → acceleration → attack → actions → end.
     if (combatMode === 'basic') {
-      while (nextPhase === 'acceleration' || nextPhase === 'movement') {
+      while (nextPhase === 'movement') {
         const ni = PHASE_ORDER.indexOf(nextPhase)
         nextPhase = PHASE_ORDER[ni + 1]
       }
@@ -711,6 +732,60 @@ const useBattleStore = create((set, get) => {
       }))
     },
   ),
+
+  // === BASIC MODE RANGE BANDS ===
+
+  /**
+   * Directly set the range band between two ships. GM override — no thrust cost.
+   * Basic mode only; used for initial setup and corrections.
+   * @param {string} id1
+   * @param {string} id2
+   * @param {string} band  Range band label from RANGE_BAND_ORDER
+   */
+  setRangeBand: wh((id1, id2, band) => {
+    set((s) => ({
+      rangeBands: { ...s.rangeBands, [pairKey(id1, id2)]: band },
+      log: [...s.log, makeLogEntry({
+        round: s.round, phase: s.phase, type: 'system',
+        message: `Range set: ${s.ships.find(sh=>sh.id===id1)?.profile.name} vs ${s.ships.find(sh=>sh.id===id2)?.profile.name} → ${band}.`,
+      })],
+    }))
+  }),
+
+  /**
+   * Apply basic-mode manoeuvre: spend thrust to change range band between two ships.
+   * CRB §5.1 — thrust cost = RANGE_BAND_MOVE_COST[currentBand]; bidirectional approach sums thrust.
+   * @param {string} movingShipId
+   * @param {string} targetShipId
+   * @param {'approach'|'flee'} direction
+   * @param {number} movingThrust    Thrust this ship commits
+   * @param {number} [targetThrust]  Thrust target also commits (approach only)
+   */
+  applyBasicMovement: wh((movingShipId, targetShipId, direction, movingThrust, targetThrust = 0) => {
+    const { ships, rangeBands } = get()
+    const moving = ships.find((s) => s.id === movingShipId)
+    const target = ships.find((s) => s.id === targetShipId)
+    if (!moving || !target) return
+    const key = pairKey(movingShipId, targetShipId)
+    const currentBand = rangeBands[key] ?? 'Very Long'
+    const idx = RANGE_BAND_ORDER.indexOf(currentBand)
+    const newIdx = direction === 'approach'
+      ? Math.max(0, idx - 1)
+      : Math.min(RANGE_BAND_ORDER.length - 1, idx + 1)
+    const newBand = RANGE_BAND_ORDER[newIdx]
+    set((s) => ({
+      rangeBands: { ...s.rangeBands, [key]: newBand },
+      ships: s.ships.map((sh) => {
+        if (sh.id === movingShipId) return { ...sh, thrustUsedThisRound: sh.thrustUsedThisRound + movingThrust }
+        if (sh.id === targetShipId && targetThrust > 0) return { ...sh, thrustUsedThisRound: sh.thrustUsedThisRound + targetThrust }
+        return sh
+      }),
+      log: [...s.log, makeLogEntry({
+        round: s.round, phase: s.phase, type: 'movement',
+        message: `${moving.profile.name} ${direction === 'approach' ? 'approaches' : 'flees from'} ${target.profile.name}: ${currentBand} → ${newBand}.`,
+      })],
+    }))
+  }),
 
   /**
    * Apply a sensor lock from one ship to another.
@@ -1211,6 +1286,7 @@ const useBattleStore = create((set, get) => {
     boardings: [],
     log: [],
     mapSettings: { scale: 1 },
+    rangeBands: {},
     undoStack: [],
     redoStack: [],
   }),
@@ -1218,8 +1294,8 @@ const useBattleStore = create((set, get) => {
   // === IMPORT / EXPORT ===
 
   exportBattleState: () => {
-    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings } = get()
-    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, savedAt: new Date().toISOString() })
+    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands } = get()
+    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, savedAt: new Date().toISOString() })
   },
 
   /**
@@ -1242,6 +1318,7 @@ const useBattleStore = create((set, get) => {
       boardings: battle.boardings ?? [],
       log: battle.log ?? [],
       mapSettings: battle.mapSettings ?? { scale: 1 },
+      rangeBands: battle.rangeBands ?? {},
       undoStack: [],
       redoStack: [],
     })
