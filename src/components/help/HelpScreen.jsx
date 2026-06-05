@@ -365,14 +365,22 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="ROLE ASSIGNMENTS">
-            <p>Right-click ship → <span className="text-slate-200">Assign Crew…</span> to assign each member to a role slot. An unassigned role contributes 0 skill.</p>
-            <KV k="Pilot" v="Initiative roll, evasion DM, dogfight — uses skill 0 if unassigned." />
-            <KV k="Leadership" v="Improve Initiative action not available if unassigned." />
-            <KV k="Tactics" v="No Tactics(naval) check at initiative if unassigned." />
-            <KV k="Engineer" v="Engineer actions use skill 0 if unassigned." />
-            <KV k="Gunner (T1, T2…)" v="That turret cannot fire if unassigned." />
-            <KV k="Sensors" v="Sensors actions use skill 0 if unassigned." />
-            <p>A crew member can be assigned to multiple slots (e.g. same person as Pilot and Gunner T1). When placed on the map the app auto-assigns the best-skilled member per role — adjust at any time.</p>
+            <p>Right-click ship → <span className="text-slate-200">Assign Crew…</span> to open the assignment modal.</p>
+            <p>The modal has two sections:</p>
+            <p><span className="text-slate-200">Roles</span> — one dropdown per non-gunner slot: Pilot, Leadership (LDR), Tactics (TAC), Engineer, Sensors.</p>
+            <p><span className="text-slate-200">Gunners</span> — one dropdown per turret (T1, T2…), with weapon names shown next to the slot label.</p>
+            <p>Each dropdown lists all named crew members. The relevant skill level is shown in brackets — e.g. <span className="text-(--neon-cyan)">Mira Vasquez [pilot 1]</span> or <span className="text-slate-500">Joko Hendrik [no skill]</span>. Select <span className="text-slate-400">— unassigned —</span> to leave the slot empty.</p>
+            <KV k="CLEAR ALL" v="Reset every slot to unassigned." />
+            <KV k="SAVE ASSIGNMENTS" v="Commit selections to the ship and close." />
+            <p className="text-slate-500 italic">If the profile has no named crew the modal prompts you to add crew in the profile editor first.</p>
+            <p className="mt-1">Effects of unassigned slots:</p>
+            <KV k="Pilot" v="Initiative roll, evasion DM, dogfight — uses skill 0." />
+            <KV k="Leadership" v="Improve Initiative action not available." />
+            <KV k="Tactics" v="No Tactics(naval) check at initiative." />
+            <KV k="Engineer" v="Engineer actions use skill 0." />
+            <KV k="Gunner (T1, T2…)" v="That turret cannot fire." />
+            <KV k="Sensors" v="Sensors actions use skill 0." />
+            <p>One crew member can cover multiple slots (e.g. same person as Pilot and Gunner T1 on a light fighter). On placement the app auto-assigns the best-skilled member per role — adjust any time before or during combat.</p>
           </Sub>
 
           <Sub title="EDITING CREW">

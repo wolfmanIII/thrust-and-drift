@@ -451,6 +451,37 @@ Roles are **optional** — an unassigned role contributes **0 skill** (no bonus)
 
 Right-click any ship token → **Assign Crew…** to open the assignment modal.
 
+#### Using the Assign Crew modal
+
+The modal is divided into two sections:
+
+**Roles** — one dropdown per non-gunner role:
+
+| Slot | Dropdown label |
+| ---- | -------------- |
+| Pilot | `Pilot` |
+| Leadership | `Leadership (LDR)` |
+| Tactics | `Tactics (TAC)` |
+| Engineer | `Engineer` |
+| Sensors | `Sensors` |
+
+**Gunners** — one dropdown per turret slot (T1, T2…), with the weapon names
+listed next to the slot label.
+
+Each dropdown lists all named crew members. The relevant skill level is shown
+in brackets — e.g. `Mira Vasquez [pilot 1]` or `Joko Hendrik [no skill]`.
+Select `— unassigned —` to leave the slot empty.
+
+Buttons:
+
+- **CLEAR ALL** — resets every slot to unassigned.
+- **SAVE ASSIGNMENTS** — commits the selection to the ship and closes the modal.
+
+> If the ship profile has no named crew, the modal shows
+> *"No named crew on this ship. Add crew members in the profile editor."*
+
+#### Effect of unassigned roles
+
 | Role slot | Effect if unassigned |
 | --------- | -------------------- |
 | Pilot | Initiative roll, evasion DM, dogfight use skill 0 |
