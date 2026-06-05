@@ -5,7 +5,7 @@
  */
 
 export const FACTIONS = [
-  { id: 'players', label: 'Giocatori', color: '#60a5fa' },
-  { id: 'npc',     label: 'NPC',       color: '#f87171' },
-  { id: 'neutral', label: 'Neutrale',  color: '#a3a3a3' },
+  { id: 'players', label: 'Players', color: '#60a5fa' },
+  { id: 'npc',     label: 'NPC',     color: '#f87171' },
+  { id: 'neutral', label: 'Neutral', color: '#a3a3a3' },
 ]

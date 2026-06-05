@@ -55,7 +55,7 @@ function ShipCheckRow({ ship, dms, dice, onDice }) {
     `Pilot ${pilotSkill >= 0 ? '+' : ''}${pilotSkill}`,
     `Tonnage ${tonnageDM >= 0 ? '+' : ''}${tonnageDM}`,
     `Thrust +${thrustDM}`,
-    extraEnemyDM < 0 && `Nemici extra ${extraEnemyDM}`,
+    extraEnemyDM < 0 && `Extra enemies ${extraEnemyDM}`,
     prevRoundBonus > 0 && `Bonus round +${prevRoundBonus}`,
   ].filter(Boolean).join(' / ')
 
