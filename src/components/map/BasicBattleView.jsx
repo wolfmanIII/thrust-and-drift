@@ -73,7 +73,14 @@ const FACTION_COLORS = {
 }
 
 export function BasicBattleView() {
-  const ships = useBattleStore((s) => s.ships)
+  const ships          = useBattleStore((s) => s.ships)
+  const showContextMenu = useUiStore((s) => s.showContextMenu)
+
+  const handleContainerContextMenu = useCallback((e) => {
+    if (e.target !== e.currentTarget) return
+    e.preventDefault()
+    showContextMenu({ x: e.clientX, y: e.clientY, type: 'empty', hex: null })
+  }, [showContextMenu])
 
   const byFaction = ships.reduce((acc, ship) => {
     const f = ship.faction ?? 'neutral'
@@ -83,7 +90,7 @@ export function BasicBattleView() {
   }, {})
 
   return (
-    <div className="w-full h-full overflow-y-auto p-6">
+    <div className="w-full h-full overflow-y-auto p-6" onContextMenu={handleContainerContextMenu}>
       {ships.length === 0 && (
         <div className="flex items-center justify-center h-full">
           <p className="font-mono text-slate-600 text-sm tracking-widest">

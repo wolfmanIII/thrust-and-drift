@@ -20,9 +20,11 @@ export function AddShipModal() {
   const modalPayload   = useUiStore((s) => s.modalPayload)
   const startPlacement = useUiStore((s) => s.startPlacement)
   const addShip        = useBattleStore((s) => s.addShip)
+  const combatMode     = useBattleStore((s) => s.combatMode)
   const profiles       = useProfilesStore((s) => s.profiles)
 
   const initialHex = modalPayload?.hex ?? null
+  const isBasicMode = combatMode === 'basic'
 
   const [selectedProfileId, setSelectedProfileId] = useState(profiles[0]?.id ?? null)
   const [faction, setFaction] = useState('npc')
@@ -38,11 +40,14 @@ export function AddShipModal() {
   const handleConfirm = () => {
     if (!selectedProfile) return
     if (initialHex) {
-      // Placed directly from context menu with hex pre-selected
       addShip(selectedProfile, initialHex, faction, color)
       closeModal()
+    } else if (isBasicMode) {
+      // Basic mode has no hex map — position is irrelevant, use origin
+      addShip(selectedProfile, { q: 0, r: 0 }, faction, color)
+      closeModal()
     } else {
-      // Enter placement mode — user clicks the map
+      // Vectorial mode: enter placement mode — user clicks a hex cell
       startPlacement({ profile: selectedProfile, faction, color })
       closeModal()
     }
@@ -128,7 +133,7 @@ export function AddShipModal() {
           disabled={!selectedProfile}
           className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {initialHex ? 'PLACE SHIP' : 'SELECT HEX ON MAP →'}
+          {initialHex ? 'PLACE SHIP' : isBasicMode ? 'ADD SHIP' : 'SELECT HEX ON MAP →'}
         </button>
       </div>
     </Modal>
