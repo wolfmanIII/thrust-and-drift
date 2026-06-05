@@ -296,22 +296,26 @@ function traceMissileShape(ctx, cx, cy, ox, oy) {
  */
 export function drawMissileToken(ctx, missile, cx, cy) {
   const OFFSETS = [[-3, 1.5], [0, -1.5], [3, 1.5]]
+  const rotation = computeShipRotation(missile.vector)
 
-  // Fill all three bodies first, then stroke (avoids overlap artefacts)
+  // Silhouettes — rotated to face velocity direction (same convention as ship token)
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.rotate(rotation)
   ctx.fillStyle = '#fbbf24'
-  OFFSETS.forEach(([ox, oy]) => { traceMissileShape(ctx, cx, cy, ox, oy); ctx.fill() })
+  OFFSETS.forEach(([ox, oy]) => { traceMissileShape(ctx, 0, 0, ox, oy); ctx.fill() })
   ctx.strokeStyle = '#92400e'
   ctx.lineWidth = 0.8
-  OFFSETS.forEach(([ox, oy]) => { traceMissileShape(ctx, cx, cy, ox, oy); ctx.stroke() })
+  OFFSETS.forEach(([ox, oy]) => { traceMissileShape(ctx, 0, 0, ox, oy); ctx.stroke() })
+  ctx.restore()
 
-  // Count label below cluster
+  // Count label and thrust arc — canvas-space, unrotated (same as ship name label)
   ctx.font = 'bold 7px monospace'
   ctx.fillStyle = '#fbbf24'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
   ctx.fillText(`×${missile.count}`, cx, cy + 6)
 
-  // Thrust remaining indicator (arc)
   const thrustFraction = missile.thrustRemaining / 10
   ctx.beginPath()
   ctx.arc(cx, cy, MISSILE_RADIUS + 3, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * thrustFraction)
