@@ -83,12 +83,12 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
 
   const open = (modal, payload) => { openModal(modal, payload); close() }
 
-  const boardingTargets = ships.filter((t) => {
+  const boardingTargets = combatMode === 'vectorial' ? ships.filter((t) => {
     if (t.faction === ship.faction) return false
     if (hexDistance(ship.position, t.position) > 1) return false
     const mDriveDisabled = t.criticalHits?.some((c) => c.system === 'm-drive' && c.disabled)
     return mDriveDisabled || ship.profile.thrust >= t.profile.thrust
-  })
+  }) : []
 
   return (
     <MenuShell x={x} y={y} menuRef={menuRef}>

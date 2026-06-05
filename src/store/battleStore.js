@@ -622,13 +622,21 @@ const useBattleStore = create((set, get) => {
 
   /** Advance to the next phase in sequence. Drives all transitions via PHASE_ORDER. */
   advancePhase: wh(() => {
-    const { phase } = get()
+    const { phase, combatMode } = get()
     const idx = PHASE_ORDER.indexOf(phase)
     if (idx === -1 || idx === PHASE_ORDER.length - 1) {
       set((s) => buildNextRoundState(s))
       return
     }
-    const nextPhase = PHASE_ORDER[idx + 1]
+    let nextPhase = PHASE_ORDER[idx + 1]
+    // Basic mode has no acceleration or movement phases — skip both.
+    // CRB pp.160–168: initiative → attack → actions → end.
+    if (combatMode === 'basic') {
+      while (nextPhase === 'acceleration' || nextPhase === 'movement') {
+        const ni = PHASE_ORDER.indexOf(nextPhase)
+        nextPhase = PHASE_ORDER[ni + 1]
+      }
+    }
     set((s) => ({
       phase: nextPhase,
       currentActorIndex: 0,
