@@ -1474,3 +1474,157 @@ describe('boarding', () => {
     expect(useBattleStore.getState().boardings).toHaveLength(0)
   })
 })
+
+// === BASIC MODE — RANGE BANDS ===
+
+describe('basic mode — addShip initialises range bands', () => {
+  beforeEach(() => { useBattleStore.getState().resetBattle('basic') })
+
+  it('adds no range band when first ship is added', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    expect(Object.keys(useBattleStore.getState().rangeBands)).toHaveLength(0)
+  })
+
+  it('adds no range band when two ships are same faction', () => {
+    useBattleStore.getState().addShip(makeProfile({ name: 'A' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ name: 'B' }), { q: 0, r: 0 }, 'players', '#00f')
+    expect(Object.keys(useBattleStore.getState().rangeBands)).toHaveLength(0)
+  })
+
+  it('creates range band at Very Long for cross-faction ships', () => {
+    useBattleStore.getState().addShip(makeProfile({ name: 'A' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ name: 'B' }), { q: 0, r: 0 }, 'npc',     '#f00')
+    const bands = useBattleStore.getState().rangeBands
+    expect(Object.values(bands)).toHaveLength(1)
+    expect(Object.values(bands)[0]).toBe('Very Long')
+  })
+
+  it('creates one range band per cross-faction pair with 3 ships', () => {
+    useBattleStore.getState().addShip(makeProfile({ name: 'A' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ name: 'B' }), { q: 0, r: 0 }, 'npc',     '#f00')
+    useBattleStore.getState().addShip(makeProfile({ name: 'C' }), { q: 0, r: 0 }, 'npc',     '#ff0')
+    // A vs B and A vs C — B and C are same faction so no pair between them
+    expect(Object.values(useBattleStore.getState().rangeBands)).toHaveLength(2)
+  })
+})
+
+describe('basic mode — removeShip cleans range bands', () => {
+  beforeEach(() => { useBattleStore.getState().resetBattle('basic') })
+
+  it('removes range band entries containing the removed ship', () => {
+    useBattleStore.getState().addShip(makeProfile({ name: 'A' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ name: 'B' }), { q: 0, r: 0 }, 'npc',     '#f00')
+    const { ships } = useBattleStore.getState()
+    useBattleStore.getState().removeShip(ships[0].id)
+    expect(Object.keys(useBattleStore.getState().rangeBands)).toHaveLength(0)
+  })
+})
+
+describe('setRangeBand', () => {
+  beforeEach(() => { useBattleStore.getState().resetBattle('basic') })
+
+  it('sets range band between two ships', () => {
+    useBattleStore.getState().addShip(makeProfile({ name: 'A' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ name: 'B' }), { q: 0, r: 0 }, 'npc',     '#f00')
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().setRangeBand(a.id, b.id, 'Medium')
+    const key = [a.id, b.id].sort().join('_')
+    expect(useBattleStore.getState().rangeBands[key]).toBe('Medium')
+  })
+
+  it('is commutative — key is order-independent', () => {
+    useBattleStore.getState().addShip(makeProfile({ name: 'A' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ name: 'B' }), { q: 0, r: 0 }, 'npc',     '#f00')
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().setRangeBand(a.id, b.id, 'Short')
+    useBattleStore.getState().setRangeBand(b.id, a.id, 'Long')
+    const key = [a.id, b.id].sort().join('_')
+    expect(useBattleStore.getState().rangeBands[key]).toBe('Long')
+  })
+})
+
+describe('applyBasicMovement', () => {
+  beforeEach(() => { useBattleStore.getState().resetBattle('basic') })
+
+  function setupShips(startBand = 'Medium') {
+    useBattleStore.getState().addShip(makeProfile({ name: 'A', thrust: 6 }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ name: 'B', thrust: 4 }), { q: 0, r: 0 }, 'npc',     '#f00')
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().setRangeBand(a.id, b.id, startBand)
+    return [a.id, b.id]
+  }
+
+  it('approach reduces range band by one step', () => {
+    const [aId, bId] = setupShips('Long')
+    useBattleStore.getState().applyBasicMovement(aId, bId, 'approach', 10)
+    const key = [aId, bId].sort().join('_')
+    expect(useBattleStore.getState().rangeBands[key]).toBe('Medium')
+  })
+
+  it('flee increases range band by one step', () => {
+    const [aId, bId] = setupShips('Medium')
+    useBattleStore.getState().applyBasicMovement(aId, bId, 'flee', 5)
+    const key = [aId, bId].sort().join('_')
+    expect(useBattleStore.getState().rangeBands[key]).toBe('Long')
+  })
+
+  it('cannot go closer than Adjacent', () => {
+    const [aId, bId] = setupShips('Adjacent')
+    useBattleStore.getState().applyBasicMovement(aId, bId, 'approach', 1)
+    const key = [aId, bId].sort().join('_')
+    expect(useBattleStore.getState().rangeBands[key]).toBe('Adjacent')
+  })
+
+  it('cannot go further than Distant', () => {
+    const [aId, bId] = setupShips('Distant')
+    useBattleStore.getState().applyBasicMovement(aId, bId, 'flee', 50)
+    const key = [aId, bId].sort().join('_')
+    expect(useBattleStore.getState().rangeBands[key]).toBe('Distant')
+  })
+
+  it('deducts thrustSpent from moving ship', () => {
+    const [aId, bId] = setupShips('Long')
+    useBattleStore.getState().applyBasicMovement(aId, bId, 'approach', 10)
+    const a = useBattleStore.getState().ships.find((s) => s.id === aId)
+    expect(a.thrustUsedThisRound).toBe(10)
+  })
+
+  it('bidirectional approach deducts thrust from both ships', () => {
+    const [aId, bId] = setupShips('Very Long')
+    useBattleStore.getState().applyBasicMovement(aId, bId, 'approach', 15, 10)
+    const ships = useBattleStore.getState().ships
+    expect(ships.find((s) => s.id === aId).thrustUsedThisRound).toBe(15)
+    expect(ships.find((s) => s.id === bId).thrustUsedThisRound).toBe(10)
+  })
+
+  it('flee does not deduct thrust from target', () => {
+    const [aId, bId] = setupShips('Medium')
+    useBattleStore.getState().applyBasicMovement(aId, bId, 'flee', 5, 3)
+    const b = useBattleStore.getState().ships.find((s) => s.id === bId)
+    expect(b.thrustUsedThisRound).toBe(0)
+  })
+})
+
+describe('basic mode — advancePhase skips movement', () => {
+  beforeEach(() => { useBattleStore.getState().resetBattle('basic') })
+
+  it('goes setup → initiative → acceleration (not skipped)', () => {
+    expect(useBattleStore.getState().phase).toBe('setup')
+    useBattleStore.getState().advancePhase()
+    expect(useBattleStore.getState().phase).toBe('initiative')
+    useBattleStore.getState().advancePhase()
+    expect(useBattleStore.getState().phase).toBe('acceleration')
+  })
+
+  it('skips movement phase: acceleration → attack', () => {
+    useBattleStore.setState({ phase: 'acceleration', combatMode: 'basic' })
+    useBattleStore.getState().advancePhase()
+    expect(useBattleStore.getState().phase).toBe('attack')
+  })
+
+  it('does NOT skip movement in vectorial mode', () => {
+    useBattleStore.setState({ phase: 'acceleration', combatMode: 'vectorial' })
+    useBattleStore.getState().advancePhase()
+    expect(useBattleStore.getState().phase).toBe('movement')
+  })
+})

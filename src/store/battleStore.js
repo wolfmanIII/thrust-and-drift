@@ -777,7 +777,8 @@ const useBattleStore = create((set, get) => {
       rangeBands: { ...s.rangeBands, [key]: newBand },
       ships: s.ships.map((sh) => {
         if (sh.id === movingShipId) return { ...sh, thrustUsedThisRound: sh.thrustUsedThisRound + movingThrust }
-        if (sh.id === targetShipId && targetThrust > 0) return { ...sh, thrustUsedThisRound: sh.thrustUsedThisRound + targetThrust }
+        if (sh.id === targetShipId && direction === 'approach' && targetThrust > 0)
+          return { ...sh, thrustUsedThisRound: sh.thrustUsedThisRound + targetThrust }
         return sh
       }),
       log: [...s.log, makeLogEntry({
