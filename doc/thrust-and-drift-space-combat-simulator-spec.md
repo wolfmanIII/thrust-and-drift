@@ -1139,7 +1139,7 @@ Tutti gli effetti sono puramente decorativi — non bloccano input, non modifica
 - Flusso micro-round (6 tick) prima della fase Attacco standard; navi esterne non bloccate
 - Fuga dal dogfight con check inseguimento
 - Electronic warfare (jamming), evasive action avanzata
-- Vedi `dogfight-system-design.md`
+- Vedi [dogfight-system-design.md](dogfight-system-design.md)
 
 ### 13.6 Versione 1.4.2 — Ships That Pass in the Night
 
@@ -1172,7 +1172,7 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - `BoardingContactModal` — picker metodo ingresso, toggle rotazione/forced-linkage, checker dadi per metodi con check, hull-cut tracker con resilienza per componente e armatura
 - `BoardingConflictModal` — 3 checkbox obiettivi tattici, roll stacking, missed-shot table con toggle paratia corazzata, reminder DM armi
 - `BoardingOutcomeModal` — picker esito, trasferimento fazione opzionale su attacker_wins
-- `ContextMenu` — voce "⚔ Board [target]…" condizionata a regole §2 boarding-system-design.md
+- `ContextMenu` — voce "⚔ Board [target]…" condizionata a regole §2 [boarding-system-design.md](boarding-system-design.md)
 - `HUD` — badge ⚔ BOARDING per ogni boarding attivo, con link diretto alla fase corrente
 - Tutta la UI in inglese — nessuna stringa italiana nell'interfaccia
 
@@ -1190,11 +1190,15 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - `AttackModal` — badge `OUT OF RANGE` per arma; messaggio esplicativo range/distanza; ROLL ATTACK disabilitato se fuori portata
 - 606 test (da 596) — +10 test `isOutOfRange`/`RANGE_ORDER`
 
-### 13.10 Versione 2.0 — Future
+### 13.9 Versione 2.0 — Ostacoli Ambientali
+
+Asteroid field, debris field, gravity well (zona proibita), nebula.
+Vedi [obstacles-system-design.md](obstacles-system-design.md) per la specifica completa.
+
+### 13.10 Versione 3.0 — Future
 
 - Scale mappa multiple con transizione
 - Asse Z opzionale (3D)
-- Ostacoli ambientali (asteroidi, detriti)
 - Esporta resoconto battaglia in PDF
 
 ---

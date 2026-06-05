@@ -277,3 +277,11 @@ endDogfight(groupId)
 - Più dogfight simultanei sono possibili ma indipendenti — il GM li risolve in sequenza
 - Nessuna nuova schermata: tutto su mappa + modali + HUD esteso
 - I 6 micro-round non sono obbligatori: il GM può chiudere il dogfight prima se una nave viene distrutta o fugge
+
+---
+
+## Documenti Correlati
+
+- [thrust-and-drift-space-combat-simulator-spec.md](thrust-and-drift-space-combat-simulator-spec.md) — architettura generale, modelli dati, roadmap (§13.5)
+- [boarding-system-design.md](boarding-system-design.md) — sistema di abbordaggio (fase successiva al dogfight)
+- [obstacles-system-design.md](obstacles-system-design.md) — ostacoli ambientali (asteroid field, gravity well, nebula)

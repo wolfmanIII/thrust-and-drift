@@ -232,3 +232,11 @@ Per abbordaggi di routine il GM può saltare le fasi e usare la risoluzione rapi
 - Unico check contrapposto: `2D6 + marines.count + marines.skill` vs `2D6 + equipaggio difensore`
 - Esito immediato: vince chi supera di più
 - Accessibile come toggle "Risoluzione rapida" nel `BoardingSetupModal`
+
+---
+
+## Documenti Correlati
+
+- [thrust-and-drift-space-combat-simulator-spec.md](thrust-and-drift-space-combat-simulator-spec.md) — architettura generale, modelli dati, roadmap (§13.7)
+- [dogfight-system-design.md](dogfight-system-design.md) — sistema dogfight (può precedere un abbordaggio)
+- [obstacles-system-design.md](obstacles-system-design.md) — ostacoli ambientali (asteroid field, gravity well, nebula)

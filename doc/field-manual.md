@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.9.2** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.9.3** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -680,6 +680,8 @@ Check:        2D6 + Pilot + Tonnage DM + free Thrust  (same as §14.3)
 On successful escape `inDogfight` is cleared; the ship re-enters normal combat
 from the next standard round.
 
+> **Technical reference:** [dogfight-system-design.md](dogfight-system-design.md)
+
 ---
 
 ## 15. Boarding
@@ -788,6 +790,21 @@ Click the phase button to reopen the relevant modal at any time.
 - A ship with **Forced Linkage active** cannot use thrust to manoeuvre
 - If the target is destroyed during Conflict, resolve with outcome **Ship destroyed**
 - Normal rounds continue in parallel — the GM can advance phases and resolve the boarding on its own timeline, as with dogfights
+
+---
+
+> **Technical reference:** [boarding-system-design.md](boarding-system-design.md)
+
+---
+
+## 16. Further Reading
+
+| Document | Contents |
+| -------- | -------- |
+| [thrust-and-drift-space-combat-simulator-spec.md](thrust-and-drift-space-combat-simulator-spec.md) | Full technical spec — data models, store actions, component structure, roadmap |
+| [dogfight-system-design.md](dogfight-system-design.md) | Dogfight sub-system design — micro-round flow, pursuit checks, escape mechanics |
+| [boarding-system-design.md](boarding-system-design.md) | Boarding sub-system design — entry methods, hull-cut, conflict objectives |
+| [obstacles-system-design.md](obstacles-system-design.md) | Environmental obstacles design — asteroid field, gravity well, debris, nebula |
 
 ---
 

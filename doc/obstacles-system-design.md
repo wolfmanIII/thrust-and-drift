@@ -473,7 +473,15 @@ Backward compatibility: sessioni salvate senza `obstacles` leggono `battle.obsta
 
 ---
 
-## 12. Scope Escluso (v1 Obstacles)
+## 12. Documenti Correlati
+
+- [thrust-and-drift-space-combat-simulator-spec.md](thrust-and-drift-space-combat-simulator-spec.md) — architettura generale, modelli dati, roadmap (§13.9)
+- [dogfight-system-design.md](dogfight-system-design.md) — sistema dogfight
+- [boarding-system-design.md](boarding-system-design.md) — sistema di abbordaggio
+
+---
+
+## 13. Scope Escluso (v1 Obstacles)
 
 - **Pull gravitazionale attivo** — fisicamente non rilevante alla scala temporale del combattimento
   tattico (round = 6 minuti, distanze nell'ordine di migliaia di km); l'accelerazione gravitazionale
