@@ -6,6 +6,34 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.9.4] — 2026-06-05
+
+### Added
+
+- **Basic combat mode — range band tracking** — `rangeBands: Record<string, string>` in `battleStore`; cross-faction pairs initialised at `'Very Long'` on `addShip`; cleaned up on `removeShip`; key = `[id1, id2].sort().join('_')` (order-independent)
+- **`setRangeBand(id1, id2, band)`** — GM direct override, no thrust cost
+- **`applyBasicMovement(movingId, targetId, direction, movingThrust, targetThrust)`** — spends thrust, shifts band by 1; `approach` sums both ships' thrust; `flee` uses moving ship only
+- **`BasicManoeuvreModal`** — new modal for acceleration phase in basic mode: approach/flee direction, thrust sliders, cost bar showing band change, GM SET override button
+- **DISTANCES section in `BasicBattleView`** — `RangeBandRow` per tracked pair with ▼/▲ GM controls
+- **`RANGE_BAND_ORDER`** and **`RANGE_BAND_MOVE_COST`** exported from `data/rangeBands.js` (CRB p.161)
+- **Context menu** — `🧭 Manovra…` entry visible in `acceleration` phase + `combatMode === 'basic'`
+
+### Fixed
+
+- **`getEvasiveDM`** — formula corrected to `−pilotSkill` (fixed, CRB p.171); was incorrectly `−pilotSkill × evasiveThrust`
+- **`advancePhase`** — basic mode now skips only `movement`; `acceleration` is preserved for range band changes
+
+### Changed
+
+- **`AttackModal`** — in basic mode with a tracked range band, the manual band selector is hidden; stored band shown read-only; CONFIRM disabled if no band tracked
+- **`useAttackSetup`** — exposes `storedBand`; range band falls back chain: storedBand → manualRangeBand → 'Medium'
+
+### Tests
+
+- 666 tests (+22 from 644) — `getEvasiveDM` tests corrected; 18 new basic mode tests in `battleStore.test.js`: `addShip` range init, `removeShip` cleanup, `setRangeBand` (including commutativity), `applyBasicMovement` (approach, flee, clamp, thrust deduction, bidirectional, flee ignores target), `advancePhase` skips movement
+
+---
+
 ## [1.9.3] — 2026-06-05
 
 ### Fixed

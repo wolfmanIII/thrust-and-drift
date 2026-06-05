@@ -107,6 +107,7 @@ thrust-and-drift/
     │   │   ├── InitiativeModal.jsx    ← Tiro iniziativa inizio round
     │   │   ├── LegendModal.jsx        ← Riferimento visivo token, armi, effetti
     │   │   ├── CrewAssignmentModal.jsx← Assegna membri equipaggio ai ruoli (Pilot, Gunner T1…)
+    │   │   ├── BasicManoeuvreModal.jsx       ← Manovra base mode: avvicina/allontana + costo thrust
     │   │   ├── PassingAttackModal.jsx ← Finestra di fuoco "ships that pass in the night"
     │   │   ├── DogfightNotificationModal.jsx ← Intent engagement + check inseguimento
     │   │   ├── DogfightRoundModal.jsx        ← Micro-round dogfight (fuga + Pilot check)
@@ -344,11 +345,14 @@ interface BattleState {
   name: string                  // Nome opzionale dello scenario
   round: number                 // Round corrente (parte da 1)
   phase: BattlePhase
+  combatMode: 'vectorial' | 'basic'  // 'vectorial' = hex map + vettori; 'basic' = range band per coppia
   initiativeOrder: string[]     // Array di id ShipInstance, ordine iniziativa
   currentActorIndex: number     // Indice in initiativeOrder di chi agisce ora
   
   ships: ShipInstance[]
   missiles: MissileToken[]
+  
+  rangeBands: Record<string, string>  // basic mode only: key = [id1,id2].sort().join('_'), value = banda
   
   log: LogEntry[]
   
@@ -742,7 +746,8 @@ Appare al right-click su un token nave. Le azioni visibili dipendono dalla **fas
 ┌──────────────────────────────┐
 │ [Nome Nave] — Hull: 18/22    │  ← sempre visibile
 │ ─────────────────────────── │
-│ 🚀 Applica Thrust            │  ← solo fase: acceleration (vectorial)
+│ 🚀 Applica Thrust            │  ← solo fase: acceleration (vectorial only)
+│ 🧭 Manovra…                  │  ← solo fase: acceleration (basic mode only)
 │ ─────────────────────────── │
 │ 🎯 Attacca...                │  ← solo fase: attack
 │ 🚀 Lancia Missili...         │  ← solo fase: attack + ha Missile Rack
@@ -875,6 +880,43 @@ Ogni azione mostra la difficoltà, il check richiesto, e i DM pertinenti. Il GM 
 Visualizzazione completa della scheda nave (read-only durante la battaglia).
 Mostra profilo completo + stato attuale + log delle azioni di quella nave nel round.
 
+### 8.7 BasicManoeuvreModal
+
+Gestione manovra in modalità base (non vettoriale). Solo visibile in fase `acceleration`, `combatMode === 'basic'`.
+
+**Layout:**
+
+- Intestazione: nave che manovra e bersaglio selezionato
+- Toggle: **Approach** / **Flee** (direzione del movimento)
+- Barra costo thrust con banda corrente → banda risultante
+- Slider thrust per nave manovrante (0 → thrust disponibile)
+- Slider thrust target (solo `Approach`: il bersaglio può contribuire alla riduzione della distanza)
+- Pulsante **GM SET** per override diretto della banda senza costo thrust (controllo GM)
+
+**Logica:**
+
+```text
+costoBanda = RANGE_BAND_MOVE_COST[bandaCorrente]
+combined   = (direction === 'approach') ? movingThrust + targetThrust : movingThrust
+canConfirm = combined >= costoBanda && !noChange
+```
+
+- `Approach`: riduce di 1 la banda (verso `Adjacent`); somma thrust di entrambe le navi
+- `Flee`: aumenta di 1 la banda (verso `Distant`); solo thrust della nave manovrante
+- `GM SET` chiama `setRangeBand` direttamente — nessun costo thrust
+- Confirma chiama `applyBasicMovement` — scala `thrustUsedThisRound` su entrambe le navi (solo attaccante su `flee`)
+
+**Costi banda (CRB p.161):**
+
+| Banda corrente | Thrust richiesto |
+| -------------- | ---------------- |
+| Adjacent       | 1                |
+| Short          | 2                |
+| Medium         | 5                |
+| Long           | 10               |
+| Very Long      | 25               |
+| Distant        | 50               |
+
 ---
 
 ## 9. Rendering Canvas
@@ -965,6 +1007,16 @@ Ogni token è un cerchio con:
 ║  → Ripeti                            ║
 ╚══════════════════════════════════════╝
 ```
+
+**Modalità Base — fasi saltate:**
+
+In `combatMode === 'basic'` la fase `movement` viene saltata automaticamente da `advancePhase`. Il flusso diventa:
+
+```text
+Initiative → Acceleration → Attack → Actions → End
+```
+
+La fase `acceleration` in basic mode usa `BasicManoeuvreModal` per modificare le bande di distanza (`rangeBands`) invece di aggiornare vettori e posizioni hex.
 
 ### 10.2 Ships That Pass in the Night
 
@@ -1136,7 +1188,7 @@ Funzionalità incluse nella prima versione funzionante:
 - ✅ Pulsante "Riprendi Autosalvataggio" in Dashboard con round/fase/navi/timestamp
 - ✅ Error boundary globale — cattura crash render, mostra UI recovery con pulsante ricarica
 - ✅ `utils/db.js` — wrapper IndexedDB testato con fake-indexeddb (285 test totali)
-- ✅ `utils/io.js` — import/export JSON testato con mock File (644 test totali)
+- ✅ `utils/io.js` — import/export JSON testato con mock File (666 test totali)
 
 ### 13.2 Versione 1.1 — Persistenza e Resilienza ✅ COMPLETATA
 
@@ -1335,6 +1387,20 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - `useAttackSetup.js` — espone `outOfRange: boolean`
 - `AttackModal` — badge `OUT OF RANGE` per arma; messaggio esplicativo range/distanza; ROLL ATTACK disabilitato se fuori portata
 - 606 test (da 596) — +10 test `isOutOfRange`/`RANGE_ORDER`
+
+### 13.8b Versione 1.9.4 — Basic Mode Completo ✅ COMPLETATA
+
+**Modalità base operativa end-to-end:**
+
+- `getEvasiveDM` fix — formula corretta `−pilotSkill` fisso (era `−pilotSkill × evasiveThrust`); CRB p.171
+- `data/rangeBands.js` — esportati `RANGE_BAND_ORDER` (array ordinato) e `RANGE_BAND_MOVE_COST` (costo thrust per banda, CRB p.161)
+- `battleStore` — aggiunto `rangeBands: {}` in stato; `addShip` inizializza coppie cross-faction a `'Very Long'`; `removeShip` ripulisce le entry; nuove azioni `setRangeBand(id1, id2, band)` e `applyBasicMovement(movingId, targetId, direction, movingThrust, targetThrust)`; `advancePhase` salta `movement` in basic mode; export/import include `rangeBands`
+- `BasicManoeuvreModal` — nuovo modal per fase acceleration in basic mode: approach/flee, slider thrust, barra costo, override GM SET
+- `ContextMenu` — voce `🧭 Manovra…` in fase `acceleration` + `combatMode === 'basic'`
+- `BasicBattleView` — sezione DISTANCES con lista `RangeBandRow` per ogni coppia tracciata (pulsanti ▼/▲ GM override)
+- `useAttackSetup` — legge `rangeBands` dallo store; `storedBand` sostituisce selezione manuale banda in basic mode
+- `AttackModal` — mostra banda stored read-only se `storedBand` presente; nasconde selettore manuale; CONFIRM disabilitato se basic mode senza banda tracciata
+- 666 test (+22 da 644) — `getEvasiveDM` corretti; 18 nuovi test basic mode in `battleStore.test.js` (addShip, removeShip, setRangeBand, applyBasicMovement, advancePhase basic)
 
 ### 13.9 Versione 2.0 — Ostacoli Ambientali
 
