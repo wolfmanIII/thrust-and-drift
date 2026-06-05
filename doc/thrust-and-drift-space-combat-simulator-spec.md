@@ -387,8 +387,13 @@ Griglia **flat-top** con coordinate assiali (q, r). Il lato piatto è in alto (o
 ```javascript
 // === COORDINATE ===
 
+// Assiali → cubo
+export function axialToCube(q, r) {
+  return { q, r, s: -q - r }
+}
+
 // Distanza tra due hex (formula cubica)
-function hexDistance(a, b) {
+export function hexDistance(a, b) {
   const dq = Math.abs(a.q - b.q)
   const dr = Math.abs(a.r - b.r)
   const ds = Math.abs((-a.q - a.r) - (-b.q - b.r))
@@ -396,23 +401,23 @@ function hexDistance(a, b) {
 }
 
 // Somma vettori
-function hexAdd(a, b) {
+export function hexAdd(a, b) {
   return { q: a.q + b.q, r: a.r + b.r }
 }
 
 // Scala vettore
-function hexScale(v, factor) {
+export function hexScale(v, factor) {
   return { q: v.q * factor, r: v.r * factor }
 }
 
 // Magnitudine vettore (lunghezza in caselle)
-function hexMagnitude(v) {
+export function hexMagnitude(v) {
   return hexDistance({ q: 0, r: 0 }, v)
 }
 
 // === 6 DIREZIONI (flat-top) ===
-// // Traveller Companion p.172
-const HEX_DIRECTIONS = [
+// Traveller Companion p.172
+export const HEX_DIRECTIONS = [
   { q:  1, r:  0 }, // SE
   { q:  1, r: -1 }, // NE
   { q:  0, r: -1 }, // N
@@ -420,22 +425,23 @@ const HEX_DIRECTIONS = [
   { q: -1, r:  1 }, // SW
   { q:  0, r:  1 }, // S
 ]
+export const DIRECTION_LABELS = ['SE', 'NE', 'N', 'NW', 'SW', 'S']
 
 // Vicini di un hex
-function hexNeighbors(hex) {
+export function hexNeighbors(hex) {
   return HEX_DIRECTIONS.map(d => hexAdd(hex, d))
 }
 
 // === CONVERSIONE PIXEL ↔ HEX (flat-top) ===
 // size = raggio del hex (pixel)
 
-function hexToPixel(q, r, size, offsetX = 0, offsetY = 0) {
+export function hexToPixel(q, r, size, offsetX = 0, offsetY = 0) {
   const x = size * (1.5 * q)
   const y = size * ((Math.sqrt(3) / 2) * q + Math.sqrt(3) * r)
   return { x: x + offsetX, y: y + offsetY }
 }
 
-function pixelToHex(px, py, size, offsetX = 0, offsetY = 0) {
+export function pixelToHex(px, py, size, offsetX = 0, offsetY = 0) {
   const x = (px - offsetX) / size
   const y = (py - offsetY) / size
   const q = (2 / 3) * x
@@ -444,7 +450,7 @@ function pixelToHex(px, py, size, offsetX = 0, offsetY = 0) {
 }
 
 // Arrotonda a hex intero (necessario per pixelToHex)
-function hexRound(hex) {
+export function hexRound(hex) {
   const rq = Math.round(hex.q)
   const rr = Math.round(hex.r)
   const rs = Math.round(-hex.q - hex.r)
@@ -456,14 +462,43 @@ function hexRound(hex) {
   return { q: rq, r: rr }
 }
 
+// === DISTANZA MINIMA TRA TRAIETTORIE ===
+// Usata per "ships that pass in the night" — Traveller Companion p.172
+// Entrambe le navi si muovono da start a end nel medesimo intervallo t∈[0,1].
+// La distanza è piecewise-linear → il minimo è in t=0, t=1 o dove un componente
+// cubo cambia segno. Ricerca O(1) sui breakpoint.
+export function segmentMinDistance(a0, a1, b0, b1) {
+  const dq0 = a0.q - b0.q
+  const dr0 = a0.r - b0.r
+  const dvq = (a1.q - a0.q) - (b1.q - b0.q)
+  const dvr = (a1.r - a0.r) - (b1.r - b0.r)
+  const dvs = -(dvq + dvr)
+  const ds0 = -(dq0 + dr0)
+
+  const candidates = [0, 1]
+  if (dvq !== 0) candidates.push(-dq0 / dvq)
+  if (dvr !== 0) candidates.push(-dr0 / dvr)
+  if (dvs !== 0) candidates.push(-ds0 / dvs)
+
+  let minDist = Infinity
+  for (const t of candidates) {
+    if (t < 0 || t > 1) continue
+    const dq = dq0 + t * dvq
+    const dr = dr0 + t * dvr
+    minDist = Math.min(minDist, Math.max(Math.abs(dq), Math.abs(dr), Math.abs(dq + dr)))
+  }
+  return minDist
+}
+
 // === RANGE BANDS ===
-function getRangeBand(distance) {
-  if (distance <= 0)  return "Adjacent"
-  if (distance <= 2)  return "Short"
-  if (distance <= 15) return "Medium"
-  if (distance <= 38) return "Long"
-  if (distance <= 77) return "Very Long"
-  return "Distant"
+// MgT2e CRB p.164
+export function getRangeBand(distance) {
+  if (distance <= 0)  return 'Adjacent'
+  if (distance <= 2)  return 'Short'
+  if (distance <= 15) return 'Medium'
+  if (distance <= 38) return 'Long'
+  if (distance <= 77) return 'Very Long'
+  return 'Distant'
 }
 ```
 
@@ -475,12 +510,15 @@ function getRangeBand(distance) {
 
 ```javascript
 // 2D6 + Pilot skill + Ship Thrust [+ effetto Tactics(naval)]
-function rollInitiative(pilotSkill, thrust, tacticsEffect = 0) {
-  const roll = rollDice(2, 6)
+// diceOverride: { results, total } per navi player con dadi fisici (v1.3.6)
+// MgT2e CRB p.160
+export function rollInitiative(pilotSkill, thrust, tacticsEffect = 0, diceOverride = null) {
+  const roll = diceOverride ?? roll2D6()
+  const total = roll.total + pilotSkill + thrust + tacticsEffect
   return {
     roll,
-    total: roll + pilotSkill + thrust + tacticsEffect,
-    breakdown: { roll, pilotSkill, thrust, tacticsEffect }
+    total,
+    breakdown: { roll: roll.total, pilotSkill, thrust, tacticsEffect },
   }
 }
 ```
@@ -488,51 +526,69 @@ function rollInitiative(pilotSkill, thrust, tacticsEffect = 0) {
 ### 6.2 Tiro di Attacco
 
 ```javascript
-// 2D6 + Gunner + DM_DEX + DM_aidGunners + DM_range + DM_size - DM_evasive
+// 2D6 + Gunner + DM_dex + DM_aidGunners + DM_range + DM_weapon + DM_size + DM_evasive + DM_sensorLock
 // Target: 8+
-function rollAttack({
+// MgT2e CRB p.163, p.167
+export function rollAttack({
   gunnerSkill,
   dexDM,
-  aidGunnersDM,   // da task chain pilota
-  rangeDM,        // calcolato da getRangeDM()
-  weaponDM,       // Pulse Laser +2, Beam Laser +4, ecc.
-  targetSizeDM,   // +1 per ogni 1000 ton bersaglio (max +6)
-  evasiveDM,      // negativo: - (pilot skill) fisso — 1 thrust speso per attacco (CRB p.171)
+  aidGunnersDM,     // da task chain pilota
+  rangeDM,          // da getRangeDM()
+  weaponDM,         // da weapons.js
+  targetSizeDM,     // +1 per 1000 ton bersaglio (max +6)
+  evasiveDM,        // negativo: -(pilotSkill × evasiveThrust) — CRB p.166
+  sensorLockDM = 0, // effetto del tiro Sensor Lock — CRB p.167
+  diceOverride = null,
 }) {
-  const roll = rollDice(2, 6)
-  const total = roll + gunnerSkill + dexDM + aidGunnersDM
-               + rangeDM + weaponDM + targetSizeDM + evasiveDM
+  const roll = diceOverride ?? roll2D6()
+  const total =
+    roll.total + gunnerSkill + dexDM + aidGunnersDM +
+    rangeDM + weaponDM + targetSizeDM + evasiveDM + sensorLockDM
   return {
     roll,
     total,
     effect: total - 8,
     hit: total >= 8,
-    breakdown: { roll, gunnerSkill, dexDM, aidGunnersDM,
-                 rangeDM, weaponDM, targetSizeDM, evasiveDM }
+    breakdown: {
+      roll: roll.total, gunnerSkill, dexDM, aidGunnersDM,
+      rangeDM, weaponDM, targetSizeDM, evasiveDM, sensorLockDM,
+    },
   }
 }
 
-function getRangeDM(rangeBand) {
+// Bande ordinate dalla più vicina alla più lontana — CRB p.165
+export const RANGE_ORDER = ['Adjacent', 'Short', 'Medium', 'Long', 'Very Long', 'Distant']
+
+// true se currentRangeBand è oltre il maxRange dell'arma
+// 'Special' (missili, sandcaster) = mai fuori portata
+export function isOutOfRange(maxRange, currentRangeBand) {
+  if (!maxRange || maxRange === 'Special') return false
+  return RANGE_ORDER.indexOf(currentRangeBand) > RANGE_ORDER.indexOf(maxRange)
+}
+
+export function getRangeDM(rangeBand) {
   const table = {
-    "Adjacent": 0,
-    "Short":    1,
-    "Medium":   0,
-    "Long":    -2,
-    "Very Long": -4,
-    "Distant":  -6,
+    Adjacent:   0,
+    Short:      1,
+    Medium:     0,
+    Long:      -2,
+    'Very Long': -4,
+    Distant:   -6,
   }
   return table[rangeBand] ?? 0
 }
 
-function getTargetSizeDM(tonnage) {
-  return Math.min(6, Math.floor(tonnage / 1000))
+// +1 per 1000 ton, max +6 — CRB p.163
+export function getTargetSizeDM(tonnage) {
+  return Math.min(6, Math.floor((tonnage ?? 0) / 1000))
 }
 ```
 
 ### 6.3 DM Caratteristica
 
 ```javascript
-function getCharDM(value) {
+// MgT2e CRB p.6
+export function getCharDM(value) {
   if (value <= 0)  return -3
   if (value <= 2)  return -2
   if (value <= 5)  return -1
@@ -547,18 +603,53 @@ function getCharDM(value) {
 
 ```javascript
 // Su griglia hex il Thrust si distribuisce tra direzioni.
-// Vincolo: sum(|Δq|, |Δr|, |Δs|) / 2 ≤ thrustAvailable
-// Equivalente a: hexDistance({q:0,r:0}, delta) ≤ thrustAvailable
-function isValidThrustDelta(delta, thrustAvailable) {
+// Vincolo: hexDistance({q:0,r:0}, delta) ≤ thrustAvailable
+// NON usare Manhattan distance (|dq| + |dr|) — sbagliata su hex.
+// Traveller Companion p.172
+export function isValidThrustDelta(delta, thrustAvailable) {
   return hexDistance({ q: 0, r: 0 }, delta) <= thrustAvailable
 }
 
-function applyThrust(currentVector, delta) {
+export function applyThrust(currentVector, delta) {
   return hexAdd(currentVector, delta)
 }
 
-function applyMovement(currentPosition, currentVector) {
+export function applyMovement(currentPosition, currentVector) {
   return hexAdd(currentPosition, currentVector)
+}
+```
+
+### 6.5 Evasive Action
+
+```javascript
+// Per ogni thrust point dichiarato per evasione, gli attaccanti subiscono DM -(pilotSkill).
+// Più thrust → DM maggiore (moltiplicato, non fisso). CRB p.166
+export function getEvasiveDM(pilotSkill, evasiveThrust) {
+  if (evasiveThrust <= 0 || pilotSkill === 0) return 0
+  return -(pilotSkill * evasiveThrust)
+}
+```
+
+### 6.6 Critical Hits
+
+```javascript
+// Critical hit se Effect ≥ 6 — CRB p.165
+export function isCriticalHit(effect) {
+  return effect >= 6
+}
+
+// Severity = Effect − 5, clamped 1–6 — CRB p.169
+export function getCriticalSeverity(effect) {
+  return Math.max(1, Math.min(6, effect - 5))
+}
+
+// Conta i critical da soglia (ogni 10% hull massimo attraversato) — CRB p.169
+export function getThresholdCriticalCount(prevHull, newHull, maxHull) {
+  if (maxHull <= 0 || newHull >= prevHull) return 0
+  const threshold = maxHull * 0.1
+  const prevCrossed = Math.floor((maxHull - prevHull) / threshold)
+  const newCrossed  = Math.floor((maxHull - newHull)  / threshold)
+  return Math.max(0, newCrossed - prevCrossed)
 }
 ```
 
@@ -921,41 +1012,78 @@ Quando due navi terminano il movimento nella stessa casella:
 
 ### 11.3 Funzioni I/O
 
+Tutte le funzioni sono esportate da `utils/io.js`. Validation centralizzata in `parseJSONFile` (privata).
+
 ```javascript
-// Export profili
-function exportProfiles(profiles) {
-  const data = {
-    version: "1.0",
-    type: "ship-profiles",
-    exportedAt: new Date().toISOString(),
-    profiles
+// Legge il file, parsa il JSON, valida il type tag.
+// Lancia su: file.text() reject, JSON malformato, struttura inattesa, type errato.
+async function parseJSONFile(file, expectedType) {
+  let text
+  try {
+    text = await file.text()
+  } catch (e) {
+    throw new Error(`Cannot read file: ${e.message}`, { cause: e })
   }
-  downloadJSON(data, `traveller-profiles-${Date.now()}.json`)
+  let data
+  try {
+    data = JSON.parse(text)
+  } catch (e) {
+    throw new Error(`Invalid file: malformed JSON. (${e.message})`, { cause: e })
+  }
+  if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+    throw new Error('Invalid file: unexpected JSON structure.')
+  }
+  if (data.type !== expectedType) {
+    throw new Error(`Invalid file: wrong type. Expected "${expectedType}", got "${data.type ?? 'none'}".`)
+  }
+  return data
 }
 
-// Import profili
-async function importProfiles(file) {
-  const text = await file.text()
-  const data = JSON.parse(text)
-  if (data.type !== "ship-profiles") throw new Error("File non valido")
+// Export profili → download JSON
+export function exportProfiles(profiles) {
+  downloadJSON(
+    { version: '1.0', type: 'ship-profiles', exportedAt: new Date().toISOString(), profiles },
+    `traveller-profiles-${Date.now()}.json`
+  )
+}
+
+// Import profili — ritorna l'array profiles
+export async function importProfiles(file) {
+  const data = await parseJSONFile(file, 'ship-profiles')
+  if (!Array.isArray(data.profiles)) {
+    throw new Error('Invalid file: "profiles" field missing or not an array.')
+  }
   return data.profiles
 }
 
-// Export battaglia
-function exportBattle(battle) {
-  const data = {
-    version: "1.0",
-    type: "battle-state",
-    exportedAt: new Date().toISOString(),
-    battle
+// Export battaglia → download JSON
+export function exportBattle(battle) {
+  downloadJSON(
+    { version: '1.0', type: 'battle-state', exportedAt: new Date().toISOString(), battle },
+    `traveller-battle-round${battle.round}-${Date.now()}.json`
+  )
+}
+
+// Import battaglia — ritorna solo l'oggetto battle
+export async function importBattle(file) {
+  const data = await parseBattleFile(file)
+  return data.battle
+}
+
+// Import battaglia — ritorna il wrapper completo { version, type, exportedAt, battle }
+// Usato da Dashboard per la preview (round, fase, timestamp).
+export async function parseBattleFile(file) {
+  const data = await parseJSONFile(file, 'battle-state')
+  if (!data.battle || typeof data.battle !== 'object') {
+    throw new Error('Invalid file: "battle" field missing or not an object.')
   }
-  downloadJSON(data, `traveller-battle-round${battle.round}-${Date.now()}.json`)
+  return data
 }
 
 function downloadJSON(data, filename) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
-  const a = document.createElement("a")
+  const a = document.createElement('a')
   a.href = url
   a.download = filename
   a.click()
@@ -1245,7 +1373,7 @@ L'Evasive Action è una **Reaction** dichiarata durante la Fase di Attacco, non 
 
 ```text
 Costo:   1 thrust point per attacco schivato
-DM:      -(pilot_skill)  — fisso, non moltiplicato per il thrust
+DM:      -(pilot_skill × evasiveThrust)  — moltiplicato per i thrust dichiarati (CRB p.166)
 Fonte:   thrust non usato per il movimento in questo round
 Reset:   evasiveThrust si azzera a inizio round successivo
 ```
