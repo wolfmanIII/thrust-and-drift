@@ -117,6 +117,27 @@ describe('restore on mount', () => {
     expect(useProfilesStore.getState().profiles).toEqual(profiles)
   })
 
+  it('restores dogfights, boardings and rangeBands from IndexedDB', async () => {
+    const dogfights  = [{ id: 'dg1', shipIds: ['s1', 's2'], microRound: 1, active: true }]
+    const boardings  = [{ id: 'b1', attackerId: 's1', defenderId: 's2', phase: 'contact' }]
+    const rangeBands = { 's1_s2': 'Short' }
+    mockStore['battle:current'] = {
+      id: 'battle-2', name: 'Test', round: 2, combatMode: 'basic',
+      phase: 'attack', initiativeOrder: [], currentActorIndex: 0,
+      ships: [makeShip()], missiles: [], log: [], mapSettings: { scale: 1 },
+      dogfights, boardings, rangeBands,
+    }
+
+    const { unmount } = renderHook(() => useAutosave())
+    await act(async () => {})
+    unmount()
+
+    const state = useBattleStore.getState()
+    expect(state.dogfights).toEqual(dogfights)
+    expect(state.boardings).toEqual(boardings)
+    expect(state.rangeBands).toEqual(rangeBands)
+  })
+
   it('does not restore profiles when saved array is empty', async () => {
     mockStore['profiles:all'] = []
     useProfilesStore.setState({ profiles: [{ id: 'p1', name: 'Existing' }] })
@@ -190,5 +211,20 @@ describe('autosave on significant changes', () => {
     unmount()
 
     expect(dbPut).toHaveBeenCalledWith('profiles', 'all', profiles)
+  })
+
+  it('includes dogfights, boardings and rangeBands in persisted snapshot', async () => {
+    const { unmount } = renderHook(() => useAutosave())
+    await act(async () => {})
+
+    const dogfights  = [{ id: 'dg1', shipIds: ['s1', 's2'], microRound: 2, active: true }]
+    const boardings  = [{ id: 'b1', attackerId: 's1', defenderId: 's2', phase: 'conflict' }]
+    const rangeBands = { 's1_s2': 'Medium' }
+    act(() => { useBattleStore.setState({ round: 2, dogfights, boardings, rangeBands }) })
+    await act(async () => {})
+    unmount()
+
+    const call = dbPut.mock.calls.find(([store]) => store === 'battle')
+    expect(call[2]).toMatchObject({ dogfights, boardings, rangeBands })
   })
 })
