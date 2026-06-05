@@ -83,32 +83,46 @@ thrust-and-drift/
     │   │   ├── Dashboard.jsx          ← Pre-battle lobby (layout 2 colonne)
     │   │   ├── CatalogPanel.jsx       ← Catalogo HG 2022 (sola lettura, filtri)
     │   │   └── useProfileImport.js    ← Hook import profili da file
+    │   ├── help/
+    │   │   └── HelpScreen.jsx         ← Field manual integrato (TOC sidebar + download PDF)
     │   ├── map/
     │   │   ├── BattleMap.jsx          ← Canvas principale (modalità vettoriale)
     │   │   ├── BasicBattleView.jsx    ← Vista semplificata (modalità base)
     │   │   ├── useCanvasRenderer.js   ← Hook rendering hex + token
     │   │   ├── useMapInteraction.js   ← Hook pan, zoom, click, right-click
     │   │   ├── useShipHover.js        ← Hook hover detection + timer 200ms
+    │   │   ├── useDogfightDetection.js← Hook rilevamento dogfight post-movement
     │   │   ├── ShipTooltip.jsx        ← Pannello tooltip nave (React portal)
-    │   │   └── tokenRenderers.js      ← Funzioni draw per navi e missili
+    │   │   ├── tokenRenderers.js      ← Funzioni draw per navi e missili
+    │   │   ├── effectRenderers.js     ← Funzioni draw effetti canvas (laser, burst, plume…)
+    │   │   └── useCanvasEffects.js    ← Hook loop rAF effetti canvas
     │   ├── modals/
     │   │   ├── Modal.jsx              ← Wrapper modale generico
-    │   │   ├── ShipProfileModal.jsx   ← Crea/modifica profilo nave (modale)
-    │   │   ├── AddShipModal.jsx       ← Sceglie profilo da aggiungere in battaglia
+    │   │   ├── ShipProfileModal.jsx   ← Crea/modifica profilo nave
+    │   │   ├── AddShipModal.jsx       ← Aggiunge nave alla battaglia con scelta fazione/colore
     │   │   ├── ThrustModal.jsx        ← Applica Thrust con preview mappa
-    │   │   ├── AttackModal.jsx        ← Risolve attacco con calcolo DM (+ pannello Reactions)
-    │   │   ├── MissileLaunchModal.jsx ← Lancia salvo missili
-    │   │   ├── ShipDetailModal.jsx    ← Scheda completa nave
-    │   │   ├── ActionModal.jsx        ← Azioni fase Actions (engineer, ecc.)
+    │   │   ├── AttackModal.jsx        ← Risolve attacco 4 step + pannello Reactions (CRB p.171)
+    │   │   ├── ShipDetailModal.jsx    ← Scheda completa nave (read-only in battaglia)
+    │   │   ├── ActionModal.jsx        ← Azioni fase Actions per membro equipaggio
     │   │   ├── InitiativeModal.jsx    ← Tiro iniziativa inizio round
-    │   │   └── useAttackSetup.js      ← Hook derivazione DM attacco
+    │   │   ├── LegendModal.jsx        ← Riferimento visivo token, armi, effetti
+    │   │   ├── CrewAssignmentModal.jsx← Assegna membri equipaggio ai ruoli (Pilot, Gunner T1…)
+    │   │   ├── PassingAttackModal.jsx ← Finestra di fuoco "ships that pass in the night"
+    │   │   ├── DogfightNotificationModal.jsx ← Intent engagement + check inseguimento
+    │   │   ├── DogfightRoundModal.jsx        ← Micro-round dogfight (fuga + Pilot check)
+    │   │   ├── BoardingSetupModal.jsx        ← Selezione bersaglio + avvio abbordaggio
+    │   │   ├── BoardingContactModal.jsx      ← Fase 2: metodo ingresso, hull-cut, modificatori
+    │   │   ├── BoardingConflictModal.jsx     ← Fase 3: obiettivi, stacking, missed-shot
+    │   │   ├── BoardingOutcomeModal.jsx      ← Fase 4: esito + trasferimento fazione
+    │   │   └── useAttackSetup.js             ← Hook derivazione DM attacco
     │   ├── ui/
-    │   │   ├── ContextMenu.jsx        ← Menu tasto destro
-    │   │   ├── HUD.jsx                ← Overlay minimo + modale conferma uscita
+    │   │   ├── ContextMenu.jsx        ← Menu tasto destro (phase-gated + initiative order)
+    │   │   ├── HUD.jsx                ← Overlay minimo + undo/redo + modale conferma uscita
     │   │   ├── BattleLog.jsx          ← Log eventi collassabile
-    │   │   ├── PhaseTracker.jsx       ← Indicatore fase corrente
+    │   │   ├── PhaseTracker.jsx       ← Indicatore fase e ordine iniziativa
     │   │   ├── Tooltip.jsx            ← Tooltip via React portal
-    │   │   └── ErrorBoundary.jsx      ← Error boundary globale con UI recovery
+    │   │   ├── ErrorBoundary.jsx      ← Error boundary globale con UI recovery
+    │   │   └── LegalFooter.jsx        ← Footer fisso disclaimer Mongoose Publishing
     │   └── forms/
     │       ├── ShipProfileForm.jsx    ← Form completo profilo nave
     │       └── DiceInput.jsx          ← Input manuale 2D6 per dadi fisici giocatori
@@ -116,18 +130,22 @@ thrust-and-drift/
     │   └── useAutosave.js             ← Autosave IndexedDB + restore al mount
     ├── store/
     │   ├── profilesStore.js           ← Profili nave (CRUD + import/export)
-    │   ├── battleStore.js             ← Stato battaglia corrente
+    │   ├── battleStore.js             ← Stato battaglia corrente (undo/redo inclusi)
     │   └── uiStore.js                 ← Stato UI (modal aperto, nave selezionata, ecc.)
     ├── utils/
     │   ├── hex.js                     ← Matematica esagonale (flat-top)
     │   ├── combat.js                  ← Calcoli combattimento (DM, danni, range band)
     │   ├── crew.js                    ← Helper equipaggio array (getCrewSkill, getEffectiveSkill, getAssignedSkill, buildDefaultAssignments, migrateCrew, blankCrewMember)
-    │   ├── io.js                      ← Import/export JSON via File API
+    │   ├── boarding.js                ← Logica abbordaggio (metodi ingresso, resilienza, stacking)
+    │   ├── dogfight.js                ← Logica dogfight (tonnage DM, Pilot check, fuga)
+    │   ├── effectQueue.js             ← Coda effetti canvas (emitEffect, drainEffects)
+    │   ├── io.js                      ← Import/export JSON via File API (parseBattleFile)
     │   ├── dice.js                    ← Lancio dadi e formattazione risultati
     │   └── db.js                      ← Wrapper IndexedDB (openDB, dbGet, dbPut, dbDelete)
     └── data/
-        ├── weapons.js                 ← Tabelle armi, tratti, danni
+        ├── weapons.js                 ← Tabelle armi, tratti, danni, maxRange
         ├── rangeBands.js              ← Soglie bande di distanza
+        ├── criticalHits.js            ← Location table + effect table (11 sistemi × 6 severità)
         ├── crewActions.js             ← Definizioni azioni equipaggio fase Actions
         ├── factions.js                ← Fazioni disponibili
         ├── shipCatalog.js             ← Catalogo ufficiale navi HG 2022 (sola lettura)
