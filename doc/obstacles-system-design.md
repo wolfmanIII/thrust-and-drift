@@ -2,8 +2,8 @@
 
 > Specifica implementativa per gli ostacoli ambientali sulla mappa di combattimento.
 > Regole di riferimento: MgT2e CRB pp.160–168, Traveller Companion 2024 pp.169–186.
-> Le meccaniche di gravità e collisione non hanno regole RAW esplicite — vengono trattate
-> come estensioni ragionevoli del sistema vettoriale.
+> Le meccaniche di collisione e danno da detriti non hanno regole RAW esplicite — vengono
+> trattate come estensioni ragionevoli del sistema vettoriale.
 
 ---
 
@@ -18,7 +18,7 @@ il comportamento delle navi che li attraversano o si avvicinano.
 | Tipo | Impatto tattico | Complessità implementativa |
 | ------ | ---------------- | --------------------------- |
 | Asteroid Field | Cover DM, danno collisione, costo movimento | Media |
-| Gravity Well | Modifica vettori automaticamente ogni round | Alta |
+| Gravity Well | Zona proibita, fascia di esclusione visiva | Bassa |
 | Debris Field | Come asteroid field, più denso | Bassa (variante di Asteroid) |
 | Nebula | Penalità sensori, copertura totale | Bassa |
 
@@ -40,7 +40,6 @@ interface ObstacleToken {
 
   // Campi specifici per tipo (presenti solo se rilevanti)
   density?: 'light' | 'dense'   // Asteroid/Debris Field
-  mass?: 'small' | 'large'      // Gravity Well — determina forza pull
 }
 
 type ObstacleType = 'asteroid_field' | 'debris_field' | 'gravity_well' | 'nebula'
@@ -86,14 +85,12 @@ function getObstaclesInPath(obstacles, hexList) {
 Attraversare un hex di campo asteroidi costa **+1 thrust** aggiuntivo rispetto al normale.
 Questo viene sommato al thrust già speso nel round.
 
-Meccanica:
-
 ```text
 se nave.nextPosition è dentro asteroid_field:
   thrustCost += 1
   se thrustUsedThisRound + thrustCost > thrustDisponibile:
     → la nave non può attraversare il campo in questo round
-    → ThrustModal mostra avviso "Campo asteroidi: +1 thrust richiesto"
+    → ThrustModal mostra avviso "Asteroid field: +1 thrust required"
 ```
 
 Il costo si applica solo se la posizione finale è nel campo. Transitare attraverso senza fermarsi
@@ -104,7 +101,7 @@ Il costo si applica solo se la posizione finale è nel campo. Transitare attrave
 Una nave dentro un campo asteroidi riceve copertura parziale:
 
 | Densità | DM attacco contro nave nel campo |
-|---------|----------------------------------|
+| ------- | -------------------------------- |
 | light   | −1                               |
 | dense   | −2                               |
 
@@ -127,15 +124,14 @@ Se una nave **termina il movimento** in un hex di campo asteroidi senza aver spe
 (es. vettore incontrollato che porta nel campo), subisce danno da collisione automatico.
 
 ```text
-danno collisione = 1D6
-  → il danno ignora Armor (impatto diretto sullo scafo)
-  → se density === 'dense': 2D6
+danno collisione = 1D6  (ignora Armor)
+se density === 'dense': 2D6
 ```
 
 Il sistema rileva la collisione in `resolveMovement`, dopo aver aggiornato le posizioni,
 confrontando la nuova posizione di ogni nave con gli ostacoli. Se la nave non ha pagato
-il costo extra di throughput (controllato da flag sul vettore), viene applicato il danno
-tramite `applyDamage` con `_skipHistory: true` (come i critici threshold).
+il costo extra di thrust (controllato da flag `paidFieldCost` impostato in `applyThrust`),
+viene applicato il danno tramite `applyDamage` con `_skipHistory: true`.
 
 > **Nota GM:** il campo asteroidi non blocca il movimento in assoluto. Una nave con thrust
 > sufficiente può sempre attraversarlo pagando il costo. Il rischio collisione scatta solo
@@ -163,63 +159,34 @@ Il GM può eliminarlo manualmente.
 
 ### 3.3 Gravity Well
 
-**Definizione:** corpo massiccio (pianeta, luna, gigante gassoso) che deforma i vettori delle
-navi entro il suo raggio di influenza.
+**Definizione:** corpo celeste massiccio (pianeta, luna, gigante gassoso) rappresentato sulla
+mappa come **zona di esclusione statica**. Non esercita pull meccanico sui vettori delle navi.
 
-**Raggio tipico:** 3–6 hex. Il token visivo è più grande degli altri ostacoli.
+**Motivazione:** il combattimento vettoriale si svolge su scala di 6 minuti per round, con hex
+da ~648 km ciascuno. A questa scala e distanza, l'accelerazione gravitazionale di un pianeta
+è dell'ordine di mm/s² — trascurabile rispetto al thrust delle navi. Il pull gravitazionale
+è rilevante per la navigazione interplanetaria (scala di ore/giorni), non per lo scontro tattico.
 
-#### Pull gravitazionale
+**Raggio tipico:** 2–5 hex (rappresenta il corpo fisico + atmosfera/anelli).
 
-Ogni round, **durante la fase Movement**, dopo che i vettori sono stati aggiornati da thrust
-ma *prima* che le posizioni vengano aggiornate, il sistema applica il pull:
+#### Zona proibita
 
-```javascript
-function applyGravityPull(ship, gravityWell) {
-  const dist = hexDistance(ship.position, gravityWell.position)
-  if (dist > gravityWell.radius) return ship.vector   // fuori raggio
+Tutti gli hex entro il raggio del gravity well sono **non attraversabili**:
 
-  // Direzione verso il centro del gravity well (hex più vicino al centro)
-  const pullDir = hexDirectionToward(ship.position, gravityWell.position)
-
-  // Forza pull in base alla massa e alla distanza
-  const pullStrength = gravityWell.mass === 'large'
-    ? (dist <= 1 ? 3 : dist <= 2 ? 2 : 1)
-    : (dist <= 1 ? 2 : dist <= 2 ? 1 : 0)
-
-  return hexAdd(ship.vector, hexScale(pullDir, pullStrength))
-}
-```
-
-`hexDirectionToward(from, to)` restituisce il vettore unitario hex nella direzione di `to`
-rispetto a `from`. Usare la direzione del vicino più vicino al centro del well.
-
-Il pull modifica il **vettore** della nave, non la posizione direttamente. L'effetto si
-accumula round dopo round se la nave non compensa con thrust sufficiente.
-
-#### Zona di pericolo (impact zone)
-
-L'hex centrale del gravity well è impraticabile. Se una nave termina il movimento nell'hex
-del corpo celeste (radius 0), subisce danno grave:
-
-| Massa | Danno impatto | Effetto |
-| ------- | -------------- | --------- |
-| small | 6D6, ignora armor | nave probabilmente distrutta |
-| large | distruzione immediata | hull → 0 |
-
-La zona entro `radius: 1` dal centro è "bassa orbita" — nessun danno diretto, ma il pull è
-al massimo e sfuggire richiede thrust elevato.
-
-#### Avviso ThrustModal
-
-Quando una nave è nel raggio di un gravity well, ThrustModal mostra:
+- ThrustModal non permette di impostare un vettore che porterebbe la nave dentro il raggio
+- Se il vettore corrente porterebbe la nave dentro la zona (nessun thrust disponibile per correggere),
+  `resolveMovement` blocca la nave sull'hex di bordo più vicino e applica danno da impatto atmosferico:
 
 ```text
-⚠ GRAVITY WELL — pull [N] hex verso [direzione] al prossimo movimento
-   Thrust richiesto per mantenere orbita: N
+danno impatto = 4D6  (ignora Armor)
+log entry: "[nave] impatta [label] — atmospheric entry"
 ```
 
-Il calcolo è basato sul pull che verrà applicato con il vettore corrente, permettendo al GM
-di compensare prima di confermare il thrust.
+#### Fascia di avviso
+
+Gli hex al raggio + 1 (bordo esterno) vengono evidenziati con un colore distinto (arancione
+semitrasparente) per segnalare la zona pericolosa. ThrustModal mostra un banner se il ghost
+token si avvicina al bordo.
 
 ---
 
@@ -267,15 +234,15 @@ updateObstacle(id: string, patch: Partial<ObstacleToken>): void
 
 ### 4.2 Integrazione resolveMovement
 
-`resolveMovement` viene esteso con tre passaggi aggiuntivi nell'ordine:
+`resolveMovement` viene esteso con passaggi aggiuntivi nell'ordine:
 
 ```text
-1. Applica gravity pull a tutti i vettori (prima del movimento)
-2. Aggiorna posizioni (esistente)
-3. Controlla collisioni asteroid/debris (dopo il movimento)
-4. Rimuovi sensor lock per navi entrate in nebula (dopo il movimento)
-5. [esistente] Passa passing encounters
-6. [esistente] Passa dogfight detection
+1. Aggiorna posizioni (esistente)
+2. Controlla collisioni asteroid/debris — applica danno se paidFieldCost = false
+3. Controlla impatto gravity well — blocca nave al bordo, applica danno atmosferico
+4. Rimuovi sensor lock per navi entrate in nebula
+5. [esistente] Passing encounters
+6. [esistente] Dogfight detection
 ```
 
 ---
@@ -289,37 +256,37 @@ Gli ostacoli vengono disegnati nel **layer 1** (dopo la griglia, prima degli hig
 ```text
 1. Griglia hex
 2. [NUOVO] Ostacoli (zone colorate semitrasparenti + bordo tratteggiato)
-3. Highlight celle
-4. Ghost positions
-5. Frecce vettore
-6. Token missili
-7. Token navi
-8. Label navi
+3. [NUOVO] Fascia di avviso gravity well (bordo esterno arancione)
+4. Highlight celle
+5. Ghost positions
+6. Frecce vettore
+7. Token missili
+8. Token navi
+9. Label navi
 ```
 
 ### 5.2 Visual per tipo
 
-| Tipo | Fill | Bordo | Icona centro |
-| ------ | ------ | ------- | ------------- |
-| asteroid_field (light) | `rgba(161,138,104,0.18)` | `rgba(161,138,104,0.5)` dashed | `⬡` grigio chiaro |
-| asteroid_field (dense) | `rgba(161,138,104,0.30)` | `rgba(161,138,104,0.7)` dashed | `⬡` più marcato |
-| debris_field | `rgba(100,100,120,0.28)` | `rgba(150,150,180,0.6)` dashed | nessuna |
-| gravity_well | `rgba(139,92,246,0.12)` | `rgba(139,92,246,0.5)` solid | corpo celeste (cerchio pieno) |
-| nebula | `rgba(56,189,248,0.10)` | `rgba(56,189,248,0.3)` dashed | nessuna |
+| Tipo | Fill | Bordo | Dettaglio centro |
+| ------ | ------ | ------- | ---------------- |
+| asteroid_field (light) | `rgba(161,138,104,0.18)` | `rgba(161,138,104,0.5)` dashed | nessuno |
+| asteroid_field (dense) | `rgba(161,138,104,0.30)` | `rgba(161,138,104,0.7)` dashed | nessuno |
+| debris_field | `rgba(100,100,120,0.28)` | `rgba(150,150,180,0.6)` dashed | nessuno |
+| gravity_well | `rgba(139,92,246,0.20)` | `rgba(139,92,246,0.7)` solid | cerchio pieno viola + label |
+| gravity_well (fascia avviso) | `rgba(251,146,60,0.10)` | `rgba(251,146,60,0.4)` dashed | nessuno |
+| nebula | `rgba(56,189,248,0.10)` | `rgba(56,189,248,0.3)` dashed | nessuno |
 
 Tutti gli ostacoli multi-hex (radius > 0) vengono disegnati come un insieme di hex colorati,
 non come un cerchio: per ogni hex nel raggio, si disegna il fill dell'esagono.
 
-Il token centrale del gravity well mostra un cerchio pieno con colore viola, dimensione
-proporzionale alla massa (`small` = r 12px, `large` = r 20px), con label del nome se
-impostato.
+Il token centrale del gravity well mostra un cerchio pieno viola (r = 14px) con label del nome
+se impostato.
 
 ### 5.3 Draw function
 
 ```javascript
-// in tokenRenderers.js o nuovo obstacleRenderers.js
+// in obstacleRenderers.js (nuovo file)
 export function drawObstacle(ctx, obstacle, hexSize, offsetX, offsetY) {
-  // genera lista hex nell'area
   const hexes = getHexesInRadius(obstacle.position, obstacle.radius)
   hexes.forEach(hex => {
     const { x, y } = hexToPixel(hex.q, hex.r, hexSize, offsetX, offsetY)
@@ -333,10 +300,24 @@ export function drawObstacle(ctx, obstacle, hexSize, offsetX, offsetY) {
     ctx.setLineDash([])
   })
 
-  // Icona/label al centro
   if (obstacle.type === 'gravity_well') {
+    // Fascia di avviso: hex al raggio + 1
+    getHexesInRadius(obstacle.position, obstacle.radius + 1)
+      .filter(h => hexDistance(h, obstacle.position) === obstacle.radius + 1)
+      .forEach(hex => {
+        const { x, y } = hexToPixel(hex.q, hex.r, hexSize, offsetX, offsetY)
+        traceHexPath(ctx, x, y, hexSize)
+        ctx.fillStyle = 'rgba(251,146,60,0.10)'
+        ctx.fill()
+        ctx.setLineDash([3, 3])
+        ctx.strokeStyle = 'rgba(251,146,60,0.4)'
+        ctx.lineWidth = 1
+        ctx.stroke()
+        ctx.setLineDash([])
+      })
     drawGravityWellCore(ctx, obstacle, hexSize, offsetX, offsetY)
   }
+
   if (obstacle.label) {
     drawObstacleLabel(ctx, obstacle, hexSize, offsetX, offsetY)
   }
@@ -353,7 +334,7 @@ Aggiungere sotto "Add ship here":
 
 ```text
 ─────────────────────────────
-🪨 Place obstacle here →     (submenu o diretto a modal)
+🪨 Place obstacle here
 ```
 
 Visibile sempre (non phase-gated — il GM può piazzare ostacoli in qualsiasi momento).
@@ -387,7 +368,7 @@ Modale semplice a step:
 | ------ | ------- |
 | Asteroid Field | Radius (1–4), Density (light / dense), Label (opzionale) |
 | Debris Field | Radius (1–3), Label (opzionale) |
-| Gravity Well | Radius (2–6), Mass (small / large), Label (opzionale) |
+| Gravity Well | Radius (2–5), Label (opzionale) |
 | Nebula | Radius (3–8), Label (opzionale) |
 
 **Conferma:** aggiunge l'ostacolo sull'hex selezionato e chiude il modal.
@@ -399,16 +380,16 @@ Modale semplice a step:
 ThrustModal legge `obstacles` dallo store e mostra avvisi contestuali nel pannello di anteprima:
 
 ```text
-se nextPosition in asteroid_field:
-  → banner giallo: "⚠ Campo asteroidi — +1 thrust richiesto"
+se nextPosition in asteroid_field o debris_field:
+  → banner giallo: "⚠ Asteroid field — +1 thrust required"
   → thrust disponibile mostrato come (thrust - thrustUsed - 1)
 
-se ship.position in gravity_well.radius:
-  → banner viola: "⚠ Gravity well — pull N hex → [direzione] al prossimo movimento"
-  → mostra vettore risultante dopo il pull (con highlight della differenza)
+se ghost token è nella fascia di avviso gravity well (raggio + 1):
+  → banner arancione: "⚠ Approaching [label] — exclusion zone ahead"
 
-se ghost token sarebbe in gravity_well.radius 0:
-  → banner rosso: "⚠ IMPATTO — hull → 0"
+se ghost token è dentro gravity well (raggio):
+  → banner rosso: "⚠ COLLISION — trajectory enters exclusion zone"
+  → il vettore non è applicabile; pulsante CONFIRM disabilitato
 ```
 
 ---
@@ -421,8 +402,8 @@ se ghost token sarebbe in gravity_well.radius 0:
 const targetObstacle = getObstacleAt(obstacles, target.position)
 const obstacleCoverDM = computeObstacleCoverDM(targetObstacle)
 
-// obstacleCoverDM viene incluso nel breakdown DM
-// mostrato come riga "Field cover: −N" nella tabella DM
+// obstacleCoverDM incluso nel breakdown DM
+// riga "Field cover: −N" nella tabella DM
 ```
 
 ```javascript
@@ -444,12 +425,12 @@ function computeObstacleCoverDM(obstacle) {
 In `ActionModal`, prima di confermare l'acquisizione sensor lock, controllare:
 
 ```javascript
-const actorInNebula   = getObstacleAt(obstacles, actor.position)?.type === 'nebula'
-const targetInNebula  = getObstacleAt(obstacles, target.position)?.type === 'nebula'
+const actorInNebula  = getObstacleAt(obstacles, actor.position)?.type === 'nebula'
+const targetInNebula = getObstacleAt(obstacles, target.position)?.type === 'nebula'
 
 if (actorInNebula || targetInNebula) {
   // disabilita l'azione Sensor Lock
-  // mostra messaggio: "Sensor lock impossibile in nebula"
+  // mostra messaggio: "Sensor lock impossible — nebula interference"
 }
 ```
 
@@ -486,18 +467,20 @@ Backward compatibility: sessioni salvate senza `obstacles` leggono `battle.obsta
 
 | File | Suite |
 | ------ | ------- |
-| `utils/obstacles.test.js` | `getObstacleAt`, `getObstaclesInPath`, `computeObstacleCoverDM`, `applyGravityPull` (pull direzione, forza per distanza/massa, fuori raggio = no-op) |
-| `store/battleStore.test.js` | `addObstacle`, `removeObstacle`, `updateObstacle` in undo/redo; `resolveMovement` + gravity pull; collisione asteroid/debris; nebula rimuove sensor lock |
-| `components/modals/PlaceObstacleModal.test.jsx` | render per tipo, step 1→2, confirm chiama addObstacle |
+| `utils/obstacles.test.js` | `getObstacleAt` (hit, miss, raggio 0, raggio N), `getObstaclesInPath`, `computeObstacleCoverDM` per tutti i tipi |
+| `store/battleStore.test.js` | `addObstacle` / `removeObstacle` / `updateObstacle` in undo/redo; `resolveMovement` + collisione asteroid/debris (con e senza paidFieldCost); impatto gravity well; nebula rimuove sensor lock |
+| `components/modals/PlaceObstacleModal.test.jsx` | render step 1, selezione tipo aggiorna step 2, confirm chiama addObstacle, gravity well non mostra campo mass |
 
 ---
 
 ## 12. Scope Escluso (v1 Obstacles)
 
+- **Pull gravitazionale attivo** — fisicamente non rilevante alla scala temporale del combattimento
+  tattico (round = 6 minuti, distanze nell'ordine di migliaia di km); l'accelerazione gravitazionale
+  a queste distanze è dell'ordine di mm/s², trascurabile rispetto al thrust delle navi. Eventuale
+  implementazione come house rule opzionale rimandato a versione futura.
 - Ostacoli in movimento (asteroide con vettore proprio)
 - Ostacoli distruttibili (sparare agli asteroidi)
 - Stazione spaziale come ostacolo attivo con torrette proprie
 - Asse Z per corpi celesti (orbite)
 - Effetti radiazioni su equipaggio
-
-Questi punti sono candidati per una versione futura.
