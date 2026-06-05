@@ -221,10 +221,16 @@ See §9.9 Reactions below.
 
 ## 8. Movement Phase
 
-*Vectorial mode only.* All ships move simultaneously — no player input required.
+*Vectorial mode only.* **Fully automatic — no player input required.**
 
-Click **NEXT PHASE ⟶** to execute movement. Each ship's position advances by
-its current velocity vector.
+Click **NEXT PHASE ⟶** to execute movement. The app immediately:
+
+1. Advances every ship's position by its current velocity vector.
+2. Detects hostile ships whose trajectories crossed within **Short range (≤ 2 hexes)** — opens the **Passing Encounter** window for each.
+3. Detects ships that end in the same hex — opens the **Dogfight** engagement intent modal.
+
+The GM watches the tokens move on the map. If no encounters or dogfights are
+triggered, the phase advances to **Attack** automatically.
 
 ### 8.1 Ships That Pass in the Night
 

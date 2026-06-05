@@ -257,8 +257,14 @@ export function HelpScreen() {
 
         {/* MOVEMENT */}
         <Section id="movement" title="Movement Phase">
-          <p>Vectorial mode only. All ships move simultaneously — no player input required.</p>
-          <p>Click <span className="text-slate-200">NEXT PHASE ⟶</span> to execute movement. Each ship's position advances by its current velocity vector.</p>
+          <p>Vectorial mode only. <span className="text-slate-200">Fully automatic — no player input required.</span></p>
+          <p>Click <span className="text-slate-200">NEXT PHASE ⟶</span> to execute. The app immediately:</p>
+          <ol className="list-decimal list-inside space-y-1 text-slate-400 pl-2">
+            <li>Advances every ship's position by its current velocity vector.</li>
+            <li>Detects hostile ships whose trajectories crossed within Short range (≤ 2 hexes) — opens the <span className="text-slate-200">Passing Encounter</span> window for each.</li>
+            <li>Detects ships that end in the same hex — opens the <span className="text-slate-200">Dogfight</span> engagement intent modal.</li>
+          </ol>
+          <p>If no encounters or dogfights are triggered, the phase advances to Attack automatically.</p>
           <Sub title="SHIPS THAT PASS IN THE NIGHT">
             <p>If two hostile ships cross within <span className="text-slate-200">Short range (≤ 2 hexes)</span> during movement — even if their final positions are far apart — the system detects the closest approach and opens the <span className="text-slate-200">Passing Encounter</span> window.</p>
             <KV k="[Ship A] FIRES" v="Opens the Attack Modal pre-configured for that attacker." />
