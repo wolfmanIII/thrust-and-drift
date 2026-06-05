@@ -536,7 +536,7 @@ export function rollAttack({
   rangeDM,          // da getRangeDM()
   weaponDM,         // da weapons.js
   targetSizeDM,     // +1 per 1000 ton bersaglio (max +6)
-  evasiveDM,        // negativo: -(pilotSkill × evasiveThrust) — CRB p.166
+  evasiveDM,        // negativo: -(pilotSkill) fisso per attacco schivato — CRB p.171
   sensorLockDM = 0, // effetto del tiro Sensor Lock — CRB p.167
   diceOverride = null,
 }) {
@@ -622,11 +622,11 @@ export function applyMovement(currentPosition, currentVector) {
 ### 6.5 Evasive Action
 
 ```javascript
-// Per ogni thrust point dichiarato per evasione, gli attaccanti subiscono DM -(pilotSkill).
-// Più thrust → DM maggiore (moltiplicato, non fisso). CRB p.166
+// DM fisso = −pilotSkill per attacco schivato. Il thrust determina quanti attacchi si possono schivare,
+// non il moltiplicatore del DM. CRB p.171: "fisso — non si moltiplica per il Thrust speso"
 export function getEvasiveDM(pilotSkill, evasiveThrust) {
   if (evasiveThrust <= 0 || pilotSkill === 0) return 0
-  return -(pilotSkill * evasiveThrust)
+  return -pilotSkill
 }
 ```
 
@@ -1373,7 +1373,7 @@ L'Evasive Action è una **Reaction** dichiarata durante la Fase di Attacco, non 
 
 ```text
 Costo:   1 thrust point per attacco schivato
-DM:      -(pilot_skill × evasiveThrust)  — moltiplicato per i thrust dichiarati (CRB p.166)
+DM:      -(pilot_skill) fisso per attacco — il thrust determina quanti attacchi si possono schivare (CRB p.171)
 Fonte:   thrust non usato per il movimento in questo round
 Reset:   evasiveThrust si azzera a inizio round successivo
 ```
