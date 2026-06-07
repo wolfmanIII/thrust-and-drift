@@ -242,6 +242,7 @@ const useBattleStore = create((set, get) => {
       position: { ...position },
       vector: { q: 0, r: 0 },
       hullCurrent: profile.hull,
+      isDestroyed: false,
       thrustUsedThisRound: 0,
       thrustBonusThisRound: 0,
       thrustPenalty: 0,
@@ -523,17 +524,26 @@ const useBattleStore = create((set, get) => {
     if (!_skipThreshold) get().pushHistory()
     const prevHull    = ship.hullCurrent
     const hullCurrent = Math.max(0, prevHull - damage)
-    get().updateShip(shipId, { hullCurrent })
-    set((s) => ({
-      log: [...s.log, makeLogEntry({
-        round: s.round,
-        phase: s.phase,
-        type: 'damage',
-        message: `${ship.profile.name} takes ${damage} damage from ${sourceLabel}. Hull: ${hullCurrent}/${ship.profile.hull}.`,
+    const isDestroyed = hullCurrent === 0
+    get().updateShip(shipId, { hullCurrent, ...(isDestroyed ? { isDestroyed: true } : {}) })
+    const logEntries = [makeLogEntry({
+      round: get().round,
+      phase: get().phase,
+      type: 'damage',
+      message: `${ship.profile.name} takes ${damage} damage from ${sourceLabel}. Hull: ${hullCurrent}/${ship.profile.hull}.`,
+      shipId,
+      details: { damage, hullCurrent, hullMax: ship.profile.hull },
+    })]
+    if (isDestroyed && prevHull > 0) {
+      logEntries.push(makeLogEntry({
+        round: get().round,
+        phase: get().phase,
+        type: 'system',
+        message: `⚠ ${ship.profile.name} DESTROYED — hull reduced to 0. Wreck remains on map until removed by GM.`,
         shipId,
-        details: { damage, hullCurrent, hullMax: ship.profile.hull },
-      })],
-    }))
+      }))
+    }
+    set((s) => ({ log: [...s.log, ...logEntries] }))
 
     if (_skipThreshold || damage <= 0) return
 
@@ -687,14 +697,21 @@ const useBattleStore = create((set, get) => {
     }
   }),
 
-  /** Mark the current actor as having acted; advance the actor index. */
+  /** Mark the current actor as having acted; advance the actor index, skipping destroyed ships. */
   advanceActor: wh(() => {
-    const { initiativeOrder, currentActorIndex } = get()
+    const { initiativeOrder, currentActorIndex, ships } = get()
     const shipId = initiativeOrder[currentActorIndex]
     if (shipId) {
       get().updateShip(shipId, { hasActedThisPhase: true })
     }
-    set((s) => ({ currentActorIndex: s.currentActorIndex + 1 }))
+    // Skip over destroyed ships so their turn is never surfaced
+    let next = currentActorIndex + 1
+    while (next < initiativeOrder.length) {
+      const nextShip = ships.find((s) => s.id === initiativeOrder[next])
+      if (!nextShip?.isDestroyed) break
+      next++
+    }
+    set({ currentActorIndex: next })
   }),
 
   /** Reset all round-scoped state and increment round counter. */
