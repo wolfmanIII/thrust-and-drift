@@ -124,7 +124,7 @@ export const SHIP_CATALOG = [
     shipClass:   'Launch',
     description: 'Utility shuttle. Crew transfers and supply runs. No armament.',
     category:    'small-craft',
-    sourcePage:  142,
+    sourcePage:  139,
     techLevel:   12,
     tonnage:  20,
     hull:     8,
@@ -134,7 +134,7 @@ export const SHIP_CATALOG = [
     turrets:  [],
     crew:     [ cm('Pell Thorne',   { pilot: 1 }) ],
     fuel:     0,
-    cargo:    9,
+    cargo:    14,
   }),
 
   makeEntry({
@@ -142,7 +142,7 @@ export const SHIP_CATALOG = [
     shipClass:   "Ship's Boat",
     description: 'General-purpose utility craft. Standard fitting on 200-ton merchants.',
     category:    'small-craft',
-    sourcePage:  144,
+    sourcePage:  140,
     techLevel:   12,
     tonnage:  30,
     hull:     12,
@@ -152,7 +152,7 @@ export const SHIP_CATALOG = [
     turrets:  [{ slot: 1, weapons: [] }],  // fixed mount, empty
     crew:     [ cm('Remi Lacroix',  { pilot: 1 }) ],
     fuel:     0,
-    cargo:    14,
+    cargo:    12,
   }),
 
   makeEntry({
@@ -160,7 +160,7 @@ export const SHIP_CATALOG = [
     shipClass:   'Slow Boat',
     description: "Economy version of the Ship's Boat. Reduced thrust, lower operating cost.",
     category:    'small-craft',
-    sourcePage:  146,
+    sourcePage:  141,
     techLevel:   12,
     tonnage:  30,
     hull:     12,
@@ -170,7 +170,7 @@ export const SHIP_CATALOG = [
     turrets:  [{ slot: 1, weapons: [] }],
     crew:     [ cm('Nessa Okello',  { pilot: 1 }) ],
     fuel:     0,
-    cargo:    16,
+    cargo:    19,
   }),
 
   makeEntry({
@@ -178,7 +178,7 @@ export const SHIP_CATALOG = [
     shipClass:   'Pinnace',
     description: 'Medium utility craft for extended in-system operations.',
     category:    'small-craft',
-    sourcePage:  148,
+    sourcePage:  142,
     techLevel:   12,
     tonnage:  40,
     hull:     16,
@@ -188,7 +188,7 @@ export const SHIP_CATALOG = [
     turrets:  [{ slot: 1, weapons: [] }],
     crew:     [ cm('Zhen Liang',    { pilot: 1 }) ],
     fuel:     0,
-    cargo:    20,
+    cargo:    21,
   }),
 
   makeEntry({
@@ -196,7 +196,7 @@ export const SHIP_CATALOG = [
     shipClass:   'Slow Pinnace',
     description: 'Economy Pinnace. Reduced thrust, larger cargo hold.',
     category:    'small-craft',
-    sourcePage:  150,
+    sourcePage:  143,
     techLevel:   12,
     tonnage:  40,
     hull:     16,
@@ -206,7 +206,7 @@ export const SHIP_CATALOG = [
     turrets:  [{ slot: 1, weapons: [] }],
     crew:     [ cm('Ora Lindqvist', { pilot: 1 }) ],
     fuel:     0,
-    cargo:    22,
+    cargo:    30,
   }),
 
   makeEntry({
@@ -214,7 +214,7 @@ export const SHIP_CATALOG = [
     shipClass:   'Modular Cutter',
     description: 'Versatile 50-ton platform with swappable 30-ton mission modules.',
     category:    'small-craft',
-    sourcePage:  152,
+    sourcePage:  144,
     techLevel:   12,
     tonnage:  50,
     hull:     20,
@@ -224,7 +224,7 @@ export const SHIP_CATALOG = [
     turrets:  [],
     crew:     [ cm('Kyler Strand',  { pilot: 1 }) ],
     fuel:     0,
-    cargo:    0,
+    cargo:    4,
   }),
 
   makeEntry({
@@ -413,7 +413,7 @@ export const SHIP_CATALOG = [
     shipClass:   'Far Trader',
     description: 'Standard jump-2 far trader. Two double turrets with beam lasers for self-defence.',
     category:    'civilian',
-    sourcePage:  172,
+    sourcePage:  167,
     techLevel:   12,
     shipType:   'A2',
     tonnage:  200,
@@ -427,8 +427,8 @@ export const SHIP_CATALOG = [
       { slot: 2, weapons: ['Beam Laser', 'Beam Laser'] },
     ],
     crew:     [ cm('Danae Patel',   { pilot: 1 }), cm('Roja Mehta',    { engineer: 1 }), cm('Storm Bellini', { gunner: 2 }), cm('Grey Obi',      { gunner: 2 }) ],
-    fuel:     40,
-    cargo:    70,
+    fuel:     41,
+    cargo:    57,
     passengers: 9,
   }),
 
@@ -437,7 +437,7 @@ export const SHIP_CATALOG = [
     shipClass:   'Far Trader',
     description: 'Jump-2 merchant with light Crystaliron armour. No standard weapons.',
     category:    'civilian',
-    sourcePage:  172,
+    sourcePage:  169,
     techLevel:   12,
     shipType:   'A2',
     tonnage:  200,
@@ -448,8 +448,8 @@ export const SHIP_CATALOG = [
     sensors:  'Civilian',
     turrets:  [],
     crew:     [ cm('Merit Sung',    { pilot: 1 }), cm('Cort Breckenridge', { engineer: 1 }) ],
-    fuel:     40,
-    cargo:    73,
+    fuel:     41,
+    cargo:    65,
     passengers: 9,
   }),
 
@@ -469,8 +469,8 @@ export const SHIP_CATALOG = [
     sensors:  'Civilian',
     turrets:  [],
     crew:     [ cm('Kessa Andric',  { pilot: 1 }), cm('Yann Bellamy',  { engineer: 1 }) ],
-    fuel:     20,
-    cargo:    82,
+    fuel:     21,
+    cargo:    81,
     passengers: 8,
   }),
 
@@ -541,7 +541,7 @@ export const SHIP_CATALOG = [
   makeEntry({
     name:        'System Defence Boat (TL15)',
     shipClass:   'System Defence Boat',
-    description: 'TL15 non-jump SDB. Reinforced hull, Crystaliron 13, triple turrets, 240-missile magazine.',
+    description: 'TL15 non-jump SDB. Reinforced hull, Crystaliron 13, triple turrets, 144-missile magazine.',
     category:    'military',
     sourcePage:  175,
     techLevel:   15,
@@ -565,7 +565,7 @@ export const SHIP_CATALOG = [
       cm('Sgt. Erin Okafor',    { sensors: 1 }),
     ],
     fuel:     6,
-    cargo:    15,
+    cargo:    22,
   }),
 
   // ── CIVILIAN 400t ─────────────────────────────────────────────────────────
