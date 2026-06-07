@@ -11,10 +11,12 @@ import { useCanvasEffects } from './useCanvasEffects.js'
 import { useMapInteraction } from './useMapInteraction.js'
 import { useShipHover } from './useShipHover.js'
 import { ShipTooltip } from './ShipTooltip.jsx'
+import { useUiStore } from '../../store/uiStore.js'
 
 export function BattleMap() {
   const canvasRef        = useRef(null)
   const effectsCanvasRef = useRef(null)
+  const isAnimating = useUiStore((s) => s.movementAnimation !== null)
 
   const {
     offset,
@@ -50,6 +52,7 @@ export function BattleMap() {
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full cursor-crosshair"
+        style={{ pointerEvents: isAnimating ? 'none' : 'auto' }}
         onMouseDown={combinedMouseDown}
         onMouseMove={combinedMouseMove}
         onMouseUp={onMouseUp}
