@@ -7,12 +7,13 @@ import { useUiStore } from './uiStore.js'
 
 beforeEach(() => {
   useUiStore.setState({
-    screen:           'dashboard',
-    activeModal:      null,
-    modalPayload:     null,
-    selectedShipId:   null,
-    contextMenu:      null,
-    pendingPlacement: null,
+    screen:            'dashboard',
+    activeModal:       null,
+    modalPayload:      null,
+    selectedShipId:    null,
+    contextMenu:       null,
+    pendingPlacement:  null,
+    movementAnimation: null,
   })
 })
 
@@ -105,6 +106,41 @@ describe('showContextMenu / hideContextMenu', () => {
     useUiStore.getState().showContextMenu({ x: 20, y: 20, type: 'missile', targetId: 'b' })
     expect(useUiStore.getState().contextMenu.type).toBe('missile')
     expect(useUiStore.getState().contextMenu.targetId).toBe('b')
+  })
+})
+
+// === MOVEMENT ANIMATION ===
+
+describe('movementAnimation', () => {
+  it('startMovementAnimation imposta startPositions e startTime', () => {
+    const startPositions = { 'ship-1': { q: 2, r: 3 }, 'ship-2': { q: -1, r: 0 } }
+    const before = performance.now()
+    useUiStore.getState().startMovementAnimation(startPositions)
+    const after = performance.now()
+    const anim = useUiStore.getState().movementAnimation
+    expect(anim).not.toBeNull()
+    expect(anim.startPositions).toEqual(startPositions)
+    expect(anim.duration).toBe(600)
+    expect(anim.startTime).toBeGreaterThanOrEqual(before)
+    expect(anim.startTime).toBeLessThanOrEqual(after)
+  })
+
+  it('startMovementAnimation accetta duration custom', () => {
+    useUiStore.getState().startMovementAnimation({ 'a': { q: 0, r: 0 } }, 1000)
+    expect(useUiStore.getState().movementAnimation.duration).toBe(1000)
+  })
+
+  it('clearMovementAnimation riporta movementAnimation a null', () => {
+    useUiStore.getState().startMovementAnimation({ 'ship-1': { q: 0, r: 0 } })
+    useUiStore.getState().clearMovementAnimation()
+    expect(useUiStore.getState().movementAnimation).toBeNull()
+  })
+
+  it('startMovementAnimation sovrascrive animazione precedente', () => {
+    useUiStore.getState().startMovementAnimation({ 'ship-1': { q: 0, r: 0 } })
+    const pos2 = { 'ship-2': { q: 5, r: 5 } }
+    useUiStore.getState().startMovementAnimation(pos2)
+    expect(useUiStore.getState().movementAnimation.startPositions).toEqual(pos2)
   })
 })
 
