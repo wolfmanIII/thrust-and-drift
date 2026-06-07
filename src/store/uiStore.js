@@ -5,6 +5,9 @@
 
 import { create } from 'zustand'
 
+/** Duration of the movement animation in milliseconds. */
+const MOVEMENT_ANIM_DURATION_MS = 600
+
 /**
  * @typedef {'shipProfile'|'addShip'|'thrust'|'attack'|'shipDetail'|'action'|'initiative'|'dogfightRound'|'crewAssignment'|'basicManoeuvre'|null} ModalId
  */
@@ -82,6 +85,25 @@ const useUiStore = create((set) => ({
   /** @param {{ shipId: string, x: number, y: number }} state */
   setHoveredShip: (state) => set({ hoveredShip: state }),
   clearHoveredShip: () => set({ hoveredShip: null }),
+
+  // === MOVEMENT ANIMATION ===
+  /**
+   * Purely visual animation state for the movement phase.
+   * null  → no animation active.
+   * @type {{ startPositions: Record<string, { q: number, r: number }>, startTime: number, duration: number }|null}
+   */
+  movementAnimation: null,
+
+  /**
+   * Begin a movement animation from the given start positions.
+   * @param {Record<string, { q: number, r: number }>} startPositions  map of id → { q, r }
+   * @param {number} [duration]  ms
+   */
+  startMovementAnimation: (startPositions, duration = MOVEMENT_ANIM_DURATION_MS) =>
+    set({ movementAnimation: { startPositions, startTime: performance.now(), duration } }),
+
+  /** Clear the active movement animation. */
+  clearMovementAnimation: () => set({ movementAnimation: null }),
 }))
 
 export { useUiStore }
