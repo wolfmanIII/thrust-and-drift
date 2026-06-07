@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.10.0] — 2026-06-07
+
+### Added
+
+- **Movement animation** — ship and missile tokens slide smoothly from their start position to their destination during the Movement phase (~600 ms, easeInOut). Canvas pointer events are disabled during the animation to prevent mis-clicks. Animation state lives in `uiStore.movementAnimation` (transient, never autosaved). `undo`/`redo` clear the animation immediately to avoid stale start positions.
+
+### Tests
+
+- 672 tests (+4) — `uiStore`: `startMovementAnimation` (sets positions, startTime, duration), custom duration, `clearMovementAnimation`, overwrite behaviour.
+
+---
+
 ## [1.9.5] — 2026-06-05
 
 ### Added
