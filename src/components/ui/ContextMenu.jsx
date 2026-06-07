@@ -107,14 +107,19 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
         )}
       </div>
 
+      {/* ── Destroyed wreck — no combat actions available ─────────── */}
+      {ship.isDestroyed && (
+        <p className="px-3 py-1.5 font-mono text-xs text-red-400">WRECK — no actions available</p>
+      )}
+
       {/* ── Acceleration: thrust (vectorial) or range band change (basic) ── */}
-      {phase === 'acceleration' && combatMode === 'vectorial' && isCurrentActor && (
+      {!ship.isDestroyed && phase === 'acceleration' && combatMode === 'vectorial' && isCurrentActor && (
         <>
           <MenuItem icon="🚀" label="Apply Thrust" onClick={() => open('thrust', { shipId: targetId })} />
           <MenuDivider />
         </>
       )}
-      {phase === 'acceleration' && combatMode === 'basic' && isCurrentActor && (
+      {!ship.isDestroyed && phase === 'acceleration' && combatMode === 'basic' && isCurrentActor && (
         <>
           <MenuItem icon="🧭" label="Manoeuvre…" onClick={() => open('basicManoeuvre', { shipId: targetId })} />
           <MenuDivider />
@@ -122,7 +127,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       )}
 
       {/* ── Attack: weapons ───────────────────────────────────────── */}
-      {phase === 'attack' && isCurrentActor && (
+      {!ship.isDestroyed && phase === 'attack' && isCurrentActor && (
         <>
           {hasUnfiredOffensiveTurret(ship) && (
             <MenuItem icon="🎯" label="Attack…" onClick={() => open('attack', { shipId: targetId })} />
@@ -132,7 +137,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       )}
 
       {/* ── Actions: crew actions ─────────────────────────────────── */}
-      {phase === 'actions' && isCurrentActor && hasAvailableCrewMember(ship) && (
+      {!ship.isDestroyed && phase === 'actions' && isCurrentActor && hasAvailableCrewMember(ship) && (
         <>
           <MenuItem icon="⚡" label="Crew Action…" onClick={() => open('action', { shipId: targetId })} />
           <MenuDivider />
@@ -140,7 +145,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       )}
 
       {/* ── Boarding: only on current actor's turn ────────────────── */}
-      {isCurrentActor && boardingTargets.length > 0 && (
+      {!ship.isDestroyed && isCurrentActor && boardingTargets.length > 0 && (
         <>
           {boardingTargets.map((t) => (
             <MenuItem
@@ -155,10 +160,15 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       )}
 
       {/* ── Always available ──────────────────────────────────────── */}
-      <MenuItem icon="👥" label="Assign Crew…" onClick={() => open('crewAssignment', { shipId: targetId })} />
-      <MenuItem icon="📊" label="Ship Sheet"           onClick={() => open('shipDetail', { shipId: targetId })} />
+      {!ship.isDestroyed && (
+        <MenuItem icon="👥" label="Assign Crew…" onClick={() => open('crewAssignment', { shipId: targetId })} />
+      )}
+      <MenuItem icon="📊" label="Ship Sheet" onClick={() => open('shipDetail', { shipId: targetId })} />
       <MenuDivider />
-      <MenuItem icon="🗑" label="Remove from battle" danger onClick={() => { removeShip(targetId); close() }} />
+      {ship.isDestroyed
+        ? <MenuItem icon="💀" label="Remove Wreck" danger onClick={() => { removeShip(targetId); close() }} />
+        : <MenuItem icon="🗑" label="Remove from battle" danger onClick={() => { removeShip(targetId); close() }} />
+      }
 
     </MenuShell>
   )
