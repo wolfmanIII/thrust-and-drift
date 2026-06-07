@@ -117,10 +117,15 @@ function vectorToPixelDirection(vector, hexSize) {
  * @param {number} [timestamp=0]  rAF timestamp in ms — drives dogfight pulse animation
  */
 export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
-  const { color, profile, hullCurrent } = ship
+  const { color, profile, hullCurrent, isDestroyed } = ship
   const hullFraction = profile.hull > 0 ? hullCurrent / profile.hull : 0
   const inDogfight   = ship.inDogfight !== null && ship.inDogfight !== undefined
   const rotation     = computeShipRotation(ship.vector)
+
+  if (isDestroyed) {
+    ctx.save()
+    ctx.globalAlpha = 0.35
+  }
 
   // Dogfight pulsing ring — circular, drawn before selection ring
   if (inDogfight) {
@@ -193,6 +198,16 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText('⚔', cx + TOKEN_RADIUS * 0.75, cy - TOKEN_RADIUS * 0.75)
+  }
+
+  if (isDestroyed) {
+    ctx.restore()
+    // ☠ badge — drawn at full opacity outside the semi-transparent save block
+    ctx.font = 'bold 18px monospace'
+    ctx.fillStyle = '#f87171'   // red-400
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('☠', cx + TOKEN_RADIUS * 0.75, cy - TOKEN_RADIUS * 0.75)
   }
 }
 
