@@ -266,11 +266,12 @@ The threshold to change one band step depends on the current band
 
 *Vectorial mode only.* **Fully automatic — no player input required.**
 
-Click **NEXT PHASE ⟶** to execute movement. The app immediately:
+Click **NEXT PHASE ⟶** to execute movement. The app:
 
-1. Advances every ship's position by its current velocity vector.
-2. Detects hostile ships whose trajectories crossed within **Short range (≤ 2 hexes)** — opens the **Passing Encounter** window for each.
-3. Detects ships that end in the same hex — opens the **Dogfight** engagement intent modal.
+1. **Animates** every token sliding from its current position to its new position (~600 ms, easeInOut). Input is blocked during the animation to prevent mis-clicks.
+2. Advances every ship's position by its current velocity vector.
+3. Detects hostile ships whose trajectories crossed within **Short range (≤ 2 hexes)** — opens the **Passing Encounter** window for each.
+4. Detects ships that end in the same hex — opens the **Dogfight** engagement intent modal.
 
 The GM watches the tokens move on the map. If no encounters or dogfights are
 triggered, the phase advances to **Attack** automatically.
