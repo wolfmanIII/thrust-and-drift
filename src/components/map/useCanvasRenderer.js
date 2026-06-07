@@ -17,6 +17,25 @@ import {
   drawMissileToken,
 } from './tokenRenderers.js'
 
+// === ANIMATION UTILITIES ===
+
+/** @param {number} t */
+function easeInOut(t) {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
+}
+
+/**
+ * Linearly interpolates between two hex positions.
+ * hexToPixel accepts float coords — no rounding needed.
+ * @param {{ q: number, r: number }} start
+ * @param {{ q: number, r: number }} end
+ * @param {number} t  0..1
+ * @returns {{ q: number, r: number }}
+ */
+function lerpHex(start, end, t) {
+  return { q: start.q + (end.q - start.q) * t, r: start.r + (end.r - start.r) * t }
+}
+
 // === GRID CONSTANTS ===
 const HEX_SIZE = 32
 const GRID_COLOR = 'rgba(100, 116, 139, 0.3)'   // slate-500 @ 30%
@@ -98,6 +117,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
   const timestampRef = useRef(0)
 
   const hasActiveDogfight = ships.some((s) => s.inDogfight !== null)
+  const movementAnimation = useUiStore((s) => s.movementAnimation)
 
   const render = useCallback(() => {
     const canvas = canvasRef.current
@@ -115,6 +135,9 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
     const ox = offset.current.x
     const oy = offset.current.y
     const size = HEX_SIZE * z
+
+    const anim = useUiStore.getState().movementAnimation
+    const now = performance.now()
 
     // --- Layer 3: Ghost positions — only during acceleration (thrust preview) ---
     if (phase === 'acceleration') {
@@ -135,15 +158,30 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
 
     // --- Layer 5: Missile tokens ---
     for (const missile of missiles) {
-      const { x: cx, y: cy } = hexToPixel(missile.position.q, missile.position.r, size, ox, oy)
+      let renderPos = missile.position
+      if (anim?.startPositions[missile.id]) {
+        const t = easeInOut(Math.min(1, (now - anim.startTime) / anim.duration))
+        renderPos = lerpHex(anim.startPositions[missile.id], missile.position, t)
+      }
+      const { x: cx, y: cy } = hexToPixel(renderPos.q, renderPos.r, size, ox, oy)
       drawMissileToken(ctx, missile, cx, cy)
     }
 
     // --- Layer 6 + 7: Ship tokens + labels ---
     for (const ship of ships) {
-      const { x: cx, y: cy } = hexToPixel(ship.position.q, ship.position.r, size, ox, oy)
+      let renderPos = ship.position
+      if (anim?.startPositions[ship.id]) {
+        const t = easeInOut(Math.min(1, (now - anim.startTime) / anim.duration))
+        renderPos = lerpHex(anim.startPositions[ship.id], ship.position, t)
+      }
+      const { x: cx, y: cy } = hexToPixel(renderPos.q, renderPos.r, size, ox, oy)
       drawShipToken(ctx, ship, cx, cy, ship.id === selectedShipId, timestampRef.current)
       drawShipLabel(ctx, ship, cx, cy)
+    }
+
+    // Clear animation state once complete
+    if (anim && (now - anim.startTime) >= anim.duration) {
+      useUiStore.getState().clearMovementAnimation()
     }
   }, [canvasRef, ships, missiles, selectedShipId, offset, zoom, timestampRef])
 
@@ -174,9 +212,9 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
     return () => observer.disconnect()
   }, [canvasRef, render])
 
-  // rAF animation loop — active only when ships are in dogfight (drives pulse ring)
+  // rAF animation loop — active during dogfight pulse or movement animation
   useEffect(() => {
-    if (!hasActiveDogfight) return
+    if (!hasActiveDogfight && !movementAnimation) return
     let frameId
     const loop = (ts) => {
       timestampRef.current = ts
@@ -185,7 +223,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
     }
     frameId = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(frameId)
-  }, [render, hasActiveDogfight, timestampRef])
+  }, [render, hasActiveDogfight, movementAnimation, timestampRef])
 }
 
 export { HEX_SIZE }
