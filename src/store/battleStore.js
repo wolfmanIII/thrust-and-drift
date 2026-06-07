@@ -14,6 +14,7 @@ import { roll2D6, rollDice } from '../utils/dice.js'
 import { getCrewSkill, getEffectiveSkill, buildDefaultAssignments } from '../utils/crew.js'
 import { resolveDogfightChecks } from '../utils/dogfight.js'
 import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST } from '../data/rangeBands.js'
+import { useUiStore } from './uiStore.js'
 
 /** Canonical sort key for a ship pair — order-independent. */
 function pairKey(id1, id2) { return [id1, id2].sort().join('_') }
@@ -172,6 +173,7 @@ const useBattleStore = create((set, get) => {
 
   /** Restore the most recent snapshot; saves current state to redoStack; log is append-only. */
   undoLastAction: () => {
+    useUiStore.getState().clearMovementAnimation()
     const { undoStack, redoStack, log } = get()
     if (undoStack.length === 0) return
     const { ships, missiles, dogfights, boardings, round, phase, initiativeOrder, currentActorIndex } = get()
@@ -197,6 +199,7 @@ const useBattleStore = create((set, get) => {
 
   /** Restore the next state from the redoStack; saves current state to undoStack; log is append-only. */
   redoLastAction: () => {
+    useUiStore.getState().clearMovementAnimation()
     const { redoStack, undoStack, log } = get()
     if (redoStack.length === 0) return
     const { ships, missiles, dogfights, boardings, round, phase, initiativeOrder, currentActorIndex } = get()
@@ -464,6 +467,11 @@ const useBattleStore = create((set, get) => {
         }
       }
     }
+
+    const startPositions = {}
+    ships.forEach((sh) => { startPositions[sh.id] = { ...sh.position } })
+    missiles.forEach((m) => { startPositions[m.id] = { ...m.position } })
+    useUiStore.getState().startMovementAnimation(startPositions)
 
     const movedShips = ships.map((sh) => ({
       ...sh,
