@@ -32,6 +32,7 @@
 Nessun task pianificato. La feature v1.10.0 è completa e verificata (build OK, 672 test passing, nessuna circular dependency).
 
 Possibili aree di sviluppo future:
+
 - **Animazione lancio missili** — analoga al movimento navi (attualmente il token appare istantaneamente)
 - **Configurabilità durata animazione** — esporre `MOVEMENT_ANIM_DURATION_MS` nelle impostazioni GM
 - **Test renderer** — `easeInOut` e `lerpHex` sono funzioni pure isolabili in un util testabile
