@@ -18,6 +18,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Ship profiles (defaultProfiles.js)** — hull formula corrected to `tonnage / 2.5` (MgT2e RAW); all 5 default profiles were using ~tonnage/9. Armor, jump, sensors, and cargo aligned to CRB/HG: Free Trader hull 22→80 armor 0→2 jump 2→1, Scout hull 11→40 armor 0→4 sensors Civilian→Military, Light Fighter hull 2→4 sensors Civilian→Improved, Patrol Cruiser hull 44→160, Far Trader hull 22→80 armor 0→2.
 - **Ship catalog (shipCatalog.js)** — sourcePage corrected for all 7 small craft entries to match actual HG 2022 PDF page numbers (pp.139–144). Cargo/fuel corrected per stat blocks: Empress Marava cargo 70→57 fuel 40→41, A2 Hero cargo 73→65 fuel 40→41, Free Trader A cargo 82→81 fuel 20→21, SDB TL15 cargo 15→22, description "240-missile magazine" → "144-missile magazine".
 
+### Fixed (continued)
+
+- **BasicBattleView destroyed ship card** — `ShipCard` now renders at 40% opacity with a red border and ☠ WRECK badge when `isDestroyed`; critical hits hidden on wreck. Combat actions were already blocked via the shared `ContextMenu.jsx`.
+
 ### Tests
 
 - 672 tests (unchanged)

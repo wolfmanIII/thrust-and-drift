@@ -35,6 +35,7 @@
 4. **`fix(defaultProfiles): correct hull formula`** (`26b5c08`) — hull corretto a `tonnage / 2.5` (RAW) per tutti i 5 profili default; armor, jump, sensors, cargo allineati a CRB/HG.
 5. **`fix(shipCatalog): correct cargo, fuel, sourcePage refs`** (`90cabaa`) — sourcePage corretti per tutti i small craft (pp.139–144 HG 2022); cargo/fuel corretti per Empress Marava, A2 Hero, Beowulf, SDB TL15; descrizione SDB "240-missile" → "144-missile".
 6. **`feat(AttackModal): add inline 🎲 auto-roll button for player damage dice`** (`0e13f56`) — `AttackDamageStep` e `AttackCriticalStep` (extra damage): aggiunto `🎲` inline accanto al numero input. Pre-compila il valore e abilita CONFIRM, stesso pattern di `DiceInput`. Tutti gli altri tiri usavano già `DiceInput` con `🎲` built-in.
+7. **`fix(BasicBattleView): render destroyed ships at 40% opacity with ☠ WRECK badge`** (`81394ce`) — `ShipCard` ora mostra `opacity-40`, bordo `red-900/50`, badge `☠ WRECK` e nasconde i critical hits quando `isDestroyed`. Le azioni erano già bloccate dal `ContextMenu.jsx` condiviso.
 
 ---
 
