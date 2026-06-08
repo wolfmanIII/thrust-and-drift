@@ -35,14 +35,21 @@ function ShipCard({ ship }) {
     <div
       ref={cardRef}
       onContextMenu={handleContextMenu}
-      className="bg-slate-900 border border-slate-700 rounded-lg p-3 cursor-context-menu hover:border-slate-500 transition-colors select-none"
+      className={`bg-slate-900 border rounded-lg p-3 cursor-context-menu transition-colors select-none ${
+        ship.isDestroyed
+          ? 'border-red-900/50 opacity-40'
+          : 'border-slate-700 hover:border-slate-500'
+      }`}
     >
       <div className="flex items-center gap-2 mb-2">
         <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
         <span className="font-mono text-sm text-slate-200 font-bold truncate">{ship.profile.name}</span>
-        {ship.evasiveThrust > 0 && (
-          <span className="ml-auto text-sky-400 font-mono text-xs shrink-0">EVA {ship.evasiveThrust}</span>
-        )}
+        {ship.isDestroyed
+          ? <span className="ml-auto font-mono text-xs text-red-400 shrink-0">☠ WRECK</span>
+          : ship.evasiveThrust > 0 && (
+              <span className="ml-auto text-sky-400 font-mono text-xs shrink-0">EVA {ship.evasiveThrust}</span>
+            )
+        }
       </div>
       <HullBar current={ship.hullCurrent} max={ship.profile.hull} />
       <div className="flex justify-between mt-1.5">
@@ -53,7 +60,7 @@ function ShipCard({ ship }) {
           Ini {ship.initiative}
         </span>
       </div>
-      {ship.criticalHits?.length > 0 && (
+      {ship.criticalHits?.length > 0 && !ship.isDestroyed && (
         <p className="mt-1 font-mono text-xs text-red-400">
           ⚠ {ship.criticalHits.length} colpo/i critico/i
         </p>
