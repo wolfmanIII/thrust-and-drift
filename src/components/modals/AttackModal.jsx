@@ -626,6 +626,15 @@ function AttackDamageStep({ damageDice, effectBonus, armor, isPlayer, damageResu
                   className="w-20 bg-slate-700 border border-slate-600 text-(--neon-cyan) font-mono text-lg rounded text-center px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
                   placeholder="—"
                 />
+                <button
+                  type="button"
+                  onClick={() => { const r = rollDice(damageDice, 6); setManualRaw(r.total.toString()) }}
+                  className="text-slate-500 hover:text-(--neon-cyan) font-mono text-sm transition-colors"
+                  title="Auto-roll"
+                  aria-label="Auto-roll damage dice"
+                >
+                  🎲
+                </button>
               </div>
               <button
                 onClick={handleManualConfirm}
@@ -809,6 +818,15 @@ function AttackCriticalStep({
                       className="w-20 bg-slate-700 border border-slate-600 text-red-400 font-mono text-lg rounded text-center px-2 py-1 focus:outline-none focus:border-red-500/60"
                       placeholder="—"
                     />
+                    <button
+                      type="button"
+                      onClick={() => { const r = rollDice(extraDice, 6); setManualExtra(r.total.toString()) }}
+                      className="text-slate-500 hover:text-red-400 font-mono text-sm transition-colors"
+                      title="Auto-roll"
+                      aria-label="Auto-roll extra damage"
+                    >
+                      🎲
+                    </button>
                   </div>
                   <button
                     onClick={handleExtraRoll}
