@@ -27,13 +27,14 @@
 5. **`test(uiStore): cover startMovementAnimation and clearMovementAnimation`** (`69a9ee3`) — 4 nuovi test.
 6. **Docs + version bump v1.10.0** (`e917027`, `8ef3bf8`).
 
-### Sessione corrente — isDestroyed + ship data corrections
+### Sessione corrente — isDestroyed + ship data corrections + QoL
 
 1. **`feat(battleStore): add isDestroyed flag`** (`a675101`) — `isDestroyed: false` all'init; rilevato quando `hullCurrent === 0`; log DESTROYED; `advanceActor()` skippa navi distrutte.
 2. **`feat(ContextMenu): block all actions on destroyed ships`** (`2c841b6`) — tutte le azioni combat bloccate su navi distrutte; label "WRECK — no actions available"; "Remove Wreck" al posto di "Remove from battle".
 3. **`feat(tokenRenderers): render destroyed ships at 35% opacity with ☠ badge`** (`2a49e15`) — `globalAlpha = 0.35` su tutto il token; badge ☠ disegnato a full opacity sopra.
 4. **`fix(defaultProfiles): correct hull formula`** (`26b5c08`) — hull corretto a `tonnage / 2.5` (RAW) per tutti i 5 profili default; armor, jump, sensors, cargo allineati a CRB/HG.
 5. **`fix(shipCatalog): correct cargo, fuel, sourcePage refs`** (`90cabaa`) — sourcePage corretti per tutti i small craft (pp.139–144 HG 2022); cargo/fuel corretti per Empress Marava, A2 Hero, Beowulf, SDB TL15; descrizione SDB "240-missile" → "144-missile".
+6. **`feat(AttackModal): add inline 🎲 auto-roll button for player damage dice`** (`0e13f56`) — `AttackDamageStep` e `AttackCriticalStep` (extra damage): aggiunto `🎲` inline accanto al numero input. Pre-compila il valore e abilita CONFIRM, stesso pattern di `DiceInput`. Tutti gli altri tiri usavano già `DiceInput` con `🎲` built-in.
 
 ---
 
