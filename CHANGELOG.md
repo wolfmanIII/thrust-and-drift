@@ -6,6 +6,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.11.0] — 2026-06-08
+
+### Added
+
+- **Destroyed ships** — when a ship's hull reaches 0, `isDestroyed: true` is set on the ship instance and a `DESTROYED` entry is appended to the battle log. Token is rendered at 35% opacity with a full-opacity ☠ badge. All combat actions (thrust, attack, crew action, boarding) are blocked in the context menu, replaced by a "WRECK — no actions available" notice. The ship is skipped in `advanceActor()` initiative cycling. GM removes the wreck manually via "Remove Wreck" (renamed from "Remove from battle").
+- **Inline 🎲 auto-roll for player damage dice** — `AttackDamageStep` and `AttackCriticalStep` (extra damage roll): an inline 🎲 button next to the numeric input pre-fills it with an auto-rolled result and enables CONFIRM immediately. Consistent with the built-in 🎲 already present in `DiceInput` for all 2D6 player roll steps (attack roll, critical location, reactions, crew actions, initiative).
+
+### Fixed
+
+- **Ship profiles (defaultProfiles.js)** — hull formula corrected to `tonnage / 2.5` (MgT2e RAW); all 5 default profiles were using ~tonnage/9. Armor, jump, sensors, and cargo aligned to CRB/HG: Free Trader hull 22→80 armor 0→2 jump 2→1, Scout hull 11→40 armor 0→4 sensors Civilian→Military, Light Fighter hull 2→4 sensors Civilian→Improved, Patrol Cruiser hull 44→160, Far Trader hull 22→80 armor 0→2.
+- **Ship catalog (shipCatalog.js)** — sourcePage corrected for all 7 small craft entries to match actual HG 2022 PDF page numbers (pp.139–144). Cargo/fuel corrected per stat blocks: Empress Marava cargo 70→57 fuel 40→41, A2 Hero cargo 73→65 fuel 40→41, Free Trader A cargo 82→81 fuel 20→21, SDB TL15 cargo 15→22, description "240-missile magazine" → "144-missile magazine".
+
+### Tests
+
+- 672 tests (unchanged)
+
+---
+
 ## [1.10.0] — 2026-06-07
 
 ### Added
