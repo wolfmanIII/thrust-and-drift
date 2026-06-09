@@ -189,7 +189,14 @@ export function ActionModal() {
 
             <div className="flex gap-2">
               <button
-                onClick={() => { setRollResult(null); setTargetShipId(null) }}
+                onClick={() => {
+                  setRollResult(null)
+                  setSelectedMemberId(null)
+                  setSelectedAction(null)
+                  setTargetShipId(null)
+                  setManualDice(null)
+                  setSkillOverride(null)
+                }}
                 className="flex-1 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500"
               >
                 ANOTHER ACTION
