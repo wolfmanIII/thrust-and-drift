@@ -128,7 +128,8 @@ thrust-and-drift/
     │       ├── ShipProfileForm.jsx    ← Form completo profilo nave
     │       └── DiceInput.jsx          ← Input manuale 2D6 per dadi fisici giocatori
     ├── hooks/
-    │   └── useAutosave.js             ← Autosave IndexedDB + restore al mount
+    │   ├── useAutosave.js             ← Autosave IndexedDB + restore al mount
+    │   └── useAudioEngine.js          ← Singleton AudioContext, subscriber effectQueue, rispetta audioEnabled
     ├── store/
     │   ├── profilesStore.js           ← Profili nave (CRUD + import/export)
     │   ├── battleStore.js             ← Stato battaglia corrente (undo/redo inclusi)
@@ -139,7 +140,8 @@ thrust-and-drift/
     │   ├── crew.js                    ← Helper equipaggio array (getCrewSkill, getEffectiveSkill, getAssignedSkill, buildDefaultAssignments, migrateCrew, blankCrewMember)
     │   ├── boarding.js                ← Logica abbordaggio (metodi ingresso, resilienza, stacking)
     │   ├── dogfight.js                ← Logica dogfight (tonnage DM, Pilot check, fuga)
-    │   ├── effectQueue.js             ← Coda effetti canvas (emitEffect, drainEffects)
+    │   ├── effectQueue.js             ← Coda effetti canvas (emitEffect, drainEffects, subscribeEffects)
+    │   ├── audioSynth.js              ← Sintesi procedurale Web Audio API (laser, impact, critical, missile, thrust)
     │   ├── io.js                      ← Import/export JSON via File API (parseBattleFile)
     │   ├── dice.js                    ← Lancio dadi e formattazione risultati
     │   └── db.js                      ← Wrapper IndexedDB (openDB, dbGet, dbPut, dbDelete)
@@ -1402,6 +1404,13 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - `AttackModal` — mostra banda stored read-only se `storedBand` presente; nasconde selettore manuale; CONFIRM disabilitato se basic mode senza banda tracciata
 - 666 test (+22 da 644) — `getEvasiveDM` corretti; 18 nuovi test basic mode in `battleStore.test.js` (addShip, removeShip, setRangeBand, applyBasicMovement, advancePhase basic)
 
+### 13.8c Versione 1.12.0 — Missile Guidance + Audio ✅ COMPLETATA
+
+- **Missile guidance** — `computeMissileGuidance` in `battleStore.resolveMovement`: ogni round i missili con `thrustRemaining > 0` aggiornano il proprio vettore puntando alla posizione predetta del target (`target.pos + target.vector`), fino a `MISSILE_GUIDANCE_THRUST = 3` hex/round di delta-v. Senza thrust → deriva.
+- **Effetti sonori procedurali** — `audioSynth.js` (sintesi Web Audio API), `useAudioEngine.js` (singleton + subscriber), `effectQueue.subscribeEffects`, `uiStore.audioEnabled` + `toggleAudio`, HUD 🔊/🔇.
+- **Fix UX** — `ContextMenu`: Attack sempre visibile (disabled con reason se turret esauriti); `ActionModal`: ANOTHER ACTION resetta tutta la selezione.
+- 674 test (+2 missile guidance)
+
 ### 13.9 Versione 2.0 — Ostacoli Ambientali
 
 Asteroid field, debris field, gravity well (zona proibita), nebula.
@@ -1455,3 +1464,30 @@ Al lancio il missile eredita il vettore attuale della nave. Ogni round, nella fa
 3. Scala `thrustRemaining` di 1
 
 Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiunge la casella del bersaglio (o adiacente), si risolve l'impatto.
+
+**Implementazione guidance (v1.12.0):**
+
+`computeMissileGuidance(missile, targetShip)` in `battleStore.js`:
+
+- Punta alla posizione predetta del target: `targetNext = hexAdd(target.position, target.vector)`
+- Calcola il vettore ideale: `ideal = targetNext - missile.position`
+- Calcola il delta rispetto al vettore corrente; lo scala a `MISSILE_GUIDANCE_THRUST = 3` hex/round massimo
+- Con `thrustRemaining = 0` o target assente → vettore invariato (deriva)
+
+Il valore `3` rispecchia una guida attiva moderata — sufficiente a inseguire bersagli tipici (thrust 2–4), possibile da evadere con manovre estreme.
+
+---
+
+### 14.5 Effetti Sonori — Sintesi Procedurale
+
+Tutti i suoni sono generati via Web Audio API (nessun file audio). `audioSynth.js` espone `playEffectSound(ctx, effect)` che dispatcha per tipo:
+
+| Tipo effetto | Sintesi |
+| ------------ | ------- |
+| `laser_ray` | Oscillatore sawtooth discendente 900→180 Hz, 400 ms |
+| `impact_burst` | Buffer rumore bianco + lowpass sweep 3000→150 Hz, 350 ms |
+| `critical_flash` | Thud sine 80→25 Hz + noise crack bandpass 1200 Hz |
+| `missile_launch` | Oscillatore sawtooth ascendente 80→500 Hz, 550 ms |
+| `thrust_plume` | Buffer rumore bandpass 350 Hz, attacco lineare, 300 ms |
+
+`useAudioEngine` (hook) si monta in `BattleMap`, crea un `AudioContext` singleton al primo suono, si iscrive a `effectQueue.subscribeEffects`. Rispetta `uiStore.audioEnabled`; il toggle 🔊/🔇 è nel HUD.

@@ -6,6 +6,29 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.12.0] — 2026-06-09
+
+### Added
+
+- **Missile guidance** — in `resolveMovement`, each missile with `thrustRemaining > 0` now applies `computeMissileGuidance`: aims for the target's predicted next position (`target.position + target.vector`) and applies up to `MISSILE_GUIDANCE_THRUST = 3` hex-distance of delta-v per round (TC p.176 — Smart guidance). Missiles with no remaining thrust drift without correction. Previously missiles inherited the launcher's vector at launch and never updated it.
+- **Procedural sound effects** — `src/utils/audioSynth.js`: Web Audio API synthesis for all combat events (no audio files). `src/hooks/useAudioEngine.js`: singleton `AudioContext`, subscribes to `effectQueue` on mount, no-ops when muted. `effectQueue.js` extended with `subscribeEffects` (listener pattern, parallel to `drainEffects` for canvas). `uiStore`: `audioEnabled` flag + `toggleAudio()`. HUD: 🔊/🔇 toggle in the utility toolbar.
+  - `laser_ray` — descending sawtooth sweep 900→180 Hz
+  - `impact_burst` — white-noise burst with lowpass sweep
+  - `critical_flash` — sub-bass thud 80→25 Hz + noise crack at 1200 Hz
+  - `missile_launch` — ascending sawtooth whoosh 80→500 Hz
+  - `thrust_plume` — bandpass noise burst at 350 Hz
+
+### Fixed
+
+- **ContextMenu Attack visibility** — `Attack…` option now always shown during the attack phase on the current actor's turn (not hidden when all turrets have fired). If all turrets are exhausted, the entry is rendered as a `MenuItemDisabled` with `All turrets fired` reason. This aligns with the existing behaviour for turrets used for PD/Sand reactions (which correctly mark the defender's turret slot as fired per RAW — the slot can't be used for offence in the same round).
+- **ActionModal ANOTHER ACTION** — clicking ANOTHER ACTION now resets `selectedMemberId`, `selectedAction`, `manualDice`, and `skillOverride` in addition to `rollResult` and `targetShipId`. Previously the just-used crew member remained selected (resolved from `crewArray`, not the filtered `availableCrew`), leaving their action list active and executable a second time.
+
+### Tests
+
+- 674 tests (+2) — `battleStore`: missile guidance partial correction (target too far for single-round intercept), out-of-fuel drift.
+
+---
+
 ## [1.11.0] — 2026-06-08
 
 ### Added
