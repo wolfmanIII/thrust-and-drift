@@ -31,6 +31,16 @@ function MenuItem({ label, icon, onClick, danger = false }) {
   )
 }
 
+function MenuItemDisabled({ label, icon, reason }) {
+  return (
+    <div className="w-full flex items-center gap-2 px-3 py-1.5 font-mono text-xs text-slate-600 cursor-not-allowed select-none">
+      <span className="w-4 text-center opacity-40">{icon}</span>
+      <span>{label}</span>
+      {reason && <span className="ml-auto text-slate-700 text-[10px] shrink-0">{reason}</span>}
+    </div>
+  )
+}
+
 function MenuDivider() {
   return <div className="border-t border-slate-700/50 my-0.5" />
 }
@@ -129,9 +139,10 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       {/* ── Attack: weapons ───────────────────────────────────────── */}
       {!ship.isDestroyed && phase === 'attack' && isCurrentActor && (
         <>
-          {hasUnfiredOffensiveTurret(ship) && (
-            <MenuItem icon="🎯" label="Attack…" onClick={() => open('attack', { shipId: targetId })} />
-          )}
+          {hasUnfiredOffensiveTurret(ship)
+            ? <MenuItem icon="🎯" label="Attack…" onClick={() => open('attack', { shipId: targetId })} />
+            : <MenuItemDisabled icon="🎯" label="Attack…" reason="All turrets fired" />
+          }
           <MenuDivider />
         </>
       )}
