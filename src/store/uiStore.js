@@ -104,6 +104,13 @@ const useUiStore = create((set) => ({
 
   /** Clear the active movement animation. */
   clearMovementAnimation: () => set({ movementAnimation: null }),
+
+  // === AUDIO ===
+  /** Whether in-app sound effects are enabled. */
+  audioEnabled: true,
+
+  /** Toggle sound effects on/off. */
+  toggleAudio: () => set((s) => ({ audioEnabled: !s.audioEnabled })),
 }))
 
 export { useUiStore }
