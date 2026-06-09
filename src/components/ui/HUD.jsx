@@ -39,6 +39,8 @@ export function HUD() {
   const canRedo             = useBattleStore((s) => s.redoStack.length > 0)
   const gotoScreen          = useUiStore((s) => s.gotoScreen)
   const openModal           = useUiStore((s) => s.openModal)
+  const audioEnabled        = useUiStore((s) => s.audioEnabled)
+  const toggleAudio         = useUiStore((s) => s.toggleAudio)
   const dogfights           = useBattleStore((s) => s.dogfights)
   const boardings           = useBattleStore((s) => s.boardings)
 
@@ -160,6 +162,19 @@ export function HUD() {
             className="flex-1 bg-slate-800/80 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
           >
             💾 SAVE
+          </button>
+        </Tooltip>
+        <Tooltip label={audioEnabled ? 'Mute sound effects' : 'Unmute sound effects'} position="bottom">
+          <button
+            onClick={toggleAudio}
+            aria-label={audioEnabled ? 'Mute sound effects' : 'Unmute sound effects'}
+            className={`bg-slate-800/80 border font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors ${
+              audioEnabled
+                ? 'border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500'
+                : 'border-slate-700 text-slate-700 hover:text-slate-500'
+            }`}
+          >
+            {audioEnabled ? '🔊' : '🔇'}
           </button>
         </Tooltip>
         <Tooltip label="Return to main menu" position="bottom">

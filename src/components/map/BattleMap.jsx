@@ -8,6 +8,7 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { useCanvasRenderer, HEX_SIZE } from './useCanvasRenderer.js'
 import { useCanvasEffects } from './useCanvasEffects.js'
+import { useAudioEngine }   from '../../hooks/useAudioEngine.js'
 import { useMapInteraction } from './useMapInteraction.js'
 import { useShipHover } from './useShipHover.js'
 import { ShipTooltip } from './ShipTooltip.jsx'
@@ -34,6 +35,7 @@ export function BattleMap() {
 
   useCanvasRenderer({ canvasRef, offset, zoom })
   useCanvasEffects({ effectsCanvasRef, offset, zoom })
+  useAudioEngine()
 
   const combinedMouseMove = useCallback((e) => { onMouseMove(e); onHoverMove(e) }, [onMouseMove, onHoverMove])
   const combinedMouseDown = useCallback((e) => { onMouseDown(e); onHoverDown(e) }, [onMouseDown, onHoverDown])
