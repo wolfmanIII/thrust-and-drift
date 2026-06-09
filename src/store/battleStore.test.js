@@ -642,7 +642,9 @@ describe('resolveMovement', () => {
     expect(useBattleStore.getState().ships[0].position).toEqual({ q: 4, r: -2 })
   })
 
-  it('missiles move and decrement thrustRemaining', () => {
+  it('missiles apply guidance toward target and decrement thrustRemaining', () => {
+    // Missile at {q:1,r:0} vector {q:1,r:0}, target at {q:5,r:0} stationary.
+    // Guidance: idealQ=4, deltaQ=3, deltaMag=3, scale=1 → guided vector {q:4,r:0} → pos {q:5,r:0}.
     useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#fff')
     useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'B' }), { q: 5, r: 0 }, 'npc',     '#f00')
     const [att, tgt] = useBattleStore.getState().ships
@@ -650,8 +652,40 @@ describe('resolveMovement', () => {
     const missileId = useBattleStore.getState().missiles[0].id
     useBattleStore.getState().resolveMovement()
     const missile = useBattleStore.getState().missiles.find(m => m.id === missileId)
-    expect(missile.position).toEqual({ q: 2, r: 0 })
+    expect(missile.position).toEqual({ q: 5, r: 0 })
+    expect(missile.vector).toEqual({ q: 4, r: 0 })
     expect(missile.thrustRemaining).toBe(9)
+  })
+
+  it('missile guidance is partial when correction exceeds GUIDANCE_THRUST per round', () => {
+    // Missile at {q:0,r:0} vector {q:1,r:0}, target at {q:10,r:0} stationary.
+    // idealQ=10, deltaQ=9, deltaMag=9, scale=3/9=1/3 → guided vector {q:1+round(3),r:0}={q:4,r:0} → pos {q:4,r:0}.
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q:  0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 10, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 1, { q: 0, r: 0 }, { q: 1, r: 0 })
+    const missileId = useBattleStore.getState().missiles[0].id
+    useBattleStore.getState().resolveMovement()
+    const missile = useBattleStore.getState().missiles.find(m => m.id === missileId)
+    expect(missile.vector).toEqual({ q: 4, r: 0 })
+    expect(missile.position).toEqual({ q: 4, r: 0 })
+  })
+
+  it('missile with thrustRemaining 0 drifts without guidance', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 1, { q: 0, r: 0 }, { q: 2, r: 0 })
+    const missileId = useBattleStore.getState().missiles[0].id
+    useBattleStore.setState({
+      missiles: useBattleStore.getState().missiles.map(m =>
+        m.id === missileId ? { ...m, thrustRemaining: 0 } : m
+      ),
+    })
+    useBattleStore.getState().resolveMovement()
+    const missile = useBattleStore.getState().missiles.find(m => m.id === missileId)
+    // thrustRemaining 0 → no guidance, drifts on original vector; 0-1 = -1 → filtered out
+    expect(missile).toBeUndefined()
   })
 
   it('removes missiles with thrustRemaining reaching -1 after decrement', () => {

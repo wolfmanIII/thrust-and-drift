@@ -20,6 +20,40 @@ import { useUiStore } from './uiStore.js'
 function pairKey(id1, id2) { return [id1, id2].sort().join('_') }
 
 /**
+ * Max hex-distance of vector correction a missile may apply per round.
+ * // Traveller Companion p.176 — Standard missile Thrust 10
+ */
+const MISSILE_GUIDANCE_THRUST = 3
+
+/**
+ * Compute the guided vector for a missile homing toward its target.
+ * Aims for the target's predicted next position (target.position + target.vector).
+ * Applies up to MISSILE_GUIDANCE_THRUST hex-distance of delta-v per round.
+ * Returns the current vector unchanged if thrustRemaining is 0 or target is gone.
+ * @param {{ vector: {q:number,r:number}, position: {q:number,r:number}, thrustRemaining: number }} missile
+ * @param {{ position: {q:number,r:number}, vector: {q:number,r:number} }|undefined} targetShip
+ * @returns {{ q:number, r:number }}
+ */
+function computeMissileGuidance(missile, targetShip) {
+  if (missile.thrustRemaining <= 0 || !targetShip) return missile.vector
+
+  const targetNext = hexAdd(targetShip.position, targetShip.vector)
+  const idealQ     = targetNext.q - missile.position.q
+  const idealR     = targetNext.r - missile.position.r
+  const deltaQ     = idealQ - missile.vector.q
+  const deltaR     = idealR - missile.vector.r
+
+  const deltaMag = hexDistance({ q: 0, r: 0 }, { q: deltaQ, r: deltaR })
+  if (deltaMag === 0) return missile.vector
+
+  const scale = Math.min(1, MISSILE_GUIDANCE_THRUST / deltaMag)
+  return {
+    q: missile.vector.q + Math.round(deltaQ * scale),
+    r: missile.vector.r + Math.round(deltaR * scale),
+  }
+}
+
+/**
  * @typedef {'setup'|'initiative'|'acceleration'|'movement'|'attack'|'actions'|'end'} BattlePhase
  */
 
@@ -478,11 +512,16 @@ const useBattleStore = create((set, get) => {
       ...sh,
       position: applyMovement(sh.position, sh.vector),
     }))
-    const movedMissiles = missiles.map((m) => ({
-      ...m,
-      position: applyMovement(m.position, m.vector),
-      thrustRemaining: m.thrustRemaining - 1,
-    }))
+    const movedMissiles = missiles.map((m) => {
+      const targetShip  = ships.find((s) => s.id === m.target)
+      const guidedVector = computeMissileGuidance(m, targetShip)
+      return {
+        ...m,
+        vector:           guidedVector,
+        position:         applyMovement(m.position, guidedVector),
+        thrustRemaining:  m.thrustRemaining - 1,
+      }
+    })
 
     const entries = movedShips.map((sh) => makeLogEntry({
       round,
