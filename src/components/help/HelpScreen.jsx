@@ -174,6 +174,7 @@ export function HelpScreen() {
           <KV k="Double-click" v="Centre the map on that hex." />
           <KV k="Left-click token" v="Select the ship (highlights it)." />
           <KV k="Right-click hex" v="Open context menu — actions depend on what is in the hex and the current phase." />
+          <KV k="🔊/🔇 button" v="Audio toggle (HUD, top-left) — enables or mutes procedural sound effects (laser, impact, thrust plume, missile launch)." />
           <Note>Context menu actions are phase-gated and initiative-gated. Only options valid for the current phase are shown — and in the Acceleration, Attack, and Actions phases, combat actions are shown only for the ship whose turn it currently is. Right-clicking another ship shows "Not this ship's turn".</Note>
 
           <Sub title="BASIC MODE VIEW">
@@ -489,7 +490,7 @@ export function HelpScreen() {
 
           <Sub title="TRIGGERING">
             <p>Right-click the attacker ship → <span className="text-slate-200">⚔ Board [target]…</span></p>
-            <p>Visible only when: distance ≤ 1, attacker thrust ≥ target thrust (or target M-Drive disabled), different factions.</p>
+            <p>Visible only when: distance ≤ 1, target not in an active dogfight, attacker thrust ≥ target thrust (or target M-Drive disabled), different factions.</p>
           </Sub>
 
           <Sub title="PHASE 2 — CONTACT">
@@ -519,7 +520,7 @@ export function HelpScreen() {
             <KV k="Ship destroyed" v="Target destroyed by internal damage during Conflict." />
           </Sub>
 
-          <Note>Active boardings show a ⚔ BOARDING badge in the HUD. Click it to reopen the current phase modal. Ships in a boarding do not participate in the standard Attack phase.</Note>
+          <Note>Active boardings show a ⚔ BOARDING badge in the HUD. Click it to reopen the current phase modal. Ships in a boarding do not participate in the standard Attack phase. A ship already in a dogfight cannot be boarded — it must exit the dogfight first.</Note>
         </Section>
 
       </main>

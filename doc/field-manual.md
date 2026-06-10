@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.9.4** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.12.1** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -97,6 +97,7 @@ The battle map is a **flat-top hex grid**. All interaction is mouse-driven.
 | **Double-click** | Centre the map on that hex. |
 | **Left-click token** | Select the ship (highlights it). |
 | **Right-click hex** | Open context menu — actions depend on the hex content and the current phase. |
+| **🔊/🔇 (HUD)** | Audio toggle — enables or mutes procedural sound effects (laser fire, impacts, thrust plume, missile launch). No audio files required. |
 
 > **Note:** Context menu actions are phase-gated **and initiative-gated**.
 > Only options valid for the current phase are shown — and in the Acceleration,
@@ -743,6 +744,7 @@ The option is visible only when:
 
 ```text
 distance(attacker, target) ≤ 1  (Adjacent or Close)
+AND target.inDogfight === null  (target not in an active dogfight)
 AND attacker.thrust ≥ target.thrust
     OR target M-Drive critical is disabled
 AND different factions
@@ -832,6 +834,7 @@ Click the phase button to reopen the relevant modal at any time.
 ### 15.7 Boarding and Normal Combat
 
 - Ships **inBoarding** do not participate in the standard Attack phase
+- A ship in an active **dogfight** cannot be targeted for boarding — it must exit the dogfight first
 - A ship with **Forced Linkage active** cannot use thrust to manoeuvre
 - If the target is destroyed during Conflict, resolve with outcome **Ship destroyed**
 - Normal rounds continue in parallel — the GM can advance phases and resolve the boarding on its own timeline, as with dogfights
