@@ -1662,3 +1662,52 @@ describe('basic mode — advancePhase skips movement', () => {
     expect(useBattleStore.getState().phase).toBe('movement')
   })
 })
+
+describe('inBoarding guards — dogfight and passing encounters', () => {
+  it('startDogfight is blocked when one of the ships is in boarding', () => {
+    useBattleStore.getState().addShip(makeProfile({ name: 'A' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ name: 'B' }), { q: 0, r: 0 }, 'npc',     '#f00')
+    const [a, b] = useBattleStore.getState().ships.map((s) => s.id)
+    useBattleStore.setState({
+      ships: useBattleStore.getState().ships.map((s) =>
+        s.id === a ? { ...s, inBoarding: 'boarding-99' } : s
+      ),
+      boardings: [{ id: 'boarding-99', attackerId: a, defenderId: b, phase: 'contact', outcome: null }],
+    })
+    const before = useBattleStore.getState().dogfights.length
+    useBattleStore.getState().startDogfight([a, b])
+    expect(useBattleStore.getState().dogfights.length).toBe(before)
+  })
+
+  it('passingEncounters excludes ships in boarding', () => {
+    useBattleStore.getState().addShip(makeProfile({ name: 'A', thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ name: 'B', thrust: 4 }), { q: 3, r: 0 }, 'npc',     '#f00')
+    const [a] = useBattleStore.getState().ships.map((s) => s.id)
+    useBattleStore.setState({
+      ships: useBattleStore.getState().ships.map((s) =>
+        s.id === a ? { ...s, vector: { q: 3, r: 0 }, inBoarding: 'boarding-99' } : s
+      ),
+    })
+    useBattleStore.getState().resolveMovement()
+    expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
+  })
+})
+
+describe('resolveMovement — basic mode guard', () => {
+  it('is a no-op in basic mode', () => {
+    useBattleStore.setState({ combatMode: 'basic' })
+    useBattleStore.getState().addShip(makeProfile({ name: 'A' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ name: 'B' }), { q: 2, r: 0 }, 'npc',     '#f00')
+    const [a] = useBattleStore.getState().ships.map((s) => s.id)
+    useBattleStore.setState({
+      ships: useBattleStore.getState().ships.map((s) =>
+        s.id === a ? { ...s, vector: { q: 2, r: 0 } } : s
+      ),
+    })
+    const posBefore = useBattleStore.getState().ships.find((s) => s.id === a).position
+    useBattleStore.getState().resolveMovement()
+    const posAfter = useBattleStore.getState().ships.find((s) => s.id === a).position
+    expect(posAfter).toEqual(posBefore)
+    expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
+  })
+})
