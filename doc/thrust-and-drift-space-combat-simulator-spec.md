@@ -1411,6 +1411,17 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - **Fix UX** — `ContextMenu`: Attack sempre visibile (disabled con reason se turret esauriti); `ActionModal`: ANOTHER ACTION resetta tutta la selezione.
 - 674 test (+2 missile guidance)
 
+### 13.8d Versione 1.12.1 — Conflict Resolution Fixes ✅ COMPLETATA
+
+**Incompatibilità di stato navi — guard mancanti:**
+
+- `detectDogfightGroups` — esclude navi con `inBoarding !== null` (fisicamente ancorate, non possono manovrare per ingaggio ravvicinato)
+- `resolveMovement` `passingEncounters` loop — salta coppie dove almeno una nave è in abbordaggio (vettore effettivamente nullo produce falsi positivi in `segmentMinDistance`)
+- `startDogfight` predicate — rifiuta qualsiasi partecipante con `inBoarding !== null` (doppia protezione dopo `detectDogfightGroups`)
+- `BoardingSetupModal.canBoard` — esclude bersagli con `inDogfight !== null` (nave in micro-round dogfight non può ricevere boarding)
+- `resolveMovement` — early return esplicito quando `combatMode === 'basic'`; il contratto della funzione è ora esplicito e protegge da regressioni future (in modalità base il movimento è gestito da `advancePhase` via range bands)
+- 679 test (+5) — `useDogfightDetection`: 2 test `inBoarding` exclusion; `battleStore`: 3 test guard inBoarding/basic mode
+
 ### 13.9 Versione 2.0 — Ostacoli Ambientali
 
 Asteroid field, debris field, gravity well (zona proibita), nebula.

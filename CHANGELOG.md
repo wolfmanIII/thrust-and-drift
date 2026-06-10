@@ -6,6 +6,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.12.1] — 2026-06-10
+
+### Fixed
+
+- **`inBoarding` guard in dogfight detection** — `detectDogfightGroups` now excludes ships with `inBoarding !== null` (physically anchored, cannot maneuver into close engagement); `resolveMovement` `passingEncounters` loop now skips pairs where either ship is in boarding (anchored ship produces false positives in trajectory intersection); `startDogfight` predicate now rejects any participant with `inBoarding !== null` as an explicit double guard.
+- **`inDogfight` guard in `BoardingSetupModal.canBoard`** — targets with `inDogfight !== null` are excluded from valid boarding targets; a ship actively maneuvering in a dogfight cannot be boarded.
+- **`resolveMovement` no-op in basic mode** — explicit early return when `combatMode === 'basic'`; movement is managed via range bands in `advancePhase`. Previously unreachable through normal flow but lacked an explicit contract, making the function unsafe to call directly in tests or future refactors.
+
+### Docs
+
+- **`doc/obstacles-system-design.md` §14** — new section: obstacle × dogfight interaction rules. Obstacle damage applied once per macroscopic round regardless of micro-rounds completed; gravity well impact auto-terminates active dogfight before applying atmospheric damage; obstacle placement during active dogfight applies at next `resolveMovement`.
+
+### Tests
+
+- 679 tests (+5) — `useDogfightDetection`: 2 new tests for `inBoarding` exclusion in `detectDogfightGroups`; `battleStore`: `startDogfight` blocked when ship in boarding, `passingEncounters` excludes boarding ships, `resolveMovement` no-op in basic mode.
+
+---
+
 ## [1.12.0] — 2026-06-09
 
 ### Added

@@ -19,8 +19,9 @@ La sfida implementativa è che il dogfight può coesistere con il combattimento 
 
 Rilevamento automatico al termine della fase Movimento:
 
-```
+```text
 per ogni coppia (nave_A, nave_B) in ships dove nave_A.faction ≠ nave_B.faction:
+  se nave_A.inBoarding !== null o nave_B.inBoarding !== null → escludi (fisicamente ancorata)
   se hexDistance(nave_A.position, nave_B.position) === 0:
     → possibile dogfight
 ```
