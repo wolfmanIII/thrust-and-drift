@@ -6,6 +6,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.12.2] — 2026-06-10
+
+### Fixed
+
+- **`PassingAttackModal` single-fire bug** — encounters now track `firedA`/`firedB` flags per side; `markPassingEncounterFired(id, side)` store action updates the flag and auto-dismisses only when both sides have resolved; buttons show `✓ FIRED` state and are disabled after use. Previously `handleOpenFire` dismissed the entire encounter before opening `AttackModal`, making it impossible for the second ship to fire.
+- **Intermittent audio not playing** — `useAudioEngine` subscriber made `async`; `ctx.resume()` is now `await`ed before scheduling audio nodes. Browser auto-suspends `AudioContext` after ~30 s of inactivity; without `await`, sounds were scheduled on a still-suspended context and silently dropped.
+- **`MISSILE_GUIDANCE_THRUST` incorrect value** — corrected from `3` to `10` (MgT2e CRB p.162: standard missiles have Thrust 10). At `3`, missiles were trivially evadable; correction aligns with RAW.
+
+### Tests
+
+- 681 tests (+2) — `PassingAttackModal`: `firedA`/`firedB` flag assertions, auto-dismiss on both-fired, disabled button label; `battleStore`: missile guidance partial correction test target moved to q:20 to produce delta > 10.
+
+---
+
 ## [1.12.1] — 2026-06-10
 
 ### Fixed

@@ -19,7 +19,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Attack resolution** | 4-step flow: weapon/target config → 2D6 roll → damage → critical; per-turret firing limit (CRB p.164) — each turret fires once per round, slot badge (T1, T2…) shown in weapon list |
 | **Reactions (CRB p.171)** | Defender reacts before each attack roll: Evasive Action (1 thrust → DM −Pilot skill), Point Defence (laser turret → Gunner check, removes missiles), Disperse Sand (sandcaster turret → Gunner check, +1D+Effect armour vs laser); player ships enter physical dice manually |
 | **Missile launch** | Missile Rack selectable directly in Attack modal — count stepper + 🚀 LAUNCH SALVO (no DM roll); salvo token inherits launcher vector; rotates to face velocity direction |
-| **Missile guidance** | Each round in the movement phase, missiles home toward their target's predicted next position; up to 3 hex/round delta-v correction (TC p.176 — Smart guidance); drifts when fuel exhausted |
+| **Missile guidance** | Each round in the movement phase, missiles home toward their target's predicted next position; up to 10 hex/round delta-v correction (MgT2e CRB p.162 — Thrust 10 standard missile); drifts when 10-round fuel exhausted |
 | **Sound effects** | Procedural synthesis via Web Audio API — laser, impact, critical, missile launch, thrust plume; 🔊/🔇 mute toggle in HUD; no audio files required |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in on all roll steps (attack, damage, critical location, extra damage, reactions, crew actions, initiative); NPC ships auto-roll |
 | **Destroyed ships** | Hull = 0 → `isDestroyed` flag; token rendered at 35% opacity with ☠ badge; all combat actions blocked ("WRECK — no actions available"); ship skipped in initiative cycling; GM removes wreck manually |
@@ -149,7 +149,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-679 tests across utils, Zustand stores, hooks, and UI components.
+681 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 

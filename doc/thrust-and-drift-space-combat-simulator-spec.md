@@ -1357,7 +1357,7 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 
 - `utils/hex.js` — `segmentMinDistance(a0, a1, b0, b1)`: distanza minima tra due traiettorie lineari simultanee; ricerca analitica O(1) sui breakpoint dei componenti cube (dq, dr, ds)
 - `battleStore` — `resolveMovement` rileva le coppie ostili in transito prima di aggiornare le posizioni; risultati in `passingEncounters[]` (escluse: stessa fazione, navi in dogfight, navi che finiscono nello stesso hex); `dismissPassingEncounter(id)` rimuove l'entry dopo la risoluzione
-- `PassingAttackModal` — mostra gli incontri uno alla volta; per ogni coppia il GM sceglie quale nave spara (apre `AttackModal` pre-configurato con `shipId`) oppure passa; il `rangeBand` visualizzato è quello della distanza minima
+- `PassingAttackModal` — mostra gli incontri uno alla volta; per ogni coppia entrambe le navi possono sparare indipendentemente; l'incontro si chiude solo dopo che entrambi i lati hanno agito (o passato); i flag `firedA`/`firedB` sull'encounter tracciano chi ha già sparato; il pulsante mostra `✓ FIRED` ed è disabilitato dopo l'uso; `markPassingEncounterFired(id, side)` in battleStore; il `rangeBand` visualizzato è quello della distanza minima
 - `passingEncounters` non è incluso negli snapshot undo/redo — è stato transitorio di UI
 
 ### 13.7 Versione 1.5 — Abbordaggio ✅ COMPLETATA
@@ -1406,7 +1406,7 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 
 ### 13.8c Versione 1.12.0 — Missile Guidance + Audio ✅ COMPLETATA
 
-- **Missile guidance** — `computeMissileGuidance` in `battleStore.resolveMovement`: ogni round i missili con `thrustRemaining > 0` aggiornano il proprio vettore puntando alla posizione predetta del target (`target.pos + target.vector`), fino a `MISSILE_GUIDANCE_THRUST = 3` hex/round di delta-v. Senza thrust → deriva.
+- **Missile guidance** — `computeMissileGuidance` in `battleStore.resolveMovement`: ogni round i missili con `thrustRemaining > 0` aggiornano il proprio vettore puntando alla posizione predetta del target (`target.pos + target.vector`), fino a `MISSILE_GUIDANCE_THRUST = 10` hex/round di delta-v (MgT2e CRB p.162 — Thrust 10 missile standard). Senza thrust → deriva.
 - **Effetti sonori procedurali** — `audioSynth.js` (sintesi Web Audio API), `useAudioEngine.js` (singleton + subscriber), `effectQueue.subscribeEffects`, `uiStore.audioEnabled` + `toggleAudio`, HUD 🔊/🔇.
 - **Fix UX** — `ContextMenu`: Attack sempre visibile (disabled con reason se turret esauriti); `ActionModal`: ANOTHER ACTION resetta tutta la selezione.
 - 674 test (+2 missile guidance)
@@ -1421,6 +1421,13 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - `BoardingSetupModal.canBoard` — esclude bersagli con `inDogfight !== null` (nave in micro-round dogfight non può ricevere boarding)
 - `resolveMovement` — early return esplicito quando `combatMode === 'basic'`; il contratto della funzione è ora esplicito e protegge da regressioni future (in modalità base il movimento è gestito da `advancePhase` via range bands)
 - 679 test (+5) — `useDogfightDetection`: 2 test `inBoarding` exclusion; `battleStore`: 3 test guard inBoarding/basic mode
+
+### 13.8e Versione 1.12.2 — Bugfix In-App Testing ✅ COMPLETATA
+
+- **`PassingAttackModal` single-fire** — aggiunto `firedA: false, firedB: false` all'encounter; `markPassingEncounterFired(id, side)` store action; auto-dismiss solo quando entrambi i flag sono `true`; pulsante `✓ FIRED` disabilitato dopo uso.
+- **Audio intermittente** — `useAudioEngine` subscriber reso `async`; `await ctx.resume()` prima di schedulare audio node; previene silent-drop quando il browser auto-sospende `AudioContext` dopo ~30 s di inattività.
+- **`MISSILE_GUIDANCE_THRUST` corretto da 3 a 10** — MgT2e CRB p.162: missile standard Thrust 10; con valore 3 i missili erano banalmente eludibili.
+- 681 test (+2) — `PassingAttackModal`: flag assertions, auto-dismiss, disabled label; `battleStore`: missile guidance partial correction (target spostato a q:20 per produrre delta > 10).
 
 ### 13.9 Versione 2.0 — Ostacoli Ambientali
 
@@ -1482,10 +1489,8 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 
 - Punta alla posizione predetta del target: `targetNext = hexAdd(target.position, target.vector)`
 - Calcola il vettore ideale: `ideal = targetNext - missile.position`
-- Calcola il delta rispetto al vettore corrente; lo scala a `MISSILE_GUIDANCE_THRUST = 3` hex/round massimo
+- Calcola il delta rispetto al vettore corrente; lo scala a `MISSILE_GUIDANCE_THRUST = 10` hex/round massimo (MgT2e CRB p.162 — Thrust 10 missile standard)
 - Con `thrustRemaining = 0` o target assente → vettore invariato (deriva)
-
-Il valore `3` rispecchia una guida attiva moderata — sufficiente a inseguire bersagli tipici (thrust 2–4), possibile da evadere con manovre estreme.
 
 ---
 
