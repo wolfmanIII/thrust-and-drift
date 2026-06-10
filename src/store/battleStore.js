@@ -190,12 +190,13 @@ const useBattleStore = create((set, get) => {
    * Called internally before every user-facing mutation.
    */
   pushHistory: () => {
-    const { ships, missiles, dogfights, boardings, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, rangeBands, round, phase, initiativeOrder, currentActorIndex } = get()
     const snapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
       dogfights: structuredClone(dogfights),
       boardings: structuredClone(boardings),
+      rangeBands: { ...rangeBands },
       round,
       phase,
       initiativeOrder: [...initiativeOrder],
@@ -210,12 +211,13 @@ const useBattleStore = create((set, get) => {
     useUiStore.getState().clearMovementAnimation()
     const { undoStack, redoStack, log } = get()
     if (undoStack.length === 0) return
-    const { ships, missiles, dogfights, boardings, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, rangeBands, round, phase, initiativeOrder, currentActorIndex } = get()
     const redoSnapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
       dogfights: structuredClone(dogfights),
       boardings: structuredClone(boardings),
+      rangeBands: { ...rangeBands },
       round, phase,
       initiativeOrder: [...initiativeOrder],
       currentActorIndex,
@@ -236,12 +238,13 @@ const useBattleStore = create((set, get) => {
     useUiStore.getState().clearMovementAnimation()
     const { redoStack, undoStack, log } = get()
     if (redoStack.length === 0) return
-    const { ships, missiles, dogfights, boardings, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, rangeBands, round, phase, initiativeOrder, currentActorIndex } = get()
     const undoSnapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
       dogfights: structuredClone(dogfights),
       boardings: structuredClone(boardings),
+      rangeBands: { ...rangeBands },
       round, phase,
       initiativeOrder: [...initiativeOrder],
       currentActorIndex,

@@ -1638,6 +1638,15 @@ describe('applyBasicMovement', () => {
     const b = useBattleStore.getState().ships.find((s) => s.id === bId)
     expect(b.thrustUsedThisRound).toBe(0)
   })
+
+  it('undo restores rangeBands after applyBasicMovement', () => {
+    const [aId, bId] = setupShips('Very Long')
+    const key = [aId, bId].sort().join('_')
+    useBattleStore.getState().applyBasicMovement(aId, bId, 'approach', 25)
+    expect(useBattleStore.getState().rangeBands[key]).toBe('Long')
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().rangeBands[key]).toBe('Very Long')
+  })
 })
 
 describe('basic mode — advancePhase skips movement', () => {
