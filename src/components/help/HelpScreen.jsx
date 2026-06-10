@@ -288,10 +288,10 @@ export function HelpScreen() {
           <p>If no encounters or dogfights are triggered, the phase advances to Attack automatically.</p>
           <Sub title="SHIPS THAT PASS IN THE NIGHT">
             <p>If two hostile ships cross within <span className="text-slate-200">Short range (≤ 2 hexes)</span> during movement — even if their final positions are far apart — the system detects the closest approach and opens the <span className="text-slate-200">Passing Encounter</span> window.</p>
-            <KV k="[Ship A] FIRES" v="Opens the Attack Modal pre-configured for that attacker." />
-            <KV k="[Ship B] FIRES" v="Opens the Attack Modal pre-configured for that attacker." />
-            <KV k="PASS" v="Skip the opportunity with no attack." />
-            <p>Multiple encounters resolve sequentially. Ships ending in the same hex trigger the Dogfight system instead.</p>
+            <KV k="[Ship A] FIRES" v="Opens the Attack Modal for Ship A. Button shows ✓ FIRED after resolving — the encounter stays open so Ship B can still fire." />
+            <KV k="[Ship B] FIRES" v="Opens the Attack Modal for Ship B. Button shows ✓ FIRED after resolving." />
+            <KV k="PASS" v="Dismiss the encounter immediately — no attacks for either ship." />
+            <p>Both ships can fire independently. The encounter closes once both have resolved. Multiple encounters resolve sequentially. Ships ending in the same hex trigger the Dogfight system instead.</p>
           </Sub>
           <Note>In Basic mode this phase is skipped automatically.</Note>
         </Section>
@@ -334,6 +334,7 @@ export function HelpScreen() {
 
           <Sub title="LAUNCHING MISSILES">
             <p>In the Attack modal, select <span className="text-slate-200">Missile Rack</span> from the weapon list, choose a target, adjust salvo count (1–12), then click Launch. The salvo spawns as a token inheriting the launcher's velocity. No dice roll required at launch.</p>
+            <p>Missiles have <span className="text-slate-200">Thrust 10</span> and <span className="text-slate-200">10 rounds of guided flight</span> (CRB p.162). Each round in the Movement phase they home toward the target's predicted next position. After fuel is exhausted the salvo drifts on its last vector.</p>
           </Sub>
 
           <Sub title="PER-TURRET FIRING LIMIT">

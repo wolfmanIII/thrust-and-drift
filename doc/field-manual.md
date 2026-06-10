@@ -287,12 +287,11 @@ For each encounter the GM sees:
 
 - Both ship names and faction colours
 - Closest approach distance and range band
-- **[Ship A] FIRES** / **[Ship B] FIRES** — opens the standard Attack Modal
-  pre-set to that attacker; the GM can adjust weapon and target freely
-- **PASS — LET THEM GO** — skips the opportunity with no attack
+- **[Ship A] FIRES** — opens the Attack Modal pre-set to Ship A; button shows **✓ FIRED** after resolving
+- **[Ship B] FIRES** — opens the Attack Modal pre-set to Ship B; button shows **✓ FIRED** after resolving
+- **PASS — LET THEM GO** — dismisses the encounter immediately with no attack for either ship
 
-Multiple encounters are resolved sequentially; the window closes automatically
-when all are dismissed.
+Both ships may fire independently. The encounter window closes automatically once both have either fired or the GM passes. Multiple encounters are resolved sequentially.
 
 > **Note:** Ships that end in the same hex trigger the **Dogfight** system
 > instead and are handled at the movement → attack phase transition.
@@ -374,6 +373,11 @@ The salvo spawns as a missile token on the map, inheriting the launching ship's
 current velocity. Each round in the Movement phase it advances toward the target
 using its remaining thrust. A **LAUNCH** burst animation plays on the launching
 ship's hex.
+
+Missiles have **Thrust 10** and **10 rounds of guided flight** *(MgT2e CRB p.162 —
+standard missiles)*. Each round they apply up to Thrust 10 of delta-v to home toward
+the target's predicted next position. After fuel is exhausted the salvo drifts on its
+last vector until it either reaches the target or is destroyed.
 
 > The launching turret is marked as fired. Missile Rack entries disappear from
 > the Attack weapon list after launch, consistent with the per-turret limit.
