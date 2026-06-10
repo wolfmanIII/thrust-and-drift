@@ -480,7 +480,9 @@ const useBattleStore = create((set, get) => {
 
   /** Move all ships and missiles by their current vector (movement phase). */
   resolveMovement: wh(() => {
-    const { ships, missiles, round } = get()
+    const { ships, missiles, round, combatMode } = get()
+    // Basic mode has no hex map — movement is managed via range bands in advancePhase.
+    if (combatMode === 'basic') return
 
     // Detect "ships that pass in the night" before committing new positions.
     // // Traveller Companion p.172 — ships passing within Short range during movement
@@ -491,6 +493,7 @@ const useBattleStore = create((set, get) => {
         const b = ships[j]
         if (a.faction === b.faction) continue
         if (a.inDogfight || b.inDogfight) continue
+        if (a.inBoarding || b.inBoarding) continue
         const a1 = hexAdd(a.position, a.vector)
         const b1 = hexAdd(b.position, b.vector)
         const minDist  = segmentMinDistance(a.position, a1, b.position, b1)
@@ -1024,7 +1027,13 @@ const useBattleStore = create((set, get) => {
    * Create a dogfight group and mark all participating ships.
    * @param {string[]} shipIds  — must contain ≥ 2 IDs
    */
-  startDogfight: wh((shipIds) => shipIds.length >= 2, (shipIds) => {
+  startDogfight: wh(
+    (shipIds) => {
+      if (shipIds.length < 2) return false
+      const { ships } = get()
+      return !ships.some((s) => shipIds.includes(s.id) && s.inBoarding !== null)
+    },
+    (shipIds) => {
     const { ships, round, phase } = get()
     const group = {
       id: uuidv7(),

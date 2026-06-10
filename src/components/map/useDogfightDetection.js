@@ -17,7 +17,7 @@ import { hexDistance } from '../../utils/hex.js'
  * @returns {{ shipIds: string[] }[]}
  */
 export function detectDogfightGroups(ships) {
-  const active = ships.filter((s) => !s.inDogfight)
+  const active = ships.filter((s) => !s.inDogfight && !s.inBoarding)
 
   // Bucket ships by hex position
   const byHex = new Map()

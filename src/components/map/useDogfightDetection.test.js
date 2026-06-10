@@ -3,8 +3,8 @@ import { renderHook, act } from '@testing-library/react'
 import { detectDogfightGroups, useDogfightDetection } from './useDogfightDetection.js'
 import { useBattleStore } from '../../store/battleStore.js'
 
-function ship(id, q, r, faction, inDogfight = null) {
-  return { id, position: { q, r }, faction, inDogfight }
+function ship(id, q, r, faction, inDogfight = null, inBoarding = null) {
+  return { id, position: { q, r }, faction, inDogfight, inBoarding }
 }
 
 // ── useDogfightDetection hook ────────────────────────────────────────────────
@@ -145,5 +145,25 @@ describe('detectDogfightGroups', () => {
       ship('c', 5, 5, 'players'),
     ]
     expect(detectDogfightGroups(ships)).toHaveLength(1)
+  })
+
+  it('ignores ships with inBoarding in dogfight detection', () => {
+    const ships = [
+      ship('a', 0, 0, 'players', null, 'boarding-1'),
+      ship('b', 0, 0, 'npc',     null, null),
+    ]
+    expect(detectDogfightGroups(ships)).toEqual([])
+  })
+
+  it('detects dogfight only among free ships in the same hex', () => {
+    const ships = [
+      ship('a', 0, 0, 'players', null, null),
+      ship('b', 0, 0, 'npc',     null, null),
+      ship('c', 0, 0, 'npc',     null, 'boarding-2'),
+    ]
+    const groups = detectDogfightGroups(ships)
+    expect(groups).toHaveLength(1)
+    expect(groups[0].shipIds).toEqual(expect.arrayContaining(['a', 'b']))
+    expect(groups[0].shipIds).not.toContain('c')
   })
 })

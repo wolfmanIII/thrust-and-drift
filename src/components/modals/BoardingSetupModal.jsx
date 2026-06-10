@@ -20,6 +20,7 @@ import { hexDistance }    from '../../utils/hex.js'
  */
 function canBoard(attacker, defender) {
   if (attacker.faction === defender.faction) return false
+  if (defender.inDogfight) return false
   if (hexDistance(attacker.position, defender.position) > 1) return false
   const mDriveDisabled = defender.criticalHits?.some((c) => c.system === 'm-drive' && c.disabled)
   if (!mDriveDisabled && attacker.profile.thrust < defender.profile.thrust) return false
