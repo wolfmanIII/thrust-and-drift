@@ -501,7 +501,7 @@ const useBattleStore = create((set, get) => {
         // Only flag when they pass within Short range but don't end in the same hex
         // (same-hex landings are handled by dogfight detection at movement→attack transition).
         if (minDist <= 2 && finalDist > 0) {
-          encounters.push({ id: uuidv7(), shipAId: a.id, shipBId: b.id, minDistance: minDist })
+          encounters.push({ id: uuidv7(), shipAId: a.id, shipBId: b.id, minDistance: minDist, firedA: false, firedB: false })
         }
       }
     }
@@ -546,6 +546,26 @@ const useBattleStore = create((set, get) => {
   /** Remove a single passing encounter by id (GM dismissed it via PassingAttackModal). */
   dismissPassingEncounter: (id) => {
     set((s) => ({ passingEncounters: s.passingEncounters.filter((e) => e.id !== id) }))
+  },
+
+  /**
+   * Mark one side of a passing encounter as having fired.
+   * Auto-dismisses the encounter once both sides are resolved.
+   * @param {string} id - encounter id
+   * @param {'A'|'B'} side - which ship fired
+   */
+  markPassingEncounterFired: (id, side) => {
+    set((s) => {
+      const updated = s.passingEncounters.map((e) => {
+        if (e.id !== id) return e
+        return { ...e, firedA: side === 'A' ? true : e.firedA, firedB: side === 'B' ? true : e.firedB }
+      })
+      const enc = updated.find((e) => e.id === id)
+      if (enc?.firedA && enc?.firedB) {
+        return { passingEncounters: updated.filter((e) => e.id !== id) }
+      }
+      return { passingEncounters: updated }
+    })
   },
 
   // === DAMAGE ===

@@ -23,7 +23,7 @@ function addShipToStore(name, faction, q, r, color = '#fff') {
  */
 function injectEncounterByIndex(indexA, indexB, minDistance = 1) {
   const { ships } = useBattleStore.getState()
-  const encounter = { id: 'enc-1', shipAId: ships[indexA].id, shipBId: ships[indexB].id, minDistance }
+  const encounter = { id: 'enc-1', shipAId: ships[indexA].id, shipBId: ships[indexB].id, minDistance, firedA: false, firedB: false }
   useBattleStore.setState({ passingEncounters: [encounter] })
   return encounter
 }
@@ -41,7 +41,7 @@ describe('PassingAttackModal — guard', () => {
 
   it('auto-dismisses stale encounter (ship no longer in store)', () => {
     useBattleStore.setState({
-      passingEncounters: [{ id: 'enc-x', shipAId: 'ghost-1', shipBId: 'ghost-2', minDistance: 1 }],
+      passingEncounters: [{ id: 'enc-x', shipAId: 'ghost-1', shipBId: 'ghost-2', minDistance: 1, firedA: false, firedB: false }],
     })
     const { container } = render(<PassingAttackModal />)
     expect(container.firstChild).toBeNull()
@@ -83,8 +83,8 @@ describe('PassingAttackModal — display', () => {
     const { ships } = useBattleStore.getState()
     useBattleStore.setState({
       passingEncounters: [
-        { id: 'e1', shipAId: ships[0].id, shipBId: ships[1].id, minDistance: 1 },
-        { id: 'e2', shipAId: ships[0].id, shipBId: ships[1].id, minDistance: 2 },
+        { id: 'e1', shipAId: ships[0].id, shipBId: ships[1].id, minDistance: 1, firedA: false, firedB: false },
+        { id: 'e2', shipAId: ships[0].id, shipBId: ships[1].id, minDistance: 2, firedA: false, firedB: false },
       ],
     })
     render(<PassingAttackModal />)
@@ -93,7 +93,7 @@ describe('PassingAttackModal — display', () => {
 })
 
 describe('PassingAttackModal — actions', () => {
-  it('PASS dismisses the encounter', () => {
+  it('PASS dismisses the encounter immediately', () => {
     addShipToStore('Viper', 'players', 0, 0)
     addShipToStore('Fighter', 'npc', 5, 0)
     injectEncounterByIndex(0, 1, 1)
@@ -102,27 +102,57 @@ describe('PassingAttackModal — actions', () => {
     expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
   })
 
-  it('ship A FIRES button opens attack modal with ship A as attacker', () => {
+  it('ship A FIRES marks firedA and opens attack modal — encounter stays until both resolved', () => {
     addShipToStore('Viper', 'players', 0, 0, '#0f0')
     addShipToStore('Fighter', 'npc', 5, 0, '#f00')
     injectEncounterByIndex(0, 1, 1)
     render(<PassingAttackModal />)
     fireEvent.click(screen.getAllByText(/FIRES/)[0])
-    expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
+    const enc = useBattleStore.getState().passingEncounters[0]
+    expect(enc).toBeDefined()
+    expect(enc.firedA).toBe(true)
+    expect(enc.firedB).toBe(false)
     expect(useUiStore.getState().activeModal).toBe('attack')
     const shipAId = useBattleStore.getState().ships[0].id
     expect(useUiStore.getState().modalPayload?.shipId).toBe(shipAId)
   })
 
-  it('ship B FIRES button opens attack modal with ship B as attacker', () => {
+  it('ship B FIRES marks firedB and opens attack modal — encounter stays until both resolved', () => {
     addShipToStore('Viper', 'players', 0, 0, '#0f0')
     addShipToStore('Fighter', 'npc', 5, 0, '#f00')
     injectEncounterByIndex(0, 1, 1)
     render(<PassingAttackModal />)
     fireEvent.click(screen.getAllByText(/FIRES/)[1])
-    expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
+    const enc = useBattleStore.getState().passingEncounters[0]
+    expect(enc).toBeDefined()
+    expect(enc.firedA).toBe(false)
+    expect(enc.firedB).toBe(true)
     expect(useUiStore.getState().activeModal).toBe('attack')
     const shipBId = useBattleStore.getState().ships[1].id
     expect(useUiStore.getState().modalPayload?.shipId).toBe(shipBId)
+  })
+
+  it('encounter auto-dismisses when both sides have fired', () => {
+    addShipToStore('Viper', 'players', 0, 0, '#0f0')
+    addShipToStore('Fighter', 'npc', 5, 0, '#f00')
+    const { ships } = useBattleStore.getState()
+    const encId = 'enc-both'
+    useBattleStore.setState({
+      passingEncounters: [{ id: encId, shipAId: ships[0].id, shipBId: ships[1].id, minDistance: 1, firedA: true, firedB: false }],
+    })
+    useBattleStore.getState().markPassingEncounterFired(encId, 'B')
+    expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
+  })
+
+  it('fired button is disabled and shows ✓ FIRED label', () => {
+    addShipToStore('Viper', 'players', 0, 0, '#0f0')
+    addShipToStore('Fighter', 'npc', 5, 0, '#f00')
+    const { ships } = useBattleStore.getState()
+    useBattleStore.setState({
+      passingEncounters: [{ id: 'enc-1', shipAId: ships[0].id, shipBId: ships[1].id, minDistance: 1, firedA: true, firedB: false }],
+    })
+    render(<PassingAttackModal />)
+    expect(screen.getByText(/✓ VIPER FIRED/)).toBeInTheDocument()
+    expect(screen.getByText(/FIGHTER FIRES/)).toBeInTheDocument()
   })
 })

@@ -11,10 +11,11 @@ import { useUiStore }     from '../../store/uiStore.js'
 import { getRangeBand }   from '../../utils/hex.js'
 
 export function PassingAttackModal() {
-  const encounters              = useBattleStore((s) => s.passingEncounters)
-  const ships                   = useBattleStore((s) => s.ships)
-  const dismissPassingEncounter = useBattleStore((s) => s.dismissPassingEncounter)
-  const openModal               = useUiStore((s) => s.openModal)
+  const encounters                = useBattleStore((s) => s.passingEncounters)
+  const ships                     = useBattleStore((s) => s.ships)
+  const dismissPassingEncounter   = useBattleStore((s) => s.dismissPassingEncounter)
+  const markPassingEncounterFired = useBattleStore((s) => s.markPassingEncounterFired)
+  const openModal                 = useUiStore((s) => s.openModal)
 
   const encounter = encounters[0]
   if (!encounter) return null
@@ -32,7 +33,8 @@ export function PassingAttackModal() {
   const remaining  = encounters.length
 
   function handleOpenFire(attackerShipId) {
-    dismissPassingEncounter(encounter.id)
+    const side = attackerShipId === encounter.shipAId ? 'A' : 'B'
+    markPassingEncounterFired(encounter.id, side)
     openModal('attack', { shipId: attackerShipId })
   }
 
@@ -98,20 +100,26 @@ export function PassingAttackModal() {
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
             <button
+              disabled={encounter.firedA}
               onClick={() => handleOpenFire(shipA.id)}
-              className="flex-1 bg-amber-900/40 border border-amber-600/60 text-amber-300
-                font-mono text-xs tracking-widest py-2 rounded
-                hover:bg-amber-800/50 transition-colors"
+              className={`flex-1 font-mono text-xs tracking-widest py-2 rounded transition-colors
+                ${encounter.firedA
+                  ? 'bg-slate-800/40 border border-slate-700 text-slate-600 cursor-default'
+                  : 'bg-amber-900/40 border border-amber-600/60 text-amber-300 hover:bg-amber-800/50'
+                }`}
             >
-              {shipA.profile.name.toUpperCase()} FIRES
+              {encounter.firedA ? `✓ ${shipA.profile.name.toUpperCase()} FIRED` : `${shipA.profile.name.toUpperCase()} FIRES`}
             </button>
             <button
+              disabled={encounter.firedB}
               onClick={() => handleOpenFire(shipB.id)}
-              className="flex-1 bg-amber-900/40 border border-amber-600/60 text-amber-300
-                font-mono text-xs tracking-widest py-2 rounded
-                hover:bg-amber-800/50 transition-colors"
+              className={`flex-1 font-mono text-xs tracking-widest py-2 rounded transition-colors
+                ${encounter.firedB
+                  ? 'bg-slate-800/40 border border-slate-700 text-slate-600 cursor-default'
+                  : 'bg-amber-900/40 border border-amber-600/60 text-amber-300 hover:bg-amber-800/50'
+                }`}
             >
-              {shipB.profile.name.toUpperCase()} FIRES
+              {encounter.firedB ? `✓ ${shipB.profile.name.toUpperCase()} FIRED` : `${shipB.profile.name.toUpperCase()} FIRES`}
             </button>
           </div>
           <button
