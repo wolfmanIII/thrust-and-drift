@@ -26,13 +26,17 @@ export function useAudioEngine() {
   useEffect(() => { enabledRef.current = audioEnabled }, [audioEnabled])
 
   useEffect(() => {
-    return subscribeEffects((effect) => {
+    return subscribeEffects(async (effect) => {
       if (!enabledRef.current) return
       try {
         const ctx = getAudioContext()
+        // resume() is async; await it so sound is scheduled only after the
+        // context is actually running — avoids silent drops when the browser
+        // auto-suspends the context after ~30 s of inactivity.
+        if (ctx.state !== 'running') await ctx.resume()
         playEffectSound(ctx, effect)
       } catch {
-        // AudioContext may be blocked; fail silently
+        // AudioContext may be blocked (no user gesture); fail silently
       }
     })
   }, [])
