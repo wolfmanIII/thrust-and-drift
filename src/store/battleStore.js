@@ -23,7 +23,7 @@ function pairKey(id1, id2) { return [id1, id2].sort().join('_') }
  * Max hex-distance of vector correction a missile may apply per round.
  * // Traveller Companion p.176 — Standard missile Thrust 10
  */
-const MISSILE_GUIDANCE_THRUST = 3
+const MISSILE_GUIDANCE_THRUST = 10 // MgT2e CRB p.162 — standard missile Thrust 10
 
 /**
  * Compute the guided vector for a missile homing toward its target.
