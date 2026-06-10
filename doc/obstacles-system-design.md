@@ -186,7 +186,6 @@ Se la nave colpisce la gravity well mentre è in dogfight attivo (`inDogfight !=
 il dogfight viene terminato automaticamente (`endDogfight`) prima di applicare il danno —
 la nave è in emergenza atmosferica e non può più manovrare. Vedi §14.3.
 
-
 #### Fascia di avviso
 
 Gli hex al raggio + 1 (bordo esterno) vengono evidenziati con un colore distinto (arancione
