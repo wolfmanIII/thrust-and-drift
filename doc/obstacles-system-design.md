@@ -182,6 +182,11 @@ danno impatto = 4D6  (ignora Armor)
 log entry: "[nave] impatta [label] — atmospheric entry"
 ```
 
+Se la nave colpisce la gravity well mentre è in dogfight attivo (`inDogfight !== null`),
+il dogfight viene terminato automaticamente (`endDogfight`) prima di applicare il danno —
+la nave è in emergenza atmosferica e non può più manovrare. Vedi §14.3.
+
+
 #### Fascia di avviso
 
 Gli hex al raggio + 1 (bordo esterno) vengono evidenziati con un colore distinto (arancione
@@ -239,11 +244,15 @@ updateObstacle(id: string, patch: Partial<ObstacleToken>): void
 ```text
 1. Aggiorna posizioni (esistente)
 2. Controlla collisioni asteroid/debris — applica danno se paidFieldCost = false
-3. Controlla impatto gravity well — blocca nave al bordo, applica danno atmosferico
+3. Controlla impatto gravity well — blocca nave al bordo, applica danno atmosferico;
+   se la nave è in dogfight, chiama endDogfight prima del danno (vedi §14.3)
 4. Rimuovi sensor lock per navi entrate in nebula
 5. [esistente] Passing encounters
 6. [esistente] Dogfight detection
 ```
+
+Il danno da ostacoli viene calcolato UNA SOLA VOLTA al termine del round macroscopico,
+indipendentemente dal numero di micro-round completati nel dogfight. Vedi §14.
 
 ---
 
@@ -486,9 +495,60 @@ Backward compatibility: sessioni salvate senza `obstacles` leggono `battle.obsta
 - **Pull gravitazionale attivo** — fisicamente non rilevante alla scala temporale del combattimento
   tattico (round = 6 minuti, distanze nell'ordine di migliaia di km); l'accelerazione gravitazionale
   a queste distanze è dell'ordine di mm/s², trascurabile rispetto al thrust delle navi. Eventuale
-  implementazione come house rule opzionale rimandato a versione futura.
+  implementazione come house rule opzionale rimandato a versione futura. (→ §14 per interazione dogfight)
 - Ostacoli in movimento (asteroide con vettore proprio)
 - Ostacoli distruttibili (sparare agli asteroidi)
 - Stazione spaziale come ostacolo attivo con torrette proprie
 - Asse Z per corpi celesti (orbite)
 - Effetti radiazioni su equipaggio
+
+---
+
+## 14. Interazione con il Dogfight
+
+### 14.1 Danno da ostacoli durante il dogfight
+
+Il danno da collisione asteroid/debris e il danno da impatto gravity well vengono
+calcolati **UNA SOLA VOLTA** al termine del round macroscopico (6 minuti),
+indipendentemente dal numero di micro-round completati in quel round.
+
+**Motivazione:** i micro-round del dogfight sono un'astrazione per la risoluzione dei
+check Pilot contrapposti. Il vettore effettivo della nave cambia alla fine del round
+standard, non ogni 6 secondi. Applicare il danno per ogni micro-round moltiplicherebbe
+l'effetto ×6 rispetto all'intenzione regolistica.
+
+**Implementazione:** in `resolveMovement`, il controllo collisioni ostacoli viene eseguito
+sulle posizioni post-movimento **finali**. Navi con `inDogfight !== null` vengono incluse
+nel controllo (la posizione finale è reale) ma non ricevono danno moltiplicato.
+
+### 14.2 Piazzamento ostacoli durante un dogfight attivo
+
+Il GM può piazzare ostacoli in qualsiasi momento tramite il context menu. Se un ostacolo
+viene piazzato su una casella già occupata da una nave in dogfight, l'effetto si applica
+al prossimo `resolveMovement`, non retroattivamente.
+
+### 14.3 Gravity well — navi in dogfight
+
+Una nave in dogfight non può "scegliere" di entrare nel raggio di un gravity well tramite
+manovra volontaria (`ThrustModal` è disabilitato durante un dogfight). L'unico modo in
+cui ci entra è per vettore ereditato che la trascinasse dentro durante il `resolveMovement`.
+
+In questo caso:
+
+- `resolveMovement` termina il dogfight automaticamente (`endDogfight(sh.inDogfight)`)
+  **prima** di applicare il danno da impatto — la nave è in emergenza atmosferica e non
+  può più manovrare
+- Il danno da impatto atmosferico (4D6, ignora Armor) viene applicato una sola volta
+  per round macroscopico come da §3.3
+- Log entry: `"[nave] trascina fuori dal dogfight per impatto con [label]"`
+
+### 14.4 Ordine di esecuzione in resolveMovement (con ostacoli)
+
+```text
+1. Aggiorna posizioni e vettori (ship + missiles)
+2. [OSTACOLI] Collisioni asteroid/debris → danno se paidFieldCost = false
+3. [OSTACOLI] Impatto gravity well → endDogfight se attivo → danno atmosferico
+4. [OSTACOLI] Nebula → rimuovi sensor lock
+5. Passing encounters (esclusi inDogfight, inBoarding)
+6. Dogfight detection (movement→attack transition, vectorial only)
+```
