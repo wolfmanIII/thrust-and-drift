@@ -29,7 +29,7 @@ per ogni coppia (nave_A, nave_B) in ships dove nave_A.faction ≠ nave_B.faction
 **Tre casi:**
 
 | Situazione | Risultato |
-|-----------|-----------|
+| ----------- | ----------- |
 | Entrambe vogliono il dogfight | Ingaggio automatico |
 | Nessuna vuole | Trattate come Short range (distanza 1) |
 | Una insegue, l'altra evade | Check Pilot contrapposto (vedi §3.1) |
@@ -46,7 +46,7 @@ Quando la distanza scende a **Close o Adjacent** (≤ 1 band) tra navi ostili. S
 
 ### 3.1 Check di Inseguimento (solo se una parte vuole evitare)
 
-```
+```text
 // MgT2e CRB p.138 + Traveller Companion p.172
 inseguitore: 2D6 + Pilot(DEX) + thrustLibero (thrust non speso in questo round)
 fuggitivo:   2D6 + Pilot(DEX) + thrustLibero
@@ -114,7 +114,7 @@ Il HUD mostra un tracker separato per ogni dogfight attivo (vedi §7).
 
 Per ogni `DogfightGroup` attivo, prima della fase Attacco standard:
 
-```
+```text
 per ogni micro-round (1 → 6):
   1. Check Pilot contrapposto (§6)
   2. Risoluzione attacchi dogfight (§6.3)
@@ -154,7 +154,7 @@ function getTonnageDM(tonnage) {
 ### 6.2 Effetti del Check
 
 | Risultato | Effetto |
-|-----------|---------|
+| ----------- | ------- |
 | Vincitore | DM +2 a tutti gli attacchi del micro-round; sceglie arco di fuoco nemico |
 | Perdente | DM −2 a tutti gli attacchi |
 | Parità | Armi fisse non possono sparare; torrette OK |
@@ -171,7 +171,7 @@ function getTonnageDM(tonnage) {
 
 Condizioni per tentare la fuga (dichiarata dal GM all'inizio del micro-round):
 
-```
+```text
 può fuggire se:
   nave.profile.thrust > max(thrust di tutti i nemici nel gruppo)
   oppure
@@ -188,7 +188,7 @@ Se tenta la fuga: check Pilot contrapposto con regole §3.1. Se vince: `inDogfig
 
 `DogfightNotificationModal` — appare al termine della fase Movimento se vengono rilevate collisioni:
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │  ⚠ CONTATTO RAVVICINATO                         │
 │  Viper MkII e Far Trader sono nella stessa cella│
@@ -206,7 +206,7 @@ Se tenta la fuga: check Pilot contrapposto con regole §3.1. Se vince: `inDogfig
 
 Quando almeno un dogfight è attivo, il HUD espande il tracker:
 
-```
+```text
 ROUND 4 — ACCELERAZIONE
 ──────────────────────────────
 DOGFIGHT #1  [Viper ↔ Fighter-1]
@@ -230,6 +230,7 @@ Modale per la risoluzione di ogni micro-round:
 ### 7.4 Token Canvas
 
 Navi in dogfight:
+
 - Bordo token: giallo/arancio pulsante (`animation: dogfight-pulse`)
 - Freccia vettore: nascosta (non rilevante durante dogfight)
 - Badge: piccola icona ⚔ in alto a destra del token
@@ -263,7 +264,7 @@ endDogfight(groupId)
 ## 9. Nuovi Componenti
 
 | Componente | Tipo | Responsabilità |
-|-----------|------|----------------|
+| ----------- | ---- | -------------- |
 | `DogfightNotificationModal.jsx` | Modal | Notifica ingaggio, raccoglie intenzioni GM |
 | `DogfightRoundModal.jsx` | Modal | Risolve singolo micro-round (check + attacchi) |
 | `useDogfightDetection.js` | Hook | Rileva collisioni post-movimento, prepara gruppi |
