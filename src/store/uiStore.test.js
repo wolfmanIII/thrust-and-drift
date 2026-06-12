@@ -120,7 +120,7 @@ describe('movementAnimation', () => {
     const anim = useUiStore.getState().movementAnimation
     expect(anim).not.toBeNull()
     expect(anim.startPositions).toEqual(startPositions)
-    expect(anim.duration).toBe(600)
+    expect(anim.duration).toBe(2000)
     expect(anim.startTime).toBeGreaterThanOrEqual(before)
     expect(anim.startTime).toBeLessThanOrEqual(after)
   })
