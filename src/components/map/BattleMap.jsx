@@ -19,7 +19,9 @@ import { useUiStore } from '../../store/uiStore.js'
 export function BattleMap() {
   const canvasRef        = useRef(null)
   const effectsCanvasRef = useRef(null)
-  const isAnimating = useUiStore((s) => s.movementAnimation !== null)
+  const mouseHexRef      = useRef({ q: 0, r: 0 })
+  const isAnimating           = useUiStore((s) => s.movementAnimation !== null)
+  const cancelThrustTargeting = useUiStore((s) => s.cancelThrustTargeting)
 
   const {
     offset,
@@ -31,14 +33,21 @@ export function BattleMap() {
     onClick,
     onContextMenu,
     onDoubleClick,
-  } = useMapInteraction({ hexSize: HEX_SIZE, canvasRef })
+  } = useMapInteraction({ hexSize: HEX_SIZE, canvasRef, mouseHexRef })
 
   const { onHoverMove, onHoverLeave, onHoverDown } = useShipHover({ canvasRef, hexSize: HEX_SIZE, offset, zoom })
   const { onMissileHoverMove, onMissileHoverLeave, onMissileHoverDown } = useMissileHover({ canvasRef, hexSize: HEX_SIZE, offset, zoom })
 
-  useCanvasRenderer({ canvasRef, offset, zoom })
+  useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef })
   useCanvasEffects({ effectsCanvasRef, offset, zoom })
   useAudioEngine()
+
+  // ESC cancels thrust targeting mode
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') cancelThrustTargeting() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [cancelThrustTargeting])
 
   const combinedMouseMove = useCallback((e) => { onMouseMove(e); onHoverMove(e); onMissileHoverMove(e) }, [onMouseMove, onHoverMove, onMissileHoverMove])
   const combinedMouseDown = useCallback((e) => { onMouseDown(e); onHoverDown(e); onMissileHoverDown(e) }, [onMouseDown, onHoverDown, onMissileHoverDown])

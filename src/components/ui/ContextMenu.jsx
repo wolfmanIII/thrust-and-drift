@@ -79,8 +79,9 @@ function hasUnfiredOffensiveTurret(ship) {
 const INITIATIVE_GATED_PHASES = ['acceleration', 'attack', 'actions']
 
 function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
-  const openModal        = useUiStore((s) => s.openModal)
-  const removeShip       = useBattleStore((s) => s.removeShip)
+  const openModal             = useUiStore((s) => s.openModal)
+  const startThrustTargeting  = useUiStore((s) => s.startThrustTargeting)
+  const removeShip            = useBattleStore((s) => s.removeShip)
   const combatMode       = useBattleStore((s) => s.combatMode)
   const phase            = useBattleStore((s) => s.phase)
   const ships            = useBattleStore((s) => s.ships)
@@ -125,7 +126,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       {/* ── Acceleration: thrust (vectorial) or range band change (basic) ── */}
       {!ship.isDestroyed && phase === 'acceleration' && combatMode === 'vectorial' && isCurrentActor && (
         <>
-          <MenuItem icon="🚀" label="Apply Thrust" onClick={() => open('thrust', { shipId: targetId })} />
+          <MenuItem icon="🚀" label="Apply Thrust" onClick={() => { startThrustTargeting(targetId); close() }} />
           <MenuDivider />
         </>
       )}

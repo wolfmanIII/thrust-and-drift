@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useCallback, useRef } from 'react'
-import { hexToPixel, hexAdd } from '../../utils/hex.js'
+import { hexToPixel, hexAdd, hexDistance, computeClampedDelta } from '../../utils/hex.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore } from '../../store/uiStore.js'
 import {
@@ -101,17 +101,91 @@ function drawGrid(ctx, width, height, offset, zoom) {
 }
 
 /**
+ * Draw the rubber-band thrust targeting overlay.
+ * Dashed line ship→thrustEndpoint, endpoint dot, ghost at next-round position,
+ * faint line defaultGhost→newGhost, thrust budget badge.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {object} ship  ShipInstance
+ * @param {{ q: number, r: number }} mouseHex
+ * @param {number} size  Scaled hex size
+ * @param {number} ox  Canvas x offset
+ * @param {number} oy  Canvas y offset
+ */
+function drawThrustTargeting(ctx, ship, mouseHex, size, ox, oy) {
+  const thrustAvailable = Math.max(0,
+    ship.profile.thrust + (ship.thrustBonusThisRound ?? 0)
+    - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0)
+  )
+  const delta     = computeClampedDelta(mouseHex, ship.position, thrustAvailable)
+  const cost      = hexDistance({ q: 0, r: 0 }, delta)
+  const atCap     = thrustAvailable > 0 && cost >= thrustAvailable
+  const lineColor = atCap ? '#f97316' : '#22d3ee'  // orange-500 : neon-cyan
+
+  const { x: sx, y: sy } = hexToPixel(ship.position.q, ship.position.r, size, ox, oy)
+  const thrustEndHex = hexAdd(ship.position, delta)
+  const { x: ex, y: ey } = hexToPixel(thrustEndHex.q, thrustEndHex.r, size, ox, oy)
+
+  ctx.save()
+
+  // Dashed line: ship → thrust endpoint
+  ctx.setLineDash([4, 4])
+  ctx.strokeStyle = lineColor
+  ctx.lineWidth = 2
+  ctx.globalAlpha = 0.85
+  ctx.beginPath()
+  ctx.moveTo(sx, sy)
+  ctx.lineTo(ex, ey)
+  ctx.stroke()
+  ctx.setLineDash([])
+
+  // Dot at thrust endpoint
+  ctx.beginPath()
+  ctx.arc(ex, ey, 4, 0, Math.PI * 2)
+  ctx.fillStyle = lineColor
+  ctx.fill()
+
+  // Ghost at next-round position: ship.pos + ship.vector + delta
+  const ghostHex = hexAdd(hexAdd(ship.position, ship.vector), delta)
+  const { x: gx, y: gy } = hexToPixel(ghostHex.q, ghostHex.r, size, ox, oy)
+  drawGhostToken(ctx, ship, gx, gy)
+
+  // Faint line from default ghost (no thrust) to new ghost
+  const defaultGhostHex = hexAdd(ship.position, ship.vector)
+  const { x: dgx, y: dgy } = hexToPixel(defaultGhostHex.q, defaultGhostHex.r, size, ox, oy)
+  ctx.setLineDash([2, 4])
+  ctx.strokeStyle = lineColor
+  ctx.lineWidth = 1
+  ctx.globalAlpha = 0.4
+  ctx.beginPath()
+  ctx.moveTo(dgx, dgy)
+  ctx.lineTo(gx, gy)
+  ctx.stroke()
+  ctx.setLineDash([])
+
+  // Thrust budget badge below ghost
+  ctx.globalAlpha = 1
+  ctx.font = `bold ${Math.round(9 * (size / 32))}px monospace`
+  ctx.fillStyle = atCap ? '#f97316' : '#94a3b8'
+  ctx.textAlign = 'center'
+  ctx.fillText(`${cost}/${thrustAvailable}`, gx, gy + size * 0.9)
+
+  ctx.restore()
+}
+
+/**
  * @param {{
  *   canvasRef: React.RefObject<HTMLCanvasElement>,
  *   offset: React.MutableRefObject<{x:number,y:number}>,
  *   zoom: React.MutableRefObject<number>,
+ *   mouseHexRef: React.MutableRefObject<{q:number,r:number}>,
  * }} params
  */
-export function useCanvasRenderer({ canvasRef, offset, zoom }) {
-  const ships   = useBattleStore((s) => s.ships)
-  const missiles = useBattleStore((s) => s.missiles)
-  const phase   = useBattleStore((s) => s.phase)
-  const selectedShipId = useUiStore((s) => s.selectedShipId)
+export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
+  const ships          = useBattleStore((s) => s.ships)
+  const missiles       = useBattleStore((s) => s.missiles)
+  const phase          = useBattleStore((s) => s.phase)
+  const selectedShipId  = useUiStore((s) => s.selectedShipId)
+  const thrustTargeting = useUiStore((s) => s.thrustTargeting)
 
   /** rAF timestamp in ms — used for dogfight pulse animation. */
   const timestampRef = useRef(0)
@@ -143,9 +217,19 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
     if (phase === 'acceleration') {
       for (const ship of ships) {
         if (ship.inDogfight !== null) continue
+        // Skip default ghost for the ship in targeting mode — drawThrustTargeting draws its own
+        if (thrustTargeting?.shipId === ship.id) continue
         const next = hexAdd(ship.position, ship.vector)
         const { x: gx, y: gy } = hexToPixel(next.q, next.r, size, ox, oy)
         drawGhostToken(ctx, ship, gx, gy)
+      }
+    }
+
+    // --- Layer 3b: Thrust targeting overlay ---
+    if (thrustTargeting && phase === 'acceleration') {
+      const targetingShip = ships.find((s) => s.id === thrustTargeting.shipId)
+      if (targetingShip && targetingShip.inDogfight === null) {
+        drawThrustTargeting(ctx, targetingShip, mouseHexRef.current, size, ox, oy)
       }
     }
 
@@ -183,7 +267,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom }) {
     if (anim && (now - anim.startTime) >= anim.duration) {
       useUiStore.getState().clearMovementAnimation()
     }
-  }, [canvasRef, ships, missiles, selectedShipId, offset, zoom, timestampRef])
+  }, [canvasRef, ships, missiles, selectedShipId, offset, zoom, timestampRef, thrustTargeting, mouseHexRef])
 
   // Render on state changes
   useEffect(() => {

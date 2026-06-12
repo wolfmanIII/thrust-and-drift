@@ -7,7 +7,8 @@
  */
 
 import { useRef, useCallback } from 'react'
-import { pixelToHex } from '../../utils/hex.js'
+import { pixelToHex, hexDistance, computeClampedDelta } from '../../utils/hex.js'
+import { emitEffect } from '../../utils/effectQueue.js'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 
@@ -16,7 +17,11 @@ const MAX_ZOOM = 3
 const ZOOM_FACTOR = 0.001
 
 /**
- * @param {{ hexSize: number, canvasRef: React.RefObject<HTMLCanvasElement> }} params
+ * @param {{
+ *   hexSize: number,
+ *   canvasRef: React.RefObject<HTMLCanvasElement>,
+ *   mouseHexRef: React.MutableRefObject<{q:number,r:number}>,
+ * }} params
  * @returns {{
  *   offset: React.MutableRefObject<{x: number, y: number}>,
  *   zoom: React.MutableRefObject<number>,
@@ -29,7 +34,7 @@ const ZOOM_FACTOR = 0.001
  *   onDoubleClick: Function,
  * }}
  */
-export function useMapInteraction({ hexSize, canvasRef }) {
+export function useMapInteraction({ hexSize, canvasRef, mouseHexRef }) {
   const offset = useRef({ x: 0, y: 0 })
   const zoom = useRef(1)
   const isPanning = useRef(false)
@@ -37,15 +42,18 @@ export function useMapInteraction({ hexSize, canvasRef }) {
   const hasDragged = useRef(false)
 
   // Granular selectors — no full-store subscriptions
-  const showContextMenu = useUiStore((s) => s.showContextMenu)
-  const hideContextMenu = useUiStore((s) => s.hideContextMenu)
-  const selectShip     = useUiStore((s) => s.selectShip)
-  const pendingPlacement = useUiStore((s) => s.pendingPlacement)
-  const cancelPlacement  = useUiStore((s) => s.cancelPlacement)
+  const showContextMenu       = useUiStore((s) => s.showContextMenu)
+  const hideContextMenu       = useUiStore((s) => s.hideContextMenu)
+  const selectShip            = useUiStore((s) => s.selectShip)
+  const pendingPlacement      = useUiStore((s) => s.pendingPlacement)
+  const cancelPlacement       = useUiStore((s) => s.cancelPlacement)
+  const thrustTargeting       = useUiStore((s) => s.thrustTargeting)
+  const cancelThrustTargeting = useUiStore((s) => s.cancelThrustTargeting)
 
-  const ships    = useBattleStore((s) => s.ships)
-  const missiles = useBattleStore((s) => s.missiles)
-  const addShip  = useBattleStore((s) => s.addShip)
+  const ships           = useBattleStore((s) => s.ships)
+  const missiles        = useBattleStore((s) => s.missiles)
+  const addShip         = useBattleStore((s) => s.addShip)
+  const applyShipThrust = useBattleStore((s) => s.applyShipThrust)
 
   /** Convert canvas-relative pixel coords to world hex coordinates. */
   const pixelToWorld = useCallback((clientX, clientY) => {
@@ -76,6 +84,12 @@ export function useMapInteraction({ hexSize, canvasRef }) {
   }, [hideContextMenu])
 
   const onMouseMove = useCallback((e) => {
+    // Track cursor hex for thrust targeting preview
+    if (thrustTargeting) {
+      mouseHexRef.current = pixelToWorld(e.clientX, e.clientY)
+      canvasRef.current?.dispatchEvent(new CustomEvent('map:redraw'))
+    }
+
     if (!isPanning.current) return
     const dx = e.clientX - panStart.current.x - offset.current.x
     const dy = e.clientY - panStart.current.y - offset.current.y
@@ -85,7 +99,7 @@ export function useMapInteraction({ hexSize, canvasRef }) {
       y: e.clientY - panStart.current.y,
     }
     canvasRef.current?.dispatchEvent(new CustomEvent('map:redraw'))
-  }, [canvasRef])
+  }, [thrustTargeting, mouseHexRef, pixelToWorld, canvasRef])
 
   const onMouseUp = useCallback(() => {
     isPanning.current = false
@@ -116,6 +130,25 @@ export function useMapInteraction({ hexSize, canvasRef }) {
     if (hasDragged.current) return
     const hex = pixelToWorld(e.clientX, e.clientY)
 
+    // Thrust targeting: confirm delta on click
+    if (thrustTargeting) {
+      const ship = ships.find((s) => s.id === thrustTargeting.shipId)
+      if (ship) {
+        const thrustAvailable = Math.max(0,
+          ship.profile.thrust + (ship.thrustBonusThisRound ?? 0)
+          - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0)
+        )
+        const delta = computeClampedDelta(mouseHexRef.current, ship.position, thrustAvailable)
+        const cost  = hexDistance({ q: 0, r: 0 }, delta)
+        if (cost > 0) {
+          applyShipThrust(ship.id, delta, cost)
+          emitEffect('thrust_plume', { duration: 2500, hex: ship.position, delta, shipColor: ship.color })
+        }
+      }
+      cancelThrustTargeting()
+      return
+    }
+
     // Placement mode: place the pending ship on the clicked hex
     if (pendingPlacement) {
       addShip(pendingPlacement.profile, hex, pendingPlacement.faction, pendingPlacement.color)
@@ -125,7 +158,7 @@ export function useMapInteraction({ hexSize, canvasRef }) {
 
     const ship = findShipAt(hex)
     selectShip(ship ? ship.id : null)
-  }, [pixelToWorld, pendingPlacement, findShipAt, selectShip, addShip, cancelPlacement])
+  }, [pixelToWorld, thrustTargeting, ships, mouseHexRef, applyShipThrust, cancelThrustTargeting, pendingPlacement, findShipAt, selectShip, addShip, cancelPlacement])
 
   const onContextMenu = useCallback((e) => {
     e.preventDefault()
