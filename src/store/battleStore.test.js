@@ -642,19 +642,22 @@ describe('resolveMovement', () => {
     expect(useBattleStore.getState().ships[0].position).toEqual({ q: 4, r: -2 })
   })
 
-  it('missiles apply guidance toward target and decrement thrustRemaining', () => {
+  it('missiles reaching target hex are consumed and queued as pendingMissileImpacts', () => {
     // Missile at {q:1,r:0} vector {q:1,r:0}, target at {q:5,r:0} stationary.
-    // Guidance: idealQ=4, deltaQ=3, deltaMag=3, scale=1 → guided vector {q:4,r:0} → pos {q:5,r:0}.
+    // Guidance closes the gap in one step → lands on target hex → impact queued.
     useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#fff')
     useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'B' }), { q: 5, r: 0 }, 'npc',     '#f00')
     const [att, tgt] = useBattleStore.getState().ships
     useBattleStore.getState().launchMissile(att.id, tgt.id, 2, { q: 1, r: 0 }, { q: 1, r: 0 })
     const missileId = useBattleStore.getState().missiles[0].id
     useBattleStore.getState().resolveMovement()
-    const missile = useBattleStore.getState().missiles.find(m => m.id === missileId)
-    expect(missile.position).toEqual({ q: 5, r: 0 })
-    expect(missile.vector).toEqual({ q: 4, r: 0 })
-    expect(missile.thrustRemaining).toBe(9)
+    // Missile consumed by impact — removed from active missiles
+    expect(useBattleStore.getState().missiles.find(m => m.id === missileId)).toBeUndefined()
+    const impacts = useBattleStore.getState().pendingMissileImpacts
+    expect(impacts).toHaveLength(1)
+    expect(impacts[0].target).toBe(tgt.id)
+    expect(impacts[0].launchedBy).toBe(att.id)
+    expect(impacts[0].count).toBe(2)
   })
 
   it('missile guidance is partial when correction exceeds GUIDANCE_THRUST per round', () => {

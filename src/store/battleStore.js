@@ -172,6 +172,8 @@ const useBattleStore = create((set, get) => {
   log: [],
   /** @type {object[]} Transient passing encounters — cleared after movement phase resolution. */
   passingEncounters: [],
+  /** @type {object[]} Missile salvos that reached their target hex — awaiting damage resolution. */
+  pendingMissileImpacts: [],
 
   mapSettings: { scale: 1 },
 
@@ -529,6 +531,29 @@ const useBattleStore = create((set, get) => {
       }
     })
 
+    // Detect missile impacts: salvo reached its target's new hex. // MgT2e CRB p.162
+    const movedShipPos = {}
+    movedShips.forEach((sh) => { movedShipPos[sh.id] = sh.position })
+
+    const impactedMissiles  = []
+    const survivingMissiles = []
+    movedMissiles.forEach((m) => {
+      const targetPos = movedShipPos[m.target]
+      if (targetPos && hexDistance(m.position, targetPos) === 0) {
+        impactedMissiles.push(m)
+      } else {
+        survivingMissiles.push(m)
+      }
+    })
+
+    const newImpacts = impactedMissiles.map((m) => ({
+      id: uuidv7(),
+      launchedBy: m.launchedBy,
+      target: m.target,
+      count: m.count,
+      type: m.type,
+    }))
+
     const entries = movedShips.map((sh) => makeLogEntry({
       round,
       phase: 'movement',
@@ -538,17 +563,35 @@ const useBattleStore = create((set, get) => {
       details: { position: sh.position, vector: sh.vector },
     }))
 
+    const impactLogEntries = impactedMissiles.map((m) => {
+      const launcherShip = movedShips.find((s) => s.id === m.launchedBy)
+      const targetShip   = movedShips.find((s) => s.id === m.target)
+      return makeLogEntry({
+        round,
+        phase: 'movement',
+        type: 'system',
+        message: `⚡ ${m.count}× ${m.type ?? 'Missile'} salvo from ${launcherShip?.profile.name ?? '?'} impacts ${targetShip?.profile.name ?? '?'}. Resolve damage.`,
+        shipId: m.target,
+      })
+    })
+
     set((s) => ({
       ships: movedShips,
-      missiles: movedMissiles.filter((m) => m.thrustRemaining >= 0),
-      log: [...s.log, ...entries],
+      missiles: survivingMissiles.filter((m) => m.thrustRemaining >= 0),
+      log: [...s.log, ...entries, ...impactLogEntries],
       passingEncounters: encounters,
+      pendingMissileImpacts: [...s.pendingMissileImpacts, ...newImpacts],
     }))
   }),
 
   /** Remove a single passing encounter by id (GM dismissed it via PassingAttackModal). */
   dismissPassingEncounter: (id) => {
     set((s) => ({ passingEncounters: s.passingEncounters.filter((e) => e.id !== id) }))
+  },
+
+  /** Remove a single missile impact by id after GM has resolved damage. */
+  dismissMissileImpact: (id) => {
+    set((s) => ({ pendingMissileImpacts: s.pendingMissileImpacts.filter((e) => e.id !== id) }))
   },
 
   /**
@@ -1386,6 +1429,8 @@ const useBattleStore = create((set, get) => {
     rangeBands: {},
     undoStack: [],
     redoStack: [],
+    passingEncounters: [],
+    pendingMissileImpacts: [],
   }),
 
   // === IMPORT / EXPORT ===
