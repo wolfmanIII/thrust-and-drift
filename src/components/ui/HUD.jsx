@@ -3,7 +3,7 @@
  * Read-only display; phase advancement is via the button.
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore } from '../../store/uiStore.js'
 import { Tooltip } from './Tooltip.jsx'
@@ -48,6 +48,33 @@ export function HUD() {
   const activeBoardings  = boardings.filter((b) => b.outcome === null)
 
   const [showExitWarning, setShowExitWarning] = useState(false)
+  const [phaseBlockMsg,   setPhaseBlockMsg]   = useState(null)
+
+  // true when advancing to the next phase is allowed
+  const canAdvancePhase = useMemo(() => {
+    if (phase === 'setup') return ships.length > 0
+    if (ACTOR_TURN_PHASES.has(phase)) return currentActorIndex >= initiativeOrder.length
+    return true
+  }, [phase, ships, currentActorIndex, initiativeOrder])
+
+  // clear the warning once the condition is satisfied
+  useEffect(() => {
+    if (canAdvancePhase) setPhaseBlockMsg(null)
+  }, [canAdvancePhase])
+
+  const handleAdvancePhase = useCallback(() => {
+    if (!canAdvancePhase) {
+      if (phase === 'setup') {
+        setPhaseBlockMsg('Place at least one ship first.')
+      } else {
+        const remaining = initiativeOrder.length - currentActorIndex
+        setPhaseBlockMsg(`${remaining} actor${remaining !== 1 ? 's' : ''} still to act.`)
+      }
+      return
+    }
+    setPhaseBlockMsg(null)
+    advancePhase()
+  }, [canAdvancePhase, advancePhase, phase, initiativeOrder, currentActorIndex])
 
   const handleUndo = useCallback(() => {
     if (canUndo) undoLastAction()
@@ -124,12 +151,23 @@ export function HUD() {
 
       {/* Phase advance — skip movement phase in basic mode (no vectors) */}
       {(combatMode === 'vectorial' || phase !== 'movement') && (
-        <button
-          onClick={advancePhase}
-          className="pointer-events-auto bg-slate-800/80 border border-slate-600 hover:border-(--neon-cyan)/60 text-slate-300 hover:text-(--neon-cyan) font-mono text-xs tracking-widest rounded px-3 py-1.5 backdrop-blur-sm transition-colors text-left"
-        >
-          NEXT PHASE ⟶
-        </button>
+        <>
+          <button
+            onClick={handleAdvancePhase}
+            className={`pointer-events-auto bg-slate-800/80 border rounded px-3 py-1.5 backdrop-blur-sm transition-colors text-left font-mono text-xs tracking-widest ${
+              canAdvancePhase
+                ? 'border-slate-600 hover:border-(--neon-cyan)/60 text-slate-300 hover:text-(--neon-cyan)'
+                : 'border-slate-700 text-slate-600 cursor-not-allowed'
+            }`}
+          >
+            NEXT PHASE ⟶
+          </button>
+          {phaseBlockMsg && (
+            <p className="font-mono text-xs text-amber-400/90 pl-1 pointer-events-none">
+              ⚠ {phaseBlockMsg}
+            </p>
+          )}
+        </>
       )}
 
       {/* Battle utilities */}

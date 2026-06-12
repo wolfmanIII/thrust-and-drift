@@ -66,11 +66,36 @@ describe('HUD — NEXT PHASE button', () => {
     expect(screen.getByText(/NEXT PHASE/)).toBeInTheDocument()
   })
 
-  it('click calls advancePhase', () => {
+  it('click calls advancePhase when guard passes', () => {
     useBattleStore.setState({ combatMode: 'vectorial', phase: 'setup' })
+    useBattleStore.getState().addShip(
+      { id: 'g1', name: 'Guard', hull: 10, thrust: 2, turrets: [], crew: [] },
+      { q: 0, r: 0 }, 'players', '#0ff'
+    )
     render(<HUD />)
     fireEvent.click(screen.getByText(/NEXT PHASE/))
     expect(useBattleStore.getState().phase).toBe('initiative')
+  })
+
+  it('blocks advance and shows warning in setup with no ships', () => {
+    useBattleStore.setState({ combatMode: 'vectorial', phase: 'setup', ships: [] })
+    render(<HUD />)
+    fireEvent.click(screen.getByText(/NEXT PHASE/))
+    expect(useBattleStore.getState().phase).toBe('setup')
+    expect(screen.getByText(/Place at least one ship/)).toBeInTheDocument()
+  })
+
+  it('blocks advance and shows remaining actor count in actor phases', () => {
+    useBattleStore.setState({
+      combatMode: 'vectorial',
+      phase: 'attack',
+      initiativeOrder: ['a', 'b'],
+      currentActorIndex: 0,
+    })
+    render(<HUD />)
+    fireEvent.click(screen.getByText(/NEXT PHASE/))
+    expect(useBattleStore.getState().phase).toBe('attack')
+    expect(screen.getByText(/2 actors still to act/)).toBeInTheDocument()
   })
 })
 
