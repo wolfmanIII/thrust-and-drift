@@ -159,3 +159,16 @@ describe('startPlacement / cancelPlacement', () => {
     expect(useUiStore.getState().pendingPlacement).toBeNull()
   })
 })
+
+describe('thrustTargeting', () => {
+  it('startThrustTargeting sets shipId', () => {
+    useUiStore.getState().startThrustTargeting('ship-42')
+    expect(useUiStore.getState().thrustTargeting).toEqual({ shipId: 'ship-42' })
+  })
+
+  it('cancelThrustTargeting resets to null', () => {
+    useUiStore.getState().startThrustTargeting('ship-42')
+    useUiStore.getState().cancelThrustTargeting()
+    expect(useUiStore.getState().thrustTargeting).toBeNull()
+  })
+})

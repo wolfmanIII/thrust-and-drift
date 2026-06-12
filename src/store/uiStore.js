@@ -9,7 +9,7 @@ import { create } from 'zustand'
 const MOVEMENT_ANIM_DURATION_MS = 600
 
 /**
- * @typedef {'shipProfile'|'addShip'|'thrust'|'attack'|'shipDetail'|'action'|'initiative'|'dogfightRound'|'crewAssignment'|'basicManoeuvre'|null} ModalId
+ * @typedef {'shipProfile'|'addShip'|'attack'|'shipDetail'|'action'|'initiative'|'dogfightRound'|'crewAssignment'|'basicManoeuvre'|null} ModalId
  */
 
 /**
@@ -111,6 +111,18 @@ const useUiStore = create((set) => ({
 
   /** Clear the active movement animation. */
   clearMovementAnimation: () => set({ movementAnimation: null }),
+
+  // === THRUST TARGETING ===
+  /**
+   * When not null, the map is in "thrust targeting mode": mouse hover draws a
+   * rubber-band line from the ship toward the cursor; click confirms thrust.
+   * @type {{ shipId: string } | null}
+   */
+  thrustTargeting: null,
+
+  /** @param {string} shipId */
+  startThrustTargeting: (shipId) => set({ thrustTargeting: { shipId } }),
+  cancelThrustTargeting: () => set({ thrustTargeting: null }),
 
   // === AUDIO ===
   /** Whether in-app sound effects are enabled. */
