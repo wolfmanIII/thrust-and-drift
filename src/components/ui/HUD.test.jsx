@@ -85,6 +85,26 @@ describe('HUD — NEXT PHASE button', () => {
     expect(screen.getByText(/Place at least one ship/)).toBeInTheDocument()
   })
 
+  it('blocks advance in initiative phase when initiative not rolled', () => {
+    useBattleStore.setState({ combatMode: 'vectorial', phase: 'initiative', initiativeOrder: [] })
+    render(<HUD />)
+    fireEvent.click(screen.getByText(/NEXT PHASE/))
+    expect(useBattleStore.getState().phase).toBe('initiative')
+    expect(screen.getByText(/Roll initiative before advancing/)).toBeInTheDocument()
+  })
+
+  it('allows advance in initiative phase after rolling', () => {
+    useBattleStore.setState({
+      combatMode: 'vectorial',
+      phase: 'initiative',
+      initiativeOrder: ['a'],
+      ships: [],
+    })
+    render(<HUD />)
+    fireEvent.click(screen.getByText(/NEXT PHASE/))
+    expect(useBattleStore.getState().phase).toBe('acceleration')
+  })
+
   it('blocks advance and shows remaining actor count in actor phases', () => {
     useBattleStore.setState({
       combatMode: 'vectorial',

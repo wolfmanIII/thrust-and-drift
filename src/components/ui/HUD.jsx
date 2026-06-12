@@ -52,7 +52,8 @@ export function HUD() {
 
   // true when advancing to the next phase is allowed
   const canAdvancePhase = useMemo(() => {
-    if (phase === 'setup') return ships.length > 0
+    if (phase === 'setup')      return ships.length > 0
+    if (phase === 'initiative') return initiativeOrder.length > 0
     if (ACTOR_TURN_PHASES.has(phase)) return currentActorIndex >= initiativeOrder.length
     return true
   }, [phase, ships, currentActorIndex, initiativeOrder])
@@ -66,6 +67,8 @@ export function HUD() {
     if (!canAdvancePhase) {
       if (phase === 'setup') {
         setPhaseBlockMsg('Place at least one ship first.')
+      } else if (phase === 'initiative') {
+        setPhaseBlockMsg('Roll initiative before advancing.')
       } else {
         const remaining = initiativeOrder.length - currentActorIndex
         setPhaseBlockMsg(`${remaining} actor${remaining !== 1 ? 's' : ''} still to act.`)
