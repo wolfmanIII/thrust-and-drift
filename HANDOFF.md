@@ -9,10 +9,10 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.13.0 |
+| **Versione** | 1.13.1 |
 | **Branch** | main (clean) |
 | **Test** | 686 passing |
-| **Ultimo commit** | `1713424` fix(hud): block phase advance in initiative until initiative is rolled |
+| **Ultimo commit** | `v1.13.1` docs: markdown formatting + version bump |
 
 ---
 

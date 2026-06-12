@@ -6,6 +6,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.13.1] — 2026-06-12
+
+### Docs
+
+- **`doc/thrust-targeting-ux-design.md`** — fixed markdown code block language tags (bare ` ``` ` → ` ```text `), table column alignment, and added missing blank line before list.
+
+---
+
 ## [1.13.0] — 2026-06-12
 
 ### Added
