@@ -178,6 +178,31 @@ export function segmentMinDistance(a0, a1, b0, b1) {
   return minDist
 }
 
+// === THRUST TARGETING ===
+
+/**
+ * Compute a thrust delta from shipPos toward targetHex, clamped to thrustAvailable.
+ * Returns the largest integer-hex delta in that direction with magnitude ≤ thrustAvailable.
+ * @param {{ q: number, r: number }} targetHex
+ * @param {{ q: number, r: number }} shipPos
+ * @param {number} thrustAvailable
+ * @returns {{ q: number, r: number }}
+ */
+export function computeClampedDelta(targetHex, shipPos, thrustAvailable) {
+  const rawDelta = { q: targetHex.q - shipPos.q, r: targetHex.r - shipPos.r }
+  const rawMag   = hexDistance({ q: 0, r: 0 }, rawDelta)
+  if (rawMag === 0 || thrustAvailable === 0) return { q: 0, r: 0 }
+  if (rawMag <= thrustAvailable) return rawDelta
+
+  let scale = (thrustAvailable - 0.5) / rawMag
+  let delta = hexRound({ q: rawDelta.q * scale, r: rawDelta.r * scale })
+  while (hexDistance({ q: 0, r: 0 }, delta) > thrustAvailable && scale > 0) {
+    scale -= 1 / rawMag
+    delta = hexRound({ q: rawDelta.q * scale, r: rawDelta.r * scale })
+  }
+  return delta
+}
+
 // === RANGE BANDS ===
 
 /**

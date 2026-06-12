@@ -16,6 +16,7 @@ import {
   hexRound,
   getRangeBand,
   segmentMinDistance,
+  computeClampedDelta,
   HEX_DIRECTIONS,
 } from './hex.js'
 
@@ -232,5 +233,26 @@ describe('getRangeBand', () => {
 
   it.each(CASES)('distance %i → "%s"', (d, expected) => {
     expect(getRangeBand(d)).toBe(expected)
+  })
+})
+
+describe('computeClampedDelta', () => {
+  it('returns rawDelta when within budget', () => {
+    const delta = computeClampedDelta({ q: 3, r: 0 }, { q: 0, r: 0 }, 4)
+    expect(hexDistance({ q: 0, r: 0 }, delta)).toBeLessThanOrEqual(4)
+    expect(delta).toEqual({ q: 3, r: 0 })
+  })
+
+  it('clamps magnitude to thrustAvailable when over budget', () => {
+    const delta = computeClampedDelta({ q: 10, r: 0 }, { q: 0, r: 0 }, 3)
+    expect(hexDistance({ q: 0, r: 0 }, delta)).toBeLessThanOrEqual(3)
+  })
+
+  it('returns {0,0} when thrustAvailable is 0', () => {
+    expect(computeClampedDelta({ q: 5, r: 0 }, { q: 0, r: 0 }, 0)).toEqual({ q: 0, r: 0 })
+  })
+
+  it('returns {0,0} when target equals ship position', () => {
+    expect(computeClampedDelta({ q: 2, r: 2 }, { q: 2, r: 2 }, 4)).toEqual({ q: 0, r: 0 })
   })
 })
