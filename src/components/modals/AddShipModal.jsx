@@ -9,7 +9,7 @@ import { useUiStore } from '../../store/uiStore.js'
 import { useProfilesStore } from '../../store/profilesStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { FACTIONS } from '../../data/factions.js'
-import { getShapeTracer, drawCapitalShipDetail, SHIP_SHAPES } from '../map/shipTokenShapes.js'
+import { getShapeTracer, getDetailDrawer, SHIP_SHAPES } from '../map/shipTokenShapes.js'
 
 const SHAPE_LABELS = {
   delta:     'Delta',
@@ -42,7 +42,7 @@ function ShapePreview({ shape, selected, onClick }) {
     ctx.strokeStyle = selected ? 'rgba(34,211,238,0.9)' : 'rgba(255,255,255,0.2)'
     ctx.lineWidth = 1
     ctx.stroke()
-    if (shape === 'capital') drawCapitalShipDetail(ctx, PREVIEW_SIZE * 0.42)
+    getDetailDrawer(shape)?.(ctx, PREVIEW_SIZE * 0.42)
     ctx.restore()
   }, [shape, selected])
 

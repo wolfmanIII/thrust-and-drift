@@ -252,6 +252,133 @@ export function drawCapitalShipDetail(ctx, size) {
   }
 }
 
+// ─── TOKEN DETAILS ────────────────────────────────────────────────────────────
+// Per-shape overlay drawn AFTER fill+stroke, while transform is still active.
+// Each function receives the same (ctx, size) contract as the tracers.
+
+/** Delta — narrow fuselage stripe + cockpit dot near nose. */
+export function drawDeltaDetail(ctx, size) {
+  ctx.beginPath()
+  ctx.moveTo(0,            -size * 0.90)
+  ctx.lineTo( size * 0.09, -size * 0.52)
+  ctx.lineTo( size * 0.09,  size * 0.50)
+  ctx.lineTo(0,             size * 0.68)
+  ctx.lineTo(-size * 0.09,  size * 0.50)
+  ctx.lineTo(-size * 0.09, -size * 0.52)
+  ctx.closePath()
+  ctx.fillStyle = 'rgba(255,255,255,0.14)'
+  ctx.fill()
+
+  ctx.beginPath()
+  ctx.arc(0, -size * 0.62, size * 0.13, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.32)'
+  ctx.fill()
+}
+
+/** Needle — sensor dot near nose tip + slim spine line. */
+export function drawNeedleDetail(ctx, size) {
+  ctx.beginPath()
+  ctx.moveTo(0, -size * 0.88)
+  ctx.lineTo(0,  size * 0.82)
+  ctx.strokeStyle = 'rgba(255,255,255,0.10)'
+  ctx.lineWidth = 1.5
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.arc(0, -size * 0.72, size * 0.10, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.35)'
+  ctx.fill()
+}
+
+/** Freighter — raised bridge tower below the prow with porthole row. */
+export function drawFreighterDetail(ctx, size) {
+  const bw = size * 0.24
+  const bh = size * 0.18
+  const by = -size * 0.58
+  ctx.beginPath()
+  ctx.rect(-bw / 2, by - bh / 2, bw, bh)
+  ctx.fillStyle = 'rgba(255,255,255,0.15)'
+  ctx.fill()
+  ctx.strokeStyle = 'rgba(255,255,255,0.22)'
+  ctx.lineWidth = 0.8
+  ctx.stroke()
+
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath()
+    ctx.arc(i * size * 0.07, by, size * 0.03, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(125,211,252,0.60)'
+    ctx.fill()
+  }
+}
+
+/** Gunship — armored CIC dome amidships-forward + targeting sensor on top. */
+export function drawGunshipDetail(ctx, size) {
+  ctx.beginPath()
+  ctx.ellipse(0, -size * 0.38, size * 0.18, size * 0.11, 0, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.14)'
+  ctx.fill()
+  ctx.strokeStyle = 'rgba(255,255,255,0.28)'
+  ctx.lineWidth = 1
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.arc(0, -size * 0.50, size * 0.05, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.30)'
+  ctx.fill()
+}
+
+/** Cruiser — elongated command bridge on central spine with twin portholes. */
+export function drawCruiserDetail(ctx, size) {
+  ctx.beginPath()
+  ctx.moveTo(0,            -size * 0.78)
+  ctx.lineTo( size * 0.06, -size * 0.55)
+  ctx.lineTo( size * 0.06,  size * 0.18)
+  ctx.lineTo(0,             size * 0.60)
+  ctx.lineTo(-size * 0.06,  size * 0.18)
+  ctx.lineTo(-size * 0.06, -size * 0.55)
+  ctx.closePath()
+  ctx.fillStyle = 'rgba(255,255,255,0.11)'
+  ctx.fill()
+
+  ctx.beginPath()
+  ctx.ellipse(0, -size * 0.60, size * 0.09, size * 0.14, 0, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.20)'
+  ctx.fill()
+  ctx.strokeStyle = 'rgba(255,255,255,0.32)'
+  ctx.lineWidth = 0.8
+  ctx.stroke()
+
+  for (let i = -1; i <= 1; i += 2) {
+    ctx.beginPath()
+    ctx.arc(i * size * 0.04, -size * 0.60, size * 0.025, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(125,211,252,0.55)'
+    ctx.fill()
+  }
+}
+
+/**
+ * Map of detail draw functions, keyed by shape.
+ * Capital uses drawCapitalShipDetail (already exported above).
+ * @type {Record<string, (ctx: CanvasRenderingContext2D, size: number) => void>}
+ */
+export const SHIP_DETAILS = {
+  delta:     drawDeltaDetail,
+  needle:    drawNeedleDetail,
+  freighter: drawFreighterDetail,
+  gunship:   drawGunshipDetail,
+  cruiser:   drawCruiserDetail,
+  capital:   drawCapitalShipDetail,
+}
+
+/**
+ * Return the detail drawer for a given shape key, or null if none registered.
+ * @param {string} key
+ * @returns {((ctx: CanvasRenderingContext2D, size: number) => void) | null}
+ */
+export function getDetailDrawer(key) {
+  return SHIP_DETAILS[key] ?? null
+}
+
 // ─── SHAPE MAP ────────────────────────────────────────────────────────────────
 
 /**

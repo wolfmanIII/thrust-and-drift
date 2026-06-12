@@ -6,7 +6,7 @@
  */
 
 import { hexToPixel, hexMagnitude } from '../../utils/hex.js'
-import { getShapeTracer, drawCapitalShipDetail } from './shipTokenShapes.js'
+import { getShapeTracer, getDetailDrawer } from './shipTokenShapes.js'
 
 // === CONSTANTS ===
 
@@ -136,28 +136,7 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
   ctx.lineWidth = 1
   ctx.stroke()
 
-  if (shape === 'capital') {
-    drawCapitalShipDetail(ctx, TOKEN_RADIUS)
-  } else {
-    // Fuselage center stripe
-    const r2 = TOKEN_RADIUS
-    ctx.beginPath()
-    ctx.moveTo(0,          -r2 * 0.90)
-    ctx.lineTo( r2 * 0.09, -r2 * 0.52)
-    ctx.lineTo( r2 * 0.09,  r2 * 0.50)
-    ctx.lineTo(0,           r2 * 0.68)
-    ctx.lineTo(-r2 * 0.09,  r2 * 0.50)
-    ctx.lineTo(-r2 * 0.09, -r2 * 0.52)
-    ctx.closePath()
-    ctx.fillStyle = 'rgba(255,255,255,0.14)'
-    ctx.fill()
-
-    // Cockpit dot (just below nose tip)
-    ctx.beginPath()
-    ctx.arc(0, -r2 * 0.62, r2 * 0.13, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(255,255,255,0.32)'
-    ctx.fill()
-  }
+  getDetailDrawer(shape)?.(ctx, TOKEN_RADIUS)
 
   ctx.restore()
 
