@@ -9,14 +9,23 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.13.1 |
+| **Versione** | 1.14.0 |
 | **Branch** | main (clean) |
-| **Test** | 686 passing |
-| **Ultimo commit** | `v1.13.1` docs: markdown formatting + version bump |
+| **Test** | 692 passing |
+| **Ultimo commit** | `v1.14.0` feat: rubber-band canvas thrust targeting |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
+
+### Sessione corrente — Rubber-band Thrust Targeting (v1.14.0)
+
+1. **`feat(hex): add computeClampedDelta`** (`03444e7`) — funzione pura in `hex.js`; calcola delta clamped da `shipPos` verso `targetHex` entro `thrustAvailable`; while-loop di correzione post-round. +4 test.
+2. **`feat(uiStore): thrustTargeting state`** (`ccde095`) — `thrustTargeting: { shipId } | null`; `startThrustTargeting` / `cancelThrustTargeting`; `'thrust'` rimosso da `ModalId` typedef. +2 test.
+3. **`feat(thrust-targeting): canvas rubber-band`** (`0ed79f4`) — `useMapInteraction` accetta `mouseHexRef`; `onMouseMove` aggiorna hex in targeting mode; `onClick` conferma delta via `applyShipThrust` + `emitEffect`; `BattleMap` crea `mouseHexRef` + ESC keydown; `useCanvasRenderer` Layer 3b `drawThrustTargeting` (linea tratteggiata, dot, ghost, linea inerziale, badge cost/max); ghost default soppresso per la nave in targeting; `ContextMenu` chiama `startThrustTargeting`; `App.jsx` rimuove import/entry `ThrustModal`.
+4. **`docs: mark ThrustModal unused`** (`403af7d`) — README nota `⚠ UNUSED`.
+
+### Sessione precedente — Phase Guards + UI Fixes (v1.13.0 / v1.13.1)
 
 ### Due sessioni fa — In-App Testing Bugfixes (v1.12.2)
 
@@ -46,6 +55,7 @@ Nessun task pianificato. Test in app + pubblicazione previsti a breve.
 
 Possibili aree di sviluppo future:
 
+- **Eliminare `ThrustModal.jsx`** — file ancora su disco ma non più importato; rimuovere quando confermato stabile il nuovo targeting
 - **Obstacles system** — vedi `doc/obstacles-system-design.md` per spec completa; §14 documenta già l'interazione dogfight × ostacoli
 - **BoardingPanel side panel** — vedi `doc/conflict-resolution-implementation.md` §5 (UX D); sostituisce i 3 boarding modal con pannello laterale persistente accanto alla mappa
 - **Animazione lancio missili** — token appare istantaneamente, manca slide-in analoga al movimento navi

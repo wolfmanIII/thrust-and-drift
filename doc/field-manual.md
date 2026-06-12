@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.13.1** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.14.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -232,15 +232,21 @@ declares evasive action.
 
 ### 7.1 Applying Thrust
 
-Right-click ship → **Apply Thrust**.
+Right-click ship → **Apply Thrust**. The map enters **targeting mode**:
 
-The Thrust Modal shows the current velocity vector and a hex direction pad.
-Enter a delta-V (Δq / Δr) or click the direction buttons. The total magnitude
-of the delta cannot exceed the ship's available thrust
-(base thrust minus any M-Drive critical hit penalties).
+1. **Move the cursor** toward the hex you want the thrust to point at.
+   A dashed line stretches from the ship to the clamped thrust endpoint.
+2. **Read the overlay**:
+   - Dashed line colour: **cyan** when within budget, **orange** when at cap.
+   - Circle marks the thrust endpoint (ship position + delta).
+   - Ghost token shows next-round position (`ship.pos + ship.vector + delta`).
+   - Faint line from the inertial ghost (no thrust) to the new ghost.
+   - Badge `cost / max` below the ghost.
+3. **Click** to confirm. The thrust delta is applied and targeting mode exits.
+4. **ESC** (or right-click) to cancel without applying thrust.
 
-A **ghost token** on the map previews where the ship will be next round if it
-maintains its current velocity after this thrust.
+The available thrust (`thrustAvailable`) equals base thrust + any engineer
+bonus − thrust already used this round − M-Drive critical penalty.
 
 ### 7.2 Note
 

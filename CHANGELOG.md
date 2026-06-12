@@ -6,6 +6,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.14.0] — 2026-06-12
+
+### Added
+
+- **Rubber-band canvas thrust targeting** — `ThrustModal` replaced by a direct canvas interaction in the Acceleration phase. Right-click ship → *Apply Thrust* enters targeting mode; moving the mouse draws a dashed rubber-band line from the ship toward the cursor with the thrust endpoint clamped to `thrustAvailable`. The line turns orange when at cap. A ghost token shows the next-round position (`ship.pos + ship.vector + delta`); a faint line connects the inertial ghost to the new ghost; a `cost/max` badge appears below. Click confirms; ESC cancels. Implemented across:
+  - `src/utils/hex.js` — new `computeClampedDelta(targetHex, shipPos, thrustAvailable)` pure function
+  - `src/store/uiStore.js` — `thrustTargeting: { shipId } | null`; `startThrustTargeting` / `cancelThrustTargeting` actions; `'thrust'` removed from `ModalId` typedef
+  - `src/components/map/useMapInteraction.js` — accepts `mouseHexRef`; `onMouseMove` tracks cursor hex during targeting; `onClick` confirms delta → `applyShipThrust` + `emitEffect('thrust_plume')`
+  - `src/components/map/BattleMap.jsx` — creates `mouseHexRef`; wires ESC keydown → `cancelThrustTargeting`; passes `mouseHexRef` to both hooks
+  - `src/components/map/useCanvasRenderer.js` — Layer 3b `drawThrustTargeting`; default ghost suppressed for the targeting ship
+  - `src/components/ui/ContextMenu.jsx` — *Apply Thrust* calls `startThrustTargeting` instead of `openModal('thrust')`
+  - `src/App.jsx` — `ThrustModal` import and `MODAL_MAP` entry removed (`ThrustModal.jsx` kept on disk, marked ⚠ UNUSED in README)
+
+### Tests
+
+- 692 tests (+6 from 686 — `computeClampedDelta` ×4, `thrustTargeting` store ×2)
+
+---
+
 ## [1.13.1] — 2026-06-12
 
 ### Docs

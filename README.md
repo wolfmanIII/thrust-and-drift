@@ -14,6 +14,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | --------- | ------------- |
 | **Hex grid map** | Flat-top axial hex grid with pan & zoom |
 | **Vectorial movement** | Ships have velocity vectors; thrust modifies them |
+| **Thrust targeting** | Rubber-band canvas interaction during Acceleration: right-click → *Apply Thrust* → move cursor to aim; dashed line + ghost preview + `cost/max` badge; line turns orange at thrust cap; click to confirm, ESC to cancel |
 | **Ship profiles** | Full CRUD — create, edit, duplicate, delete (with confirmation); turret weapon slots capped at 3 (triple turret, CRB p.163) |
 | **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
 | **Attack resolution** | 4-step flow: weapon/target config → 2D6 roll → damage → critical; per-turret firing limit (CRB p.164) — each turret fires once per round, slot badge (T1, T2…) shown in weapon list |
@@ -150,7 +151,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-686 tests across utils, Zustand stores, hooks, and UI components.
+692 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 

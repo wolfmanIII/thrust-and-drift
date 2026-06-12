@@ -270,9 +270,12 @@ export function HelpScreen() {
           <p>Each ship in reverse initiative order adjusts its velocity vector.</p>
 
           <Sub title="APPLYING THRUST">
-            <p>Right-click ship → <span className="text-slate-200">Apply Thrust</span>.</p>
-            <p>The Thrust Modal shows the current velocity vector and a hex direction pad. Enter a delta-V (Δq / Δr) or click the direction buttons. The total magnitude cannot exceed the ship's available thrust (base thrust minus any M-Drive critical penalties).</p>
-            <p>A ghost token on the map previews where the ship will be next round if it keeps its current velocity after this thrust.</p>
+            <p>Right-click ship → <span className="text-slate-200">Apply Thrust</span>. The map enters targeting mode.</p>
+            <KV k="Move cursor" v="Aim toward the target hex. A dashed line stretches from the ship to the clamped thrust endpoint — cyan within budget, orange at cap." />
+            <KV k="Overlay" v="Circle = thrust endpoint. Ghost = next-round position (pos + vector + delta). Faint line = inertial ghost → new ghost. Badge = cost/max thrust." />
+            <KV k="Click" v="Confirm thrust delta and exit targeting mode." />
+            <KV k="ESC" v="Cancel without applying thrust." />
+            <p className="text-slate-500 italic text-xs">thrustAvailable = base thrust + engineer bonus − used this round − M-Drive penalty.</p>
           </Sub>
           <Note>Full thrust is available for movement. Evasive Action is a Reaction declared during the Attack phase — not pre-allocated here (CRB p.171). See the Attack Phase section below.</Note>
 
