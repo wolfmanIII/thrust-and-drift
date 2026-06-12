@@ -573,6 +573,7 @@ const useBattleStore = create((set, get) => {
         type: 'system',
         message: `⚡ ${m.count}× ${m.type ?? 'Missile'} salvo from ${launcherShip?.profile.name ?? '?'} impacts ${targetShip?.profile.name ?? '?'}. Resolve damage.`,
         shipId: m.target,
+        details: { recoverable: true, impact: { launchedBy: m.launchedBy, target: m.target, count: m.count, type: m.type ?? 'Missile' } },
       })
     })
 
@@ -611,6 +612,16 @@ const useBattleStore = create((set, get) => {
   /** Remove a single missile impact by id after GM has resolved damage. */
   dismissMissileImpact: (id) => {
     set((s) => ({ pendingMissileImpacts: s.pendingMissileImpacts.filter((e) => e.id !== id) }))
+  },
+
+  /**
+   * Re-queue a missile impact from the battle log (recovery after accidental dismiss).
+   * @param {{ launchedBy: string, target: string, count: number, type: string }} impact
+   */
+  reopenMissileImpact: (impact) => {
+    set((s) => ({
+      pendingMissileImpacts: [...s.pendingMissileImpacts, { id: uuidv7(), ...impact }],
+    }))
   },
 
   /**

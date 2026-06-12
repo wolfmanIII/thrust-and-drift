@@ -35,8 +35,9 @@ export function HUD() {
   const combatMode          = useBattleStore((s) => s.combatMode)
   const undoLastAction      = useBattleStore((s) => s.undoLastAction)
   const redoLastAction      = useBattleStore((s) => s.redoLastAction)
-  const canUndo             = useBattleStore((s) => s.undoStack.length > 0)
-  const canRedo             = useBattleStore((s) => s.redoStack.length > 0)
+  const canUndo                = useBattleStore((s) => s.undoStack.length > 0)
+  const canRedo                = useBattleStore((s) => s.redoStack.length > 0)
+  const pendingMissileImpacts  = useBattleStore((s) => s.pendingMissileImpacts)
   const gotoScreen          = useUiStore((s) => s.gotoScreen)
   const openModal           = useUiStore((s) => s.openModal)
   const audioEnabled        = useUiStore((s) => s.audioEnabled)
@@ -52,11 +53,12 @@ export function HUD() {
 
   // true when advancing to the next phase is allowed
   const canAdvancePhase = useMemo(() => {
+    if (pendingMissileImpacts.length > 0) return false
     if (phase === 'setup')      return ships.length > 0
     if (phase === 'initiative') return initiativeOrder.length > 0
     if (ACTOR_TURN_PHASES.has(phase)) return currentActorIndex >= initiativeOrder.length
     return true
-  }, [phase, ships, currentActorIndex, initiativeOrder])
+  }, [phase, ships, currentActorIndex, initiativeOrder, pendingMissileImpacts])
 
   // clear the warning once the condition is satisfied
   useEffect(() => {
@@ -65,7 +67,9 @@ export function HUD() {
 
   const handleAdvancePhase = useCallback(() => {
     if (!canAdvancePhase) {
-      if (phase === 'setup') {
+      if (pendingMissileImpacts.length > 0) {
+        setPhaseBlockMsg(`Resolve ${pendingMissileImpacts.length} pending missile impact${pendingMissileImpacts.length !== 1 ? 's' : ''} first.`)
+      } else if (phase === 'setup') {
         setPhaseBlockMsg('Place at least one ship first.')
       } else if (phase === 'initiative') {
         setPhaseBlockMsg('Roll initiative before advancing.')
@@ -150,6 +154,13 @@ export function HUD() {
         >
           🎲 ROLL INITIATIVE →
         </button>
+      )}
+
+      {/* Pending missile impacts alert */}
+      {pendingMissileImpacts.length > 0 && (
+        <p className="font-mono text-xs text-amber-400 animate-pulse pointer-events-none">
+          ⚡ {pendingMissileImpacts.length} impact{pendingMissileImpacts.length !== 1 ? 's' : ''} unresolved
+        </p>
       )}
 
       {/* Phase advance — skip movement phase in basic mode (no vectors) */}

@@ -1457,6 +1457,12 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - **Durata animazione movimento** — `MOVEMENT_ANIM_DURATION_MS` aumentato da 600 ms a 2000 ms per dare al GM il tempo di seguire il movimento simultaneo.
 - 692 test (invariati — test guidance refactored: verifica `pendingMissileImpacts` invece di missile sopravvissuto).
 
+### 13.8l Versione 1.15.4 — Missile impact recovery + phase block ✅ COMPLETATA
+
+- **Recovery dal battle log** — log entry di impatto include `details: { recoverable: true, impact: { launchedBy, target, count, type } }`. Nel `BattleLog` ogni entry con `details.recoverable` mostra un pulsante ↩ amber; click chiama `reopenMissileImpact(impact)` che ri-accoda l'impatto in `pendingMissileImpacts` via `uuidv7()`. Funziona anche dopo reload (log persisto, `pendingMissileImpacts` transient).
+- **Phase advance block** — `canAdvancePhase` (HUD) restituisce `false` se `pendingMissileImpacts.length > 0`; messaggio specifico `"Resolve N pending missile impact(s) first."`; badge `⚡ N impacts unresolved` pulsante (amber, `animate-pulse`) sempre visibile nell'HUD quando ci sono impatti irrisolti.
+- 692 test (invariato).
+
 ### 13.8k Versione 1.15.3 — MissileImpactModal dice roll ✅ COMPLETATA
 
 - **Pulsante 🎲 nella `MissileImpactModal`** — pulsante inline affianco al campo danno; chiama `rollDice(count × DICE_PER_MISSILE, 6)` e popola il totale automaticamente. L'input manuale rimane per override con dadi fisici. Import `rollDice` aggiunto alla modale.

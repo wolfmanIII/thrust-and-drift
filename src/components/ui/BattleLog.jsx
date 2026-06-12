@@ -28,9 +28,10 @@ const TYPE_PREFIX = {
 
 export function BattleLog() {
   const [collapsed, setCollapsed] = useState(true)
-  const log    = useBattleStore((s) => s.log)
-  const clearLog = useBattleStore((s) => s.clearLog)
-  const listRef  = useRef(null)
+  const log                 = useBattleStore((s) => s.log)
+  const clearLog            = useBattleStore((s) => s.clearLog)
+  const reopenMissileImpact = useBattleStore((s) => s.reopenMissileImpact)
+  const listRef             = useRef(null)
 
   const visible = log.slice(-MAX_VISIBLE)
 
@@ -78,7 +79,16 @@ export function BattleLog() {
                   {TYPE_PREFIX[entry.type] ?? '·'}
                 </span>
                 <span className="text-slate-500 shrink-0">R{entry.round}</span>
-                <span className="text-slate-300">{entry.message}</span>
+                <span className="text-slate-300 flex-1">{entry.message}</span>
+                {entry.details?.recoverable && (
+                  <button
+                    onClick={() => reopenMissileImpact(entry.details.impact)}
+                    className="shrink-0 text-amber-500 hover:text-amber-300 transition-colors leading-none"
+                    title="Re-open impact resolution"
+                  >
+                    ↩
+                  </button>
+                )}
               </div>
             ))}
           </div>

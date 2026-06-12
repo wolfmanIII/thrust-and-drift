@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.15.4] — 2026-06-12
+
+### Added
+
+- **Missile impact recovery from battle log** — log entries for missile impacts now store `details.recoverable + impact` data. A ↩ button appears on each recoverable entry in the battle log; clicking it re-queues the impact in `pendingMissileImpacts` via the new `reopenMissileImpact` store action. Works even after page reload (log is persisted; `pendingMissileImpacts` is transient).
+- **Phase advance blocked by unresolved impacts** — `canAdvancePhase` returns false when `pendingMissileImpacts.length > 0`; clicking NEXT PHASE shows `"Resolve N pending missile impact(s) first."`. An amber `⚡ N impacts unresolved` badge pulses in the HUD whenever impacts are pending.
+
+### Tests
+
+- 692 tests (invariato)
+
+---
+
 ## [1.15.3] — 2026-06-12
 
 ### Added
