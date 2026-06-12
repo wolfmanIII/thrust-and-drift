@@ -24,10 +24,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - **Battle log layout** — width changed from full-viewport to `w-1/3` (responsive, 33%); panel anchored bottom-left. Legal footer `border-t border-slate-800` restored.
+- **Phase advance guards** — `NEXT PHASE ⟶` button in `HUD.jsx` is now conditional: Setup requires ≥ 1 ship placed; Initiative requires at least one `initiativeOrder` entry (i.e. initiative has been rolled); Acceleration, Attack, and Actions require `currentActorIndex >= initiativeOrder.length` (all actors have acted). Clicking the button while blocked shows an amber warning (`⚠ Place at least one ship first.` / `Roll initiative before advancing.` / `N actors still to act.`); button styled `cursor-not-allowed` when blocked. Warning auto-clears when the condition is satisfied.
 
 ### Tests
 
-- 682 tests (+1 from 681 — `rangeBands` included in `pushHistory` snapshot)
+- 686 tests (+5 from 681 — `rangeBands` undo snapshot +1; phase advance guards +4)
 
 ---
 

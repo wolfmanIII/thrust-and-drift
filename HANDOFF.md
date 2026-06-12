@@ -11,8 +11,8 @@
 | --- | --- |
 | **Versione** | 1.13.0 |
 | **Branch** | main (clean) |
-| **Test** | 682 passing |
-| **Ultimo commit** | `d384a5a` fix(ui): battle log width 1/3 of viewport |
+| **Test** | 686 passing |
+| **Ultimo commit** | `1713424` fix(hud): block phase advance in initiative until initiative is rolled |
 
 ---
 
@@ -33,12 +33,16 @@
 4. **`fix(effects): pin effects canvas to z-index 1 to guarantee render above ship tokens`** (`f5f9b7d`) — `effectsCanvasRef` ottiene `style={{ zIndex: 1 }}`; risolve `impact_burst`/`critical_flash`/`missile_launch`/`evasive_aura` che apparivano sotto i token nave.
 5. **`feat(footer): add Mongoose Publishing link to legal footer`** (`36edee6`) — testo "Mongoose Publishing" nel footer diventa `<a href="https://www.mongoosepublishing.com/" target="_blank">`.
 6. **`fix(ui): narrow battle log to left panel + restore footer border`** → poi **`fix(ui): battle log width 1/3 of viewport`** (`d384a5a`) — `BattleLog` da `left-0 right-0` a `left-0 w-1/3`; footer `border-t border-slate-800` ripristinato.
+7. **`fix(hud): add phase advance guards`** (`df6210c`) — `NEXT PHASE ⟶` bloccato in setup (nessuna nave), acceleration/attack/actions (non tutti gli attori hanno agito); amber warning su click bloccato; `cursor-not-allowed`; auto-clear warning quando condizione soddisfatta. +3 test.
+8. **`fix(hud): block phase advance in initiative until initiative is rolled`** (`1713424`) — fase `initiative` non coperta dai guard iniziali: `canAdvancePhase` ora include `if (phase === 'initiative') return initiativeOrder.length > 0`; blocco con messaggio `Roll initiative before advancing.` +1 test.
 
 ---
 
 ## Prossimo task
 
 Nessun task pianificato. Test in app + pubblicazione previsti a breve.
+
+> **Nota doc**: CHANGELOG/README/HANDOFF aggiornati a `1713424` (686 test). Prossimo bump di versione sarà v1.14.0.
 
 Possibili aree di sviluppo future:
 

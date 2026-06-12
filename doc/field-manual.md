@@ -149,6 +149,19 @@ round and phase. Click **NEXT PHASE ⟶** to advance.
 | **ACTIONS** | Each ship in initiative order; each crew member may perform one action. |
 | **END OF ROUND** | Round counter increments. Click NEXT PHASE to begin the next round. |
 
+### 4.1 Phase Advance Guards
+
+**NEXT PHASE ⟶** enforces preconditions before allowing advancement:
+
+| Phase | Guard | Blocked message |
+| ----- | ----- | --------------- |
+| **Setup** | At least 1 ship must be placed | *Place at least one ship first.* |
+| **Initiative** | Initiative must have been rolled (`initiativeOrder` non-empty) | *Roll initiative before advancing.* |
+| **Acceleration / Attack / Actions** | All ships in initiative order must have acted (`currentActorIndex ≥ initiativeOrder.length`) | *N actor(s) still to act.* |
+| **Movement / End** | Always allowed | — |
+
+When blocked, the button turns dim (`cursor-not-allowed`) and clicking it shows an amber warning below the button. The warning clears automatically once the condition is satisfied.
+
 ---
 
 ## 5. Setup Phase

@@ -214,6 +214,17 @@ export function HelpScreen() {
               <KV key={phase} k={phase} v={desc} />
             ))}
           </div>
+          <Sub title="PHASE ADVANCE GUARDS">
+            <p>
+              <span className="text-slate-200">NEXT PHASE ⟶</span> enforces preconditions before advancing.
+              When blocked, the button dims and clicking shows an amber warning below it.
+              The warning clears automatically once the condition is met.
+            </p>
+            <KV k="Setup" v="At least 1 ship must be placed on the map. ⚠ Place at least one ship first." />
+            <KV k="Initiative" v="Initiative must be rolled (Roll Initiative modal). ⚠ Roll initiative before advancing." />
+            <KV k="Accel / Attack / Actions" v="All actors in initiative order must have taken their turn. ⚠ N actor(s) still to act." />
+            <KV k="Movement / End" v="Always allowed — no guard." />
+          </Sub>
         </Section>
 
         {/* SETUP */}
