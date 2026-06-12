@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.15.3] — 2026-06-12
+
+### Added
+
+- **`MissileImpactModal` — in-app dice roll** — pulsante 🎲 affianco al campo danno; chiama `rollDice(count × 4, 6)` e popola il totale automaticamente. L'input manuale rimane per override con dadi fisici.
+
+### Tests
+
+- 692 tests (invariato)
+
+---
+
 ## [1.15.2] — 2026-06-12
 
 ### Fixed

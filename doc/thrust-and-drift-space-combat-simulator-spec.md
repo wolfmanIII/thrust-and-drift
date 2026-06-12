@@ -1457,6 +1457,11 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - **Durata animazione movimento** — `MOVEMENT_ANIM_DURATION_MS` aumentato da 600 ms a 2000 ms per dare al GM il tempo di seguire il movimento simultaneo.
 - 692 test (invariati — test guidance refactored: verifica `pendingMissileImpacts` invece di missile sopravvissuto).
 
+### 13.8k Versione 1.15.3 — MissileImpactModal dice roll ✅ COMPLETATA
+
+- **Pulsante 🎲 nella `MissileImpactModal`** — pulsante inline affianco al campo danno; chiama `rollDice(count × DICE_PER_MISSILE, 6)` e popola il totale automaticamente. L'input manuale rimane per override con dadi fisici. Import `rollDice` aggiunto alla modale.
+- 692 test (invariato).
+
 ### 13.8j Versione 1.15.2 — Missile impact token + sound ✅ COMPLETATA
 
 - **Bug**: il token missile spariva istantaneamente all'impatto (rimosso dal `set()` sincrono prima dell'animazione) e nessun suono veniva emesso. `emitEffect` non era importato in `battleStore.js`.

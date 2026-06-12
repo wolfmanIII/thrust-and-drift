@@ -9,10 +9,10 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.15.2 |
+| **Versione** | 1.15.3 |
 | **Branch** | main (clean) |
 | **Test** | 692 passing |
-| **Ultimo commit** | fix(missiles): keep impacted missiles alive during animation; emit impact sound |
+| **Ultimo commit** | feat(missiles): add in-app dice roll button to MissileImpactModal |
 
 ---
 
@@ -21,7 +21,8 @@
 ### Sessione corrente — Missile Impact Fixes (v1.15.1 → v1.15.2)
 
 1. **`fix(missiles): defer impact modal via setTimeout`** (`eea2000`) — `MissileImpactModal` compariva durante l'animazione di movimento (cross-store tearing con `useSyncExternalStore`). Fix: `resolveMovement` rimuove `pendingMissileImpacts` dal `set()` sincrono; aggiunge via `setTimeout(animDuration + 100ms)`. Modale elimina guard `movementAnimation` e import `useUiStore`. Test aggiornato con fake timers. 692 test (invariato).
-2. **`fix(missiles): keep impacted missiles alive during animation; emit impact sound`** — i missili impattati venivano rimossi dal `set()` sincrono: il token spariva istantaneamente e nessun suono veniva emesso. Fix: missili impattati inclusi nello store insieme ai sopravvissuti durante l'animazione; il `setTimeout` li rimuove, mostra la modale e chiama `emitEffect('impact_burst')` per ogni salvo. Import `emitEffect` aggiunto a `battleStore.js`. 692 test (invariato).
+2. **`fix(missiles): keep impacted missiles alive during animation; emit impact sound`** (`ff2ecea`) — i missili impattati venivano rimossi dal `set()` sincrono: il token spariva istantaneamente e nessun suono veniva emesso. Fix: missili impattati inclusi nello store insieme ai sopravvissuti durante l'animazione; il `setTimeout` li rimuove, mostra la modale e chiama `emitEffect('impact_burst')` per ogni salvo. Import `emitEffect` aggiunto a `battleStore.js`. 692 test (invariato).
+3. **`feat(missiles): add in-app dice roll button to MissileImpactModal`** — pulsante 🎲 affianco al campo danno; chiama `rollDice(count × 4, 6)` e popola il totale. Input manuale rimane per override con dadi fisici. 692 test (invariato).
 
 ### Sessione precedente — Missile Impact + Animation (v1.15.0)
 

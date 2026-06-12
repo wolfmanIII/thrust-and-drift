@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { Modal }          from './Modal.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
+import { rollDice }       from '../../utils/dice.js'
 
 const DICE_PER_MISSILE = 4 // HG p.28 — Missile Rack 4D6
 
@@ -104,14 +105,24 @@ export function MissileImpactModal() {
             <span className="font-mono text-xs text-slate-500 tracking-widest">
               DAMAGE ROLLED (total)
             </span>
-            <input
-              type="number"
-              min="0"
-              value={damageRolled}
-              onChange={(e) => setDamageRolled(e.target.value)}
-              placeholder="0"
-              className="bg-slate-900 border border-slate-600 focus:border-(--neon-cyan)/60 rounded px-3 py-2 font-mono text-sm text-white outline-none w-full"
-            />
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min="0"
+                value={damageRolled}
+                onChange={(e) => setDamageRolled(e.target.value)}
+                placeholder="0"
+                className="flex-1 bg-slate-900 border border-slate-600 focus:border-(--neon-cyan)/60 rounded px-3 py-2 font-mono text-sm text-white outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setDamageRolled(String(rollDice(totalDice, 6).total))}
+                className="px-3 py-2 bg-slate-800 border border-slate-600 text-slate-300 font-mono text-sm rounded hover:border-(--neon-cyan)/60 hover:text-(--neon-cyan) transition-colors"
+                title={`Auto-roll ${totalDice}D6`}
+              >
+                🎲
+              </button>
+            </div>
           </label>
 
           {/* Armour & net */}
