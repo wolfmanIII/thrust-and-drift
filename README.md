@@ -179,7 +179,7 @@ src/
 │   │   ├── Modal.jsx           ← Generic modal wrapper
 │   │   ├── ShipProfileModal.jsx
 │   │   ├── AddShipModal.jsx
-│   │   ├── ThrustModal.jsx
+│   │   ├── ThrustModal.jsx     ← ⚠ UNUSED — replaced by canvas rubber-band targeting (useMapInteraction + useCanvasRenderer Layer 3b)
 │   │   ├── AttackModal.jsx     ← Attack resolution + Reactions panel (CRB p.171)
 │   │   ├── MissileLaunchModal.jsx
 │   │   ├── ShipDetailModal.jsx
