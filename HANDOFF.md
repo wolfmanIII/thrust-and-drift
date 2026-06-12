@@ -9,16 +9,23 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.14.0 |
+| **Versione** | 1.15.0 |
 | **Branch** | main (clean) |
 | **Test** | 692 passing |
-| **Ultimo commit** | `v1.14.0` feat: rubber-band canvas thrust targeting |
+| **Ultimo commit** | docs: update field-manual, README, CHANGELOG, HANDOFF for v1.15.0 |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Rubber-band Thrust Targeting (v1.14.0)
+### Sessione corrente — Missile Impact + Animation (v1.15.0)
+
+1. **`feat(missiles): detect impact when salvo reaches target hex`** (`ed214bd`) — `pendingMissileImpacts: []` in store; in `resolveMovement` post-movement hex check (missile pos == target pos); impacted missiles rimossi dall'array attivo e accodati in `pendingMissileImpacts`; log entry per impatto; `dismissMissileImpact(id)` action; test guidance refactored per nuovo comportamento.
+2. **`feat(missiles): add MissileImpactModal`** (`6f9a607`) — modal self-contained (pattern PassingAttackModal): mostra launcher/target/salvo count, input danno totale, armour da profilo, net damage live, APPLY DAMAGE / MISS DISMISS; auto-dismiss se target rimosso.
+3. **`feat(app): mount MissileImpactModal`** (`e13cc37`) — `<MissileImpactModal />` nel layer overlay accanto a `<PassingAttackModal />`.
+4. **`fix(animation): increase movement animation duration 600ms → 2000ms`** (`4e8cbd5`) — `MOVEMENT_ANIM_DURATION_MS` in `uiStore.js`.
+
+### Sessione precedente — Rubber-band Thrust Targeting (v1.14.0)
 
 1. **`feat(hex): add computeClampedDelta`** (`03444e7`) — funzione pura in `hex.js`; calcola delta clamped da `shipPos` verso `targetHex` entro `thrustAvailable`; while-loop di correzione post-round. +4 test.
 2. **`feat(uiStore): thrustTargeting state`** (`ccde095`) — `thrustTargeting: { shipId } | null`; `startThrustTargeting` / `cancelThrustTargeting`; `'thrust'` rimosso da `ModalId` typedef. +2 test.
@@ -50,8 +57,6 @@
 ## Prossimo task
 
 Nessun task pianificato. Test in app + pubblicazione previsti a breve.
-
-> **Nota doc**: CHANGELOG/README/HANDOFF aggiornati a `1713424` (686 test). Prossimo bump di versione sarà v1.14.0.
 
 Possibili aree di sviluppo future:
 

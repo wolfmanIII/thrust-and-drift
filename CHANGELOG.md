@@ -6,6 +6,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.15.0] — 2026-06-12
+
+### Added
+
+- **Missile impact resolution** — when a missile salvo reaches its target's hex during the Movement phase, the salvo is consumed and a **⚡ MISSILE IMPACT** modal opens automatically. The GM enters the total damage rolled (count × 4D6 per missile, reminder shown); armour is read from the target's ship profile; net damage (`max(0, rolled − armour)`) is displayed live. **APPLY DAMAGE** calls `applyDamage` and closes the entry; **MISS / INTERCEPTED — DISMISS** closes without applying damage. Multiple salvos that impact in the same round are resolved sequentially (pending count shown). Stale impacts (target removed via undo) are auto-dismissed. Implemented across:
+  - `src/store/battleStore.js` — `pendingMissileImpacts: []` added to initial state and `resetBattle`; impact detection in `resolveMovement` (post-movement hex comparison of missile position vs target position); `dismissMissileImpact(id)` action; log entry (`⚡ … impacts … Resolve damage.`) per impact.
+  - `src/components/modals/MissileImpactModal.jsx` — new self-contained modal (pattern: `PassingAttackModal`).
+  - `src/App.jsx` — `<MissileImpactModal />` mounted in the always-present overlay layer alongside `<PassingAttackModal />`.
+
+### Changed
+
+- **Movement animation duration** — increased from 600 ms to 2 s (`MOVEMENT_ANIM_DURATION_MS` in `uiStore.js`). Gives the GM more time to track ship and missile positions during the simultaneous movement step.
+
+### Tests
+
+- 692 tests (unchanged count — guidance test refactored: missile-on-target-hex now verifies `pendingMissileImpacts` queue instead of surviving missile state).
+
+---
+
 ## [1.14.0] — 2026-06-12
 
 ### Added

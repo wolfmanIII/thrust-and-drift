@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.14.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.15.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -13,7 +13,7 @@
 5. [Setup Phase](#5-setup-phase)
 6. [Initiative Phase](#6-initiative-phase)
 7. [Acceleration Phase](#7-acceleration-phase)
-8. [Movement Phase](#8-movement-phase)
+8. [Movement Phase](#8-movement-phase) — includes §8.1 missile impact, §8.2 ships that pass in the night
 9. [Attack Phase](#9-attack-phase) — includes §9.5 per-turret limit, §9.6 missile launch, §9.9 reactions
 10. [Actions Phase — Crew](#10-actions-phase--crew)
 11. [Crew System](#11-crew-system)
@@ -289,7 +289,7 @@ The threshold to change one band step depends on the current band
 
 Click **NEXT PHASE ⟶** to execute movement. The app:
 
-1. **Animates** every token sliding from its current position to its new position (~600 ms, easeInOut). Input is blocked during the animation to prevent mis-clicks.
+1. **Animates** every token sliding from its current position to its new position (~2 s, easeInOut). Input is blocked during the animation to prevent mis-clicks.
 2. Advances every ship's position by its current velocity vector.
 3. Detects hostile ships whose trajectories crossed within **Short range (≤ 2 hexes)** — opens the **Passing Encounter** window for each.
 4. Detects ships that end in the same hex — opens the **Dogfight** engagement intent modal.
@@ -297,7 +297,28 @@ Click **NEXT PHASE ⟶** to execute movement. The app:
 The GM watches the tokens move on the map. If no encounters or dogfights are
 triggered, the phase advances to **Attack** automatically.
 
-### 8.1 Ships That Pass in the Night
+### 8.1 Missile Impact
+
+If one or more missile salvos reach their target's hex during the movement step, each salvo is consumed and a **⚡ MISSILE IMPACT** modal opens automatically after the animation.
+
+| Field | Description |
+| ----- | ----------- |
+| **Launcher / Target** | Ships involved. Target hull shown for reference. |
+| **Salvo** | Count and type (e.g. *3× Missile Rack*). |
+| **Damage rolled** | GM enters the total rolled. Formula: `count × 4D6` *(HG p.28 — Missile Rack 4D6 per missile)*. |
+| **Armour** | Read automatically from the target's ship profile. |
+| **Net damage** | `max(0, rolled − armour)`. Updated live as you type. |
+
+- **APPLY DAMAGE** — deducts net damage from target hull (triggers threshold criticals if applicable), logs the hit, closes this entry.
+- **MISS / INTERCEPTED — DISMISS** — closes without applying damage (e.g. all missiles were destroyed by Point Defence before movement).
+
+Multiple salvos impacting in the same round are resolved sequentially; the pending count is shown in the modal header.
+
+> **Note:** Per RAW, armour applies independently to each missile's damage roll.
+> The modal accepts a pre-summed total for speed — the GM may choose to enter
+> each missile separately and apply in sequence.
+
+### 8.2 Ships That Pass in the Night
 
 If two hostile ships cross within **Short range (≤ 2 hexes)** during the same
 movement step — even if their final positions are far apart — the system detects

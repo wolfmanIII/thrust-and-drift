@@ -21,6 +21,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Reactions (CRB p.171)** | Defender reacts before each attack roll: Evasive Action (1 thrust → DM −Pilot skill), Point Defence (laser turret → Gunner check, removes missiles), Disperse Sand (sandcaster turret → Gunner check, +1D+Effect armour vs laser); player ships enter physical dice manually |
 | **Missile launch** | Missile Rack selectable directly in Attack modal — count stepper + 🚀 LAUNCH SALVO (no DM roll); salvo token inherits launcher vector; rotates to face velocity direction |
 | **Missile guidance** | Each round in the movement phase, missiles home toward their target's predicted next position; up to 10 hex/round delta-v correction (MgT2e CRB p.162 — Thrust 10 standard missile); drifts when 10-round fuel exhausted |
+| **Missile impact** | When a salvo reaches its target's hex, the token is consumed and a **⚡ MISSILE IMPACT** modal opens: GM enters total damage rolled (count × 4D6), armour read from ship profile, net damage computed; APPLY DAMAGE or MISS/INTERCEPTED; multiple impacts queue sequentially |
 | **Sound effects** | Procedural synthesis via Web Audio API — laser, impact, critical, missile launch, thrust plume; 🔊/🔇 mute toggle in HUD; no audio files required |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in on all roll steps (attack, damage, critical location, extra damage, reactions, crew actions, initiative); NPC ships auto-roll |
 | **Destroyed ships** | Hull = 0 → `isDestroyed` flag; token rendered at 35% opacity with ☠ badge; all combat actions blocked ("WRECK — no actions available"); ship skipped in initiative cycling; GM removes wreck manually |
@@ -43,7 +44,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Dogfight system** | Close-range sub-system: 6 micro-rounds per standard round; Pilot opposed checks; tonnage/thrust/multi-enemy DMs; escape via thrust advantage or pursuit check; pulsing token visuals |
 | **Boarding system** | 4-phase boarding action (HG 2022): Contact → Conflict → Security; 6 entry methods incl. hull-cut tracker; stacking rolls; missed-shot table; Bridge/Engineering/Turrets objectives; optional faction transfer on capture; HUD badge per active boarding |
 | **Weapon range enforcement** | Each weapon has a maximum range band (CRB p.167); Attack Modal shows OUT OF RANGE badge and blocks firing beyond a weapon's listed range |
-| **Movement animation** | Ship and missile tokens slide smoothly from start to end position during the Movement phase (~600 ms easeInOut); canvas input blocked for the duration to prevent mis-clicks |
+| **Movement animation** | Ship and missile tokens slide smoothly from start to end position during the Movement phase (~2 s easeInOut); canvas input blocked for the duration to prevent mis-clicks |
 | **Basic combat mode** | Non-vectorial mode: no hex map; range bands tracked per ship pair (`Adjacent`→`Distant`); `BasicManoeuvreModal` lets GM spend thrust to approach/flee; Attack Modal reads stored range band automatically |
 | **Legend modal** | Always-visible `📖 Legend` button fixed top-right; also in right-click empty hex menu; 2-column visual reference for all tokens, beam weapon colours, hit/movement effects, and persistent indicators |
 
@@ -151,7 +152,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-692 tests across utils, Zustand stores, hooks, and UI components.
+692 tests across utils, Zustand stores, hooks, and UI components. (v1.15.0)
 
 ---
 
@@ -190,6 +191,7 @@ src/
 │   │   ├── DogfightNotificationModal.jsx ← Engagement intent + pursuit check
 │   │   ├── DogfightRoundModal.jsx        ← Micro-round resolution (escape + Pilot check)
 │   │   ├── PassingAttackModal.jsx        ← Passing encounter fire window
+│   │   ├── MissileImpactModal.jsx        ← Missile salvo impact damage resolution
 │   │   ├── BoardingSetupModal.jsx        ← Target selection + boarding initiation
 │   │   ├── BoardingContactModal.jsx      ← Phase 2: entry method, hull-cut, modifiers
 │   │   ├── BoardingConflictModal.jsx     ← Phase 3: objectives, stacking, missed shot
