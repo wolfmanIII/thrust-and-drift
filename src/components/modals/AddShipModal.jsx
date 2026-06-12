@@ -3,12 +3,68 @@
  * Initiates pendingPlacement mode; user clicks a hex cell to confirm position.
  */
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useProfilesStore } from '../../store/profilesStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { FACTIONS } from '../../data/factions.js'
+import { getShapeTracer, drawCapitalShipDetail, SHIP_SHAPES } from '../map/shipTokenShapes.js'
+
+const SHAPE_LABELS = {
+  delta:     'Delta',
+  needle:    'Needle',
+  freighter: 'Freighter',
+  gunship:   'Gunship',
+  cruiser:   'Cruiser',
+  capital:   'Capital',
+}
+
+const PREVIEW_SIZE = 40
+
+function ShapePreview({ shape, selected, onClick }) {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const dpr = window.devicePixelRatio ?? 1
+    canvas.width  = PREVIEW_SIZE * dpr
+    canvas.height = PREVIEW_SIZE * dpr
+    ctx.scale(dpr, dpr)
+    ctx.clearRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE)
+    ctx.save()
+    ctx.translate(PREVIEW_SIZE / 2, PREVIEW_SIZE / 2)
+    getShapeTracer(shape)(ctx, PREVIEW_SIZE * 0.42)
+    ctx.fillStyle = selected ? 'rgba(34,211,238,0.75)' : 'rgba(148,163,184,0.5)'
+    ctx.fill()
+    ctx.strokeStyle = selected ? 'rgba(34,211,238,0.9)' : 'rgba(255,255,255,0.2)'
+    ctx.lineWidth = 1
+    ctx.stroke()
+    if (shape === 'capital') drawCapitalShipDetail(ctx, PREVIEW_SIZE * 0.42)
+    ctx.restore()
+  }, [shape, selected])
+
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1 p-1.5 rounded border transition-colors ${
+        selected
+          ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10'
+          : 'border-slate-700 hover:border-slate-500'
+      }`}
+    >
+      <canvas
+        ref={canvasRef}
+        style={{ width: PREVIEW_SIZE, height: PREVIEW_SIZE }}
+      />
+      <span className={`font-mono text-[10px] ${selected ? 'text-(--neon-cyan)' : 'text-slate-500'}`}>
+        {SHAPE_LABELS[shape]}
+      </span>
+    </button>
+  )
+}
 
 const PRESET_COLORS = [
   '#60a5fa', '#f87171', '#4ade80', '#facc15',
@@ -27,9 +83,10 @@ export function AddShipModal() {
   const isBasicMode = combatMode === 'basic'
 
   const [selectedProfileId, setSelectedProfileId] = useState(profiles[0]?.id ?? null)
-  const [faction, setFaction] = useState('npc')
-  const [color, setColor]     = useState('#f87171')
-  const [filter, setFilter]   = useState('')
+  const [faction, setFaction]     = useState('npc')
+  const [color, setColor]         = useState('#f87171')
+  const [filter, setFilter]       = useState('')
+  const [tokenShape, setTokenShape] = useState('delta')
 
   const filtered = profiles.filter((p) =>
     p.name.toLowerCase().includes(filter.toLowerCase())
@@ -39,16 +96,15 @@ export function AddShipModal() {
 
   const handleConfirm = () => {
     if (!selectedProfile) return
+    const profile = { ...selectedProfile, tokenShape }
     if (initialHex) {
-      addShip(selectedProfile, initialHex, faction, color)
+      addShip(profile, initialHex, faction, color)
       closeModal()
     } else if (isBasicMode) {
-      // Basic mode has no hex map — position unused, origin is fine.
-      addShip(selectedProfile, { q: 0, r: 0 }, faction, color)
+      addShip(profile, { q: 0, r: 0 }, faction, color)
       closeModal()
     } else {
-      // Vectorial mode: enter placement mode — user clicks a hex cell
-      startPlacement({ profile: selectedProfile, faction, color })
+      startPlacement({ profile, faction, color })
       closeModal()
     }
   }
@@ -122,6 +178,21 @@ export function AddShipModal() {
                 className={`w-6 h-6 rounded-full border-2 transition-all ${
                   color === c ? 'border-white scale-125' : 'border-transparent'
                 }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Token shape */}
+        <div>
+          <p className="text-slate-500 font-mono text-xs mb-1.5">Token shape</p>
+          <div className="grid grid-cols-6 gap-1.5">
+            {Object.keys(SHIP_SHAPES).map((shape) => (
+              <ShapePreview
+                key={shape}
+                shape={shape}
+                selected={tokenShape === shape}
+                onClick={() => setTokenShape(shape)}
               />
             ))}
           </div>

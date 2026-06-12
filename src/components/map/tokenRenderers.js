@@ -6,6 +6,7 @@
  */
 
 import { hexToPixel, hexMagnitude } from '../../utils/hex.js'
+import { getShapeTracer, drawCapitalShipDetail } from './shipTokenShapes.js'
 
 // === CONSTANTS ===
 
@@ -35,42 +36,6 @@ function computeShipRotation(vector) {
   return Math.atan2(vy, vx) + Math.PI / 2
 }
 
-/**
- * Trace the ship silhouette path in local coordinates (nose pointing up = -y,
- * centered at origin). Does NOT fill or stroke — call those after.
- * Shape: narrow nose, swept delta wings with protruding tip "guns", inner
- * trailing notch, twin engine pods with central exhaust V.
- * @param {CanvasRenderingContext2D} ctx
- */
-function traceShipBody(ctx) {
-  const size = TOKEN_RADIUS
-
-  ctx.beginPath()
-
-  ctx.moveTo(0, -size)                    // nose tip
-
-  // right side
-  ctx.lineTo(size * 0.15, -size * 0.7)   // right nose edge
-  ctx.lineTo(size * 0.3,  -size * 0.1)   // right wing root
-  ctx.lineTo(size * 0.8,   size * 0.4)   // right wing leading edge
-  ctx.lineTo(size * 0.85,  size * 0.8)   // right wing tip (gun mount)
-  ctx.lineTo(size * 0.6,   size * 0.9)   // right wing trailing base
-  ctx.lineTo(size * 0.3,   size * 0.5)   // right inner notch
-  ctx.lineTo(size * 0.25,  size * 0.95)  // right engine pod
-
-  ctx.lineTo(0,            size * 0.85)  // central exhaust
-
-  // left side (mirrored)
-  ctx.lineTo(-size * 0.25, size * 0.95)  // left engine pod
-  ctx.lineTo(-size * 0.3,  size * 0.5)   // left inner notch
-  ctx.lineTo(-size * 0.6,  size * 0.9)   // left wing trailing base
-  ctx.lineTo(-size * 0.85, size * 0.8)   // left wing tip (gun mount)
-  ctx.lineTo(-size * 0.8,  size * 0.4)   // left wing leading edge
-  ctx.lineTo(-size * 0.3, -size * 0.1)   // left wing root
-  ctx.lineTo(-size * 0.15, -size * 0.7)  // left nose edge
-
-  ctx.closePath()
-}
 
 /**
  * Draw an arrowhead at (x, y) pointing in direction (dx, dy).
@@ -163,31 +128,36 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
   ctx.translate(cx, cy)
   ctx.rotate(rotation)
 
-  traceShipBody(ctx)
+  const shape = ship.profile.tokenShape ?? 'delta'
+  getShapeTracer(shape)(ctx, TOKEN_RADIUS)
   ctx.fillStyle = color
   ctx.fill()
   ctx.strokeStyle = 'rgba(255,255,255,0.3)'
   ctx.lineWidth = 1
   ctx.stroke()
 
-  // Fuselage center stripe
-  const r2 = TOKEN_RADIUS
-  ctx.beginPath()
-  ctx.moveTo(0,          -r2 * 0.90)
-  ctx.lineTo( r2 * 0.09, -r2 * 0.52)
-  ctx.lineTo( r2 * 0.09,  r2 * 0.50)
-  ctx.lineTo(0,           r2 * 0.68)
-  ctx.lineTo(-r2 * 0.09,  r2 * 0.50)
-  ctx.lineTo(-r2 * 0.09, -r2 * 0.52)
-  ctx.closePath()
-  ctx.fillStyle = 'rgba(255,255,255,0.14)'
-  ctx.fill()
+  if (shape === 'capital') {
+    drawCapitalShipDetail(ctx, TOKEN_RADIUS)
+  } else {
+    // Fuselage center stripe
+    const r2 = TOKEN_RADIUS
+    ctx.beginPath()
+    ctx.moveTo(0,          -r2 * 0.90)
+    ctx.lineTo( r2 * 0.09, -r2 * 0.52)
+    ctx.lineTo( r2 * 0.09,  r2 * 0.50)
+    ctx.lineTo(0,           r2 * 0.68)
+    ctx.lineTo(-r2 * 0.09,  r2 * 0.50)
+    ctx.lineTo(-r2 * 0.09, -r2 * 0.52)
+    ctx.closePath()
+    ctx.fillStyle = 'rgba(255,255,255,0.14)'
+    ctx.fill()
 
-  // Cockpit dot (just below nose tip)
-  ctx.beginPath()
-  ctx.arc(0, -r2 * 0.62, r2 * 0.13, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.32)'
-  ctx.fill()
+    // Cockpit dot (just below nose tip)
+    ctx.beginPath()
+    ctx.arc(0, -r2 * 0.62, r2 * 0.13, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.32)'
+    ctx.fill()
+  }
 
   ctx.restore()
 
@@ -270,7 +240,7 @@ export function drawGhostToken(ctx, ship, cx, cy) {
   ctx.globalAlpha = GHOST_ALPHA
   ctx.translate(cx, cy)
   ctx.rotate(rotation)
-  traceShipBody(ctx)
+  getShapeTracer(ship.profile.tokenShape ?? 'delta')(ctx, TOKEN_RADIUS)
   ctx.fillStyle = ship.color
   ctx.fill()
   ctx.strokeStyle = '#7dd3fc'
