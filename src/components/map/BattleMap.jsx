@@ -67,10 +67,12 @@ export function BattleMap() {
         onContextMenu={onContextMenu}
         onDoubleClick={onDoubleClick}
       />
-      {/* Effects overlay — pointer-events:none so all interaction passes through */}
+      {/* Effects overlay — pointer-events:none so all interaction passes through.
+          zIndex:1 ensures it paints above the main canvas (z-auto) but below HUD overlays (z-10+). */}
       <canvas
         ref={effectsCanvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ zIndex: 1 }}
       />
       <ShipTooltip />
       <MissileTooltip />
