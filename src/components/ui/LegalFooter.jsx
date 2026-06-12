@@ -6,7 +6,7 @@ export function LegalFooter() {
 
   return (
     <>
-      <div className="legal-footer fixed bottom-0 left-0 right-0 z-50 h-7 flex items-center px-3 bg-slate-950/95">
+      <div className="legal-footer fixed bottom-0 left-0 right-0 z-50 h-7 flex items-center px-3 bg-slate-950/95 border-t border-slate-800">
         <p className="text-xs text-slate-400 font-mono leading-none">
           The Traveller game in all forms is owned by{' '}
           <a
