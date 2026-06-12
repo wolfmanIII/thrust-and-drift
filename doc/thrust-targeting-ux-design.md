@@ -20,7 +20,7 @@ Conferma → click. Annullamento → ESC o click fuori dalla mappa.
 
 ### 2.1 Flusso
 
-```
+```text
 right-click nave
   → ContextMenu "Apply Thrust"
     → uiStore.startThrustTargeting(shipId)
@@ -40,7 +40,7 @@ right-click nave
 
 ### 2.2 Calcolo del thrust delta
 
-```
+```text
 rawDelta = { q: mouseHex.q - ship.position.q,
              r: mouseHex.r - ship.position.r }
 rawMag   = hexDistance({ q:0, r:0 }, rawDelta)
@@ -62,7 +62,7 @@ else →
 
 ### 2.3 Ghost position
 
-```
+```text
 ghostHex = hexAdd(hexAdd(ship.position, ship.vector), delta)
 ```
 
@@ -341,6 +341,7 @@ const startThrustTargeting = useUiStore((s) => s.startThrustTargeting)
 **Eliminare il file.** Non viene più triggerata da nessuna parte.
 
 Rimuovere anche:
+
 - L'import in `App.jsx` (o dove viene montata)
 - `'thrust'` dal typedef `ModalId` in `uiStore.js`
 
@@ -348,7 +349,7 @@ Rimuovere anche:
 
 ## 4. Layer di rendering aggiornato
 
-```
+```text
 Layer 1  — hex grid
 Layer 2  — (non usato / futuro)
 Layer 3  — ghost acceleration (posizione inerziale prossimo round, senza thrust)
@@ -369,7 +370,7 @@ Layer 7  — ship labels
 ## 5. Edge cases
 
 | Caso | Comportamento |
-|---|---|
+| --- | --- |
 | `thrustAvailable === 0` | delta = `{0,0}`; ghost coincide con il ghost inerziale; badge "0/0"; click chiude il targeting mode senza applicare |
 | Nave in dogfight | "Apply Thrust" non compare nel context menu (invariato — `inDogfight !== null` disabilita il menu) |
 | Nave già al cap | La linea è sempre arancione; il ghost non si sposta oltre |
