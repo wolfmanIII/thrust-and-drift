@@ -6,7 +6,7 @@
 import { create } from 'zustand'
 
 /** Duration of the movement animation in milliseconds. */
-const MOVEMENT_ANIM_DURATION_MS = 600
+const MOVEMENT_ANIM_DURATION_MS = 2000
 
 /**
  * @typedef {'shipProfile'|'addShip'|'attack'|'shipDetail'|'action'|'initiative'|'dogfightRound'|'crewAssignment'|'basicManoeuvre'|null} ModalId
