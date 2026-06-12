@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { Modal }          from './Modal.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
+import { useUiStore }     from '../../store/uiStore.js'
 
 const DICE_PER_MISSILE = 4 // HG p.28 — Missile Rack 4D6
 
@@ -16,8 +17,12 @@ export function MissileImpactModal() {
   const ships                 = useBattleStore((s) => s.ships)
   const dismissMissileImpact  = useBattleStore((s) => s.dismissMissileImpact)
   const applyDamage           = useBattleStore((s) => s.applyDamage)
+  const movementAnimation     = useUiStore((s) => s.movementAnimation)
 
   const [damageRolled, setDamageRolled] = useState('')
+
+  // Wait for the movement animation to finish before showing the modal
+  if (movementAnimation) return null
 
   const impact = pendingMissileImpacts[0]
   if (!impact) return null
