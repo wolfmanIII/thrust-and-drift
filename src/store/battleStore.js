@@ -15,6 +15,7 @@ import { getCrewSkill, getEffectiveSkill, buildDefaultAssignments } from '../uti
 import { resolveDogfightChecks } from '../utils/dogfight.js'
 import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST } from '../data/rangeBands.js'
 import { useUiStore } from './uiStore.js'
+import { emitEffect } from '../utils/effectQueue.js'
 
 /** Canonical sort key for a ship pair — order-independent. */
 function pairKey(id1, id2) { return [id1, id2].sort().join('_') }
@@ -575,21 +576,29 @@ const useBattleStore = create((set, get) => {
       })
     })
 
+    // Impacted missiles are kept in the store during the movement animation so they
+    // visually travel to the target hex. The setTimeout removes them and triggers the
+    // modal + sound after the animation completes.
+    const impactedIds = impactedMissiles.map((m) => m.id)
+
     set((s) => ({
       ships: movedShips,
-      missiles: survivingMissiles.filter((m) => m.thrustRemaining >= 0),
+      missiles: [
+        ...survivingMissiles.filter((m) => m.thrustRemaining >= 0),
+        ...impactedMissiles,  // kept alive for animation, removed below
+      ],
       log: [...s.log, ...entries, ...impactLogEntries],
       passingEncounters: encounters,
     }))
 
-    // Defer missile impact modals until after the movement animation completes.
-    // Adding impacts synchronously with the animation start causes cross-store
-    // tearing with useSyncExternalStore: the modal may render before movementAnimation
-    // is visible, bypassing the guard. setTimeout guarantees ordering.
     if (newImpacts.length > 0) {
       const animDuration = useUiStore.getState().movementAnimation?.duration ?? 2000
       setTimeout(() => {
-        set((s) => ({ pendingMissileImpacts: [...s.pendingMissileImpacts, ...newImpacts] }))
+        set((s) => ({
+          missiles: s.missiles.filter((m) => !impactedIds.includes(m.id)),
+          pendingMissileImpacts: [...s.pendingMissileImpacts, ...newImpacts],
+        }))
+        newImpacts.forEach(() => emitEffect('impact_burst', {}))
       }, animDuration + 100)
     }
   }),

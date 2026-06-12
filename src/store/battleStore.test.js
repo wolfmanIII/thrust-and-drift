@@ -654,12 +654,14 @@ describe('resolveMovement', () => {
     useBattleStore.getState().launchMissile(att.id, tgt.id, 2, { q: 1, r: 0 }, { q: 1, r: 0 })
     const missileId = useBattleStore.getState().missiles[0].id
     useBattleStore.getState().resolveMovement()
-    // Missile consumed immediately — removed from active missiles
-    expect(useBattleStore.getState().missiles.find(m => m.id === missileId)).toBeUndefined()
+    // Missile kept in store during animation — still visible
+    expect(useBattleStore.getState().missiles.find(m => m.id === missileId)).toBeDefined()
     // Impacts deferred — not visible yet
     expect(useBattleStore.getState().pendingMissileImpacts).toHaveLength(0)
     // Flush the deferred setTimeout
     vi.runAllTimers()
+    // Missile removed after animation
+    expect(useBattleStore.getState().missiles.find(m => m.id === missileId)).toBeUndefined()
     const impacts = useBattleStore.getState().pendingMissileImpacts
     expect(impacts).toHaveLength(1)
     expect(impacts[0].target).toBe(tgt.id)

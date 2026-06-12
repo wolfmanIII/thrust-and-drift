@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.15.2] — 2026-06-12
+
+### Fixed
+
+- **Missile impact: token animation + sound** — impacted missiles were removed from the store synchronously (disappearing before the movement animation showed them reaching the target), and no sound was played. Fix: impacted missiles are now kept in the store alongside surviving missiles during the animation; the `setTimeout` callback removes them, opens the impact modal, and emits `impact_burst` once per salvo. `emitEffect` import added to `battleStore.js`.
+
+### Tests
+
+- 692 tests (unchanged — impact test updated: missile now present in store immediately after `resolveMovement`, absent after `vi.runAllTimers()`)
+
+---
+
 ## [1.15.1] — 2026-06-12
 
 ### Fixed

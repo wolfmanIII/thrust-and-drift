@@ -1457,6 +1457,12 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - **Durata animazione movimento** — `MOVEMENT_ANIM_DURATION_MS` aumentato da 600 ms a 2000 ms per dare al GM il tempo di seguire il movimento simultaneo.
 - 692 test (invariati — test guidance refactored: verifica `pendingMissileImpacts` invece di missile sopravvissuto).
 
+### 13.8j Versione 1.15.2 — Missile impact token + sound ✅ COMPLETATA
+
+- **Bug**: il token missile spariva istantaneamente all'impatto (rimosso dal `set()` sincrono prima dell'animazione) e nessun suono veniva emesso. `emitEffect` non era importato in `battleStore.js`.
+- **Fix**: i missili impattati vengono inclusi nello store insieme ai sopravvissuti durante i 2 s di animazione (si vedono muoversi verso il target). Il `setTimeout` callback rimuove i token, aggiunge `pendingMissileImpacts` e chiama `emitEffect('impact_burst')` per ogni salvo. Import `emitEffect` aggiunto a `battleStore.js`.
+- 692 test (invariato — assert aggiornato: missile presente subito dopo `resolveMovement`, assente dopo `vi.runAllTimers()`).
+
 ### 13.8i Versione 1.15.1 — MissileImpactModal deferred ✅ COMPLETATA
 
 - **Bug**: la modale `MissileImpactModal` compariva durante l'animazione di movimento (2 s), coprendo la mappa. La guardia `if (movementAnimation) return null` non funzionava per cross-store tearing: Zustand v5 usa `useSyncExternalStore` per store separato; React poteva renderizzare il componente con `pendingMissileImpacts` aggiornato ma `movementAnimation` ancora `null` tra i due `set()` sincroni.
