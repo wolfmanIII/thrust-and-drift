@@ -6,6 +6,31 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.13.0] — 2026-06-12
+
+### Added
+
+- **Ship token silhouettes** — 6 shape variants selectable per-placement: `delta` (swept-wing fighter), `needle` (lance-hull scout), `freighter` (bulky cargo hull), `gunship` (wide broadside body), `cruiser` (elongated mid hull), `capital` (massive rectangular hull). Implemented as pure Canvas path tracers in `shipTokenShapes.js` (`SHIP_SHAPES` map + `getShapeTracer`). Shape chosen in `AddShipModal` via a 6-column mini-canvas grid with live previews (colored when selected, slate otherwise). Stored as `tokenShape` per ship instance; persists through save/autosave/export.
+- **Per-shape bridge/cockpit detail overlays** — each silhouette has a dedicated detail draw function called after fill+stroke: delta (fuselage stripe + cockpit dot), needle (spine line + nose sensor dot), freighter (bridge tower + 3 portholes), gunship (armored CIC dome + targeting sensor), cruiser (elongated bridge oval + twin portholes), capital (command tower blister + bridge windows). Dispatched via `getDetailDrawer(key)` map.
+- **Missile hover tooltip** — hovering a missile salvo token for 150 ms shows a portal panel with: salvo type, launcher → target ship names with faction colour dots, and a thrust-remaining bar (cyan → yellow → red based on `thrustRemaining / 10`). Clears on mouse leave, pan, or click. Implemented via `useMissileHover` hook + `MissileTooltip` component; `hoveredMissile: null` state + setters added to `uiStore`.
+- **Mongoose Publishing link in legal footer** — "Mongoose Publishing" text is now a clickable `<a>` linking to `mongoosepublishing.com` (opens in new tab).
+
+### Fixed
+
+- **Effects canvas z-index** — `effectsCanvasRef` now has explicit `zIndex: 1`; previously both canvases used `z-index: auto` (DOM order), which some browser compositing paths resolve incorrectly when sibling elements carry integer z-index (HUD: z-10, ContextMenu: z-50). Effects `impact_burst`, `critical_flash`, `missile_launch`, and `evasive_aura` now reliably paint above ship tokens while remaining below all HUD/overlay elements (z-10+).
+- **`rangeBands` excluded from undo snapshots** — `pushHistory` was missing `rangeBands`; undo in a basic mode session restored ship thrust but left range bands unchanged. All three snapshot sites (`pushHistory`, `undoLastAction` redo-snapshot, `redoLastAction` undo-snapshot) now include `rangeBands`.
+- **Missile token radius** — `MISSILE_RADIUS` corrected from `8` to `11` in `tokenRenderers.js`; tokens were visually undersized relative to the thrust arc and count label.
+
+### Changed
+
+- **Battle log layout** — width changed from full-viewport to `w-1/3` (responsive, 33%); panel anchored bottom-left. Legal footer `border-t border-slate-800` restored.
+
+### Tests
+
+- 682 tests (+1 from 681 — `rangeBands` included in `pushHistory` snapshot)
+
+---
+
 ## [1.12.2] — 2026-06-10
 
 ### Fixed

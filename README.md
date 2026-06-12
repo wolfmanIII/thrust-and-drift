@@ -37,7 +37,8 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Profile I/O** | Import/export ship profiles via JSON files |
 | **Safety modals** | Confirm before deleting profiles; confirm before leaving battle without saving |
 | **Legal footer** | Fixed Mongoose Publishing disclaimer on all screens; "About" modal with full Fair Use text |
-| **Ship tokens** | Swept-wing silhouette polygon; rotates to face velocity direction; HP arc (green→yellow→red); selection ring; cockpit + fuselage highlights; dogfight pulsing amber ring + ⚔ badge |
+| **Ship tokens** | 6 silhouette shapes (delta, needle, freighter, gunship, cruiser, capital) — chosen per-placement; each rotates to face velocity direction; per-shape bridge/cockpit detail overlay; HP arc (green→yellow→red); selection ring; dogfight pulsing amber ring + ⚔ badge |
+| **Missile hover tooltip** | Hover a missile salvo token (150 ms) to see type, launcher → target with faction colour dots, and a thrust-remaining bar (cyan → yellow → red); portal overlay, clears on pan/click |
 | **Dogfight system** | Close-range sub-system: 6 micro-rounds per standard round; Pilot opposed checks; tonnage/thrust/multi-enemy DMs; escape via thrust advantage or pursuit check; pulsing token visuals |
 | **Boarding system** | 4-phase boarding action (HG 2022): Contact → Conflict → Security; 6 entry methods incl. hull-cut tracker; stacking rolls; missed-shot table; Bridge/Engineering/Turrets objectives; optional faction transfer on capture; HUD badge per active boarding |
 | **Weapon range enforcement** | Each weapon has a maximum range band (CRB p.167); Attack Modal shows OUT OF RANGE badge and blocks firing beyond a weapon's listed range |
@@ -149,7 +150,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-681 tests across utils, Zustand stores, hooks, and UI components.
+682 tests across utils, Zustand stores, hooks, and UI components.
 
 ---
 

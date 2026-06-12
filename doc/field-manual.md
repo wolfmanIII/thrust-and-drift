@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.12.1** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.13.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -110,7 +110,7 @@ Click **📖 Legend** (fixed button, top-right of the battle screen) to open the
 
 | Category | Symbols |
 | -------- | ------- |
-| **Tokens** | Ship silhouette (delta-wing polygon — pointed nose, swept wings with gun-mount tips, twin engine pods, central exhaust notch; rotates to face velocity direction); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — rotates to face velocity direction; count + thrust arc shown) |
+| **Tokens** | Ship silhouette (6 shapes: delta, needle, freighter, gunship, cruiser, capital — each rotates to face velocity direction); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — rotates to face velocity direction; count + thrust arc shown; hover for launcher/target/thrust tooltip) |
 | **Beam weapons** | Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange) |
 | **Hit effects** | Impact burst (expanding sparks on target), Critical flash (red ring + label) |
 | **Movement effects** | Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line) |
@@ -163,6 +163,7 @@ Right-click any empty hex → **Add ship here**. A modal opens where you select:
 - **Faction** — Players, Allies, Enemies, Neutral. Affects token colour and
   auto-roll behaviour.
 - **Color** — token display colour.
+- **Shape** — token silhouette: Delta, Needle, Freighter, Gunship, Cruiser, or Capital. Each shape has a distinct hull outline and bridge/cockpit detail overlay. The choice is per-placement and does not affect game mechanics.
 
 After placing, right-click the ship token → **Assign Crew…** to review or
 adjust which crew member covers each role and turret (see [§ 11.3](#113-crew-role-assignments)).

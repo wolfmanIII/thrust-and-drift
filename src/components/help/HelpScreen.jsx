@@ -187,7 +187,7 @@ export function HelpScreen() {
 
           <Sub title="LEGEND">
             <p>Click <span className="text-slate-200">📖 Legend</span> (fixed button, top-right of the battle screen) to open the visual reference panel. Also accessible via right-click any empty hex → Legend.</p>
-            <KV k="Tokens" v="Ship silhouette (delta-wing polygon — pointed nose, swept wings with gun-mount tips, twin engine pods, central exhaust notch; rotates to face velocity direction); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — rotates to face velocity direction; count + thrust arc shown)." />
+            <KV k="Tokens" v="Ship silhouette (6 shapes: delta, needle, freighter, gunship, cruiser, capital — each rotates to face velocity direction; shape chosen at placement); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — rotates to face velocity direction; count + thrust arc; hover for launcher/target/thrust tooltip)." />
             <KV k="Beam weapons" v="Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange)." />
             <KV k="Hit effects" v="Impact burst (expanding sparks on target), Critical flash (red ring + label)." />
             <KV k="Movement effects" v="Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line)." />
@@ -224,6 +224,7 @@ export function HelpScreen() {
             <KV k="Profile" v="Which saved ship profile to use." />
             <KV k="Faction" v="Players, Allies, Enemies, Neutral — affects token colour and auto-roll behaviour." />
             <KV k="Color" v="Token display colour." />
+            <KV k="Shape" v="Token silhouette — Delta, Needle, Freighter, Gunship, Cruiser, or Capital. Each has a distinct hull outline and bridge/cockpit overlay. Per-placement only; does not affect game mechanics." />
             <p>After placing, right-click the ship token → <span className="text-slate-200">Assign Crew…</span> to review or adjust which crew member covers each role and turret (see Crew System below).</p>
           </Sub>
           <Sub title="REMOVING A SHIP">
