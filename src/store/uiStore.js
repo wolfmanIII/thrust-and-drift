@@ -86,6 +86,13 @@ const useUiStore = create((set) => ({
   setHoveredShip: (state) => set({ hoveredShip: state }),
   clearHoveredShip: () => set({ hoveredShip: null }),
 
+  /** @type {{ missileId: string, x: number, y: number }|null} */
+  hoveredMissile: null,
+
+  /** @param {{ missileId: string, x: number, y: number }} state */
+  setHoveredMissile: (state) => set({ hoveredMissile: state }),
+  clearHoveredMissile: () => set({ hoveredMissile: null }),
+
   // === MOVEMENT ANIMATION ===
   /**
    * Purely visual animation state for the movement phase.

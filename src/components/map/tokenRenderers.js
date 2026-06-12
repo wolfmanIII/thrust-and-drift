@@ -16,7 +16,7 @@ const VECTOR_ARROW_HEAD = 7
 const HP_BAR_RADIUS = TOKEN_RADIUS + 5
 const LABEL_FONT = 'bold 11px monospace'
 const GHOST_ALPHA = 0.35
-const MISSILE_RADIUS = 8
+const MISSILE_RADIUS = 11
 
 // === HELPERS ===
 

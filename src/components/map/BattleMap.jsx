@@ -10,8 +10,10 @@ import { useCanvasRenderer, HEX_SIZE } from './useCanvasRenderer.js'
 import { useCanvasEffects } from './useCanvasEffects.js'
 import { useAudioEngine }   from '../../hooks/useAudioEngine.js'
 import { useMapInteraction } from './useMapInteraction.js'
-import { useShipHover } from './useShipHover.js'
-import { ShipTooltip } from './ShipTooltip.jsx'
+import { useShipHover }    from './useShipHover.js'
+import { useMissileHover } from './useMissileHover.js'
+import { ShipTooltip }    from './ShipTooltip.jsx'
+import { MissileTooltip } from './MissileTooltip.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 
 export function BattleMap() {
@@ -32,13 +34,14 @@ export function BattleMap() {
   } = useMapInteraction({ hexSize: HEX_SIZE, canvasRef })
 
   const { onHoverMove, onHoverLeave, onHoverDown } = useShipHover({ canvasRef, hexSize: HEX_SIZE, offset, zoom })
+  const { onMissileHoverMove, onMissileHoverLeave, onMissileHoverDown } = useMissileHover({ canvasRef, hexSize: HEX_SIZE, offset, zoom })
 
   useCanvasRenderer({ canvasRef, offset, zoom })
   useCanvasEffects({ effectsCanvasRef, offset, zoom })
   useAudioEngine()
 
-  const combinedMouseMove = useCallback((e) => { onMouseMove(e); onHoverMove(e) }, [onMouseMove, onHoverMove])
-  const combinedMouseDown = useCallback((e) => { onMouseDown(e); onHoverDown(e) }, [onMouseDown, onHoverDown])
+  const combinedMouseMove = useCallback((e) => { onMouseMove(e); onHoverMove(e); onMissileHoverMove(e) }, [onMouseMove, onHoverMove, onMissileHoverMove])
+  const combinedMouseDown = useCallback((e) => { onMouseDown(e); onHoverDown(e); onMissileHoverDown(e) }, [onMouseDown, onHoverDown, onMissileHoverDown])
 
   // Prevent default browser context menu and wheel scroll
   useEffect(() => {
@@ -58,7 +61,7 @@ export function BattleMap() {
         onMouseDown={combinedMouseDown}
         onMouseMove={combinedMouseMove}
         onMouseUp={onMouseUp}
-        onMouseLeave={onHoverLeave}
+        onMouseLeave={(e) => { onHoverLeave(e); onMissileHoverLeave(e) }}
         onWheel={onWheel}
         onClick={onClick}
         onContextMenu={onContextMenu}
@@ -70,6 +73,7 @@ export function BattleMap() {
         className="absolute inset-0 w-full h-full pointer-events-none"
       />
       <ShipTooltip />
+      <MissileTooltip />
     </>
   )
 }
