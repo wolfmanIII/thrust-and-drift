@@ -220,10 +220,11 @@ export function HelpScreen() {
               When blocked, the button dims and clicking shows an amber warning below it.
               The warning clears automatically once the condition is met.
             </p>
+            <KV k="⚡ Any phase" v="Missile impacts must all be resolved before advancing. The button dims and shows ⚠ Resolve all pending missile impacts. Use the ↩ button in the Battle Log to re-open a dismissed impact modal." />
             <KV k="Setup" v="At least 1 ship must be placed on the map. ⚠ Place at least one ship first." />
             <KV k="Initiative" v="Initiative must be rolled (Roll Initiative modal). ⚠ Roll initiative before advancing." />
             <KV k="Accel / Attack / Actions" v="All actors in initiative order must have taken their turn. ⚠ N actor(s) still to act." />
-            <KV k="Movement / End" v="Always allowed — no guard." />
+            <KV k="Movement / End" v="Always allowed unless missile impacts are pending (see above)." />
           </Sub>
         </Section>
 
@@ -295,12 +296,24 @@ export function HelpScreen() {
           <p>Vectorial mode only. <span className="text-slate-200">Fully automatic — no player input required.</span></p>
           <p>Click <span className="text-slate-200">NEXT PHASE ⟶</span> to execute. The app:</p>
           <ol className="list-decimal list-inside space-y-1 text-slate-400 pl-2">
-            <li><span className="text-slate-200">Animates</span> every token sliding from its current position to its new position (~600 ms, easeInOut). Canvas input is blocked during the animation.</li>
+            <li><span className="text-slate-200">Animates</span> every token sliding from its current position to its new position (~2 s, easeInOut). Canvas input is blocked during the animation.</li>
             <li>Advances every ship's position by its current velocity vector.</li>
             <li>Detects hostile ships whose trajectories crossed within Short range (≤ 2 hexes) — opens the <span className="text-slate-200">Passing Encounter</span> window for each.</li>
             <li>Detects ships that end in the same hex — opens the <span className="text-slate-200">Dogfight</span> engagement intent modal.</li>
           </ol>
           <p>If no encounters or dogfights are triggered, the phase advances to Attack automatically.</p>
+          <Sub title="MISSILE IMPACT">
+            <p>If a missile salvo reaches its target's hex during movement, the token is consumed and a <span className="text-slate-200">⚡ MISSILE IMPACT</span> modal opens automatically after the animation.</p>
+            <KV k="Launcher / Target" v="Ships involved. Target hull shown for reference." />
+            <KV k="Salvo" v="Count and type (e.g. 3× Missile Rack)." />
+            <KV k="Damage rolled" v="Enter the total manually, or click 🎲 to auto-roll count × 4D6 in-app (HG p.28 — Missile Rack 4D6 per missile)." />
+            <KV k="Armour" v="Read automatically from the target's ship profile." />
+            <KV k="Net damage" v="max(0, rolled − armour). Updated live." />
+            <KV k="APPLY DAMAGE" v="Deducts net damage, triggers criticals if applicable, logs the hit, closes this entry." />
+            <KV k="MISS / INTERCEPTED" v="Close without applying damage (e.g. all missiles destroyed by Point Defence)." />
+            <p>Multiple salvos queue sequentially; the pending count is shown in the modal header. An impact sound plays when the modal opens.</p>
+            <p className="text-amber-400 font-mono text-xs">⚡ If dismissed accidentally: find the impact entry in the Battle Log and click ↩ to re-queue it. Phase advance is blocked until all impacts are resolved — the HUD shows a pulsing ⚡ N impacts unresolved badge.</p>
+          </Sub>
           <Sub title="SHIPS THAT PASS IN THE NIGHT">
             <p>If two hostile ships cross within <span className="text-slate-200">Short range (≤ 2 hexes)</span> during movement — even if their final positions are far apart — the system detects the closest approach and opens the <span className="text-slate-200">Passing Encounter</span> window.</p>
             <KV k="[Ship A] FIRES" v="Opens the Attack Modal for Ship A. Button shows ✓ FIRED after resolving — the encounter stays open so Ship B can still fire." />

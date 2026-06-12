@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.15.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.15.4** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -155,10 +155,11 @@ round and phase. Click **NEXT PHASE ⟶** to advance.
 
 | Phase | Guard | Blocked message |
 | ----- | ----- | --------------- |
+| **All phases** | No unresolved missile impacts (`pendingMissileImpacts` empty) | *Resolve all pending missile impacts first. Use the ↩ button in the Battle Log to re-open a dismissed impact.* |
 | **Setup** | At least 1 ship must be placed | *Place at least one ship first.* |
 | **Initiative** | Initiative must have been rolled (`initiativeOrder` non-empty) | *Roll initiative before advancing.* |
 | **Acceleration / Attack / Actions** | All ships in initiative order must have acted (`currentActorIndex ≥ initiativeOrder.length`) | *N actor(s) still to act.* |
-| **Movement / End** | Always allowed | — |
+| **Movement / End** | Always allowed (unless missile impacts pending — see above) | — |
 
 When blocked, the button turns dim (`cursor-not-allowed`) and clicking it shows an amber warning below the button. The warning clears automatically once the condition is satisfied.
 
@@ -305,18 +306,24 @@ If one or more missile salvos reach their target's hex during the movement step,
 | ----- | ----------- |
 | **Launcher / Target** | Ships involved. Target hull shown for reference. |
 | **Salvo** | Count and type (e.g. *3× Missile Rack*). |
-| **Damage rolled** | GM enters the total rolled. Formula: `count × 4D6` *(HG p.28 — Missile Rack 4D6 per missile)*. |
+| **Damage rolled** | GM enters the total rolled, or clicks **🎲** to auto-roll `count × 4D6` in-app. Formula: `count × 4D6` *(HG p.28 — Missile Rack 4D6 per missile)*. |
 | **Armour** | Read automatically from the target's ship profile. |
 | **Net damage** | `max(0, rolled − armour)`. Updated live as you type. |
 
 - **APPLY DAMAGE** — deducts net damage from target hull (triggers threshold criticals if applicable), logs the hit, closes this entry.
 - **MISS / INTERCEPTED — DISMISS** — closes without applying damage (e.g. all missiles were destroyed by Point Defence before movement).
 
-Multiple salvos impacting in the same round are resolved sequentially; the pending count is shown in the modal header.
+Multiple salvos impacting in the same round are resolved sequentially; the pending count is shown in the modal header. An impact sound plays when each modal opens.
 
 > **Note:** Per RAW, armour applies independently to each missile's damage roll.
 > The modal accepts a pre-summed total for speed — the GM may choose to enter
 > each missile separately and apply in sequence.
+
+#### Recovery
+
+If the impact modal is accidentally dismissed before resolving, it can be re-opened at any time from the **Battle Log**: find the `⚡ MISSILE IMPACT` entry and click the amber **↩** button at the right of the row. The impact is re-queued and the modal re-opens.
+
+While any impact is pending, the HUD shows a pulsing `⚡ N impacts unresolved` badge above the **NEXT PHASE ⟶** button, and phase advance is blocked until all impacts are resolved (see §4.1).
 
 ### 8.2 Ships That Pass in the Night
 
