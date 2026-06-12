@@ -21,6 +21,7 @@ import { ShipProfileModal }   from './components/modals/ShipProfileModal.jsx'
 import { DogfightNotificationModal } from './components/modals/DogfightNotificationModal.jsx'
 import { DogfightRoundModal }        from './components/modals/DogfightRoundModal.jsx'
 import { PassingAttackModal }        from './components/modals/PassingAttackModal.jsx'
+import { MissileImpactModal }        from './components/modals/MissileImpactModal.jsx'
 import { BoardingSetupModal }    from './components/modals/BoardingSetupModal.jsx'
 import { BoardingContactModal }  from './components/modals/BoardingContactModal.jsx'
 import { BoardingConflictModal } from './components/modals/BoardingConflictModal.jsx'
@@ -129,6 +130,9 @@ export function App() {
 
       {/* ── Passing encounter window ─────────────────────────────────── */}
       <PassingAttackModal />
+
+      {/* ── Missile impact resolution ────────────────────────────────── */}
+      <MissileImpactModal />
 
       {/* ── Boarding modals ──────────────────────────────────────────── */}
       <BoardingSetupModal />
