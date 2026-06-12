@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.15.1] — 2026-06-12
+
+### Fixed
+
+- **`MissileImpactModal` covering movement animation** — the modal was appearing during the 2-second movement animation, hiding ship and missile movement. Root cause: Zustand v5 uses `useSyncExternalStore` per store; with `pendingMissileImpacts` in `battleStore` and `movementAnimation` in `uiStore`, React could render `MissileImpactModal` between the two synchronous store updates (cross-store tearing), bypassing the `if (movementAnimation) return null` guard. Fix: `resolveMovement` no longer adds impacts synchronously; they are deferred via `setTimeout(animDuration + 100 ms)`. `MissileImpactModal` drops the `movementAnimation` guard and `useUiStore` import (no longer needed).
+
+### Tests
+
+- 692 tests (unchanged — missile impact test updated to use `vi.useFakeTimers()` / `vi.runAllTimers()` to flush the deferred `setTimeout`)
+
+---
+
 ## [1.15.0] — 2026-06-12
 
 ### Added

@@ -1429,6 +1429,40 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - **`MISSILE_GUIDANCE_THRUST` corretto da 3 a 10** — MgT2e CRB p.162: missile standard Thrust 10; con valore 3 i missili erano banalmente eludibili.
 - 681 test (+2) — `PassingAttackModal`: flag assertions, auto-dismiss, disabled label; `battleStore`: missile guidance partial correction (target spostato a q:20 per produrre delta > 10).
 
+### 13.8f Versione 1.13.0 / 1.13.1 — Token Shapes, Missile Tooltip, UI Fixes ✅ COMPLETATA
+
+- **Ship token silhouettes** — 6 forme selezionabili per-placement in `AddShipModal`: `delta`, `needle`, `freighter`, `gunship`, `cruiser`, `capital`. Implementate come path Canvas in `shipTokenShapes.js`; ogni forma ha un detail-draw separato (bridge, cockpit, portholes). Salvate come `tokenShape` per-instance.
+- **Missile hover tooltip** — `useMissileHover` (150 ms debounce) + `MissileTooltip` portal: launcher→target, thrust bar cyan→yellow→red. `hoveredMissile` in `uiStore`.
+- **Phase advance guards** — `HUD.jsx`: setup richiede ≥ 1 nave; initiative richiede roll fatto; acceleration/attack/actions richiedono tutti gli attori serviti. Warning amber + `cursor-not-allowed`.
+- **Effects canvas z-index** — `effectsCanvasRef` ha `zIndex: 1`; fix per `impact_burst`/`critical_flash` che apparivano sotto i token.
+- **Battle log** — `w-1/3` (da full-width); footer `border-t` ripristinato.
+- 686 test (+5 da 681 — `rangeBands` undo +1, phase guards +4). Poi 692 (+6 da 686 — `computeClampedDelta` ×4, `thrustTargeting` ×2, in 1.14.0 di seguito).
+
+### 13.8g Versione 1.14.0 — Rubber-band Thrust Targeting ✅ COMPLETATA
+
+- **`ThrustModal` sostituita** — interazione canvas diretta nella fase di accelerazione. Right-click → *Apply Thrust* → targeting mode: linea tratteggiata da nave a cursore (clampata a `thrustAvailable`), arancione a cap. Ghost a `pos + vel + delta` (next-round position); badge `cost/max`. Click conferma; ESC annulla.
+- `hex.js` — `computeClampedDelta(targetHex, shipPos, thrustAvailable)` funzione pura esportata.
+- `uiStore.js` — `thrustTargeting: { shipId } | null`; `startThrustTargeting` / `cancelThrustTargeting`; `'thrust'` rimosso da `ModalId`.
+- `useMapInteraction.js` — accetta `mouseHexRef`; `onMouseMove` aggiorna hex; `onClick` conferma delta → `applyShipThrust` + `emitEffect('thrust_plume')`.
+- `BattleMap.jsx` — crea `mouseHexRef`; ESC keydown → `cancelThrustTargeting`.
+- `useCanvasRenderer.js` — Layer 3b `drawThrustTargeting` (linea, dot, ghost, linea inerziale, badge).
+- `ContextMenu.jsx` — *Apply Thrust* → `startThrustTargeting` invece di `openModal('thrust')`.
+- `ThrustModal.jsx` — non più importata (`⚠ UNUSED` nel README).
+- 692 test (+6 da 686).
+
+### 13.8h Versione 1.15.0 — Missile Impact Resolution ✅ COMPLETATA
+
+- **`MissileImpactModal`** — quando un salvo raggiunge l'hex del bersaglio nella fase movimento, viene consumato e aggiunto a `pendingMissileImpacts: []` nello store. La modale apre automaticamente: mostra launcher/target/count, input danno totale (count × 4D6 per MgT2e HG p.28), armour dal profilo, net damage live. *APPLY DAMAGE* chiama `applyDamage`; *MISS/INTERCEPTED* fa dismiss. Impatti multipli risolti in sequenza (pending count visibile). Target rimosso via undo → auto-dismiss.
+- `battleStore.js` — `pendingMissileImpacts: []` in state e `resetBattle`; rilevamento impatto in `resolveMovement` (missile.position == target.position post-movimento); `dismissMissileImpact(id)`.
+- **Durata animazione movimento** — `MOVEMENT_ANIM_DURATION_MS` aumentato da 600 ms a 2000 ms per dare al GM il tempo di seguire il movimento simultaneo.
+- 692 test (invariati — test guidance refactored: verifica `pendingMissileImpacts` invece di missile sopravvissuto).
+
+### 13.8i Versione 1.15.1 — MissileImpactModal deferred ✅ COMPLETATA
+
+- **Bug**: la modale `MissileImpactModal` compariva durante l'animazione di movimento (2 s), coprendo la mappa. La guardia `if (movementAnimation) return null` non funzionava per cross-store tearing: Zustand v5 usa `useSyncExternalStore` per store separato; React poteva renderizzare il componente con `pendingMissileImpacts` aggiornato ma `movementAnimation` ancora `null` tra i due `set()` sincroni.
+- **Fix**: `resolveMovement` rimuove `pendingMissileImpacts` dal `set()` sincrono; gli impatti vengono aggiunti via `setTimeout(animDuration + 100 ms)` dopo la fine dell'animazione. `MissileImpactModal` elimina la guardia `movementAnimation` e l'import `useUiStore`. Test aggiornato con `vi.useFakeTimers()` / `vi.runAllTimers()`.
+- 692 test (invariato).
+
 ### 13.9 Versione 2.0 — Ostacoli Ambientali
 
 Asteroid field, debris field, gravity well (zona proibita), nebula.

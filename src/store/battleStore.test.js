@@ -645,19 +645,27 @@ describe('resolveMovement', () => {
   it('missiles reaching target hex are consumed and queued as pendingMissileImpacts', () => {
     // Missile at {q:1,r:0} vector {q:1,r:0}, target at {q:5,r:0} stationary.
     // Guidance closes the gap in one step → lands on target hex → impact queued.
+    // Impacts are deferred via setTimeout to avoid cross-store tearing with
+    // useSyncExternalStore; advance fake timers to flush.
+    vi.useFakeTimers()
     useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#fff')
     useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'B' }), { q: 5, r: 0 }, 'npc',     '#f00')
     const [att, tgt] = useBattleStore.getState().ships
     useBattleStore.getState().launchMissile(att.id, tgt.id, 2, { q: 1, r: 0 }, { q: 1, r: 0 })
     const missileId = useBattleStore.getState().missiles[0].id
     useBattleStore.getState().resolveMovement()
-    // Missile consumed by impact — removed from active missiles
+    // Missile consumed immediately — removed from active missiles
     expect(useBattleStore.getState().missiles.find(m => m.id === missileId)).toBeUndefined()
+    // Impacts deferred — not visible yet
+    expect(useBattleStore.getState().pendingMissileImpacts).toHaveLength(0)
+    // Flush the deferred setTimeout
+    vi.runAllTimers()
     const impacts = useBattleStore.getState().pendingMissileImpacts
     expect(impacts).toHaveLength(1)
     expect(impacts[0].target).toBe(tgt.id)
     expect(impacts[0].launchedBy).toBe(att.id)
     expect(impacts[0].count).toBe(2)
+    vi.useRealTimers()
   })
 
   it('missile guidance is partial when correction exceeds GUIDANCE_THRUST per round', () => {

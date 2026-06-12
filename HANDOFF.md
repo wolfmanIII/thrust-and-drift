@@ -9,16 +9,20 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.15.0 |
+| **Versione** | 1.15.1 |
 | **Branch** | main (clean) |
 | **Test** | 692 passing |
-| **Ultimo commit** | docs: update field-manual, README, CHANGELOG, HANDOFF for v1.15.0 |
+| **Ultimo commit** | fix(missiles): defer impact modal via setTimeout to avoid cross-store tearing |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Missile Impact + Animation (v1.15.0)
+### Sessione corrente — MissileImpactModal deferred (v1.15.1)
+
+1. **`fix(missiles): defer impact modal via setTimeout`** — `MissileImpactModal` compariva durante l'animazione di movimento (cross-store tearing con `useSyncExternalStore`). Fix: `resolveMovement` rimuove `pendingMissileImpacts` dal `set()` sincrono; aggiunge via `setTimeout(animDuration + 100ms)`. Modale elimina guard `movementAnimation` e import `useUiStore`. Test aggiornato con fake timers. 692 test (invariato).
+
+### Sessione precedente — Missile Impact + Animation (v1.15.0)
 
 1. **`feat(missiles): detect impact when salvo reaches target hex`** (`ed214bd`) — `pendingMissileImpacts: []` in store; in `resolveMovement` post-movement hex check (missile pos == target pos); impacted missiles rimossi dall'array attivo e accodati in `pendingMissileImpacts`; log entry per impatto; `dismissMissileImpact(id)` action; test guidance refactored per nuovo comportamento.
 2. **`feat(missiles): add MissileImpactModal`** (`6f9a607`) — modal self-contained (pattern PassingAttackModal): mostra launcher/target/salvo count, input danno totale, armour da profilo, net damage live, APPLY DAMAGE / MISS DISMISS; auto-dismiss se target rimosso.

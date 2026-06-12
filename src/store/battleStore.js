@@ -580,8 +580,18 @@ const useBattleStore = create((set, get) => {
       missiles: survivingMissiles.filter((m) => m.thrustRemaining >= 0),
       log: [...s.log, ...entries, ...impactLogEntries],
       passingEncounters: encounters,
-      pendingMissileImpacts: [...s.pendingMissileImpacts, ...newImpacts],
     }))
+
+    // Defer missile impact modals until after the movement animation completes.
+    // Adding impacts synchronously with the animation start causes cross-store
+    // tearing with useSyncExternalStore: the modal may render before movementAnimation
+    // is visible, bypassing the guard. setTimeout guarantees ordering.
+    if (newImpacts.length > 0) {
+      const animDuration = useUiStore.getState().movementAnimation?.duration ?? 2000
+      setTimeout(() => {
+        set((s) => ({ pendingMissileImpacts: [...s.pendingMissileImpacts, ...newImpacts] }))
+      }, animDuration + 100)
+    }
   }),
 
   /** Remove a single passing encounter by id (GM dismissed it via PassingAttackModal). */
