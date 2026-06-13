@@ -9,10 +9,10 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.15.6 |
+| **Versione** | 1.16.0 |
 | **Branch** | main (clean) |
-| **Test** | 694 passing |
-| **Ultimo commit** | chore(release): v1.15.6 — token contrast + min-w-85 |
+| **Test** | 698 passing |
+| **Ultimo commit** | chore(release): v1.16.0 — missile magazine tracking |
 
 ---
 

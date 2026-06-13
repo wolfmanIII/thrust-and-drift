@@ -362,7 +362,7 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="LAUNCHING MISSILES">
-            <p>In the Attack modal, select <span className="text-slate-200">Missile Rack</span> from the weapon list, choose a target, adjust salvo count (1–12), then click Launch. The salvo spawns as a token inheriting the launcher's velocity. No dice roll required at launch.</p>
+            <p>In the Attack modal, select <span className="text-slate-200">Missile Rack</span> from the weapon list, choose a target, adjust salvo count using the stepper (capped at the ship's remaining magazine — 12 per rack, CRB p.162), then click Launch. Remaining ammo is shown next to the stepper; the button shows <span className="text-red-400">⚠ NO AMMO</span> when the magazine is empty. No dice roll required at launch.</p>
             <p>Missiles have <span className="text-slate-200">Thrust 10</span> and <span className="text-slate-200">10 rounds of guided flight</span> (CRB p.162). Each round in the Movement phase they home toward the target's predicted next position. After fuel is exhausted the salvo drifts on its last vector.</p>
           </Sub>
 

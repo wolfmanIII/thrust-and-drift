@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.15.6** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.16.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -414,7 +414,7 @@ Missile Racks are selected directly in the Attack modal alongside other weapons.
 Select the `Missile Rack` entry in the weapon list, then:
 
 1. Select the **target** ship.
-2. Adjust the **missile count** (1–12) using the `−` / `+` stepper.
+2. Adjust the **missile count** using the `−` / `+` stepper. The maximum is capped by the ship's remaining magazine (`count × 12` per Missile Rack — *MgT2e CRB p.162*). Remaining ammo is shown next to the stepper; the button reads **⚠ NO AMMO** and is disabled when the magazine is empty.
 3. Click **🚀 LAUNCH SALVO →** — no dice roll required.
 
 The salvo spawns as a missile token on the map, inheriting the launching ship's

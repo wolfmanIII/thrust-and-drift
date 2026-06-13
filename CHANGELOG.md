@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.16.0] — 2026-06-13
+
+### Added
+
+- **Missile magazine tracking** — each ship instance now tracks `missileAmmoTotal = N_rack × 12` (MgT2e CRB p.162 — standard rack holds 12). The Attack modal stepper is capped at the remaining ammo; remaining count displayed in cyan (red at 0); launch button shows `⚠ NO AMMO` and is disabled when magazine is empty. Ammo persists across rounds and degrades correctly across multiple salvos.
+
+### Tests
+
+- 698 tests (+4: magazine initialisation, depletion, clamp at 0, 2-rack ship)
+
+---
+
 ## [1.15.6] — 2026-06-13
 
 ### Fixed
