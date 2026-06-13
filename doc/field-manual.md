@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.15.5** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.15.6** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 

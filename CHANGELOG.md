@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.15.6] — 2026-06-13
+
+### Fixed
+
+- **Ship token detail contrast** — bridge, cockpit, and porthole overlays raised from 10–35% to 40–65% opacity (white elements) and 90% (cyan portholes); tokens now legible on all faction colours, including for users with colour-vision deficiency.
+
+### Style
+
+- **`PassingAttackModal` — `min-w-85`** — replaced non-canonical `min-w-[340px]` with Tailwind v4 `min-w-85`.
+
+---
+
 ## [1.15.5] — 2026-06-13
 
 ### Fixed

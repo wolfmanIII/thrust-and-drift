@@ -236,7 +236,7 @@ export function HelpScreen() {
             <KV k="Profile" v="Which saved ship profile to use." />
             <KV k="Faction" v="Players, Allies, Enemies, Neutral — affects token colour and auto-roll behaviour." />
             <KV k="Color" v="Token display colour." />
-            <KV k="Shape" v="Token silhouette — Delta, Needle, Freighter, Gunship, Cruiser, or Capital. Each has a distinct hull outline and bridge/cockpit overlay. Per-placement only; does not affect game mechanics." />
+            <KV k="Shape" v="Token silhouette — Delta, Needle, Freighter, Gunship, Cruiser, or Capital. Each has a distinct hull outline and bridge/cockpit overlay (increased contrast for colour-vision accessibility). Per-placement only; does not affect game mechanics." />
             <p>After placing, right-click the ship token → <span className="text-slate-200">Assign Crew…</span> to review or adjust which crew member covers each role and turret (see Crew System below).</p>
           </Sub>
           <Sub title="REMOVING A SHIP">

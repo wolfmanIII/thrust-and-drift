@@ -9,10 +9,10 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.15.5 |
+| **Versione** | 1.15.6 |
 | **Branch** | main (clean) |
 | **Test** | 694 passing |
-| **Ultimo commit** | fix(passing-encounter): hide modal 1.5s after attack so effects are visible |
+| **Ultimo commit** | chore(release): v1.15.6 — token contrast + min-w-85 |
 
 ---
 
