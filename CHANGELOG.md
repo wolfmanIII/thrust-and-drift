@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.15.5] — 2026-06-13
+
+### Fixed
+
+- **`PassingAttackModal` — visual effects now visible after attack resolution** — the modal now hides for 1.5 s when the `AttackModal` closes (transition `activeModal: 'attack' → null`), giving beam/impact/critical effects time to animate on the canvas before the backdrop reappears. Store state (`firedA`/`firedB`) is preserved during the window so the modal resumes correctly for subsequent actions (Ship B still fires, multi-encounter queue unaffected).
+
+### Tests
+
+- 694 tests (+2 for effects-window hide/reappear behaviour)
+
+---
+
 ## [1.15.4] — 2026-06-12
 
 ### Added
