@@ -237,9 +237,9 @@ export function drawCapitalShipDetail(ctx, size) {
   // Command tower blister — oval raised section at midship
   ctx.beginPath()
   ctx.ellipse(0, -size * 0.18, size * 0.14, size * 0.09, 0, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.18)'
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'
   ctx.fill()
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)'
+  ctx.strokeStyle = 'rgba(255,255,255,0.60)'
   ctx.lineWidth = 1
   ctx.stroke()
 
@@ -247,7 +247,7 @@ export function drawCapitalShipDetail(ctx, size) {
   for (let i = -2; i <= 2; i++) {
     ctx.beginPath()
     ctx.rect(i * size * 0.045 - size * 0.015, -size * 0.22, size * 0.03, size * 0.05)
-    ctx.fillStyle = 'rgba(125,211,252,0.65)'
+    ctx.fillStyle = 'rgba(125,211,252,0.90)'
     ctx.fill()
   }
 }
@@ -266,12 +266,12 @@ export function drawDeltaDetail(ctx, size) {
   ctx.lineTo(-size * 0.09,  size * 0.50)
   ctx.lineTo(-size * 0.09, -size * 0.52)
   ctx.closePath()
-  ctx.fillStyle = 'rgba(255,255,255,0.14)'
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'
   ctx.fill()
 
   ctx.beginPath()
   ctx.arc(0, -size * 0.62, size * 0.13, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.32)'
+  ctx.fillStyle = 'rgba(255,255,255,0.65)'
   ctx.fill()
 }
 
@@ -280,13 +280,13 @@ export function drawNeedleDetail(ctx, size) {
   ctx.beginPath()
   ctx.moveTo(0, -size * 0.88)
   ctx.lineTo(0,  size * 0.82)
-  ctx.strokeStyle = 'rgba(255,255,255,0.10)'
+  ctx.strokeStyle = 'rgba(255,255,255,0.45)'
   ctx.lineWidth = 1.5
   ctx.stroke()
 
   ctx.beginPath()
   ctx.arc(0, -size * 0.72, size * 0.10, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.35)'
+  ctx.fillStyle = 'rgba(255,255,255,0.65)'
   ctx.fill()
 }
 
@@ -297,16 +297,16 @@ export function drawFreighterDetail(ctx, size) {
   const by = -size * 0.58
   ctx.beginPath()
   ctx.rect(-bw / 2, by - bh / 2, bw, bh)
-  ctx.fillStyle = 'rgba(255,255,255,0.15)'
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'
   ctx.fill()
-  ctx.strokeStyle = 'rgba(255,255,255,0.22)'
+  ctx.strokeStyle = 'rgba(255,255,255,0.60)'
   ctx.lineWidth = 0.8
   ctx.stroke()
 
   for (let i = -1; i <= 1; i++) {
     ctx.beginPath()
     ctx.arc(i * size * 0.07, by, size * 0.03, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(125,211,252,0.60)'
+    ctx.fillStyle = 'rgba(125,211,252,0.90)'
     ctx.fill()
   }
 }
@@ -315,15 +315,15 @@ export function drawFreighterDetail(ctx, size) {
 export function drawGunshipDetail(ctx, size) {
   ctx.beginPath()
   ctx.ellipse(0, -size * 0.38, size * 0.18, size * 0.11, 0, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.14)'
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'
   ctx.fill()
-  ctx.strokeStyle = 'rgba(255,255,255,0.28)'
+  ctx.strokeStyle = 'rgba(255,255,255,0.60)'
   ctx.lineWidth = 1
   ctx.stroke()
 
   ctx.beginPath()
   ctx.arc(0, -size * 0.50, size * 0.05, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.30)'
+  ctx.fillStyle = 'rgba(255,255,255,0.65)'
   ctx.fill()
 }
 
@@ -337,21 +337,21 @@ export function drawCruiserDetail(ctx, size) {
   ctx.lineTo(-size * 0.06,  size * 0.18)
   ctx.lineTo(-size * 0.06, -size * 0.55)
   ctx.closePath()
-  ctx.fillStyle = 'rgba(255,255,255,0.11)'
+  ctx.fillStyle = 'rgba(255,255,255,0.40)'
   ctx.fill()
 
   ctx.beginPath()
   ctx.ellipse(0, -size * 0.60, size * 0.09, size * 0.14, 0, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(255,255,255,0.20)'
+  ctx.fillStyle = 'rgba(255,255,255,0.50)'
   ctx.fill()
-  ctx.strokeStyle = 'rgba(255,255,255,0.32)'
+  ctx.strokeStyle = 'rgba(255,255,255,0.65)'
   ctx.lineWidth = 0.8
   ctx.stroke()
 
   for (let i = -1; i <= 1; i += 2) {
     ctx.beginPath()
     ctx.arc(i * size * 0.04, -size * 0.60, size * 0.025, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(125,211,252,0.55)'
+    ctx.fillStyle = 'rgba(125,211,252,0.90)'
     ctx.fill()
   }
 }
