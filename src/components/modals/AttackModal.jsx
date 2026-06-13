@@ -303,11 +303,15 @@ function AttackConfigStep({
         {/* Missile count — only for Missile Rack */}
         {isMissile && (
           <div>
-            <p className="text-slate-500 font-mono text-xs mb-1.5">Missiles in salvo (1–12)</p>
+            <p className="text-slate-500 font-mono text-xs mb-1.5">
+              Missiles in salvo (1–{ammoLeft})
+              {' · '}Ammo: <span className={ammoLeft === 0 ? 'text-red-400' : 'text-(--neon-cyan)'}>{ammoLeft}</span>
+            </p>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setMissileCount((c) => Math.max(1, c - 1))}
-                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors"
+                disabled={ammoLeft === 0}
+                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 −
               </button>
@@ -315,8 +319,9 @@ function AttackConfigStep({
                 {missileCount}
               </span>
               <button
-                onClick={() => setMissileCount((c) => Math.min(12, c + 1))}
-                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors"
+                onClick={() => setMissileCount((c) => Math.min(ammoLeft, c + 1))}
+                disabled={ammoLeft === 0}
+                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 +
               </button>
@@ -420,10 +425,10 @@ function AttackConfigStep({
           ) : (
             <button
               onClick={onNext}
-              disabled={!weapon || !target}
+              disabled={!weapon || !target || ammoLeft === 0}
               className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              🚀 LAUNCH SALVO →
+              {ammoLeft === 0 ? '⚠ NO AMMO' : '🚀 LAUNCH SALVO →'}
             </button>
           )
         ) : (
@@ -904,7 +909,8 @@ export function AttackModal() {
   const [sandTurretSlot, setSandTurretSlot]   = useState(null)
   const [sandResult, setSandResult]           = useState(null)
 
-  const isMissile = weaponKey === 'Missile Rack'
+  const isMissile  = weaponKey === 'Missile Rack'
+  const ammoLeft   = isMissile ? (attacker.missileAmmoTotal ?? 0) : 0
 
   const resetReactions = () => {
     setReactionEvasion(false); setPdTurretSlot(null); setPdResult(null)
