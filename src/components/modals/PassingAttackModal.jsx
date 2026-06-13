@@ -3,12 +3,18 @@
  * Short range (≤ 2 hexes) during the movement phase without ending in the same hex.
  * GM can open fire on one of the ships or pass the opportunity.
  * // Traveller Companion p.172 — Ships That Pass in the Night
+ *
+ * Hides itself for EFFECTS_WINDOW_MS after each AttackModal closes so that
+ * beam/impact/critical effects are visible on the canvas before the modal reappears.
  */
 
+import { useState, useEffect, useRef } from 'react'
 import { Modal }          from './Modal.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore }     from '../../store/uiStore.js'
 import { getRangeBand }   from '../../utils/hex.js'
+
+const EFFECTS_WINDOW_MS = 1500
 
 export function PassingAttackModal() {
   const encounters                = useBattleStore((s) => s.passingEncounters)
@@ -16,9 +22,23 @@ export function PassingAttackModal() {
   const dismissPassingEncounter   = useBattleStore((s) => s.dismissPassingEncounter)
   const markPassingEncounterFired = useBattleStore((s) => s.markPassingEncounterFired)
   const openModal                 = useUiStore((s) => s.openModal)
+  const activeModal               = useUiStore((s) => s.activeModal)
+
+  const [hiding, setHiding] = useState(false)
+  const prevActiveModal = useRef(activeModal)
+
+  // When AttackModal closes (attack → null), hide PAM briefly so effects are visible
+  useEffect(() => {
+    if (prevActiveModal.current === 'attack' && activeModal === null) {
+      setHiding(true)
+      const t = setTimeout(() => setHiding(false), EFFECTS_WINDOW_MS)
+      return () => clearTimeout(t)
+    }
+    prevActiveModal.current = activeModal
+  }, [activeModal])
 
   const encounter = encounters[0]
-  if (!encounter) return null
+  if (!encounter || hiding) return null
 
   const shipA = ships.find((s) => s.id === encounter.shipAId)
   const shipB = ships.find((s) => s.id === encounter.shipBId)
