@@ -26,10 +26,11 @@ export function MissileLaunchModal() {
   const attacker = ships.find((s) => s.id === modalPayload?.shipId)
 
   const rackCount = attacker ? countMissileRacks(attacker.profile) : 0
+  const ammoLeft  = attacker ? (attacker.missileAmmoTotal ?? rackCount * 12) : 0
   const enemies   = attacker ? ships.filter((s) => s.id !== attacker.id) : []
 
   const [targetId, setTargetId] = useState('')
-  const [count, setCount]       = useState(rackCount > 0 ? rackCount : 1)
+  const [count, setCount]       = useState(Math.min(rackCount > 0 ? rackCount : 1, ammoLeft))
 
   if (!attacker) return null
 
@@ -51,6 +52,7 @@ export function MissileLaunchModal() {
       <div className="space-y-4">
         <p className="text-slate-400 font-mono text-xs">
           Missile Rack turrets: <span className="text-(--neon-cyan)">{rackCount}</span>
+          {' · '}Ammo remaining: <span className={ammoLeft === 0 ? 'text-red-400' : 'text-(--neon-cyan)'}>{ammoLeft}</span>
           {' · '}Salvo inherits the ship&apos;s current vector.
         </p>
 
@@ -81,12 +83,13 @@ export function MissileLaunchModal() {
         {/* Missile count */}
         <div>
           <p className="text-slate-500 font-mono text-xs mb-1.5">
-            Missiles in salvo (1–12)
+            Missiles in salvo (1–{ammoLeft})
           </p>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setCount((c) => Math.max(1, c - 1))}
-              className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors"
+              disabled={ammoLeft === 0}
+              className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               −
             </button>
@@ -94,8 +97,9 @@ export function MissileLaunchModal() {
               {count}
             </span>
             <button
-              onClick={() => setCount((c) => Math.min(12, c + 1))}
-              className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors"
+              onClick={() => setCount((c) => Math.min(ammoLeft, c + 1))}
+              disabled={ammoLeft === 0}
+              className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               +
             </button>
@@ -114,10 +118,10 @@ export function MissileLaunchModal() {
           </button>
           <button
             onClick={handleLaunch}
-            disabled={!targetId}
+            disabled={!targetId || ammoLeft === 0}
             className="flex-1 py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-xs tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            🚀 LAUNCH SALVO
+            {ammoLeft === 0 ? '⚠ NO AMMO' : '🚀 LAUNCH SALVO'}
           </button>
         </div>
       </div>

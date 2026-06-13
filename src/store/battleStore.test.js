@@ -797,6 +797,38 @@ describe('dismissPassingEncounter', () => {
 
 // === MISSILES ===
 
+describe('missile magazine (missileAmmoTotal)', () => {
+  it('initialises to 0 for ships with no missile rack', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(0)
+  })
+
+  it('initialises to 12 × rack count', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Missile Rack', 'Pulse Laser'] }, { slot: 2, weapons: ['Missile Rack'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(24)
+  })
+
+  it('decrements missileAmmoTotal by salvo count on launch', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Missile Rack'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile(), { q: 5, r: 0 }, 'npc', '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 5, { q: 0, r: 0 }, { q: 0, r: 0 })
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(7)
+  })
+
+  it('clamps missileAmmoTotal at 0, never negative', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Missile Rack'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile(), { q: 5, r: 0 }, 'npc', '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 12, { q: 0, r: 0 }, { q: 0, r: 0 })
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 12, { q: 0, r: 0 }, { q: 0, r: 0 })
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(0)
+  })
+})
+
 describe('launchMissile', () => {
   it('adds missile to missiles array', () => {
     useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#fff')

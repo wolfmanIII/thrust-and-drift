@@ -20,6 +20,11 @@ import { emitEffect } from '../utils/effectQueue.js'
 /** Canonical sort key for a ship pair — order-independent. */
 function pairKey(id1, id2) { return [id1, id2].sort().join('_') }
 
+/** Count Missile Rack weapons across all turrets. // MgT2e CRB p.162 — 12 missiles per rack */
+function countMissileRacks(profile) {
+  return (profile.turrets ?? []).flatMap((t) => t.weapons).filter((w) => w === 'Missile Rack').length
+}
+
 /**
  * Max hex-distance of vector correction a missile may apply per round.
  * // Traveller Companion p.176 — Standard missile Thrust 10
@@ -297,6 +302,7 @@ const useBattleStore = create((set, get) => {
       sensorLockedBy: null,
       sensorLockDM: 0,
       turretsNeedingReload: 0,
+      missileAmmoTotal: countMissileRacks(profile) * 12,
       inDogfight: null,
       inBoarding: null,
       crewAssignments: buildDefaultAssignments(profile.crew, profile.turrets),
@@ -776,7 +782,11 @@ const useBattleStore = create((set, get) => {
     set((s) => ({
       missiles: [...s.missiles, missile],
       ships: s.ships.map((sh) =>
-        sh.id === launchedBy ? { ...sh, turretsNeedingReload: (sh.turretsNeedingReload ?? 0) + 1 } : sh
+        sh.id === launchedBy ? {
+          ...sh,
+          turretsNeedingReload: (sh.turretsNeedingReload ?? 0) + 1,
+          missileAmmoTotal: Math.max(0, (sh.missileAmmoTotal ?? countMissileRacks(sh.profile) * 12) - count),
+        } : sh
       ),
       log: [...s.log, makeLogEntry({
         round: s.round,
