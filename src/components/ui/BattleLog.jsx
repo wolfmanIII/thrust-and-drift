@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useBattleStore } from '../../store/battleStore.js'
+import { useUiStore }     from '../../store/uiStore.js'
 
 const MAX_VISIBLE = 60
 
@@ -28,9 +29,12 @@ const TYPE_PREFIX = {
 
 export function BattleLog() {
   const [collapsed, setCollapsed] = useState(true)
-  const log                 = useBattleStore((s) => s.log)
-  const clearLog            = useBattleStore((s) => s.clearLog)
-  const reopenMissileImpact = useBattleStore((s) => s.reopenMissileImpact)
+  const log                   = useBattleStore((s) => s.log)
+  const clearLog              = useBattleStore((s) => s.clearLog)
+  const reopenMissileImpact   = useBattleStore((s) => s.reopenMissileImpact)
+  const pendingMissileImpacts = useBattleStore((s) => s.pendingMissileImpacts)
+  const activeModal           = useUiStore((s) => s.activeModal)
+  const impactBusy            = pendingMissileImpacts.length > 0 || activeModal !== null
   const listRef             = useRef(null)
 
   const visible = log.slice(-MAX_VISIBLE)
@@ -82,9 +86,14 @@ export function BattleLog() {
                 <span className="text-slate-300 flex-1">{entry.message}</span>
                 {entry.details?.recoverable && (
                   <button
+                    disabled={impactBusy}
                     onClick={() => reopenMissileImpact(entry.details.impact)}
-                    className="shrink-0 text-amber-500 hover:text-amber-300 transition-colors leading-none"
-                    title="Re-open impact resolution"
+                    className={`shrink-0 leading-none transition-colors ${
+                      impactBusy
+                        ? 'text-slate-600 cursor-not-allowed'
+                        : 'text-amber-500 hover:text-amber-300'
+                    }`}
+                    title={impactBusy ? 'Resolve pending modals first' : 'Re-open impact resolution'}
                   >
                     ↩
                   </button>
