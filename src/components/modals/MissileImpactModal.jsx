@@ -56,7 +56,7 @@ export function MissileImpactModal() {
 
   return (
     <Modal>
-      <div className="flex flex-col gap-5 min-w-[340px]">
+      <div className="flex flex-col gap-5 min-w-85">
 
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="flex items-center justify-between">
