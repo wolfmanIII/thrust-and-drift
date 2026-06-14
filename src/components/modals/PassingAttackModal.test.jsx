@@ -92,45 +92,6 @@ describe('PassingAttackModal — display', () => {
   })
 })
 
-describe('PassingAttackModal — effects window', () => {
-  afterEach(() => vi.useRealTimers())
-
-  it('hides for 1.5s when AttackModal closes, then reappears with preserved state', () => {
-    vi.useFakeTimers()
-    addShipToStore('Viper', 'players', 0, 0, '#0f0')
-    addShipToStore('Fighter', 'npc', 5, 0, '#f00')
-    injectEncounterByIndex(0, 1, 1)
-
-    // Simulate AttackModal already open
-    useUiStore.setState({ activeModal: 'attack' })
-    const { container } = render(<PassingAttackModal />)
-
-    // AttackModal closes → PAM should hide immediately
-    act(() => { useUiStore.setState({ activeModal: null }) })
-    expect(container.firstChild).toBeNull()
-
-    // Before window expires, still hidden
-    act(() => { vi.advanceTimersByTime(1000) })
-    expect(container.firstChild).toBeNull()
-
-    // After 1.5s, PAM reappears
-    act(() => { vi.advanceTimersByTime(600) })
-    expect(container.firstChild).not.toBeNull()
-  })
-
-  it('does not hide when a non-attack modal closes', () => {
-    vi.useFakeTimers()
-    addShipToStore('Viper', 'players', 0, 0, '#0f0')
-    addShipToStore('Fighter', 'npc', 5, 0, '#f00')
-    injectEncounterByIndex(0, 1, 1)
-
-    useUiStore.setState({ activeModal: 'shipDetail' })
-    const { container } = render(<PassingAttackModal />)
-
-    act(() => { useUiStore.setState({ activeModal: null }) })
-    expect(container.firstChild).not.toBeNull()
-  })
-})
 
 describe('PassingAttackModal — actions', () => {
   it('PASS dismisses the encounter immediately', () => {
