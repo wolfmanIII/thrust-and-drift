@@ -910,7 +910,6 @@ export function AttackModal() {
   const [sandResult, setSandResult]           = useState(null)
 
   const isMissile  = weaponKey === 'Missile Rack'
-  const ammoLeft   = isMissile ? (attacker.missileAmmoTotal ?? 0) : 0
 
   const resetReactions = () => {
     setReactionEvasion(false); setPdTurretSlot(null); setPdResult(null)
@@ -926,6 +925,8 @@ export function AttackModal() {
     useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand, selectedTurretSlot)
 
   if (!attacker) return null
+
+  const ammoLeft = isMissile ? (attacker.missileAmmoTotal ?? 0) : 0
 
   // ── Reaction-derived values ────────────────────────────────────────────
   const targetPilotSkill = target ? getEffectiveSkill(target.profile.crew, target.crewAssignments, 'pilot') : 0
