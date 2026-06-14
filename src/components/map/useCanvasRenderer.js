@@ -213,9 +213,14 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
     const anim = useUiStore.getState().movementAnimation
     const now = performance.now()
 
+    // Read ships and missiles fresh from the store — avoids stale-closure race where
+    // startMovementAnimation (uiStore) fires before the battleStore set() that moves
+    // the tokens, causing lerpHex(pre, pre, t) → no visible movement.
+    const { ships: liveShips, missiles: liveMissiles } = useBattleStore.getState()
+
     // --- Layer 3: Ghost positions — only during acceleration (thrust preview) ---
     if (phase === 'acceleration') {
-      for (const ship of ships) {
+      for (const ship of liveShips) {
         if (ship.isDestroyed) continue
         if (ship.inDogfight !== null) continue
         // Skip default ghost for the ship in targeting mode — drawThrustTargeting draws its own
@@ -228,14 +233,14 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
 
     // --- Layer 3b: Thrust targeting overlay ---
     if (thrustTargeting && phase === 'acceleration') {
-      const targetingShip = ships.find((s) => s.id === thrustTargeting.shipId)
+      const targetingShip = liveShips.find((s) => s.id === thrustTargeting.shipId)
       if (targetingShip && targetingShip.inDogfight === null) {
         drawThrustTargeting(ctx, targetingShip, mouseHexRef.current, size, ox, oy)
       }
     }
 
     // --- Layer 4: Vector arrows — skip for dogfight/destroyed ships ---
-    for (const ship of ships) {
+    for (const ship of liveShips) {
       if (ship.isDestroyed) continue
       if (ship.inDogfight !== null) continue
       const { x: cx, y: cy } = hexToPixel(ship.position.q, ship.position.r, size, ox, oy)
@@ -243,7 +248,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
     }
 
     // --- Layer 5: Missile tokens ---
-    for (const missile of missiles) {
+    for (const missile of liveMissiles) {
       let renderPos = missile.position
       if (anim?.startPositions[missile.id]) {
         const t = easeInOut(Math.min(1, (now - anim.startTime) / anim.duration))
@@ -254,7 +259,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
     }
 
     // --- Layer 6 + 7: Ship tokens + labels ---
-    for (const ship of ships) {
+    for (const ship of liveShips) {
       let renderPos = ship.position
       if (anim?.startPositions[ship.id]) {
         const t = easeInOut(Math.min(1, (now - anim.startTime) / anim.duration))
