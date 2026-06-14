@@ -9,16 +9,26 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.17.0 |
+| **Versione** | 1.17.1 |
 | **Branch** | main (clean) |
-| **Test** | 702 passing |
-| **Ultimo commit** | chore(release): v1.17.0 — changelog screen + audio/animation/ghost fixes |
+| **Test** | 700 passing |
+| **Ultimo commit** | chore(release): v1.17.1 — panel modals + PAM fixes |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Audio + Animation + Ghost Fixes + ChangelogScreen (v1.17.0)
+### Sessione corrente — Panel Modals + PAM Fixes (v1.17.1)
+
+1. **`feat(ui): anchor all modals bottom-right as panel`** (`5c76d0f`) — `Modal.jsx` aggiunge `variant="panel"` come default; nessun backdrop, mappa sempre visibile e panbile. `PassingAttackModal` e `MissileImpactModal` ereditano automaticamente. `ABANDON SESSION` in HUD mantiene `variant="dialog"`.
+2. **`fix(pam): remove effects-window delay`** (`6a06ca5`) — rimosso `EFFECTS_WINDOW_MS` + hiding logic; con panel non c'è backdrop che oscura il canvas. −2 test obsoleti (700 totali).
+3. **`fix(battle-log): disable reopen button while any modal or impact is active`** (`8507cf2`) — ↩ diventa grigio/disabled quando `pendingMissileImpacts.length > 0` o `activeModal !== null`.
+4. **`fix(pam): lock action buttons while another modal is open`** (`4c3c6ab`) — `actionsLocked = activeModal !== null`; previene doppio-fire quando i panel si sovrappongono.
+5. **`fix(hud): abandon session modal uses variant=dialog`** (`f644d94`) — conferma distruttiva rimane centrata con backdrop.
+6. **`docs: clarify Ships That Pass in the Night initiative order per TC p.177`** (`0e80908`) — field manual + HelpScreen: ordine iniziativa, secondo pulsante bloccato, nave distrutta non risponde.
+7. **`chore(netlify): disable auto-deploy via ignore script`** (`e172b45`) — `netlify.toml` con `ignore = "exit 0"`; deploy solo manuale.
+
+### Sessione precedente — Audio + Animation + Ghost Fixes + ChangelogScreen (v1.17.0)
 
 1. **`fix(audio): add 10ms lookahead to all synth scheduling`** (`ee78794`) — `ctx.currentTime + 0.01` in tutti e 6 i synth di `audioSynth.js`; previene il drop silenzioso alla prima riproduzione quando `ctx.currentTime` è 0.
 2. **`fix(audio): increase lookahead to 50ms and handle closed AudioContext`** (`0ee95c1`) — lookahead alzato a 50ms (sufficiente dopo `AudioContext.resume()`); guard per stato `'closed'` → ricrea context; `console.warn` in DEV su errori scheduling.

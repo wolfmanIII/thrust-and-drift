@@ -6,6 +6,30 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.17.1] — 2026-06-14
+
+### Added
+
+- **`netlify.toml`** — `ignore = "exit 0"` disables automatic deploys on push; builds triggered manually from Netlify dashboard or CLI.
+
+### Fixed
+
+- **Panel modals — map always visible** — all modals now use `variant="panel"` (anchored bottom-right, no backdrop); map remains visible and pannable during attack resolution, missile impacts, and passing encounters. `ABANDON SESSION` confirmation keeps `variant="dialog"` (centred backdrop) as a destructive action requiring full attention.
+- **PAM action buttons locked while AttackModal is open** — prevents double-firing when panels stack at the same screen position; buttons re-enable once AttackModal closes.
+- **PAM effects-window delay removed** — 1.5 s hide logic was a workaround for the old dialog backdrop; no longer needed with panel variant.
+- **BattleLog ↩ disabled while any modal or impact is active** — prevents opening a second MissileImpactModal while one is already resolving.
+- **`MissileImpactModal` `min-w-[340px]` → `min-w-85`** — canonical Tailwind v4 syntax.
+
+### Docs
+
+- Field manual and HelpScreen updated: Ships That Pass in the Night now documents initiative order (TC p.177) — GM decides which ship fires first; second button locked until first attack resolves; destroyed ships cannot fire back.
+
+### Tests
+
+- 700 tests (−2: removed obsolete PAM effects-window tests)
+
+---
+
 ## [1.17.0] — 2026-06-14
 
 ### Added
