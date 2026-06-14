@@ -216,6 +216,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
     // --- Layer 3: Ghost positions — only during acceleration (thrust preview) ---
     if (phase === 'acceleration') {
       for (const ship of ships) {
+        if (ship.isDestroyed) continue
         if (ship.inDogfight !== null) continue
         // Skip default ghost for the ship in targeting mode — drawThrustTargeting draws its own
         if (thrustTargeting?.shipId === ship.id) continue
@@ -233,8 +234,9 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
       }
     }
 
-    // --- Layer 4: Vector arrows — skip for dogfight ships (no movement during dogfight) ---
+    // --- Layer 4: Vector arrows — skip for dogfight/destroyed ships ---
     for (const ship of ships) {
+      if (ship.isDestroyed) continue
       if (ship.inDogfight !== null) continue
       const { x: cx, y: cy } = hexToPixel(ship.position.q, ship.position.r, size, ox, oy)
       drawVectorArrow(ctx, ship, cx, cy, size)

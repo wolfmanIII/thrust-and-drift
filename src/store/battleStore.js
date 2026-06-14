@@ -504,6 +504,7 @@ const useBattleStore = create((set, get) => {
         const a = ships[i]
         const b = ships[j]
         if (a.faction === b.faction) continue
+        if (a.isDestroyed || b.isDestroyed) continue
         if (a.inDogfight || b.inDogfight) continue
         if (a.inBoarding || b.inBoarding) continue
         const a1 = hexAdd(a.position, a.vector)
