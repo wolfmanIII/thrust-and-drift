@@ -14,8 +14,7 @@ import { playEffectSound }  from '../utils/audioSynth.js'
 let _ctx = null
 
 function getAudioContext() {
-  if (!_ctx) _ctx = new AudioContext()
-  if (_ctx.state === 'suspended') _ctx.resume()
+  if (!_ctx || _ctx.state === 'closed') _ctx = new AudioContext()
   return _ctx
 }
 
@@ -35,8 +34,9 @@ export function useAudioEngine() {
         // auto-suspends the context after ~30 s of inactivity.
         if (ctx.state !== 'running') await ctx.resume()
         playEffectSound(ctx, effect)
-      } catch {
-        // AudioContext may be blocked (no user gesture); fail silently
+      } catch (err) {
+        // AudioContext may be blocked by autoplay policy; fail silently in production
+        if (import.meta.env.DEV) console.warn('[audio]', err)
       }
     })
   }, [])

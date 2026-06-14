@@ -22,7 +22,7 @@ function noiseBuffer(ctx, durationSec) {
 
 /** Sci-fi laser beam — descending sawtooth sweep. */
 export function playLaserRay(ctx) {
-  const t   = ctx.currentTime + 0.01
+  const t   = ctx.currentTime + 0.05
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
 
@@ -41,7 +41,7 @@ export function playLaserRay(ctx) {
 
 /** Kinetic/particle impact — noise burst with low-pass sweep. */
 export function playImpactBurst(ctx) {
-  const t = ctx.currentTime + 0.01
+  const t = ctx.currentTime + 0.05
   const { source } = noiseBuffer(ctx, 0.35)
 
   const filter = ctx.createBiquadFilter()
@@ -62,7 +62,7 @@ export function playImpactBurst(ctx) {
 
 /** Critical hit — deep rumble + impact layer. */
 export function playCriticalFlash(ctx) {
-  const t = ctx.currentTime + 0.01
+  const t = ctx.currentTime + 0.05
 
   // Low-frequency thud
   const osc  = ctx.createOscillator()
@@ -95,7 +95,7 @@ export function playCriticalFlash(ctx) {
 
 /** Missile launch — ascending whoosh with tail. */
 export function playMissileLaunch(ctx) {
-  const t   = ctx.currentTime + 0.01
+  const t   = ctx.currentTime + 0.05
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
 
@@ -115,7 +115,7 @@ export function playMissileLaunch(ctx) {
 
 /** Thrust plume — filtered noise burst, engine texture. */
 export function playThrustPlume(ctx) {
-  const t = ctx.currentTime + 0.01
+  const t = ctx.currentTime + 0.05
   const { source } = noiseBuffer(ctx, 0.3)
 
   const filter = ctx.createBiquadFilter()
@@ -137,7 +137,7 @@ export function playThrustPlume(ctx) {
 
 /** Short UI confirmation tick. */
 export function playUiTick(ctx) {
-  const t   = ctx.currentTime + 0.01
+  const t   = ctx.currentTime + 0.05
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
 
