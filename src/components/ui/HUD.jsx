@@ -313,7 +313,7 @@ export function HUD() {
       })}
 
       {showExitWarning && (
-        <Modal title="ABANDON SESSION" onClose={() => setShowExitWarning(false)} width="max-w-sm">
+        <Modal title="ABANDON SESSION" onClose={() => setShowExitWarning(false)} width="max-w-sm" variant="dialog">
           <div className="space-y-4">
             <p className="font-mono text-sm text-slate-300 leading-relaxed">
               Unsaved data will be lost.
