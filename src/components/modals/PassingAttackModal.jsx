@@ -17,6 +17,11 @@ export function PassingAttackModal() {
   const dismissPassingEncounter   = useBattleStore((s) => s.dismissPassingEncounter)
   const markPassingEncounterFired = useBattleStore((s) => s.markPassingEncounterFired)
   const openModal                 = useUiStore((s) => s.openModal)
+  const activeModal               = useUiStore((s) => s.activeModal)
+
+  // Disable action buttons while another modal (e.g. AttackModal) is open —
+  // prevents double-firing when panels stack at the same screen position.
+  const actionsLocked = activeModal !== null
 
   const encounter = encounters[0]
   // Missile impacts take priority — resolve them before handling passing encounters
@@ -102,10 +107,10 @@ export function PassingAttackModal() {
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
             <button
-              disabled={encounter.firedA}
+              disabled={encounter.firedA || actionsLocked}
               onClick={() => handleOpenFire(shipA.id)}
               className={`flex-1 font-mono text-xs tracking-widest py-2 rounded transition-colors
-                ${encounter.firedA
+                ${encounter.firedA || actionsLocked
                   ? 'bg-slate-800/40 border border-slate-700 text-slate-600 cursor-default'
                   : 'bg-amber-900/40 border border-amber-600/60 text-amber-300 hover:bg-amber-800/50'
                 }`}
@@ -113,10 +118,10 @@ export function PassingAttackModal() {
               {encounter.firedA ? `✓ ${shipA.profile.name.toUpperCase()} FIRED` : `${shipA.profile.name.toUpperCase()} FIRES`}
             </button>
             <button
-              disabled={encounter.firedB}
+              disabled={encounter.firedB || actionsLocked}
               onClick={() => handleOpenFire(shipB.id)}
               className={`flex-1 font-mono text-xs tracking-widest py-2 rounded transition-colors
-                ${encounter.firedB
+                ${encounter.firedB || actionsLocked
                   ? 'bg-slate-800/40 border border-slate-700 text-slate-600 cursor-default'
                   : 'bg-amber-900/40 border border-amber-600/60 text-amber-300 hover:bg-amber-800/50'
                 }`}
@@ -125,10 +130,13 @@ export function PassingAttackModal() {
             </button>
           </div>
           <button
+            disabled={actionsLocked}
             onClick={handlePass}
-            className="w-full bg-slate-800/60 border border-slate-600 text-slate-400
-              font-mono text-xs tracking-widest py-2 rounded
-              hover:bg-slate-700/60 transition-colors"
+            className={`w-full font-mono text-xs tracking-widest py-2 rounded transition-colors
+              ${actionsLocked
+                ? 'bg-slate-800/40 border border-slate-700 text-slate-600 cursor-default'
+                : 'bg-slate-800/60 border border-slate-600 text-slate-400 hover:bg-slate-700/60'
+              }`}
           >
             PASS — LET THEM GO
           </button>
