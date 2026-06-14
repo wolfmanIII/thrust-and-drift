@@ -213,7 +213,7 @@ const PHASE_LABELS = {
 }
 
 /** Left column: mode selector + action buttons. */
-function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onResumeAutosave, onClearAutosave, onHelp, autosave, loading, error }) {
+function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onResumeAutosave, onClearAutosave, onHelp, onChangelog, autosave, loading, error }) {
   return (
     <div className="border-r border-slate-800 flex flex-col overflow-hidden">
 
@@ -309,6 +309,16 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
               FIELD MANUAL
               <span className="block font-mono text-slate-600 mt-0.5 normal-case tracking-normal font-normal text-xs">
                 How to play
+              </span>
+            </button>
+            <button
+              onClick={onChangelog}
+              className="w-full py-3 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded-lg hover:border-slate-500 hover:text-slate-300 transition-colors"
+            >
+              <span className="text-sm block mb-0.5">📋</span>
+              CHANGELOG
+              <span className="block font-mono text-slate-600 mt-0.5 normal-case tracking-normal font-normal text-xs">
+                Version history
               </span>
             </button>
           </div>
@@ -680,6 +690,7 @@ function SessionPanel() {
         onResumeAutosave={handleResumeAutosave}
         onClearAutosave={handleClearAutosave}
         onHelp={() => gotoScreen('help')}
+        onChangelog={() => gotoScreen('changelog')}
         autosave={autosave}
         loading={loading}
         error={error}

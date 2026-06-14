@@ -29,7 +29,8 @@ import { BoardingOutcomeModal }  from './components/modals/BoardingOutcomeModal.
 import { LegendModal }            from './components/modals/LegendModal.jsx'
 import { CrewAssignmentModal }   from './components/modals/CrewAssignmentModal.jsx'
 import { BasicManoeuvreModal }  from './components/modals/BasicManoeuvreModal.jsx'
-import { HelpScreen }      from './components/help/HelpScreen.jsx'
+import { HelpScreen }       from './components/help/HelpScreen.jsx'
+import { ChangelogScreen }  from './components/help/ChangelogScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
 import { useUiStore }      from './store/uiStore.js'
 import { useBattleStore }  from './store/battleStore.js'
@@ -96,6 +97,17 @@ export function App() {
       <>
         <div className="h-[calc(100%-1.75rem)]">
           <HelpScreen />
+        </div>
+        <LegalFooter />
+      </>
+    )
+  }
+
+  if (screen === 'changelog') {
+    return (
+      <>
+        <div className="h-[calc(100%-1.75rem)]">
+          <ChangelogScreen />
         </div>
         <LegalFooter />
       </>
