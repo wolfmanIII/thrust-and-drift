@@ -340,6 +340,8 @@ For each encounter the GM sees:
 - **[Ship B] FIRES** — opens the Attack Modal pre-set to Ship B; button shows **✓ FIRED** after resolving
 - **PASS — LET THEM GO** — dismisses the encounter immediately with no attack for either ship
 
+**Initiative order applies** (TC p.177): attacks resolve at the initiative of the ship that fires first. The GM decides which ship acts first by clicking the corresponding **FIRES** button — the second ship's button remains locked until the first attack is resolved. The second ship fires only if it survives the first ship's attack; if destroyed, the Passing Encounter window closes automatically.
+
 Both ships may fire independently. The encounter window closes automatically once both have either fired or the GM passes. Multiple encounters are resolved sequentially.
 
 > **Note:** Ships that end in the same hex trigger the **Dogfight** system

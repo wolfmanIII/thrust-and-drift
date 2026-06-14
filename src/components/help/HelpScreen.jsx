@@ -326,7 +326,7 @@ export function HelpScreen() {
             <KV k="[Ship B] FIRES" v="Opens the Attack Modal for Ship B. Button shows ✓ FIRED after resolving." />
             <KV k="PASS" v="Dismiss the encounter immediately — no attacks for either ship." />
             <p>Both ships can fire independently. The encounter closes once both have resolved. Multiple encounters resolve sequentially. Ships ending in the same hex trigger the Dogfight system instead.</p>
-            <Note>After each attack resolves, the encounter window briefly hides (~1.5 s) so that beam/impact/critical effects are visible on the map before it reappears.</Note>
+            <Note>Initiative order applies (TC p.177): the GM decides which ship fires first by clicking the corresponding FIRES button. The other ship's button is locked until the first attack resolves. If the first attack destroys the target, the encounter closes automatically — the destroyed ship does not fire back.</Note>
           </Sub>
           <Note>In Basic mode this phase is skipped automatically.</Note>
         </Section>
