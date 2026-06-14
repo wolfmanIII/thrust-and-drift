@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.16.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.17.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -72,6 +72,7 @@ The right panel lists all saved ship profiles.
 | **▶ NEW SESSION** | Clears any existing battle state and enters the combat map. |
 | **↓ RESUME FROM FILE** | Load a previously saved `.json` session. A preview screen shows the full roster before you confirm. |
 | **📖 FIELD MANUAL** | Opens this manual inside the app. |
+| **📋 CHANGELOG** | Opens the in-app version history (all releases with change categories). |
 
 ### 2.3 Ship Profile Form
 

@@ -9,16 +9,28 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.16.0 |
+| **Versione** | 1.17.0 |
 | **Branch** | main (clean) |
-| **Test** | 698 passing |
-| **Ultimo commit** | chore(release): v1.16.0 — missile magazine tracking |
+| **Test** | 702 passing |
+| **Ultimo commit** | chore(release): v1.17.0 — changelog screen + audio/animation/ghost fixes |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Passing Encounter + Doc Fixes (v1.15.5)
+### Sessione corrente — Audio + Animation + Ghost Fixes + ChangelogScreen (v1.17.0)
+
+1. **`fix(audio): add 10ms lookahead to all synth scheduling`** (`ee78794`) — `ctx.currentTime + 0.01` in tutti e 6 i synth di `audioSynth.js`; previene il drop silenzioso alla prima riproduzione quando `ctx.currentTime` è 0.
+2. **`fix(audio): increase lookahead to 50ms and handle closed AudioContext`** (`0ee95c1`) — lookahead alzato a 50ms (sufficiente dopo `AudioContext.resume()`); guard per stato `'closed'` → ricrea context; `console.warn` in DEV su errori scheduling.
+3. **`fix(passing-encounter): defer passingEncounters until after movement animation`** (`cfb26cc`) — passing encounter queue emessa nel `setTimeout(animDuration + 100ms)` già usato dai missile impact, evitando apertura modale durante l'animazione.
+4. **`fix(attack): move ammoLeft after useAttackSetup — fixes TDZ crash on missile attack`** (`4cecdba`) — `ammoLeft` calcolato prima di `useAttackSetup` causava Temporal Dead Zone crash in `AttackModal`.
+5. **`test(attack): add AttackModal missile rack tests; fix ammoLeft prop threading`** (`f30f65b`) — +4 test: `ammoLeft` threading, `AttackConfigStep` ammo prop, launch disabilitato a 0 ammo, colore ammo display. 702 test totali.
+6. **`fix(movement): exclude destroyed ships from passing encounter + hide wreck overlays`** (`97b7a67`) — `resolveMovement` loop ora salta navi con `isDestroyed`; Layer 3 (ghost) e Layer 4 (vector arrows) in `useCanvasRenderer` saltano le navi distrutte.
+7. **`fix(pam): defer passing encounter until missile impacts are resolved`** (`fbe6c82`) — `PassingAttackModal` si sopprime mentre `pendingMissileImpacts.length > 0`; auto-dismiss per encounter con navi distrutte.
+8. **`feat(ui): add in-app ChangelogScreen with parsed CHANGELOG.md`** (`7dbf766`) — `ChangelogScreen.jsx`: import `?raw` a build time, parser `parseChangelog`, render con jump-nav sidebar e badge categoria; bottone `📋 CHANGELOG` in Dashboard + HelpScreen; screen `'changelog'` in `uiStore` e `App.jsx`.
+9. **`fix(canvas): read ships/missiles from getState() in render to fix stale-closure animation`** (`3ebfdcf`) — `render` useCallback chiudeva su `ships`/`missiles` al momento della creazione; quando `startMovementAnimation` (uiStore) sparava prima del `battleStore.set()`, il rAF loop iniziava con posizioni pre-movement → `lerpHex(pre, pre, t) = pre` → token fermi. Fix: `useBattleStore.getState()` dentro `render`, stesso pattern di `movementAnimation`.
+
+### Sessione precedente — Passing Encounter + Doc Fixes (v1.15.5)
 
 1. **`fix(passing-encounter): hide modal 1.5s after attack resolves so effects are visible`** (`351ffc3`) — `PassingAttackModal` monitorava `activeModal`; quando transitava da `'attack'` a `null`, il modal si nascondeva per 1500ms via `hiding` state + `setTimeout`, poi riappariva con stato store invariato (firedA/firedB preservati). Stesso pattern del fix MissileImpactModal. +2 test (effects window hide/reappear). 694 test totali.
 2. **`docs: update field manual + HelpScreen for v1.15.1–v1.15.4`** (`21aae8b`) — §8.1 aggiornato con 🎲 button, suono impatto, recovery ↩, badge HUD; §4.1 guard missile impact; durata animazione corretta (600ms→2s).
@@ -68,7 +80,8 @@
 
 ## Prossimo task
 
-Nessun task pianificato. Test in app + pubblicazione previsti a breve.
+Rigenerare `public/field-manual.pdf` da `doc/field-manual.md` (aggiornato a v1.17.0 + voce 📋 CHANGELOG nella §2.2).
+Poi push a origin quando confermato.
 
 Possibili aree di sviluppo future:
 

@@ -6,6 +6,28 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.17.0] — 2026-06-14
+
+### Added
+
+- **In-app Changelog page** — new `ChangelogScreen` accessible from the Dashboard ("📋 CHANGELOG" button) and from the Field Manual sidebar. Parses `CHANGELOG.md` at build time via Vite `?raw` import; renders all 45+ versions with colour-coded category badges (Added/Fixed/Changed/Removed/Style/Tests/Docs), inline bold/code formatting, and a jump-nav sidebar.
+
+### Fixed
+
+- **Missile token animation — stale closure** — `useCanvasRenderer` `render` callback closed over `ships`/`missiles` from subscription time. When `startMovementAnimation` (uiStore) fired before `battleStore.set()`, the rAF loop started with pre-movement positions → `lerpHex(pre, pre, t) = pre` → tokens stationary. Fix: read `liveShips`/`liveMissiles` from `useBattleStore.getState()` inside `render`, same pattern already used for `movementAnimation`.
+- **Passing encounter + missile impact simultaneous modals** — `resolveMovement` set both `pendingMissileImpacts` and `passingEncounters` in the same `setTimeout` callback, causing both modals to appear at the same time. Fix: `PassingAttackModal` suppresses itself while `pendingMissileImpacts.length > 0`.
+- **Ghost token (destroyed wreck) triggering passing encounters** — `resolveMovement` passing-encounter detection loop had no `isDestroyed` guard; a destroyed ship drifting on its vector would collide with live ships and open the encounter modal. Fix: added `if (a.isDestroyed || b.isDestroyed) continue` to the loop.
+- **Wreck ghost/vector overlays visible after destruction** — canvas Layer 3 (ghost preview) and Layer 4 (vector arrows) rendered destroyed ships. Fix: `if (ship.isDestroyed) continue` in both layers of `useCanvasRenderer`.
+- **Audio intermittent silence** — three root causes: (1) synth scheduling lookahead `ctx.currentTime + 0.01` (10ms) too tight after `AudioContext.resume()` → raised to 50ms; (2) `AudioContext` in `'closed'` state was reused → added closed-state guard + context recreation; (3) scheduling errors silently swallowed → added `console.warn` in DEV mode.
+- **Passing encounters deferred until after movement animation** — passing encounters were queued before the 2s movement animation completed, obscuring ship movement with an immediate modal. Fix: encounter queue now emits in the same `setTimeout(animDuration + 100ms)` window as missile impacts.
+- **AttackModal TDZ crash on missile attack** — `ammoLeft` was computed before `useAttackSetup` returned, causing a Temporal Dead Zone crash when opening the attack modal on a ship with missile racks. Fix: moved `ammoLeft` derivation after the hook call.
+
+### Tests
+
+- 702 tests (+4: missile rack `ammoLeft` threading, `AttackConfigStep` ammo prop, disabled launch at 0 ammo, ammo display colour)
+
+---
+
 ## [1.16.0] — 2026-06-13
 
 ### Added
