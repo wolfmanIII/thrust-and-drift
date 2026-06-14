@@ -47,7 +47,9 @@ function hasSignificantChange(prev, next) {
     prev.ships !== next.ships ||
     prev.missiles !== next.missiles ||
     prev.log !== next.log ||
-    prev.initiativeOrder !== next.initiativeOrder
+    prev.initiativeOrder !== next.initiativeOrder ||
+    prev.dogfights !== next.dogfights ||
+    prev.boardings !== next.boardings
   )
 }
 
