@@ -222,7 +222,7 @@ function AttackConfigStep({
   target, weapon, rangeBand, distance, dmBreakdown,
   combatMode, storedBand, manualRangeBand, setManualRangeBand,
   outOfRange,
-  isMissile, missileCount, setMissileCount,
+  isMissile, missileCount, setMissileCount, ammoLeft,
   reactions,
   onNext, onClose,
 }) {
@@ -1122,6 +1122,7 @@ export function AttackModal() {
         isMissile={isMissile}
         missileCount={missileCount}
         setMissileCount={setMissileCount}
+        ammoLeft={ammoLeft}
         reactions={{
           evasion:         reactionEvasion,
           setEvasion:      setReactionEvasion,
