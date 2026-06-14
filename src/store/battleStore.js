@@ -595,15 +595,16 @@ const useBattleStore = create((set, get) => {
         ...impactedMissiles,  // kept alive for animation, removed below
       ],
       log: [...s.log, ...entries, ...impactLogEntries],
-      passingEncounters: encounters,
+      passingEncounters: [],  // deferred below — must not appear before animation ends
     }))
 
-    if (newImpacts.length > 0) {
-      const animDuration = useUiStore.getState().movementAnimation?.duration ?? 2000
+    const animDuration = useUiStore.getState().movementAnimation?.duration ?? 2000
+    if (newImpacts.length > 0 || encounters.length > 0) {
       setTimeout(() => {
         set((s) => ({
           missiles: s.missiles.filter((m) => !impactedIds.includes(m.id)),
           pendingMissileImpacts: [...s.pendingMissileImpacts, ...newImpacts],
+          passingEncounters: encounters,
         }))
         newImpacts.forEach(() => emitEffect('impact_burst', {}))
       }, animDuration + 100)

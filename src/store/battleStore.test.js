@@ -721,6 +721,8 @@ describe('resolveMovement', () => {
   // ── passing encounters ──────────────────────────────────────────────────
 
   it('creates passing encounter when hostile ships cross within Short range', () => {
+    // passingEncounters is deferred via setTimeout (same pattern as pendingMissileImpacts)
+    vi.useFakeTimers()
     // A at (0,0) moving E×5; B at (5,1) moving W×5 — they converge to within 1 hex
     useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#0f0')
     useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'B' }), { q: 5, r: 1 }, 'npc',     '#f00')
@@ -728,11 +730,14 @@ describe('resolveMovement', () => {
     useBattleStore.getState().updateShip(a.id, { vector: { q: 5, r: 0 } })
     useBattleStore.getState().updateShip(b.id, { vector: { q: -5, r: 0 } })
     useBattleStore.getState().resolveMovement()
+    expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
+    vi.runAllTimers()
     const encounters = useBattleStore.getState().passingEncounters
     expect(encounters).toHaveLength(1)
     expect(encounters[0].shipAId).toBe(a.id)
     expect(encounters[0].shipBId).toBe(b.id)
     expect(encounters[0].minDistance).toBeLessThanOrEqual(2)
+    vi.useRealTimers()
   })
 
   it('does not create encounter for same-faction ships', () => {
