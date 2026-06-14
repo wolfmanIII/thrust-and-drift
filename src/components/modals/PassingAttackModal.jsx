@@ -19,6 +19,7 @@ const EFFECTS_WINDOW_MS = 1500
 export function PassingAttackModal() {
   const encounters                = useBattleStore((s) => s.passingEncounters)
   const ships                     = useBattleStore((s) => s.ships)
+  const pendingMissileImpacts     = useBattleStore((s) => s.pendingMissileImpacts)
   const dismissPassingEncounter   = useBattleStore((s) => s.dismissPassingEncounter)
   const markPassingEncounterFired = useBattleStore((s) => s.markPassingEncounterFired)
   const openModal                 = useUiStore((s) => s.openModal)
@@ -38,13 +39,14 @@ export function PassingAttackModal() {
   }, [activeModal])
 
   const encounter = encounters[0]
-  if (!encounter || hiding) return null
+  // Missile impacts take priority — resolve them before handling passing encounters
+  if (!encounter || hiding || pendingMissileImpacts.length > 0) return null
 
   const shipA = ships.find((s) => s.id === encounter.shipAId)
   const shipB = ships.find((s) => s.id === encounter.shipBId)
 
-  // Stale encounter (ship removed via undo) — auto-dismiss
-  if (!shipA || !shipB) {
+  // Stale encounter: ship removed (undo) or destroyed during missile impact resolution
+  if (!shipA || !shipB || shipA.isDestroyed || shipB.isDestroyed) {
     dismissPassingEncounter(encounter.id)
     return null
   }
