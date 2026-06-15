@@ -6,6 +6,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.17.2] — 2026-06-16
+
+### Fixed
+
+- **Sensor lock ring persists after ship destruction** — `useCanvasEffects` rAF loop was reading `shipsRef.current`, which was stale in the window between Zustand's synchronous `set()` and React's async commit + `useLayoutEffect`. Fix: read `useBattleStore.getState()` directly inside each frame — Zustand updates its internal store synchronously, so `getState()` always returns the latest state regardless of React's render cycle. Same pattern already used in `useCanvasRenderer`.
+- **Canvas TypeError crash on effects without hex position** — `renderOneshotEffect` threw `Cannot read properties of undefined (reading 'q')` when an effect (e.g. `impact_burst`) was emitted for a ship not yet placed on the map. Added null guards on all hex-dependent cases (`laser_ray`, `impact_burst`, `thrust_plume`, `critical_flash`, `missile_trail`, `missile_launch`, `chaff`).
+
+---
+
 ## [1.17.1] — 2026-06-14
 
 ### Added

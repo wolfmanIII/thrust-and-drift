@@ -9,16 +9,21 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.17.1 |
+| **Versione** | 1.17.2 |
 | **Branch** | main (clean) |
 | **Test** | 700 passing |
-| **Ultimo commit** | chore(release): v1.17.1 — panel modals + PAM fixes |
+| **Ultimo commit** | chore(release): v1.17.2 — canvas getState fix + effect guards |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Panel Modals + PAM Fixes (v1.17.1)
+### Sessione corrente — Canvas getState Fix (v1.17.2)
+
+1. **`fix(canvas): read battle state via getState() in rAF loop`** (`652d93f`) — `shipsRef.current` era stale nella finestra tra `set()` Zustand (sincrono) e il commit React + `useLayoutEffect`. Il sensor lock ring persisteva sulla mappa anche dopo la distruzione della nave target perché il loop rAF leggeva lo stato vecchio. Fix: `useBattleStore.getState()` dentro `frame()` — stesso pattern già in uso in `useCanvasRenderer`. Rimossi `shipsRef`/`missilesRef` e i relativi `useLayoutEffect`.
+2. **null guards in `renderOneshotEffect`** — `impact_burst`, `laser_ray`, `thrust_plume`, `critical_flash`, `missile_trail`, `missile_launch`, `chaff` ora controllano che hex/fromHex/toHex siano definiti prima di chiamare `hpx()`; eliminata TypeError su navi non ancora posizionate sulla mappa.
+
+### Sessione precedente — Panel Modals + PAM Fixes (v1.17.1)
 
 1. **`feat(ui): anchor all modals bottom-right as panel`** (`5c76d0f`) — `Modal.jsx` aggiunge `variant="panel"` come default; nessun backdrop, mappa sempre visibile e panbile. `PassingAttackModal` e `MissileImpactModal` ereditano automaticamente. `ABANDON SESSION` in HUD mantiene `variant="dialog"`.
 2. **`fix(pam): remove effects-window delay`** (`6a06ca5`) — rimosso `EFFECTS_WINDOW_MS` + hiding logic; con panel non c'è backdrop che oscura il canvas. −2 test obsoleti (700 totali).
