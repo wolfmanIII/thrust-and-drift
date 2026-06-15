@@ -4,6 +4,10 @@
  * No audio files — fully synthesized via oscillators, noise, and envelope shaping.
  */
 
+// 100ms lookahead — 50ms was too tight; GC pauses on the main thread can exceed it,
+// causing Web Audio to silently drop sounds scheduled in the past.
+const LOOKAHEAD = 0.1
+
 /**
  * Create a one-shot white-noise burst.
  * @param {AudioContext} ctx
@@ -22,7 +26,7 @@ function noiseBuffer(ctx, durationSec) {
 
 /** Sci-fi laser beam — descending sawtooth sweep. */
 export function playLaserRay(ctx) {
-  const t   = ctx.currentTime + 0.05
+  const t   = ctx.currentTime + LOOKAHEAD
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
 
@@ -41,7 +45,7 @@ export function playLaserRay(ctx) {
 
 /** Kinetic/particle impact — noise burst with low-pass sweep. */
 export function playImpactBurst(ctx) {
-  const t = ctx.currentTime + 0.05
+  const t = ctx.currentTime + LOOKAHEAD
   const { source } = noiseBuffer(ctx, 0.35)
 
   const filter = ctx.createBiquadFilter()
@@ -62,7 +66,7 @@ export function playImpactBurst(ctx) {
 
 /** Critical hit — deep rumble + impact layer. */
 export function playCriticalFlash(ctx) {
-  const t = ctx.currentTime + 0.05
+  const t = ctx.currentTime + LOOKAHEAD
 
   // Low-frequency thud
   const osc  = ctx.createOscillator()
@@ -95,7 +99,7 @@ export function playCriticalFlash(ctx) {
 
 /** Missile launch — ascending whoosh with tail. */
 export function playMissileLaunch(ctx) {
-  const t   = ctx.currentTime + 0.05
+  const t   = ctx.currentTime + LOOKAHEAD
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
 
@@ -115,7 +119,7 @@ export function playMissileLaunch(ctx) {
 
 /** Thrust plume — filtered noise burst, engine texture. */
 export function playThrustPlume(ctx) {
-  const t = ctx.currentTime + 0.05
+  const t = ctx.currentTime + LOOKAHEAD
   const { source } = noiseBuffer(ctx, 0.3)
 
   const filter = ctx.createBiquadFilter()
@@ -137,7 +141,7 @@ export function playThrustPlume(ctx) {
 
 /** Short UI confirmation tick. */
 export function playUiTick(ctx) {
-  const t   = ctx.currentTime + 0.05
+  const t   = ctx.currentTime + LOOKAHEAD
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
 
