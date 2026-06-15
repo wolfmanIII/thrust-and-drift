@@ -82,6 +82,7 @@ function renderOneshotEffect(ctx, effect, t, size, ox, oy) {
       break
     }
     case 'ship_destroyed': {
+      if (!effect.hex) break
       const { x: cx, y: cy } = hpx(effect.hex)
       drawShipDestroyed(ctx, cx, cy, t)
       break

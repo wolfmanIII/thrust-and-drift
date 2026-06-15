@@ -700,7 +700,7 @@ const useBattleStore = create((set, get) => {
         message: `⚠ ${ship.profile.name} DESTROYED — hull reduced to 0. Wreck remains on map until removed by GM.`,
         shipId,
       }))
-      emitEffect('ship_destroyed', { duration: 2200, hex: ship.position })
+      if (ship.position) emitEffect('ship_destroyed', { duration: 2200, hex: ship.position })
     }
     set((s) => ({ log: [...s.log, ...logEntries] }))
 
