@@ -8,7 +8,7 @@
  * // Spec §13.4 — Canvas Visual Effects
  */
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useBattleStore } from '../../store/battleStore.js'
 import { hexToPixel } from '../../utils/hex.js'
 import { drainEffects, emitEffect } from '../../utils/effectQueue.js'
@@ -153,11 +153,13 @@ export function useCanvasEffects({ effectsCanvasRef, offset, zoom }) {
   const ships    = useBattleStore((s) => s.ships)
   const missiles = useBattleStore((s) => s.missiles)
 
-  // Keep refs in sync for rAF loop access without re-triggering the loop effect
+  // Keep refs in sync for rAF loop access without re-triggering the loop effect.
+  // useLayoutEffect runs synchronously after DOM commit, before the browser paints —
+  // this guarantees the rAF loop never reads stale persistent-effect state.
   const shipsRef    = useRef(ships)
   const missilesRef = useRef(missiles)
-  useEffect(() => { shipsRef.current = ships },    [ships])
-  useEffect(() => { missilesRef.current = missiles }, [missiles])
+  useLayoutEffect(() => { shipsRef.current = ships },    [ships])
+  useLayoutEffect(() => { missilesRef.current = missiles }, [missiles])
 
   // Detect missile movement to emit missile_trail one-shot effects
   const prevMissilesRef = useRef([])
