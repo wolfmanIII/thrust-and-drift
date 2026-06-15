@@ -72,7 +72,7 @@ Non esiste un caso in cui tutti gli step siano visibili simultaneamente,
 quindi non c'è rischio di contenuto nascosto.
 
 | Modale | `width` consigliato |
-|---|---|
+| --- | --- |
 | `PassingAttackModal` | `max-w-sm` |
 | `MissileImpactModal` | `max-w-sm` |
 | `AttackModal` | `max-w-lg` |
@@ -95,7 +95,7 @@ quindi non c'è rischio di contenuto nascosto.
 ## File da modificare
 
 | File | Modifica |
-|---|---|
+| --- | --- |
 | `src/components/modals/Modal.jsx` | aggiungere prop `variant`, branching JSX |
 | `src/components/modals/PassingAttackModal.jsx` | self-contained, aggiornare wrapper interno |
 | `src/components/modals/MissileImpactModal.jsx` | self-contained, aggiornare wrapper interno |
