@@ -8,7 +8,7 @@
  * // Spec §13.4 — Canvas Visual Effects
  */
 
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useBattleStore } from '../../store/battleStore.js'
 import { hexToPixel } from '../../utils/hex.js'
 import { drainEffects, emitEffect } from '../../utils/effectQueue.js'
@@ -45,17 +45,19 @@ function renderOneshotEffect(ctx, effect, t, size, ox, oy) {
 
   switch (effect.type) {
     case 'laser_ray': {
+      if (!effect.fromHex || !effect.toHex) break
       drawLaserRay(ctx, hpx(effect.fromHex), hpx(effect.toHex), effect.weaponType, t)
       break
     }
     case 'impact_burst': {
+      if (!effect.hex) break
       const { x: cx, y: cy } = hpx(effect.hex)
       drawImpactBurst(ctx, cx, cy, effect.shipColor, t)
       break
     }
     case 'thrust_plume': {
+      if (!effect.hex || !effect.delta) break
       const { x: cx, y: cy } = hpx(effect.hex)
-      // Compute normalised pixel direction of the delta-v
       const raw = hexToPixel(effect.delta.q, effect.delta.r, size)
       const len = Math.sqrt(raw.x * raw.x + raw.y * raw.y)
       if (len === 0) break
@@ -63,20 +65,24 @@ function renderOneshotEffect(ctx, effect, t, size, ox, oy) {
       break
     }
     case 'critical_flash': {
+      if (!effect.hex) break
       const { x: cx, y: cy } = hpx(effect.hex)
       drawCriticalFlash(ctx, cx, cy, effect.system, t)
       break
     }
     case 'missile_trail': {
+      if (!effect.fromHex || !effect.toHex) break
       drawMissileTrail(ctx, hpx(effect.fromHex), hpx(effect.toHex), t)
       break
     }
     case 'missile_launch': {
+      if (!effect.hex) break
       const { x: cx, y: cy } = hpx(effect.hex)
       drawMissileLaunch(ctx, cx, cy, t)
       break
     }
     case 'chaff': {
+      if (!effect.hex) break
       const { x: cx, y: cy } = hpx(effect.hex)
       drawChaff(ctx, cx, cy, t)
       break
@@ -105,9 +111,9 @@ function renderPersistentEffects(ctx, ships, missiles, size, ox, oy, timestamp) 
 
   // Sensor lock rings — dashed line + ring on target
   for (const ship of ships) {
-    if (!ship.sensorLockOn || ship.isDestroyed) continue
+    if (!ship.sensorLockOn || ship.isDestroyed || ship.hullCurrent === 0) continue
     const target = ships.find((s) => s.id === ship.sensorLockOn)
-    if (!target || target.isDestroyed) continue
+    if (!target || target.isDestroyed || target.hullCurrent === 0) continue
     drawSensorLockRing(ctx, hpx(ship.position), hpx(target.position), timestamp)
   }
 
@@ -150,18 +156,9 @@ function renderPersistentEffects(ctx, ships, missiles, size, ox, oy, timestamp) 
  * }} params
  */
 export function useCanvasEffects({ effectsCanvasRef, offset, zoom }) {
-  const ships    = useBattleStore((s) => s.ships)
+  // Needed only for missile-trail detection (prev vs current comparison)
   const missiles = useBattleStore((s) => s.missiles)
 
-  // Keep refs in sync for rAF loop access without re-triggering the loop effect.
-  // useLayoutEffect runs synchronously after DOM commit, before the browser paints —
-  // this guarantees the rAF loop never reads stale persistent-effect state.
-  const shipsRef    = useRef(ships)
-  const missilesRef = useRef(missiles)
-  useLayoutEffect(() => { shipsRef.current = ships },    [ships])
-  useLayoutEffect(() => { missilesRef.current = missiles }, [missiles])
-
-  // Detect missile movement to emit missile_trail one-shot effects
   const prevMissilesRef = useRef([])
   useEffect(() => {
     for (const missile of missiles) {
@@ -184,7 +181,12 @@ export function useCanvasEffects({ effectsCanvasRef, offset, zoom }) {
   // Active one-shot effects list — ref to avoid triggering re-renders
   const activeRef = useRef([])
 
-  // rAF loop — runs for component lifetime
+  // rAF loop — runs for component lifetime.
+  // Reads ships/missiles directly from useBattleStore.getState() each frame —
+  // Zustand updates its store synchronously on set(), so getState() always
+  // reflects the latest state without waiting for React to commit and fire
+  // useLayoutEffect. This eliminates the stale-ref window between the React
+  // commit phase and the next rAF callback.
   useEffect(() => {
     const canvas = effectsCanvasRef.current
     if (!canvas) return
@@ -203,7 +205,8 @@ export function useCanvasEffects({ effectsCanvasRef, offset, zoom }) {
       const oy   = offset.current.y
       const size = HEX_SIZE * z
 
-      renderPersistentEffects(ctx, shipsRef.current, missilesRef.current, size, ox, oy, timestamp)
+      const { ships: liveShips, missiles: liveMissiles } = useBattleStore.getState()
+      renderPersistentEffects(ctx, liveShips, liveMissiles, size, ox, oy, timestamp)
 
       activeRef.current = activeRef.current.filter((effect) => {
         const t = (timestamp - effect.startedAt) / effect.duration
