@@ -672,6 +672,18 @@ const useBattleStore = create((set, get) => {
     const hullCurrent = Math.max(0, prevHull - damage)
     const isDestroyed = hullCurrent === 0
     get().updateShip(shipId, { hullCurrent, ...(isDestroyed ? { isDestroyed: true } : {}) })
+    if (isDestroyed && (ship.sensorLockOn || ship.sensorLockedBy)) {
+      const lockedTargetId = ship.sensorLockOn
+      const lockerId       = ship.sensorLockedBy
+      set((s) => ({
+        ships: s.ships.map((sh) => {
+          if (sh.id === shipId)         return { ...sh, sensorLockOn: null, sensorLockDM: 0, sensorLockedBy: null }
+          if (sh.id === lockedTargetId) return { ...sh, sensorLockedBy: null }
+          if (sh.id === lockerId)       return { ...sh, sensorLockOn: null, sensorLockDM: 0 }
+          return sh
+        }),
+      }))
+    }
     const logEntries = [makeLogEntry({
       round: get().round,
       phase: get().phase,

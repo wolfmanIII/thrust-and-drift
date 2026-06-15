@@ -98,9 +98,9 @@ function renderPersistentEffects(ctx, ships, missiles, size, ox, oy, timestamp) 
 
   // Sensor lock rings — dashed line + ring on target
   for (const ship of ships) {
-    if (!ship.sensorLockOn) continue
+    if (!ship.sensorLockOn || ship.isDestroyed) continue
     const target = ships.find((s) => s.id === ship.sensorLockOn)
-    if (!target) continue
+    if (!target || target.isDestroyed) continue
     drawSensorLockRing(ctx, hpx(ship.position), hpx(target.position), timestamp)
   }
 
