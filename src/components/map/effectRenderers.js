@@ -340,6 +340,90 @@ export function drawMissileLaunch(ctx, cx, cy, t) {
   ctx.restore()
 }
 
+/**
+ * Ship destruction — white flash, double shockwave ring, debris scatter, DESTROYED label.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} cx
+ * @param {number} cy
+ * @param {number} t
+ */
+export function drawShipDestroyed(ctx, cx, cy, t) {
+  if (t >= 1) return
+
+  ctx.save()
+
+  // White flash (first 15%)
+  if (t < 0.15) {
+    const ft = t / 0.15
+    ctx.globalAlpha = (1 - ft) * 0.9
+    ctx.fillStyle   = '#ffffff'
+    ctx.shadowColor = '#ffffff'
+    ctx.shadowBlur  = 30
+    ctx.beginPath()
+    ctx.arc(cx, cy, lerp(TOKEN_RADIUS, TOKEN_RADIUS * 2.8, ft), 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  // Primary shockwave ring
+  const r1    = lerp(TOKEN_RADIUS + 2, TOKEN_RADIUS + 90, t)
+  const alpha1 = Math.pow(1 - t, 1.2)
+  ctx.globalAlpha = alpha1
+  ctx.shadowColor = '#f97316'
+  ctx.shadowBlur  = lerp(28, 4, t)
+  ctx.strokeStyle = '#fb923c'
+  ctx.lineWidth   = lerp(5, 0.5, t)
+  ctx.setLineDash([])
+  ctx.beginPath()
+  ctx.arc(cx, cy, r1, 0, Math.PI * 2)
+  ctx.stroke()
+
+  // Secondary ring — starts at t=0.12, faster fade
+  if (t > 0.12) {
+    const t2     = (t - 0.12) / 0.88
+    const r2     = lerp(TOKEN_RADIUS + 2, TOKEN_RADIUS + 56, t2)
+    const alpha2 = Math.pow(1 - t2, 2) * 0.7
+    ctx.globalAlpha = alpha2
+    ctx.strokeStyle = '#fbbf24'
+    ctx.lineWidth   = lerp(3, 0.5, t2)
+    ctx.shadowColor = '#f59e0b'
+    ctx.shadowBlur  = lerp(14, 2, t2)
+    ctx.beginPath()
+    ctx.arc(cx, cy, r2, 0, Math.PI * 2)
+    ctx.stroke()
+  }
+
+  // Debris particles — 14 fragments
+  const debrisAlpha = Math.pow(1 - t, 1.4)
+  ctx.shadowBlur = 4
+  for (let i = 0; i < 14; i++) {
+    const angle     = (i / 14) * Math.PI * 2 + i * 0.35
+    const radFactor = (((i * 5 + 2) % 7) / 7) * 0.55 + 0.45
+    const r         = t * 75 * radFactor
+    const size      = lerp(3, 0.3, t)
+    const col       = i % 3 === 0 ? '#fbbf24' : i % 3 === 1 ? '#fb923c' : '#ef4444'
+    ctx.globalAlpha = debrisAlpha
+    ctx.fillStyle   = col
+    ctx.shadowColor = col
+    ctx.beginPath()
+    ctx.rect(cx + Math.cos(angle) * r - size / 2, cy + Math.sin(angle) * r - size / 2, size, size)
+    ctx.fill()
+  }
+
+  // "DESTROYED" label — visible first 40%
+  if (t < 0.4) {
+    ctx.globalAlpha  = (1 - t / 0.4) * Math.pow(1 - t, 1.2)
+    ctx.shadowColor  = '#ef4444'
+    ctx.shadowBlur   = 8
+    ctx.font         = 'bold 11px monospace'
+    ctx.fillStyle    = '#fca5a5'
+    ctx.textAlign    = 'center'
+    ctx.textBaseline = 'bottom'
+    ctx.fillText('DESTROYED', cx, cy - TOKEN_RADIUS - 12)
+  }
+
+  ctx.restore()
+}
+
 // ─── PERSISTENT EFFECTS ──────────────────────────────────────────────────────
 
 /**

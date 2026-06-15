@@ -207,6 +207,24 @@ function ExhaustedIcon() {
   )
 }
 
+function ExplosionIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="15" fill="none" stroke="#fb923c" strokeWidth="2" strokeOpacity="0.7" />
+      <circle cx="20" cy="20" r="9"  fill="none" stroke="#fbbf24" strokeWidth="1.5" strokeOpacity="0.5" />
+      <circle cx="20" cy="20" r="4"  fill="#ffffff" fillOpacity="0.9" />
+      {[0,1,2,3,4,5,6,7].map((i) => {
+        const a = (i / 8) * Math.PI * 2
+        return <line key={i}
+          x1={20 + Math.cos(a) * 6}  y1={20 + Math.sin(a) * 6}
+          x2={20 + Math.cos(a) * 13} y2={20 + Math.sin(a) * 13}
+          stroke={i % 2 === 0 ? '#fb923c' : '#fbbf24'} strokeWidth="1.5"
+        />
+      })}
+    </svg>
+  )
+}
+
 // ── Modal ─────────────────────────────────────────────────────────────────────
 
 export function LegendModal() {
@@ -243,8 +261,9 @@ export function LegendModal() {
         <div className="space-y-5">
 
           <Section title="Hit effects — vectorial mode">
-            <Row icon={<BurstIcon color="#fb923c" />} label="Impact burst"   description="hit registered on target" />
-            <Row icon={<CritFlashIcon />}             label="Critical flash"  description="critical system hit applied" />
+            <Row icon={<BurstIcon color="#fb923c" />} label="Impact burst"    description="hit registered on target" />
+            <Row icon={<CritFlashIcon />}             label="Critical flash"   description="critical system hit applied" />
+            <Row icon={<ExplosionIcon />}             label="Ship destroyed"   description="hull at 0 — double shockwave + debris" />
           </Section>
 
           <Section title="Movement effects — vectorial mode">

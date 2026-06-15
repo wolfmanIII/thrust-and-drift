@@ -24,6 +24,7 @@ import {
   drawEvasiveAura,
   drawMissileExhausted,
   drawDogfightAlert,
+  drawShipDestroyed,
 } from './effectRenderers.js'
 
 const HEX_SIZE = 32  // must match useCanvasRenderer.js
@@ -78,6 +79,11 @@ function renderOneshotEffect(ctx, effect, t, size, ox, oy) {
     case 'chaff': {
       const { x: cx, y: cy } = hpx(effect.hex)
       drawChaff(ctx, cx, cy, t)
+      break
+    }
+    case 'ship_destroyed': {
+      const { x: cx, y: cy } = hpx(effect.hex)
+      drawShipDestroyed(ctx, cx, cy, t)
       break
     }
   }

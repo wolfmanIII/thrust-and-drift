@@ -157,6 +157,54 @@ export function playUiTick(ctx) {
   osc.stop(t + 0.08)
 }
 
+/** Ship destruction — deep bass thud + mid noise + high crackle. */
+export function playExplosion(ctx) {
+  const t = ctx.currentTime + LOOKAHEAD
+
+  // Deep bass thud
+  const bass     = ctx.createOscillator()
+  const bassGain = ctx.createGain()
+  bass.type = 'sine'
+  bass.frequency.setValueAtTime(60, t)
+  bass.frequency.exponentialRampToValueAtTime(18, t + 0.9)
+  bassGain.gain.setValueAtTime(0.7, t)
+  bassGain.gain.exponentialRampToValueAtTime(0.001, t + 1.0)
+  bass.connect(bassGain)
+  bassGain.connect(ctx.destination)
+  bass.start(t)
+  bass.stop(t + 1.0)
+
+  // Mid-range noise burst
+  const { source: mid }  = noiseBuffer(ctx, 0.7)
+  const midFilter = ctx.createBiquadFilter()
+  midFilter.type = 'bandpass'
+  midFilter.frequency.setValueAtTime(900, t)
+  midFilter.frequency.exponentialRampToValueAtTime(120, t + 0.6)
+  midFilter.Q.value = 0.6
+  const midGain = ctx.createGain()
+  midGain.gain.setValueAtTime(0.6, t)
+  midGain.gain.exponentialRampToValueAtTime(0.001, t + 0.7)
+  mid.connect(midFilter)
+  midFilter.connect(midGain)
+  midGain.connect(ctx.destination)
+  mid.start(t)
+  mid.stop(t + 0.7)
+
+  // High crackle transient
+  const { source: crackle } = noiseBuffer(ctx, 0.12)
+  const hiFilter = ctx.createBiquadFilter()
+  hiFilter.type = 'highpass'
+  hiFilter.frequency.value = 3200
+  const hiGain = ctx.createGain()
+  hiGain.gain.setValueAtTime(0.3, t)
+  hiGain.gain.exponentialRampToValueAtTime(0.001, t + 0.12)
+  crackle.connect(hiFilter)
+  hiFilter.connect(hiGain)
+  hiGain.connect(ctx.destination)
+  crackle.start(t)
+  crackle.stop(t + 0.12)
+}
+
 /**
  * Dispatch an effect event to the appropriate synth function.
  * No-op for unknown types or visual-only effects (missile_trail).
@@ -170,6 +218,7 @@ export function playEffectSound(ctx, effect) {
     case 'critical_flash': return playCriticalFlash(ctx)
     case 'missile_launch': return playMissileLaunch(ctx)
     case 'thrust_plume':   return playThrustPlume(ctx)
+    case 'ship_destroyed': return playExplosion(ctx)
     default: break
   }
 }
