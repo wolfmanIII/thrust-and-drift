@@ -25,3 +25,6 @@ dist-ssr
 *.sw?
 doc/*.pdf
 coverage/
+
+# Local Netlify folder
+.netlify
