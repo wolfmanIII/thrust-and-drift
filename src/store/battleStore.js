@@ -338,7 +338,13 @@ const useBattleStore = create((set, get) => {
     (shipId) => {
       const ship = get().ships.find((s) => s.id === shipId)
       set((s) => ({
-        ships: s.ships.filter((sh) => sh.id !== shipId),
+        ships: s.ships
+          .filter((sh) => sh.id !== shipId)
+          .map((sh) => {
+            if (sh.sensorLockOn   === shipId) return { ...sh, sensorLockOn: null, sensorLockDM: 0 }
+            if (sh.sensorLockedBy === shipId) return { ...sh, sensorLockedBy: null }
+            return sh
+          }),
         missiles: s.missiles.filter((m) => m.launchedBy !== shipId && m.target !== shipId),
         initiativeOrder: s.initiativeOrder.filter((id) => id !== shipId),
         rangeBands: Object.fromEntries(
@@ -671,19 +677,30 @@ const useBattleStore = create((set, get) => {
     const prevHull    = ship.hullCurrent
     const hullCurrent = Math.max(0, prevHull - damage)
     const isDestroyed = hullCurrent === 0
-    get().updateShip(shipId, { hullCurrent, ...(isDestroyed ? { isDestroyed: true } : {}) })
-    if (isDestroyed && (ship.sensorLockOn || ship.sensorLockedBy)) {
-      const lockedTargetId = ship.sensorLockOn
-      const lockerId       = ship.sensorLockedBy
-      set((s) => ({
-        ships: s.ships.map((sh) => {
-          if (sh.id === shipId)         return { ...sh, sensorLockOn: null, sensorLockDM: 0, sensorLockedBy: null }
-          if (sh.id === lockedTargetId) return { ...sh, sensorLockedBy: null }
-          if (sh.id === lockerId)       return { ...sh, sensorLockOn: null, sensorLockDM: 0 }
-          return sh
-        }),
-      }))
-    }
+    // Atomic set: update hull + destruction + sensor-lock cleanup in one transaction.
+    // Splitting into multiple set() calls creates intermediate states that the rAF loop
+    // can observe before React's passive useEffect syncs shipsRef.current.
+    set((s) => ({
+      ships: s.ships.map((sh) => {
+        if (sh.id === shipId) {
+          return {
+            ...sh,
+            hullCurrent,
+            ...(isDestroyed ? {
+              isDestroyed:   true,
+              sensorLockOn:  null,
+              sensorLockDM:  0,
+              sensorLockedBy: null,
+            } : {}),
+          }
+        }
+        if (!isDestroyed) return sh
+        // Clear sensor-lock references pointing to/from the destroyed ship on other ships
+        if (sh.sensorLockOn   === shipId) return { ...sh, sensorLockOn: null, sensorLockDM: 0 }
+        if (sh.sensorLockedBy === shipId) return { ...sh, sensorLockedBy: null }
+        return sh
+      }),
+    }))
     const logEntries = [makeLogEntry({
       round: get().round,
       phase: get().phase,
