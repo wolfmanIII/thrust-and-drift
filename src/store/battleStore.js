@@ -959,10 +959,9 @@ const useBattleStore = create((set, get) => {
    * @param {string} movingShipId
    * @param {string} targetShipId
    * @param {'approach'|'flee'} direction
-   * @param {number} movingThrust    Thrust this ship commits
-   * @param {number} [targetThrust]  Thrust target also commits (approach only)
+   * @param {number} movingThrust  Thrust this ship commits
    */
-  applyBasicMovement: wh((movingShipId, targetShipId, direction, movingThrust, targetThrust = 0) => {
+  applyBasicMovement: wh((movingShipId, targetShipId, direction, movingThrust) => {
     const { ships, rangeBands } = get()
     const moving = ships.find((s) => s.id === movingShipId)
     const target = ships.find((s) => s.id === targetShipId)
@@ -978,8 +977,6 @@ const useBattleStore = create((set, get) => {
       rangeBands: { ...s.rangeBands, [key]: newBand },
       ships: s.ships.map((sh) => {
         if (sh.id === movingShipId) return { ...sh, thrustUsedThisRound: sh.thrustUsedThisRound + movingThrust }
-        if (sh.id === targetShipId && direction === 'approach' && targetThrust > 0)
-          return { ...sh, thrustUsedThisRound: sh.thrustUsedThisRound + targetThrust }
         return sh
       }),
       log: [...s.log, makeLogEntry({

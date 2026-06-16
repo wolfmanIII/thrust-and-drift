@@ -9,7 +9,6 @@ import { Modal } from './Modal.jsx'
 import { useUiStore }    from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST } from '../../data/rangeBands.js'
-import { getEffectiveSkill } from '../../utils/crew.js'
 
 function availableThrust(ship) {
   return Math.max(0,
@@ -38,7 +37,6 @@ export function BasicManoeuvreModal() {
   const [targetId, setTargetId]         = useState(enemies[0]?.id ?? null)
   const [direction, setDirection]       = useState('approach')
   const [movingThrust, setMovingThrust] = useState(0)
-  const [targetThrust, setTargetThrust] = useState(0)
 
   const target = ships.find((s) => s.id === targetId) ?? null
 
@@ -52,24 +50,20 @@ export function BasicManoeuvreModal() {
   const canFlee     = currentIdx < RANGE_BAND_ORDER.length - 1
 
   const cost = RANGE_BAND_MOVE_COST[currentBand] ?? 1
-  const combined = direction === 'approach'
-    ? movingThrust + targetThrust
-    : movingThrust
 
   const resultIdx = direction === 'approach'
     ? Math.max(0, currentIdx - 1)
     : Math.min(RANGE_BAND_ORDER.length - 1, currentIdx + 1)
   const resultBand = RANGE_BAND_ORDER[resultIdx]
 
-  const canAfford    = combined >= cost
-  const noChange     = currentBand === resultBand
-  const canConfirm   = !!target && canAfford && !noChange
-  const movingAvail  = movingShip ? availableThrust(movingShip) : 0
-  const targetAvail  = target ? availableThrust(target) : 0
+  const canAfford   = movingThrust >= cost
+  const noChange    = currentBand === resultBand
+  const canConfirm  = !!target && canAfford && !noChange
+  const movingAvail = movingShip ? availableThrust(movingShip) : 0
 
   const handleConfirm = () => {
     if (!movingShip || !target) return
-    applyBasicMovement(movingShip.id, target.id, direction, movingThrust, direction === 'approach' ? targetThrust : 0)
+    applyBasicMovement(movingShip.id, target.id, direction, movingThrust)
     closeModal()
   }
 
@@ -156,40 +150,28 @@ export function BasicManoeuvreModal() {
               </div>
             </div>
 
-            {/* Thrust inputs */}
-            <div className="space-y-3">
-              <ThrustInput
-                label={`${movingShip.profile.name} (this ship)`}
-                color={movingShip.color}
-                value={movingThrust}
-                max={movingAvail}
-                onChange={setMovingThrust}
-              />
-              {direction === 'approach' && (
-                <ThrustInput
-                  label={`${target.profile.name} (also approaching)`}
-                  color={target.color}
-                  value={targetThrust}
-                  max={targetAvail}
-                  onChange={setTargetThrust}
-                  optional
-                />
-              )}
-            </div>
+            {/* Thrust input */}
+            <ThrustInput
+              label={`${movingShip.profile.name} (this ship)`}
+              color={movingShip.color}
+              value={movingThrust}
+              max={movingAvail}
+              onChange={setMovingThrust}
+            />
 
-            {/* Combined vs cost */}
+            {/* Thrust vs cost */}
             <div className="flex items-center gap-2">
               <div className="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all"
                   style={{
-                    width: `${Math.min(100, (combined / Math.max(1, cost)) * 100)}%`,
+                    width: `${Math.min(100, (movingThrust / Math.max(1, cost)) * 100)}%`,
                     backgroundColor: canAfford ? '#4ade80' : '#f87171',
                   }}
                 />
               </div>
               <span className={`font-mono text-xs shrink-0 ${canAfford ? 'text-green-400' : 'text-slate-500'}`}>
-                {combined}/{cost}
+                {movingThrust}/{cost}
               </span>
             </div>
 
@@ -220,13 +202,12 @@ export function BasicManoeuvreModal() {
   )
 }
 
-function ThrustInput({ label, color, value, max, onChange, optional = false }) {
+function ThrustInput({ label, color, value, max, onChange }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-1">
         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
         <span className="font-mono text-xs text-slate-400">{label}</span>
-        {optional && <span className="ml-auto font-mono text-xs text-slate-500">optional</span>}
         <span className="font-mono text-xs text-slate-400 ml-auto">{value}/{max} avail</span>
       </div>
       <input

@@ -1674,17 +1674,9 @@ describe('applyBasicMovement', () => {
     expect(a.thrustUsedThisRound).toBe(10)
   })
 
-  it('bidirectional approach deducts thrust from both ships', () => {
-    const [aId, bId] = setupShips('Very Long')
-    useBattleStore.getState().applyBasicMovement(aId, bId, 'approach', 15, 10)
-    const ships = useBattleStore.getState().ships
-    expect(ships.find((s) => s.id === aId).thrustUsedThisRound).toBe(15)
-    expect(ships.find((s) => s.id === bId).thrustUsedThisRound).toBe(10)
-  })
-
   it('flee does not deduct thrust from target', () => {
     const [aId, bId] = setupShips('Medium')
-    useBattleStore.getState().applyBasicMovement(aId, bId, 'flee', 5, 3)
+    useBattleStore.getState().applyBasicMovement(aId, bId, 'flee', 5)
     const b = useBattleStore.getState().ships.find((s) => s.id === bId)
     expect(b.thrustUsedThisRound).toBe(0)
   })
