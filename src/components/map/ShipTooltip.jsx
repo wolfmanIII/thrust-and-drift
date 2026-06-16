@@ -47,15 +47,18 @@ export function ShipTooltip() {
   const hoveredShip = useUiStore((s) => s.hoveredShip)
   const contextMenu = useUiStore((s) => s.contextMenu)
   const ships       = useBattleStore((s) => s.ships)
+  const missiles    = useBattleStore((s) => s.missiles)
 
   if (!hoveredShip || contextMenu) return null
 
   const ship = ships.find((s) => s.id === hoveredShip.shipId)
   if (!ship) return null
 
-  const thrustAvail = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0))
-  const vectorMag   = hexMagnitude(ship.vector)
+  const thrustAvail  = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0))
+  const vectorMag    = hexMagnitude(ship.vector)
   const factionColor = FACTION_COLOR[ship.faction] ?? FACTION_COLOR.neutral
+  const inbound      = missiles.filter((m) => m.target === ship.id)
+  const lockerName   = ship.sensorLockedBy ? (ships.find((s) => s.id === ship.sensorLockedBy)?.profile.name ?? '?') : null
 
   // Flip toward viewport center when cursor is in the right/bottom 35%
   const flipX = hoveredShip.x > window.innerWidth  * 0.65
@@ -107,7 +110,16 @@ export function ShipTooltip() {
           <StatRow label="Initiative" value={ship.initiative} />
         )}
         {ship.sensorLockOn && (
-          <StatRow label="Sensor Lock" value="attivo" accent />
+          <StatRow label="Sensor Lock" value={ships.find((s) => s.id === ship.sensorLockOn)?.profile.name ?? '?'} accent />
+        )}
+        {lockerName && (
+          <StatRow label="Locked by" value={lockerName} />
+        )}
+        {inbound.length > 0 && (
+          <StatRow
+            label="Inbound"
+            value={`⚡ ${inbound.reduce((n, m) => n + m.count, 0)}× missile${inbound.reduce((n, m) => n + m.count, 0) !== 1 ? 's' : ''}`}
+          />
         )}
       </div>
 
