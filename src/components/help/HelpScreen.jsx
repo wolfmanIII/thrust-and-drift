@@ -312,6 +312,7 @@ export function HelpScreen() {
             <li>Detects ships that end in the same hex — opens the <span className="text-slate-200">Dogfight</span> engagement intent modal.</li>
           </ol>
           <p>If no encounters or dogfights are triggered, the phase advances to Attack automatically.</p>
+          <Note>Wrecks drift. A destroyed ship (☠ WRECK) retains its last velocity vector and continues to drift each Movement phase — it has no pilot or reactor and cannot spend thrust. Remove it manually via right-click → Remove from battle when no longer relevant.</Note>
           <Sub title="MISSILE IMPACT">
             <p>If a missile salvo reaches its target's hex during movement, the token is consumed and a <span className="text-slate-200">⚡ MISSILE IMPACT</span> modal opens automatically after the animation.</p>
             <KV k="Launcher / Target" v="Ships involved. Target hull shown for reference." />
