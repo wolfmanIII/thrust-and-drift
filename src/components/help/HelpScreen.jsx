@@ -349,7 +349,7 @@ export function HelpScreen() {
           <Sub title="REACTIONS (CRB p.171)">
             <p>The defender can declare Reactions in Step 1 before the attack roll.</p>
             <KV k="Evasive Action" v="Toggle: spend 1 thrust to dodge this attack. The attack suffers DM −Pilot skill (fixed). Button disabled if no thrust remains or Pilot skill is 0." />
-            <KV k="Point Defence" v="Missile attacks only. Gunner (turret) check — Effect removes that many missiles from the salvo. Turret marked fired." />
+            <KV k="Point Defence" v="Missile attacks only. Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Turret marked fired." />
             <KV k="Disperse Sand" v="Laser attacks only. Gunner (turret) check — on success adds 1D+Effect to armour for this attack only. Turret marked fired." />
             <p className="text-slate-500 italic text-xs">Player-controlled defending ships enter physical dice manually for PD and Sand rolls.</p>
           </Sub>
@@ -519,6 +519,13 @@ export function HelpScreen() {
             <p>Ships in a dogfight show a <span className="text-amber-400">pulsing amber ring</span> and ⚔ badge. Ghost position is hidden during dogfight.</p>
           </Sub>
 
+          <Sub title="ESCAPE MID-DOGFIGHT">
+            <p>Escape can be declared at Step 1 of any micro-round.</p>
+            <KV k="Auto-escape" v="Ship thrust exceeds all enemy thrusts — OR — enemies choose not to pursue (toggle NOT PURSUING)." />
+            <KV k="Pursuit check" v="2D6 + Pilot + Tonnage DM + free Thrust. Evader total > pursuer total → escaped." />
+            <p className="text-slate-400">On successful escape <code className="text-(--neon-cyan)">inDogfight</code> is cleared; the ship re-enters normal combat from the next standard round.</p>
+          </Sub>
+
           <Note>Ships that pass within Short range (≤ 2 hexes) along their trajectories without ending in the same hex trigger the Passing Encounter window instead — a quick fire opportunity before they separate.</Note>
         </Section>
 
@@ -532,6 +539,12 @@ export function HelpScreen() {
           <Sub title="TRIGGERING">
             <p>Right-click the attacker ship → <span className="text-slate-200">⚔ Board [target]…</span></p>
             <p>Visible only when: distance ≤ 1, target not in an active dogfight, attacker thrust ≥ target thrust (or target M-Drive disabled), different factions.</p>
+          </Sub>
+
+          <Sub title="PHASE 1 — APPROACH">
+            <p>Handled outside the app. The approach phase is the normal combat movement that brought the two ships together; the GM declares the boarding when conditions are met.</p>
+            <KV k="Voluntary boarding" v="Target cooperates — skip to Contact immediately." />
+            <KV k="Forced boarding" v="Target attempted to flee and failed (or is immobilised) — proceed to Contact." />
           </Sub>
 
           <Sub title="PHASE 2 — CONTACT">
@@ -561,7 +574,7 @@ export function HelpScreen() {
             <KV k="Ship destroyed" v="Target destroyed by internal damage during Conflict." />
           </Sub>
 
-          <Note>Active boardings show a ⚔ BOARDING badge in the HUD. Click it to reopen the current phase modal. Ships in a boarding do not participate in the standard Attack phase. A ship already in a dogfight cannot be boarded — it must exit the dogfight first.</Note>
+          <Note>Active boardings show a ⚔ BOARDING badge in the HUD. Click it to reopen the current phase modal. Ships in a boarding do not participate in the standard Attack phase. A ship already in a dogfight cannot be boarded — it must exit the dogfight first. A ship with Forced Linkage active cannot use thrust to manoeuvre. Normal rounds continue in parallel — the GM can advance phases and resolve the boarding on its own timeline.</Note>
         </Section>
 
       </main>
