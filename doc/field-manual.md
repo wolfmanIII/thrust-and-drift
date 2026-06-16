@@ -313,6 +313,8 @@ Click **NEXT PHASE ⟶** to execute movement. The app:
 The GM watches the tokens move on the map. If no encounters or dogfights are
 triggered, the phase advances to **Attack** automatically.
 
+> **Wrecks drift.** A destroyed ship (☠ WRECK) has no pilot and no reactor — it cannot spend thrust — but it retains its last velocity vector. Each Movement phase it continues to drift on that vector indefinitely, following Newtonian inertia. Remove it manually via right-click → *Remove from battle* when no longer relevant to the scenario.
+
 ### 8.1 Missile Impact
 
 If one or more missile salvos reach their target's hex during the movement step, each salvo is consumed and a **⚡ MISSILE IMPACT** modal opens automatically after the animation.
