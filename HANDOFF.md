@@ -9,16 +9,27 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.17.2 |
+| **Versione** | 1.18.0 |
 | **Branch** | main (clean) |
-| **Test** | 700 passing |
-| **Ultimo commit** | chore(release): v1.17.2 — canvas getState fix + effect guards |
+| **Test** | 709 passing |
+| **Ultimo commit** | docs(help): clarify basic mode manoeuvre — per-ship turns + GM SET guidance |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Canvas getState Fix (v1.17.2)
+### Sessione corrente — BasicBattleView Bento + Contrast + Manoeuvre fix (v1.18.0)
+
+1. **`fix(a11y): WCAG AA contrast`** (`ee19143`) — testo secondario `text-slate-500`/`text-slate-600` sotto il rapporto 4.5:1 su sfondi scuri. Alzato a `text-slate-400` (label/secondario) in 32 file componenti. `text-slate-600` mantenuto solo per stati disabled/placeholder.
+2. **`feat(tooltip): sensor-locked-by + inbound missiles`** (`030bcbd`) — `ShipTooltip.jsx` in modalità vettoriale ora mostra: "Sensor Lock → [nome]" con DM, "Locked by [nome]" se il sensore è puntato su questa nave, "⚡ N× missile inbound" se missili sono in volo verso di essa.
+3. **`refactor(combat): countMissileRacks estratto a utils/combat.js`** (`e0dbe0f`) — funzione privata in `battleStore.js` spostata come named export; condivisa tra store e `BasicBattleView` senza dipendenza circolare.
+4. **`feat(basic): ShipBentoCard sostituisce ShipCard`** (`b66ac42`) — layout a tre zone: Header (nome + badge), Hull (barra + hull/max + ini), Status (zona condizionale con sensor lock, locked-by, missili inbound per launcher, missili lanciati per target, torrette in ricarica, critical hits, ammo). Grid `1→2→3 colonne` responsiva.
+5. **`test(basic): 10 test suite BasicBattleView`** (`d414d8e`) — coprono tutte le zone status, badge, ammo, caso senza status.
+6. **`fix(autosave): rangeBands trigger`** (`5ccb8f0`) — `hasSignificantChange` in `useAutosave.js` non confrontava `rangeBands`; cambio di banda in basic mode non scriveva su IndexedDB. Aggiunto `prev.rangeBands !== next.rangeBands`.
+7. **`refactor(basic-mode): manovra per-nave indipendente`** (`620dd2f`) — rimosso slider "target contribuisce thrust". Ogni nave spende solo il proprio thrust nel suo turno. `applyBasicMovement` semplificato: parametro `targetThrust` rimosso. Test bidirectionality rimosso.
+8. **`docs(help): aggiornato HelpScreen §Manoeuvre`** (`930975b`) — spiega manovra per-nave, quando usare GM SET (navi piccole a Very Long), nota su costi alti per grandi navi.
+
+### Sessione precedente — Canvas getState Fix (v1.17.2)
 
 1. **`fix(canvas): read battle state via getState() in rAF loop`** (`652d93f`) — `shipsRef.current` era stale nella finestra tra `set()` Zustand (sincrono) e il commit React + `useLayoutEffect`. Il sensor lock ring persisteva sulla mappa anche dopo la distruzione della nave target perché il loop rAF leggeva lo stato vecchio. Fix: `useBattleStore.getState()` dentro `frame()` — stesso pattern già in uso in `useCanvasRenderer`. Rimossi `shipsRef`/`missilesRef` e i relativi `useLayoutEffect`.
 2. **null guards in `renderOneshotEffect`** — `impact_burst`, `laser_ray`, `thrust_plume`, `critical_flash`, `missile_trail`, `missile_launch`, `chaff` ora controllano che hex/fromHex/toHex siano definiti prima di chiamare `hpx()`; eliminata TypeError su navi non ancora posizionate sulla mappa.
@@ -95,7 +106,8 @@
 
 ## Prossimo task
 
-Rigenerare `public/field-manual.pdf` da `doc/field-manual.md` (aggiornato a v1.17.0 + voce 📋 CHANGELOG nella §2.2).
+Rigenerare `public/field-manual.pdf` da `doc/field-manual.md` (aggiornato a v1.18.0).
+Fare bump di versione in `package.json` + commit release.
 Poi push a origin quando confermato.
 
 Possibili aree di sviluppo future:

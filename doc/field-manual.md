@@ -119,12 +119,21 @@ Click **📖 Legend** (fixed button, top-right of the battle screen) to open the
 
 ### 3.2 Basic Mode View
 
-In **Basic** mode there is no hex map. The screen shows **ship cards** grouped
+In **Basic** mode there is no hex map. The screen shows **ship bento cards** grouped
 by faction.
+
+Each card has three zones:
+
+| Zone | Content |
+| ---- | ------- |
+| **Header** | Ship name · faction colour dot · status badges: `☠ WRECK`, `DOGFIGHT`, `BOARDING`, `EVA N` (evasive thrust), `LOCKED` (sensor locked) |
+| **Hull** | Hull bar (green → yellow → red) · "Hull N/M" · "Ini N" |
+| **Status** *(conditional)* | Sensor lock → target name (with DM if set); Locked by [attacker]; inbound missiles per launcher (⚡ N× type); launched missiles per target (🚀 N× type); reloading turrets; critical hits list; missile ammo (🚀 N/max, yellow < 25%, red at 0) |
+
+The Status zone is hidden when none of these conditions are active.
 
 | Element | Description |
 | ------- | ----------- |
-| **Ship card** | Displays name, hull bar, hull / max hull, initiative, and any active critical hits. Right-click a card to open the context menu for that ship. |
 | **DISTANCES panel** | Appears above the ship list. Lists every cross-faction pair with its current range band. Use **▼** (closer) / **▲** (further) to adjust a band directly — GM override, no thrust spent. |
 
 Right-click anywhere in the background (not on a card) to open the global
@@ -263,13 +272,18 @@ Right-click a ship → **Manoeuvre…** during the Acceleration phase.
 
 The modal changes the range band between the moving ship and one enemy:
 
+Each ship manoeuvres **independently on its own initiative turn** — there is no combined thrust between ships.
+
 | Control | Description |
 | ------- | ----------- |
 | **Target** | Select which enemy ship this manoeuvre targets. |
 | **▼ Approach / ▲ Flee** | Direction of movement. |
-| **Thrust sliders** | Thrust committed by each ship. On Approach, the target may also contribute thrust (both sides sum). On Flee, only the fleeing ship's thrust counts. |
-| **APPLY MANOEUVRE** | Confirm and spend thrust — range band changes by one step if combined thrust meets the threshold. |
-| **GM SET** | Override: sets the result band directly without spending thrust. |
+| **Thrust slider** | Thrust this ship commits (0 → available thrust). |
+| **APPLY MANOEUVRE** | Confirm and spend thrust — range band changes by one step if this ship's thrust meets the threshold. Disabled if thrust is below the cost. |
+| **GM SET** | Override: sets the result band directly without spending thrust. Use this for initial setup and whenever thrust costs are impractical (e.g. small ships at Very Long). |
+
+> If both ships want to approach on the same round, each opens the modal on its own
+> turn — the band closes by **two steps** in a single round.
 
 The threshold to change one band step depends on the current band
 *(MgT2e CRB p.161)*:

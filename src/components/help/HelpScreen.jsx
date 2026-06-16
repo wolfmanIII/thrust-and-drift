@@ -181,13 +181,16 @@ export function HelpScreen() {
           <KV k="Left-click token" v="Select the ship (highlights it)." />
           <KV k="Right-click hex" v="Open context menu — actions depend on what is in the hex and the current phase." />
           <KV k="🔊/🔇 button" v="Audio toggle (HUD, top-left) — enables or mutes procedural sound effects (laser, impact, thrust plume, missile launch)." />
+          <KV k="Hover ship token" v="After 200 ms, a tooltip panel appears showing: name, hull bar, vector, available thrust, evasion DM, initiative, sensor lock → target (if active, with DM), Locked by [attacker] (if targeted), ⚡ N× missile inbound (if applicable), critical hits. Clears on pan or mouse-leave." />
           <Note>Context menu actions are phase-gated and initiative-gated. Only options valid for the current phase are shown — and in the Acceleration, Attack, and Actions phases, combat actions are shown only for the ship whose turn it currently is. Right-clicking another ship shows "Not this ship's turn".</Note>
 
           <Sub title="BASIC MODE VIEW">
-            <p>In Basic mode there is no hex map. Ships appear as cards grouped by faction.</p>
-            <KV k="Ship card" v="Shows name, hull bar, initiative, and active criticals. Right-click a card to open its context menu." />
+            <p>In Basic mode there is no hex map. Ships appear as bento cards grouped by faction. Each card has three zones:</p>
+            <KV k="Header" v="Ship name · faction dot · status badges: ☠ WRECK, DOGFIGHT, BOARDING, EVA N (evasive thrust), LOCKED (sensor locked by enemy)." />
+            <KV k="Hull" v="Hull bar (green → yellow → red) · Hull N/M · Initiative." />
+            <KV k="Status" v="Conditional zone — shown only when active: sensor lock target (with DM), locked-by attacker, inbound missiles per launcher, launched missiles per target, reloading turrets, critical hits, missile ammo. Hidden when none apply." />
             <KV k="DISTANCES panel" v="Lists every cross-faction pair with its current range band. ▼ / ▲ buttons adjust the band directly (GM override — no thrust spent)." />
-            <p>Right-click anywhere in the background to open the global context menu (Roll Initiative, Add ship here).</p>
+            <p>Right-click a card to open the context menu. Right-click anywhere in the background for the global menu (Roll Initiative, Add ship here).</p>
             <Note>Ships are placed at Very Long range by default when added to a basic mode session.</Note>
           </Sub>
 

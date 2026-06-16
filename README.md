@@ -30,7 +30,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Initiative** | 2D6 + Pilot + Thrust [+ Tactics Effect]; optional Tactics(naval) check (CRB p.160); player ships manual entry, NPC auto-rolled |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase AND when it is that ship's turn (initiative order enforced in Acceleration, Attack, Actions phases) |
-| **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals (200ms delay) |
+| **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals, sensor lock → target, locked-by attacker, inbound missiles (200ms delay) |
 | **Battle log** | Timestamped event log with colour-coded entry types |
 | **Undo/Redo (Ctrl+Z / Ctrl+Y)** | Snapshot-based undo/redo — 20-step stacks; `⟲` `↷` buttons in HUD; new action clears redo |
 | **Session save / resume** | Export session to JSON; resume flow shows a full preview before loading |
@@ -45,7 +45,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Boarding system** | 4-phase boarding action (HG 2022): Contact → Conflict → Security; 6 entry methods incl. hull-cut tracker; stacking rolls; missed-shot table; Bridge/Engineering/Turrets objectives; optional faction transfer on capture; HUD badge per active boarding |
 | **Weapon range enforcement** | Each weapon has a maximum range band (CRB p.167); Attack Modal shows OUT OF RANGE badge and blocks firing beyond a weapon's listed range |
 | **Movement animation** | Ship and missile tokens slide smoothly from start to end position during the Movement phase (~2 s easeInOut); canvas input blocked for the duration to prevent mis-clicks |
-| **Basic combat mode** | Non-vectorial mode: no hex map; range bands tracked per ship pair (`Adjacent`→`Distant`); `BasicManoeuvreModal` lets GM spend thrust to approach/flee; Attack Modal reads stored range band automatically |
+| **Basic combat mode** | Non-vectorial mode: no hex map; ships shown as bento cards (Header / Hull bar / conditional Status zone) grouped by faction; range bands tracked per ship pair (`Adjacent`→`Distant`); each ship manoeuvres independently on its own initiative turn; Attack Modal reads stored range band automatically |
 | **Legend modal** | Always-visible `📖 Legend` button fixed top-right; also in right-click empty hex menu; 2-column visual reference for all tokens, beam weapon colours, hit/movement effects, and persistent indicators |
 
 ---
@@ -152,7 +152,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-700 tests across utils, Zustand stores, hooks, and UI components. (v1.17.2)
+709 tests across utils, Zustand stores, hooks, and UI components. (v1.18.0)
 
 ---
 

@@ -6,6 +6,29 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.18.0] — 2026-06-16
+
+### Added
+
+- **ShipBentoCard in BasicBattleView** — replaced the flat `ShipCard` with a three-zone bento layout: Header (name + faction colour dot + status badges), Hull (bar + hull/max + initiative), Status (conditional zone with sensor lock, locked-by, inbound missiles per launcher, launched missiles per target, reloading turrets, critical hits, missile ammo). Badges: `☠ WRECK`, `DOGFIGHT`, `BOARDING`, `EVA N`, `LOCKED`. Grid: `1 col → 2 cols (sm) → 3 cols (lg)`.
+- **ShipTooltip — sensor locked-by and inbound missiles** — the vectorial mode hover tooltip now shows: "Sensor Lock → [target name]" (with DM) when the ship holds a lock; "Locked by [attacker name]" when targeted by a lock; "⚡ N× missile inbound" when missiles are in flight toward this ship.
+- **`countMissileRacks` exported from `utils/combat.js`** — extracted from a private function in `battleStore.js` to a named export; now shared between the store and `BasicBattleView` without circular dependency.
+
+### Fixed
+
+- **WCAG AA contrast** — all secondary text that used `text-slate-500` or `text-slate-600` on dark backgrounds was below the 4.5:1 AA threshold. Bumped to `text-slate-400` (label/secondary text) across 32 component files. `text-slate-600` retained only for disabled/placeholder states where intentional low-contrast applies.
+- **Autosave gap in basic mode** — `rangeBands` changes (via `setRangeBand` or `applyBasicMovement`) were not triggering an IndexedDB write because `hasSignificantChange` did not compare `rangeBands` references. Added `prev.rangeBands !== next.rangeBands` to the check.
+
+### Changed
+
+- **BasicManoeuvreModal — per-ship independent manoeuvre** — removed the "target also contributes thrust" optional slider. Each ship now commits only its own thrust when it acts in the manoeuvre phase. If both ships want to approach, each opens the modal on its own initiative turn; the band closes by 2 steps in a single round. The bidirectional thrust summing was confusing in a turn-based system and did not match the sequential initiative order. `applyBasicMovement` signature simplified: `targetThrust` parameter removed.
+
+### Tests
+
+- 709 tests (+9 from 700 — 10 new `BasicBattleView` bento card tests; −1 removed bidirectional `applyBasicMovement` test)
+
+---
+
 ## [1.17.2] — 2026-06-16
 
 ### Fixed

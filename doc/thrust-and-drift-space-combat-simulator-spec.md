@@ -87,7 +87,8 @@ thrust-and-drift/
     │   │   └── HelpScreen.jsx         ← Field manual integrato (TOC sidebar + download PDF)
     │   ├── map/
     │   │   ├── BattleMap.jsx          ← Canvas principale (modalità vettoriale)
-    │   │   ├── BasicBattleView.jsx    ← Vista semplificata (modalità base)
+    │   │   ├── BasicBattleView.jsx    ← Vista semplificata (modalità base) — bento card per nave
+    │   │   ├── BasicBattleView.test.jsx ← 10 test suite bento card (badge, status zone, ammo, sensors)
     │   │   ├── useCanvasRenderer.js   ← Hook rendering hex + token
     │   │   ├── useMapInteraction.js   ← Hook pan, zoom, click, right-click
     │   │   ├── useShipHover.js        ← Hook hover detection + timer 200ms
@@ -892,21 +893,20 @@ Gestione manovra in modalità base (non vettoriale). Solo visibile in fase `acce
 - Toggle: **Approach** / **Flee** (direzione del movimento)
 - Barra costo thrust con banda corrente → banda risultante
 - Slider thrust per nave manovrante (0 → thrust disponibile)
-- Slider thrust target (solo `Approach`: il bersaglio può contribuire alla riduzione della distanza)
 - Pulsante **GM SET** per override diretto della banda senza costo thrust (controllo GM)
 
 **Logica:**
 
 ```text
 costoBanda = RANGE_BAND_MOVE_COST[bandaCorrente]
-combined   = (direction === 'approach') ? movingThrust + targetThrust : movingThrust
-canConfirm = combined >= costoBanda && !noChange
+canConfirm = movingThrust >= costoBanda && !noChange
 ```
 
-- `Approach`: riduce di 1 la banda (verso `Adjacent`); somma thrust di entrambe le navi
-- `Flee`: aumenta di 1 la banda (verso `Distant`); solo thrust della nave manovrante
-- `GM SET` chiama `setRangeBand` direttamente — nessun costo thrust
-- Confirma chiama `applyBasicMovement` — scala `thrustUsedThisRound` su entrambe le navi (solo attaccante su `flee`)
+- `Approach`: riduce di 1 la banda (verso `Adjacent`); solo thrust della nave che agisce
+- `Flee`: aumenta di 1 la banda (verso `Distant`); solo thrust della nave che agisce
+- Ogni nave agisce nel proprio turno iniziativa — se entrambe si avvicinano la banda scende di 2 passi nel round
+- `GM SET` chiama `setRangeBand` direttamente — nessun costo thrust (usare per setup iniziale e navi piccole a Very Long)
+- Conferma chiama `applyBasicMovement(movingId, targetId, direction, movingThrust)` — scala `thrustUsedThisRound` solo sulla nave che agisce
 
 **Costi banda (CRB p.161):**
 
@@ -1214,7 +1214,7 @@ Funzionalità incluse nella prima versione funzionante:
 **Tooltip hover nave** — implementato:
 
 - `useShipHover.js`: hook SRP — rileva via `pixelToHex` quale ship è sotto il cursore, arma un timer da 200ms prima di mostrare il tooltip; resetta il timer ad ogni mousemove (nessun flickering durante il pan); cancella immediatamente su mousedown, mouseleave, cella vuota
-- `ShipTooltip.jsx`: pannello HTML via `createPortal` — mostra nome, fazione (colore), barra hull colorata (verde/giallo/rosso), vettore + magnitudine, thrust disponibile, evasione (se attiva), iniziativa, sensor lock (se attivo), lista critical hits con severità; si posiziona automaticamente accanto al cursore con flip verso il centro del viewport se il cursore è oltre il 65% del bordo
+- `ShipTooltip.jsx`: pannello HTML via `createPortal` — mostra nome, fazione (colore), barra hull colorata (verde/giallo/rosso), vettore + magnitudine, thrust disponibile, evasione (se attiva), iniziativa, sensor lock → nome target (se attivo), "Locked by [nome]" (se il sensore altrui è puntato su questa nave), "⚡ N× missile inbound" (se missili in volo verso questa nave), lista critical hits con severità; si posiziona automaticamente accanto al cursore con flip verso il centro del viewport se il cursore è oltre il 65% del bordo
 - `uiStore`: stato `hoveredShip { shipId, x, y }` + `setHoveredShip` / `clearHoveredShip`
 - Si nasconde automaticamente all'apertura del context menu
 - `BattleMap.jsx`: combina `onMouseMove` e `onMouseDown` da entrambi i hook; aggiunge `onMouseLeave`
@@ -1396,7 +1396,7 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 
 - `getEvasiveDM` fix — formula corretta `−pilotSkill` fisso (era `−pilotSkill × evasiveThrust`); CRB p.171
 - `data/rangeBands.js` — esportati `RANGE_BAND_ORDER` (array ordinato) e `RANGE_BAND_MOVE_COST` (costo thrust per banda, CRB p.161)
-- `battleStore` — aggiunto `rangeBands: {}` in stato; `addShip` inizializza coppie cross-faction a `'Very Long'`; `removeShip` ripulisce le entry; nuove azioni `setRangeBand(id1, id2, band)` e `applyBasicMovement(movingId, targetId, direction, movingThrust, targetThrust)`; `advancePhase` salta `movement` in basic mode; export/import include `rangeBands`
+- `battleStore` — aggiunto `rangeBands: {}` in stato; `addShip` inizializza coppie cross-faction a `'Very Long'`; `removeShip` ripulisce le entry; nuove azioni `setRangeBand(id1, id2, band)` e `applyBasicMovement(movingId, targetId, direction, movingThrust)`; `advancePhase` salta `movement` in basic mode; export/import include `rangeBands`
 - `BasicManoeuvreModal` — nuovo modal per fase acceleration in basic mode: approach/flee, slider thrust, barra costo, override GM SET
 - `ContextMenu` — voce `🧭 Manovra…` in fase `acceleration` + `combatMode === 'basic'`
 - `BasicBattleView` — sezione DISTANCES con lista `RangeBandRow` per ogni coppia tracciata (pulsanti ▼/▲ GM override)
@@ -1545,7 +1545,17 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 
 ---
 
-### 14.5 Effetti Sonori — Sintesi Procedurale
+### 14.5 Versione 1.18.0 — BasicBattleView Bento + Contrast + Manoeuvre ✅ COMPLETATA
+
+- **WCAG AA contrast** — testo secondario `text-slate-500`/`text-slate-600` alzato a `text-slate-400` in 32 file componenti (rapporto 5.4:1 vs 4.5:1 soglia AA); `text-slate-600` mantenuto solo per disabled/placeholder.
+- **ShipTooltip esteso** — `ShipTooltip.jsx` aggiunge: "Sensor Lock → [nome]" con DM, "Locked by [nome]", "⚡ N× missile inbound" per missili in volo verso questa nave. Selettori Zustand aggiunti: `missiles`, `ships` (per nome locker).
+- **`countMissileRacks` estratto** — da funzione privata in `battleStore.js` a named export in `utils/combat.js`; condivisa da store e `BasicBattleView` senza circular dep.
+- **ShipBentoCard** — sostituisce `ShipCard` in `BasicBattleView`: zona A (Header: nome + badge: `☠ WRECK` / `DOGFIGHT` / `BOARDING` / `EVA N` / `LOCKED`), zona B (HullBar + hull/max + ini), zona C condizionale (sensor lock, locked-by, inbound per launcher, launched per target, torrette reloading, critical hits, ammo). Grid `1→2→3 colonne`.
+- **Autosave gap** — `hasSignificantChange` in `useAutosave.js` aggiunto `prev.rangeBands !== next.rangeBands`; cambio banda in basic mode ora persiste su IndexedDB.
+- **BasicManoeuvreModal semplificato** — rimosso slider "target contribuisce thrust"; ogni nave agisce autonomamente nel proprio turno; `applyBasicMovement` perde il parametro `targetThrust`; test bidirectionality rimosso.
+- 709 test (+9 da 700).
+
+### 14.6 Effetti Sonori — Sintesi Procedurale
 
 Tutti i suoni sono generati via Web Audio API (nessun file audio). `audioSynth.js` espone `playEffectSound(ctx, effect)` che dispatcha per tipo:
 
