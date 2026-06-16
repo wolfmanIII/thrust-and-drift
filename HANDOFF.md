@@ -9,16 +9,20 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.18.0 |
+| **Versione** | 1.18.1 |
 | **Branch** | main (clean) |
 | **Test** | 709 passing |
-| **Ultimo commit** | docs(help): clarify basic mode manoeuvre — per-ship turns + GM SET guidance |
+| **Ultimo commit** | fix(acceleration): advanceActor uses reversed order in acceleration phase |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — BasicBattleView Bento + Contrast + Manoeuvre fix (v1.18.0)
+### Sessione corrente — Acceleration Phase Actor Order Fix (v1.18.1)
+
+1. **`fix(acceleration): advanceActor uses reversed order in acceleration phase`** (`b3752ce`) — `advanceActor` iterava `initiativeOrder` in avanti, ma HUD e ContextMenu usano `[...initiativeOrder].reverse()` nella fase di accelerazione. Stessa fase, stesso indice, navi diverse: la nave distrutta appariva come attore corrente mentre la nave viva veniva saltata silenziosamente, lasciando solo NEXT PHASE disponibile. Fix: `advanceActor` legge `phase` dallo store e applica la stessa inversione.
+
+### Sessione precedente — BasicBattleView Bento + Contrast + Manoeuvre fix (v1.18.0)
 
 1. **`fix(a11y): WCAG AA contrast`** (`ee19143`) — testo secondario `text-slate-500`/`text-slate-600` sotto il rapporto 4.5:1 su sfondi scuri. Alzato a `text-slate-400` (label/secondario) in 32 file componenti. `text-slate-600` mantenuto solo per stati disabled/placeholder.
 2. **`feat(tooltip): sensor-locked-by + inbound missiles`** (`030bcbd`) — `ShipTooltip.jsx` in modalità vettoriale ora mostra: "Sensor Lock → [nome]" con DM, "Locked by [nome]" se il sensore è puntato su questa nave, "⚡ N× missile inbound" se missili sono in volo verso di essa.

@@ -1555,7 +1555,12 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **BasicManoeuvreModal semplificato** — rimosso slider "target contribuisce thrust"; ogni nave agisce autonomamente nel proprio turno; `applyBasicMovement` perde il parametro `targetThrust`; test bidirectionality rimosso.
 - 709 test (+9 da 700).
 
-### 14.6 Effetti Sonori — Sintesi Procedurale
+### 14.6 Versione 1.18.1 — Acceleration Phase Actor Order Fix ✅ COMPLETATA
+
+- **`advanceActor` order mismatch** — `advanceActor` in `battleStore.js` iterava `initiativeOrder` in avanti; HUD e ContextMenu usano `[...initiativeOrder].reverse()` per la fase di accelerazione. L'indice puntava a navi diverse: nave distrutta come attore corrente, nave viva saltata silenziosamente. Fix: `advanceActor` legge `phase` dallo store e applica la stessa inversione quando `phase === 'acceleration'`.
+- 709 test (invariati).
+
+### 14.7 Effetti Sonori — Sintesi Procedurale
 
 Tutti i suoni sono generati via Web Audio API (nessun file audio). `audioSynth.js` espone `playEffectSound(ctx, effect)` che dispatcha per tipo:
 

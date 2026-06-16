@@ -6,6 +6,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.18.1] — 2026-06-16
+
+### Fixed
+
+- **Acceleration phase actor order** — `advanceActor` was iterating `initiativeOrder` forward while HUD and ContextMenu used `[...initiativeOrder].reverse()` for the acceleration phase display. Mismatched indices caused destroyed ships to appear as current actor while alive ships were silently skipped, leaving only NEXT PHASE available. Fix: `advanceActor` now mirrors the same reversal when `phase === 'acceleration'`.
+
+---
+
 ## [1.18.0] — 2026-06-16
 
 ### Added
