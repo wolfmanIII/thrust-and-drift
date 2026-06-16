@@ -49,7 +49,8 @@ function hasSignificantChange(prev, next) {
     prev.log !== next.log ||
     prev.initiativeOrder !== next.initiativeOrder ||
     prev.dogfights !== next.dogfights ||
-    prev.boardings !== next.boardings
+    prev.boardings !== next.boardings ||
+    prev.rangeBands !== next.rangeBands
   )
 }
 
