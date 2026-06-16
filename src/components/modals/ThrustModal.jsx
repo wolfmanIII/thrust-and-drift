@@ -75,12 +75,12 @@ export function ThrustModal() {
         {/* Vector display */}
         <div className="grid grid-cols-3 gap-2 text-center font-mono text-xs">
           <div className="bg-slate-800 rounded p-2">
-            <p className="text-slate-500 text-xs mb-1">Current vector</p>
+            <p className="text-slate-400 text-xs mb-1">Current vector</p>
             <p className="text-slate-200">({ship.vector.q}, {ship.vector.r})</p>
           </div>
-          <div className="flex items-center justify-center text-slate-600 text-lg">→</div>
+          <div className="flex items-center justify-center text-slate-500 text-lg">→</div>
           <div className={`rounded p-2 ${isValid ? 'bg-slate-800' : 'bg-red-950/40 border border-red-700/50'}`}>
-            <p className="text-slate-500 text-xs mb-1">New vector</p>
+            <p className="text-slate-400 text-xs mb-1">New vector</p>
             <p className={isValid ? 'text-(--neon-cyan)' : 'text-red-400'}>
               ({newVector.q}, {newVector.r})
             </p>
@@ -88,7 +88,7 @@ export function ThrustModal() {
         </div>
 
         {/* Delta display */}
-        <div className="text-center font-mono text-xs text-slate-500">
+        <div className="text-center font-mono text-xs text-slate-400">
           Δ ({delta.q}, {delta.r}) — costo: {cost} thrust
         </div>
 
@@ -120,7 +120,7 @@ export function ThrustModal() {
         {/* Manual Δq / Δr inputs */}
         <div className="grid grid-cols-2 gap-3">
           <label className="space-y-1">
-            <span className="font-mono text-xs text-slate-500">Δq</span>
+            <span className="font-mono text-xs text-slate-400">Δq</span>
             <input
               type="number"
               value={delta.q}
@@ -129,7 +129,7 @@ export function ThrustModal() {
             />
           </label>
           <label className="space-y-1">
-            <span className="font-mono text-xs text-slate-500">Δr</span>
+            <span className="font-mono text-xs text-slate-400">Δr</span>
             <input
               type="number"
               value={delta.r}

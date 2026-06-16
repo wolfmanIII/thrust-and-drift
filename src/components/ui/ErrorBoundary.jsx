@@ -37,7 +37,7 @@ export class ErrorBoundary extends Component {
             An unexpected error occurred. The current session has been
             saved automatically — reload the page to restore it.
           </p>
-          <pre className="font-mono text-xs text-slate-500 bg-slate-900/60 rounded p-3 overflow-auto max-h-40">
+          <pre className="font-mono text-xs text-slate-400 bg-slate-900/60 rounded p-3 overflow-auto max-h-40">
             {this.state.error.message}
           </pre>
           <button

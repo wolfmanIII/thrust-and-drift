@@ -65,7 +65,7 @@ function ReactionsPanel({
 
       {/* Evasive Action — 1 thrust, DM fixed = −pilotSkill (CRB p.171) */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between font-mono text-xs text-slate-500">
+        <div className="flex items-center justify-between font-mono text-xs text-slate-400">
           <span>Evasive Action <span className="text-slate-700">(CRB p.171)</span></span>
           <span>Pilot {targetPilotSkill} · {availableThrust} thrust avail.</span>
         </div>
@@ -91,7 +91,7 @@ function ReactionsPanel({
       {/* Point Defence — missile attacks + target has laser turret */}
       {isMissile && pdTurrets.length > 0 && (
         <div className="border-t border-amber-700/20 pt-3 space-y-2">
-          <div className="flex items-center justify-between font-mono text-xs text-slate-500">
+          <div className="flex items-center justify-between font-mono text-xs text-slate-400">
             <span>Point Defence</span>
             <span>Gunner turret · removes Effect missiles</span>
           </div>
@@ -116,7 +116,7 @@ function ReactionsPanel({
             <div className="space-y-1.5">
               {isPlayerTarget && (
                 <div className="flex items-center gap-2 bg-slate-800/60 rounded px-3 py-1.5">
-                  <span className="text-slate-500 font-mono text-xs">2D6:</span>
+                  <span className="text-slate-400 font-mono text-xs">2D6:</span>
                   <DiceInput value={null} onChange={setPdManualDice} />
                 </div>
               )}
@@ -142,7 +142,7 @@ function ReactionsPanel({
       {/* Disperse Sand — laser attacks + target has sandcaster */}
       {laserAttack && sandTurrets.length > 0 && (
         <div className="border-t border-amber-700/20 pt-3 space-y-2">
-          <div className="flex items-center justify-between font-mono text-xs text-slate-500">
+          <div className="flex items-center justify-between font-mono text-xs text-slate-400">
             <span>Disperse Sand</span>
             <span>Gunner turret · +1D+Effect armour vs laser</span>
           </div>
@@ -167,7 +167,7 @@ function ReactionsPanel({
             <div className="space-y-1.5">
               {isPlayerTarget && (
                 <div className="flex items-center gap-2 bg-slate-800/60 rounded px-3 py-1.5">
-                  <span className="text-slate-500 font-mono text-xs">2D6:</span>
+                  <span className="text-slate-400 font-mono text-xs">2D6:</span>
                   <DiceInput value={null} onChange={setSandManualDice} />
                 </div>
               )}
@@ -232,7 +232,7 @@ function AttackConfigStep({
       <div className="space-y-4">
         {/* Weapon select */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">Weapon</p>
+          <p className="text-slate-400 font-mono text-xs mb-1.5">Weapon</p>
           <div className="flex flex-col gap-1">
             {availableWeapons.length === 0 && (
               <p className="text-slate-600 font-mono text-xs italic">No offensive weapons available.</p>
@@ -253,7 +253,7 @@ function AttackConfigStep({
                 >
                   <span className="flex items-center justify-between gap-2">
                     <span>
-                      <span className="text-slate-600 mr-1.5">T{w.turretSlot}</span>
+                      <span className="text-slate-500 mr-1.5">T{w.turretSlot}</span>
                       {w.weaponName}
                     </span>
                     {wOutOfRange && (
@@ -261,7 +261,7 @@ function AttackConfigStep({
                     )}
                   </span>
                   {wDef && (
-                    <span className="text-slate-600">
+                    <span className="text-slate-500">
                       {w.weaponName === 'Missile Rack' ? 'Guided · 4D dmg/missile · Special' : (
                         <>
                           DM {wDef.attackDM >= 0 ? `+${wDef.attackDM}` : wDef.attackDM}
@@ -278,7 +278,7 @@ function AttackConfigStep({
 
         {/* Target select */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">Target</p>
+          <p className="text-slate-400 font-mono text-xs mb-1.5">Target</p>
           <div className="flex flex-col gap-1">
             {enemies.map((e) => (
               <button
@@ -293,7 +293,7 @@ function AttackConfigStep({
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: e.color }} />
                 <span>{e.profile.name}</span>
                 {target?.id === e.id && combatMode === 'vectorial' && (
-                  <span className="ml-auto text-slate-500">{rangeBand} ({distance} hex)</span>
+                  <span className="ml-auto text-slate-400">{rangeBand} ({distance} hex)</span>
                 )}
               </button>
             ))}
@@ -303,7 +303,7 @@ function AttackConfigStep({
         {/* Missile count — only for Missile Rack */}
         {isMissile && (
           <div>
-            <p className="text-slate-500 font-mono text-xs mb-1.5">
+            <p className="text-slate-400 font-mono text-xs mb-1.5">
               Missiles in salvo (1–{ammoLeft})
               {' · '}Ammo: <span className={ammoLeft === 0 ? 'text-red-400' : 'text-(--neon-cyan)'}>{ammoLeft}</span>
             </p>
@@ -325,7 +325,7 @@ function AttackConfigStep({
               >
                 +
               </button>
-              <span className="text-slate-600 font-mono text-xs ml-2">
+              <span className="text-slate-500 font-mono text-xs ml-2">
                 missiles · guided munitions
               </span>
             </div>
@@ -335,7 +335,7 @@ function AttackConfigStep({
         {/* Range band selector — basic mode, non-missile, no stored band */}
         {!isMissile && combatMode === 'basic' && target && !storedBand && (
           <div>
-            <p className="text-slate-500 font-mono text-xs mb-1.5">Range (manual — set via Manoeuvre phase)</p>
+            <p className="text-slate-400 font-mono text-xs mb-1.5">Range (manual — set via Manoeuvre phase)</p>
             <div className="grid grid-cols-3 gap-1">
               {RANGE_BANDS.map(({ label }) => (
                 <button
@@ -356,7 +356,7 @@ function AttackConfigStep({
         {/* Range band from store — basic mode, shown as read-only */}
         {!isMissile && combatMode === 'basic' && target && storedBand && (
           <div className="flex items-center justify-between bg-slate-800/60 rounded px-3 py-1.5">
-            <span className="font-mono text-xs text-slate-500">Range (from Manoeuvre phase)</span>
+            <span className="font-mono text-xs text-slate-400">Range (from Manoeuvre phase)</span>
             <span className="font-mono text-xs text-yellow-400">{storedBand}</span>
           </div>
         )}
@@ -666,7 +666,7 @@ function AttackDamageStep({ damageDice, effectBonus, armor, isPlayer, damageResu
                   : `[${damageResult.roll.results.join('+')}] + ${effectBonus} − ${armor} armour`}
               </p>
               <p className="text-red-400 font-bold text-2xl mt-1">{damageResult.total}</p>
-              <p className="text-slate-500">damage dealt</p>
+              <p className="text-slate-400">damage dealt</p>
             </div>
 
             <div className="flex gap-2">
@@ -795,7 +795,7 @@ function AttackCriticalStep({
                 <p className="text-slate-400 text-xs mt-1">
                   Severity {effectiveSeverity}
                   {existingCrit && (
-                    <span className="text-slate-500"> (was {existingCrit.severity}, stacking)</span>
+                    <span className="text-slate-400"> (was {existingCrit.severity}, stacking)</span>
                   )}
                 </p>
               )}

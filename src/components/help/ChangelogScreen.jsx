@@ -79,7 +79,7 @@ function ChangelogItem({ text }) {
       {subs.length > 0 && (
         <ul className="mt-1 ml-4 space-y-0.5 list-none">
           {subs.map((sub, i) => (
-            <li key={i} className="text-slate-500 text-xs before:content-['·'] before:mr-1.5 before:text-slate-700">
+            <li key={i} className="text-slate-400 text-xs before:content-['·'] before:mr-1.5 before:text-slate-700">
               {renderInline(sub)}
             </li>
           ))}
@@ -172,7 +172,7 @@ export function ChangelogScreen() {
               <h2 className="font-display text-(--neon-cyan) tracking-widest text-base">
                 v{version}
               </h2>
-              <span className="font-mono text-xs text-slate-600">{date}</span>
+              <span className="font-mono text-xs text-slate-500">{date}</span>
             </div>
 
             {/* Category groups */}

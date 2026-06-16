@@ -107,7 +107,7 @@ export function CrewAssignmentModal() {
           <>
             {/* Non-gunner roles */}
             <div>
-              <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">Roles</p>
+              <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">Roles</p>
               <div className="space-y-1.5">
                 {NON_GUNNER_ROLES.map((role) => (
                   <div key={role} className="flex items-center gap-2">
@@ -123,7 +123,7 @@ export function CrewAssignmentModal() {
             {/* Gunner per turret */}
             {turrets.length > 0 && (
               <div>
-                <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">
+                <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">
                   Gunners
                 </p>
                 <div className="space-y-1.5">
@@ -131,7 +131,7 @@ export function CrewAssignmentModal() {
                     <div key={t.slot} className="flex items-center gap-2">
                       <span className="font-mono text-xs text-slate-400 w-36 shrink-0">
                         Gunner (T{t.slot})
-                        <span className="text-slate-600 ml-1">
+                        <span className="text-slate-500 ml-1">
                           {(t.weapons ?? []).join(', ')}
                         </span>
                       </span>
@@ -139,7 +139,7 @@ export function CrewAssignmentModal() {
                     </div>
                   ))}
                 </div>
-                <p className="font-mono text-xs text-slate-600 mt-1.5">
+                <p className="font-mono text-xs text-slate-500 mt-1.5">
                   Turrets without a gunner cannot fire.
                 </p>
               </div>

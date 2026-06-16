@@ -87,7 +87,7 @@ export function BasicManoeuvreModal() {
 
         {/* Target selector */}
         <div>
-          <p className="font-mono text-xs text-slate-500 mb-1.5">Target ship</p>
+          <p className="font-mono text-xs text-slate-400 mb-1.5">Target ship</p>
           <div className="flex flex-col gap-1">
             {enemies.length === 0 && (
               <p className="font-mono text-xs text-slate-600 italic">No enemy ships.</p>
@@ -107,7 +107,7 @@ export function BasicManoeuvreModal() {
                 >
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: e.color }} />
                   <span className="font-bold">{e.profile.name}</span>
-                  <span className="ml-auto text-slate-500">{band}</span>
+                  <span className="ml-auto text-slate-400">{band}</span>
                 </button>
               )
             })}
@@ -118,7 +118,7 @@ export function BasicManoeuvreModal() {
           <>
             {/* Direction */}
             <div>
-              <p className="font-mono text-xs text-slate-500 mb-1.5">Direction</p>
+              <p className="font-mono text-xs text-slate-400 mb-1.5">Direction</p>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { val: 'approach', label: '▼ Approach', disabled: !canApproach },
@@ -143,15 +143,15 @@ export function BasicManoeuvreModal() {
             {/* Range display */}
             <div className="bg-slate-800/60 rounded p-3 space-y-1">
               <div className="flex justify-between font-mono text-xs">
-                <span className="text-slate-500">Current range</span>
+                <span className="text-slate-400">Current range</span>
                 <span className="text-slate-200">{currentBand}</span>
               </div>
               <div className="flex justify-between font-mono text-xs">
-                <span className="text-slate-500">Cost to change band</span>
+                <span className="text-slate-400">Cost to change band</span>
                 <span className="text-yellow-400">{cost} thrust</span>
               </div>
               <div className="flex justify-between font-mono text-xs">
-                <span className="text-slate-500">Result if confirmed</span>
+                <span className="text-slate-400">Result if confirmed</span>
                 <span className={canAfford ? 'text-green-400' : 'text-slate-600'}>{resultBand}</span>
               </div>
             </div>
@@ -210,7 +210,7 @@ export function BasicManoeuvreModal() {
                 GM SET
               </button>
             </div>
-            <p className="font-mono text-xs text-slate-600 text-center">
+            <p className="font-mono text-xs text-slate-500 text-center">
               GM SET overrides range without spending thrust
             </p>
           </>
@@ -226,8 +226,8 @@ function ThrustInput({ label, color, value, max, onChange, optional = false }) {
       <div className="flex items-center gap-2 mb-1">
         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
         <span className="font-mono text-xs text-slate-400">{label}</span>
-        {optional && <span className="ml-auto font-mono text-xs text-slate-600">optional</span>}
-        <span className="font-mono text-xs text-slate-500 ml-auto">{value}/{max} avail</span>
+        {optional && <span className="ml-auto font-mono text-xs text-slate-500">optional</span>}
+        <span className="font-mono text-xs text-slate-400 ml-auto">{value}/{max} avail</span>
       </div>
       <input
         type="range"

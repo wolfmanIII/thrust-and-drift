@@ -33,7 +33,7 @@ function HullBar({ current, max }) {
 function StatRow({ label, value, accent = false }) {
   return (
     <div className="flex justify-between items-baseline gap-2">
-      <span className="font-mono text-xs text-slate-500 shrink-0">{label}</span>
+      <span className="font-mono text-xs text-slate-400 shrink-0">{label}</span>
       <span className={`font-mono text-xs text-right truncate ${accent ? 'text-sky-400' : 'text-slate-300'}`}>
         {value}
       </span>
@@ -88,7 +88,7 @@ export function ShipTooltip() {
       {/* ── Stats ──────────────────────────────────────────────────────── */}
       <div className="px-3 py-2 space-y-1.5">
         <div>
-          <span className="font-mono text-xs text-slate-500 uppercase tracking-widest block mb-0.5">Hull</span>
+          <span className="font-mono text-xs text-slate-400 uppercase tracking-widest block mb-0.5">Hull</span>
           <HullBar current={ship.hullCurrent} max={ship.profile.hull} />
         </div>
 

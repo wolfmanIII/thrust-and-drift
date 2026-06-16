@@ -53,7 +53,7 @@ function initForm(profile) {
 function NumField({ label, value, onChange, min = 0, max = 99 }) {
   return (
     <label className="flex flex-col gap-0.5">
-      <span className="font-mono text-xs text-slate-500 tracking-widest">{label}</span>
+      <span className="font-mono text-xs text-slate-400 tracking-widest">{label}</span>
       <input
         type="number"
         min={min}
@@ -70,7 +70,7 @@ function NumField({ label, value, onChange, min = 0, max = 99 }) {
 function TextField({ label, value, onChange, placeholder = '' }) {
   return (
     <label className="flex flex-col gap-0.5">
-      <span className="font-mono text-xs text-slate-500 tracking-widest">{label}</span>
+      <span className="font-mono text-xs text-slate-400 tracking-widest">{label}</span>
       <input
         type="text"
         value={value}
@@ -111,7 +111,7 @@ function CrewMemberRow({ member, onChange, onRemove }) {
       <div className="grid grid-cols-5 gap-1.5">
         {CREW_SKILLS.map((skill) => (
           <label key={skill} className="flex flex-col gap-0.5">
-            <span className="font-mono text-[10px] text-slate-500 tracking-widest uppercase">
+            <span className="font-mono text-[10px] text-slate-400 tracking-widest uppercase">
               {skill.slice(0, 3).toUpperCase()}
             </span>
             <input
@@ -136,7 +136,7 @@ function CrewMemberRow({ member, onChange, onRemove }) {
 function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurret }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5 bg-slate-800 rounded px-2 py-1.5">
-      <span className="text-slate-500 font-mono text-xs shrink-0 w-16">
+      <span className="text-slate-400 font-mono text-xs shrink-0 w-16">
         Turret {turret.slot}
       </span>
 
@@ -172,7 +172,7 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
         </select>
       )}
       {turret.weapons.length >= 3 && (
-        <span className="text-slate-600 font-mono text-xs italic">triple turret</span>
+        <span className="text-slate-500 font-mono text-xs italic">triple turret</span>
       )}
 
       {/* Remove turret */}
@@ -278,7 +278,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
 
         {/* Basic info */}
         <section className="space-y-3">
-          <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase border-b border-slate-800 pb-1">
+          <h3 className="font-mono text-xs text-slate-400 tracking-widest uppercase border-b border-slate-800 pb-1">
             Identification
           </h3>
           <div className="grid grid-cols-2 gap-3">
@@ -302,7 +302,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
 
         {/* Combat stats */}
         <section className="space-y-3">
-          <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase border-b border-slate-800 pb-1">
+          <h3 className="font-mono text-xs text-slate-400 tracking-widest uppercase border-b border-slate-800 pb-1">
             Combat Stats
           </h3>
           <div className="grid grid-cols-4 gap-3">
@@ -316,7 +316,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
         {/* Crew Manifest */}
         <section className="space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800 pb-1">
-            <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase">
+            <h3 className="font-mono text-xs text-slate-400 tracking-widest uppercase">
               Crew Manifest ({form.crew.length})
             </h3>
             <button
@@ -345,7 +345,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
         {/* Turrets */}
         <section className="space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800 pb-1">
-            <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase">
+            <h3 className="font-mono text-xs text-slate-400 tracking-widest uppercase">
               Turrets ({form.turrets.length})
             </h3>
             <button

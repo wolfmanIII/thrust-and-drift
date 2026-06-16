@@ -10,7 +10,7 @@ import { migrateCrew, CREW_SKILLS } from '../../utils/crew.js'
 function StatRow({ label, value }) {
   return (
     <div className="flex justify-between items-center py-0.5">
-      <span className="text-slate-500 font-mono text-xs">{label}</span>
+      <span className="text-slate-400 font-mono text-xs">{label}</span>
       <span className="text-slate-200 font-mono text-xs font-bold">{value ?? '—'}</span>
     </div>
   )
@@ -19,7 +19,7 @@ function StatRow({ label, value }) {
 function Section({ title, children }) {
   return (
     <div>
-      <h3 className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1 border-b border-slate-800 pb-1">
+      <h3 className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1 border-b border-slate-800 pb-1">
         {title}
       </h3>
       {children}
@@ -89,7 +89,7 @@ export function ShipDetailModal() {
             )}
             {(profile.turrets ?? []).map((t) => (
               <div key={t.slot} className="py-0.5">
-                <span className="text-slate-500 font-mono text-xs">Turret {t.slot}: </span>
+                <span className="text-slate-400 font-mono text-xs">Turret {t.slot}: </span>
                 <span className="text-slate-300 font-mono text-xs">
                   {t.weapons.join(', ')}
                 </span>

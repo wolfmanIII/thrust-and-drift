@@ -10,7 +10,7 @@ import { useUiStore } from '../../store/uiStore.js'
 function Section({ title, children }) {
   return (
     <div className="space-y-2">
-      <p className="font-mono text-xs text-slate-500 tracking-widest uppercase border-b border-slate-800 pb-1">
+      <p className="font-mono text-xs text-slate-400 tracking-widest uppercase border-b border-slate-800 pb-1">
         {title}
       </p>
       <div className="space-y-2">{children}</div>
@@ -25,7 +25,7 @@ function Row({ icon, label, description }) {
       <div className="min-w-0">
         <p className="font-mono text-xs text-slate-200 font-bold leading-tight">{label}</p>
         {description && (
-          <p className="font-mono text-xs text-slate-500 leading-tight mt-0.5">{description}</p>
+          <p className="font-mono text-xs text-slate-400 leading-tight mt-0.5">{description}</p>
         )}
       </div>
     </div>

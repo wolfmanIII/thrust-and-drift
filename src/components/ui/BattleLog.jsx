@@ -14,7 +14,7 @@ const TYPE_COLORS = {
   attack: 'text-red-400',
   damage: 'text-orange-400',
   action: 'text-purple-400',
-  system: 'text-slate-500',
+  system: 'text-slate-400',
   info:   'text-slate-300',
 }
 
@@ -61,11 +61,11 @@ export function BattleLog() {
           >
             <span>{collapsed ? '▲' : '▼'}</span>
             <span>BATTLE LOG</span>
-            <span className="text-slate-600">({log.length})</span>
+            <span className="text-slate-500">({log.length})</span>
           </button>
           <button
             onClick={clearLog}
-            className="ml-auto text-slate-600 hover:text-red-400 font-mono text-xs transition-colors"
+            className="ml-auto text-slate-500 hover:text-red-400 font-mono text-xs transition-colors"
           >
             CLEAR
           </button>
@@ -82,7 +82,7 @@ export function BattleLog() {
                 <span className={`shrink-0 ${TYPE_COLORS[entry.type] ?? 'text-slate-400'}`}>
                   {TYPE_PREFIX[entry.type] ?? '·'}
                 </span>
-                <span className="text-slate-500 shrink-0">R{entry.round}</span>
+                <span className="text-slate-400 shrink-0">R{entry.round}</span>
                 <span className="text-slate-300 flex-1">{entry.message}</span>
                 {entry.details?.recoverable && (
                   <button

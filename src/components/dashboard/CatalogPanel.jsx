@@ -52,7 +52,7 @@ function weaponSummary(ship) {
 function StatBadge({ label, value, dim = false }) {
   return (
     <span className={`inline-flex items-baseline gap-0.5 ${dim ? 'text-slate-600' : ''}`}>
-      <span className="font-mono text-slate-600 text-xs">{label}</span>
+      <span className="font-mono text-slate-500 text-xs">{label}</span>
       <span className="font-mono text-slate-300 text-xs font-bold">{value}</span>
     </span>
   )
@@ -82,7 +82,7 @@ function ShipRow({ entry, added, onAdd }) {
             {entry.name}
           </span>
           {entry.shipType && (
-            <span className="font-mono text-xs text-slate-600">Type {entry.shipType}</span>
+            <span className="font-mono text-xs text-slate-500">Type {entry.shipType}</span>
           )}
           <span className="font-mono text-xs text-slate-700">TL{entry.techLevel}</span>
         </div>
@@ -105,7 +105,7 @@ function ShipRow({ entry, added, onAdd }) {
         </p>
 
         {/* Description */}
-        <p className="font-mono text-xs text-slate-600 mt-0.5 leading-tight line-clamp-1">
+        <p className="font-mono text-xs text-slate-500 mt-0.5 leading-tight line-clamp-1">
           {entry.description}
         </p>
       </div>
@@ -179,7 +179,7 @@ export function CatalogPanel() {
       <div className="px-4 py-3 border-b border-slate-800 shrink-0">
         <h2 className="font-mono text-xs text-slate-400 tracking-widest uppercase">
           Official Catalog
-          <span className="ml-2 text-slate-600">HG 2022</span>
+          <span className="ml-2 text-slate-500">HG 2022</span>
           <span className="ml-2 text-slate-700">({filtered.length}/{SHIP_CATALOG.length})</span>
         </h2>
       </div>

@@ -53,10 +53,10 @@ function ShipCard({ ship }) {
       </div>
       <HullBar current={ship.hullCurrent} max={ship.profile.hull} />
       <div className="flex justify-between mt-1.5">
-        <span className="font-mono text-xs text-slate-500">
+        <span className="font-mono text-xs text-slate-400">
           Hull {ship.hullCurrent}/{ship.profile.hull}
         </span>
-        <span className="font-mono text-xs text-slate-600">
+        <span className="font-mono text-xs text-slate-500">
           Ini {ship.initiative}
         </span>
       </div>
@@ -88,7 +88,7 @@ function RangeBandRow({ ship1, ship2, band, onSet }) {
     <div className="flex items-center gap-2 py-1">
       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ship1.color }} />
       <span className="font-mono text-xs text-slate-300 truncate">{ship1.profile.name}</span>
-      <span className="text-slate-600 mx-1">↔</span>
+      <span className="text-slate-500 mx-1">↔</span>
       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ship2.color }} />
       <span className="font-mono text-xs text-slate-300 truncate">{ship2.profile.name}</span>
       <span className="ml-auto font-mono text-xs text-yellow-400 shrink-0">{band}</span>
@@ -181,7 +181,7 @@ export function BasicBattleView() {
           <div key={faction}>
             <h2 className={`font-display text-xs tracking-widest mb-3 pb-1.5 border-b ${FACTION_COLORS[faction] ?? FACTION_COLORS.neutral}`}>
               {FACTION_LABELS[faction] ?? faction.toUpperCase()}
-              <span className="ml-2 text-slate-600">({factionShips.length})</span>
+              <span className="ml-2 text-slate-500">({factionShips.length})</span>
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {factionShips.map((ship) => (

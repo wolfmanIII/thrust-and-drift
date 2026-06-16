@@ -49,7 +49,7 @@ export function MissileTooltip() {
       {/* Launcher → Target */}
       <div className="px-3 py-2 space-y-1.5">
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-xs text-slate-500 shrink-0">From</span>
+          <span className="font-mono text-xs text-slate-400 shrink-0">From</span>
           {launcher && (
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: launcher.color }} />
           )}
@@ -58,7 +58,7 @@ export function MissileTooltip() {
           </span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-xs text-slate-500 shrink-0">To</span>
+          <span className="font-mono text-xs text-slate-400 shrink-0">To</span>
           {target && (
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: target.color }} />
           )}
@@ -70,7 +70,7 @@ export function MissileTooltip() {
         {/* Thrust bar */}
         <div>
           <div className="flex justify-between mb-0.5">
-            <span className="font-mono text-xs text-slate-500">Thrust</span>
+            <span className="font-mono text-xs text-slate-400">Thrust</span>
             <span className="font-mono text-xs text-slate-400">{missile.thrustRemaining}/10</span>
           </div>
           <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">

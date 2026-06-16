@@ -92,7 +92,7 @@ export function InitiativeModal() {
             {/* Player ships — manual dice entry */}
             {playerShips.length > 0 && (
               <div>
-                <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">
+                <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">
                   Player Ships — roll dice
                 </p>
                 <div className="space-y-2">
@@ -112,7 +112,7 @@ export function InitiativeModal() {
                             value={null}
                             onChange={(d) => setShipDice(ship.id, d)}
                           />
-                          <span className="text-slate-600 font-mono text-xs">→</span>
+                          <span className="text-slate-500 font-mono text-xs">→</span>
                           <span className={`font-mono text-sm font-bold w-6 text-right ${previewTotal(ship) === '?' ? 'text-slate-600' : 'text-(--neon-cyan)'}`}>
                             {previewTotal(ship)}
                           </span>
@@ -120,7 +120,7 @@ export function InitiativeModal() {
                         {/* Tactics check row — only if captain has Tactics skill */}
                         {tacticsSkill > 0 && (
                           <div className="flex items-center gap-2 pl-4 border-l border-slate-700">
-                            <span className="text-slate-500 font-mono text-xs w-24 shrink-0">
+                            <span className="text-slate-400 font-mono text-xs w-24 shrink-0">
                               Tactics {tacticsSkill} (opt.)
                             </span>
                             <DiceInput
@@ -145,7 +145,7 @@ export function InitiativeModal() {
             {/* NPC ships — auto-rolled on confirm */}
             {npcShips.length > 0 && (
               <div>
-                <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">
+                <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">
                   NPC Ships — auto
                 </p>
                 <div className="space-y-1">
@@ -157,7 +157,7 @@ export function InitiativeModal() {
                         className="flex items-center gap-3 bg-slate-800/50 rounded px-3 py-1.5"
                       >
                         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
-                        <span className="text-slate-500 font-mono text-xs flex-1 min-w-0 truncate">
+                        <span className="text-slate-400 font-mono text-xs flex-1 min-w-0 truncate">
                           {ship.profile.name}
                         </span>
                         <span className="text-slate-700 font-mono text-xs">
@@ -188,7 +188,7 @@ export function InitiativeModal() {
                 if (!ship) return null
                 return (
                   <li key={id} className="flex items-center gap-3 bg-slate-800 rounded px-3 py-1.5">
-                    <span className="text-slate-500 font-mono text-xs w-4">{idx + 1}.</span>
+                    <span className="text-slate-400 font-mono text-xs w-4">{idx + 1}.</span>
                     <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
                     <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.profile.name}</span>
                     <span className="text-(--neon-cyan) font-mono text-sm font-bold">{ship.initiative}</span>

@@ -36,7 +36,7 @@ function PursuitRow({ label, ship, pilotSkill, tonnageDM, thrustFree, dice, onDi
           {label}: {ship.profile.name}
         </span>
       </div>
-      <p className="text-slate-500 font-mono text-xs">
+      <p className="text-slate-400 font-mono text-xs">
         Pilot {pilotSkill >= 0 ? '+' : ''}{pilotSkill}
         {' / '}
         Tonnage {tonnageDM >= 0 ? '+' : ''}{tonnageDM}
@@ -214,10 +214,10 @@ export function DogfightNotificationModal({ groups, onDone }) {
                   <span className="text-slate-200 font-mono text-xs flex-1 min-w-0 truncate">
                     {ship.profile.name}
                   </span>
-                  <span className="text-slate-600 font-mono text-xs shrink-0">
+                  <span className="text-slate-500 font-mono text-xs shrink-0">
                     [{ship.faction}]
                   </span>
-                  <span className="text-slate-500 font-mono text-xs shrink-0 ml-1">
+                  <span className="text-slate-400 font-mono text-xs shrink-0 ml-1">
                     dogfight?
                   </span>
                   <button
@@ -260,7 +260,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
             <p className="text-amber-400 font-mono text-xs tracking-wider uppercase">
               Pursuit check — one party wants to avoid contact
             </p>
-            <p className="text-slate-500 font-mono text-xs">
+            <p className="text-slate-400 font-mono text-xs">
               Formula: 2D6 + Pilot + Tonnage DM + Thrust libero // MgT2e CRB p.138
             </p>
 
@@ -310,7 +310,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
           <>
             {/* Pursuit summary if applicable */}
             {pursuitData && (
-              <div className="text-slate-500 font-mono text-xs space-y-0.5">
+              <div className="text-slate-400 font-mono text-xs space-y-0.5">
                 <p>
                   Pursuer: <span className="text-slate-300">{pursuitData.pursuerTotal}</span>
                   {' — '}

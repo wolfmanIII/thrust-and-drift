@@ -50,7 +50,7 @@ export function DiceInput({ value, onChange }) {
         type="number" min={1} max={6} value={d1} placeholder="—"
         onChange={handleD1} className={inputClass} aria-label="Die 1"
       />
-      <span className="text-slate-600 font-mono text-xs">+</span>
+      <span className="text-slate-500 font-mono text-xs">+</span>
       <input
         type="number" min={1} max={6} value={d2} placeholder="—"
         onChange={handleD2} className={inputClass} aria-label="Die 2"

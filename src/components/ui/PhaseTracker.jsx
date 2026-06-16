@@ -44,7 +44,7 @@ export function PhaseTracker() {
                   key={id}
                   className={`flex items-center gap-2 px-3 py-1 ${isActive ? 'bg-slate-700/60' : ''}`}
                 >
-                  <span className="text-slate-500 font-mono text-xs w-3">{isActive ? '●' : '○'}</span>
+                  <span className="text-slate-400 font-mono text-xs w-3">{isActive ? '●' : '○'}</span>
                   <span
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: ship.color }}
@@ -54,7 +54,7 @@ export function PhaseTracker() {
                   >
                     {ship.profile.name}
                   </span>
-                  <span className="ml-auto font-mono text-xs text-slate-600">{ship.initiative}</span>
+                  <span className="ml-auto font-mono text-xs text-slate-500">{ship.initiative}</span>
                 </li>
               )
             })}

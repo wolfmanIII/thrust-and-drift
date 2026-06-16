@@ -58,7 +58,7 @@ export function MissileLaunchModal() {
 
         {/* Target */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">Target</p>
+          <p className="text-slate-400 font-mono text-xs mb-1.5">Target</p>
           <div className="space-y-0.5">
             {enemies.length === 0 && (
               <p className="text-slate-600 font-mono text-xs italic">No ships on the field.</p>
@@ -82,7 +82,7 @@ export function MissileLaunchModal() {
 
         {/* Missile count */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">
+          <p className="text-slate-400 font-mono text-xs mb-1.5">
             Missiles in salvo (1–{ammoLeft})
           </p>
           <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ export function MissileLaunchModal() {
             >
               +
             </button>
-            <span className="text-slate-600 font-mono text-xs ml-2">
+            <span className="text-slate-500 font-mono text-xs ml-2">
               missiles · vector ({attacker.vector.q}, {attacker.vector.r})
             </span>
           </div>

@@ -73,21 +73,21 @@ export function MissileImpactModal() {
         {/* ── Salvo info ──────────────────────────────────────────── */}
         <div className="bg-slate-800/60 border border-slate-700 rounded px-4 py-3 flex flex-col gap-2">
           <div className="flex justify-between text-xs font-mono">
-            <span className="text-slate-500">LAUNCHER</span>
+            <span className="text-slate-400">LAUNCHER</span>
             <span className="text-slate-200">{launcher?.profile.name ?? '?'}</span>
           </div>
           <div className="flex justify-between text-xs font-mono">
-            <span className="text-slate-500">TARGET</span>
+            <span className="text-slate-400">TARGET</span>
             <span style={{ color: target.color }} className="font-semibold">
               {target.profile.name}
             </span>
           </div>
           <div className="flex justify-between text-xs font-mono">
-            <span className="text-slate-500">SALVO</span>
+            <span className="text-slate-400">SALVO</span>
             <span className="text-amber-300">{impact.count}× {impact.type ?? 'Missile'}</span>
           </div>
           <div className="flex justify-between text-xs font-mono">
-            <span className="text-slate-500">HULL</span>
+            <span className="text-slate-400">HULL</span>
             <span className="text-slate-300">
               {target.hullCurrent}/{target.profile.hull}
             </span>
@@ -102,7 +102,7 @@ export function MissileImpactModal() {
           </p>
 
           <label className="flex flex-col gap-1">
-            <span className="font-mono text-xs text-slate-500 tracking-widest">
+            <span className="font-mono text-xs text-slate-400 tracking-widest">
               DAMAGE ROLLED (total)
             </span>
             <div className="flex gap-2">
@@ -127,7 +127,7 @@ export function MissileImpactModal() {
 
           {/* Armour & net */}
           <div className="flex justify-between items-center bg-slate-800/40 rounded px-3 py-2 font-mono text-xs">
-            <span className="text-slate-500">
+            <span className="text-slate-400">
               ARMOUR
             </span>
             <span className="text-slate-300">{armor}</span>

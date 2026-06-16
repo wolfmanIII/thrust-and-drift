@@ -216,7 +216,7 @@ export function ActionModal() {
           <>
             {/* Crew member list */}
             <div>
-              <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">
+              <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">
                 Crew Member
               </p>
               {crewArray.length === 0 && (
@@ -246,7 +246,7 @@ export function ActionModal() {
             {/* Action list for selected member */}
             {selectedMember && (
               <div>
-                <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">
+                <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">
                   Actions
                 </p>
                 {memberActions.length === 0 && (
@@ -264,7 +264,7 @@ export function ActionModal() {
                       }`}
                     >
                       <span className="font-bold">{action.label}</span>
-                      <span className="text-slate-500 ml-2">
+                      <span className="text-slate-400 ml-2">
                         {action.difficulty === 'auto' ? 'Automatic' : `Target ${action.difficulty}+`}
                         {' · '}Skill {action.skillLevel}
                       </span>
@@ -277,7 +277,7 @@ export function ActionModal() {
             {/* Target selector */}
             {selectedAction?.requiresTarget && (
               <div>
-                <p className="font-mono text-xs text-slate-500 tracking-widest uppercase mb-1.5">Target</p>
+                <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">Target</p>
                 <div className="space-y-0.5">
                   {otherShips.length === 0 && (
                     <p className="text-slate-600 font-mono text-xs italic">No ships available.</p>
@@ -305,7 +305,7 @@ export function ActionModal() {
 
             {/* Action description */}
             {selectedAction && (
-              <p className="text-slate-500 font-mono text-xs leading-relaxed border-l-2 border-slate-700 pl-3">
+              <p className="text-slate-400 font-mono text-xs leading-relaxed border-l-2 border-slate-700 pl-3">
                 {selectedAction.description}
               </p>
             )}
@@ -313,7 +313,7 @@ export function ActionModal() {
             {/* Skill level override — always shown when non-auto action selected */}
             {selectedAction && selectedAction.difficulty !== 'auto' && (
               <div className="flex items-center gap-2 bg-slate-800/60 rounded px-3 py-1.5">
-                <span className="text-slate-500 font-mono text-xs flex-1">Skill DM</span>
+                <span className="text-slate-400 font-mono text-xs flex-1">Skill DM</span>
                 <input
                   type="number"
                   min={-3}
@@ -327,7 +327,7 @@ export function ActionModal() {
                   <button
                     type="button"
                     onClick={() => setSkillOverride(selectedAction.skillLevel)}
-                    className="text-slate-600 hover:text-slate-400 font-mono text-xs transition-colors"
+                    className="text-slate-500 hover:text-slate-400 font-mono text-xs transition-colors"
                     title="Reset to base skill"
                   >
                     ↺
@@ -339,7 +339,7 @@ export function ActionModal() {
             {/* Player manual dice entry — shown when an action requiring a roll is selected */}
             {isPlayer && selectedAction && selectedAction.difficulty !== 'auto' && (
               <div className="flex items-center gap-3 bg-slate-800 rounded px-3 py-2">
-                <span className="text-slate-500 font-mono text-xs">2D6:</span>
+                <span className="text-slate-400 font-mono text-xs">2D6:</span>
                 <DiceInput
                   key={selectedAction.id}
                   value={null}

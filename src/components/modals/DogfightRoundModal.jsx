@@ -66,9 +66,9 @@ function ShipCheckRow({ ship, dms, dice, onDice }) {
         <span className="text-slate-200 font-mono text-xs font-bold flex-1 min-w-0 truncate">
           {ship.profile.name}
         </span>
-        <span className="text-slate-600 font-mono text-xs shrink-0">[{ship.faction}]</span>
+        <span className="text-slate-500 font-mono text-xs shrink-0">[{ship.faction}]</span>
       </div>
-      <p className="text-slate-500 font-mono text-xs">{dmParts}</p>
+      <p className="text-slate-400 font-mono text-xs">{dmParts}</p>
       <div className="flex items-center gap-3">
         <DiceInput value={null} onChange={onDice} />
         {total !== null && (
@@ -142,13 +142,13 @@ function EscapeCheckRow({ ship, pursuer, totals, onFleeRoll, onPursuerRoll }) {
       <div className="flex items-center gap-2">
         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
         <span className="text-slate-200 font-mono text-xs font-bold">{ship.profile.name}</span>
-        <span className="text-slate-500 font-mono text-xs">attempts escape</span>
+        <span className="text-slate-400 font-mono text-xs">attempts escape</span>
       </div>
 
       {/* Evader row */}
       <div className="flex items-center gap-2 pl-2">
-        <span className="text-slate-500 font-mono text-xs w-20 shrink-0">Evader</span>
-        <span className="text-slate-600 font-mono text-xs">
+        <span className="text-slate-400 font-mono text-xs w-20 shrink-0">Evader</span>
+        <span className="text-slate-500 font-mono text-xs">
           P{fleeDMs.pilot >= 0 ? '+' : ''}{fleeDMs.pilot} / T{fleeDMs.tonnage >= 0 ? '+' : ''}{fleeDMs.tonnage} / Thr+{fleeDMs.thrust}
         </span>
         <div className="ml-auto flex items-center gap-2">
@@ -162,11 +162,11 @@ function EscapeCheckRow({ ship, pursuer, totals, onFleeRoll, onPursuerRoll }) {
       {/* Pursuer row */}
       {pursuer && pursuerDMs && (
         <div className="flex items-center gap-2 pl-2">
-          <span className="text-slate-500 font-mono text-xs w-20 shrink-0">
+          <span className="text-slate-400 font-mono text-xs w-20 shrink-0">
             <span className="w-2 h-2 rounded-full inline-block mr-1" style={{ backgroundColor: pursuer.color }} />
             Pursuer
           </span>
-          <span className="text-slate-600 font-mono text-xs">
+          <span className="text-slate-500 font-mono text-xs">
             P{pursuerDMs.pilot >= 0 ? '+' : ''}{pursuerDMs.pilot} / T{pursuerDMs.tonnage >= 0 ? '+' : ''}{pursuerDMs.tonnage} / Thr+{pursuerDMs.thrust}
           </span>
           <div className="ml-auto flex items-center gap-2">
@@ -366,7 +366,7 @@ export function DogfightRoundModal() {
         <div className="flex items-center gap-2 flex-wrap">
           {groupShips.map((s, i) => (
             <span key={s.id} className="flex items-center gap-1.5">
-              {i > 0 && <span className="text-slate-600 font-mono text-xs">↔</span>}
+              {i > 0 && <span className="text-slate-500 font-mono text-xs">↔</span>}
               <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
               <span className="text-slate-300 font-mono text-xs">{s.profile.name}</span>
             </span>
@@ -385,7 +385,7 @@ export function DogfightRoundModal() {
         {/* ── PHASE: DECLARE ── */}
         {phase === 'declare' && (
           <>
-            <p className="text-slate-500 font-mono text-xs">
+            <p className="text-slate-400 font-mono text-xs">
               Dichiara le intenzioni di fuga prima del check Pilot. // MgT2e CRB p.138 §6.4
             </p>
             <div className="space-y-2">
@@ -400,7 +400,7 @@ export function DogfightRoundModal() {
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
                       <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.profile.name}</span>
-                      <span className="text-slate-600 font-mono text-xs shrink-0">
+                      <span className="text-slate-500 font-mono text-xs shrink-0">
                         Thrust {ship.profile.thrust} vs max {enemyThrusts.length > 0 ? Math.max(...enemyThrusts) : '—'}
                       </span>
                       <button
@@ -519,7 +519,7 @@ export function DogfightRoundModal() {
               </div>
             )}
 
-            <p className="text-slate-500 font-mono text-xs">
+            <p className="text-slate-400 font-mono text-xs">
               2D6 + Pilot + Tonnage + Thrust + DM round precedente // MgT2e CRB p.138
             </p>
             <div className="space-y-3">
@@ -596,7 +596,7 @@ export function DogfightRoundModal() {
             </div>
 
             {!resolved.tied && (
-              <p className="text-slate-500 font-mono text-xs">
+              <p className="text-slate-400 font-mono text-xs">
                 Apply the attack DMs above when opening the Attack panel.
               </p>
             )}

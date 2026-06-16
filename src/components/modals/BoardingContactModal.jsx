@@ -59,7 +59,7 @@ function CutTracker({ boarding, onDamage }) {
         ))}
       </div>
 
-      <p className="text-slate-500 font-mono text-xs">
+      <p className="text-slate-400 font-mono text-xs">
         Block resilience: <span className="text-slate-300">{res.block}</span>
         {' / '}
         breach: <span className="text-slate-300">{res.breach}</span>
@@ -86,7 +86,7 @@ function CutTracker({ boarding, onDamage }) {
       {/* Roll + result */}
       <div className="flex items-center gap-3">
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1">
+          <p className="text-slate-400 font-mono text-xs mb-1">
             Mechanic (DEX) — Average (8+)
             {contactDM !== 0 && (
               <span className={contactDM > 0 ? 'text-emerald-400' : 'text-red-400'}>
@@ -113,7 +113,7 @@ function CutTracker({ boarding, onDamage }) {
         </button>
       )}
 
-      <p className="text-slate-500 font-mono text-xs">
+      <p className="text-slate-400 font-mono text-xs">
         Progress: <span className="text-slate-300">{boarding.hullDamageSoFar ?? 0}</span> / {res.breach} (breach)
         {(boarding.hullDamageSoFar ?? 0) >= res.block && (boarding.hullDamageSoFar ?? 0) < res.breach && (
           <span className="text-amber-400 ml-2">ACCESS BLOCKED — continue for breach</span>
@@ -192,7 +192,7 @@ export function BoardingContactModal() {
 
         {/* Entry method */}
         <div className="space-y-1.5">
-          <p className="text-slate-500 font-mono text-xs uppercase">Entry method</p>
+          <p className="text-slate-400 font-mono text-xs uppercase">Entry method</p>
           <div className="grid grid-cols-1 gap-1.5">
             {Object.entries(ENTRY_METHODS).map(([k, m]) => (
               <button
@@ -206,7 +206,7 @@ export function BoardingContactModal() {
               >
                 <div className="flex-1">
                   <p className="font-bold">{m.label}</p>
-                  <p className="text-slate-500 text-[10px]">
+                  <p className="text-slate-400 text-[10px]">
                     {m.check ? `${m.check} (${m.difficulty}+)` : 'No check'}
                     {' · '}
                     {m.time}
@@ -230,7 +230,7 @@ export function BoardingContactModal() {
             }`}
           >
             {boarding.defenderRotating ? '↻ TUMBLING' : '↻ Tumbling'}
-            <span className="block text-[10px] text-slate-500">DM −1 Contact</span>
+            <span className="block text-[10px] text-slate-400">DM −1 Contact</span>
           </button>
           <button
             onClick={() => toggleForcedLinkage(boarding.id)}
@@ -241,7 +241,7 @@ export function BoardingContactModal() {
             }`}
           >
             {boarding.forcedLinkage ? '🔗 LINKAGE ACTIVE' : '🔗 Forced Linkage'}
-            <span className="block text-[10px] text-slate-500">DM +2 Contact</span>
+            <span className="block text-[10px] text-slate-400">DM +2 Contact</span>
           </button>
         </div>
 
@@ -265,7 +265,7 @@ export function BoardingContactModal() {
               <DiceInput value={dice} onChange={setDice} />
               {checkTotal !== null && (
                 <div className="text-right">
-                  <p className="text-slate-500 font-mono text-xs">= {checkTotal}</p>
+                  <p className="text-slate-400 font-mono text-xs">= {checkTotal}</p>
                   <p className={`font-mono text-xs font-bold ${checkPassed ? 'text-emerald-400' : 'text-red-400'}`}>
                     {checkPassed ? 'SUCCESS' : 'FAILURE'}
                   </p>

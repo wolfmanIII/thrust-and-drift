@@ -148,7 +148,7 @@ export function AddShipModal() {
 
         {/* Faction */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">Faction</p>
+          <p className="text-slate-400 font-mono text-xs mb-1.5">Faction</p>
           <div className="flex gap-2">
             {FACTIONS.map((f) => (
               <button
@@ -168,7 +168,7 @@ export function AddShipModal() {
 
         {/* Color */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">Token color</p>
+          <p className="text-slate-400 font-mono text-xs mb-1.5">Token color</p>
           <div className="flex gap-2 flex-wrap">
             {PRESET_COLORS.map((c) => (
               <button
@@ -185,7 +185,7 @@ export function AddShipModal() {
 
         {/* Token shape */}
         <div>
-          <p className="text-slate-500 font-mono text-xs mb-1.5">Token shape</p>
+          <p className="text-slate-400 font-mono text-xs mb-1.5">Token shape</p>
           <div className="grid grid-cols-6 gap-1.5">
             {Object.keys(SHIP_SHAPES).map((shape) => (
               <ShapePreview

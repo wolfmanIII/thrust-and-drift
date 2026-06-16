@@ -114,7 +114,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
           )}
         </p>
         {INITIATIVE_GATED_PHASES.includes(phase) && !isCurrentActor && (
-          <p className="font-mono text-xs text-slate-600 mt-0.5">Not this ship&apos;s turn</p>
+          <p className="font-mono text-xs text-slate-500 mt-0.5">Not this ship&apos;s turn</p>
         )}
       </div>
 
@@ -204,7 +204,7 @@ function MissileContextMenu({ x, y, menuRef, missile, targetId, close }) {
         <p className="font-mono text-xs text-slate-400">
           {launchedBy?.profile.name ?? '?'} → {target?.profile.name ?? '?'}
         </p>
-        <p className="font-mono text-xs text-slate-500">
+        <p className="font-mono text-xs text-slate-400">
           Thrust remaining: {missile?.thrustRemaining ?? '?'}/10
         </p>
       </div>

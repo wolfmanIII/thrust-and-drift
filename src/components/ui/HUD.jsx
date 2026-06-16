@@ -119,10 +119,10 @@ export function HUD() {
       {/* Round + phase badge */}
       <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-700 rounded px-3 py-1.5 backdrop-blur-sm">
         <img src={tdLogo} alt="" className="w-5 h-5" />
-        <span className="text-slate-600 text-xs">│</span>
+        <span className="text-slate-500 text-xs">│</span>
         <span className="text-slate-400 text-xs font-display tracking-widest">ROUND</span>
         <span className="text-(--neon-cyan) font-mono font-bold text-lg leading-none">{round}</span>
-        <span className="text-slate-600 text-xs">│</span>
+        <span className="text-slate-500 text-xs">│</span>
         <span className="text-slate-200 font-display text-xs tracking-widest">{phaseLabel}</span>
       </div>
 
@@ -136,7 +136,7 @@ export function HUD() {
           <span className="text-slate-200 font-mono text-xs truncate max-w-32">
             {currentActor.profile.name}
           </span>
-          <span className="text-slate-500 text-xs">{currentActorIndex + 1}/{initiativeOrder.length}</span>
+          <span className="text-slate-400 text-xs">{currentActorIndex + 1}/{initiativeOrder.length}</span>
           <button
             onClick={advanceActor}
             className="ml-1 text-(--neon-cyan) font-display text-xs border border-(--neon-cyan)/40 rounded px-1.5 py-0.5 hover:bg-(--neon-cyan)/10 transition-colors"
@@ -256,7 +256,7 @@ export function HUD() {
               <span className="text-amber-400 font-mono text-xs font-bold shrink-0">
                 ⚔ DOGFIGHT {idx + 1}
               </span>
-              <span className="text-slate-500 font-mono text-xs truncate">
+              <span className="text-slate-400 font-mono text-xs truncate">
                 {groupShips.map((s) => s.profile.name).join(' ↔ ')}
               </span>
             </div>
@@ -264,7 +264,7 @@ export function HUD() {
               <span>Micro-round {group.microRound}/6</span>
               {winnerShip && (
                 <>
-                  <span className="text-slate-600">│</span>
+                  <span className="text-slate-500">│</span>
                   <span className="text-amber-300 truncate">
                     ↑ {winnerShip.profile.name} +{group.roundWinnerMargin}
                   </span>
@@ -298,7 +298,7 @@ export function HUD() {
           >
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-red-400 font-mono text-xs font-bold shrink-0">⚔ BOARDING</span>
-              <span className="text-slate-500 font-mono text-xs truncate">
+              <span className="text-slate-400 font-mono text-xs truncate">
                 {attacker?.profile.name ?? '?'} → {defender?.profile.name ?? '?'}
               </span>
             </div>
@@ -318,7 +318,7 @@ export function HUD() {
             <p className="font-mono text-sm text-slate-300 leading-relaxed">
               Unsaved data will be lost.
             </p>
-            <p className="font-mono text-xs text-slate-500">
+            <p className="font-mono text-xs text-slate-400">
               Save the session before leaving to resume later.
             </p>
             <div className="flex gap-2 pt-1">

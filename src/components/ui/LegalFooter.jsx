@@ -49,7 +49,7 @@ export function LegalFooter() {
               program/articles/file on this site cannot be republished or distributed without the
               consent of the author who contributed it.
             </p>
-            <p className="text-slate-500">
+            <p className="text-slate-400">
               Source code: personal use. Rules implemented: MgT2e CRB pp.160–168,
               Traveller Companion 2024 pp.169–186.
             </p>

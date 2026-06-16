@@ -282,7 +282,7 @@ export function HelpScreen() {
             <KV k="Overlay" v="Circle = thrust endpoint. Ghost = next-round position (pos + vector + delta). Faint line = inertial ghost → new ghost. Badge = cost/max thrust." />
             <KV k="Click" v="Confirm thrust delta and exit targeting mode." />
             <KV k="ESC" v="Cancel without applying thrust." />
-            <p className="text-slate-500 italic text-xs">thrustAvailable = base thrust + engineer bonus − used this round − M-Drive penalty.</p>
+            <p className="text-slate-400 italic text-xs">thrustAvailable = base thrust + engineer bonus − used this round − M-Drive penalty.</p>
           </Sub>
           <Note>Full thrust is available for movement. Evasive Action is a Reaction declared during the Attack phase — not pre-allocated here (CRB p.171). See the Attack Phase section below.</Note>
 
@@ -293,7 +293,7 @@ export function HelpScreen() {
             <KV k="▲ Flee" v="Only the fleeing ship's thrust counts." />
             <KV k="APPLY MANOEUVRE" v="Spends thrust and moves the band one step if the threshold is met." />
             <KV k="GM SET" v="Override — sets the result band without spending any thrust." />
-            <p className="text-slate-500">Thrust thresholds per band (CRB p.161): Adjacent 1 · Short 2 · Medium 5 · Long 10 · Very Long 25 · Distant 50.</p>
+            <p className="text-slate-400">Thrust thresholds per band (CRB p.161): Adjacent 1 · Short 2 · Medium 5 · Long 10 · Very Long 25 · Distant 50.</p>
           </Sub>
         </Section>
 
@@ -346,7 +346,7 @@ export function HelpScreen() {
             <KV k="Evasive Action" v="Toggle: spend 1 thrust to dodge this attack. The attack suffers DM −Pilot skill (fixed). Button disabled if no thrust remains or Pilot skill is 0." />
             <KV k="Point Defence" v="Missile attacks only. Gunner (turret) check — Effect removes that many missiles from the salvo. Turret marked fired." />
             <KV k="Disperse Sand" v="Laser attacks only. Gunner (turret) check — on success adds 1D+Effect to armour for this attack only. Turret marked fired." />
-            <p className="text-slate-600 italic text-xs">Player-controlled defending ships enter physical dice manually for PD and Sand rolls.</p>
+            <p className="text-slate-500 italic text-xs">Player-controlled defending ships enter physical dice manually for PD and Sand rolls.</p>
           </Sub>
 
           <Sub title="ATTACK MODAL — STEP 2: ROLL">
@@ -432,10 +432,10 @@ export function HelpScreen() {
             <p>The modal has two sections:</p>
             <p><span className="text-slate-200">Roles</span> — one dropdown per non-gunner slot: Pilot, Leadership (LDR), Tactics (TAC), Engineer, Sensors.</p>
             <p><span className="text-slate-200">Gunners</span> — one dropdown per turret (T1, T2…), with weapon names shown next to the slot label.</p>
-            <p>Each dropdown lists all named crew members. The relevant skill level is shown in brackets — e.g. <span className="text-(--neon-cyan)">Mira Vasquez [pilot 1]</span> or <span className="text-slate-500">Joko Hendrik [no skill]</span>. Select <span className="text-slate-400">— unassigned —</span> to leave the slot empty.</p>
+            <p>Each dropdown lists all named crew members. The relevant skill level is shown in brackets — e.g. <span className="text-(--neon-cyan)">Mira Vasquez [pilot 1]</span> or <span className="text-slate-400">Joko Hendrik [no skill]</span>. Select <span className="text-slate-400">— unassigned —</span> to leave the slot empty.</p>
             <KV k="CLEAR ALL" v="Reset every slot to unassigned." />
             <KV k="SAVE ASSIGNMENTS" v="Commit selections to the ship and close." />
-            <p className="text-slate-500 italic">If the profile has no named crew the modal prompts you to add crew in the profile editor first.</p>
+            <p className="text-slate-400 italic">If the profile has no named crew the modal prompts you to add crew in the profile editor first.</p>
             <p className="mt-1">Effects of unassigned slots:</p>
             <KV k="Pilot" v="Initiative roll, evasion DM, dogfight — uses skill 0." />
             <KV k="Leadership" v="Improve Initiative action not available." />

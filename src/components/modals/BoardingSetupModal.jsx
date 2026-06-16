@@ -53,12 +53,12 @@ export function BoardingSetupModal() {
 
         {/* Attacker */}
         <div className="bg-slate-800/80 rounded px-3 py-2.5">
-          <p className="text-slate-500 font-mono text-xs uppercase mb-1">Attacker</p>
+          <p className="text-slate-400 font-mono text-xs uppercase mb-1">Attacker</p>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: attacker.color }} />
             <span className="text-slate-200 font-mono text-sm font-bold">{attacker.profile.name}</span>
           </div>
-          <p className="text-slate-500 font-mono text-xs mt-1">
+          <p className="text-slate-400 font-mono text-xs mt-1">
             Thrust {attacker.profile.thrust} · {attacker.profile.tonnage} ton
           </p>
         </div>
@@ -70,7 +70,7 @@ export function BoardingSetupModal() {
           </p>
         ) : (
           <div className="space-y-2">
-            <p className="text-slate-500 font-mono text-xs uppercase">Select target</p>
+            <p className="text-slate-400 font-mono text-xs uppercase">Select target</p>
             {targets.map((t) => (
               <button
                 key={t.id}
@@ -80,7 +80,7 @@ export function BoardingSetupModal() {
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: t.color }} />
                 <div className="flex-1 min-w-0">
                   <p className="text-slate-200 font-mono text-sm font-bold truncate">{t.profile.name}</p>
-                  <p className="text-slate-500 font-mono text-xs">
+                  <p className="text-slate-400 font-mono text-xs">
                     Thrust {t.profile.thrust} · {t.profile.tonnage} ton
                     {' · '}
                     {t.faction.toUpperCase()}
