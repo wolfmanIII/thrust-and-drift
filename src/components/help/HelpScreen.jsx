@@ -288,12 +288,13 @@ export function HelpScreen() {
 
           <Sub title="MANOEUVRE (BASIC MODE)">
             <p>In Basic mode, <span className="text-slate-200">Apply Thrust</span> is replaced by <span className="text-slate-200">Manoeuvre…</span> in the context menu.</p>
-            <p>The modal changes the range band between the moving ship and a selected enemy. Pick direction, assign thrust with the sliders, then confirm:</p>
-            <KV k="▼ Approach" v="Both ships can contribute thrust (sums together) to meet the band threshold." />
-            <KV k="▲ Flee" v="Only the fleeing ship's thrust counts." />
-            <KV k="APPLY MANOEUVRE" v="Spends thrust and moves the band one step if the threshold is met." />
-            <KV k="GM SET" v="Override — sets the result band without spending any thrust." />
+            <p>The modal changes the range band between the maneuvering ship and a selected enemy. Each ship acts independently on its own initiative turn — there is no combined thrust between ships.</p>
+            <KV k="▼ Approach" v="Spend this ship's thrust to move one band closer. If both ships approach on their respective turns, the band closes by two steps in a single round." />
+            <KV k="▲ Flee" v="Spend this ship's thrust to move one band further away." />
+            <KV k="APPLY MANOEUVRE" v="Deducts thrust and shifts the band one step. Disabled if this ship's available thrust is below the threshold for the current band." />
+            <KV k="GM SET" v="Override — sets the band directly without spending any thrust. Use this for initial placement, narrative jumps, or whenever thrust costs are impractical (e.g. small ships at Very Long range)." />
             <p className="text-slate-400">Thrust thresholds per band (CRB p.161): Adjacent 1 · Short 2 · Medium 5 · Long 10 · Very Long 25 · Distant 50.</p>
+            <Note>The costs at Very Long (25) and Distant (50) are designed for large ships with high-rated M-Drives. Small ships (Thrust 2–4) cannot normally meet these thresholds — use GM SET to set the engagement range at the start of the session instead of placing all ships at Very Long by default.</Note>
           </Sub>
         </Section>
 
