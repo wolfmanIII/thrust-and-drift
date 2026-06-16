@@ -7,7 +7,7 @@
 import { create } from 'zustand'
 import { v7 as uuidv7 } from 'uuid'
 import { exportBattle, importBattle } from '../utils/io.js'
-import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount } from '../utils/combat.js'
+import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount, countMissileRacks } from '../utils/combat.js'
 import { hexAdd, hexDistance, segmentMinDistance } from '../utils/hex.js'
 import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
@@ -20,10 +20,6 @@ import { emitEffect } from '../utils/effectQueue.js'
 /** Canonical sort key for a ship pair — order-independent. */
 function pairKey(id1, id2) { return [id1, id2].sort().join('_') }
 
-/** Count Missile Rack weapons across all turrets. // MgT2e CRB p.162 — 12 missiles per rack */
-function countMissileRacks(profile) {
-  return (profile.turrets ?? []).flatMap((t) => t.weapons).filter((w) => w === 'Missile Rack').length
-}
 
 /**
  * Max hex-distance of vector correction a missile may apply per round.
