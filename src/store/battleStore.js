@@ -875,15 +875,18 @@ const useBattleStore = create((set, get) => {
 
   /** Mark the current actor as having acted; advance the actor index, skipping destroyed ships. */
   advanceActor: wh(() => {
-    const { initiativeOrder, currentActorIndex, ships } = get()
-    const shipId = initiativeOrder[currentActorIndex]
+    const { initiativeOrder, currentActorIndex, ships, phase } = get()
+    // Acceleration iterates lowest-initiative-first (reversed). HUD and ContextMenu do the
+    // same reversal when computing currentActorId — must use the same order here.
+    const order = phase === 'acceleration' ? [...initiativeOrder].reverse() : initiativeOrder
+    const shipId = order[currentActorIndex]
     if (shipId) {
       get().updateShip(shipId, { hasActedThisPhase: true })
     }
     // Skip over destroyed ships so their turn is never surfaced
     let next = currentActorIndex + 1
-    while (next < initiativeOrder.length) {
-      const nextShip = ships.find((s) => s.id === initiativeOrder[next])
+    while (next < order.length) {
+      const nextShip = ships.find((s) => s.id === order[next])
       if (!nextShip?.isDestroyed) break
       next++
     }
