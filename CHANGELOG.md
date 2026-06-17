@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.20.2] — 2026-06-17
+
+### Fixed
+
+- **Basic mode: Apply Manoeuvre always disabled** — `RANGE_BAND_MOVE_COST` stored hex distances (`Very Long = 25`, `Distant = 50`), making the button permanently greyed out for any ship with normal thrust (2–6). Replaced with flat cost of 1 thrust per band change per CRB p.161 non-vectorial mode. `RANGE_BAND_MOVE_COST` import removed from `battleStore.js`.
+
+### Known / Pending investigation
+
+- **Lowest initiative acting first** (reported by CotI user) — in Acceleration phase this is correct per RAW (CRB p.161); in Attack/Actions phases it would be a bug. Awaiting reproduction steps to confirm.
+- **TL field for Smart trait gating** — currently all missiles carry Smart trait unconditionally; proper TL-based gating not yet implemented.
+
+---
+
 ## [1.20.1] — 2026-06-17
 
 ### Fixed

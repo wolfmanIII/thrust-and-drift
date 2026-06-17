@@ -9,16 +9,24 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.20.1 |
+| **Versione** | 1.20.2 |
 | **Branch** | main (clean) |
 | **Test** | 830 passing |
-| **Ultimo commit** | chore(release): v1.20.1 — missile impact RAW fix |
+| **Ultimo commit** | chore(release): v1.20.2 — basic mode manoeuvre fix |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Missile Impact RAW Fix (v1.20.1)
+### Sessione corrente — Bug Reports CotI (v1.20.2)
+
+1. **`fix(basic): flat cost 1 per band change in BasicManoeuvreModal`** (`4048424`) — `RANGE_BAND_MOVE_COST` usava distanze hex (`Very Long=25`, `Distant=50`) → pulsante APPLY MANOEUVRE sempre grigio per navi con thrust normale. Sostituito con costante `BAND_CHANGE_COST = 1`. Import rimosso da `battleStore.js`.
+
+**Segnalazioni CotI ancora aperte:**
+- **Iniziativa invertita** — in Acceleration è corretto per RAW (lowest first); in Attack/Actions sarebbe un bug. In attesa di passi per riprodurre.
+- **TL field per Smart trait** — feature gap: il profilo nave non ha campo TL; tutti i missili hanno Smart trait incondizionatamente.
+
+### Sessione precedente — Missile Impact RAW Fix (v1.20.1)
 
 1. **`fix(missile): two-step impact resolution per CRB p.173`** (`6406e48`) — `MissileImpactModal.jsx` riscritto. Step 1: attack roll 2D6 + DM+1/missile + DM+2 Smart ± Evasive Action vs 8+; Effect < 0 → miss. Step 2: danno `max(0, 4D6 − armour) × min(Effect, count)`. Vecchia formula `max(0, count×4D6 − armour)` era sbagliata per RAW. Stato resettato tra salve consecutive via `useEffect([impact.id])`. Evasive Action spende 1 thrust dal target via `spendReactionThrust`, DM −Pilot applicato a questo roll.
 
@@ -139,9 +147,9 @@
 
 ## Prossimo task
 
-Rigenerare `public/field-manual.pdf` da `doc/field-manual.md` v1.20.1 tramite MD2FastPdf (Gotenberg).
+Test manuali in app ancora da fare: dogfight e boarding (non testati da v1.17.1) e il nuovo flusso missile impact two-step.
 
-Test manuali in app ancora da fare: dogfight e boarding (non testati da v1.17.1).
+Seguire up segnalazione CotI su iniziativa: chiedere in quale fase hanno visto la nave con iniziativa più bassa agire per prima (in Acceleration è corretto per RAW). Se confermato in Attack/Actions, investigare `advanceActor`.
 
 Possibili aree di sviluppo future:
 
