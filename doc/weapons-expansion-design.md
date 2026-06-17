@@ -188,7 +188,7 @@ Il moltiplicatore si applica **dopo** l'armatura, non prima.
 // Fusion Gun, Plasma Gun
 ```
 
-2. Aggiungere le 6 barbette standard:
+1. Aggiungere le 6 barbette standard:
 
 ```js
 'Beam Laser Barbette': {
@@ -271,7 +271,7 @@ Il moltiplicatore si applica **dopo** l'armatura, non prima.
 },
 ```
 
-3. Aggiornare il JSDoc `@typedef` con tutti i nuovi tipi.
+1. Aggiornare il JSDoc `@typedef` con tutti i nuovi tipi.
 
 #### `src/components/modals/AttackModal.jsx`
 
@@ -360,7 +360,7 @@ case 'Railgun Barbette':
 
 Aggiungere sezione **Barbettes** nell'Attack Phase (§9 / Attack section):
 
-```
+```text
 Barbette weapons occupy one Hardpoint (like a turret) but consume 5 tons of internal
 space and use the Gunner skill. Damage is calculated as:
   finalDamage = max(0, rawDice + Effect − Armour) × 3
@@ -472,6 +472,7 @@ Qualunque callsite di `countMissileRacks` → `countMissileAmmoCapacity` (da `co
 ### Approccio
 
 Torpedo funziona identicamente ai missili (Smart/guidato, stesso sistema di movimento) ma con:
+
 - Ammo: 3 per barbette (1 salva da 3, no ricarica in battaglia)
 - Danno: 6D per torpedo
 - Il token sul canvas può essere distinto (colore diverso) o riusare il missile token
@@ -620,6 +621,7 @@ Alternativa più semplice: riutilizzare `AttackDamageStep` ma con logica special
 ### Effetto visivo
 
 Nuovo effetto `'ion_burst'` in `effectQueue.js` → `useCanvasEffects.js`:
+
 - Anello pulsante blu elettrico intorno al target
 - Durata: ~1.5 s
 - Colore: `#60a5fa` (blue-400)
@@ -646,7 +648,7 @@ Nuovo effetto `'ion_burst'` in `effectQueue.js` → `useCanvasEffects.js`:
 
 ## Ordine di implementazione consigliato
 
-```
+```text
 1. Tier 1   — Fusion Gun + Plasma Gun              (30 min)
 2. Tier 2   — damageMultiple + 6 Barbette          (2–3 h)
 3. Tier 3a  — Missile Barbette                     (1 h)
@@ -678,6 +680,7 @@ Per ogni nuovo weapon/feature, verificare:
 ## Note sui Bays (fuori scope)
 
 I Bay Weapons (Small Bay ×10, Medium Bay ×20, Large Bay ×100) sono esclusi dallo scope. Richiedono:
+
 - Slot dedicati (non hardpoint/turret)
 - Gunner secondario (Bay Gunner)
 - Tons significativi (50/100/500t)
