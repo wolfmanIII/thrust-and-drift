@@ -61,7 +61,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
           placeholder="Search profile…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-600"
+          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-500"
         />
       </div>
 
@@ -292,7 +292,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
             <button
               onClick={onResumeClick}
               disabled={loading}
-              className="w-full py-3 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded-lg hover:border-slate-500 hover:text-slate-300 transition-colors disabled:opacity-40"
+              className="w-full py-3 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded-lg hover:border-slate-500 hover:text-slate-300 transition-colors disabled:opacity-60"
             >
               <span className="text-sm block mb-0.5">{loading ? '⌛' : '↓'}</span>
               {loading ? 'LOADING…' : 'RESUME FROM FILE'}
@@ -590,14 +590,14 @@ function SessionPreview({ data, onConfirm, onCancel, loading }) {
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="w-full py-3 bg-amber-600/20 border border-amber-500/40 text-amber-400 font-display text-sm tracking-widest rounded-lg hover:bg-amber-600/30 transition-colors disabled:opacity-40"
+            className="w-full py-3 bg-amber-600/20 border border-amber-500/40 text-amber-400 font-display text-sm tracking-widest rounded-lg hover:bg-amber-600/30 transition-colors disabled:opacity-60"
           >
             {loading ? 'LOADING…' : '▶  LOAD AND START'}
           </button>
           <button
             onClick={onCancel}
             disabled={loading}
-            className="w-full py-2 border border-slate-700 text-slate-500 font-display text-xs tracking-widest rounded-lg hover:border-slate-600 hover:text-slate-400 transition-colors disabled:opacity-40"
+            className="w-full py-2 border border-slate-700 text-slate-500 font-display text-xs tracking-widest rounded-lg hover:border-slate-600 hover:text-slate-400 transition-colors disabled:opacity-60"
           >
             CANCEL
           </button>

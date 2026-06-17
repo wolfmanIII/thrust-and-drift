@@ -239,13 +239,13 @@ function RangeBandRow({ ship1, ship2, band, onSet }) {
           disabled={idx <= 0}
           onClick={() => onSet(RANGE_BAND_ORDER[idx - 1])}
           title="Closer"
-          className="w-5 h-5 flex items-center justify-center border border-slate-700 text-slate-400 rounded text-xs hover:border-slate-500 hover:text-slate-200 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+          className="w-5 h-5 flex items-center justify-center border border-slate-700 text-slate-400 rounded text-xs hover:border-slate-500 hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >▼</button>
         <button
           disabled={idx >= RANGE_BAND_ORDER.length - 1}
           onClick={() => onSet(RANGE_BAND_ORDER[idx + 1])}
           title="Further"
-          className="w-5 h-5 flex items-center justify-center border border-slate-700 text-slate-400 rounded text-xs hover:border-slate-500 hover:text-slate-200 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+          className="w-5 h-5 flex items-center justify-center border border-slate-700 text-slate-400 rounded text-xs hover:border-slate-500 hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >▲</button>
       </div>
     </div>

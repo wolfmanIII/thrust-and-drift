@@ -157,7 +157,7 @@ export function ThrustModal() {
           <button
             onClick={handleConfirm}
             disabled={!isValid || cost === 0}
-            className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             APPLY THRUST
           </button>

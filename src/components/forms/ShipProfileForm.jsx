@@ -76,7 +76,7 @@ function TextField({ label, value, onChange, placeholder = '' }) {
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-600"
+        className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-500"
       />
     </label>
   )
@@ -95,7 +95,7 @@ function CrewMemberRow({ member, onChange, onRemove }) {
           value={member.name}
           placeholder="Name"
           onChange={(e) => onChange({ ...member, name: e.target.value })}
-          className="flex-1 bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-600"
+          className="flex-1 bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-500"
         />
         <Tooltip label="Remove crew member" position="top">
           <button

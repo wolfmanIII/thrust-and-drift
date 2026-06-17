@@ -210,7 +210,7 @@ export function CatalogPanel() {
           placeholder="Search ship…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-600"
+          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-500"
         />
       </div>
 

@@ -173,7 +173,7 @@ export function InitiativeModal() {
             <button
               onClick={handleConfirm}
               disabled={!allEntered}
-              className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {allEntered ? 'CONFIRM →' : `WAITING — ${playerShips.filter((s) => !playerDice[s.id]).length} ship(s) not rolled`}
             </button>
