@@ -10,7 +10,7 @@ import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS } from '../../data/weapons.js'
 import { RANGE_BANDS } from '../../data/rangeBands.js'
-import { rollAttack, isCriticalHit, getCriticalSeverity, isOutOfRange } from '../../utils/combat.js'
+import { rollAttack, isCriticalHit, getCriticalSeverity, isOutOfRange, getApValue } from '../../utils/combat.js'
 import { rollDice, roll2D6 } from '../../utils/dice.js'
 import { getCriticalLocation, getCriticalEffect } from '../../data/criticalHits.js'
 import { useAttackSetup } from './useAttackSetup.js'
@@ -588,33 +588,38 @@ function AttackRollStep({
  *   damageDice: number,
  *   effectBonus: number,
  *   armor: number,
+ *   apReduction: number,
  *   damageResult: object|null,
  *   setDamageResult: Function,
  *   onApply: Function,
  *   onClose: Function,
  * }} props
  */
-function AttackDamageStep({ damageDice, effectBonus, armor, isPlayer, damageResult, setDamageResult, onApply, onClose }) {
+function AttackDamageStep({ damageDice, effectBonus, armor, apReduction = 0, isPlayer, damageResult, setDamageResult, onApply, onClose }) {
   const [manualRaw, setManualRaw] = useState('')
+
+  // AP trait reduces effective armour (min 0). // MgT2e HG p.28
+  const effectiveArmor = Math.max(0, armor - apReduction)
 
   const handleAutoRoll = () => {
     const roll  = rollDice(damageDice, 6)
-    const total = Math.max(0, roll.total + effectBonus - armor)
-    setDamageResult({ roll, total, effectBonus, armor })
+    const total = Math.max(0, roll.total + effectBonus - effectiveArmor)
+    setDamageResult({ roll, total, effectBonus, armor: effectiveArmor })
   }
 
   const handleManualConfirm = () => {
     const raw   = Number(manualRaw)
     if (!raw && raw !== 0) return
-    const total = Math.max(0, raw + effectBonus - armor)
-    setDamageResult({ roll: { results: [], total: raw }, total, effectBonus, armor })
+    const total = Math.max(0, raw + effectBonus - effectiveArmor)
+    setDamageResult({ roll: { results: [], total: raw }, total, effectBonus, armor: effectiveArmor })
   }
 
   return (
     <Modal title="Damage" onClose={onClose}>
       <div className="space-y-4">
         <div className="text-center font-mono text-xs text-slate-400">
-          {damageDice}D + Effect ({effectBonus >= 0 ? `+${effectBonus}` : effectBonus}) − Armour ({armor})
+          {damageDice}D + Effect ({effectBonus >= 0 ? `+${effectBonus}` : effectBonus}) − Armour ({effectiveArmor}
+          {apReduction > 0 && <span className="text-orange-400"> −AP{apReduction}</span>})
         </div>
 
         {!damageResult ? (
@@ -662,8 +667,8 @@ function AttackDamageStep({ damageDice, effectBonus, armor, isPlayer, damageResu
             <div className="bg-slate-800 rounded p-4 text-center font-mono text-xs">
               <p className="text-slate-400">
                 {isPlayer
-                  ? `${damageResult.roll.total} (entered) + ${effectBonus} − ${armor} armour`
-                  : `[${damageResult.roll.results.join('+')}] + ${effectBonus} − ${armor} armour`}
+                  ? `${damageResult.roll.total} (entered) + ${effectBonus} − ${effectiveArmor} armour${apReduction > 0 ? ` (AP−${apReduction})` : ''}`
+                  : `[${damageResult.roll.results.join('+')}] + ${effectBonus} − ${effectiveArmor} armour${apReduction > 0 ? ` (AP−${apReduction})` : ''}`}
               </p>
               <p className="text-red-400 font-bold text-2xl mt-1">{damageResult.total}</p>
               <p className="text-slate-400">damage dealt</p>
@@ -1184,6 +1189,7 @@ export function AttackModal() {
       damageDice={weapon?.damageDice ?? 1}
       effectBonus={attackResult?.effect ?? 0}
       armor={(target?.profile.armor ?? 0) + sandBonusArmor}
+      apReduction={getApValue(weapon?.traits ?? [])}
       isPlayer={attacker.faction === 'players'}
       damageResult={damageResult}
       setDamageResult={setDamageResult}

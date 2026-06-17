@@ -263,3 +263,17 @@ export function getThresholdCriticalCount(prevHull, newHull, maxHull) {
   const newCrossed  = Math.floor((maxHull - newHull)  / threshold)
   return Math.max(0, newCrossed - prevCrossed)
 }
+
+/**
+ * Parse the AP (Armor Piercing) value from a weapon's traits array.
+ * // MgT2e HG p.28 — "subtract AP value from effective armour before damage"
+ * @param {string[]} traits  e.g. ['AP 4', 'Radiation']
+ * @returns {number}  AP reduction (0 if trait absent)
+ */
+export function getApValue(traits) {
+  for (const t of traits) {
+    const m = t.match(/^AP\s+(\d+)$/)
+    if (m) return parseInt(m[1], 10)
+  }
+  return 0
+}
