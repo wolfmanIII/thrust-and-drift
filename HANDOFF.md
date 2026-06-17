@@ -9,16 +9,24 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.20.0 |
+| **Versione** | 1.20.1 |
 | **Branch** | main (clean) |
-| **Test** | 815 passing |
-| **Ultimo commit** | chore(release): v1.20.0 — weapons expansion |
+| **Test** | 830 passing |
+| **Ultimo commit** | chore(release): v1.20.1 — missile impact RAW fix |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Weapons Expansion (v1.20.0)
+### Sessione corrente — Missile Impact RAW Fix (v1.20.1)
+
+1. **`fix(missile): two-step impact resolution per CRB p.173`** (`6406e48`) — `MissileImpactModal.jsx` riscritto. Step 1: attack roll 2D6 + DM+1/missile + DM+2 Smart ± Evasive Action vs 8+; Effect < 0 → miss. Step 2: danno `max(0, 4D6 − armour) × min(Effect, count)`. Vecchia formula `max(0, count×4D6 − armour)` era sbagliata per RAW. Stato resettato tra salve consecutive via `useEffect([impact.id])`. Evasive Action spende 1 thrust dal target via `spendReactionThrust`, DM −Pilot applicato a questo roll.
+
+2. **`test(missile): extract formulas + 15 unit tests`** (`53ca20e`) — `computeMissileAttackDM(count, evasivePilot)` e `computeMissileImpactDamage(roll, armour, effect, count)` estratte da modal a `combat.js`. Test: DM salvo, Smart trait, evasione, pilot alto → DM negativo; danno: caso normale, effect cappato da count, count cappato da effect, roll < armour, effect=0→0, torpedo, armour=0.
+
+3. **`docs`** (`bbcb185`) — `doc/field-manual.md` §8.1 riscritto (step 1 attack roll + step 2 damage, Evasive Action, formula RAW). `HelpScreen.jsx` sincronizzato. `README.md` riga missile impact aggiornata.
+
+### Sessione precedente — Weapons Expansion (v1.20.0)
 
 1. **`feat(weapons): barbettes, Ion Cannon, Torpedo, Missile Barbette`** (weapons.js) — 11 nuove armi: Fusion Gun, Plasma Gun, Ion Cannon, Torpedo, Missile Barbette, Pulse/Beam/Particle/Fusion/Plasma/Railgun Barbette. Tutti i barbette hanno `damageMultiple: 3`. Ion Cannon: `traits: ['Ion']`, no hull damage. Torpedo: 6D, Smart trait. Missile Barbette: Smart trait, 25 munizioni.
 
@@ -131,8 +139,9 @@
 
 ## Prossimo task
 
-Rigenerare `public/field-manual.pdf` da `doc/field-manual.md` v1.20.0 tramite MD2FastPdf (Gotenberg).
-Push a origin quando confermato.
+Rigenerare `public/field-manual.pdf` da `doc/field-manual.md` v1.20.1 tramite MD2FastPdf (Gotenberg).
+
+Test manuali in app ancora da fare: dogfight e boarding (non testati da v1.17.1).
 
 Possibili aree di sviluppo future:
 

@@ -6,6 +6,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.20.1] — 2026-06-17
+
+### Fixed
+
+- **Missile impact damage formula corrected per CRB p.173** — previous formula `max(0, count×4D6 − armour)` was wrong. RAW formula is `max(0, 4D6 − armour) × min(Effect, count)` (single missile roll, multiplied by Effect capped at salvo size).
+- **Missile impact: attack roll now happens at impact** — CRB p.173 IMPACT specifies a 2D6 attack roll at the moment of impact, not at launch. Roll: 2D6 + DM+1/missile + DM+2 (Smart trait) ± Evasive Action. Effect < 0 → miss, no damage applied.
+- **Missile impact: Evasive Action** — target may spend 1 reaction thrust before the impact attack roll to apply DM −Pilot (CRB p.171). Button disabled when no thrust available.
+- **Two-step modal flow**: Step 1 (attack roll) → Step 2 (damage). State resets between queued salvos via `useEffect`.
+- **`computeMissileAttackDM` and `computeMissileImpactDamage`** extracted to `combat.js` as pure functions for testability.
+
+### Tests
+
+- 830 (+15 from v1.20.0): `computeMissileAttackDM` (8 cases — salvo size, Smart DM, evasive pilot, high pilot reduces below base), `computeMissileImpactDamage` (8 cases — typical hit, effect > count cap, count > effect cap, roll < armour clamped to 0, effect=0, roll equals armour, torpedo, armour=0).
+
+---
+
 ## [1.20.0] — 2026-06-17
 
 ### Added
