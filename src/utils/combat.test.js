@@ -22,6 +22,8 @@ import {
   getApValue,
   countMissileAmmoCapacity,
   countSandcasters,
+  computeMissileAttackDM,
+  computeMissileImpactDamage,
 } from './combat.js'
 
 // === RANGE DMs ===
@@ -507,5 +509,84 @@ describe('countSandcasters', () => {
 
   it('handles missing turrets field', () => {
     expect(countSandcasters({})).toBe(0)
+  })
+})
+
+// === MISSILE IMPACT ===
+// // MgT2e CRB p.173 — IMPACT
+
+describe('computeMissileAttackDM', () => {
+  // DM = count (salvo size) + 2 (Smart) − evasivePilot
+
+  it('1 missile, no evasion → DM+3', () => {
+    expect(computeMissileAttackDM(1, 0)).toBe(3)
+  })
+
+  it('3 missiles, no evasion → DM+5', () => {
+    expect(computeMissileAttackDM(3, 0)).toBe(5)
+  })
+
+  it('5 missiles, no evasion → DM+7', () => {
+    expect(computeMissileAttackDM(5, 0)).toBe(7)
+  })
+
+  it('evasive pilot 2, 3 missiles → DM+3', () => {
+    expect(computeMissileAttackDM(3, 2)).toBe(3)
+  })
+
+  it('evasive pilot 3, 3 missiles → DM+2', () => {
+    expect(computeMissileAttackDM(3, 3)).toBe(2)
+  })
+
+  it('evasive pilot 0 = no DM penalty even if evading flag set', () => {
+    expect(computeMissileAttackDM(2, 0)).toBe(4)
+  })
+
+  it('high pilot can reduce total DM below base', () => {
+    // 1 missile + 2 Smart = base 3; pilot 4 → −4 → DM −1
+    expect(computeMissileAttackDM(1, 4)).toBe(-1)
+  })
+})
+
+describe('computeMissileImpactDamage', () => {
+  // Formula: max(0, roll − armour) × min(Effect, count)
+
+  it('typical hit: 3 missiles, effect 2, roll 14, armour 3', () => {
+    // (14−3) × min(2,3) = 11 × 2 = 22
+    expect(computeMissileImpactDamage(14, 3, 2, 3)).toBe(22)
+  })
+
+  it('effect capped by count: effect 5 > count 3', () => {
+    // (16−0) × min(5,3) = 16 × 3 = 48
+    expect(computeMissileImpactDamage(16, 0, 5, 3)).toBe(48)
+  })
+
+  it('count capped by effect: count 5, effect 2', () => {
+    // (10−0) × min(2,5) = 10 × 2 = 20
+    expect(computeMissileImpactDamage(10, 0, 2, 5)).toBe(20)
+  })
+
+  it('roll below armour → per-missile net clamped to 0 → 0 total', () => {
+    // max(0, 5−10) × 3 = 0
+    expect(computeMissileImpactDamage(5, 10, 3, 3)).toBe(0)
+  })
+
+  it('effect = 0 → multiplier 0 → 0 damage regardless of roll', () => {
+    // (20−0) × min(0,5) = 0
+    expect(computeMissileImpactDamage(20, 0, 0, 5)).toBe(0)
+  })
+
+  it('single missile, effect 1, roll exactly equals armour → 0', () => {
+    expect(computeMissileImpactDamage(6, 6, 1, 1)).toBe(0)
+  })
+
+  it('single torpedo (6D), effect 4 → full pen', () => {
+    // (24−5) × min(4,1) = 19 × 1 = 19
+    expect(computeMissileImpactDamage(24, 5, 4, 1)).toBe(19)
+  })
+
+  it('armour 0 — no reduction', () => {
+    // (18−0) × min(3,4) = 18 × 3 = 54
+    expect(computeMissileImpactDamage(18, 0, 3, 4)).toBe(54)
   })
 })

@@ -15,11 +15,12 @@
  * // MgT2e CRB p.173 (IMPACT), p.171 (Evasive Action), HG p.28–31 (weapon stats)
  */
 
-import { useState, useEffect }  from 'react'
-import { Modal }                 from './Modal.jsx'
-import { useBattleStore }        from '../../store/battleStore.js'
-import { rollDice }              from '../../utils/dice.js'
-import { getEffectiveSkill }     from '../../utils/crew.js'
+import { useState, useEffect }                           from 'react'
+import { Modal }                                         from './Modal.jsx'
+import { useBattleStore }                                from '../../store/battleStore.js'
+import { rollDice }                                      from '../../utils/dice.js'
+import { getEffectiveSkill }                             from '../../utils/crew.js'
+import { computeMissileAttackDM, computeMissileImpactDamage } from '../../utils/combat.js'
 
 // MgT2e HG p.28 (Missile Rack 4D), HG p.30 (Torpedo 6D)
 function dicePerUnit(type) {
@@ -77,10 +78,10 @@ export function MissileImpactModal() {
   )
 
   // Attack DMs — CRB p.173
-  const smartDM    = 2              // Smart trait on all current missile weapons
-  const salvoSizeDM = impact.count  // DM+1 per missile in salvo
+  const totalDM    = computeMissileAttackDM(impact.count, evasiveActive ? pilotSkill : 0)
+  const smartDM    = 2
+  const salvoSizeDM = impact.count
   const evasiveDM  = evasiveActive ? -pilotSkill : 0
-  const totalDM    = smartDM + salvoSizeDM + evasiveDM
 
   const d1 = parseInt(die1, 10)
   const d2 = parseInt(die2, 10)
@@ -93,7 +94,9 @@ export function MissileImpactModal() {
   const rawRolled  = parseInt(damageRolled, 10)
   const netPerMiss = isNaN(rawRolled) ? null : Math.max(0, rawRolled - armor)
   const multiplier = effect !== null ? Math.min(effect, impact.count) : null
-  const netDamage  = netPerMiss !== null && multiplier !== null ? netPerMiss * multiplier : null
+  const netDamage  = (!isNaN(rawRolled) && effect !== null)
+    ? computeMissileImpactDamage(rawRolled, armor, effect, impact.count)
+    : null
 
   function handleAutoRollAttack() {
     const r = rollDice(2, 6)

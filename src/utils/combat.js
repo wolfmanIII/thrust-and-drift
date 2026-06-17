@@ -298,3 +298,31 @@ export function getApValue(traits) {
   }
   return 0
 }
+
+// === MISSILE IMPACT ===
+
+/**
+ * Compute the total attack DM for a missile salvo impact roll.
+ * DM+1/missile (salvo size) + DM+2 (Smart trait) − Pilot (evasive action).
+ * // MgT2e CRB p.173 (IMPACT), p.79 (Smart trait)
+ * @param {number} count         Missiles remaining in salvo
+ * @param {number} evasivePilot  Pilot skill of evading target (0 = not evading)
+ * @returns {number}
+ */
+export function computeMissileAttackDM(count, evasivePilot = 0) {
+  return count + 2 - evasivePilot   // salvoSize + Smart − evasive
+}
+
+/**
+ * Compute net missile salvo damage per CRB p.173 IMPACT formula.
+ * Roll diceEach D6 for a single missile; multiply by min(Effect, count).
+ * // MgT2e CRB p.173
+ * @param {number} roll    Damage roll for one missile/torpedo
+ * @param {number} armour  Target armour value
+ * @param {number} effect  Attack Effect (total − 8), must be ≥ 0
+ * @param {number} count   Number of missiles/torpedoes in salvo
+ * @returns {number}
+ */
+export function computeMissileImpactDamage(roll, armour, effect, count) {
+  return Math.max(0, roll - armour) * Math.min(effect, count)
+}
