@@ -9,16 +9,37 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.18.1 |
+| **Versione** | 1.20.0 |
 | **Branch** | main (clean) |
-| **Test** | 709 passing |
-| **Ultimo commit** | fix(acceleration): advanceActor uses reversed order in acceleration phase |
+| **Test** | 815 passing |
+| **Ultimo commit** | chore(release): v1.20.0 — weapons expansion |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Acceleration Phase Actor Order Fix (v1.18.1)
+### Sessione corrente — Weapons Expansion (v1.20.0)
+
+1. **`feat(weapons): barbettes, Ion Cannon, Torpedo, Missile Barbette`** (weapons.js) — 11 nuove armi: Fusion Gun, Plasma Gun, Ion Cannon, Torpedo, Missile Barbette, Pulse/Beam/Particle/Fusion/Plasma/Railgun Barbette. Tutti i barbette hanno `damageMultiple: 3`. Ion Cannon: `traits: ['Ion']`, no hull damage. Torpedo: 6D, Smart trait. Missile Barbette: Smart trait, 25 munizioni.
+
+2. **`feat(combat): AP trait, barbette multiplier, countMissileAmmoCapacity, countSandcasters, applyIonDamage, spendSandAmmo, getApValue`** — `effectiveArmour = max(0, armour − apReduction)`; `netDamage = max(0, roll + Effect − effectiveArmour) × damageMultiple`; `countMissileAmmoCapacity`: racks×12 + barbettes×25 + torpedoes×3; `countSandcasters`: sandcasters×20; `applyIonDamage(shipId, penalty, rounds)` in battleStore; `spendSandAmmo(shipId)` in battleStore; `buildNextRoundState` decrementa `ionRoundsLeft` e azzera `ionPenalty` quando raggiunge 0.
+
+3. **`fix(attack): isMissileBarbette prop threading in AttackConfigStep`** — `isMissileBarbette` era una variabile calcolata in `AttackModal` usata dentro `AttackConfigStep` ma non passata come prop → dangling closure. Aggiunta come prop esplicita. Risolveva 3 test failure pre-esistenti.
+
+4. **`fix(basic): countMissileRacks double-multiply in BasicBattleView`** — `countMissileRacks` è ora alias di `countMissileAmmoCapacity` (ritorna capacità totale); il codice moltiplicava ancora ×12 → doppio conteggio. Rimossa la moltiplicazione.
+
+5. **`feat(ui): weapons expansion state in BasicBattleView, ShipDetailModal, ShipTooltip`** — ION NR badge (blu), riga status ion disruption (⚡ −N thrust / NR), riga sand canisters (🪨 N/max), sezione Ammunition in ShipDetailModal, torpedo separato da missili in ShipTooltip.
+
+6. **`test(weapons): 106 nuovi test`** — `data/weapons.test.js` (nuovo): completezza catalogo, campi obbligatori, barbette ×3, Ion Cannon, Torpedo, Missile Barbette, AP cross-check via `getApValue`, missile maxRange=Special, DEFENSIVE_WEAPONS. `combat.test.js`: `getApValue` (8 casi), `countMissileAmmoCapacity` (8 casi), `countSandcasters` (6 casi). `battleStore.test.js`: `sandcaster ammo init` (3), `spendSandAmmo` (4), `missile ammo init barbette/torpedo` (3), `applyIonDamage` (4), `ion round decrement` (3), `spendReactionThrust + ionPenalty` (2). `BasicBattleView.test.jsx`: Missile Barbette ammo (1), Torpedo ammo (1), sand row (2), ION badge (2), ion status row (1).
+
+7. **`docs + chore`** — `doc/field-manual.md` v1.20.0 (§3.1, §3.2, §9.6 rewrite, §9.8 tabella completa 17 armi, §9.10 nuovo, §16). `HelpScreen.jsx` sincronizzato. `CHANGELOG.md` entry v1.20.0. `package.json` 1.19.0→1.20.0. PDF da rigenerare con MD2FastPdf.
+
+### Sessione precedente — WCAG AA + Emoji Icons (v1.19.0)
+
+1. **`fix(a11y): WCAG AA contrast — definitive floor`** — tre passate: `disabled:opacity` → colori espliciti; `text-slate-500/600` → `text-slate-400`; `text-slate-700` → `text-slate-400`. Affected 28+ file JSX.
+2. **`feat(ui): sci-fi emoji icon system`** — sostituiti tutti i glyph non-emoji con emoji tematiche in 26 file JSX e documentazione. ⚠→🚨, ⚔→⚔️, ✓→✅, ↺↻→🔄🌀, ⟲↷→↩️↪️, ⌂→🏠, ✦→✨, ▼▲→⬇⬆, ←→⬅️.
+
+### Sessione precedente — Acceleration Phase Actor Order Fix (v1.18.1)
 
 1. **`fix(acceleration): advanceActor uses reversed order in acceleration phase`** (`b3752ce`) — `advanceActor` iterava `initiativeOrder` in avanti, ma HUD e ContextMenu usano `[...initiativeOrder].reverse()` nella fase di accelerazione. Stessa fase, stesso indice, navi diverse: la nave distrutta appariva come attore corrente mentre la nave viva veniva saltata silenziosamente, lasciando solo NEXT PHASE disponibile. Fix: `advanceActor` legge `phase` dallo store e applica la stessa inversione.
 
@@ -110,9 +131,8 @@
 
 ## Prossimo task
 
-Rigenerare `public/field-manual.pdf` da `doc/field-manual.md` (aggiornato a v1.18.0).
-Fare bump di versione in `package.json` + commit release.
-Poi push a origin quando confermato.
+Rigenerare `public/field-manual.pdf` da `doc/field-manual.md` v1.20.0 tramite MD2FastPdf (Gotenberg).
+Push a origin quando confermato.
 
 Possibili aree di sviluppo future:
 

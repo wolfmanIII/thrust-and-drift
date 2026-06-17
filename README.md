@@ -19,9 +19,14 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
 | **Attack resolution** | 4-step flow: weapon/target config → 2D6 roll → damage → critical; per-turret firing limit (CRB p.164) — each turret fires once per round, slot badge (T1, T2…) shown in weapon list |
 | **Reactions (CRB p.171)** | Defender reacts before each attack roll: Evasive Action (1 thrust → DM −Pilot skill), Point Defence (laser turret → Gunner check, removes missiles), Disperse Sand (sandcaster turret → Gunner check, +1D+Effect armour vs laser); player ships enter physical dice manually |
-| **Missile launch** | Missile Rack selectable directly in Attack modal — count stepper + 🚀 LAUNCH SALVO (no DM roll); salvo token inherits launcher vector; rotates to face velocity direction |
-| **Missile guidance** | Each round in the movement phase, missiles home toward their target's predicted next position; up to 10 hex/round delta-v correction (MgT2e CRB p.162 — Thrust 10 standard missile); drifts when 10-round fuel exhausted |
-| **Missile impact** | When a salvo reaches its target's hex, the token is consumed and a **⚡ MISSILE IMPACT** modal opens: GM enters total damage rolled (count × 4D6), armour read from ship profile, net damage computed; APPLY DAMAGE or MISS/INTERCEPTED; multiple impacts queue sequentially |
+| **Missile launch** | Three launcher types in the Attack modal: **Missile Rack** (count stepper, 12/rack, 4D per missile), **Missile Barbette** (fixed 5-missile salvo, 25 total, 4D per missile), **Torpedo** (1–3 per launch, 3 total, 6D per torpedo, red token) — no DM roll at launch; salvo token inherits launcher vector |
+| **Missile guidance** | Each round in the movement phase, all guided salvos home toward their target's predicted next position; up to 10 hex/round delta-v correction (MgT2e CRB p.162 — Thrust 10); drifts when 10-round fuel exhausted |
+| **Missile impact** | When a salvo reaches its target's hex, token consumed and **⚡ MISSILE IMPACT** modal opens: GM enters total damage rolled (or clicks 🎲 to auto-roll), armour read from ship profile, net damage computed; APPLY DAMAGE or MISS/INTERCEPTED; multiple impacts queue sequentially |
+| **Weapons expansion** | 11 new weapons (HG pp.28–31): Fusion Gun, Plasma Gun, Ion Cannon, Torpedo, Missile Barbette + 6 barbettes (Pulse/Beam/Particle/Fusion/Plasma/Railgun Barbette) |
+| **Barbette ×3 multiplier** | All barbette weapons apply `×3` to net hull damage after armour subtraction (HG p.29): `netDamage = max(0, roll + Effect − effectiveArmour) × 3` |
+| **AP trait** | `AP N` trait reduces effective armour before damage: `effectiveArmour = max(0, armour − apReduction)` — active on Railgun (4), Fusion Barbette (3), Plasma Barbette (2), Railgun Barbette (5) |
+| **Ion Cannon** | No hull damage on hit — applies `ionPenalty` (2D6 roll) to target thrust for 1 round (D3 rounds if Effect ≥ 6); blue burst/aura canvas effects; ION NR badge on bento card (HG p.30) |
+| **Sandcaster ammo** | 20 canisters per sandcaster slot; depleted by Disperse Sand reaction; shown as 🪨 N/max on bento cards, ship detail modal, and tooltip |
 | **Sound effects** | Procedural synthesis via Web Audio API — laser, impact, critical, missile launch, thrust plume; 🔊/🔇 mute toggle in HUD; no audio files required |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in on all roll steps (attack, damage, critical location, extra damage, reactions, crew actions, initiative); NPC ships auto-roll |
 | **Destroyed ships** | Hull = 0 → `isDestroyed` flag; token rendered at 35% opacity with ☠ badge; all combat actions blocked ("WRECK — no actions available"); ship skipped in initiative cycling; GM removes wreck manually |
@@ -46,7 +51,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Weapon range enforcement** | Each weapon has a maximum range band (CRB p.167); Attack Modal shows OUT OF RANGE badge and blocks firing beyond a weapon's listed range |
 | **Movement animation** | Ship and missile tokens slide smoothly from start to end position during the Movement phase (~2 s easeInOut); canvas input blocked for the duration to prevent mis-clicks |
 | **Basic combat mode** | Non-vectorial mode: no hex map; ships shown as bento cards (Header / Hull bar / conditional Status zone) grouped by faction; range bands tracked per ship pair (`Adjacent`→`Distant`); each ship manoeuvres independently on its own initiative turn; Attack Modal reads stored range band automatically |
-| **Legend modal** | Always-visible `📖 Legend` button fixed top-right; also in right-click empty hex menu; 2-column visual reference for all tokens, beam weapon colours, hit/movement effects, and persistent indicators |
+| **Legend modal** | Always-visible `📖 Legend` button fixed top-right; also in right-click empty hex menu; 2-column visual reference for all tokens (incl. torpedo), 7 turret beam colours, 6 barbette beam colours, hit/movement effects, persistent indicators (incl. ion aura) |
 
 ---
 
@@ -152,7 +157,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-709 tests across utils, Zustand stores, hooks, and UI components. (v1.19.0)
+815 tests across utils, Zustand stores, hooks, and UI components. (v1.20.0)
 
 ---
 

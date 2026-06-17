@@ -163,12 +163,14 @@ Suite Vitest collocata accanto ai file sorgente (`*.test.js` / `*.test.jsx`):
 | File | Coverage |
 | ---- | -------- |
 | `utils/hex.test.js` | `hex.js` — coordinate, distanza, pixel↔hex, range band |
-| `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco |
+| `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco, getApValue, countMissileAmmoCapacity, countSandcasters |
 | `utils/dice.test.js` | `dice.js` — rollDice, formatDiceResults, formatCheckResult |
 | `utils/crew.test.js` | `crew.js` — getCrewSkill, getEffectiveSkill, getAssignedSkill, buildDefaultAssignments, migrateCrew, blankCrewMember |
-| `store/battleStore.test.js` | battleStore — tutte le azioni, export/import |
+| `data/weapons.test.js` | `weapons.js` — completezza catalogo WEAPON_IDS, campi obbligatori per ogni arma, barbette damageMultiple=3, turret damageMultiple=1, Ion Cannon invariants, Torpedo invariants, Missile Barbette invariants, AP cross-check, missile maxRange=Special, DEFENSIVE_WEAPONS |
+| `store/battleStore.test.js` | battleStore — tutte le azioni, export/import, sandcaster ammo init, spendSandAmmo, missile ammo init (barbette/torpedo), applyIonDamage, ion round decrement, spendReactionThrust+ionPenalty |
 | `store/profilesStore.test.js` | profilesStore — CRUD, import/export |
 | `store/uiStore.test.js` | uiStore — screen, modal, selection, contextMenu |
+| `components/map/BasicBattleView.test.jsx` | BasicBattleView — bento card (badge, status zone, ammo Rack/Barbette/Torpedo, sandcaster, ION badge, ion status row) |
 | `components/ui/Tooltip.test.jsx` | Tooltip — show/hide, portal, posizione |
 | `components/ui/HUD.test.jsx` | HUD — round/fase, controllo attore |
 | `components/ui/BattleLog.test.jsx` | BattleLog — entries, collapse, clear |
@@ -256,12 +258,26 @@ interface BaySlot {
 }
 
 type WeaponType =
+  // Turret weapons
   | "Pulse Laser"
   | "Beam Laser"
   | "Missile Rack"
   | "Sandcaster"
   | "Particle Beam"
   | "Railgun"
+  | "Fusion Gun"      // HG p.28 — AP —, Radiation
+  | "Plasma Gun"      // HG p.28
+  | "Ion Cannon"      // HG p.30 — no hull damage; applies ionPenalty
+  // Barbette weapons (damageMultiple: 3 — HG p.29)
+  | "Pulse Laser Barbette"
+  | "Beam Laser Barbette"
+  | "Particle Barbette"    // Radiation
+  | "Fusion Barbette"      // AP 3, Radiation
+  | "Plasma Barbette"      // AP 2
+  | "Railgun Barbette"     // AP 5
+  // Launcher weapons
+  | "Missile Barbette"     // HG p.29 — fixed 5-missile salvo, 25 total
+  | "Torpedo"              // HG p.30–31 — 6D, 3 total, Smart trait
 ```
 
 ### 4.2 Istanza Nave in Battaglia (ShipInstance)
@@ -297,6 +313,21 @@ interface ShipInstance {
   sensorLockOn: string | null   // id nave su cui ha sensor lock attivo
   sensorLockedBy: string | null // id nave che ha sensor lock su di essa
   sensorLockDM: number          // DM attacco bonus da sensor lock (effetto del tiro)
+
+  // ION CANNON — HG p.30
+  ionPenalty: number            // Thrust penalty attivo (2D6 roll); 0 se non ionizzata
+  ionRoundsLeft: number         // Round rimanenti con penalità attiva; decrementato da buildNextRoundState
+
+  // MUNIZIONI
+  missileAmmoTotal: number      // Missili rimanenti (tutti i launcher missile/torpedo combinati)
+                                // max = countMissileAmmoCapacity(profile): racks×12 + barbettes×25 + torpedoes×3
+  sandAmmoTotal: number         // Canister sandcaster rimanenti; max = countSandcasters(profile): sandcasters×20
+
+  // STATO DISTRUZIONE / MANOVRE SPECIALI
+  isDestroyed: boolean          // Hull ≤ 0 → true; blocca tutte le azioni; token semitrasparente + ☠
+  inDogfight: string | null     // id gruppo dogfight attivo; null se in combattimento normale
+  inBoarding: string | null     // id boarding attivo; null se non in abbordaggio
+  thrustPenalty: number         // Penalità thrust da M-Drive critical (Sev 2–4: −1/round; Sev 5–6: thrust→0)
 
   // MISSILI
   // I missili sono token separati (vedi MissileToken)
@@ -336,7 +367,10 @@ interface MissileToken {
   position: HexCoord
   vector: HexCoord              // Vettore corrente del salvo
   thrustRemaining: number       // Thrust rimanente (parte da 10)
-  type: "Standard" | "Smart" | "Nuclear" | "Ortillery"
+  type: "Standard" | "Smart" | "Torpedo"
+  // "Standard" = Missile Rack salvo
+  // "Smart"    = Missile Barbette salvo (fixed 5-missile)
+  // "Torpedo"  = Torpedo salvo (red token; 6D per torpedo)
 }
 ```
 
@@ -658,6 +692,53 @@ export function getThresholdCriticalCount(prevHull, newHull, maxHull) {
   const newCrossed  = Math.floor((maxHull - newHull)  / threshold)
   return Math.max(0, newCrossed - prevCrossed)
 }
+```
+
+### 6.7 Weapons Expansion (HG pp.28–31)
+
+```javascript
+// === AP TRAIT ===
+// Parsa il tratto 'AP N' dall'array traits; ritorna il valore numerico (0 se assente).
+// effectiveArmour = max(0, profile.armour − getApValue(traits))
+export function getApValue(traits) {
+  const ap = traits.find(t => /^AP \d+$/.test(t))
+  return ap ? parseInt(ap.split(' ')[1], 10) : 0
+}
+
+// === MISSILE AMMO CAPACITY ===
+// Capacità totale munizioni per tutti i launcher su una nave.
+// racks×12 + barbettes×25 + torpedoes×3 — HG p.29–31
+export function countMissileAmmoCapacity(profile) {
+  const turrets = profile.turrets ?? []
+  let total = 0
+  for (const t of turrets) {
+    for (const w of t.weapons ?? []) {
+      if (w === 'Missile Rack')     total += 12
+      if (w === 'Missile Barbette') total += 25
+      if (w === 'Torpedo')          total += 3
+    }
+  }
+  return total
+}
+
+// === SANDCASTER AMMO CAPACITY ===
+// 20 canister per slot sandcaster.
+export function countSandcasters(profile) {
+  const turrets = profile.turrets ?? []
+  let total = 0
+  for (const t of turrets) {
+    for (const w of t.weapons ?? []) {
+      if (w === 'Sandcaster') total += 20
+    }
+  }
+  return total
+}
+
+// === BARBETTE DAMAGE FORMULA ===
+// Il multiplier ×3 si applica DOPO la sottrazione armatura — HG p.29.
+// netDamage = max(0, roll + effect − effectiveArmour) × damageMultiple
+// damageMultiple viene letto da WEAPONS[id].damageMultiple (1 per torrette, 3 per barbette).
+// Missile e Torpedo usano damageMultiple=1 (danno per-proiettile, non ×3).
 ```
 
 ---
