@@ -483,7 +483,7 @@ export function HelpScreen() {
           <Sub title="PROFILE EXPORT / IMPORT">
             <p>Ship profiles are separate from battle sessions. Use <span className="text-slate-200">↑ EXPORT</span> and <span className="text-slate-200">↓ IMPORT</span> in the profile panel to share or back up profiles independently.</p>
           </Sub>
-          <Note>Clicking ⌂ in the HUD returns to the Dashboard. A confirmation modal warns that unsaved battle data will be lost — save first if you need to resume.</Note>
+          <Note>Clicking 🏠 in the HUD returns to the Dashboard. A confirmation modal warns that unsaved battle data will be lost — save first if you need to resume.</Note>
         </Section>
 
         {/* DOGFIGHT */}

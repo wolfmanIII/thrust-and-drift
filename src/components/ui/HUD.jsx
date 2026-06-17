@@ -191,7 +191,7 @@ export function HUD() {
             <button
               onClick={handleUndo}
               aria-label="Undo last action (Ctrl+Z)"
-              className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-400 hover:text-slate-300 hover:border-slate-500"
+              className="bg-slate-800/80 border border-slate-700 font-mono text-sm rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-400 hover:text-slate-300 hover:border-slate-500"
             >
               ⟲
             </button>
@@ -202,7 +202,7 @@ export function HUD() {
             <button
               onClick={handleRedo}
               aria-label="Redo last action (Ctrl+Y)"
-              className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-400 hover:text-slate-300 hover:border-slate-500"
+              className="bg-slate-800/80 border border-slate-700 font-mono text-sm rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-400 hover:text-slate-300 hover:border-slate-500"
             >
               ↷
             </button>
@@ -232,9 +232,9 @@ export function HUD() {
         <Tooltip label="Return to main menu" position="bottom">
           <button
             onClick={() => setShowExitWarning(true)}
-            className="bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
+            className="bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-500 font-mono text-base rounded px-2 py-1 backdrop-blur-sm transition-colors"
           >
-            ⌂
+            🏠
           </button>
         </Tooltip>
       </div>
