@@ -122,7 +122,7 @@ export function BasicManoeuvreModal() {
                     key={val}
                     onClick={() => { if (!disabled) setDirection(val) }}
                     disabled={disabled}
-                    className={`py-1.5 font-mono text-xs rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                    className={`py-1.5 font-mono text-xs rounded border transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:cursor-not-allowed ${
                       direction === val
                         ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
                         : 'border-slate-700 text-slate-400 hover:border-slate-600'
@@ -180,7 +180,7 @@ export function BasicManoeuvreModal() {
               <button
                 onClick={handleConfirm}
                 disabled={!canConfirm}
-                className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
               >
                 APPLY MANOEUVRE
               </button>

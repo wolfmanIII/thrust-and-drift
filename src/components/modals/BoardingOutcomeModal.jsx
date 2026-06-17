@@ -149,7 +149,7 @@ export function BoardingOutcomeModal() {
         <button
           onClick={handleResolve}
           disabled={!selectedOutcome}
-          className="w-full py-2 bg-(--neon-cyan)/10 hover:bg-(--neon-cyan)/20 disabled:opacity-60 disabled:cursor-not-allowed border border-(--neon-cyan) text-(--neon-cyan) font-mono text-xs rounded transition-colors"
+          className="w-full py-2 bg-(--neon-cyan)/10 hover:bg-(--neon-cyan)/20 disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed border border-(--neon-cyan) text-(--neon-cyan) font-mono text-xs rounded transition-colors"
         >
           CONFIRM OUTCOME
         </button>

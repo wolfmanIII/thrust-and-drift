@@ -76,7 +76,7 @@ function ReactionsPanel({
             reactionEvasion
               ? 'border-amber-500/60 bg-amber-900/30 text-amber-400'
               : 'border-slate-700 text-slate-400 hover:border-slate-500'
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
+          } disabled:text-slate-400 disabled:border-slate-600/50 disabled:cursor-not-allowed`}
         >
           {reactionEvasion
             ? `✓ EVADING — DM −${targetPilotSkill} to this attack · 1 thrust`
@@ -123,7 +123,7 @@ function ReactionsPanel({
               <button
                 onClick={() => onPdRoll(isPlayerTarget ? pdManualDice : null)}
                 disabled={(pdTurrets.length > 1 && !pdTurretSlot) || (isPlayerTarget && !pdManualDice)}
-                className="w-full py-1.5 bg-amber-900/20 border border-amber-700/50 text-amber-400 font-mono text-xs rounded hover:bg-amber-900/30 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full py-1.5 bg-amber-900/20 border border-amber-700/50 text-amber-400 font-mono text-xs rounded hover:bg-amber-900/30 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
               >
                 {isPlayerTarget ? 'CONFIRM POINT DEFENCE' : '🎲 ROLL POINT DEFENCE'}
               </button>
@@ -174,7 +174,7 @@ function ReactionsPanel({
               <button
                 onClick={() => onSandRoll(isPlayerTarget ? sandManualDice : null)}
                 disabled={(sandTurrets.length > 1 && !sandTurretSlot) || (isPlayerTarget && !sandManualDice)}
-                className="w-full py-1.5 bg-amber-900/20 border border-amber-700/50 text-amber-400 font-mono text-xs rounded hover:bg-amber-900/30 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full py-1.5 bg-amber-900/20 border border-amber-700/50 text-amber-400 font-mono text-xs rounded hover:bg-amber-900/30 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
               >
                 {isPlayerTarget ? 'CONFIRM DISPERSE SAND' : '🎲 ROLL DISPERSE SAND'}
               </button>
@@ -311,7 +311,7 @@ function AttackConfigStep({
               <button
                 onClick={() => setMissileCount((c) => Math.max(1, c - 1))}
                 disabled={ammoLeft === 0}
-                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
               >
                 −
               </button>
@@ -321,7 +321,7 @@ function AttackConfigStep({
               <button
                 onClick={() => setMissileCount((c) => Math.min(ammoLeft, c + 1))}
                 disabled={ammoLeft === 0}
-                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
               >
                 +
               </button>
@@ -426,7 +426,7 @@ function AttackConfigStep({
             <button
               onClick={onNext}
               disabled={!weapon || !target || ammoLeft === 0}
-              className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
             >
               {ammoLeft === 0 ? '⚠ NO AMMO' : '🚀 LAUNCH SALVO →'}
             </button>
@@ -435,7 +435,7 @@ function AttackConfigStep({
           <button
             onClick={onNext}
             disabled={!weapon || !target || outOfRange || (combatMode === 'basic' && !storedBand && !manualRangeBand)}
-            className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
           >
             ROLL ATTACK →
           </button>
@@ -502,7 +502,7 @@ function AttackRollStep({
               <button
                 onClick={() => handleRoll(manualDice)}
                 disabled={!manualDice}
-                className="w-full py-3 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-lg tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-lg tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
               >
                 CONFIRM ROLL
               </button>
@@ -644,7 +644,7 @@ function AttackDamageStep({ damageDice, effectBonus, armor, isPlayer, damageResu
               <button
                 onClick={handleManualConfirm}
                 disabled={manualRaw === '' || isNaN(Number(manualRaw))}
-                className="w-full py-3 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-lg tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-lg tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
               >
                 CONFIRM DAMAGE
               </button>
@@ -759,7 +759,7 @@ function AttackCriticalStep({
               <button
                 onClick={() => handleLocationRoll(manualLocation)}
                 disabled={!manualLocation}
-                className="w-full py-3 bg-orange-900/30 border border-orange-700/50 text-orange-400 font-mono text-lg tracking-widest rounded hover:bg-orange-900/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-orange-900/30 border border-orange-700/50 text-orange-400 font-mono text-lg tracking-widest rounded hover:bg-orange-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
               >
                 CONFIRM LOCATION
               </button>
@@ -836,7 +836,7 @@ function AttackCriticalStep({
                   <button
                     onClick={handleExtraRoll}
                     disabled={manualExtra === '' || isNaN(Number(manualExtra))}
-                    className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
                   >
                     CONFIRM {extraDice}D EXTRA DAMAGE
                   </button>
@@ -867,7 +867,7 @@ function AttackCriticalStep({
               <button
                 onClick={onApply}
                 disabled={!canApply}
-                className="flex-1 py-2 bg-orange-900/30 border border-orange-700/50 text-orange-400 font-mono text-xs rounded hover:bg-orange-900/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex-1 py-2 bg-orange-900/30 border border-orange-700/50 text-orange-400 font-mono text-xs rounded hover:bg-orange-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
               >
                 APPLY CRITICAL
               </button>

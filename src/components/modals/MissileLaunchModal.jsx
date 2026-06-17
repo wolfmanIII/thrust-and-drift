@@ -89,7 +89,7 @@ export function MissileLaunchModal() {
             <button
               onClick={() => setCount((c) => Math.max(1, c - 1))}
               disabled={ammoLeft === 0}
-              className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
             >
               −
             </button>
@@ -99,7 +99,7 @@ export function MissileLaunchModal() {
             <button
               onClick={() => setCount((c) => Math.min(ammoLeft, c + 1))}
               disabled={ammoLeft === 0}
-              className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
             >
               +
             </button>
@@ -119,7 +119,7 @@ export function MissileLaunchModal() {
           <button
             onClick={handleLaunch}
             disabled={!targetId || ammoLeft === 0}
-            className="flex-1 py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-xs tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex-1 py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-xs tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
           >
             {ammoLeft === 0 ? '⚠ NO AMMO' : '🚀 LAUNCH SALVO'}
           </button>

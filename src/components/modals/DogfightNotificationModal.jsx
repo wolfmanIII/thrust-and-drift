@@ -247,7 +247,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
             <button
               onClick={handleIntentConfirm}
               disabled={!allIntentsSet}
-              className="w-full py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
             >
               CONFIRM INTENTS →
             </button>
@@ -298,7 +298,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
             <button
               onClick={handlePursuitConfirm}
               disabled={!computedCheck}
-              className="w-full py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full py-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs tracking-widest rounded hover:bg-amber-500/20 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
             >
               CONFIRM CHECK →
             </button>
