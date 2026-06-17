@@ -218,6 +218,16 @@ export function countMissileRacks(profile) {
   return countMissileAmmoCapacity(profile)
 }
 
+/**
+ * Count total sandcaster canister capacity across all turrets.
+ * 20 canisters per sandcaster weapon slot. // MgT2e HG p.28
+ * @param {{ turrets?: Array<{ weapons: string[] }> }} profile
+ * @returns {number}
+ */
+export function countSandcasters(profile) {
+  return (profile.turrets ?? []).flatMap((t) => t.weapons).filter((w) => w === 'Sandcaster').length * 20
+}
+
 // === EVASIVE ACTION ===
 
 /**

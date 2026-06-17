@@ -53,7 +53,7 @@ function ReactionsPanel({
   target, weaponKey, isMissile, isPlayerTarget,
   reactionEvasion, setReactionEvasion, availableThrust, targetPilotSkill,
   pdTurrets, pdTurretSlot, setPdTurretSlot, pdResult, onPdRoll,
-  sandTurrets, sandTurretSlot, setSandTurretSlot, sandResult, onSandRoll,
+  sandTurrets, sandAmmoLeft, sandTurretSlot, setSandTurretSlot, sandResult, onSandRoll,
 }) {
   const [pdManualDice, setPdManualDice]     = useState(null)
   const [sandManualDice, setSandManualDice] = useState(null)
@@ -147,7 +147,7 @@ function ReactionsPanel({
       {laserAttack && sandTurrets.length > 0 && (
         <div className="border-t border-amber-700/20 pt-3 space-y-2">
           <div className="flex items-center justify-between font-mono text-xs text-slate-400">
-            <span>Disperse Sand</span>
+            <span>Disperse Sand · Ammo: <span className={sandAmmoLeft <= 5 ? 'text-orange-400' : 'text-(--neon-cyan)'}>{sandAmmoLeft}</span></span>
             <span>Gunner turret · +1D+Effect armour vs laser</span>
           </div>
           {sandTurrets.length > 1 && !sandResult && (
@@ -417,6 +417,7 @@ function AttackConfigStep({
             pdResult={reactions.pdResult}
             onPdRoll={reactions.onPdRoll}
             sandTurrets={reactions.sandTurrets}
+            sandAmmoLeft={reactions.sandAmmoLeft}
             sandTurretSlot={reactions.sandTurretSlot}
             setSandTurretSlot={reactions.setSandTurretSlot}
             sandResult={reactions.sandResult}
@@ -1037,6 +1038,7 @@ export function AttackModal() {
   const modalPayload        = useUiStore((s) => s.modalPayload)
   const applyDamage         = useBattleStore((s) => s.applyDamage)
   const applyIonDamage      = useBattleStore((s) => s.applyIonDamage)
+  const spendSandAmmo       = useBattleStore((s) => s.spendSandAmmo)
   const addCriticalHit      = useBattleStore((s) => s.addCriticalHit)
   const markTurretFired     = useBattleStore((s) => s.markTurretFired)
   const launchMissile       = useBattleStore((s) => s.launchMissile)
@@ -1103,7 +1105,8 @@ export function AttackModal() {
     }))
   : []
 
-  const targetSandTurrets = target ? (target.profile.turrets ?? [])
+  const sandAmmoLeft = target?.sandAmmoTotal ?? 0
+  const targetSandTurrets = (target && sandAmmoLeft > 0) ? (target.profile.turrets ?? [])
     .filter((t) => !(target.firedTurrets ?? []).includes(t.slot))
     .filter((t) => t.weapons?.includes('Sandcaster'))
     .map((t) => ({ slot: t.slot }))
@@ -1147,6 +1150,7 @@ export function AttackModal() {
     const armorRoll = success ? rollDice(1, 6).total : 0
     const bonusArmor = success ? armorRoll + effect : 0
     markTurretFired(target.id, slot)
+    spendSandAmmo(target.id)
     setSandTurretSlot(slot)
     setSandResult({ turretSlot: slot, roll: rollResult, gunner, total, effect, success, armorRoll, bonusArmor })
     addLogEntry(`${target.profile.name} Disperse Sand (T${slot}): total ${total}${success ? ` — +${bonusArmor} armour vs this laser attack` : ' — no effect'}.`)
@@ -1291,6 +1295,7 @@ export function AttackModal() {
           pdResult,
           onPdRoll:        handlePdRoll,
           sandTurrets:     targetSandTurrets,
+          sandAmmoLeft,
           sandTurretSlot,
           setSandTurretSlot,
           sandResult,

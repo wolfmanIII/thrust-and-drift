@@ -7,7 +7,7 @@
 import { create } from 'zustand'
 import { v7 as uuidv7 } from 'uuid'
 import { exportBattle, importBattle } from '../utils/io.js'
-import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount, countMissileAmmoCapacity } from '../utils/combat.js'
+import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount, countMissileAmmoCapacity, countSandcasters } from '../utils/combat.js'
 import { hexAdd, hexDistance, segmentMinDistance } from '../utils/hex.js'
 import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
@@ -304,6 +304,7 @@ const useBattleStore = create((set, get) => {
       sensorLockDM: 0,
       turretsNeedingReload: 0,
       missileAmmoTotal: countMissileAmmoCapacity(profile),
+      sandAmmoTotal: countSandcasters(profile),
       inDogfight: null,
       inBoarding: null,
       crewAssignments: buildDefaultAssignments(profile.crew, profile.turrets),
@@ -760,6 +761,20 @@ const useBattleStore = create((set, get) => {
    * @param {number} ionPower   Thrust penalty (2D6 roll result)
    * @param {number} ionRounds  Duration in rounds (1, or D3 if effect ≥ 6)
    */
+  /**
+   * Consume one sandcaster canister on the given ship.
+   * // MgT2e HG p.28 — 20 canisters per sandcaster
+   * @param {string} shipId
+   */
+  spendSandAmmo: (shipId) => {
+    set((s) => ({
+      ships: s.ships.map((sh) => sh.id !== shipId ? sh : {
+        ...sh,
+        sandAmmoTotal: Math.max(0, (sh.sandAmmoTotal ?? countSandcasters(sh.profile)) - 1),
+      }),
+    }))
+  },
+
   applyIonDamage: (targetId, ionPower, ionRounds) => {
     set((s) => ({
       ships: s.ships.map((sh) => sh.id !== targetId ? sh : {
