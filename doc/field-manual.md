@@ -318,24 +318,41 @@ triggered, the phase advances to **Attack** automatically.
 
 ### 8.1 Missile Impact
 
-If one or more missile salvos reach their target's hex during the movement step, each salvo is consumed and a **⚡ MISSILE IMPACT** modal opens automatically after the animation.
+If one or more missile salvos reach their target's hex during the movement step, each salvo is consumed and a **⚡ MISSILE IMPACT** modal opens automatically after the animation. Resolution follows CRB p.173 (IMPACT) in two steps.
 
-| Field | Description |
-| ----- | ----------- |
-| **Launcher / Target** | Ships involved. Target hull shown for reference. |
-| **Salvo** | Count and type (e.g. *3× Missile Rack*). |
-| **Damage rolled** | GM enters the total rolled, or clicks **🎲** to auto-roll `count × 4D6` in-app. Formula: `count × 4D6` *(HG p.28 — Missile Rack 4D6 per missile)*. |
-| **Armour** | Read automatically from the target's ship profile. |
-| **Net damage** | `max(0, rolled − armour)`. Updated live as you type. |
+#### Step 1 — Attack Roll
 
-- **APPLY DAMAGE** — deducts net damage from target hull (triggers threshold criticals if applicable), logs the hit, closes this entry.
+The attack roll happens at impact, not at launch *(CRB p.173)*.
+
+| DM | Source |
+| -- | ------ |
+| +1 per missile | Salvo size (e.g. 3 missiles → DM+3) |
+| +2 | Smart trait — all missile weapons carry this (CRB p.79) |
+| −Pilot skill | Evasive Action *(optional, see below)* |
+
+Roll 2D6 + total DM against **8+**. Effect = total − 8.
+
+- **Effect < 0** — MISS: modal closes, no damage applied.
+- **Effect ≥ 0** — HIT: proceed to Step 2.
+
+**Evasive Action** (CRB p.171): if the target has unspent thrust, the GM may click **🛡 EVASIVE ACTION** before entering the dice. This spends 1 thrust from the target's pool and applies DM −Pilot to this attack roll only. If no thrust is available, the button is disabled.
+
+#### Step 2 — Damage
+
+Roll **4D6** (Missile) or **6D6** (Torpedo) for a **single** missile/torpedo — not for the whole salvo.
+
+Formula *(CRB p.173)*:
+
+```
+net damage = max(0, roll − armour) × min(Effect, count)
+```
+
+The modal shows a full breakdown: roll / −armour / per-missile net / ×multiplier / total.
+
+- **APPLY DAMAGE** — deducts net damage from target hull, triggers threshold criticals if applicable, logs the hit.
 - **MISS / INTERCEPTED — DISMISS** — closes without applying damage (e.g. all missiles were destroyed by Point Defence before movement).
 
-Multiple salvos impacting in the same round are resolved sequentially; the pending count is shown in the modal header. An impact sound plays when each modal opens.
-
-> **Note:** Per RAW, armour applies independently to each missile's damage roll.
-> The modal accepts a pre-summed total for speed — the GM may choose to enter
-> each missile separately and apply in sequence.
+Multiple salvos impacting in the same round are resolved sequentially; the pending count is shown in the modal header. An impact sound plays when the modal opens.
 
 #### Recovery
 

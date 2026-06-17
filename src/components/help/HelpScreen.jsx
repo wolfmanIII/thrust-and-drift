@@ -315,15 +315,18 @@ export function HelpScreen() {
           <p>If no encounters or dogfights are triggered, the phase advances to Attack automatically.</p>
           <Note>Wrecks drift. A destroyed ship (☠ WRECK) retains its last velocity vector and continues to drift each Movement phase — it has no pilot or reactor and cannot spend thrust. Remove it manually via right-click → Remove from battle when no longer relevant.</Note>
           <Sub title="MISSILE IMPACT">
-            <p>If a missile salvo reaches its target's hex during movement, the token is consumed and a <span className="text-slate-200">⚡ MISSILE IMPACT</span> modal opens automatically after the animation.</p>
-            <KV k="Launcher / Target" v="Ships involved. Target hull shown for reference." />
-            <KV k="Salvo" v="Count and type (e.g. 3× Missile Rack)." />
-            <KV k="Damage rolled" v="Enter the total manually, or click 🎲 to auto-roll count × 4D6 in-app (HG p.28 — Missile Rack 4D6 per missile)." />
-            <KV k="Armour" v="Read automatically from the target's ship profile." />
-            <KV k="Net damage" v="max(0, rolled − armour). Updated live." />
-            <KV k="APPLY DAMAGE" v="Deducts net damage, triggers criticals if applicable, logs the hit, closes this entry." />
+            <p>If a missile salvo reaches its target's hex during movement, the token is consumed and a <span className="text-slate-200">⚡ MISSILE IMPACT</span> modal opens. Resolution follows CRB p.173 in two steps.</p>
+            <p className="font-mono text-xs text-slate-300 mt-1">STEP 1 — ATTACK ROLL</p>
+            <KV k="Salvo DM" v="+1 per missile in the salvo (e.g. 3 missiles → DM+3)." />
+            <KV k="Smart DM" v="+2 — all missile weapons carry the Smart trait (CRB p.79)." />
+            <KV k="🛡 EVASIVE ACTION" v="If the target has unspent thrust, click to spend 1 thrust and apply DM −Pilot to this attack roll. Button disabled when no thrust available." />
+            <p>Roll 2D6 + total DM vs 8+. Effect = total − 8. Effect &lt; 0 → MISS, modal closes. Effect ≥ 0 → proceed to damage.</p>
+            <p className="font-mono text-xs text-slate-300 mt-1">STEP 2 — DAMAGE</p>
+            <KV k="Damage roll" v="Roll 4D6 (Missile) or 6D6 (Torpedo) for a single missile — not the whole salvo." />
+            <KV k="Formula" v="max(0, roll − armour) × min(Effect, count). Breakdown shown live." />
+            <KV k="APPLY DAMAGE" v="Deducts net damage, triggers criticals if applicable, logs the hit." />
             <KV k="MISS / INTERCEPTED" v="Close without applying damage (e.g. all missiles destroyed by Point Defence)." />
-            <p>Multiple salvos queue sequentially; the pending count is shown in the modal header. An impact sound plays when the modal opens.</p>
+            <p>Multiple salvos queue sequentially; the pending count is shown in the modal header.</p>
             <p className="text-amber-400 font-mono text-xs">⚡ If dismissed accidentally: find the impact entry in the Battle Log and click ↩ to re-queue it. Phase advance is blocked until all impacts are resolved — the HUD shows a pulsing ⚡ N impacts unresolved badge.</p>
           </Sub>
           <Sub title="SHIPS THAT PASS IN THE NIGHT">
