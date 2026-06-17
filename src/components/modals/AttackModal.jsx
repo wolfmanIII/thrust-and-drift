@@ -19,7 +19,7 @@ import { DiceInput } from '../forms/DiceInput.jsx'
 import { getEffectiveSkill } from '../../utils/crew.js'
 
 /** Weapons that fire a visible beam/ray toward the target. */
-const BEAM_WEAPONS = ['Pulse Laser', 'Beam Laser', 'Particle Beam', 'Railgun']
+const BEAM_WEAPONS = ['Pulse Laser', 'Beam Laser', 'Particle Beam', 'Railgun', 'Fusion Gun', 'Plasma Gun']
 /** Laser weapon types that Disperse Sand can block (CRB p.171). */
 const LASER_TYPES = ['Pulse Laser', 'Beam Laser']
 

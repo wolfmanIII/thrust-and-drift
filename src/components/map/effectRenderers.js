@@ -18,12 +18,16 @@ const LASER_COLORS = {
   'Beam Laser':    '#38bdf8',
   'Particle Beam': '#c084fc',
   'Railgun':       '#fb923c',
+  'Fusion Gun':    '#f97316',  // orange-500
+  'Plasma Gun':    '#4ade80',  // green-400
 }
 const LASER_GLOW = {
   'Pulse Laser':   '#0ea5e9',
   'Beam Laser':    '#0284c7',
   'Particle Beam': '#a855f7',
   'Railgun':       '#f97316',
+  'Fusion Gun':    '#ea580c',  // orange-600
+  'Plasma Gun':    '#16a34a',  // green-700
 }
 
 // ─── ONE-SHOT EFFECTS ────────────────────────────────────────────────────────

@@ -17,7 +17,7 @@
  *   - notes:      Short rule clarification
  */
 
-/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'} WeaponType */
+/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'} WeaponType */
 
 /**
  * Weapon stat table.
@@ -96,6 +96,30 @@ export const WEAPONS = {
     turretOnly: false,
     bayOnly: false,
     notes: 'Kinetic weapon. AP 4. Effective only at Short range and closer.',
+  },
+  'Fusion Gun': {
+    id: 'Fusion Gun',
+    label: 'Fusion Gun',
+    attackDM: 0,
+    damageDice: 4,          // HG p.28
+    damageBonus: 0,
+    maxRange: 'Medium',     // HG p.28
+    traits: ['Radiation'],  // HG p.28
+    turretOnly: false,
+    bayOnly: false,
+    notes: 'Radiation trait: crew damage on critical hits.',
+  },
+  'Plasma Gun': {
+    id: 'Plasma Gun',
+    label: 'Plasma Gun',
+    attackDM: 0,
+    damageDice: 3,        // HG p.28
+    damageBonus: 0,
+    maxRange: 'Medium',   // HG p.28
+    traits: [],
+    turretOnly: false,
+    bayOnly: false,
+    notes: 'High-energy plasma stream.',
   },
 }
 
