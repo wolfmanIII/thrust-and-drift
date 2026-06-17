@@ -67,10 +67,10 @@ function ShipIcon({ color }) {
   )
 }
 
-function MissileIcon() {
-  // Mirrors traceMissileShape() — scale=2.5, rounded nose via SVG arc (sweep=1 = clockwise = curves up)
+function MissileIcon({ color = '#fbbf24', stroke = '#92400e' }) {
+  // Mirrors traceMissileShape() — scale=2.5, rounded nose via SVG arc
   const s = 2.5, cx = 20, cy = 19
-  const r = 0.9 * s   // 2.25 — body half-width = nose radius
+  const r = 0.9 * s
   const offsets = [[-3, 1.5], [0, -1.5], [3, 1.5]]
   return (
     <svg width="40" height="38" viewBox="0 0 40 38">
@@ -80,9 +80,28 @@ function MissileIcon() {
         const noseY = y - 3 * s
         const tailY = y + 4.5 * s
         const d = `M ${x - r},${noseY} A ${r},${r} 0 0 1 ${x + r},${noseY} L ${x + r},${tailY} L ${x - r},${tailY} Z`
-        return <path key={i} d={d} fill="#fbbf24" fillOpacity="0.85" stroke="#92400e" strokeWidth="0.6" />
+        return <path key={i} d={d} fill={color} fillOpacity="0.85" stroke={stroke} strokeWidth="0.6" />
       })}
-      <text x="20" y="37" textAnchor="middle" fontSize="7" fill="#fbbf24" fontFamily="monospace">×N</text>
+      <text x="20" y="37" textAnchor="middle" fontSize="7" fill={color} fontFamily="monospace">×N</text>
+    </svg>
+  )
+}
+
+function IonBurstIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="14" fill="none" stroke="#60a5fa" strokeWidth="2.5" strokeOpacity="0.85" />
+      <circle cx="20" cy="20" r="9"  fill="none" stroke="#93c5fd" strokeWidth="1.5" strokeOpacity="0.5" />
+      <circle cx="20" cy="20" r="4"  fill="#60a5fa" fillOpacity="0.4" />
+    </svg>
+  )
+}
+
+function IonAuraIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="15" fill="none" stroke="#60a5fa" strokeWidth="2" strokeOpacity="0.6" strokeDasharray="5 3" />
+      <circle cx="20" cy="20" r="8"  fill="#60a5fa" fillOpacity="0.08" />
     </svg>
   )
 }
@@ -242,17 +261,29 @@ export function LegendModal() {
         <div className="space-y-5">
 
           <Section title="Tokens — vectorial mode">
-            <Row icon={<ShipIcon color="#22d3ee" />}  label="Player ship"   description="cyan — current faction" />
-            <Row icon={<ShipIcon color="#f87171" />}  label="Enemy ship"    description="red — hostile faction" />
-            <Row icon={<ShipIcon color="#a3a3a3" />}  label="Neutral ship"  description="grey" />
-            <Row icon={<MissileIcon />}              label="Missile salvo" description="count + thrust remaining shown" />
+            <Row icon={<ShipIcon color="#22d3ee" />}         label="Player ship"    description="cyan — current faction" />
+            <Row icon={<ShipIcon color="#f87171" />}         label="Enemy ship"     description="red — hostile faction" />
+            <Row icon={<ShipIcon color="#a3a3a3" />}         label="Neutral ship"   description="grey" />
+            <Row icon={<MissileIcon />}                      label="Missile salvo"  description="amber — count + thrust remaining" />
+            <Row icon={<MissileIcon color="#f87171" stroke="#991b1b" />} label="Torpedo salvo" description="red — 6D per torpedo" />
           </Section>
 
-          <Section title="Beam weapons — vectorial mode">
+          <Section title="Turret beams — vectorial mode">
             <Row icon={<BeamLine color="#7dd3fc" />} label="Pulse Laser"   />
             <Row icon={<BeamLine color="#38bdf8" />} label="Beam Laser"    />
             <Row icon={<BeamLine color="#c084fc" />} label="Particle Beam" />
             <Row icon={<BeamLine color="#fb923c" />} label="Railgun"       />
+            <Row icon={<BeamLine color="#f97316" />} label="Fusion Gun"    />
+            <Row icon={<BeamLine color="#4ade80" />} label="Plasma Gun"    />
+          </Section>
+
+          <Section title="Barbette beams — vectorial mode">
+            <Row icon={<BeamLine color="#bae6fd" />} label="Pulse Laser Barbette"  />
+            <Row icon={<BeamLine color="#93c5fd" />} label="Beam Laser Barbette"   />
+            <Row icon={<BeamLine color="#e9d5ff" />} label="Particle Barbette"     />
+            <Row icon={<BeamLine color="#fed7aa" />} label="Fusion Barbette"       />
+            <Row icon={<BeamLine color="#bbf7d0" />} label="Plasma Barbette"       />
+            <Row icon={<BeamLine color="#fcd34d" />} label="Railgun Barbette"      />
           </Section>
 
         </div>
@@ -262,8 +293,9 @@ export function LegendModal() {
 
           <Section title="Hit effects — vectorial mode">
             <Row icon={<BurstIcon color="#fb923c" />} label="Impact burst"    description="hit registered on target" />
-            <Row icon={<CritFlashIcon />}             label="Critical flash"   description="critical system hit applied" />
-            <Row icon={<ExplosionIcon />}             label="Ship destroyed"   description="hull at 0 — double shockwave + debris" />
+            <Row icon={<CritFlashIcon />}             label="Critical flash"  description="critical system hit applied" />
+            <Row icon={<IonBurstIcon />}              label="Ion burst"       description="ion disruption — thrust penalty applied" />
+            <Row icon={<ExplosionIcon />}             label="Ship destroyed"  description="hull at 0 — shockwave + debris" />
           </Section>
 
           <Section title="Movement effects — vectorial mode">
@@ -275,6 +307,7 @@ export function LegendModal() {
           <Section title="Persistent indicators — vectorial mode">
             <Row icon={<SensorLockIcon />}   label="Sensor lock"       description="dashed line + ring on target" />
             <Row icon={<EvasiveAuraIcon />}  label="Evasive manoeuvre" description="evasion declared this phase" />
+            <Row icon={<IonAuraIcon />}      label="Ion disruption"    description="thrust reduced — clears next round" />
             <Row icon={<DogfightIcon />}     label="Dogfight"          description="two+ ships share a hex" />
             <Row icon={<ExhaustedIcon />}    label="Missile exhausted" description="out of thrust, won't reach target" />
           </Section>
