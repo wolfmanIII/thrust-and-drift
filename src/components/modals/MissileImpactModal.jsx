@@ -1,16 +1,27 @@
 /**
- * MissileImpactModal — shown when a missile salvo reaches its target hex during the
- * movement phase. GM enters the damage rolled; modal computes net after armour and
- * calls applyDamage. Resolves one salvo at a time; stacks if multiple arrive.
- * // MgT2e CRB p.162–165, HG p.28–31
+ * MissileImpactModal — two-step resolution per MgT2e CRB p.173 IMPACT rules.
+ *
+ * Step 1 — Attack roll at impact (not at launch):
+ *   2D6 + DM+1/missile (salvo size) + DM+2 (Smart trait) + Evasive Action DM
+ *   Target: 8+.  Effect = total − 8.  Effect < 0 → MISS, no damage.
+ *
+ * Step 2 — Damage:
+ *   Roll diceEach D6 for a single missile/torpedo.
+ *   Formula: max(0, roll − armour) × min(Effect, count)
+ *
+ * Evasive Action (Option A): if target has unspent thrust, GM may declare it;
+ *   1 thrust is spent immediately, DM −Pilot applied to this attack roll only.
+ *
+ * // MgT2e CRB p.173 (IMPACT), p.171 (Evasive Action), HG p.28–31 (weapon stats)
  */
 
-import { useState } from 'react'
-import { Modal }          from './Modal.jsx'
-import { useBattleStore } from '../../store/battleStore.js'
-import { rollDice }       from '../../utils/dice.js'
+import { useState, useEffect }  from 'react'
+import { Modal }                 from './Modal.jsx'
+import { useBattleStore }        from '../../store/battleStore.js'
+import { rollDice }              from '../../utils/dice.js'
+import { getEffectiveSkill }     from '../../utils/crew.js'
 
-/** // MgT2e HG p.28 (Missile Rack 4D), HG p.30 (Torpedo 6D) */
+// MgT2e HG p.28 (Missile Rack 4D), HG p.30 (Torpedo 6D)
 function dicePerUnit(type) {
   return type === 'Torpedo' ? 6 : 4
 }
@@ -20,10 +31,25 @@ export function MissileImpactModal() {
   const ships                 = useBattleStore((s) => s.ships)
   const dismissMissileImpact  = useBattleStore((s) => s.dismissMissileImpact)
   const applyDamage           = useBattleStore((s) => s.applyDamage)
+  const spendReactionThrust   = useBattleStore((s) => s.spendReactionThrust)
 
-  const [damageRolled, setDamageRolled] = useState('')
+  const [step, setStep]         = useState('attack')   // 'attack' | 'damage'
+  const [die1, setDie1]         = useState('')
+  const [die2, setDie2]         = useState('')
+  const [evasiveActive, setEvasive] = useState(false)
+  const [damageRolled, setDamage]   = useState('')
 
   const impact = pendingMissileImpacts[0]
+
+  // Reset all local state whenever a new impact becomes active
+  useEffect(() => {
+    setStep('attack')
+    setDie1('')
+    setDie2('')
+    setEvasive(false)
+    setDamage('')
+  }, [impact?.id])
+
   if (!impact) return null
 
   const target   = ships.find((s) => s.id === impact.target)
@@ -35,14 +61,62 @@ export function MissileImpactModal() {
     return null
   }
 
-  const armor       = target.profile.armor ?? 0
-  const diceEach    = dicePerUnit(impact.type)
-  const totalDice   = impact.count * diceEach
-  const rolled      = parseInt(damageRolled, 10)
-  const netDamage   = isNaN(rolled) ? null : Math.max(0, rolled - armor)
-  const pending     = pendingMissileImpacts.length
+  const armor      = target.profile.armor ?? 0
+  const diceEach   = dicePerUnit(impact.type)
+  const pending    = pendingMissileImpacts.length
+  const pilotSkill = getEffectiveSkill(target.profile.crew, target.crewAssignments, 'pilot')
 
-  function handleApply() {
+  // Compute remaining reaction thrust available to the target
+  const thrustAvailable = Math.max(0,
+    target.profile.thrust
+    + (target.thrustBonusThisRound ?? 0)
+    - target.thrustUsedThisRound
+    - (target.thrustPenalty ?? 0)
+    - (target.ionPenalty ?? 0)
+    - (target.evasiveThrust ?? 0)
+  )
+
+  // Attack DMs — CRB p.173
+  const smartDM    = 2              // Smart trait on all current missile weapons
+  const salvoSizeDM = impact.count  // DM+1 per missile in salvo
+  const evasiveDM  = evasiveActive ? -pilotSkill : 0
+  const totalDM    = smartDM + salvoSizeDM + evasiveDM
+
+  const d1 = parseInt(die1, 10)
+  const d2 = parseInt(die2, 10)
+  const rollReady  = !isNaN(d1) && d1 >= 1 && d1 <= 6 && !isNaN(d2) && d2 >= 1 && d2 <= 6
+  const attackTotal = rollReady ? d1 + d2 + totalDM : null
+  const effect      = attackTotal !== null ? attackTotal - 8 : null
+  const hit         = effect !== null && effect >= 0
+
+  // Damage (step 2)
+  const rawRolled  = parseInt(damageRolled, 10)
+  const netPerMiss = isNaN(rawRolled) ? null : Math.max(0, rawRolled - armor)
+  const multiplier = effect !== null ? Math.min(effect, impact.count) : null
+  const netDamage  = netPerMiss !== null && multiplier !== null ? netPerMiss * multiplier : null
+
+  function handleAutoRollAttack() {
+    const r = rollDice(2, 6)
+    setDie1(String(r.results[0]))
+    setDie2(String(r.results[1]))
+  }
+
+  function handleEvasiveToggle() {
+    if (evasiveActive || thrustAvailable <= 0) return
+    spendReactionThrust(target.id, 1)
+    setEvasive(true)
+  }
+
+  function handleConfirmAttack() {
+    if (!rollReady) return
+    if (!hit) {
+      dismissMissileImpact(impact.id)
+    } else {
+      setStep('damage')
+    }
+  }
+
+  function handleApplyDamage() {
     if (netDamage === null) return
     applyDamage(
       impact.target,
@@ -50,13 +124,13 @@ export function MissileImpactModal() {
       `${impact.count}× ${impact.type ?? 'Missile'} salvo (${launcher?.profile.name ?? '?'})`,
     )
     dismissMissileImpact(impact.id)
-    setDamageRolled('')
   }
 
   function handleMiss() {
     dismissMissileImpact(impact.id)
-    setDamageRolled('')
   }
+
+  const dmSign = (n) => (n >= 0 ? `+${n}` : String(n))
 
   return (
     <Modal>
@@ -66,11 +140,10 @@ export function MissileImpactModal() {
         <div className="flex items-center justify-between">
           <h2 className="font-display text-amber-400 tracking-widest text-sm">
             ⚡ {impact.type === 'Torpedo' ? 'TORPEDO IMPACT' : 'MISSILE IMPACT'}
+            {step === 'damage' && ' — DAMAGE'}
           </h2>
           {pending > 1 && (
-            <span className="font-mono text-xs text-slate-400">
-              {pending} PENDING
-            </span>
+            <span className="font-mono text-xs text-slate-400">{pending} PENDING</span>
           )}
         </div>
 
@@ -92,80 +165,218 @@ export function MissileImpactModal() {
           </div>
           <div className="flex justify-between text-xs font-mono">
             <span className="text-slate-400">HULL</span>
-            <span className="text-slate-300">
-              {target.hullCurrent}/{target.profile.hull}
-            </span>
+            <span className="text-slate-300">{target.hullCurrent}/{target.profile.hull}</span>
           </div>
         </div>
 
-        {/* ── Damage roll ─────────────────────────────────────────── */}
-        <div className="flex flex-col gap-2">
-          <p className="font-mono text-xs text-slate-400 leading-relaxed">
-            Roll <span className="text-amber-300">{totalDice}D6</span> ({impact.count} {impact.type === 'Torpedo' ? 'torpedo' : 'missile'}{impact.count !== 1 ? 's' : ''} × {diceEach}D6).
-            Armour applies per {impact.type === 'Torpedo' ? 'torpedo' : 'missile'} independently.
-          </p>
+        {step === 'attack' ? (
+          <>
+            {/* ── Attack DM breakdown ─────────────────────────────── */}
+            <div className="flex flex-col gap-1.5">
+              <p className="font-mono text-xs text-slate-500 tracking-widest">
+                ATTACK DMs (CRB p.173)
+              </p>
+              <div className="bg-slate-800/40 rounded px-3 py-2 flex flex-col gap-1 font-mono text-xs">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Salvo size ({impact.count} missiles)</span>
+                  <span className="text-amber-300">{dmSign(salvoSizeDM)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Smart trait</span>
+                  <span className="text-amber-300">{dmSign(smartDM)}</span>
+                </div>
+                {evasiveActive && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Evasive Action (Pilot {pilotSkill})</span>
+                    <span className="text-red-400">{dmSign(evasiveDM)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between border-t border-slate-700 pt-1 mt-0.5">
+                  <span className="text-slate-300">Total DM</span>
+                  <span className="text-slate-200 font-bold">{dmSign(totalDM)}</span>
+                </div>
+              </div>
+            </div>
 
-          <label className="flex flex-col gap-1">
-            <span className="font-mono text-xs text-slate-400 tracking-widest">
-              DAMAGE ROLLED (total)
-            </span>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                min="0"
-                value={damageRolled}
-                onChange={(e) => setDamageRolled(e.target.value)}
-                placeholder="0"
-                className="flex-1 bg-slate-900 border border-slate-600 focus:border-(--neon-cyan)/60 rounded px-3 py-2 font-mono text-sm text-white outline-none"
-              />
+            {/* ── Evasive Action toggle ───────────────────────────── */}
+            {evasiveActive ? (
+              <div className="w-full font-mono text-xs tracking-widest py-2 rounded border border-blue-600/40 bg-blue-900/20 text-blue-300 text-center">
+                ✅ EVADING — DM {dmSign(evasiveDM)} applied
+              </div>
+            ) : (
               <button
                 type="button"
-                onClick={() => setDamageRolled(String(rollDice(totalDice, 6).total))}
-                className="px-3 py-2 bg-slate-800 border border-slate-600 text-slate-300 font-mono text-sm rounded hover:border-(--neon-cyan)/60 hover:text-(--neon-cyan) transition-colors"
-                title={`Auto-roll ${totalDice}D6`}
+                onClick={handleEvasiveToggle}
+                disabled={thrustAvailable <= 0}
+                className={`w-full font-mono text-xs tracking-widest py-2 rounded border transition-colors ${
+                  thrustAvailable <= 0
+                    ? 'border-slate-700 text-slate-600 cursor-not-allowed'
+                    : 'border-blue-700/60 text-blue-400 hover:bg-blue-900/20'
+                }`}
               >
-                🎲
+                🛡 EVASIVE ACTION{' '}
+                {thrustAvailable <= 0
+                  ? '(no thrust available)'
+                  : `(spend 1 thrust — DM ${pilotSkill > 0 ? `-${pilotSkill}` : '0'})`}
+              </button>
+            )}
+
+            {/* ── 2D6 roll entry ──────────────────────────────────── */}
+            <div className="flex flex-col gap-2">
+              <p className="font-mono text-xs text-slate-400">
+                Roll 2D6{' '}
+                <span className="text-amber-300">{dmSign(totalDM)}</span>
+                {' '}— target{' '}
+                <span className="text-slate-200">8+</span>
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="number" min="1" max="6"
+                  value={die1} onChange={(e) => setDie1(e.target.value)}
+                  placeholder="D1"
+                  className="flex-1 bg-slate-900 border border-slate-600 focus:border-(--neon-cyan)/60 rounded px-3 py-2 font-mono text-sm text-white outline-none"
+                />
+                <input
+                  type="number" min="1" max="6"
+                  value={die2} onChange={(e) => setDie2(e.target.value)}
+                  placeholder="D2"
+                  className="flex-1 bg-slate-900 border border-slate-600 focus:border-(--neon-cyan)/60 rounded px-3 py-2 font-mono text-sm text-white outline-none"
+                />
+                <button
+                  type="button" onClick={handleAutoRollAttack}
+                  className="px-3 py-2 bg-slate-800 border border-slate-600 text-slate-300 font-mono text-sm rounded hover:border-(--neon-cyan)/60 hover:text-(--neon-cyan) transition-colors"
+                  title="Auto-roll 2D6"
+                >
+                  🎲
+                </button>
+              </div>
+
+              {attackTotal !== null && (
+                <div className="flex justify-between items-center bg-slate-800/40 rounded px-3 py-2 font-mono text-sm">
+                  <span className="text-slate-400">TOTAL / EFFECT</span>
+                  <span className={hit ? 'text-amber-300 font-bold' : 'text-slate-400'}>
+                    {attackTotal} / {dmSign(effect)} — {hit ? 'HIT' : 'MISS'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* ── Confirm / dismiss ───────────────────────────────── */}
+            <div className="flex flex-col gap-2">
+              <button
+                disabled={!rollReady}
+                onClick={handleConfirmAttack}
+                className={`w-full font-mono text-xs tracking-widest py-2.5 rounded transition-colors ${
+                  !rollReady
+                    ? 'bg-slate-800/40 border border-slate-700 text-slate-400 cursor-not-allowed'
+                    : hit
+                      ? 'bg-amber-900/40 border border-amber-600/60 text-amber-300 hover:bg-amber-800/50'
+                      : 'bg-slate-800/60 border border-slate-600 text-slate-400 hover:bg-slate-700/60'
+                }`}
+              >
+                {!rollReady
+                  ? 'ENTER DICE ROLL'
+                  : hit
+                    ? `HIT — EFFECT ${dmSign(effect)} — ROLL DAMAGE →`
+                    : 'MISS — DISMISS'}
+              </button>
+              <button
+                onClick={handleMiss}
+                className="w-full bg-slate-800/60 border border-slate-600 text-slate-400 font-mono text-xs tracking-widest py-2 rounded hover:bg-slate-700/60 transition-colors"
+              >
+                MISS / INTERCEPTED — DISMISS
               </button>
             </div>
-          </label>
+          </>
+        ) : (
+          <>
+            {/* ── Damage roll (single missile) ────────────────────── */}
+            <div className="flex flex-col gap-2">
+              <p className="font-mono text-xs text-slate-400 leading-relaxed">
+                Roll{' '}
+                <span className="text-amber-300">{diceEach}D6</span>
+                {' '}for one {impact.type === 'Torpedo' ? 'torpedo' : 'missile'}.{' '}
+                Multiply net by{' '}
+                <span className="text-amber-300">
+                  min(Effect {dmSign(effect)}, {impact.count} missiles) = ×{multiplier}
+                </span>.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="number" min="0"
+                  value={damageRolled} onChange={(e) => setDamage(e.target.value)}
+                  placeholder="0"
+                  className="flex-1 bg-slate-900 border border-slate-600 focus:border-(--neon-cyan)/60 rounded px-3 py-2 font-mono text-sm text-white outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setDamage(String(rollDice(diceEach, 6).total))}
+                  className="px-3 py-2 bg-slate-800 border border-slate-600 text-slate-300 font-mono text-sm rounded hover:border-(--neon-cyan)/60 hover:text-(--neon-cyan) transition-colors"
+                  title={`Auto-roll ${diceEach}D6`}
+                >
+                  🎲
+                </button>
+              </div>
 
-          {/* Armour & net */}
-          <div className="flex justify-between items-center bg-slate-800/40 rounded px-3 py-2 font-mono text-xs">
-            <span className="text-slate-400">
-              ARMOUR
-            </span>
-            <span className="text-slate-300">{armor}</span>
-          </div>
-          <div className="flex justify-between items-center bg-slate-800/40 rounded px-3 py-2 font-mono text-sm">
-            <span className="text-slate-400 tracking-widest">NET DAMAGE</span>
-            <span className={netDamage === null ? 'text-slate-400' : netDamage > 0 ? 'text-red-400 font-bold' : 'text-slate-400'}>
-              {netDamage === null ? '—' : netDamage}
-            </span>
-          </div>
-        </div>
+              {/* ── Damage breakdown ────────────────────────────────── */}
+              <div className="flex flex-col gap-1 bg-slate-800/40 rounded px-3 py-2 font-mono text-xs">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Damage roll ({diceEach}D6)</span>
+                  <span className="text-slate-300">
+                    {isNaN(rawRolled) ? '—' : rawRolled}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Armour</span>
+                  <span className="text-slate-300">−{armor}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Per missile (min 0)</span>
+                  <span className="text-slate-300">
+                    {netPerMiss !== null ? netPerMiss : '—'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Effect multiplier</span>
+                  <span className="text-amber-300">×{multiplier ?? '—'}</span>
+                </div>
+                <div className="flex justify-between border-t border-slate-700 pt-1 mt-0.5">
+                  <span className="text-slate-300 tracking-widest">NET DAMAGE</span>
+                  <span className={
+                    netDamage === null
+                      ? 'text-slate-400'
+                      : netDamage > 0
+                        ? 'text-red-400 font-bold'
+                        : 'text-slate-400'
+                  }>
+                    {netDamage === null ? '—' : netDamage}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-        {/* ── Action buttons ──────────────────────────────────────── */}
-        <div className="flex flex-col gap-2">
-          <button
-            disabled={netDamage === null}
-            onClick={handleApply}
-            className={`w-full font-mono text-xs tracking-widest py-2.5 rounded transition-colors ${
-              netDamage === null
-                ? 'bg-slate-800/40 border border-slate-700 text-slate-400 cursor-not-allowed'
-                : 'bg-red-900/40 border border-red-600/60 text-red-300 hover:bg-red-800/50'
-            }`}
-          >
-            APPLY {netDamage !== null ? netDamage : '—'} DAMAGE
-          </button>
-          <button
-            onClick={handleMiss}
-            className="w-full bg-slate-800/60 border border-slate-600 text-slate-400
-              font-mono text-xs tracking-widest py-2 rounded
-              hover:bg-slate-700/60 transition-colors"
-          >
-            MISS / INTERCEPTED — DISMISS
-          </button>
-        </div>
+            {/* ── Confirm / dismiss ───────────────────────────────── */}
+            <div className="flex flex-col gap-2">
+              <button
+                disabled={netDamage === null}
+                onClick={handleApplyDamage}
+                className={`w-full font-mono text-xs tracking-widest py-2.5 rounded transition-colors ${
+                  netDamage === null
+                    ? 'bg-slate-800/40 border border-slate-700 text-slate-400 cursor-not-allowed'
+                    : 'bg-red-900/40 border border-red-600/60 text-red-300 hover:bg-red-800/50'
+                }`}
+              >
+                APPLY {netDamage !== null ? netDamage : '—'} DAMAGE
+              </button>
+              <button
+                onClick={handleMiss}
+                className="w-full bg-slate-800/60 border border-slate-600 text-slate-400 font-mono text-xs tracking-widest py-2 rounded hover:bg-slate-700/60 transition-colors"
+              >
+                MISS / INTERCEPTED — DISMISS
+              </button>
+            </div>
+          </>
+        )}
 
       </div>
     </Modal>
