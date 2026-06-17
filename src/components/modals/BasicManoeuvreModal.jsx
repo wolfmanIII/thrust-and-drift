@@ -1,6 +1,6 @@
 /**
  * BasicManoeuvreModal — basic-mode manoeuvre phase: change range band between two ships.
- * Enforces thrust cost from CRB §5.1 table. Bidirectional approach sums both ships' thrust.
+ * Cost: 1 thrust per band change (CRB p.161 non-vectorial — no hex distance scaling).
  * // MgT2e CRB p.161 — Fase di Manovra
  */
 
@@ -8,7 +8,9 @@ import { useState, useMemo } from 'react'
 import { Modal } from './Modal.jsx'
 import { useUiStore }    from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
-import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST } from '../../data/rangeBands.js'
+import { RANGE_BAND_ORDER } from '../../data/rangeBands.js'
+
+const BAND_CHANGE_COST = 1  // flat thrust cost per range band step (CRB p.161)
 
 function availableThrust(ship) {
   return Math.max(0,
@@ -49,7 +51,7 @@ export function BasicManoeuvreModal() {
   const canApproach = currentIdx > 0
   const canFlee     = currentIdx < RANGE_BAND_ORDER.length - 1
 
-  const cost = RANGE_BAND_MOVE_COST[currentBand] ?? 1
+  const cost = BAND_CHANGE_COST
 
   const resultIdx = direction === 'approach'
     ? Math.max(0, currentIdx - 1)
