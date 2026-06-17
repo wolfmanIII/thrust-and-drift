@@ -67,8 +67,8 @@ The right panel lists all saved ship profiles.
 | Control | Action |
 | ------- | ------ |
 | **COMBAT MODE** | Toggle between Vectorial and Basic before starting. |
-| **↺ RESUME** | Appears when an autosaved session is found. Click to restore instantly. The right panel shows the full saved roster (round, phase, ships by faction with hull bars). |
-| **✕** | Clears the autosave from IndexedDB. Appears next to ↺ RESUME. |
+| **🔄 RESUME** | Appears when an autosaved session is found. Click to restore instantly. The right panel shows the full saved roster (round, phase, ships by faction with hull bars). |
+| **✕** | Clears the autosave from IndexedDB. Appears next to 🔄 RESUME. |
 | **▶ NEW SESSION** | Clears any existing battle state and enters the combat map. |
 | **↓ RESUME FROM FILE** | Load a previously saved `.json` session. A preview screen shows the full roster before you confirm. |
 | **📖 FIELD MANUAL** | Opens this manual inside the app. |
@@ -115,7 +115,7 @@ Click **📖 Legend** (fixed button, top-right of the battle screen) to open the
 | **Beam weapons** | Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange) |
 | **Hit effects** | Impact burst (expanding sparks on target), Critical flash (red ring + label) |
 | **Movement effects** | Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line) |
-| **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔ + red ring), Missile exhausted (×) |
+| **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + red ring), Missile exhausted (×) |
 
 ### 3.2 Basic Mode View
 
@@ -134,7 +134,7 @@ The Status zone is hidden when none of these conditions are active.
 
 | Element | Description |
 | ------- | ----------- |
-| **DISTANCES panel** | Appears above the ship list. Lists every cross-faction pair with its current range band. Use **▼** (closer) / **▲** (further) to adjust a band directly — GM override, no thrust spent. |
+| **DISTANCES panel** | Appears above the ship list. Lists every cross-faction pair with its current range band. Use **⬇** (closer) / **⬆** (further) to adjust a band directly — GM override, no thrust spent. |
 
 Right-click anywhere in the background (not on a card) to open the global
 context menu (Roll Initiative, Add ship here).
@@ -277,7 +277,7 @@ Each ship manoeuvres **independently on its own initiative turn** — there is n
 | Control | Description |
 | ------- | ----------- |
 | **Target** | Select which enemy ship this manoeuvre targets. |
-| **▼ Approach / ▲ Flee** | Direction of movement. |
+| **⬇ Approach / ⬆ Flee** | Direction of movement. |
 | **Thrust slider** | Thrust this ship commits (0 → available thrust). |
 | **APPLY MANOEUVRE** | Confirm and spend thrust — range band changes by one step if this ship's thrust meets the threshold. Disabled if thrust is below the cost. |
 | **GM SET** | Override: sets the result band directly without spending thrust. Use this for initial setup and whenever thrust costs are impractical (e.g. small ships at Very Long). |
@@ -352,8 +352,8 @@ For each encounter the GM sees:
 
 - Both ship names and faction colours
 - Closest approach distance and range band
-- **[Ship A] FIRES** — opens the Attack Modal pre-set to Ship A; button shows **✓ FIRED** after resolving
-- **[Ship B] FIRES** — opens the Attack Modal pre-set to Ship B; button shows **✓ FIRED** after resolving
+- **[Ship A] FIRES** — opens the Attack Modal pre-set to Ship A; button shows **✅ FIRED** after resolving
+- **[Ship B] FIRES** — opens the Attack Modal pre-set to Ship B; button shows **✅ FIRED** after resolving
 - **PASS — LET THEM GO** — dismisses the encounter immediately with no attack for either ship
 
 **Initiative order applies** (TC p.177): attacks resolve at the initiative of the ship that fires first. The GM decides which ship acts first by clicking the corresponding **FIRES** button — the second ship's button remains locked until the first attack is resolved. The second ship fires only if it survives the first ship's attack; if destroyed, the Passing Encounter window closes automatically.
@@ -433,7 +433,7 @@ Missile Racks are selected directly in the Attack modal alongside other weapons.
 Select the `Missile Rack` entry in the weapon list, then:
 
 1. Select the **target** ship.
-2. Adjust the **missile count** using the `−` / `+` stepper. The maximum is capped by the ship's remaining magazine (`count × 12` per Missile Rack — *MgT2e CRB p.162*). Remaining ammo is shown next to the stepper; the button reads **⚠ NO AMMO** and is disabled when the magazine is empty.
+2. Adjust the **missile count** using the `−` / `+` stepper. The maximum is capped by the ship's remaining magazine (`count × 12` per Missile Rack — *MgT2e CRB p.162*). Remaining ammo is shown next to the stepper; the button reads **🚨 NO AMMO** and is disabled when the magazine is empty.
 3. Click **🚀 LAUNCH SALVO →** — no dice roll required.
 
 The salvo spawns as a missile token on the map, inheriting the launching ship's
@@ -522,7 +522,7 @@ Click **ANOTHER ACTION** to act with a second crew member, or **CLOSE** to exit.
 When an action is selected, the relevant skill level is pre-filled as the roll
 DM. The GM can override this value for specialisations
 (e.g. Engineer(M-Drive) 3 vs. generic Engineer 2).
-The **↺** button resets to the base skill level.
+The **🔄** button resets to the base skill level.
 
 ### 10.2 Available Actions
 
@@ -651,13 +651,13 @@ Every user action that changes game state pushes a snapshot to the undo stack
 
 | Control | Action |
 | ------- | ------ |
-| **⟲ Undo** | Restore the previous state. Appears in HUD when stack is non-empty. Shortcut: `Ctrl+Z` / `Cmd+Z`. |
-| **↷ Redo** | Re-apply an undone action. Appears in HUD when redo stack is non-empty. Shortcut: `Ctrl+Y` / `Cmd+Shift+Z`. |
+| **↩️ Undo** | Restore the previous state. Appears in HUD when stack is non-empty. Shortcut: `Ctrl+Z` / `Cmd+Z`. |
+| **↪️ Redo** | Re-apply an undone action. Appears in HUD when redo stack is non-empty. Shortcut: `Ctrl+Y` / `Cmd+Shift+Z`. |
 
 Both buttons are hidden when their respective stacks are empty — they appear
 only when relevant.
 
-> The battle log is **not** rolled back on undo. Instead, a `↩ Undo` entry is
+> The battle log is **not** rolled back on undo. Instead, a `↩️ Undo` entry is
 > appended to the log so the action history remains readable.
 
 ---
@@ -669,7 +669,7 @@ only when relevant.
 The app autosaves to IndexedDB after every significant action (ships
 added/removed, damage applied, phase advanced, etc.). No manual trigger needed.
 
-On next visit, the **↺ RESUME AUTOSAVE** button appears on the Dashboard with
+On next visit, the **🔄 RESUME AUTOSAVE** button appears on the Dashboard with
 round, phase, and ship count.
 
 ### 13.2 Manual Save
@@ -688,7 +688,7 @@ before you confirm loading.
 Ship profiles are separate from battle sessions. Use **↑ EXPORT** and
 **↓ IMPORT** in the profile panel to share or back up profiles independently.
 
-> Clicking **⌂** in the HUD returns to the Dashboard. A confirmation modal
+> Clicking **🏠** in the HUD returns to the Dashboard. A confirmation modal
 > warns that unsaved battle data will be lost — save first if you need to
 > resume.
 
@@ -737,7 +737,7 @@ Enter dice manually for each side. The app computes and compares totals live.
 
 ### 14.4 Micro-Round Flow
 
-Open the round from the **HUD dogfight tracker** (⚔ DOGFIGHT panel, top-left).
+Open the round from the **HUD dogfight tracker** (⚔️ DOGFIGHT panel, top-left).
 
 #### Step 1 — Declare escape (optional)
 
@@ -779,7 +779,7 @@ automatically and all ships return to normal combat flow.
 Ships in a dogfight display:
 
 - **Pulsing amber ring** around the token
-- **⚔ badge** top-right of the token
+- **⚔️ badge** top-right of the token
 - Ghost position and velocity arrow are hidden (no movement during dogfight)
 
 ### 14.6 Escape Mid-Dogfight
@@ -809,7 +809,7 @@ Boarding is a sub-system that activates when an attacker moves adjacent to a tar
 
 ### 15.1 Triggering a Boarding Action
 
-Right-click the **attacker ship** and select **⚔ Board [target name]…**
+Right-click the **attacker ship** and select **⚔️ Board [target name]…**
 
 The option is visible only when:
 
@@ -833,22 +833,22 @@ The **Boarding Setup** modal opens. Select the target and confirm. The boarding 
 
 ### 15.3 Phase 2 — Contact
 
-The **⚔ CONTACT** modal opens. The GM selects the entry method:
+The **⚔️ CONTACT** modal opens. The GM selects the entry method:
 
 | Method | Check | Difficulty | Time | DM |
 | -------- | ------- | ------------ | ------ | ---- |
 | Airlock (cooperative) | None | — | Instant | — |
 | Airlock (forced) | Mechanic (STR) | 14+ | 2D rounds + 1D | — |
-| Maintenance Hatch | Mechanic (STR) | 12+ | 2D rounds | — ⚠ |
+| Maintenance Hatch | Mechanic (STR) | 12+ | 2D rounds | — 🚨 |
 | Breaching Tube | None | — | < 2 min | — |
 | Forced Linkage Apparatus | Pilot (DEX) | 8+ | Immediate | +2 |
-| Hull Cut | Mechanic (DEX) | 8+/round | Per round | — ⚠ |
+| Hull Cut | Mechanic (DEX) | 8+/round | Per round | — 🚨 |
 
-⚠ = decompression risk if compartment not evacuated.
+🚨 = decompression risk if compartment not evacuated.
 
 **Modifiers:**
 
-- **↻ Tumbling** — defender rotating the ship: DM −1 to all Contact checks
+- **🌀 Tumbling** — defender rotating the ship: DM −1 to all Contact checks
 - **🔗 Forced Linkage** — DM +2 to all Contact checks; defender cannot manoeuvre
 
 **Hull Cut tracker:** select component (Hatch / Airlock / Hull) and cutting tool, roll each round. Damage reduces component Resilience; breach achieved when damage ≥ breach threshold.
@@ -857,7 +857,7 @@ When entry is secured, click **ADVANCE TO CONFLICT →**.
 
 ### 15.4 Phase 3 — Conflict
 
-The **⚔ CONFLICT** modal tracks the boarding fight.
+The **⚔️ CONFLICT** modal tracks the boarding fight.
 
 **Tactical objectives** — check each when captured:
 
@@ -880,7 +880,7 @@ When the fight is resolved, click **END CONFLICT — ADVANCE TO SECURITY →**.
 
 ### 15.5 Phase 4 — Security
 
-The **⚔ SECURITY — BOARDING OUTCOME** modal resolves the action.
+The **⚔️ SECURITY — BOARDING OUTCOME** modal resolves the action.
 
 | Outcome | Effect |
 | --------- | -------- |
@@ -894,10 +894,10 @@ Click **CONFIRM OUTCOME** to close the boarding.
 
 ### 15.6 HUD Indicator
 
-While a boarding is active, the HUD shows a **⚔ BOARDING** badge below the standard tracker:
+While a boarding is active, the HUD shows a **⚔️ BOARDING** badge below the standard tracker:
 
 ```text
-⚔ BOARDING   [Attacker] → [Defender]   CONTACT →
+⚔️ BOARDING   [Attacker] → [Defender]   CONTACT →
 ```
 
 Click the phase button to reopen the relevant modal at any time.
