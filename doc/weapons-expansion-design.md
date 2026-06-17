@@ -8,7 +8,7 @@
 ## Sommario
 
 | Tier | Armi | Complessità | Nuove meccaniche |
-|------|------|-------------|------------------|
+| ------ | ------ | ------------- | ------------------ |
 | 1 | Fusion Gun, Plasma Gun | Bassa | Nessuna — solo dati |
 | 2 | 7 Barbette standard | Media | `damageMultiple` post-armatura |
 | 3a | Missile Barbette | Media | Salva fissa da 5, ammo separato |
@@ -71,7 +71,7 @@ La funzione `drawLaserRay(ctx, from, to, weaponType, t)` ha uno switch sul `weap
 ### Dati RAW
 
 | Weapon | TL | Range | Damage | Traits |
-|--------|----|-------|--------|--------|
+| -------- | ---- | ------- | -------- | -------- |
 | Fusion Gun | 14 | Medium | 4D | Radiation |
 | Plasma Gun | 11 | Medium | 3D | — |
 
@@ -153,7 +153,7 @@ Nessuna altra modifica.
 
 Formula:
 
-```
+```text
 finalDamage = max(0, rawDiceRoll + attackEffect - effectiveArmour) × damageMultiple
 ```
 
@@ -162,7 +162,7 @@ Il moltiplicatore si applica **dopo** l'armatura, non prima.
 ### Dati RAW — Barbettes (HG p.30)
 
 | Weapon | TL | Range | Damage | Traits | DM |
-|--------|----|-------|--------|--------|----|
+| -------- | ---- | ------- | -------- | -------- | ---- |
 | Beam Laser Barbette | 10 | Medium | 2D | — | +4 |
 | Fusion Barbette | 12 | Medium | 5D | AP 3, Radiation | 0 |
 | Particle Barbette | 11 | Very Long | 4D | Radiation | 0 |
@@ -378,8 +378,8 @@ Barbettes cannot be used for Point Defence reactions.
 
 ### Differenze da Missile Rack
 
-| | Missile Rack | Missile Barbette |
-|--|--|--|
+| Missile Rack | Missile Barbette |
+| -- | -- | -- |
 | Salvo | 1–N (player-chosen) | Fisso: 5 |
 | Ammo totale | 12 per rack | 25 per barbette |
 | Damage per missile | 4D | 4D |
