@@ -6,6 +6,38 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.19.0] — 2026-06-17
+
+### Fixed
+
+- **WCAG AA contrast — definitive floor** — three-pass fix for all interface text:
+  1. Replaced `disabled:opacity-60/50` on coloured buttons with explicit `disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent`; opacity on buttons collapses text, border, and background together, failing even the 3:1 large-text threshold.
+  2. Promoted all `text-slate-500` and `text-slate-600` to `text-slate-400` (≥ 6.2:1 on `slate-950` — passes AA normal text). Affected 28 JSX files.
+  3. Promoted all remaining `text-slate-700` text labels to `text-slate-400`. Affected CatalogPanel, Dashboard, AttackModal, InitiativeModal, ContextMenu, ChangelogScreen.
+  - `text-slate-400` is now the minimum for any visible text. `text-slate-300/200/100` used for emphasis; no text below `text-slate-400` in any component.
+
+### Changed
+
+- **Sci-fi emoji icon system** — replaced all non-emoji Unicode glyphs with thematic emojis across 26 JSX files and all documentation:
+  - `⚠` → `🚨` (alarm klaxon — warnings, errors, critical hits, NO AMMO)
+  - `⚔` → `⚔️` (crossed swords emoji form — boarding/dogfight titles and icons)
+  - `✓` → `✅` (check marks — success states, EVADING, BREACH, SAVE CHANGES)
+  - `↺` / `↻` → `🔄` / `🌀` (reroll/resume / tumbling rotation)
+  - `⟲` / `↷` → `↩️` / `↪️` (HUD undo/redo buttons)
+  - `⌂` → `🏠` (HUD home/dashboard button, enlarged to `text-base`)
+  - `✦` → `✨` (placement banner sparkle)
+  - `◦` → `▸` (dogfight result bullets: ESCAPED, SHORT RANGE, TIE)
+  - `▼ Approach` / `▲ Flee` → `⬇ Approach` / `⬆ Flee` (manoeuvre direction buttons)
+  - `← BACK` → `⬅️ BACK` (back buttons in HelpScreen and ChangelogScreen)
+  - Undo/redo glyph buttons bumped from `text-xs` to `text-sm` for legibility.
+  - field-manual.md and HelpScreen.jsx updated to match all icon changes.
+
+### Tests
+
+- 709 (no change)
+
+---
+
 ## [1.18.1] — 2026-06-16
 
 ### Fixed

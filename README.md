@@ -32,14 +32,14 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase AND when it is that ship's turn (initiative order enforced in Acceleration, Attack, Actions phases) |
 | **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals, sensor lock → target, locked-by attacker, inbound missiles (200ms delay) |
 | **Battle log** | Timestamped event log with colour-coded entry types |
-| **Undo/Redo (Ctrl+Z / Ctrl+Y)** | Snapshot-based undo/redo — 20-step stacks; `⟲` `↷` buttons in HUD; new action clears redo |
+| **Undo/Redo (Ctrl+Z / Ctrl+Y)** | Snapshot-based undo/redo — 20-step stacks; `↩️` `↪️` buttons in HUD; new action clears redo |
 | **Session save / resume** | Export session to JSON; resume flow shows a full preview before loading |
 | **Autosave** | IndexedDB autosave after every significant action — persists ships, missiles, dogfights, boardings, range bands, and log; Dashboard shows full roster preview; one-click restore or clear |
 | **Error boundary** | Global React error boundary — catches crashes, shows recovery UI |
 | **Profile I/O** | Import/export ship profiles via JSON files |
 | **Safety modals** | Confirm before deleting profiles; confirm before leaving battle without saving |
 | **Legal footer** | Fixed Mongoose Publishing disclaimer on all screens; "About" modal with full Fair Use text |
-| **Ship tokens** | 6 silhouette shapes (delta, needle, freighter, gunship, cruiser, capital) — chosen per-placement; each rotates to face velocity direction; per-shape bridge/cockpit detail overlay; HP arc (green→yellow→red); selection ring; dogfight pulsing amber ring + ⚔ badge |
+| **Ship tokens** | 6 silhouette shapes (delta, needle, freighter, gunship, cruiser, capital) — chosen per-placement; each rotates to face velocity direction; per-shape bridge/cockpit detail overlay; HP arc (green→yellow→red); selection ring; dogfight pulsing amber ring + ⚔️ badge |
 | **Missile hover tooltip** | Hover a missile salvo token (150 ms) to see type, launcher → target with faction colour dots, and a thrust-remaining bar (cyan → yellow → red); portal overlay, clears on pan/click |
 | **Dogfight system** | Close-range sub-system: 6 micro-rounds per standard round; Pilot opposed checks; tonnage/thrust/multi-enemy DMs; escape via thrust advantage or pursuit check; pulsing token visuals |
 | **Boarding system** | 4-phase boarding action (HG 2022): Contact → Conflict → Security; 6 entry methods incl. hull-cut tracker; stacking rolls; missed-shot table; Bridge/Engineering/Turrets objectives; optional faction transfer on capture; HUD badge per active boarding |
@@ -85,7 +85,7 @@ A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 
 ### 2 — Start or resume a session
 
-- **↺ RESUME / ✕** — if an autosaved session exists, a compact row appears. `↺ RESUME` restores instantly; `✕` clears the IndexedDB record. The right panel shows the full saved roster (round, phase, ships by faction with hull bars).
+- **🔄 RESUME / ✕** — if an autosaved session exists, a compact row appears. `🔄 RESUME` restores instantly; `✕` clears the IndexedDB record. The right panel shows the full saved roster (round, phase, ships by faction with hull bars).
 - **▶ NEW SESSION** — resets battle state and enters the combat map
 - **↓ RESUME FROM FILE** — load a `.json` file; a preview screen shows round, phase, and ship roster before confirming
 
@@ -126,7 +126,7 @@ In the HUD (top-left), click **💾 SAVE** at any time to download the current
 session as a `.json` file. Use **↓ RESUME FROM FILE** on the Dashboard to
 restore it.
 
-Click **⌂** in the HUD to return to the Dashboard — a confirmation modal warns
+Click **🏠** in the HUD to return to the Dashboard — a confirmation modal warns
 that unsaved data will be lost.
 
 ---
@@ -152,7 +152,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-709 tests across utils, Zustand stores, hooks, and UI components. (v1.18.1)
+709 tests across utils, Zustand stores, hooks, and UI components. (v1.19.0)
 
 ---
 
