@@ -6,6 +6,34 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.20.0] — 2026-06-17
+
+### Added
+
+- **Weapons expansion** (MgT2e HG pp.28–31):
+  - 11 new weapons: Fusion Gun, Plasma Gun, Ion Cannon, Torpedo, Missile Barbette, Pulse Laser Barbette, Beam Laser Barbette, Particle Barbette, Fusion Barbette, Plasma Barbette, Railgun Barbette
+  - **AP trait** mechanically active: `effectiveArmour = max(0, armour − apReduction)` before damage; values: Railgun 4, Fusion Barbette 3, Plasma Barbette 2, Railgun Barbette 5
+  - **Barbette damage multiplier ×3**: `netDamage = max(0, roll + Effect − effectiveArmour) × 3` — applied after armour, not to the raw roll (HG p.29)
+  - **Ion Cannon**: no hull damage on hit; applies `ionPenalty` (2D6 roll) for 1 round (D3 rounds if Effect ≥ 6); penalty decremented by `buildNextRoundState` each round; cleared when `ionRoundsLeft` reaches 0 (HG p.30)
+  - **Torpedo**: 6D damage per torpedo, 3 per barbette, red token, guided (Smart trait); stacks as a separate salvo type vs 4D missiles (HG p.30–31)
+  - **Missile Barbette**: fixed 5-missile salvo, 25 canisters total (5 salvos) (HG p.29)
+  - **Sandcaster ammo tracking**: 20 canisters per sandcaster slot; decremented by Disperse Sand reaction; shown on bento cards, ship detail modal, and tooltip
+- **Canvas effects**: Ion burst (one-shot blue ring on hit), Ion aura (persistent pulsing ring while `ionRoundsLeft > 0`), Torpedo token (red/amber silhouette)
+- **Basic mode bento card UI**: ION NR header badge, ion disruption status row (penalty + rounds), sandcaster ammo row (🪨 N/max, yellow < 25%, red at 0)
+- **ShipDetailModal**: new Ammunition section showing missile ammo and sand canisters (shown only when the ship has launchers/sandcasters)
+- **ShipTooltip**: ion disruption stat row, separated missile/torpedo inbound counts
+
+### Fixed
+
+- `isMissileBarbette` in `AttackConfigStep` was a dangling closure variable — now passed as an explicit prop (caused 3 pre-existing test failures in isolation)
+- `BasicBattleView` missile ammo display: `countMissileRacks` aliased to return total capacity but code was multiplying by 12 again — removed the double-multiply
+
+### Tests
+
+- 815 (+106 from v1.19.0): AP parsing (8 cases), ammo capacity (8 cases — Rack/Barbette/Torpedo), sandcaster count (6 cases), `applyIonDamage` (4 cases), ion round decrement (3 cases), `spendSandAmmo` (4 cases), weapon catalogue completeness (4 groups), barbette multiplier (6 per-weapon cases), Ion Cannon/Torpedo/Missile Barbette invariants, `BasicBattleView` ION badge, ion status rows, sandcaster row, correct ammo max for all launcher types
+
+---
+
 ## [1.19.0] — 2026-06-17
 
 ### Fixed
