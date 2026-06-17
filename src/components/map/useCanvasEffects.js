@@ -25,6 +25,8 @@ import {
   drawMissileExhausted,
   drawDogfightAlert,
   drawShipDestroyed,
+  drawIonBurst,
+  drawIonAura,
 } from './effectRenderers.js'
 
 const HEX_SIZE = 32  // must match useCanvasRenderer.js
@@ -93,6 +95,12 @@ function renderOneshotEffect(ctx, effect, t, size, ox, oy) {
       drawShipDestroyed(ctx, cx, cy, t)
       break
     }
+    case 'ion_burst': {
+      if (!effect.hex) break
+      const { x: cx, y: cy } = hpx(effect.hex)
+      drawIonBurst(ctx, cx, cy, t)
+      break
+    }
   }
 }
 
@@ -122,6 +130,13 @@ function renderPersistentEffects(ctx, ships, missiles, size, ox, oy, timestamp) 
     if (!ship.evasiveThrust) continue
     const { x: cx, y: cy } = hpx(ship.position)
     drawEvasiveAura(ctx, cx, cy, timestamp)
+  }
+
+  // Ion disruption aura
+  for (const ship of ships) {
+    if (!(ship.ionRoundsLeft > 0) || ship.isDestroyed) continue
+    const { x: cx, y: cy } = hpx(ship.position)
+    drawIonAura(ctx, cx, cy, timestamp)
   }
 
   // Exhausted missiles (thrust = 0 before reaching target)

@@ -91,15 +91,20 @@ function buildNextRoundState(s) {
     round: s.round + 1,
     phase: 'initiative',
     currentActorIndex: 0,
-    ships: s.ships.map((sh) => ({
-      ...sh,
-      thrustUsedThisRound: 0,
-      thrustBonusThisRound: 0,
-      hasActedThisPhase: false,
-      evasiveThrust: 0,
-      firedTurrets: [],
-      usedCrewMembers: [],
-    })),
+    ships: s.ships.map((sh) => {
+      const ionNext = Math.max(0, (sh.ionRoundsLeft ?? 0) - 1)
+      return {
+        ...sh,
+        thrustUsedThisRound: 0,
+        thrustBonusThisRound: 0,
+        hasActedThisPhase: false,
+        evasiveThrust: 0,
+        firedTurrets: [],
+        usedCrewMembers: [],
+        ionRoundsLeft: ionNext,
+        ionPenalty: ionNext > 0 ? (sh.ionPenalty ?? 0) : 0,
+      }
+    }),
     log: [...s.log, makeLogEntry({
       round: s.round + 1,
       phase: 'initiative',
@@ -747,6 +752,25 @@ const useBattleStore = create((set, get) => {
   },
 
   /**
+   * Apply ion disruption to a ship. Does not damage hull.
+   * Reduces thrustAvailable by ionPower for ionRounds rounds.
+   * Clears automatically via buildNextRoundState at round boundary.
+   * // MgT2e HG p.30 — Ion weapons
+   * @param {string} targetId
+   * @param {number} ionPower   Thrust penalty (2D6 roll result)
+   * @param {number} ionRounds  Duration in rounds (1, or D3 if effect ≥ 6)
+   */
+  applyIonDamage: (targetId, ionPower, ionRounds) => {
+    set((s) => ({
+      ships: s.ships.map((sh) => sh.id !== targetId ? sh : {
+        ...sh,
+        ionPenalty:    ionPower,
+        ionRoundsLeft: ionRounds,
+      }),
+    }))
+  },
+
+  /**
    * Record a critical hit on a ship. Caller is responsible for computing effective
    * severity (including stacking) before calling this action.
    * Handles M-Drive thrustPenalty. Does not roll hull extra damage — caller handles that.
@@ -917,6 +941,7 @@ const useBattleStore = create((set, get) => {
         ship.profile.thrust + (ship.thrustBonusThisRound ?? 0)
         - ship.thrustUsedThisRound
         - (ship.thrustPenalty ?? 0)
+        - (ship.ionPenalty ?? 0)
         - spent
       )
       const clamped = Math.max(0, Math.min(amount, maxReaction))

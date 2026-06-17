@@ -136,7 +136,7 @@ export function useMapInteraction({ hexSize, canvasRef, mouseHexRef }) {
       if (ship) {
         const thrustAvailable = Math.max(0,
           ship.profile.thrust + (ship.thrustBonusThisRound ?? 0)
-          - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0)
+          - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0) - (ship.ionPenalty ?? 0)
         )
         const delta = computeClampedDelta(mouseHexRef.current, ship.position, thrustAvailable)
         const cost  = hexDistance({ q: 0, r: 0 }, delta)

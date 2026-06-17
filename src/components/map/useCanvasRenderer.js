@@ -114,7 +114,7 @@ function drawGrid(ctx, width, height, offset, zoom) {
 function drawThrustTargeting(ctx, ship, mouseHex, size, ox, oy) {
   const thrustAvailable = Math.max(0,
     ship.profile.thrust + (ship.thrustBonusThisRound ?? 0)
-    - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0)
+    - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0) - (ship.ionPenalty ?? 0)
   )
   const delta     = computeClampedDelta(mouseHex, ship.position, thrustAvailable)
   const cost      = hexDistance({ q: 0, r: 0 }, delta)

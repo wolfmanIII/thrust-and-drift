@@ -54,7 +54,7 @@ export function ShipTooltip() {
   const ship = ships.find((s) => s.id === hoveredShip.shipId)
   if (!ship) return null
 
-  const thrustAvail  = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0))
+  const thrustAvail  = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0) - (ship.ionPenalty ?? 0))
   const vectorMag    = hexMagnitude(ship.vector)
   const factionColor = FACTION_COLOR[ship.faction] ?? FACTION_COLOR.neutral
   const inbound      = missiles.filter((m) => m.target === ship.id)

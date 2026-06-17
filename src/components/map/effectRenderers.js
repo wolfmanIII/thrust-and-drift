@@ -557,3 +557,68 @@ export function drawDogfightAlert(ctx, cx, cy, timestamp) {
   ctx.setLineDash([])
   ctx.restore()
 }
+
+/**
+ * One-shot electric ring burst for Ion Cannon hits.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} cx
+ * @param {number} cy
+ * @param {number} t  Progress 0→1
+ */
+export function drawIonBurst(ctx, cx, cy, t) {
+  ctx.save()
+  const radius    = TOKEN_RADIUS + lerp(0, 28, t)
+  const alpha     = t < 0.2 ? t / 0.2 : Math.pow(1 - (t - 0.2) / 0.8, 1.5)
+  const ringWidth = lerp(4, 1, t)
+
+  ctx.globalAlpha = alpha * 0.4
+  ctx.strokeStyle = '#93c5fd'
+  ctx.lineWidth   = ringWidth + 4
+  ctx.shadowColor = '#60a5fa'
+  ctx.shadowBlur  = 12
+  ctx.beginPath()
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+  ctx.stroke()
+
+  ctx.globalAlpha = alpha * 0.85
+  ctx.strokeStyle = '#60a5fa'
+  ctx.lineWidth   = ringWidth
+  ctx.shadowBlur  = 6
+  ctx.beginPath()
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+  ctx.stroke()
+
+  if (t > 0.15) {
+    const t2 = (t - 0.15) / 0.85
+    ctx.globalAlpha = Math.pow(1 - t2, 2) * 0.6
+    ctx.strokeStyle = '#bfdbfe'
+    ctx.lineWidth   = 2
+    ctx.beginPath()
+    ctx.arc(cx, cy, TOKEN_RADIUS + lerp(0, 18, t2), 0, Math.PI * 2)
+    ctx.stroke()
+  }
+  ctx.restore()
+}
+
+/**
+ * Persistent pulsing ion aura for ships under active ion disruption.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} cx
+ * @param {number} cy
+ * @param {number} timestamp  rAF timestamp (ms)
+ */
+export function drawIonAura(ctx, cx, cy, timestamp) {
+  const pulse = 0.55 + 0.45 * Math.sin(timestamp / 260)
+  ctx.save()
+  ctx.globalAlpha = pulse * 0.55
+  ctx.strokeStyle = '#60a5fa'
+  ctx.lineWidth   = 2
+  ctx.shadowColor = '#3b82f6'
+  ctx.shadowBlur  = 8
+  ctx.setLineDash([5, 3])
+  ctx.beginPath()
+  ctx.arc(cx, cy, TOKEN_RADIUS + 5, 0, Math.PI * 2)
+  ctx.stroke()
+  ctx.setLineDash([])
+  ctx.restore()
+}

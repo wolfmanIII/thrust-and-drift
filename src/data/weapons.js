@@ -17,7 +17,7 @@
  *   - notes:      Short rule clarification
  */
 
-/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'|'Pulse Laser Barbette'|'Beam Laser Barbette'|'Particle Barbette'|'Fusion Barbette'|'Plasma Barbette'|'Railgun Barbette'|'Missile Barbette'|'Torpedo'} WeaponType */
+/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'|'Pulse Laser Barbette'|'Beam Laser Barbette'|'Particle Barbette'|'Fusion Barbette'|'Plasma Barbette'|'Railgun Barbette'|'Missile Barbette'|'Torpedo'|'Ion Cannon'} WeaponType */
 
 /**
  * Weapon stat table.
@@ -130,6 +130,19 @@ export const WEAPONS = {
     notes: 'High-energy plasma stream.',
   },
 
+  'Ion Cannon': {
+    id: 'Ion Cannon',
+    label: 'Ion Cannon',
+    attackDM: 0,
+    damageDice: 2,         // 2D6 → thrust penalty (not hull damage). // HG p.30
+    damageBonus: 0,
+    maxRange: 'Medium',    // HG p.30
+    damageMultiple: 1,
+    traits: ['Ion'],
+    turretOnly: false,
+    bayOnly: false,
+    notes: 'Does not damage hull. On hit: reduces target thrust by 2D6 for 1 round (D3 if Effect ≥ 6). HG p.30.',
+  },
   'Torpedo': {
     id: 'Torpedo',
     label: 'Torpedo',
