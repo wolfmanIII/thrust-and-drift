@@ -115,12 +115,19 @@ export function ShipTooltip() {
         {lockerName && (
           <StatRow label="Locked by" value={lockerName} />
         )}
-        {inbound.length > 0 && (
-          <StatRow
-            label="Inbound"
-            value={`⚡ ${inbound.reduce((n, m) => n + m.count, 0)}× missile${inbound.reduce((n, m) => n + m.count, 0) !== 1 ? 's' : ''}`}
-          />
+        {(ship.ionRoundsLeft ?? 0) > 0 && (
+          <StatRow label="Ion disruption" value={`-${ship.ionPenalty ?? 0} thrust (${ship.ionRoundsLeft}R)`} accent />
         )}
+        {(() => {
+          const mc = inbound.filter((m) => m.type !== 'Torpedo').reduce((n, m) => n + m.count, 0)
+          const tc = inbound.filter((m) => m.type === 'Torpedo').reduce((n, m) => n + m.count, 0)
+          return (
+            <>
+              {mc > 0 && <StatRow label="Inbound" value={`⚡ ${mc}× missile${mc !== 1 ? 's' : ''}`} />}
+              {tc > 0 && <StatRow label="Inbound" value={`⚡ ${tc}× torpedo${tc !== 1 ? 'es' : ''}`} />}
+            </>
+          )
+        })()}
       </div>
 
       {/* ── Critical hits ──────────────────────────────────────────────── */}

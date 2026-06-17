@@ -8,7 +8,7 @@
 import { useRef, useCallback, useMemo } from 'react'
 import { useBattleStore }    from '../../store/battleStore.js'
 import { useUiStore }        from '../../store/uiStore.js'
-import { countMissileRacks } from '../../utils/combat.js'
+import { countMissileAmmoCapacity, countSandcasters } from '../../utils/combat.js'
 import { RANGE_BAND_ORDER }  from '../../data/rangeBands.js'
 
 // ── Shared sub-components ─────────────────────────────────────────────────────
@@ -41,8 +41,8 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
   const inbound  = useMemo(() => missiles.filter((m) => m.target    === ship.id), [missiles, ship.id])
   const launched = useMemo(() => missiles.filter((m) => m.launchedBy === ship.id), [missiles, ship.id])
 
-  const rackCount = countMissileRacks(ship.profile)
-  const maxAmmo   = rackCount * 12
+  const ammoMax     = countMissileAmmoCapacity(ship.profile)
+  const sandAmmoMax = countSandcasters(ship.profile)
 
   const lockerName = ship.sensorLockedBy
     ? (ships.find((s) => s.id === ship.sensorLockedBy)?.profile.name ?? '?')
@@ -80,7 +80,9 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
     launched.length > 0 ||
     (ship.turretsNeedingReload ?? 0) > 0 ||
     (ship.criticalHits?.length > 0 && !ship.isDestroyed) ||
-    rackCount > 0
+    ammoMax > 0 ||
+    sandAmmoMax > 0 ||
+    (ship.ionRoundsLeft ?? 0) > 0
 
   return (
     <div
@@ -108,6 +110,9 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
           )}
           {!ship.isDestroyed && ship.evasiveThrust > 0 && (
             <Badge label={`EVA ${ship.evasiveThrust}`} className="text-sky-400 border-sky-700" />
+          )}
+          {(ship.ionRoundsLeft ?? 0) > 0 && (
+            <Badge label={`ION ${ship.ionRoundsLeft}R`} className="text-blue-400 border-blue-700" />
           )}
           {lockerName && (
             <Badge label="LOCKED" className="text-red-300 border-red-700" />
@@ -175,13 +180,29 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
             </StatusRow>
           )}
 
-          {rackCount > 0 && (
+          {(ship.ionRoundsLeft ?? 0) > 0 && (
+            <StatusRow icon="⚡" className="text-blue-400">
+              Ion disruption — -{ship.ionPenalty ?? 0} thrust ({ship.ionRoundsLeft} round{ship.ionRoundsLeft !== 1 ? 's' : ''})
+            </StatusRow>
+          )}
+
+          {ammoMax > 0 && (
             <StatusRow icon="🚀" className={
-              ship.missileAmmoTotal === 0 ? 'text-red-400'
-              : (ship.missileAmmoTotal ?? maxAmmo) <= maxAmmo * 0.25 ? 'text-yellow-400'
+              (ship.missileAmmoTotal ?? ammoMax) === 0 ? 'text-red-400'
+              : (ship.missileAmmoTotal ?? ammoMax) <= ammoMax * 0.25 ? 'text-yellow-400'
               : 'text-slate-300'
             }>
-              Ammo {ship.missileAmmoTotal ?? maxAmmo}/{maxAmmo}
+              Ammo {ship.missileAmmoTotal ?? ammoMax}/{ammoMax}
+            </StatusRow>
+          )}
+
+          {sandAmmoMax > 0 && (
+            <StatusRow icon="🪨" className={
+              (ship.sandAmmoTotal ?? sandAmmoMax) === 0 ? 'text-red-400'
+              : (ship.sandAmmoTotal ?? sandAmmoMax) <= sandAmmoMax * 0.25 ? 'text-yellow-400'
+              : 'text-slate-300'
+            }>
+              Sand {ship.sandAmmoTotal ?? sandAmmoMax}/{sandAmmoMax}
             </StatusRow>
           )}
 
