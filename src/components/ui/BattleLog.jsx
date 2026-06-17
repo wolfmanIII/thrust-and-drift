@@ -61,11 +61,11 @@ export function BattleLog() {
           >
             <span>{collapsed ? '▲' : '▼'}</span>
             <span>BATTLE LOG</span>
-            <span className="text-slate-500">({log.length})</span>
+            <span className="text-slate-400">({log.length})</span>
           </button>
           <button
             onClick={clearLog}
-            className="ml-auto text-slate-500 hover:text-red-400 font-mono text-xs transition-colors"
+            className="ml-auto text-slate-400 hover:text-red-400 font-mono text-xs transition-colors"
           >
             CLEAR
           </button>
@@ -75,7 +75,7 @@ export function BattleLog() {
         {!collapsed && (
           <div ref={listRef} className="flex-1 overflow-y-auto px-3 py-1 space-y-px">
             {visible.length === 0 && (
-              <p className="text-slate-600 font-mono text-xs italic">No events recorded.</p>
+              <p className="text-slate-400 font-mono text-xs italic">No events recorded.</p>
             )}
             {visible.map((entry) => (
               <div key={entry.id} className="flex items-start gap-2 font-mono text-xs leading-relaxed">
@@ -90,7 +90,7 @@ export function BattleLog() {
                     onClick={() => reopenMissileImpact(entry.details.impact)}
                     className={`shrink-0 leading-none transition-colors ${
                       impactBusy
-                        ? 'text-slate-600 cursor-not-allowed'
+                        ? 'text-slate-400 cursor-not-allowed'
                         : 'text-amber-500 hover:text-amber-300'
                     }`}
                     title={impactBusy ? 'Resolve pending modals first' : 'Re-open impact resolution'}

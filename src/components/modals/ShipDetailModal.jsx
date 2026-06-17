@@ -69,7 +69,7 @@ export function ShipDetailModal() {
                 ? profile.crew
                 : migrateCrew(profile.crew ?? {})
               if (crewArray.length === 0) {
-                return <p className="text-slate-600 font-mono text-xs italic">No crew.</p>
+                return <p className="text-slate-400 font-mono text-xs italic">No crew.</p>
               }
               return crewArray.map((member) => {
                 const skillStr = CREW_SKILLS
@@ -85,7 +85,7 @@ export function ShipDetailModal() {
 
           <Section title="Weapons">
             {(profile.turrets ?? []).length === 0 && (
-              <p className="text-slate-600 font-mono text-xs italic">None</p>
+              <p className="text-slate-400 font-mono text-xs italic">None</p>
             )}
             {(profile.turrets ?? []).map((t) => (
               <div key={t.slot} className="py-0.5">

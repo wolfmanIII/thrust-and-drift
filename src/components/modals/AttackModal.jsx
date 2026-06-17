@@ -66,7 +66,7 @@ function ReactionsPanel({
       {/* Evasive Action — 1 thrust, DM fixed = −pilotSkill (CRB p.171) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between font-mono text-xs text-slate-400">
-          <span>Evasive Action <span className="text-slate-700">(CRB p.171)</span></span>
+          <span>Evasive Action <span className="text-slate-400">(CRB p.171)</span></span>
           <span>Pilot {targetPilotSkill} · {availableThrust} thrust avail.</span>
         </div>
         <button
@@ -235,7 +235,7 @@ function AttackConfigStep({
           <p className="text-slate-400 font-mono text-xs mb-1.5">Weapon</p>
           <div className="flex flex-col gap-1">
             {availableWeapons.length === 0 && (
-              <p className="text-slate-600 font-mono text-xs italic">No offensive weapons available.</p>
+              <p className="text-slate-400 font-mono text-xs italic">No offensive weapons available.</p>
             )}
             {availableWeapons.map((w) => {
               const wDef = WEAPONS[w.weaponName]
@@ -253,7 +253,7 @@ function AttackConfigStep({
                 >
                   <span className="flex items-center justify-between gap-2">
                     <span>
-                      <span className="text-slate-500 mr-1.5">T{w.turretSlot}</span>
+                      <span className="text-slate-400 mr-1.5">T{w.turretSlot}</span>
                       {w.weaponName}
                     </span>
                     {wOutOfRange && (
@@ -261,7 +261,7 @@ function AttackConfigStep({
                     )}
                   </span>
                   {wDef && (
-                    <span className="text-slate-500">
+                    <span className="text-slate-400">
                       {w.weaponName === 'Missile Rack' ? 'Guided · 4D dmg/missile · Special' : (
                         <>
                           DM {wDef.attackDM >= 0 ? `+${wDef.attackDM}` : wDef.attackDM}
@@ -325,7 +325,7 @@ function AttackConfigStep({
               >
                 +
               </button>
-              <span className="text-slate-500 font-mono text-xs ml-2">
+              <span className="text-slate-400 font-mono text-xs ml-2">
                 missiles · guided munitions
               </span>
             </div>
@@ -634,7 +634,7 @@ function AttackDamageStep({ damageDice, effectBonus, armor, isPlayer, damageResu
                 <button
                   type="button"
                   onClick={() => { const r = rollDice(damageDice, 6); setManualRaw(r.total.toString()) }}
-                  className="text-slate-500 hover:text-(--neon-cyan) font-mono text-sm transition-colors"
+                  className="text-slate-400 hover:text-(--neon-cyan) font-mono text-sm transition-colors"
                   title="Auto-roll"
                   aria-label="Auto-roll damage dice"
                 >
@@ -826,7 +826,7 @@ function AttackCriticalStep({
                     <button
                       type="button"
                       onClick={() => { const r = rollDice(extraDice, 6); setManualExtra(r.total.toString()) }}
-                      className="text-slate-500 hover:text-red-400 font-mono text-sm transition-colors"
+                      className="text-slate-400 hover:text-red-400 font-mono text-sm transition-colors"
                       title="Auto-roll"
                       aria-label="Auto-roll extra damage"
                     >

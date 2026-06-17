@@ -62,7 +62,7 @@ function getActionsForMember(member) {
 /** Compact skill badge list for a crew member row. */
 function SkillBadges({ skills }) {
   const present = CREW_SKILLS.filter((s) => (skills[s] ?? 0) > 0)
-  if (present.length === 0) return <span className="text-slate-600 font-mono text-xs">no skills</span>
+  if (present.length === 0) return <span className="text-slate-400 font-mono text-xs">no skills</span>
   return (
     <span className="flex flex-wrap gap-1">
       {present.map((s) => (
@@ -220,10 +220,10 @@ export function ActionModal() {
                 Crew Member
               </p>
               {crewArray.length === 0 && (
-                <p className="text-slate-600 font-mono text-xs italic">No crew assigned to this ship.</p>
+                <p className="text-slate-400 font-mono text-xs italic">No crew assigned to this ship.</p>
               )}
               {crewArray.length > 0 && availableCrew.length === 0 && (
-                <p className="text-slate-600 font-mono text-xs italic">All crew members have already acted this round.</p>
+                <p className="text-slate-400 font-mono text-xs italic">All crew members have already acted this round.</p>
               )}
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {availableCrew.map((member) => (
@@ -250,7 +250,7 @@ export function ActionModal() {
                   Actions
                 </p>
                 {memberActions.length === 0 && (
-                  <p className="text-slate-600 font-mono text-xs italic">No actions available for this crew member.</p>
+                  <p className="text-slate-400 font-mono text-xs italic">No actions available for this crew member.</p>
                 )}
                 <div className="space-y-1 max-h-40 overflow-y-auto">
                   {memberActions.map((action) => (
@@ -280,7 +280,7 @@ export function ActionModal() {
                 <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">Target</p>
                 <div className="space-y-0.5">
                   {otherShips.length === 0 && (
-                    <p className="text-slate-600 font-mono text-xs italic">No ships available.</p>
+                    <p className="text-slate-400 font-mono text-xs italic">No ships available.</p>
                   )}
                   {otherShips.map((s) => (
                     <button
@@ -327,7 +327,7 @@ export function ActionModal() {
                   <button
                     type="button"
                     onClick={() => setSkillOverride(selectedAction.skillLevel)}
-                    className="text-slate-500 hover:text-slate-400 font-mono text-xs transition-colors"
+                    className="text-slate-400 hover:text-slate-400 font-mono text-xs transition-colors"
                     title="Reset to base skill"
                   >
                     ↺

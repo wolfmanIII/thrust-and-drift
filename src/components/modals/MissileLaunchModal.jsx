@@ -61,7 +61,7 @@ export function MissileLaunchModal() {
           <p className="text-slate-400 font-mono text-xs mb-1.5">Target</p>
           <div className="space-y-0.5">
             {enemies.length === 0 && (
-              <p className="text-slate-600 font-mono text-xs italic">No ships on the field.</p>
+              <p className="text-slate-400 font-mono text-xs italic">No ships on the field.</p>
             )}
             {enemies.map((e) => (
               <button
@@ -103,7 +103,7 @@ export function MissileLaunchModal() {
             >
               +
             </button>
-            <span className="text-slate-500 font-mono text-xs ml-2">
+            <span className="text-slate-400 font-mono text-xs ml-2">
               missiles · vector ({attacker.vector.q}, {attacker.vector.r})
             </span>
           </div>

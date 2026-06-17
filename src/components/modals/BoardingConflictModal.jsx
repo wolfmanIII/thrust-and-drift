@@ -38,7 +38,7 @@ function ObjectiveRow({ label, desc, conquered, onChange }) {
         </p>
         <p className="text-slate-400 font-mono text-[10px]">{desc}</p>
       </div>
-      <span className={`font-mono text-xs shrink-0 ${conquered ? 'text-emerald-400' : 'text-slate-500'}`}>
+      <span className={`font-mono text-xs shrink-0 ${conquered ? 'text-emerald-400' : 'text-slate-400'}`}>
         {conquered ? 'CAPTURED' : 'CONTESTED'}
       </span>
     </button>

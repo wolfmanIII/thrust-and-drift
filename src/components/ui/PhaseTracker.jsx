@@ -54,7 +54,7 @@ export function PhaseTracker() {
                   >
                     {ship.profile.name}
                   </span>
-                  <span className="ml-auto font-mono text-xs text-slate-500">{ship.initiative}</span>
+                  <span className="ml-auto font-mono text-xs text-slate-400">{ship.initiative}</span>
                 </li>
               )
             })}

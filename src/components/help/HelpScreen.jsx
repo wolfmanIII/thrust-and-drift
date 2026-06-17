@@ -90,7 +90,7 @@ export function HelpScreen() {
               className={`w-full text-left px-4 py-1.5 font-mono text-xs transition-colors ${
                 active === id
                   ? 'text-(--neon-cyan) bg-(--neon-cyan)/5'
-                  : 'text-slate-500 hover:text-slate-300'
+                  : 'text-slate-400 hover:text-slate-300'
               }`}
             >
               {label}
@@ -351,7 +351,7 @@ export function HelpScreen() {
             <KV k="Evasive Action" v="Toggle: spend 1 thrust to dodge this attack. The attack suffers DM −Pilot skill (fixed). Button disabled if no thrust remains or Pilot skill is 0." />
             <KV k="Point Defence" v="Missile attacks only. Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Turret marked fired." />
             <KV k="Disperse Sand" v="Laser attacks only. Gunner (turret) check — on success adds 1D+Effect to armour for this attack only. Turret marked fired." />
-            <p className="text-slate-500 italic text-xs">Player-controlled defending ships enter physical dice manually for PD and Sand rolls.</p>
+            <p className="text-slate-400 italic text-xs">Player-controlled defending ships enter physical dice manually for PD and Sand rolls.</p>
           </Sub>
 
           <Sub title="ATTACK MODAL — STEP 2: ROLL">

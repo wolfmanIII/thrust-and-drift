@@ -94,7 +94,7 @@ export function BoardingSetupModal() {
 
         <button
           onClick={closeModal}
-          className="w-full py-1.5 text-slate-500 font-mono text-xs hover:text-slate-300 transition-colors"
+          className="w-full py-1.5 text-slate-400 font-mono text-xs hover:text-slate-300 transition-colors"
         >
           CANCEL
         </button>

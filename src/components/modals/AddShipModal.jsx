@@ -59,7 +59,7 @@ function ShapePreview({ shape, selected, onClick }) {
         ref={canvasRef}
         style={{ width: PREVIEW_SIZE, height: PREVIEW_SIZE }}
       />
-      <span className={`font-mono text-[10px] ${selected ? 'text-(--neon-cyan)' : 'text-slate-500'}`}>
+      <span className={`font-mono text-[10px] ${selected ? 'text-(--neon-cyan)' : 'text-slate-400'}`}>
         {SHAPE_LABELS[shape]}
       </span>
     </button>
@@ -124,7 +124,7 @@ export function AddShipModal() {
         {/* Profile list */}
         <div className="max-h-40 overflow-y-auto space-y-0.5 border border-slate-700 rounded">
           {filtered.length === 0 && (
-            <p className="text-slate-600 font-mono text-xs italic px-3 py-2">No profiles found.</p>
+            <p className="text-slate-400 font-mono text-xs italic px-3 py-2">No profiles found.</p>
           )}
           {filtered.map((p) => {
             const isSelected = p.id === selectedProfileId
@@ -140,7 +140,7 @@ export function AddShipModal() {
               >
                 <span className={`w-3 shrink-0 text-center ${isSelected ? 'text-sky-400' : 'text-transparent'}`}>▶</span>
                 <span className="font-bold">{p.name}</span>
-                {p.shipClass && <span className={`ml-1 ${isSelected ? 'text-sky-400/60' : 'text-slate-500'}`}>{p.shipClass}</span>}
+                {p.shipClass && <span className={`ml-1 ${isSelected ? 'text-sky-400/60' : 'text-slate-400'}`}>{p.shipClass}</span>}
               </button>
             )
           })}

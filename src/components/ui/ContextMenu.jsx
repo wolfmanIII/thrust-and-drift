@@ -36,7 +36,7 @@ function MenuItemDisabled({ label, icon, reason }) {
     <div className="w-full flex items-center gap-2 px-3 py-1.5 font-mono text-xs text-slate-400 cursor-not-allowed select-none">
       <span className="w-4 text-center opacity-40">{icon}</span>
       <span>{label}</span>
-      {reason && <span className="ml-auto text-slate-700 text-[10px] shrink-0">{reason}</span>}
+      {reason && <span className="ml-auto text-slate-400 text-[10px] shrink-0">{reason}</span>}
     </div>
   )
 }
@@ -114,7 +114,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
           )}
         </p>
         {INITIATIVE_GATED_PHASES.includes(phase) && !isCurrentActor && (
-          <p className="font-mono text-xs text-slate-500 mt-0.5">Not this ship&apos;s turn</p>
+          <p className="font-mono text-xs text-slate-400 mt-0.5">Not this ship&apos;s turn</p>
         )}
       </div>
 

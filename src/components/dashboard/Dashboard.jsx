@@ -61,14 +61,14 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
           placeholder="Search profile…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-500"
+          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-400"
         />
       </div>
 
       {/* Profile list */}
       <div className="flex-1 overflow-y-auto px-2 space-y-0.5 py-1">
         {filtered.length === 0 && (
-          <p className="text-slate-600 font-mono text-xs italic px-2 py-2">
+          <p className="text-slate-400 font-mono text-xs italic px-2 py-2">
             {filter ? 'No results.' : 'No profiles. Create one.'}
           </p>
         )}
@@ -87,7 +87,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
               }`}>
                 {p.name}
               </p>
-              <p className="text-slate-500 font-mono text-xs truncate">
+              <p className="text-slate-400 font-mono text-xs truncate">
                 {[p.shipClass, p.tonnage ? `${p.tonnage}t` : null].filter(Boolean).join(' · ')}
               </p>
             </div>
@@ -186,7 +186,7 @@ function ActionIcon({ label, title, onClick, dim = '' }) {
     <Tooltip label={title}>
       <button
         onClick={onClick}
-        className={`w-6 h-6 flex items-center justify-center text-slate-500 font-mono text-sm rounded hover:bg-slate-700 transition-colors ${dim}`}
+        className={`w-6 h-6 flex items-center justify-center text-slate-400 font-mono text-sm rounded hover:bg-slate-700 transition-colors ${dim}`}
       >
         {label}
       </button>
@@ -201,8 +201,8 @@ function StatusLine({ label, value, active = true }) {
   return (
     <div className="flex items-center gap-2">
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${active ? 'bg-(--neon-cyan) animate-pulse' : 'bg-slate-700'}`} />
-      <span className="font-mono text-xs text-slate-500 flex-1">{label}</span>
-      <span className={`font-mono text-xs ${active ? 'text-(--neon-cyan)/60' : 'text-slate-500'}`}>{value}</span>
+      <span className="font-mono text-xs text-slate-400 flex-1">{label}</span>
+      <span className={`font-mono text-xs ${active ? 'text-(--neon-cyan)/60' : 'text-slate-400'}`}>{value}</span>
     </div>
   )
 }
@@ -231,7 +231,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
       <div className="flex-1 px-5 py-5 space-y-5 overflow-y-auto">
 
         <div>
-          <p className="font-display text-xs text-slate-500 tracking-widest mb-2">COMBAT MODE</p>
+          <p className="font-display text-xs text-slate-400 tracking-widest mb-2">COMBAT MODE</p>
           <div className="grid grid-cols-2 gap-1 p-1 bg-slate-900/60 border border-slate-800 rounded-lg">
             {[
               { value: 'vectorial', label: 'VECTORIAL', sub: 'Hex + vectors' },
@@ -243,18 +243,18 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
                 className={`py-2 px-2 rounded font-display text-xs tracking-widest transition-colors text-center ${
                   mode === value
                     ? 'bg-(--neon-cyan)/15 border border-(--neon-cyan)/40 text-(--neon-cyan)'
-                    : 'text-slate-500 hover:text-slate-300'
+                    : 'text-slate-400 hover:text-slate-300'
                 }`}
               >
                 {label}
-                <span className="block font-mono tracking-normal normal-case text-slate-500 mt-0.5 text-xs">{sub}</span>
+                <span className="block font-mono tracking-normal normal-case text-slate-400 mt-0.5 text-xs">{sub}</span>
               </button>
             ))}
           </div>
         </div>
 
         <div>
-          <p className="font-display text-xs text-slate-500 tracking-widest mb-2">ACTIONS</p>
+          <p className="font-display text-xs text-slate-400 tracking-widest mb-2">ACTIONS</p>
           <div className="space-y-2">
 
             {autosave && (
@@ -296,7 +296,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
             >
               <span className="text-sm block mb-0.5">{loading ? '⌛' : '↓'}</span>
               {loading ? 'LOADING…' : 'RESUME FROM FILE'}
-              <span className="block font-mono text-slate-500 mt-0.5 normal-case tracking-normal font-normal text-xs">
+              <span className="block font-mono text-slate-400 mt-0.5 normal-case tracking-normal font-normal text-xs">
                 Load from .json file
               </span>
             </button>
@@ -307,7 +307,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
             >
               <span className="text-sm block mb-0.5">📖</span>
               FIELD MANUAL
-              <span className="block font-mono text-slate-500 mt-0.5 normal-case tracking-normal font-normal text-xs">
+              <span className="block font-mono text-slate-400 mt-0.5 normal-case tracking-normal font-normal text-xs">
                 How to play
               </span>
             </button>
@@ -317,7 +317,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
             >
               <span className="text-sm block mb-0.5">📋</span>
               CHANGELOG
-              <span className="block font-mono text-slate-500 mt-0.5 normal-case tracking-normal font-normal text-xs">
+              <span className="block font-mono text-slate-400 mt-0.5 normal-case tracking-normal font-normal text-xs">
                 Version history
               </span>
             </button>
@@ -330,7 +330,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
       </div>
 
       <div className="shrink-0 px-5 py-3 border-t border-slate-800">
-        <p className="font-mono text-xs text-slate-500 leading-relaxed">
+        <p className="font-mono text-xs text-slate-400 leading-relaxed">
           Add profiles in the left panel before starting.
         </p>
       </div>
@@ -371,7 +371,7 @@ function TacticalDisplayIdle() {
           <span className="w-1.5 h-1.5 rounded-full bg-slate-600 shrink-0" />
           <span className="font-display text-xs text-slate-400 tracking-widest">TACTICAL DISPLAY</span>
           <div className="flex-1 h-px bg-slate-800" />
-          <span className="font-display text-xs text-slate-500 tracking-widest">STANDBY</span>
+          <span className="font-display text-xs text-slate-400 tracking-widest">STANDBY</span>
         </div>
 
         <div className="px-6 py-3 border-b border-slate-800/60 shrink-0 grid grid-cols-2 gap-x-8 gap-y-1">
@@ -384,7 +384,7 @@ function TacticalDisplayIdle() {
             { k: 'MISSILES', v: '—' },
           ].map(({ k, v }) => (
             <div key={k} className="flex justify-between gap-2">
-              <span className="font-mono text-xs text-slate-500">{k}</span>
+              <span className="font-mono text-xs text-slate-400">{k}</span>
               <span className="font-mono text-xs text-slate-400">{v}</span>
             </div>
           ))}
@@ -395,14 +395,14 @@ function TacticalDisplayIdle() {
             <TargetReticle />
             <div className="space-y-1">
               <p className="font-display text-xs text-slate-400 tracking-widest">NO MISSION DATA</p>
-              <p className="font-mono text-xs text-slate-500">Start a new session</p>
-              <p className="font-mono text-xs text-slate-500">or load a previous session</p>
+              <p className="font-mono text-xs text-slate-400">Start a new session</p>
+              <p className="font-mono text-xs text-slate-400">or load a previous session</p>
             </div>
           </div>
         </div>
 
         <div className="shrink-0 px-6 py-2 border-t border-slate-800/60">
-          <div className="flex justify-between font-mono text-xs text-slate-500">
+          <div className="flex justify-between font-mono text-xs text-slate-400">
             <span>SYS:ONLINE</span>
             <span>TD-IF/0.1</span>
             <span>MONGOOSE TRAVELLER 2E</span>
@@ -454,7 +454,7 @@ function TacticalDisplayAutosave({ autosave }) {
             { k: 'MISSILES',  v: missiles.length },
           ].map(({ k, v }) => (
             <div key={k} className="flex justify-between gap-2">
-              <span className="font-mono text-xs text-slate-500">{k}</span>
+              <span className="font-mono text-xs text-slate-400">{k}</span>
               <span className="font-mono text-xs text-(--neon-cyan)/70">{v}</span>
             </div>
           ))}
@@ -462,17 +462,17 @@ function TacticalDisplayAutosave({ autosave }) {
 
         {name && (
           <div className="px-6 py-2 border-b border-slate-800/40 shrink-0">
-            <span className="font-mono text-xs text-slate-500">SESSION </span>
+            <span className="font-mono text-xs text-slate-400">SESSION </span>
             <span className="font-mono text-xs text-slate-300">{name}</span>
-            <span className="font-mono text-xs text-slate-500 ml-3">SAVED </span>
+            <span className="font-mono text-xs text-slate-400 ml-3">SAVED </span>
             <span className="font-mono text-xs text-slate-400">{savedAtFormatted}</span>
           </div>
         )}
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          <p className="font-display text-xs text-slate-500 tracking-widest mb-3">SHIP ROSTER</p>
+          <p className="font-display text-xs text-slate-400 tracking-widest mb-3">SHIP ROSTER</p>
           {ships.length === 0 && (
-            <p className="font-mono text-xs text-slate-700">No ships on record.</p>
+            <p className="font-mono text-xs text-slate-400">No ships on record.</p>
           )}
           {Object.entries(byFaction).map(([faction, factionShips]) => (
             <div key={faction} className="mb-4">
@@ -487,7 +487,7 @@ function TacticalDisplayAutosave({ autosave }) {
         </div>
 
         <div className="shrink-0 px-6 py-2 border-t border-slate-800/60">
-          <div className="flex justify-between font-mono text-xs text-slate-500">
+          <div className="flex justify-between font-mono text-xs text-slate-400">
             <span>SYS:ONLINE</span>
             <span>RESUME OR CLEAR VIA LEFT PANEL</span>
             <span>MONGOOSE TRAVELLER 2E</span>
@@ -502,7 +502,7 @@ function TacticalDisplayAutosave({ autosave }) {
 function DataField({ label, value, accent = false, small = false }) {
   return (
     <div>
-      <p className="font-display text-xs text-slate-500 tracking-widest leading-none mb-0.5">{label}</p>
+      <p className="font-display text-xs text-slate-400 tracking-widest leading-none mb-0.5">{label}</p>
       <p className={`font-mono truncate ${small ? 'text-xs' : 'text-sm'} ${accent ? 'text-(--neon-cyan) font-bold' : 'text-slate-300'}`}>
         {value ?? '—'}
       </p>
@@ -522,7 +522,7 @@ function ShipPreviewRow({ ship }) {
       <div className="w-14 h-1 bg-slate-800 rounded-full overflow-hidden shrink-0">
         <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, backgroundColor: barColor }} />
       </div>
-      <span className="font-mono text-xs text-slate-500 w-10 text-right shrink-0">
+      <span className="font-mono text-xs text-slate-400 w-10 text-right shrink-0">
         {ship.hullCurrent}/{hull || '?'}
       </span>
     </div>
@@ -570,9 +570,9 @@ function SessionPreview({ data, onConfirm, onCancel, loading }) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          <p className="font-display text-xs text-slate-500 tracking-widest mb-3">SHIP ROSTER</p>
+          <p className="font-display text-xs text-slate-400 tracking-widest mb-3">SHIP ROSTER</p>
           {ships.length === 0 && (
-            <p className="font-mono text-xs text-slate-700">No ships on record.</p>
+            <p className="font-mono text-xs text-slate-400">No ships on record.</p>
           )}
           {Object.entries(byFaction).map(([faction, factionShips]) => (
             <div key={faction} className="mb-4">
@@ -597,7 +597,7 @@ function SessionPreview({ data, onConfirm, onCancel, loading }) {
           <button
             onClick={onCancel}
             disabled={loading}
-            className="w-full py-2 border border-slate-700 text-slate-500 font-display text-xs tracking-widest rounded-lg hover:border-slate-600 hover:text-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent"
+            className="w-full py-2 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded-lg hover:border-slate-600 hover:text-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent"
           >
             CANCEL
           </button>
@@ -767,11 +767,11 @@ export function Dashboard() {
             <span className="font-display text-xs text-slate-400 tracking-widest">
               TACTICAL INTERFACE // MONGOOSE TRAVELLER 2E
             </span>
-            <span className="font-display text-xs text-slate-500 tracking-widest">
+            <span className="font-display text-xs text-slate-400 tracking-widest">
               SPACE COMBAT SIMULATOR
             </span>
           </div>
-          <span className="ml-auto text-slate-700 font-mono text-xs">v1.18.1</span>
+          <span className="ml-auto text-slate-400 font-mono text-xs">v1.18.1</span>
         </header>
 
         <main className="flex-1 overflow-hidden">

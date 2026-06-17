@@ -50,18 +50,18 @@ export function DiceInput({ value, onChange }) {
         type="number" min={1} max={6} value={d1} placeholder="—"
         onChange={handleD1} className={inputClass} aria-label="Die 1"
       />
-      <span className="text-slate-500 font-mono text-xs">+</span>
+      <span className="text-slate-400 font-mono text-xs">+</span>
       <input
         type="number" min={1} max={6} value={d2} placeholder="—"
         onChange={handleD2} className={inputClass} aria-label="Die 2"
       />
-      <span className={`font-mono text-sm font-bold w-5 text-center ${total === '?' ? 'text-slate-600' : 'text-(--neon-cyan)'}`}>
+      <span className={`font-mono text-sm font-bold w-5 text-center ${total === '?' ? 'text-slate-400' : 'text-(--neon-cyan)'}`}>
         {total}
       </span>
       <button
         type="button"
         onClick={handleAutoRoll}
-        className="text-slate-500 hover:text-(--neon-cyan) font-mono text-sm transition-colors leading-none"
+        className="text-slate-400 hover:text-(--neon-cyan) font-mono text-sm transition-colors leading-none"
         title="Auto-roll"
         aria-label="Auto-roll dice"
       >

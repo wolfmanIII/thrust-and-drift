@@ -24,7 +24,7 @@ const NON_GUNNER_ROLES = ['pilot', 'leadership', 'tactics', 'engineer', 'sensors
 /** Skill badge shown next to a crew member's name. */
 function SkillBadge({ member, role }) {
   const level = member.skills?.[role] ?? 0
-  if (level === 0) return <span className="text-slate-600 font-mono text-xs">—</span>
+  if (level === 0) return <span className="text-slate-400 font-mono text-xs">—</span>
   return <span className="text-(--neon-cyan) font-mono text-xs">{role} {level}</span>
 }
 
@@ -98,7 +98,7 @@ export function CrewAssignmentModal() {
       <div className="space-y-4">
 
         {crewArray.length === 0 && (
-          <p className="text-slate-600 font-mono text-xs italic">
+          <p className="text-slate-400 font-mono text-xs italic">
             No named crew on this ship. Add crew members in the profile editor.
           </p>
         )}
@@ -131,7 +131,7 @@ export function CrewAssignmentModal() {
                     <div key={t.slot} className="flex items-center gap-2">
                       <span className="font-mono text-xs text-slate-400 w-36 shrink-0">
                         Gunner (T{t.slot})
-                        <span className="text-slate-500 ml-1">
+                        <span className="text-slate-400 ml-1">
                           {(t.weapons ?? []).join(', ')}
                         </span>
                       </span>
@@ -139,7 +139,7 @@ export function CrewAssignmentModal() {
                     </div>
                   ))}
                 </div>
-                <p className="font-mono text-xs text-slate-500 mt-1.5">
+                <p className="font-mono text-xs text-slate-400 mt-1.5">
                   Turrets without a gunner cannot fire.
                 </p>
               </div>
@@ -149,7 +149,7 @@ export function CrewAssignmentModal() {
             <div className="flex gap-2 pt-1">
               <button
                 onClick={handleClearAll}
-                className="px-3 py-1.5 border border-slate-700 text-slate-500 font-mono text-xs rounded hover:border-slate-500 hover:text-slate-400 transition-colors"
+                className="px-3 py-1.5 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500 hover:text-slate-400 transition-colors"
               >
                 CLEAR ALL
               </button>

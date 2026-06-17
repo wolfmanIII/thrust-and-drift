@@ -134,7 +134,7 @@ export function MissileImpactModal() {
           </div>
           <div className="flex justify-between items-center bg-slate-800/40 rounded px-3 py-2 font-mono text-sm">
             <span className="text-slate-400 tracking-widest">NET DAMAGE</span>
-            <span className={netDamage === null ? 'text-slate-600' : netDamage > 0 ? 'text-red-400 font-bold' : 'text-slate-400'}>
+            <span className={netDamage === null ? 'text-slate-400' : netDamage > 0 ? 'text-red-400 font-bold' : 'text-slate-400'}>
               {netDamage === null ? '—' : netDamage}
             </span>
           </div>
@@ -147,7 +147,7 @@ export function MissileImpactModal() {
             onClick={handleApply}
             className={`w-full font-mono text-xs tracking-widest py-2.5 rounded transition-colors ${
               netDamage === null
-                ? 'bg-slate-800/40 border border-slate-700 text-slate-600 cursor-not-allowed'
+                ? 'bg-slate-800/40 border border-slate-700 text-slate-400 cursor-not-allowed'
                 : 'bg-red-900/40 border border-red-600/60 text-red-300 hover:bg-red-800/50'
             }`}
           >

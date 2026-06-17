@@ -84,7 +84,7 @@ export function BasicManoeuvreModal() {
           <p className="font-mono text-xs text-slate-400 mb-1.5">Target ship</p>
           <div className="flex flex-col gap-1">
             {enemies.length === 0 && (
-              <p className="font-mono text-xs text-slate-600 italic">No enemy ships.</p>
+              <p className="font-mono text-xs text-slate-400 italic">No enemy ships.</p>
             )}
             {enemies.map((e) => {
               const key = [movingShip.id, e.id].sort().join('_')
@@ -146,7 +146,7 @@ export function BasicManoeuvreModal() {
               </div>
               <div className="flex justify-between font-mono text-xs">
                 <span className="text-slate-400">Result if confirmed</span>
-                <span className={canAfford ? 'text-green-400' : 'text-slate-600'}>{resultBand}</span>
+                <span className={canAfford ? 'text-green-400' : 'text-slate-400'}>{resultBand}</span>
               </div>
             </div>
 
@@ -170,7 +170,7 @@ export function BasicManoeuvreModal() {
                   }}
                 />
               </div>
-              <span className={`font-mono text-xs shrink-0 ${canAfford ? 'text-green-400' : 'text-slate-500'}`}>
+              <span className={`font-mono text-xs shrink-0 ${canAfford ? 'text-green-400' : 'text-slate-400'}`}>
                 {movingThrust}/{cost}
               </span>
             </div>
@@ -187,12 +187,12 @@ export function BasicManoeuvreModal() {
               <button
                 onClick={handleDirectOverride}
                 title="GM override — set range without spending thrust"
-                className="px-3 py-2 border border-slate-700 text-slate-500 font-mono text-xs rounded hover:border-slate-500 hover:text-slate-300 transition-colors"
+                className="px-3 py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500 hover:text-slate-300 transition-colors"
               >
                 GM SET
               </button>
             </div>
-            <p className="font-mono text-xs text-slate-500 text-center">
+            <p className="font-mono text-xs text-slate-400 text-center">
               GM SET overrides range without spending thrust
             </p>
           </>

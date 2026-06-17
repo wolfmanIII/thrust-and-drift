@@ -79,7 +79,7 @@ function ChangelogItem({ text }) {
       {subs.length > 0 && (
         <ul className="mt-1 ml-4 space-y-0.5 list-none">
           {subs.map((sub, i) => (
-            <li key={i} className="text-slate-400 text-xs before:content-['·'] before:mr-1.5 before:text-slate-700">
+            <li key={i} className="text-slate-400 text-xs before:content-['·'] before:mr-1.5 before:text-slate-400">
               {renderInline(sub)}
             </li>
           ))}
@@ -138,7 +138,7 @@ export function ChangelogScreen() {
               className={`w-full text-left px-4 py-1.5 font-mono text-xs transition-colors ${
                 active === version
                   ? 'text-(--neon-cyan) bg-(--neon-cyan)/5'
-                  : 'text-slate-500 hover:text-slate-300'
+                  : 'text-slate-400 hover:text-slate-300'
               }`}
             >
               v{version}
@@ -172,7 +172,7 @@ export function ChangelogScreen() {
               <h2 className="font-display text-(--neon-cyan) tracking-widest text-base">
                 v{version}
               </h2>
-              <span className="font-mono text-xs text-slate-500">{date}</span>
+              <span className="font-mono text-xs text-slate-400">{date}</span>
             </div>
 
             {/* Category groups */}

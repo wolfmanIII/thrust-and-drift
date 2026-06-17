@@ -119,10 +119,10 @@ export function HUD() {
       {/* Round + phase badge */}
       <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-700 rounded px-3 py-1.5 backdrop-blur-sm">
         <img src={tdLogo} alt="" className="w-5 h-5" />
-        <span className="text-slate-500 text-xs">│</span>
+        <span className="text-slate-400 text-xs">│</span>
         <span className="text-slate-400 text-xs font-display tracking-widest">ROUND</span>
         <span className="text-(--neon-cyan) font-mono font-bold text-lg leading-none">{round}</span>
-        <span className="text-slate-500 text-xs">│</span>
+        <span className="text-slate-400 text-xs">│</span>
         <span className="text-slate-200 font-display text-xs tracking-widest">{phaseLabel}</span>
       </div>
 
@@ -171,7 +171,7 @@ export function HUD() {
             className={`pointer-events-auto bg-slate-800/80 border rounded px-3 py-1.5 backdrop-blur-sm transition-colors text-left font-mono text-xs tracking-widest ${
               canAdvancePhase
                 ? 'border-slate-600 hover:border-(--neon-cyan)/60 text-slate-300 hover:text-(--neon-cyan)'
-                : 'border-slate-700 text-slate-600 cursor-not-allowed'
+                : 'border-slate-700 text-slate-400 cursor-not-allowed'
             }`}
           >
             NEXT PHASE ⟶
@@ -191,7 +191,7 @@ export function HUD() {
             <button
               onClick={handleUndo}
               aria-label="Undo last action (Ctrl+Z)"
-              className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-500 hover:text-slate-300 hover:border-slate-500"
+              className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-400 hover:text-slate-300 hover:border-slate-500"
             >
               ⟲
             </button>
@@ -202,7 +202,7 @@ export function HUD() {
             <button
               onClick={handleRedo}
               aria-label="Redo last action (Ctrl+Y)"
-              className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-500 hover:text-slate-300 hover:border-slate-500"
+              className="bg-slate-800/80 border border-slate-700 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-400 hover:text-slate-300 hover:border-slate-500"
             >
               ↷
             </button>
@@ -211,7 +211,7 @@ export function HUD() {
         <Tooltip label="Save session to file" position="bottom">
           <button
             onClick={exportBattleState}
-            className="flex-1 bg-slate-800/80 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
+            className="flex-1 bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
           >
             💾 SAVE
           </button>
@@ -222,8 +222,8 @@ export function HUD() {
             aria-label={audioEnabled ? 'Mute sound effects' : 'Unmute sound effects'}
             className={`bg-slate-800/80 border font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors ${
               audioEnabled
-                ? 'border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500'
-                : 'border-slate-700 text-slate-700 hover:text-slate-500'
+                ? 'border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-500'
+                : 'border-slate-700 text-slate-400 hover:text-slate-400'
             }`}
           >
             {audioEnabled ? '🔊' : '🔇'}
@@ -232,7 +232,7 @@ export function HUD() {
         <Tooltip label="Return to main menu" position="bottom">
           <button
             onClick={() => setShowExitWarning(true)}
-            className="bg-slate-800/80 border border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
+            className="bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
           >
             ⌂
           </button>
@@ -264,7 +264,7 @@ export function HUD() {
               <span>Micro-round {group.microRound}/6</span>
               {winnerShip && (
                 <>
-                  <span className="text-slate-500">│</span>
+                  <span className="text-slate-400">│</span>
                   <span className="text-amber-300 truncate">
                     ↑ {winnerShip.profile.name} +{group.roundWinnerMargin}
                   </span>

@@ -76,7 +76,7 @@ function TextField({ label, value, onChange, placeholder = '' }) {
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-500"
+        className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-400"
       />
     </label>
   )
@@ -95,7 +95,7 @@ function CrewMemberRow({ member, onChange, onRemove }) {
           value={member.name}
           placeholder="Name"
           onChange={(e) => onChange({ ...member, name: e.target.value })}
-          className="flex-1 bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-500"
+          className="flex-1 bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-400"
         />
         <Tooltip label="Remove crew member" position="top">
           <button
@@ -150,7 +150,7 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
           <button
             type="button"
             onClick={() => onRemoveWeapon(slotIdx, wIdx)}
-            className="text-slate-500 hover:text-red-400 leading-none transition-colors"
+            className="text-slate-400 hover:text-red-400 leading-none transition-colors"
             aria-label={`Remove ${w}`}
           >
             ×
@@ -172,7 +172,7 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
         </select>
       )}
       {turret.weapons.length >= 3 && (
-        <span className="text-slate-500 font-mono text-xs italic">triple turret</span>
+        <span className="text-slate-400 font-mono text-xs italic">triple turret</span>
       )}
 
       {/* Remove turret */}
@@ -328,7 +328,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
             </button>
           </div>
           {form.crew.length === 0 && (
-            <p className="text-slate-600 font-mono text-xs italic">No crew assigned.</p>
+            <p className="text-slate-400 font-mono text-xs italic">No crew assigned.</p>
           )}
           <div className="space-y-2">
             {form.crew.map((member, idx) => (
@@ -357,7 +357,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
             </button>
           </div>
           {form.turrets.length === 0 && (
-            <p className="text-slate-600 font-mono text-xs italic">No turrets.</p>
+            <p className="text-slate-400 font-mono text-xs italic">No turrets.</p>
           )}
           <div className="space-y-1.5">
             {form.turrets.map((t, idx) => (

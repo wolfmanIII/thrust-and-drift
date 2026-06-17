@@ -230,7 +230,7 @@ function RangeBandRow({ ship1, ship2, band, onSet }) {
     <div className="flex items-center gap-2 py-1">
       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ship1.color }} />
       <span className="font-mono text-xs text-slate-300 truncate">{ship1.profile.name}</span>
-      <span className="text-slate-500 mx-1">↔</span>
+      <span className="text-slate-400 mx-1">↔</span>
       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ship2.color }} />
       <span className="font-mono text-xs text-slate-300 truncate">{ship2.profile.name}</span>
       <span className="ml-auto font-mono text-xs text-yellow-400 shrink-0">{band}</span>
@@ -293,7 +293,7 @@ export function BasicBattleView() {
     <div className="w-full h-full overflow-y-auto p-6" onContextMenu={handleContainerContextMenu}>
       {ships.length === 0 && (
         <div className="flex items-center justify-center h-full">
-          <p className="font-mono text-slate-600 text-sm tracking-widest">
+          <p className="font-mono text-slate-400 text-sm tracking-widest">
             No ships — right-click to add
           </p>
         </div>
@@ -325,7 +325,7 @@ export function BasicBattleView() {
           <div key={faction}>
             <h2 className={`font-display text-xs tracking-widest mb-3 pb-1.5 border-b ${FACTION_COLORS[faction] ?? FACTION_COLORS.neutral}`}>
               {FACTION_LABELS[faction] ?? faction.toUpperCase()}
-              <span className="ml-2 text-slate-500">({factionShips.length})</span>
+              <span className="ml-2 text-slate-400">({factionShips.length})</span>
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {factionShips.map((ship) => (

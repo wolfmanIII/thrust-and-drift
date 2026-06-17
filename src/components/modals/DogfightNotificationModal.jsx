@@ -214,7 +214,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
                   <span className="text-slate-200 font-mono text-xs flex-1 min-w-0 truncate">
                     {ship.profile.name}
                   </span>
-                  <span className="text-slate-500 font-mono text-xs shrink-0">
+                  <span className="text-slate-400 font-mono text-xs shrink-0">
                     [{ship.faction}]
                   </span>
                   <span className="text-slate-400 font-mono text-xs shrink-0 ml-1">

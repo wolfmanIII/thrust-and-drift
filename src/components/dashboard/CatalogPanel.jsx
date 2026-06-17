@@ -51,8 +51,8 @@ function weaponSummary(ship) {
 /** @param {{ label: string, value: string|number, dim?: boolean }} props */
 function StatBadge({ label, value, dim = false }) {
   return (
-    <span className={`inline-flex items-baseline gap-0.5 ${dim ? 'text-slate-600' : ''}`}>
-      <span className="font-mono text-slate-500 text-xs">{label}</span>
+    <span className={`inline-flex items-baseline gap-0.5 ${dim ? 'text-slate-400' : ''}`}>
+      <span className="font-mono text-slate-400 text-xs">{label}</span>
       <span className="font-mono text-slate-300 text-xs font-bold">{value}</span>
     </span>
   )
@@ -82,9 +82,9 @@ function ShipRow({ entry, added, onAdd }) {
             {entry.name}
           </span>
           {entry.shipType && (
-            <span className="font-mono text-xs text-slate-500">Type {entry.shipType}</span>
+            <span className="font-mono text-xs text-slate-400">Type {entry.shipType}</span>
           )}
-          <span className="font-mono text-xs text-slate-700">TL{entry.techLevel}</span>
+          <span className="font-mono text-xs text-slate-400">TL{entry.techLevel}</span>
         </div>
 
         {/* Stats row */}
@@ -99,13 +99,13 @@ function ShipRow({ entry, added, onAdd }) {
 
         {/* Weapons */}
         <p className={`font-mono text-xs mt-0.5 truncate ${
-          hasWeapons ? 'text-slate-400' : 'text-slate-700'
+          hasWeapons ? 'text-slate-400' : 'text-slate-400'
         }`}>
           {weapons}
         </p>
 
         {/* Description */}
-        <p className="font-mono text-xs text-slate-500 mt-0.5 leading-tight line-clamp-1">
+        <p className="font-mono text-xs text-slate-400 mt-0.5 leading-tight line-clamp-1">
           {entry.description}
         </p>
       </div>
@@ -179,8 +179,8 @@ export function CatalogPanel() {
       <div className="px-4 py-3 border-b border-slate-800 shrink-0">
         <h2 className="font-mono text-xs text-slate-400 tracking-widest uppercase">
           Official Catalog
-          <span className="ml-2 text-slate-500">HG 2022</span>
-          <span className="ml-2 text-slate-700">({filtered.length}/{SHIP_CATALOG.length})</span>
+          <span className="ml-2 text-slate-400">HG 2022</span>
+          <span className="ml-2 text-slate-400">({filtered.length}/{SHIP_CATALOG.length})</span>
         </h2>
       </div>
 
@@ -194,7 +194,7 @@ export function CatalogPanel() {
               className={`px-2 py-0.5 font-mono text-xs rounded transition-colors ${
                 activeCategory === id
                   ? 'bg-(--neon-cyan)/15 border border-(--neon-cyan)/40 text-(--neon-cyan)'
-                  : 'border border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-400'
+                  : 'border border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-400'
               }`}
             >
               {label}
@@ -210,14 +210,14 @@ export function CatalogPanel() {
           placeholder="Search ship…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-500"
+          className="w-full bg-slate-800 border border-slate-700 text-slate-200 font-mono text-xs rounded px-3 py-1.5 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-400"
         />
       </div>
 
       {/* ── Ship list ──────────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto">
         {filtered.length === 0 && (
-          <p className="text-slate-600 font-mono text-xs italic px-4 py-3">
+          <p className="text-slate-400 font-mono text-xs italic px-4 py-3">
             No ships found.
           </p>
         )}
@@ -233,7 +233,7 @@ export function CatalogPanel() {
 
       {/* ── Footer hint ────────────────────────────────────────────────── */}
       <div className="px-4 py-2 border-t border-slate-800 shrink-0">
-        <p className="font-mono text-xs text-slate-700">
+        <p className="font-mono text-xs text-slate-400">
           Source: High Guard Update 2022 pp.135–199. Added profiles can be edited.
         </p>
       </div>

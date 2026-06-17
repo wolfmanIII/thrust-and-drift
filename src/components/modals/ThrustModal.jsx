@@ -78,7 +78,7 @@ export function ThrustModal() {
             <p className="text-slate-400 text-xs mb-1">Current vector</p>
             <p className="text-slate-200">({ship.vector.q}, {ship.vector.r})</p>
           </div>
-          <div className="flex items-center justify-center text-slate-500 text-lg">→</div>
+          <div className="flex items-center justify-center text-slate-400 text-lg">→</div>
           <div className={`rounded p-2 ${isValid ? 'bg-slate-800' : 'bg-red-950/40 border border-red-700/50'}`}>
             <p className="text-slate-400 text-xs mb-1">New vector</p>
             <p className={isValid ? 'text-(--neon-cyan)' : 'text-red-400'}>
@@ -104,7 +104,7 @@ export function ThrustModal() {
           <div className="flex items-center justify-center">
             <button
               onClick={handleReset}
-              className="w-10 h-10 rounded-full border border-slate-600 text-slate-500 font-mono text-xs hover:border-slate-400 hover:text-slate-300 transition-colors"
+              className="w-10 h-10 rounded-full border border-slate-600 text-slate-400 font-mono text-xs hover:border-slate-400 hover:text-slate-300 transition-colors"
             >
               RST
             </button>

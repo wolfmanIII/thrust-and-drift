@@ -112,8 +112,8 @@ export function InitiativeModal() {
                             value={null}
                             onChange={(d) => setShipDice(ship.id, d)}
                           />
-                          <span className="text-slate-500 font-mono text-xs">→</span>
-                          <span className={`font-mono text-sm font-bold w-6 text-right ${previewTotal(ship) === '?' ? 'text-slate-600' : 'text-(--neon-cyan)'}`}>
+                          <span className="text-slate-400 font-mono text-xs">→</span>
+                          <span className={`font-mono text-sm font-bold w-6 text-right ${previewTotal(ship) === '?' ? 'text-slate-400' : 'text-(--neon-cyan)'}`}>
                             {previewTotal(ship)}
                           </span>
                         </div>
@@ -160,7 +160,7 @@ export function InitiativeModal() {
                         <span className="text-slate-400 font-mono text-xs flex-1 min-w-0 truncate">
                           {ship.profile.name}
                         </span>
-                        <span className="text-slate-700 font-mono text-xs">
+                        <span className="text-slate-400 font-mono text-xs">
                           🎲 auto{tacticsSkill > 0 ? ` + tactics ${tacticsSkill}` : ''}
                         </span>
                       </div>

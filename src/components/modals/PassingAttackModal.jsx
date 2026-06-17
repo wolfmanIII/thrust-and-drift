@@ -73,7 +73,7 @@ export function PassingAttackModal() {
           >
             {shipA.profile.name}
           </span>
-          <span className="text-slate-500 font-mono text-xs">⟶|⟵</span>
+          <span className="text-slate-400 font-mono text-xs">⟶|⟵</span>
           <span
             className="font-display text-base tracking-wide"
             style={{ color: shipB.color }}
@@ -111,7 +111,7 @@ export function PassingAttackModal() {
               onClick={() => handleOpenFire(shipA.id)}
               className={`flex-1 font-mono text-xs tracking-widest py-2 rounded transition-colors
                 ${encounter.firedA || actionsLocked
-                  ? 'bg-slate-800/40 border border-slate-700 text-slate-600 cursor-default'
+                  ? 'bg-slate-800/40 border border-slate-700 text-slate-400 cursor-default'
                   : 'bg-amber-900/40 border border-amber-600/60 text-amber-300 hover:bg-amber-800/50'
                 }`}
             >
@@ -122,7 +122,7 @@ export function PassingAttackModal() {
               onClick={() => handleOpenFire(shipB.id)}
               className={`flex-1 font-mono text-xs tracking-widest py-2 rounded transition-colors
                 ${encounter.firedB || actionsLocked
-                  ? 'bg-slate-800/40 border border-slate-700 text-slate-600 cursor-default'
+                  ? 'bg-slate-800/40 border border-slate-700 text-slate-400 cursor-default'
                   : 'bg-amber-900/40 border border-amber-600/60 text-amber-300 hover:bg-amber-800/50'
                 }`}
             >
@@ -134,7 +134,7 @@ export function PassingAttackModal() {
             onClick={handlePass}
             className={`w-full font-mono text-xs tracking-widest py-2 rounded transition-colors
               ${actionsLocked
-                ? 'bg-slate-800/40 border border-slate-700 text-slate-600 cursor-default'
+                ? 'bg-slate-800/40 border border-slate-700 text-slate-400 cursor-default'
                 : 'bg-slate-800/60 border border-slate-600 text-slate-400 hover:bg-slate-700/60'
               }`}
           >
