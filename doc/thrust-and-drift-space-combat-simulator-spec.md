@@ -163,7 +163,7 @@ Suite Vitest collocata accanto ai file sorgente (`*.test.js` / `*.test.jsx`):
 | File | Coverage |
 | ---- | -------- |
 | `utils/hex.test.js` | `hex.js` — coordinate, distanza, pixel↔hex, range band |
-| `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco, getApValue, countMissileAmmoCapacity, countSandcasters |
+| `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco, getApValue, countMissileAmmoCapacity, countSandcasters, computeMissileAttackDM, computeMissileImpactDamage |
 | `utils/dice.test.js` | `dice.js` — rollDice, formatDiceResults, formatCheckResult |
 | `utils/crew.test.js` | `crew.js` — getCrewSkill, getEffectiveSkill, getAssignedSkill, buildDefaultAssignments, migrateCrew, blankCrewMember |
 | `data/weapons.test.js` | `weapons.js` — completezza catalogo WEAPON_IDS, campi obbligatori per ogni arma, barbette damageMultiple=3, turret damageMultiple=1, Ion Cannon invariants, Torpedo invariants, Missile Barbette invariants, AP cross-check, missile maxRange=Special, DEFENSIVE_WEAPONS |
@@ -739,6 +739,20 @@ export function countSandcasters(profile) {
 // netDamage = max(0, roll + effect − effectiveArmour) × damageMultiple
 // damageMultiple viene letto da WEAPONS[id].damageMultiple (1 per torrette, 3 per barbette).
 // Missile e Torpedo usano damageMultiple=1 (danno per-proiettile, non ×3).
+
+// === MISSILE IMPACT (CRB p.173) ===
+// Attack roll DM per salvo missile all'impatto.
+// DM = count (salvo size, +1/missile) + 2 (Smart trait) − evasivePilot
+export function computeMissileAttackDM(count, evasivePilot = 0) {
+  return count + 2 - evasivePilot
+}
+
+// Formula danno per salvo missile — CRB p.173 IMPACT.
+// Roll 4D6 (Missile) o 6D6 (Torpedo) per UN singolo proiettile.
+// netDamage = max(0, roll − armour) × min(Effect, count)
+export function computeMissileImpactDamage(roll, armour, effect, count) {
+  return Math.max(0, roll - armour) * Math.min(effect, count)
+}
 ```
 
 ---
@@ -1533,7 +1547,7 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 
 ### 13.8h Versione 1.15.0 — Missile Impact Resolution ✅ COMPLETATA
 
-- **`MissileImpactModal`** — quando un salvo raggiunge l'hex del bersaglio nella fase movimento, viene consumato e aggiunto a `pendingMissileImpacts: []` nello store. La modale apre automaticamente: mostra launcher/target/count, input danno totale (count × 4D6 per MgT2e HG p.28), armour dal profilo, net damage live. *APPLY DAMAGE* chiama `applyDamage`; *MISS/INTERCEPTED* fa dismiss. Impatti multipli risolti in sequenza (pending count visibile). Target rimosso via undo → auto-dismiss.
+- **`MissileImpactModal`** — quando un salvo raggiunge l'hex del bersaglio nella fase movimento, viene consumato e aggiunto a `pendingMissileImpacts: []` nello store. La modale apre automaticamente con flusso a 2 step (v1.20.1+): **Step 1** — attack roll 2D6 + DM+1/missile + DM+2 Smart ± Evasive Action vs 8+; Effect < 0 → miss, dismiss. **Step 2** — danno: `max(0, 4D6 − armour) × min(Effect, count)` (singolo proiettile, non count×4D6). *APPLY DAMAGE* chiama `applyDamage`; *MISS/INTERCEPTED* fa dismiss. Impatti multipli risolti in sequenza (pending count visibile). Target rimosso via undo → auto-dismiss. Stato resettato tra impatti via `useEffect([impact.id])`.
 - `battleStore.js` — `pendingMissileImpacts: []` in state e `resetBattle`; rilevamento impatto in `resolveMovement` (missile.position == target.position post-movimento); `dismissMissileImpact(id)`.
 - **Durata animazione movimento** — `MOVEMENT_ANIM_DURATION_MS` aumentato da 600 ms a 2000 ms per dare al GM il tempo di seguire il movimento simultaneo.
 - 692 test (invariati — test guidance refactored: verifica `pendingMissileImpacts` invece di missile sopravvissuto).
@@ -1640,6 +1654,34 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 
 - **`advanceActor` order mismatch** — `advanceActor` in `battleStore.js` iterava `initiativeOrder` in avanti; HUD e ContextMenu usano `[...initiativeOrder].reverse()` per la fase di accelerazione. L'indice puntava a navi diverse: nave distrutta come attore corrente, nave viva saltata silenziosamente. Fix: `advanceActor` legge `phase` dallo store e applica la stessa inversione quando `phase === 'acceleration'`.
 - 709 test (invariati).
+
+### 14.8 Versione 1.19.0 — WCAG AA Contrast + Emoji Icon System ✅ COMPLETATA
+
+- **WCAG AA contrast** — tre passate: `disabled:opacity-60/50` → colori espliciti su pulsanti colorati; `text-slate-500/600` → `text-slate-400` (≥ 6.2:1 su `slate-950`) in 28 file JSX; `text-slate-700` → `text-slate-400`. `text-slate-400` è il minimo per qualsiasi testo visibile.
+- **Sci-fi emoji icon system** — sostituiti tutti i glyph non-emoji con emoji tematiche in 26 file JSX e documentazione: `⚠→🚨`, `⚔→⚔️`, `✓→✅`, `↺↻→🔄🌀`, `⟲↷→↩️↪️`, `⌂→🏠`, `✦→✨`, `▼▲→⬇⬆`, `←→⬅️`.
+- 815 test (invariati).
+
+### 14.9 Versione 1.20.0 — Weapons Expansion ✅ COMPLETATA
+
+- **11 nuove armi** (HG pp.28–31): Fusion Gun, Plasma Gun, Ion Cannon, Torpedo, Missile Barbette, Pulse/Beam/Particle/Fusion/Plasma/Railgun Barbette. Tutti i barbette: `damageMultiple: 3`.
+- **AP trait**: `effectiveArmour = max(0, armour − getApValue(traits))`; valori: Railgun 4, Fusion Barbette 3, Plasma Barbette 2, Railgun Barbette 5.
+- **Barbette ×3**: `netDamage = max(0, roll + Effect − effectiveArmour) × 3` — dopo armatura.
+- **Ion Cannon**: nessun danno scafo; applica `ionPenalty` (2D6) per 1 round (D3 round se Effect ≥ 6); `buildNextRoundState` decrementa `ionRoundsLeft`, azzera `ionPenalty` a 0. Canvas: Ion burst (ring blu one-shot) + Ion aura (ring pulsante persistente).
+- **Torpedo**: 6D per torpedo, 3/barbette, token rosso, guided (Smart trait).
+- **Missile Barbette**: 5 missili fissi per salvo, 25 canister totali.
+- **Sandcaster ammo tracking**: 20 canister/slot; decrementato da `spendSandAmmo`; visualizzato su bento card, ShipDetailModal, ShipTooltip.
+- **ShipInstance** aggiornato: `ionPenalty`, `ionRoundsLeft`, `missileAmmoTotal`, `sandAmmoTotal`, `isDestroyed`, `inDogfight`, `inBoarding`, `thrustPenalty`.
+- **MissileToken.type**: `'Standard' | 'Torpedo'`.
+- 815 test (+106 da v1.19.0).
+
+### 14.10 Versione 1.20.1 — Missile Impact RAW Fix ✅ COMPLETATA
+
+- **Formula danno corretta** (CRB p.173): la vecchia formula `max(0, count×4D6 − armour)` era sbagliata. Formula RAW: `max(0, 4D6 − armour) × min(Effect, count)`.
+- **Attack roll all'impatto**: CRB p.173 IMPACT richiede un roll 2D6 al momento dell'impatto (non al lancio). DMs: +1/missile (salvo size) + +2 (Smart) ± Evasive Action. Effect < 0 → miss.
+- **Evasive Action in MissileImpactModal**: se il target ha thrust disponibile, il GM può dichiarare Evasive Action prima del roll; chiama `spendReactionThrust(target.id, 1)`, applica DM −Pilot (CRB p.171).
+- **Flusso two-step**: Step 1 (attack roll) → Step 2 (damage). `useEffect([impact.id])` resetta lo stato locale tra salve consecutive.
+- **`computeMissileAttackDM` / `computeMissileImpactDamage`** estratte in `combat.js` come pure functions.
+- 830 test (+15 da v1.20.0): 8 casi `computeMissileAttackDM`, 8 casi `computeMissileImpactDamage` — salvo DM, Smart, evasione, effect=0, cap effect/count, armour>roll.
 
 ### 14.7 Effetti Sonori — Sintesi Procedurale
 
