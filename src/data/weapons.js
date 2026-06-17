@@ -17,7 +17,7 @@
  *   - notes:      Short rule clarification
  */
 
-/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'|'Pulse Laser Barbette'|'Beam Laser Barbette'|'Particle Barbette'|'Fusion Barbette'|'Plasma Barbette'|'Railgun Barbette'} WeaponType */
+/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'|'Pulse Laser Barbette'|'Beam Laser Barbette'|'Particle Barbette'|'Fusion Barbette'|'Plasma Barbette'|'Railgun Barbette'|'Missile Barbette'} WeaponType */
 
 /**
  * Weapon stat table.
@@ -128,6 +128,20 @@ export const WEAPONS = {
     turretOnly: false,
     bayOnly: false,
     notes: 'High-energy plasma stream.',
+  },
+
+  'Missile Barbette': {
+    id: 'Missile Barbette',
+    label: 'Missile Barbette',
+    attackDM: 0,
+    damageDice: 4,          // HG p.30 — 4D per missile, same as Missile Rack
+    damageBonus: 0,
+    maxRange: 'Special',    // Guided — no range cap
+    damageMultiple: 1,      // missile damage is per-missile, not multiplied
+    traits: ['Smart'],
+    turretOnly: false,
+    bayOnly: false,
+    notes: 'Fixed salvo of 5 missiles. Holds 25 total (5 salvos). // HG p.30–31',
   },
 
   // ── Barbettes (HG p.30) ────────────────────────────────────────────────────

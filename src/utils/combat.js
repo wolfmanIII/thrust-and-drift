@@ -198,13 +198,24 @@ export function applyMovement(currentPosition, currentVector) {
 // === MISSILES ===
 
 /**
- * Count the number of Missile Rack weapons across all turrets of a ship profile.
- * Used to compute missile ammo capacity (12 per rack). // MgT2e CRB p.162
+ * Count total missile ammo capacity across all turrets.
+ * Missile Rack: 12 rounds each. Missile Barbette: 25 rounds. Torpedo: 3 rounds.
+ * // MgT2e CRB p.162, HG p.30–31
  * @param {{ turrets?: Array<{ weapons: string[] }> }} profile
  * @returns {number}
  */
+export function countMissileAmmoCapacity(profile) {
+  const all = (profile.turrets ?? []).flatMap((t) => t.weapons)
+  return (
+    all.filter((w) => w === 'Missile Rack').length * 12 +
+    all.filter((w) => w === 'Missile Barbette').length * 25 +
+    all.filter((w) => w === 'Torpedo').length * 3
+  )
+}
+
+/** @deprecated Use countMissileAmmoCapacity */
 export function countMissileRacks(profile) {
-  return (profile.turrets ?? []).flatMap((t) => t.weapons).filter((w) => w === 'Missile Rack').length
+  return countMissileAmmoCapacity(profile)
 }
 
 // === EVASIVE ACTION ===

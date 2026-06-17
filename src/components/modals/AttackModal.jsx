@@ -266,7 +266,7 @@ function AttackConfigStep({
                   </span>
                   {wDef && (
                     <span className="text-slate-400">
-                      {w.weaponName === 'Missile Rack' ? 'Guided · 4D dmg/missile · Special' : (
+                      {(w.weaponName === 'Missile Rack' || w.weaponName === 'Missile Barbette') ? `Guided · 4D dmg/missile · ${w.weaponName === 'Missile Barbette' ? 'Salvo 5 · 25 ammo' : 'Special'}` : (
                         <>
                           DM {wDef.attackDM >= 0 ? `+${wDef.attackDM}` : wDef.attackDM}
                           {' · '}{wDef.damageDice}D dmg{' · '}max {wDef.maxRange}
@@ -304,35 +304,44 @@ function AttackConfigStep({
           </div>
         </div>
 
-        {/* Missile count — only for Missile Rack */}
+        {/* Missile count */}
         {isMissile && (
           <div>
-            <p className="text-slate-400 font-mono text-xs mb-1.5">
-              Missiles in salvo (1–{ammoLeft})
-              {' · '}Ammo: <span className={ammoLeft === 0 ? 'text-red-400' : 'text-(--neon-cyan)'}>{ammoLeft}</span>
-            </p>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setMissileCount((c) => Math.max(1, c - 1))}
-                disabled={ammoLeft === 0}
-                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
-              >
-                −
-              </button>
-              <span className="text-(--neon-cyan) font-mono font-bold text-xl w-8 text-center">
-                {missileCount}
-              </span>
-              <button
-                onClick={() => setMissileCount((c) => Math.min(ammoLeft, c + 1))}
-                disabled={ammoLeft === 0}
-                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
-              >
-                +
-              </button>
-              <span className="text-slate-400 font-mono text-xs ml-2">
-                missiles · guided munitions
-              </span>
-            </div>
+            {isMissileBarbette ? (
+              <p className="text-slate-400 font-mono text-xs">
+                Fixed salvo: <span className="text-(--neon-cyan) font-bold">{missileCount}</span> missiles
+                {' · '}Ammo: <span className={ammoLeft === 0 ? 'text-red-400' : 'text-(--neon-cyan)'}>{ammoLeft}</span>/25
+              </p>
+            ) : (
+              <>
+                <p className="text-slate-400 font-mono text-xs mb-1.5">
+                  Missiles in salvo (1–{ammoLeft})
+                  {' · '}Ammo: <span className={ammoLeft === 0 ? 'text-red-400' : 'text-(--neon-cyan)'}>{ammoLeft}</span>
+                </p>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setMissileCount((c) => Math.max(1, c - 1))}
+                    disabled={ammoLeft === 0}
+                    className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
+                  >
+                    −
+                  </button>
+                  <span className="text-(--neon-cyan) font-mono font-bold text-xl w-8 text-center">
+                    {missileCount}
+                  </span>
+                  <button
+                    onClick={() => setMissileCount((c) => Math.min(ammoLeft, c + 1))}
+                    disabled={ammoLeft === 0}
+                    className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
+                  >
+                    +
+                  </button>
+                  <span className="text-slate-400 font-mono text-xs ml-2">
+                    missiles · guided munitions
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -927,7 +936,7 @@ export function AttackModal() {
   const [sandTurretSlot, setSandTurretSlot]   = useState(null)
   const [sandResult, setSandResult]           = useState(null)
 
-  const isMissile  = weaponKey === 'Missile Rack'
+  const isMissile  = weaponKey === 'Missile Rack' || weaponKey === 'Missile Barbette'
 
   const resetReactions = () => {
     setReactionEvasion(false); setPdTurretSlot(null); setPdResult(null)
@@ -935,7 +944,10 @@ export function AttackModal() {
   }
 
   const setWeaponSelection = (name, turretSlot) => {
-    setWeaponKey(name); setSelectedTurretSlot(turretSlot); resetReactions()
+    setWeaponKey(name)
+    setSelectedTurretSlot(turretSlot)
+    setMissileCount(name === 'Missile Barbette' ? 5 : 1)
+    resetReactions()
   }
   const handleTargetChange = (id) => { setTargetId(id); resetReactions() }
 
@@ -944,7 +956,8 @@ export function AttackModal() {
 
   if (!attacker) return null
 
-  const ammoLeft = isMissile ? (attacker.missileAmmoTotal ?? 0) : 0
+  const ammoLeft          = isMissile ? (attacker.missileAmmoTotal ?? 0) : 0
+  const isMissileBarbette = weaponKey === 'Missile Barbette'
 
   // ── Reaction-derived values ────────────────────────────────────────────
   const targetPilotSkill = target ? getEffectiveSkill(target.profile.crew, target.crewAssignments, 'pilot') : 0

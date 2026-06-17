@@ -7,7 +7,7 @@
 import { create } from 'zustand'
 import { v7 as uuidv7 } from 'uuid'
 import { exportBattle, importBattle } from '../utils/io.js'
-import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount, countMissileRacks } from '../utils/combat.js'
+import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount, countMissileAmmoCapacity } from '../utils/combat.js'
 import { hexAdd, hexDistance, segmentMinDistance } from '../utils/hex.js'
 import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
@@ -298,7 +298,7 @@ const useBattleStore = create((set, get) => {
       sensorLockedBy: null,
       sensorLockDM: 0,
       turretsNeedingReload: 0,
-      missileAmmoTotal: countMissileRacks(profile) * 12,
+      missileAmmoTotal: countMissileAmmoCapacity(profile),
       inDogfight: null,
       inBoarding: null,
       crewAssignments: buildDefaultAssignments(profile.crew, profile.turrets),
@@ -813,7 +813,7 @@ const useBattleStore = create((set, get) => {
         sh.id === launchedBy ? {
           ...sh,
           turretsNeedingReload: (sh.turretsNeedingReload ?? 0) + 1,
-          missileAmmoTotal: Math.max(0, (sh.missileAmmoTotal ?? countMissileRacks(sh.profile) * 12) - count),
+          missileAmmoTotal: Math.max(0, (sh.missileAmmoTotal ?? countMissileAmmoCapacity(sh.profile)) - count),
         } : sh
       ),
       log: [...s.log, makeLogEntry({
