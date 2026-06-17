@@ -14,20 +14,32 @@ function lerp(a, b, t) { return a + (b - a) * t }
 
 /** Weapon-specific beam colors. */
 const LASER_COLORS = {
-  'Pulse Laser':   '#7dd3fc',
-  'Beam Laser':    '#38bdf8',
-  'Particle Beam': '#c084fc',
-  'Railgun':       '#fb923c',
-  'Fusion Gun':    '#f97316',  // orange-500
-  'Plasma Gun':    '#4ade80',  // green-400
+  'Pulse Laser':           '#7dd3fc',
+  'Beam Laser':            '#38bdf8',
+  'Particle Beam':         '#c084fc',
+  'Railgun':               '#fb923c',
+  'Fusion Gun':            '#f97316',  // orange-500
+  'Plasma Gun':            '#4ade80',  // green-400
+  'Pulse Laser Barbette':  '#bae6fd',  // sky-200 — brighter than turret
+  'Beam Laser Barbette':   '#93c5fd',  // blue-300
+  'Particle Barbette':     '#e9d5ff',  // purple-200 — brighter than turret
+  'Fusion Barbette':       '#fed7aa',  // orange-200
+  'Plasma Barbette':       '#bbf7d0',  // green-200
+  'Railgun Barbette':      '#fcd34d',  // amber-300 — distinct from Railgun orange
 }
 const LASER_GLOW = {
-  'Pulse Laser':   '#0ea5e9',
-  'Beam Laser':    '#0284c7',
-  'Particle Beam': '#a855f7',
-  'Railgun':       '#f97316',
-  'Fusion Gun':    '#ea580c',  // orange-600
-  'Plasma Gun':    '#16a34a',  // green-700
+  'Pulse Laser':           '#0ea5e9',
+  'Beam Laser':            '#0284c7',
+  'Particle Beam':         '#a855f7',
+  'Railgun':               '#f97316',
+  'Fusion Gun':            '#ea580c',  // orange-600
+  'Plasma Gun':            '#16a34a',  // green-700
+  'Pulse Laser Barbette':  '#0ea5e9',  // same family, stronger glow
+  'Beam Laser Barbette':   '#2563eb',  // blue-600
+  'Particle Barbette':     '#9333ea',  // purple-600
+  'Fusion Barbette':       '#ea580c',  // orange-600
+  'Plasma Barbette':       '#16a34a',  // green-700
+  'Railgun Barbette':      '#d97706',  // amber-600
 }
 
 // ─── ONE-SHOT EFFECTS ────────────────────────────────────────────────────────

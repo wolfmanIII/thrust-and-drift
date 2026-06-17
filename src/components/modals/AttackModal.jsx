@@ -19,9 +19,13 @@ import { DiceInput } from '../forms/DiceInput.jsx'
 import { getEffectiveSkill } from '../../utils/crew.js'
 
 /** Weapons that fire a visible beam/ray toward the target. */
-const BEAM_WEAPONS = ['Pulse Laser', 'Beam Laser', 'Particle Beam', 'Railgun', 'Fusion Gun', 'Plasma Gun']
+const BEAM_WEAPONS = [
+  'Pulse Laser', 'Beam Laser', 'Particle Beam', 'Railgun', 'Fusion Gun', 'Plasma Gun',
+  'Pulse Laser Barbette', 'Beam Laser Barbette', 'Particle Barbette',
+  'Fusion Barbette', 'Plasma Barbette', 'Railgun Barbette',
+]
 /** Laser weapon types that Disperse Sand can block (CRB p.171). */
-const LASER_TYPES = ['Pulse Laser', 'Beam Laser']
+const LASER_TYPES = ['Pulse Laser', 'Beam Laser', 'Pulse Laser Barbette', 'Beam Laser Barbette']
 
 /** @typedef {'config'|'roll'|'damage'|'critical'} AttackStep */
 
@@ -589,37 +593,41 @@ function AttackRollStep({
  *   effectBonus: number,
  *   armor: number,
  *   apReduction: number,
+ *   damageMultiple: number,
  *   damageResult: object|null,
  *   setDamageResult: Function,
  *   onApply: Function,
  *   onClose: Function,
  * }} props
  */
-function AttackDamageStep({ damageDice, effectBonus, armor, apReduction = 0, isPlayer, damageResult, setDamageResult, onApply, onClose }) {
+function AttackDamageStep({ damageDice, effectBonus, armor, apReduction = 0, damageMultiple = 1, isPlayer, damageResult, setDamageResult, onApply, onClose }) {
   const [manualRaw, setManualRaw] = useState('')
 
-  // AP trait reduces effective armour (min 0). // MgT2e HG p.28
+  // AP reduces effective armour before damage, multiplier applied after. // MgT2e HG p.28–29
   const effectiveArmor = Math.max(0, armor - apReduction)
 
   const handleAutoRoll = () => {
     const roll  = rollDice(damageDice, 6)
-    const total = Math.max(0, roll.total + effectBonus - effectiveArmor)
-    setDamageResult({ roll, total, effectBonus, armor: effectiveArmor })
+    const total = Math.max(0, roll.total + effectBonus - effectiveArmor) * damageMultiple
+    setDamageResult({ roll, total, effectBonus, armor: effectiveArmor, damageMultiple })
   }
 
   const handleManualConfirm = () => {
     const raw   = Number(manualRaw)
     if (!raw && raw !== 0) return
-    const total = Math.max(0, raw + effectBonus - effectiveArmor)
-    setDamageResult({ roll: { results: [], total: raw }, total, effectBonus, armor: effectiveArmor })
+    const total = Math.max(0, raw + effectBonus - effectiveArmor) * damageMultiple
+    setDamageResult({ roll: { results: [], total: raw }, total, effectBonus, armor: effectiveArmor, damageMultiple })
   }
+
+  const formulaLabel = damageMultiple > 1
+    ? `(${damageDice}D + Effect − Armour) × ${damageMultiple}`
+    : `${damageDice}D + Effect − Armour`
 
   return (
     <Modal title="Damage" onClose={onClose}>
       <div className="space-y-4">
         <div className="text-center font-mono text-xs text-slate-400">
-          {damageDice}D + Effect ({effectBonus >= 0 ? `+${effectBonus}` : effectBonus}) − Armour ({effectiveArmor}
-          {apReduction > 0 && <span className="text-orange-400"> −AP{apReduction}</span>})
+          {formulaLabel.replace('Armour', `Armour (${effectiveArmor}${apReduction > 0 ? ` −AP${apReduction}` : ''})`)}
         </div>
 
         {!damageResult ? (
@@ -666,9 +674,14 @@ function AttackDamageStep({ damageDice, effectBonus, armor, apReduction = 0, isP
           <div className="space-y-3">
             <div className="bg-slate-800 rounded p-4 text-center font-mono text-xs">
               <p className="text-slate-400">
-                {isPlayer
-                  ? `${damageResult.roll.total} (entered) + ${effectBonus} − ${effectiveArmor} armour${apReduction > 0 ? ` (AP−${apReduction})` : ''}`
-                  : `[${damageResult.roll.results.join('+')}] + ${effectBonus} − ${effectiveArmor} armour${apReduction > 0 ? ` (AP−${apReduction})` : ''}`}
+                {(() => {
+                  const ap = apReduction > 0 ? ` (AP−${apReduction})` : ''
+                  const mult = damageMultiple > 1 ? ` ×${damageMultiple}` : ''
+                  const base = isPlayer
+                    ? `${damageResult.roll.total} (entered) + ${effectBonus} − ${effectiveArmor} armour${ap}`
+                    : `[${damageResult.roll.results.join('+')}] + ${effectBonus} − ${effectiveArmor} armour${ap}`
+                  return base + mult
+                })()}
               </p>
               <p className="text-red-400 font-bold text-2xl mt-1">{damageResult.total}</p>
               <p className="text-slate-400">damage dealt</p>
@@ -1190,6 +1203,7 @@ export function AttackModal() {
       effectBonus={attackResult?.effect ?? 0}
       armor={(target?.profile.armor ?? 0) + sandBonusArmor}
       apReduction={getApValue(weapon?.traits ?? [])}
+      damageMultiple={weapon?.damageMultiple ?? 1}
       isPlayer={attacker.faction === 'players'}
       damageResult={damageResult}
       setDamageResult={setDamageResult}

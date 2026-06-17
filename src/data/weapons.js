@@ -17,7 +17,7 @@
  *   - notes:      Short rule clarification
  */
 
-/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'} WeaponType */
+/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'|'Pulse Laser Barbette'|'Beam Laser Barbette'|'Particle Barbette'|'Fusion Barbette'|'Plasma Barbette'|'Railgun Barbette'} WeaponType */
 
 /**
  * Weapon stat table.
@@ -28,10 +28,11 @@ export const WEAPONS = {
   'Pulse Laser': {
     id: 'Pulse Laser',
     label: 'Pulse Laser',
-    attackDM: 2,       // CRB p.167 Common Modifiers
-    damageDice: 2,     // HG p.28, CRB p.168
+    attackDM: 2,          // CRB p.167 Common Modifiers
+    damageDice: 2,        // HG p.28, CRB p.168
     damageBonus: 0,
-    maxRange: 'Long',  // HG p.28, CRB p.168
+    maxRange: 'Long',     // HG p.28, CRB p.168
+    damageMultiple: 1,
     traits: [],
     turretOnly: false,
     bayOnly: false,
@@ -40,10 +41,11 @@ export const WEAPONS = {
   'Beam Laser': {
     id: 'Beam Laser',
     label: 'Beam Laser',
-    attackDM: 4,         // CRB p.167 Common Modifiers
-    damageDice: 1,       // HG p.28, CRB p.168
+    attackDM: 4,           // CRB p.167 Common Modifiers
+    damageDice: 1,         // HG p.28, CRB p.168
     damageBonus: 0,
-    maxRange: 'Medium',  // HG p.28, CRB p.168 — shorter ranged than Pulse
+    maxRange: 'Medium',    // HG p.28, CRB p.168 — shorter ranged than Pulse
+    damageMultiple: 1,
     traits: [],
     turretOnly: false,
     bayOnly: false,
@@ -53,9 +55,10 @@ export const WEAPONS = {
     id: 'Missile Rack',
     label: 'Missile Rack',
     attackDM: 0,
-    damageDice: 4,        // HG p.28, CRB p.168
+    damageDice: 4,         // HG p.28, CRB p.168
     damageBonus: 0,
-    maxRange: 'Special',  // Guided — no hard range cap
+    maxRange: 'Special',   // Guided — no hard range cap
+    damageMultiple: 1,
     traits: ['Smart'],
     turretOnly: false,
     bayOnly: false,
@@ -67,7 +70,8 @@ export const WEAPONS = {
     attackDM: 0,
     damageDice: 0,
     damageBonus: 0,
-    maxRange: 'Special',  // Defensive — range not applicable
+    maxRange: 'Special',   // Defensive — range not applicable
+    damageMultiple: 1,
     traits: ['Defensive'],
     turretOnly: false,
     bayOnly: false,
@@ -77,10 +81,11 @@ export const WEAPONS = {
     id: 'Particle Beam',
     label: 'Particle Beam',
     attackDM: 0,
-    damageDice: 3,          // HG p.28
+    damageDice: 3,           // HG p.28
     damageBonus: 0,
-    maxRange: 'Very Long',  // HG p.28, CRB p.168
-    traits: ['Radiation'],  // HG p.28 — turret version has no AP (only Particle Barbette does)
+    maxRange: 'Very Long',   // HG p.28, CRB p.168
+    damageMultiple: 1,
+    traits: ['Radiation'],   // HG p.28 — turret version has no AP (only Particle Barbette does)
     turretOnly: false,
     bayOnly: false,
     notes: 'Radiation trait causes crew damage on critical hits.',
@@ -89,10 +94,11 @@ export const WEAPONS = {
     id: 'Railgun',
     label: 'Railgun',
     attackDM: 0,
-    damageDice: 2,       // HG p.28
+    damageDice: 2,         // HG p.28
     damageBonus: 0,
-    maxRange: 'Short',   // HG p.28 — short-range kinetic weapon
-    traits: ['AP 4'],    // HG p.28
+    maxRange: 'Short',     // HG p.28 — short-range kinetic weapon
+    damageMultiple: 1,
+    traits: ['AP 4'],      // HG p.28
     turretOnly: false,
     bayOnly: false,
     notes: 'Kinetic weapon. AP 4. Effective only at Short range and closer.',
@@ -101,10 +107,11 @@ export const WEAPONS = {
     id: 'Fusion Gun',
     label: 'Fusion Gun',
     attackDM: 0,
-    damageDice: 4,          // HG p.28
+    damageDice: 4,           // HG p.28
     damageBonus: 0,
-    maxRange: 'Medium',     // HG p.28
-    traits: ['Radiation'],  // HG p.28
+    maxRange: 'Medium',      // HG p.28
+    damageMultiple: 1,
+    traits: ['Radiation'],   // HG p.28
     turretOnly: false,
     bayOnly: false,
     notes: 'Radiation trait: crew damage on critical hits.',
@@ -113,13 +120,96 @@ export const WEAPONS = {
     id: 'Plasma Gun',
     label: 'Plasma Gun',
     attackDM: 0,
-    damageDice: 3,        // HG p.28
+    damageDice: 3,         // HG p.28
     damageBonus: 0,
-    maxRange: 'Medium',   // HG p.28
+    maxRange: 'Medium',    // HG p.28
+    damageMultiple: 1,
     traits: [],
     turretOnly: false,
     bayOnly: false,
     notes: 'High-energy plasma stream.',
+  },
+
+  // ── Barbettes (HG p.30) ────────────────────────────────────────────────────
+  // damageMultiple: 3 — applied after armour subtraction. // HG p.29
+
+  'Pulse Laser Barbette': {
+    id: 'Pulse Laser Barbette',
+    label: 'Pulse Laser Barbette',
+    attackDM: 2,          // HG p.31
+    damageDice: 3,        // HG p.30
+    damageBonus: 0,
+    maxRange: 'Long',     // HG p.30
+    damageMultiple: 3,
+    traits: [],
+    turretOnly: false,
+    bayOnly: false,
+    notes: 'Barbette: (3D + Effect − Armour) × 3. Cannot be used for Point Defence.',
+  },
+  'Beam Laser Barbette': {
+    id: 'Beam Laser Barbette',
+    label: 'Beam Laser Barbette',
+    attackDM: 4,           // HG p.30
+    damageDice: 2,         // HG p.30
+    damageBonus: 0,
+    maxRange: 'Medium',    // HG p.30
+    damageMultiple: 3,
+    traits: [],
+    turretOnly: false,
+    bayOnly: false,
+    notes: 'Barbette: (2D + Effect − Armour) × 3. Cannot be used for Point Defence.',
+  },
+  'Particle Barbette': {
+    id: 'Particle Barbette',
+    label: 'Particle Barbette',
+    attackDM: 0,
+    damageDice: 4,           // HG p.30
+    damageBonus: 0,
+    maxRange: 'Very Long',   // HG p.30
+    damageMultiple: 3,
+    traits: ['Radiation'],
+    turretOnly: false,
+    bayOnly: false,
+    notes: 'Barbette: (4D + Effect − Armour) × 3. Radiation trait.',
+  },
+  'Fusion Barbette': {
+    id: 'Fusion Barbette',
+    label: 'Fusion Barbette',
+    attackDM: 0,
+    damageDice: 5,         // HG p.30
+    damageBonus: 0,
+    maxRange: 'Medium',    // HG p.30
+    damageMultiple: 3,
+    traits: ['AP 3', 'Radiation'],
+    turretOnly: false,
+    bayOnly: false,
+    notes: 'Barbette: (5D + Effect − Armour) × 3. AP 3, Radiation.',
+  },
+  'Plasma Barbette': {
+    id: 'Plasma Barbette',
+    label: 'Plasma Barbette',
+    attackDM: 0,
+    damageDice: 4,         // HG p.30
+    damageBonus: 0,
+    maxRange: 'Medium',    // HG p.30
+    damageMultiple: 3,
+    traits: ['AP 2'],
+    turretOnly: false,
+    bayOnly: false,
+    notes: 'Barbette: (4D + Effect − Armour) × 3. AP 2.',
+  },
+  'Railgun Barbette': {
+    id: 'Railgun Barbette',
+    label: 'Railgun Barbette',
+    attackDM: 0,
+    damageDice: 3,         // HG p.30
+    damageBonus: 0,
+    maxRange: 'Medium',    // HG p.30
+    damageMultiple: 3,
+    traits: ['AP 5'],
+    turretOnly: false,
+    bayOnly: false,
+    notes: 'Barbette: (3D + Effect − Armour) × 3. AP 5.',
   },
 }
 
