@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.18.1** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.20.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -14,7 +14,7 @@
 6. [Initiative Phase](#6-initiative-phase)
 7. [Acceleration Phase](#7-acceleration-phase)
 8. [Movement Phase](#8-movement-phase) — includes §8.1 missile impact, §8.2 ships that pass in the night
-9. [Attack Phase](#9-attack-phase) — includes §9.5 per-turret limit, §9.6 missile launch, §9.9 reactions
+9. [Attack Phase](#9-attack-phase) — includes §9.5 per-turret limit, §9.6 missile launch, §9.9 reactions, §9.10 special weapon mechanics
 10. [Actions Phase — Crew](#10-actions-phase--crew)
 11. [Crew System](#11-crew-system)
 12. [Undo / Redo](#12-undo--redo)
@@ -111,11 +111,12 @@ Click **📖 Legend** (fixed button, top-right of the battle screen) to open the
 
 | Category | Symbols |
 | -------- | ------- |
-| **Tokens** | Ship silhouette (6 shapes: delta, needle, freighter, gunship, cruiser, capital — each rotates to face velocity direction); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — rotates to face velocity direction; count + thrust arc shown; hover for launcher/target/thrust tooltip) |
-| **Beam weapons** | Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange) |
-| **Hit effects** | Impact burst (expanding sparks on target), Critical flash (red ring + label) |
+| **Tokens** | Ship silhouette (6 shapes: delta, needle, freighter, gunship, cruiser, capital — each rotates to face velocity direction); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — rotates to face velocity direction; count + thrust arc shown; hover for launcher/target/thrust tooltip); torpedo (red/amber silhouette — separate salvo type) |
+| **Turret beams** | Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange), Fusion Gun (amber-white), Plasma Gun (magenta), Ion Cannon (electric blue — no hull damage, applies thrust penalty) |
+| **Barbette beams** | Pulse Laser Barbette (sky blue, thicker), Beam Laser Barbette (blue, thicker), Particle Barbette (purple, thicker), Fusion Barbette (amber-white, thicker), Plasma Barbette (magenta, thicker), Railgun Barbette (orange, thicker) — all barbettes deal ×3 damage after armour |
+| **Hit effects** | Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion Cannon hit) |
 | **Movement effects** | Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line) |
-| **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + red ring), Missile exhausted (×) |
+| **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + red ring), Missile exhausted (×), Ion aura (pulsing blue ring, while ionRoundsLeft > 0) |
 
 ### 3.2 Basic Mode View
 
@@ -126,9 +127,9 @@ Each card has three zones:
 
 | Zone | Content |
 | ---- | ------- |
-| **Header** | Ship name · faction colour dot · status badges: `☠ WRECK`, `DOGFIGHT`, `BOARDING`, `EVA N` (evasive thrust), `LOCKED` (sensor locked) |
+| **Header** | Ship name · faction colour dot · status badges: `☠ WRECK`, `DOGFIGHT`, `BOARDING`, `EVA N` (evasive thrust), `LOCKED` (sensor locked), `ION NR` (ion disruption active — blue) |
 | **Hull** | Hull bar (green → yellow → red) · "Hull N/M" · "Ini N" |
-| **Status** *(conditional)* | Sensor lock → target name (with DM if set); Locked by [attacker]; inbound missiles per launcher (⚡ N× type); launched missiles per target (🚀 N× type); reloading turrets; critical hits list; missile ammo (🚀 N/max, yellow < 25%, red at 0) |
+| **Status** *(conditional)* | Sensor lock → target name (with DM if set); Locked by [attacker]; inbound missiles per launcher (⚡ N× type); inbound torpedoes; launched missiles per target (🚀 N× type); reloading turrets; critical hits list; missile ammo (🚀 N/max, yellow < 25%, red at 0); sand canisters (🪨 N/max, yellow < 25%, red at 0); ion disruption (⚡ −N thrust / NR remaining) |
 
 The Status zone is hidden when none of these conditions are active.
 
@@ -429,25 +430,43 @@ next Attack phase or the start of a new round.
 
 ### 9.6 Launching Missiles
 
-Missile Racks are selected directly in the Attack modal alongside other weapons.
-Select the `Missile Rack` entry in the weapon list, then:
+Three launcher types are available. All are selected in the Attack modal weapon list.
+No dice roll is required at launch — the turret is immediately marked as fired.
 
-1. Select the **target** ship.
-2. Adjust the **missile count** using the `−` / `+` stepper. The maximum is capped by the ship's remaining magazine (`count × 12` per Missile Rack — *MgT2e CRB p.162*). Remaining ammo is shown next to the stepper; the button reads **🚨 NO AMMO** and is disabled when the magazine is empty.
-3. Click **🚀 LAUNCH SALVO →** — no dice roll required.
+#### Missile Rack *(CRB p.162)*
 
-The salvo spawns as a missile token on the map, inheriting the launching ship's
-current velocity. Each round in the Movement phase it advances toward the target
-using its remaining thrust. A **LAUNCH** burst animation plays on the launching
-ship's hex.
+Select `Missile Rack`, choose a target, adjust the salvo count using the `−` / `+`
+stepper (maximum capped at remaining magazine — **12 missiles per Rack**), then
+click **🚀 LAUNCH SALVO →**. The button shows **🚨 NO AMMO** and is disabled when the
+magazine is empty.
 
-Missiles have **Thrust 10** and **10 rounds of guided flight** *(MgT2e CRB p.162 —
-standard missiles)*. Each round they apply up to Thrust 10 of delta-v to home toward
-the target's predicted next position. After fuel is exhausted the salvo drifts on its
-last vector until it either reaches the target or is destroyed.
+Missiles have **Thrust 10** and **10 rounds of guided flight**. Each round in the
+Movement phase they apply up to Thrust 10 toward the target's predicted position.
+After fuel is exhausted the salvo drifts on its last vector.
 
-> The launching turret is marked as fired. Missile Rack entries disappear from
-> the Attack weapon list after launch, consistent with the per-turret limit.
+Damage: **4D6 per missile** *(HG p.28)*.
+
+#### Missile Barbette *(HG p.29)*
+
+Launches a **fixed 5-missile salvo** — the count is not adjustable. Total magazine:
+**25 missiles** (5 salvos). Uses the same guided-flight system as the Missile Rack.
+
+Damage: **4D6 per missile** (same as Rack — barbette ×3 multiplier does **not** apply
+to missile weapons; the Smart trait drives the fixed salvo size instead).
+
+#### Torpedo *(HG p.30–31)*
+
+Torpedoes are larger, slower-burning guided munitions. Each barbette holds **3
+torpedoes**. Select `Torpedo` and fire — salvos may contain 1–3 torpedoes.
+
+Torpedoes use the same guided-flight system as missiles. A torpedo token is
+rendered in red/amber on the map, separate from missile salvos.
+
+Damage: **6D6 per torpedo** (vs 4D6 per missile) *(HG p.31)*.
+
+> The launching turret is marked as fired after any launch. Launcher entries
+> disappear from the Attack weapon list once ammo is empty, consistent with the
+> per-turret limit.
 
 ### 9.7 Sensor Lock
 
@@ -459,15 +478,25 @@ locked target. Shown as an **animated cyan ring** on the locked ship.
 Each weapon has a **maximum range band** beyond which it cannot fire
 *(MgT2e CRB p. 167: "cannot attack targets beyond listed Range Band")*.
 
-| Weapon | Max Range |
-| ------ | --------- |
-| Railgun | Short |
-| Beam Laser | Medium |
-| Pulse Laser | Long |
-| Particle Barbette | Very Long |
-| Particle Beam | Very Long |
-| Missile Rack | Special (no cap) |
-| Sandcaster | Special (no cap) |
+| Weapon | Type | Max Range |
+| ------ | ---- | --------- |
+| Railgun | Turret | Short |
+| Railgun Barbette | Barbette | Medium |
+| Beam Laser | Turret | Medium |
+| Beam Laser Barbette | Barbette | Medium |
+| Fusion Gun | Turret | Medium |
+| Fusion Barbette | Barbette | Medium |
+| Plasma Gun | Turret | Medium |
+| Plasma Barbette | Barbette | Medium |
+| Ion Cannon | Turret | Medium |
+| Pulse Laser | Turret | Long |
+| Pulse Laser Barbette | Barbette | Long |
+| Particle Beam | Turret | Very Long |
+| Particle Barbette | Barbette | Very Long |
+| Missile Rack | Launcher | Special (no cap) |
+| Missile Barbette | Launcher | Special (no cap) |
+| Torpedo | Launcher | Special (no cap) |
+| Sandcaster | Defensive | Special (no cap) |
 
 When a target is beyond a weapon's max range:
 
@@ -497,6 +526,51 @@ on the token shows when a ship has used reactions this round.
 
 > If Point Defence destroys all missiles (count reaches 0), the attack does not
 > proceed — click **MARK FIRED & CLOSE** to mark the attacker's turret and close.
+
+### 9.10 Special Weapon Mechanics
+
+#### AP (Armour Piercing) Trait
+
+Some weapons carry an `AP N` trait that reduces effective armour before damage.
+
+Formula: `effectiveArmour = max(0, profile.armour − apReduction)`
+
+| Weapon | AP Value |
+| ------ | -------- |
+| Railgun | 4 |
+| Fusion Barbette | 3 |
+| Plasma Barbette | 2 |
+| Railgun Barbette | 5 |
+
+#### Barbette Damage Multiplier *(HG p.29)*
+
+All barbette weapons apply a **×3 damage multiplier** after armour is subtracted.
+
+Formula: `netDamage = max(0, roll + Effect − effectiveArmour) × 3`
+
+> The multiplier applies to the net hull damage — a roll fully absorbed by armour
+> deals zero damage regardless of the ×3. Missile and torpedo barbettes are
+> excluded: their damage is per-projectile and uses the Smart trait salvo mechanic.
+
+#### Ion Cannon *(HG p.30)*
+
+The Ion Cannon does **not** deal hull damage on a hit. Instead, a successful attack
+applies a **thrust penalty** to the target for the remainder of the current round
+(and possibly longer):
+
+| Outcome | Effect |
+| ------- | ------ |
+| Hit (any Effect) | Roll 2D6 → `ionPenalty` applied to target's available thrust for 1 round |
+| Hit, Effect ≥ 6 | Duration extends to D3 rounds instead of 1 |
+
+The penalty decays by 1 round at end-of-round via `buildNextRoundState`.
+When `ionRoundsLeft` reaches 0, `ionPenalty` is cleared automatically.
+
+While active, the target's token shows a **pulsing blue aura** and the bento card
+shows an **ION NR** badge. The bento card's status zone shows the current penalty
+(`⚡ −N thrust / NR remaining`).
+
+`thrustAvailable = max(0, thrust − ionPenalty − M-Drive penalty − reactionThrust)`
 
 ---
 
@@ -924,6 +998,7 @@ Click the phase button to reopen the relevant modal at any time.
 | [dogfight-system-design.md](dogfight-system-design.md) | Dogfight sub-system design — micro-round flow, pursuit checks, escape mechanics |
 | [boarding-system-design.md](boarding-system-design.md) | Boarding sub-system design — entry methods, hull-cut, conflict objectives |
 | [obstacles-system-design.md](obstacles-system-design.md) | Environmental obstacles design — asteroid field, gravity well, debris, nebula |
+| [weapons-expansion-design.md](weapons-expansion-design.md) | Weapons expansion design — barbette ×3 multiplier, AP trait, Ion Cannon penalty, Torpedo/Missile Barbette ammo, sandcaster canister tracking |
 
 ---
 

@@ -186,9 +186,9 @@ export function HelpScreen() {
 
           <Sub title="BASIC MODE VIEW">
             <p>In Basic mode there is no hex map. Ships appear as bento cards grouped by faction. Each card has three zones:</p>
-            <KV k="Header" v="Ship name · faction dot · status badges: ☠ WRECK, DOGFIGHT, BOARDING, EVA N (evasive thrust), LOCKED (sensor locked by enemy)." />
+            <KV k="Header" v="Ship name · faction dot · status badges: ☠ WRECK, DOGFIGHT, BOARDING, EVA N (evasive thrust), LOCKED (sensor locked by enemy), ION NR (ion disruption active — blue)." />
             <KV k="Hull" v="Hull bar (green → yellow → red) · Hull N/M · Initiative." />
-            <KV k="Status" v="Conditional zone — shown only when active: sensor lock target (with DM), locked-by attacker, inbound missiles per launcher, launched missiles per target, reloading turrets, critical hits, missile ammo. Hidden when none apply." />
+            <KV k="Status" v="Conditional zone — shown only when active: sensor lock target (with DM), locked-by attacker, inbound missiles per launcher, inbound torpedoes (separate row), launched missiles per target, reloading turrets, critical hits, missile ammo (🚀 N/max, yellow < 25%, red at 0), sand canisters (🪨 N/max, yellow < 25%, red at 0), ion disruption (⚡ −N thrust / NR remaining). Hidden when none apply." />
             <KV k="DISTANCES panel" v="Lists every cross-faction pair with its current range band. ⬇ / ⬆ buttons adjust the band directly (GM override — no thrust spent)." />
             <p>Right-click a card to open the context menu. Right-click anywhere in the background for the global menu (Roll Initiative, Add ship here).</p>
             <Note>Ships are placed at Very Long range by default when added to a basic mode session.</Note>
@@ -196,11 +196,12 @@ export function HelpScreen() {
 
           <Sub title="LEGEND">
             <p>Click <span className="text-slate-200">📖 Legend</span> (fixed button, top-right of the battle screen) to open the visual reference panel. Also accessible via right-click any empty hex → Legend.</p>
-            <KV k="Tokens" v="Ship silhouette (6 shapes: delta, needle, freighter, gunship, cruiser, capital — each rotates to face velocity direction; shape chosen at placement); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — rotates to face velocity direction; count + thrust arc; hover for launcher/target/thrust tooltip)." />
-            <KV k="Beam weapons" v="Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange)." />
-            <KV k="Hit effects" v="Impact burst (expanding sparks on target), Critical flash (red ring + label)." />
+            <KV k="Tokens" v="Ship silhouette (6 shapes: delta, needle, freighter, gunship, cruiser, capital — each rotates to face velocity direction; shape chosen at placement); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — count + thrust arc; hover for launcher/target/thrust tooltip); torpedo (red/amber silhouette — separate salvo type)." />
+            <KV k="Turret beams" v="Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange), Fusion Gun (amber-white), Plasma Gun (magenta), Ion Cannon (electric blue — applies thrust penalty, no hull damage)." />
+            <KV k="Barbette beams" v="Pulse Laser Barbette (sky blue, thicker), Beam Laser Barbette (blue, thicker), Particle Barbette (purple, thicker), Fusion Barbette (amber-white, thicker), Plasma Barbette (magenta, thicker), Railgun Barbette (orange, thicker) — all barbettes deal ×3 damage after armour." />
+            <KV k="Hit effects" v="Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion Cannon hit)." />
             <KV k="Movement effects" v="Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line)." />
-            <KV k="Persistent indicators" v="Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + amber ring), Missile exhausted (×)." />
+            <KV k="Persistent indicators" v="Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + amber ring), Missile exhausted (×), Ion aura (pulsing blue ring — while ionRoundsLeft {'>'} 0)." />
           </Sub>
         </Section>
 
@@ -373,8 +374,11 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="LAUNCHING MISSILES">
-            <p>In the Attack modal, select <span className="text-slate-200">Missile Rack</span> from the weapon list, choose a target, adjust salvo count using the stepper (capped at the ship's remaining magazine — 12 per rack, CRB p.162), then click Launch. Remaining ammo is shown next to the stepper; the button shows <span className="text-red-400">🚨 NO AMMO</span> when the magazine is empty. No dice roll required at launch.</p>
-            <p>Missiles have <span className="text-slate-200">Thrust 10</span> and <span className="text-slate-200">10 rounds of guided flight</span> (CRB p.162). Each round in the Movement phase they home toward the target's predicted next position. After fuel is exhausted the salvo drifts on its last vector.</p>
+            <p>Three launcher types are available — all selected in the Attack modal weapon list. No dice roll required at launch. The turret is marked as fired immediately.</p>
+            <p><span className="text-slate-200">Missile Rack</span> (CRB p.162) — adjust salvo count using the stepper (capped at remaining magazine, 12 per rack). Damage: 4D6 per missile.</p>
+            <p><span className="text-slate-200">Missile Barbette</span> (HG p.29) — fixed 5-missile salvo, 25 total canisters (5 salvos). Damage: 4D6 per missile. Barbette ×3 multiplier does <em>not</em> apply to missile weapons.</p>
+            <p><span className="text-slate-200">Torpedo</span> (HG p.30–31) — 1–3 torpedoes per launch, 3 per barbette. Rendered as a red/amber token. Damage: 6D6 per torpedo.</p>
+            <p>All salvos show <span className="text-red-400">🚨 NO AMMO</span> and disable the launch button when the magazine is empty. Missiles and torpedoes have <span className="text-slate-200">Thrust 10</span> and <span className="text-slate-200">10 rounds of guided flight</span> — homing toward the target's predicted position each Movement phase until fuel is exhausted.</p>
           </Sub>
 
           <Sub title="PER-TURRET FIRING LIMIT">
@@ -384,10 +388,29 @@ export function HelpScreen() {
           <Sub title="WEAPON RANGE LIMITS">
             <p>Each weapon has a maximum range band beyond which it cannot fire (CRB p.167). An <span className="text-red-400">OUT OF RANGE</span> badge appears on blocked weapons; the ROLL ATTACK button is disabled.</p>
             <KV k="Railgun" v="Short" />
+            <KV k="Railgun Barbette" v="Medium (AP 5)" />
             <KV k="Beam Laser" v="Medium" />
+            <KV k="Beam Laser Barbette" v="Medium" />
+            <KV k="Fusion Gun" v="Medium (AP —, Radiation)" />
+            <KV k="Fusion Barbette" v="Medium (AP 3, Radiation)" />
+            <KV k="Plasma Gun" v="Medium" />
+            <KV k="Plasma Barbette" v="Medium (AP 2)" />
+            <KV k="Ion Cannon" v="Medium (no hull damage — applies thrust penalty)" />
             <KV k="Pulse Laser" v="Long" />
-            <KV k="Particle Beam / Barbette" v="Very Long" />
-            <KV k="Missile Rack / Sandcaster" v="Special (no cap)" />
+            <KV k="Pulse Laser Barbette" v="Long" />
+            <KV k="Particle Beam" v="Very Long (Radiation)" />
+            <KV k="Particle Barbette" v="Very Long (Radiation)" />
+            <KV k="Missile Rack" v="Special (no cap)" />
+            <KV k="Missile Barbette" v="Special (no cap)" />
+            <KV k="Torpedo" v="Special (no cap)" />
+            <KV k="Sandcaster" v="Special (no cap — defensive only)" />
+          </Sub>
+
+          <Sub title="SPECIAL WEAPON MECHANICS">
+            <p><span className="text-slate-200">AP (Armour Piercing) trait</span> — reduces effective armour before damage: <code className="text-(--neon-cyan)">effectiveArmour = max(0, armour − apReduction)</code>. Weapons: Railgun AP 4, Fusion Barbette AP 3, Plasma Barbette AP 2, Railgun Barbette AP 5.</p>
+            <p><span className="text-slate-200">Barbette ×3 multiplier</span> (HG p.29) — applied after armour: <code className="text-(--neon-cyan)">netDamage = max(0, roll + Effect − effectiveArmour) × 3</code>. A roll fully absorbed by armour deals zero damage regardless of the multiplier. Does not apply to missile or torpedo weapons.</p>
+            <p><span className="text-slate-200">Ion Cannon</span> (HG p.30) — no hull damage on hit. Applies <span className="text-blue-400">ionPenalty</span> (2D6 roll) to target's available thrust for 1 round; if Effect ≥ 6, duration extends to D3 rounds. Penalty clears when <code className="text-(--neon-cyan)">ionRoundsLeft</code> reaches 0 (decremented each round end). Token shows pulsing blue aura. Bento card shows <span className="text-blue-400">ION NR</span> badge and status row. Formula: <code className="text-(--neon-cyan)">thrustAvailable = max(0, thrust − ionPenalty − M-Drive penalty − reactionThrust)</code>.</p>
+            <p><span className="text-slate-200">Sandcaster ammo</span> — 20 canisters per sandcaster slot. Decremented each time Disperse Sand reaction is used. Shown as 🪨 N/max on bento cards (yellow {'<'} 25%, red at 0) and on the ship detail modal and tooltip.</p>
           </Sub>
 
           <Sub title="SENSOR LOCK">
