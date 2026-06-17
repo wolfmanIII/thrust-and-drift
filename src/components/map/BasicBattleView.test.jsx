@@ -118,4 +118,70 @@ describe('ShipBentoCard', () => {
     render(<BasicBattleView />)
     expect(screen.getByText('Ammo 9/12')).toBeTruthy()
   })
+
+  it('shows ammo row with correct max for Missile Barbette (25)', () => {
+    const ship = makeShip({
+      missileAmmoTotal: 20,
+      profile: {
+        name: 'Corvette', hull: 20, thrust: 4,
+        turrets: [{ weapons: ['Missile Barbette'] }],
+      },
+    })
+    useBattleStore.setState({ ships: [ship], missiles: [] })
+    render(<BasicBattleView />)
+    expect(screen.getByText('Ammo 20/25')).toBeTruthy()
+  })
+
+  it('shows ammo row with correct max for Torpedo (3)', () => {
+    const ship = makeShip({
+      missileAmmoTotal: 2,
+      profile: {
+        name: 'Fighter', hull: 8, thrust: 6,
+        turrets: [{ weapons: ['Torpedo'] }],
+      },
+    })
+    useBattleStore.setState({ ships: [ship], missiles: [] })
+    render(<BasicBattleView />)
+    expect(screen.getByText('Ammo 2/3')).toBeTruthy()
+  })
+
+  it('shows sandcaster ammo row for ship with Sandcaster', () => {
+    const ship = makeShip({
+      sandAmmoTotal: 15,
+      profile: {
+        name: 'Merchant', hull: 16, thrust: 2,
+        turrets: [{ weapons: ['Sandcaster'] }],
+      },
+    })
+    useBattleStore.setState({ ships: [ship], missiles: [] })
+    render(<BasicBattleView />)
+    expect(screen.getByText('Sand 15/20')).toBeTruthy()
+  })
+
+  it('does not show sand row for ship without Sandcaster', () => {
+    useBattleStore.setState({ ships: [makeShip()], missiles: [] })
+    render(<BasicBattleView />)
+    expect(screen.queryByText(/Sand /)).toBeNull()
+  })
+
+  it('shows ION badge when ionRoundsLeft > 0', () => {
+    const ship = makeShip({ ionRoundsLeft: 2, ionPenalty: 4 })
+    useBattleStore.setState({ ships: [ship], missiles: [] })
+    render(<BasicBattleView />)
+    expect(screen.getByText('ION 2R')).toBeTruthy()
+  })
+
+  it('does not show ION badge when ionRoundsLeft is 0 or absent', () => {
+    useBattleStore.setState({ ships: [makeShip()], missiles: [] })
+    render(<BasicBattleView />)
+    expect(screen.queryByText(/ION/)).toBeNull()
+  })
+
+  it('shows ion disruption status row with penalty and rounds', () => {
+    const ship = makeShip({ ionRoundsLeft: 1, ionPenalty: 6 })
+    useBattleStore.setState({ ships: [ship], missiles: [] })
+    render(<BasicBattleView />)
+    expect(screen.getByText(/Ion disruption/)).toBeTruthy()
+    expect(screen.getByText(/-6 thrust/)).toBeTruthy()
+  })
 })

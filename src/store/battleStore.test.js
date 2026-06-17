@@ -1763,3 +1763,179 @@ describe('resolveMovement — basic mode guard', () => {
     expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
   })
 })
+
+// === SANDCASTER AMMO ===
+// // MgT2e HG p.28 — 20 canisters per sandcaster slot
+
+describe('sandcaster ammo initialisation', () => {
+  it('sandAmmoTotal initialises to 0 for ship with no sandcasters', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].sandAmmoTotal).toBe(0)
+  })
+
+  it('sandAmmoTotal initialises to 20 for one Sandcaster slot', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Sandcaster'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].sandAmmoTotal).toBe(20)
+  })
+
+  it('sandAmmoTotal initialises to 40 for two Sandcaster slots', () => {
+    const profile = makeProfile({ turrets: [
+      { slot: 1, weapons: ['Sandcaster'] },
+      { slot: 2, weapons: ['Sandcaster', 'Pulse Laser'] },
+    ] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].sandAmmoTotal).toBe(40)
+  })
+})
+
+describe('spendSandAmmo', () => {
+  it('decrements sandAmmoTotal by 1', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Sandcaster'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().spendSandAmmo(id)
+    expect(useBattleStore.getState().ships[0].sandAmmoTotal).toBe(19)
+  })
+
+  it('clamps sandAmmoTotal at 0', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Sandcaster'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { sandAmmoTotal: 0 })
+    useBattleStore.getState().spendSandAmmo(id)
+    expect(useBattleStore.getState().ships[0].sandAmmoTotal).toBe(0)
+  })
+
+  it('does not affect other ships', () => {
+    const sandProfile = makeProfile({ turrets: [{ slot: 1, weapons: ['Sandcaster'] }] })
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(sandProfile, { q: 1, r: 0 }, 'npc', '#f00')
+    const [s1, s2] = useBattleStore.getState().ships
+    useBattleStore.getState().spendSandAmmo(s2.id)
+    expect(useBattleStore.getState().ships[0].sandAmmoTotal).toBe(0)
+    expect(useBattleStore.getState().ships[1].sandAmmoTotal).toBe(19)
+  })
+
+  it('unknown shipId is no-op', () => {
+    expect(() => useBattleStore.getState().spendSandAmmo('ghost')).not.toThrow()
+  })
+})
+
+// === MISSILE AMMO — BARBETTES AND TORPEDOES ===
+// // MgT2e HG p.30–31
+
+describe('missile ammo initialisation — barbette and torpedo', () => {
+  it('Missile Barbette initialises to 25 ammo', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Missile Barbette'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(25)
+  })
+
+  it('Torpedo initialises to 3 ammo', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Torpedo'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(3)
+  })
+
+  it('Rack + Barbette + Torpedo mixed capacity sums correctly', () => {
+    const profile = makeProfile({ turrets: [
+      { slot: 1, weapons: ['Missile Rack'] },
+      { slot: 2, weapons: ['Missile Barbette'] },
+      { slot: 3, weapons: ['Torpedo'] },
+    ] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    // 12 + 25 + 3 = 40
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(40)
+  })
+})
+
+// === ION CANNON — applyIonDamage ===
+// // MgT2e HG p.30
+
+describe('applyIonDamage', () => {
+  it('sets ionPenalty and ionRoundsLeft on target', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyIonDamage(id, 5, 2)
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.ionPenalty).toBe(5)
+    expect(ship.ionRoundsLeft).toBe(2)
+  })
+
+  it('overwrites previous ion state (new hit replaces old)', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyIonDamage(id, 3, 1)
+    useBattleStore.getState().applyIonDamage(id, 8, 3)
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.ionPenalty).toBe(8)
+    expect(ship.ionRoundsLeft).toBe(3)
+  })
+
+  it('does not affect other ships', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile(), { q: 1, r: 0 }, 'npc',     '#f00')
+    const [s1, s2] = useBattleStore.getState().ships
+    useBattleStore.getState().applyIonDamage(s2.id, 6, 1)
+    expect(useBattleStore.getState().ships[0].ionPenalty  ?? 0).toBe(0)
+    expect(useBattleStore.getState().ships[0].ionRoundsLeft ?? 0).toBe(0)
+  })
+
+  it('unknown shipId is no-op', () => {
+    expect(() => useBattleStore.getState().applyIonDamage('ghost', 4, 1)).not.toThrow()
+  })
+})
+
+// === ION STATE — round decrement via startNextRound ===
+
+describe('ion disruption — round decrement', () => {
+  it('ionRoundsLeft decrements by 1 each round', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyIonDamage(id, 4, 3)
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].ionRoundsLeft).toBe(2)
+    expect(useBattleStore.getState().ships[0].ionPenalty).toBe(4)
+  })
+
+  it('ionPenalty cleared when ionRoundsLeft reaches 0', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyIonDamage(id, 4, 1)
+    useBattleStore.getState().startNextRound()
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.ionRoundsLeft).toBe(0)
+    expect(ship.ionPenalty).toBe(0)
+  })
+
+  it('no ion state: startNextRound is no-op on ion fields', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().startNextRound()
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.ionRoundsLeft ?? 0).toBe(0)
+    expect(ship.ionPenalty  ?? 0).toBe(0)
+  })
+})
+
+describe('spendReactionThrust — ionPenalty reduces available pool', () => {
+  it('ionPenalty subtracts from available reaction thrust', () => {
+    // thrust=6, ionPenalty=3 → available=3
+    useBattleStore.getState().addShip(makeProfile({ thrust: 6 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyIonDamage(id, 3, 2)
+    useBattleStore.getState().spendReactionThrust(id, 6)
+    // max = thrust(6) - ionPenalty(3) = 3
+    expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(3)
+  })
+
+  it('ionPenalty + thrustPenalty combine to reduce available thrust', () => {
+    // thrust=6, thrustPenalty=2, ionPenalty=2 → available=2
+    useBattleStore.getState().addShip(makeProfile({ thrust: 6 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { thrustPenalty: 2 })
+    useBattleStore.getState().applyIonDamage(id, 2, 1)
+    useBattleStore.getState().spendReactionThrust(id, 10)
+    expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(2)
+  })
+})

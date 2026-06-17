@@ -19,6 +19,9 @@ import {
   rollInitiative,
   RANGE_ORDER,
   isOutOfRange,
+  getApValue,
+  countMissileAmmoCapacity,
+  countSandcasters,
 } from './combat.js'
 
 // === RANGE DMs ===
@@ -385,5 +388,124 @@ describe('isOutOfRange', () => {
   it('returns false when maxRange is null/undefined', () => {
     expect(isOutOfRange(null, 'Long')).toBe(false)
     expect(isOutOfRange(undefined, 'Long')).toBe(false)
+  })
+})
+
+// === AP TRAIT PARSING ===
+// // MgT2e HG p.28 — "subtract AP value from effective armour"
+
+describe('getApValue', () => {
+  it('returns 0 when traits array is empty', () => {
+    expect(getApValue([])).toBe(0)
+  })
+
+  it('returns 0 when no AP trait present', () => {
+    expect(getApValue(['Smart', 'Radiation', 'Defensive'])).toBe(0)
+  })
+
+  it('parses single-digit AP', () => {
+    expect(getApValue(['AP 4'])).toBe(4)
+  })
+
+  it('parses double-digit AP', () => {
+    expect(getApValue(['AP 10'])).toBe(10)
+  })
+
+  it('AP 0 returns 0', () => {
+    expect(getApValue(['AP 0'])).toBe(0)
+  })
+
+  it('ignores other traits, returns the AP value', () => {
+    expect(getApValue(['Radiation', 'AP 5', 'Smart'])).toBe(5)
+  })
+
+  it('does not match partial strings — "AP" alone does not count', () => {
+    expect(getApValue(['AP'])).toBe(0)
+  })
+
+  it('does not match "AP4" without space', () => {
+    expect(getApValue(['AP4'])).toBe(0)
+  })
+})
+
+// === MISSILE AMMO CAPACITY ===
+// // MgT2e CRB p.162, HG p.30–31
+
+describe('countMissileAmmoCapacity', () => {
+  it('returns 0 for profile with no turrets', () => {
+    expect(countMissileAmmoCapacity({ turrets: [] })).toBe(0)
+  })
+
+  it('returns 0 when turrets have no missile weapons', () => {
+    expect(countMissileAmmoCapacity({ turrets: [{ slot: 1, weapons: ['Pulse Laser', 'Sandcaster'] }] })).toBe(0)
+  })
+
+  it('12 per Missile Rack', () => {
+    expect(countMissileAmmoCapacity({ turrets: [{ slot: 1, weapons: ['Missile Rack'] }] })).toBe(12)
+  })
+
+  it('2 Missile Racks → 24', () => {
+    expect(countMissileAmmoCapacity({
+      turrets: [
+        { slot: 1, weapons: ['Missile Rack', 'Pulse Laser'] },
+        { slot: 2, weapons: ['Missile Rack'] },
+      ],
+    })).toBe(24)
+  })
+
+  it('25 per Missile Barbette', () => {
+    expect(countMissileAmmoCapacity({ turrets: [{ slot: 1, weapons: ['Missile Barbette'] }] })).toBe(25)
+  })
+
+  it('3 per Torpedo', () => {
+    expect(countMissileAmmoCapacity({ turrets: [{ slot: 1, weapons: ['Torpedo'] }] })).toBe(3)
+  })
+
+  it('mixed: 1 Rack + 1 Barbette + 1 Torpedo → 12+25+3 = 40', () => {
+    expect(countMissileAmmoCapacity({
+      turrets: [
+        { slot: 1, weapons: ['Missile Rack'] },
+        { slot: 2, weapons: ['Missile Barbette'] },
+        { slot: 3, weapons: ['Torpedo'] },
+      ],
+    })).toBe(40)
+  })
+
+  it('handles missing turrets field', () => {
+    expect(countMissileAmmoCapacity({})).toBe(0)
+  })
+})
+
+// === SANDCASTER CAPACITY ===
+// // MgT2e HG p.28 — 20 canisters per sandcaster slot
+
+describe('countSandcasters', () => {
+  it('returns 0 for profile with no turrets', () => {
+    expect(countSandcasters({ turrets: [] })).toBe(0)
+  })
+
+  it('returns 0 when no sandcaster weapons', () => {
+    expect(countSandcasters({ turrets: [{ slot: 1, weapons: ['Pulse Laser', 'Beam Laser'] }] })).toBe(0)
+  })
+
+  it('20 per Sandcaster slot', () => {
+    expect(countSandcasters({ turrets: [{ slot: 1, weapons: ['Sandcaster'] }] })).toBe(20)
+  })
+
+  it('2 sandcasters in separate turrets → 40', () => {
+    expect(countSandcasters({
+      turrets: [
+        { slot: 1, weapons: ['Sandcaster', 'Pulse Laser'] },
+        { slot: 2, weapons: ['Sandcaster'] },
+      ],
+    })).toBe(40)
+  })
+
+  it('2 sandcasters in same turret → 40', () => {
+    expect(countSandcasters({ turrets: [{ slot: 1, weapons: ['Sandcaster', 'Sandcaster'] }] })).toBe(40)
+  })
+
+  it('handles missing turrets field', () => {
+    expect(countSandcasters({})).toBe(0)
   })
 })
