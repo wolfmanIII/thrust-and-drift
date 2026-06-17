@@ -162,13 +162,13 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
           ))}
 
           {(ship.turretsNeedingReload ?? 0) > 0 && (
-            <StatusRow icon="↺" className="text-slate-400">
+            <StatusRow icon="🔄" className="text-slate-400">
               {ship.turretsNeedingReload} turret{ship.turretsNeedingReload !== 1 ? 's' : ''} reloading
             </StatusRow>
           )}
 
           {ship.criticalHits?.length > 0 && !ship.isDestroyed && (
-            <StatusRow icon="⚠" className="text-red-400">
+            <StatusRow icon="🚨" className="text-red-400">
               <span className="text-red-300">
                 {ship.criticalHits.map((c) => `${c.system} Sev.${c.severity}`).join(' · ')}
               </span>

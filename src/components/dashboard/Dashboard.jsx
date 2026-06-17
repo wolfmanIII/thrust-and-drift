@@ -105,7 +105,7 @@ function ProfilesPanel({ editingId, onEdit, onNew, onCatalog, catalogOpen }) {
       <div className="px-4 py-3 border-t border-slate-800 shrink-0 space-y-2">
         {importStatus && (
           <p className={`font-mono text-xs ${importStatus.ok ? 'text-green-400' : 'text-red-400'}`}>
-            {importStatus.ok ? '✓ ' : '⚠ '}{importStatus.msg}
+            {importStatus.ok ? '✅ ' : '🚨 '}{importStatus.msg}
           </p>
         )}
         <button
@@ -263,7 +263,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
                   onClick={onResumeAutosave}
                   className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-display text-xs tracking-widest rounded-lg hover:bg-(--neon-cyan)/20 transition-colors"
                 >
-                  ↺ RESUME
+                  🔄 RESUME
                 </button>
                 <button
                   onClick={onClearAutosave}
@@ -325,7 +325,7 @@ function CommandConsole({ mode, onModeChange, onNewSession, onResumeClick, onRes
         </div>
 
         {error && (
-          <p className="text-red-400 font-mono text-xs">⚠ {error}</p>
+          <p className="text-red-400 font-mono text-xs">🚨 {error}</p>
         )}
       </div>
 

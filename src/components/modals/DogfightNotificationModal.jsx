@@ -184,8 +184,8 @@ export function DogfightNotificationModal({ groups, onDone }) {
   // ── Title ──
 
   const modalTitle = total > 1
-    ? `⚔ CONTATTO RAVVICINATO — ${groupIdx + 1}/${total}`
-    : '⚔ CONTATTO RAVVICINATO'
+    ? `⚔️ CONTATTO RAVVICINATO — ${groupIdx + 1}/${total}`
+    : '⚔️ CONTATTO RAVVICINATO'
 
   // ── Render ──
 
@@ -325,8 +325,8 @@ export function DogfightNotificationModal({ groups, onDone }) {
                 : 'bg-slate-700/40 border-slate-600 text-slate-400'
             }`}>
               {outcome === 'dogfight'
-                ? '⚔ DOGFIGHT ACTIVE — close-quarters combat engaged.'
-                : '◦ SHORT RANGE — no engagement. Effective distance: 1 hex.'
+                ? '⚔️ DOGFIGHT ACTIVE — close-quarters combat engaged.'
+                : '▸ SHORT RANGE — no engagement. Effective distance: 1 hex.'
               }
             </div>
 

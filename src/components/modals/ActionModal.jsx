@@ -330,7 +330,7 @@ export function ActionModal() {
                     className="text-slate-400 hover:text-slate-400 font-mono text-xs transition-colors"
                     title="Reset to base skill"
                   >
-                    ↺
+                    🔄
                   </button>
                 )}
               </div>

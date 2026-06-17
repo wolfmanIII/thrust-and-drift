@@ -48,7 +48,7 @@ export function BoardingSetupModal() {
   }
 
   return (
-    <Modal title="⚔ BOARDING ACTION" onClose={closeModal}>
+    <Modal title="⚔️ BOARDING ACTION" onClose={closeModal}>
       <div className="space-y-4 min-w-72">
 
         {/* Attacker */}

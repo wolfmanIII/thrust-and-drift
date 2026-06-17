@@ -136,7 +136,7 @@ export function App() {
             bg-slate-900/90 border border-(--neon-cyan)/40 text-(--neon-cyan)
             font-mono text-xs tracking-widest px-4 py-2 rounded whitespace-nowrap"
         >
-          ✦ CLICK ON MAP TO PLACE — {pendingPlacement.profile.name}
+          ✨ CLICK ON MAP TO PLACE — {pendingPlacement.profile.name}
         </div>
       )}
 

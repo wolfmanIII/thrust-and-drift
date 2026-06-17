@@ -186,8 +186,8 @@ function EscapeCheckRow({ ship, pursuer, totals, onFleeRoll, onPursuerRoll }) {
             : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
         }`}>
           {resolved.escaped
-            ? `◦ ESCAPED (+${resolved.margin}) — leaves the dogfight.`
-            : `⚔ CAUGHT (+${resolved.margin}) — remains in dogfight.`
+            ? `▸ ESCAPED (+${resolved.margin}) — leaves the dogfight.`
+            : `⚔️ CAUGHT (+${resolved.margin}) — remains in dogfight.`
           }
         </div>
       )}
@@ -356,7 +356,7 @@ export function DogfightRoundModal() {
 
   return (
     <Modal
-      title={`⚔ DOGFIGHT — MICRO-ROUND ${group.microRound}/6`}
+      title={`⚔️ DOGFIGHT — MICRO-ROUND ${group.microRound}/6`}
       onClose={closeModal}
       width="max-w-xl"
     >
@@ -418,12 +418,12 @@ export function DogfightRoundModal() {
                       <div className="flex items-center gap-2 pl-4">
                         {thrustAdvantage ? (
                           <span className="text-slate-400 font-mono text-xs">
-                            ✓ Thrust advantage — automatic escape
+                            ✅ Thrust advantage — automatic escape
                           </span>
                         ) : (
                           <>
                             <span className="text-amber-400/70 font-mono text-xs">
-                              {notPursued ? '✓ Enemies not pursuing — automatic escape' : 'Pursuit check required'}
+                              {notPursued ? '✅ Enemies not pursuing — automatic escape' : 'Pursuit check required'}
                             </span>
                             <button
                               onClick={() => toggleEnemiesNotPursuing(ship.id)}
@@ -433,7 +433,7 @@ export function DogfightRoundModal() {
                                   : 'border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-400'
                               }`}
                             >
-                              {notPursued ? 'NOT PURSUING ✓' : 'PURSUING?'}
+                              {notPursued ? 'NOT PURSUING ✅' : 'PURSUING?'}
                             </button>
                           </>
                         )}
@@ -510,8 +510,8 @@ export function DogfightRoundModal() {
                         : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
                     }`}>
                       {outcome.escaped
-                        ? `◦ ${ship?.profile.name ?? shipId} escaped (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
-                        : `⚔ ${ship?.profile.name ?? shipId} remained in dogfight (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
+                        ? `▸ ${ship?.profile.name ?? shipId} escaped (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
+                        : `⚔️ ${ship?.profile.name ?? shipId} remained in dogfight (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
                       }
                     </div>
                   )
@@ -590,8 +590,8 @@ export function DogfightRoundModal() {
                 : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
             }`}>
               {resolved.tied
-                ? '◦ TIE — fixed weapons cannot fire; turrets OK. No positional DM.'
-                : `⚔ ${ships.find((s) => s.id === resolved.winnerId)?.profile.name ?? '—'} leads (+${resolved.margin}). Advantage carries to the next round.`
+                ? '▸ TIE — fixed weapons cannot fire; turrets OK. No positional DM.'
+                : `⚔️ ${ships.find((s) => s.id === resolved.winnerId)?.profile.name ?? '—'} leads (+${resolved.margin}). Advantage carries to the next round.`
               }
             </div>
 
@@ -606,7 +606,7 @@ export function DogfightRoundModal() {
               className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors"
             >
               {isLastRound
-                ? 'END DOGFIGHT — CLOSE ⚔'
+                ? 'END DOGFIGHT — CLOSE ⚔️'
                 : `ADVANCE → MICRO-ROUND ${group.microRound + 1}/6`
               }
             </button>

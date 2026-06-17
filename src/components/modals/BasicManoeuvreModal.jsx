@@ -115,8 +115,8 @@ export function BasicManoeuvreModal() {
               <p className="font-mono text-xs text-slate-400 mb-1.5">Direction</p>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { val: 'approach', label: '▼ Approach', disabled: !canApproach },
-                  { val: 'flee',     label: '▲ Flee',     disabled: !canFlee },
+                  { val: 'approach', label: '⬇ Approach', disabled: !canApproach },
+                  { val: 'flee',     label: '⬆ Flee',     disabled: !canFlee },
                 ].map(({ val, label, disabled }) => (
                   <button
                     key={val}

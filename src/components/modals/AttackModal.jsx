@@ -79,7 +79,7 @@ function ReactionsPanel({
           } disabled:text-slate-400 disabled:border-slate-600/50 disabled:cursor-not-allowed`}
         >
           {reactionEvasion
-            ? `✓ EVADING — DM −${targetPilotSkill} to this attack · 1 thrust`
+            ? `✅ EVADING — DM −${targetPilotSkill} to this attack · 1 thrust`
             : availableThrust < 1
               ? 'NO THRUST — cannot evade'
               : targetPilotSkill === 0
@@ -410,7 +410,7 @@ function AttackConfigStep({
         {/* All missiles intercepted banner */}
         {isMissile && missileCount === 0 && (
           <p className="text-green-400 font-mono text-xs text-center tracking-widest">
-            ✓ ALL MISSILES INTERCEPTED — salvo destroyed
+            ✅ ALL MISSILES INTERCEPTED — salvo destroyed
           </p>
         )}
 
@@ -428,7 +428,7 @@ function AttackConfigStep({
               disabled={!weapon || !target || ammoLeft === 0}
               className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
             >
-              {ammoLeft === 0 ? '⚠ NO AMMO' : '🚀 LAUNCH SALVO →'}
+              {ammoLeft === 0 ? '🚨 NO AMMO' : '🚀 LAUNCH SALVO →'}
             </button>
           )
         ) : (
@@ -547,7 +547,7 @@ function AttackRollStep({
 
             {isCriticalHit(attackResult.effect) && (
               <p className="text-orange-400 font-mono text-xs text-center">
-                ⚠ CRITICAL HIT (Effect {attackResult.effect} ≥ 6)
+                🚨 CRITICAL HIT (Effect {attackResult.effect} ≥ 6)
               </p>
             )}
 
@@ -746,7 +746,7 @@ function AttackCriticalStep({
     <Modal title="Critical Hit" onClose={onClose}>
       <div className="space-y-4">
         <div className="text-center font-mono text-xs text-orange-400">
-          ⚠ Effect {attackEffect} ≥ 6 — Critical on {targetName}
+          🚨 Effect {attackEffect} ≥ 6 — Critical on {targetName}
         </div>
 
         {!critRoll ? (

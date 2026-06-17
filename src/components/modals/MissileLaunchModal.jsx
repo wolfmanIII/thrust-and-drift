@@ -121,7 +121,7 @@ export function MissileLaunchModal() {
             disabled={!targetId || ammoLeft === 0}
             className="flex-1 py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-xs tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
           >
-            {ammoLeft === 0 ? '⚠ NO AMMO' : '🚀 LAUNCH SALVO'}
+            {ammoLeft === 0 ? '🚨 NO AMMO' : '🚀 LAUNCH SALVO'}
           </button>
         </div>
       </div>

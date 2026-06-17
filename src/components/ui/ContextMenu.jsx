@@ -162,7 +162,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
           {boardingTargets.map((t) => (
             <MenuItem
               key={t.id}
-              icon="⚔"
+              icon="⚔️"
               label={`Board ${t.profile.name}…`}
               onClick={() => open('boarding-setup', { attackerId: targetId })}
             />

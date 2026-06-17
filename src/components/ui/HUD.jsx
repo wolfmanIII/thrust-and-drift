@@ -178,7 +178,7 @@ export function HUD() {
           </button>
           {phaseBlockMsg && (
             <p className="font-mono text-xs text-amber-400/90 pl-1 pointer-events-none">
-              ⚠ {phaseBlockMsg}
+              🚨 {phaseBlockMsg}
             </p>
           )}
         </>
@@ -193,7 +193,7 @@ export function HUD() {
               aria-label="Undo last action (Ctrl+Z)"
               className="bg-slate-800/80 border border-slate-700 font-mono text-sm rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-400 hover:text-slate-300 hover:border-slate-500"
             >
-              ⟲
+              ↩️
             </button>
           </Tooltip>
         )}
@@ -204,7 +204,7 @@ export function HUD() {
               aria-label="Redo last action (Ctrl+Y)"
               className="bg-slate-800/80 border border-slate-700 font-mono text-sm rounded px-2 py-1 backdrop-blur-sm transition-colors text-slate-400 hover:text-slate-300 hover:border-slate-500"
             >
-              ↷
+              ↪️
             </button>
           </Tooltip>
         )}

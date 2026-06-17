@@ -30,7 +30,7 @@ function ObjectiveRow({ label, desc, conquered, onChange }) {
       }`}
     >
       <span className={`text-lg shrink-0 ${conquered ? 'opacity-100' : 'opacity-40'}`}>
-        {conquered ? '✓' : '○'}
+        {conquered ? '✅' : '○'}
       </span>
       <div className="flex-1 min-w-0">
         <p className={`font-mono text-xs font-bold ${conquered ? 'text-emerald-400' : 'text-slate-300'}`}>
@@ -136,7 +136,7 @@ export function BoardingConflictModal() {
           ))}
           {allConquered && (
             <p className="text-center text-emerald-400 font-mono text-xs py-1 font-bold">
-              ✓ SHIP TAKEN — all objectives captured
+              ✅ SHIP TAKEN — all objectives captured
             </p>
           )}
         </div>
@@ -161,7 +161,7 @@ export function BoardingConflictModal() {
               total:   stackResult.total,
               outcome: stackResult.success ? 'success' : 'fail',
               label:   stackResult.success
-                ? `✓ Success (${stackResult.total}) — target your chosen combatant`
+                ? `✅ Success (${stackResult.total}) — target your chosen combatant`
                 : `✗ Failure (${stackResult.total}) — first in line becomes the target`,
             }} />
           )}

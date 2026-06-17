@@ -145,7 +145,7 @@ describe('PassingAttackModal — actions', () => {
     expect(useBattleStore.getState().passingEncounters).toHaveLength(0)
   })
 
-  it('fired button is disabled and shows ✓ FIRED label', () => {
+  it('fired button is disabled and shows ✅ FIRED label', () => {
     addShipToStore('Viper', 'players', 0, 0, '#0f0')
     addShipToStore('Fighter', 'npc', 5, 0, '#f00')
     const { ships } = useBattleStore.getState()
@@ -153,7 +153,7 @@ describe('PassingAttackModal — actions', () => {
       passingEncounters: [{ id: 'enc-1', shipAId: ships[0].id, shipBId: ships[1].id, minDistance: 1, firedA: true, firedB: false }],
     })
     render(<PassingAttackModal />)
-    expect(screen.getByText(/✓ VIPER FIRED/)).toBeInTheDocument()
+    expect(screen.getByText(/✅ VIPER FIRED/)).toBeInTheDocument()
     expect(screen.getByText(/FIGHTER FIRES/)).toBeInTheDocument()
   })
 })

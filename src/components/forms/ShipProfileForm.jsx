@@ -378,7 +378,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
       {/* Footer: error + actions */}
       <div className="px-5 py-3 border-t border-slate-800 shrink-0 space-y-2">
         {error && (
-          <p className="text-red-400 font-mono text-xs">⚠ {error}</p>
+          <p className="text-red-400 font-mono text-xs">🚨 {error}</p>
         )}
         <div className="flex gap-2">
           <button
@@ -393,7 +393,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
             onClick={handleSave}
             className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors"
           >
-            {isNew ? '+ CREATE PROFILE' : '✓ SAVE CHANGES'}
+            {isNew ? '+ CREATE PROFILE' : '✅ SAVE CHANGES'}
           </button>
         </div>
       </div>

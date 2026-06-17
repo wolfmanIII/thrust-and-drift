@@ -119,7 +119,7 @@ function CutTracker({ boarding, onDamage }) {
           <span className="text-amber-400 ml-2">ACCESS BLOCKED — continue for breach</span>
         )}
         {(boarding.hullDamageSoFar ?? 0) >= res.breach && (
-          <span className="text-emerald-400 ml-2">✓ BREACH ACHIEVED</span>
+          <span className="text-emerald-400 ml-2">✅ BREACH ACHIEVED</span>
         )}
       </p>
     </div>
@@ -174,7 +174,7 @@ export function BoardingContactModal() {
   }
 
   return (
-    <Modal title="⚔ CONTACT" onClose={closeModal}>
+    <Modal title="⚔️ CONTACT" onClose={closeModal}>
       <div className="space-y-4 min-w-80">
 
         {/* Ships banner */}
@@ -183,7 +183,7 @@ export function BoardingContactModal() {
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: attacker.color }} />
             <span className="text-slate-200 font-mono text-xs font-bold truncate">{attacker.profile.name}</span>
           </div>
-          <span className="text-amber-400 font-mono text-xs shrink-0">⚔</span>
+          <span className="text-amber-400 font-mono text-xs shrink-0">⚔️</span>
           <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
             <span className="text-slate-200 font-mono text-xs font-bold truncate">{defender.profile.name}</span>
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: defender.color }} />
@@ -211,7 +211,7 @@ export function BoardingContactModal() {
                     {' · '}
                     {m.time}
                     {m.dm !== 0 && <span className="text-emerald-400"> · DM +{m.dm}</span>}
-                    {m.decompression && <span className="text-red-400"> · ⚠ decompression risk</span>}
+                    {m.decompression && <span className="text-red-400"> · 🚨 decompression risk</span>}
                   </p>
                 </div>
               </button>
@@ -229,7 +229,7 @@ export function BoardingContactModal() {
                 : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-400'
             }`}
           >
-            {boarding.defenderRotating ? '↻ TUMBLING' : '↻ Tumbling'}
+            {boarding.defenderRotating ? '🌀 TUMBLING' : '🌀 Tumbling'}
             <span className="block text-[10px] text-slate-400">DM −1 Contact</span>
           </button>
           <button

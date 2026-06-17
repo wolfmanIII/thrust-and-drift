@@ -142,7 +142,7 @@ export function ThrustModal() {
         {/* Error */}
         {!isValid && cost > 0 && (
           <p className="text-red-400 font-mono text-xs text-center">
-            ⚠ Insufficient thrust ({cost} required, {thrustAvailable} available)
+            🚨 Insufficient thrust ({cost} required, {thrustAvailable} available)
           </p>
         )}
 

@@ -115,7 +115,7 @@ export function HelpScreen() {
             onClick={() => gotoScreen('dashboard')}
             className="w-full py-2 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded hover:border-slate-500 hover:text-slate-200 transition-colors"
           >
-            ← BACK
+            ⬅️ BACK
           </button>
         </div>
       </aside>
@@ -157,7 +157,7 @@ export function HelpScreen() {
 
           <Sub title="OPERATIONS CONSOLE">
             <KV k="COMBAT MODE" v="Toggle between Vectorial and Basic before starting." />
-            <KV k="↺ RESUME AUTOSAVE" v="Appears when an autosaved session is found. Shows round, phase, ship count, and timestamp. Click to restore instantly." />
+            <KV k="🔄 RESUME AUTOSAVE" v="Appears when an autosaved session is found. Shows round, phase, ship count, and timestamp. Click to restore instantly." />
             <KV k="▶ NEW SESSION" v="Clears any existing battle state and enters the combat map." />
             <KV k="↓ RESUME FROM FILE" v="Load a previously saved .json session file. A preview screen shows the full roster before you confirm." />
             <KV k="📖 FIELD MANUAL" v="This screen." />
@@ -189,7 +189,7 @@ export function HelpScreen() {
             <KV k="Header" v="Ship name · faction dot · status badges: ☠ WRECK, DOGFIGHT, BOARDING, EVA N (evasive thrust), LOCKED (sensor locked by enemy)." />
             <KV k="Hull" v="Hull bar (green → yellow → red) · Hull N/M · Initiative." />
             <KV k="Status" v="Conditional zone — shown only when active: sensor lock target (with DM), locked-by attacker, inbound missiles per launcher, launched missiles per target, reloading turrets, critical hits, missile ammo. Hidden when none apply." />
-            <KV k="DISTANCES panel" v="Lists every cross-faction pair with its current range band. ▼ / ▲ buttons adjust the band directly (GM override — no thrust spent)." />
+            <KV k="DISTANCES panel" v="Lists every cross-faction pair with its current range band. ⬇ / ⬆ buttons adjust the band directly (GM override — no thrust spent)." />
             <p>Right-click a card to open the context menu. Right-click anywhere in the background for the global menu (Roll Initiative, Add ship here).</p>
             <Note>Ships are placed at Very Long range by default when added to a basic mode session.</Note>
           </Sub>
@@ -200,7 +200,7 @@ export function HelpScreen() {
             <KV k="Beam weapons" v="Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange)." />
             <KV k="Hit effects" v="Impact burst (expanding sparks on target), Critical flash (red ring + label)." />
             <KV k="Movement effects" v="Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line)." />
-            <KV k="Persistent indicators" v="Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔ + amber ring), Missile exhausted (×)." />
+            <KV k="Persistent indicators" v="Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + amber ring), Missile exhausted (×)." />
           </Sub>
         </Section>
 
@@ -229,10 +229,10 @@ export function HelpScreen() {
               When blocked, the button dims and clicking shows an amber warning below it.
               The warning clears automatically once the condition is met.
             </p>
-            <KV k="⚡ Any phase" v="Missile impacts must all be resolved before advancing. The button dims and shows ⚠ Resolve all pending missile impacts. Use the ↩ button in the Battle Log to re-open a dismissed impact modal." />
-            <KV k="Setup" v="At least 1 ship must be placed on the map. ⚠ Place at least one ship first." />
-            <KV k="Initiative" v="Initiative must be rolled (Roll Initiative modal). ⚠ Roll initiative before advancing." />
-            <KV k="Accel / Attack / Actions" v="All actors in initiative order must have taken their turn. ⚠ N actor(s) still to act." />
+            <KV k="⚡ Any phase" v="Missile impacts must all be resolved before advancing. The button dims and shows 🚨 Resolve all pending missile impacts. Use the ↩ button in the Battle Log to re-open a dismissed impact modal." />
+            <KV k="Setup" v="At least 1 ship must be placed on the map. 🚨 Place at least one ship first." />
+            <KV k="Initiative" v="Initiative must be rolled (Roll Initiative modal). 🚨 Roll initiative before advancing." />
+            <KV k="Accel / Attack / Actions" v="All actors in initiative order must have taken their turn. 🚨 N actor(s) still to act." />
             <KV k="Movement / End" v="Always allowed unless missile impacts are pending (see above)." />
           </Sub>
         </Section>
@@ -292,8 +292,8 @@ export function HelpScreen() {
           <Sub title="MANOEUVRE (BASIC MODE)">
             <p>In Basic mode, <span className="text-slate-200">Apply Thrust</span> is replaced by <span className="text-slate-200">Manoeuvre…</span> in the context menu.</p>
             <p>The modal changes the range band between the maneuvering ship and a selected enemy. Each ship acts independently on its own initiative turn — there is no combined thrust between ships.</p>
-            <KV k="▼ Approach" v="Spend this ship's thrust to move one band closer. If both ships approach on their respective turns, the band closes by two steps in a single round." />
-            <KV k="▲ Flee" v="Spend this ship's thrust to move one band further away." />
+            <KV k="⬇ Approach" v="Spend this ship's thrust to move one band closer. If both ships approach on their respective turns, the band closes by two steps in a single round." />
+            <KV k="⬆ Flee" v="Spend this ship's thrust to move one band further away." />
             <KV k="APPLY MANOEUVRE" v="Deducts thrust and shifts the band one step. Disabled if this ship's available thrust is below the threshold for the current band." />
             <KV k="GM SET" v="Override — sets the band directly without spending any thrust. Use this for initial placement, narrative jumps, or whenever thrust costs are impractical (e.g. small ships at Very Long range)." />
             <p className="text-slate-400">Thrust thresholds per band (CRB p.161): Adjacent 1 · Short 2 · Medium 5 · Long 10 · Very Long 25 · Distant 50.</p>
@@ -327,8 +327,8 @@ export function HelpScreen() {
           </Sub>
           <Sub title="SHIPS THAT PASS IN THE NIGHT">
             <p>If two hostile ships cross within <span className="text-slate-200">Short range (≤ 2 hexes)</span> during movement — even if their final positions are far apart — the system detects the closest approach and opens the <span className="text-slate-200">Passing Encounter</span> window.</p>
-            <KV k="[Ship A] FIRES" v="Opens the Attack Modal for Ship A. Button shows ✓ FIRED after resolving — the encounter stays open so Ship B can still fire." />
-            <KV k="[Ship B] FIRES" v="Opens the Attack Modal for Ship B. Button shows ✓ FIRED after resolving." />
+            <KV k="[Ship A] FIRES" v="Opens the Attack Modal for Ship A. Button shows ✅ FIRED after resolving — the encounter stays open so Ship B can still fire." />
+            <KV k="[Ship B] FIRES" v="Opens the Attack Modal for Ship B. Button shows ✅ FIRED after resolving." />
             <KV k="PASS" v="Dismiss the encounter immediately — no attacks for either ship." />
             <p>Both ships can fire independently. The encounter closes once both have resolved. Multiple encounters resolve sequentially. Ships ending in the same hex trigger the Dogfight system instead.</p>
             <Note>Initiative order applies (TC p.177): the GM decides which ship fires first by clicking the corresponding FIRES button. The other ship's button is locked until the first attack resolves. If the first attack destroys the target, the encounter closes automatically — the destroyed ship does not fire back.</Note>
@@ -373,7 +373,7 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="LAUNCHING MISSILES">
-            <p>In the Attack modal, select <span className="text-slate-200">Missile Rack</span> from the weapon list, choose a target, adjust salvo count using the stepper (capped at the ship's remaining magazine — 12 per rack, CRB p.162), then click Launch. Remaining ammo is shown next to the stepper; the button shows <span className="text-red-400">⚠ NO AMMO</span> when the magazine is empty. No dice roll required at launch.</p>
+            <p>In the Attack modal, select <span className="text-slate-200">Missile Rack</span> from the weapon list, choose a target, adjust salvo count using the stepper (capped at the ship's remaining magazine — 12 per rack, CRB p.162), then click Launch. Remaining ammo is shown next to the stepper; the button shows <span className="text-red-400">🚨 NO AMMO</span> when the magazine is empty. No dice roll required at launch.</p>
             <p>Missiles have <span className="text-slate-200">Thrust 10</span> and <span className="text-slate-200">10 rounds of guided flight</span> (CRB p.162). Each round in the Movement phase they home toward the target's predicted next position. After fuel is exhausted the salvo drifts on its last vector.</p>
           </Sub>
 
@@ -405,7 +405,7 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="SKILL DM OVERRIDE">
-            <p>When an action is selected, the relevant skill level is pre-filled as the roll DM. The GM can override this value for specialisations (e.g. Engineer(M-Drive) 3 vs generic Engineer 2). The <span className="text-slate-200">↺</span> button resets to the base skill.</p>
+            <p>When an action is selected, the relevant skill level is pre-filled as the roll DM. The GM can override this value for specialisations (e.g. Engineer(M-Drive) 3 vs generic Engineer 2). The <span className="text-slate-200">🔄</span> button resets to the base skill.</p>
           </Sub>
 
           <Sub title="AVAILABLE ACTIONS">
@@ -462,8 +462,8 @@ export function HelpScreen() {
         {/* UNDO / REDO */}
         <Section id="undo-redo" title="Undo / Redo">
           <p>Every user action that changes game state pushes a snapshot to the undo stack (capped at 20 entries).</p>
-          <KV k="⟲ Undo" v="Restore the previous state. Appears in HUD when stack is non-empty. Shortcut: Ctrl+Z / Cmd+Z." />
-          <KV k="↷ Redo" v="Re-apply an undone action. Appears in HUD when redo stack is non-empty. Shortcut: Ctrl+Y / Cmd+Shift+Z." />
+          <KV k="↩️ Undo" v="Restore the previous state. Appears in HUD when stack is non-empty. Shortcut: Ctrl+Z / Cmd+Z." />
+          <KV k="↪️ Redo" v="Re-apply an undone action. Appears in HUD when redo stack is non-empty. Shortcut: Ctrl+Y / Cmd+Shift+Z." />
           <p>Both buttons are hidden when their respective stacks are empty — they appear only when relevant.</p>
           <Note>The battle log is not rolled back on undo. Instead, an ↩ Undo entry is appended to the log so the history remains readable.</Note>
         </Section>
@@ -472,7 +472,7 @@ export function HelpScreen() {
         <Section id="save-resume" title="Save & Resume">
           <Sub title="AUTOSAVE">
             <p>The app autosaves to IndexedDB after every significant action (ships added/removed, damage applied, phase advanced, etc.). No manual trigger needed.</p>
-            <p>On next visit, the <span className="text-slate-200">↺ RESUME AUTOSAVE</span> button appears on the Dashboard with round, phase, and ship count.</p>
+            <p>On next visit, the <span className="text-slate-200">🔄 RESUME AUTOSAVE</span> button appears on the Dashboard with round, phase, and ship count.</p>
           </Sub>
           <Sub title="MANUAL SAVE">
             <p>Click <span className="text-slate-200">💾 SAVE</span> in the HUD at any time to download the full session as a <code className="text-(--neon-cyan)">.json</code> file.</p>
@@ -508,7 +508,7 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="MICRO-ROUND FLOW">
-            <p>Open the round from the <span className="text-slate-200">⚔ DOGFIGHT</span> badge in the HUD.</p>
+            <p>Open the round from the <span className="text-slate-200">⚔️ DOGFIGHT</span> badge in the HUD.</p>
             <KV k="Step 1 — Escape" v="Declare which ships attempt to flee. Auto-escape if thrust advantage or enemies not pursuing. Otherwise, pursuit check." />
             <KV k="Step 2 — Pilot check" v="2D6 + Pilot + Tonnage DM + Thrust + previous round bonus DM." />
             <KV k="Step 3 — Result" v="Winner: +2 DM to attacks. Loser: −2 DM. Tie: fixed weapons cannot fire, turrets OK." />
@@ -516,7 +516,7 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="TOKEN VISUALS">
-            <p>Ships in a dogfight show a <span className="text-amber-400">pulsing amber ring</span> and ⚔ badge. Ghost position is hidden during dogfight.</p>
+            <p>Ships in a dogfight show a <span className="text-amber-400">pulsing amber ring</span> and ⚔️ badge. Ghost position is hidden during dogfight.</p>
           </Sub>
 
           <Sub title="ESCAPE MID-DOGFIGHT">
@@ -537,7 +537,7 @@ export function HelpScreen() {
           </p>
 
           <Sub title="TRIGGERING">
-            <p>Right-click the attacker ship → <span className="text-slate-200">⚔ Board [target]…</span></p>
+            <p>Right-click the attacker ship → <span className="text-slate-200">⚔️ Board [target]…</span></p>
             <p>Visible only when: distance ≤ 1, target not in an active dogfight, attacker thrust ≥ target thrust (or target M-Drive disabled), different factions.</p>
           </Sub>
 
@@ -548,18 +548,18 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="PHASE 2 — CONTACT">
-            <p>Select the entry method in the <span className="text-slate-200">⚔ CONTACT</span> modal:</p>
+            <p>Select the entry method in the <span className="text-slate-200">⚔️ CONTACT</span> modal:</p>
             <KV k="Airlock (cooperative)" v="No check — instant." />
             <KV k="Airlock (forced)" v="Mechanic (STR) 14+ — 2D rounds + 1D to open." />
-            <KV k="Maintenance Hatch" v="Mechanic (STR) 12+ — 2D rounds. ⚠ Decompression risk." />
+            <KV k="Maintenance Hatch" v="Mechanic (STR) 12+ — 2D rounds. 🚨 Decompression risk." />
             <KV k="Breaching Tube" v="No check — &lt; 2 min. No decompression." />
             <KV k="Forced Linkage" v="Pilot (DEX) 8+ — DM +2 to all Contact checks. Locks defender movement." />
-            <KV k="Hull Cut" v="Mechanic (DEX) 8+/round — reduces component Resilience until breach. ⚠ Decompression risk." />
-            <p>Modifiers: <span className="text-red-400">↻ Tumbling</span> (DM −1) · <span className="text-emerald-400">🔗 Forced Linkage</span> (DM +2)</p>
+            <KV k="Hull Cut" v="Mechanic (DEX) 8+/round — reduces component Resilience until breach. 🚨 Decompression risk." />
+            <p>Modifiers: <span className="text-red-400">🌀 Tumbling</span> (DM −1) · <span className="text-emerald-400">🔗 Forced Linkage</span> (DM +2)</p>
           </Sub>
 
           <Sub title="PHASE 3 — CONFLICT">
-            <p>Track objectives in the <span className="text-slate-200">⚔ CONFLICT</span> modal:</p>
+            <p>Track objectives in the <span className="text-slate-200">⚔️ CONFLICT</span> modal:</p>
             <KV k="Bridge" v="Remote control of all systems." />
             <KV k="Engineering" v="Propulsion, reactor, life support." />
             <KV k="Turrets" v="Weapon systems." />
@@ -568,13 +568,13 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="PHASE 4 — SECURITY">
-            <p>Choose outcome in the <span className="text-slate-200">⚔ SECURITY</span> modal:</p>
+            <p>Choose outcome in the <span className="text-slate-200">⚔️ SECURITY</span> modal:</p>
             <KV k="Attacker wins" v="Optional faction transfer — captured ship joins attacker's faction." />
             <KV k="Defender repels" v="Boarders eliminated, captured, or driven off." />
             <KV k="Ship destroyed" v="Target destroyed by internal damage during Conflict." />
           </Sub>
 
-          <Note>Active boardings show a ⚔ BOARDING badge in the HUD. Click it to reopen the current phase modal. Ships in a boarding do not participate in the standard Attack phase. A ship already in a dogfight cannot be boarded — it must exit the dogfight first. A ship with Forced Linkage active cannot use thrust to manoeuvre. Normal rounds continue in parallel — the GM can advance phases and resolve the boarding on its own timeline.</Note>
+          <Note>Active boardings show a ⚔️ BOARDING badge in the HUD. Click it to reopen the current phase modal. Ships in a boarding do not participate in the standard Attack phase. A ship already in a dogfight cannot be boarded — it must exit the dogfight first. A ship with Forced Linkage active cannot use thrust to manoeuvre. Normal rounds continue in parallel — the GM can advance phases and resolve the boarding on its own timeline.</Note>
         </Section>
 
       </main>

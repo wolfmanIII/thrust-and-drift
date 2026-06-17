@@ -56,7 +56,7 @@ export function PassingAttackModal() {
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="flex items-center justify-between">
           <h2 className="font-display text-(--neon-cyan) tracking-widest text-sm">
-            ✦ PASSING ENCOUNTER
+            ✨ PASSING ENCOUNTER
           </h2>
           {remaining > 1 && (
             <span className="font-mono text-xs text-slate-400">
@@ -115,7 +115,7 @@ export function PassingAttackModal() {
                   : 'bg-amber-900/40 border border-amber-600/60 text-amber-300 hover:bg-amber-800/50'
                 }`}
             >
-              {encounter.firedA ? `✓ ${shipA.profile.name.toUpperCase()} FIRED` : `${shipA.profile.name.toUpperCase()} FIRES`}
+              {encounter.firedA ? `✅ ${shipA.profile.name.toUpperCase()} FIRED` : `${shipA.profile.name.toUpperCase()} FIRES`}
             </button>
             <button
               disabled={encounter.firedB || actionsLocked}
@@ -126,7 +126,7 @@ export function PassingAttackModal() {
                   : 'bg-amber-900/40 border border-amber-600/60 text-amber-300 hover:bg-amber-800/50'
                 }`}
             >
-              {encounter.firedB ? `✓ ${shipB.profile.name.toUpperCase()} FIRED` : `${shipB.profile.name.toUpperCase()} FIRES`}
+              {encounter.firedB ? `✅ ${shipB.profile.name.toUpperCase()} FIRED` : `${shipB.profile.name.toUpperCase()} FIRES`}
             </button>
           </div>
           <button

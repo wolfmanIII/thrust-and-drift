@@ -90,7 +90,7 @@ export function BoardingOutcomeModal() {
             <div className="flex gap-3">
               {[['bridge', 'Bridge'], ['engineering', 'Engineering'], ['turrets', 'Turrets']].map(([k, l]) => (
                 <span key={k} className={`font-mono text-xs ${boarding.objectives[k] ? 'text-emerald-400' : 'text-slate-400'}`}>
-                  {boarding.objectives[k] ? '✓' : '○'} {l}
+                  {boarding.objectives[k] ? '✅' : '○'} {l}
                 </span>
               ))}
             </div>

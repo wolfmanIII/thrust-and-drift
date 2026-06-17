@@ -31,7 +31,7 @@ export class ErrorBoundary extends Component {
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-8">
         <div className="max-w-lg w-full border border-red-700/50 bg-red-950/20 rounded p-6 space-y-4">
           <h1 className="font-display text-red-400 text-lg tracking-widest">
-            ⚠ CRITICAL ERROR
+            🚨 CRITICAL ERROR
           </h1>
           <p className="font-mono text-sm text-slate-300 leading-relaxed">
             An unexpected error occurred. The current session has been

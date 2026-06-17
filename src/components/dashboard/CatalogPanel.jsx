@@ -113,7 +113,7 @@ function ShipRow({ entry, added, onAdd }) {
       {/* Right: add button */}
       <div className="shrink-0 pt-0.5">
         {added ? (
-          <span className="font-mono text-xs text-green-500 whitespace-nowrap">✓ Added</span>
+          <span className="font-mono text-xs text-green-500 whitespace-nowrap">✅ Added</span>
         ) : (
           <button
             onClick={() => onAdd(entry)}

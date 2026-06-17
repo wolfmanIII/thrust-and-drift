@@ -132,7 +132,7 @@ export function ShipTooltip() {
           <ul className="mt-1 space-y-0.5">
             {ship.criticalHits.map((c, i) => (
               <li key={i} className="font-mono text-xs text-red-300">
-                ⚠ {c.system} <span className="text-red-500/70">Sev.{c.severity}</span>
+                🚨 {c.system} <span className="text-red-500/70">Sev.{c.severity}</span>
               </li>
             ))}
           </ul>

@@ -157,7 +157,7 @@ export function ChangelogScreen() {
             onClick={() => gotoScreen('dashboard')}
             className="w-full py-2 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded hover:border-slate-500 hover:text-slate-200 transition-colors"
           >
-            ← BACK
+            ⬅️ BACK
           </button>
         </div>
       </aside>

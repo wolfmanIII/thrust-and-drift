@@ -89,7 +89,7 @@ export function ShipProfileModal() {
           <p className={`font-mono text-xs text-center ${
             status.type === 'ok' ? 'text-green-400' : 'text-red-400'
           }`}>
-            {status.type === 'ok' ? '✓ ' : '⚠ '}{status.message}
+            {status.type === 'ok' ? '✅ ' : '🚨 '}{status.message}
           </p>
         )}
 
