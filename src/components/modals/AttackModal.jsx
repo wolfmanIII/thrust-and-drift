@@ -266,7 +266,11 @@ function AttackConfigStep({
                   </span>
                   {wDef && (
                     <span className="text-slate-400">
-                      {(w.weaponName === 'Missile Rack' || w.weaponName === 'Missile Barbette') ? `Guided · 4D dmg/missile · ${w.weaponName === 'Missile Barbette' ? 'Salvo 5 · 25 ammo' : 'Special'}` : (
+                      {['Missile Rack', 'Missile Barbette', 'Torpedo'].includes(w.weaponName) ? (
+                        w.weaponName === 'Missile Barbette' ? 'Guided · 4D dmg/missile · Salvo 5 · 25 ammo' :
+                        w.weaponName === 'Torpedo'          ? 'Guided · 6D dmg/torpedo · Salvo 1–3 · 3 ammo' :
+                                                              'Guided · 4D dmg/missile · Special'
+                      ) : (
                         <>
                           DM {wDef.attackDM >= 0 ? `+${wDef.attackDM}` : wDef.attackDM}
                           {' · '}{wDef.damageDice}D dmg{' · '}max {wDef.maxRange}
@@ -315,7 +319,7 @@ function AttackConfigStep({
             ) : (
               <>
                 <p className="text-slate-400 font-mono text-xs mb-1.5">
-                  Missiles in salvo (1–{ammoLeft})
+                  {weaponKey === 'Torpedo' ? 'Torpedoes in salvo' : 'Missiles in salvo'} (1–{ammoLeft})
                   {' · '}Ammo: <span className={ammoLeft === 0 ? 'text-red-400' : 'text-(--neon-cyan)'}>{ammoLeft}</span>
                 </p>
                 <div className="flex items-center gap-3">
@@ -337,7 +341,7 @@ function AttackConfigStep({
                     +
                   </button>
                   <span className="text-slate-400 font-mono text-xs ml-2">
-                    missiles · guided munitions
+                    {weaponKey === 'Torpedo' ? 'torpedoes · guided munitions' : 'missiles · guided munitions'}
                   </span>
                 </div>
               </>
@@ -936,7 +940,7 @@ export function AttackModal() {
   const [sandTurretSlot, setSandTurretSlot]   = useState(null)
   const [sandResult, setSandResult]           = useState(null)
 
-  const isMissile  = weaponKey === 'Missile Rack' || weaponKey === 'Missile Barbette'
+  const isMissile  = weaponKey === 'Missile Rack' || weaponKey === 'Missile Barbette' || weaponKey === 'Torpedo'
 
   const resetReactions = () => {
     setReactionEvasion(false); setPdTurretSlot(null); setPdResult(null)
@@ -1124,7 +1128,8 @@ export function AttackModal() {
 
   const handleLaunchMissile = () => {
     if (!target) return
-    launchMissile(attacker.id, target.id, missileCount, attacker.position, attacker.vector, 'Standard')
+    const missileType = weaponKey === 'Torpedo' ? 'Torpedo' : 'Standard'
+    launchMissile(attacker.id, target.id, missileCount, attacker.position, attacker.vector, missileType)
     if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
     emitEffect('missile_launch', { duration: 2500, hex: attacker.position })
     closeModal()

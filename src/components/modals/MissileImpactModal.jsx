@@ -2,7 +2,7 @@
  * MissileImpactModal — shown when a missile salvo reaches its target hex during the
  * movement phase. GM enters the damage rolled; modal computes net after armour and
  * calls applyDamage. Resolves one salvo at a time; stacks if multiple arrive.
- * // MgT2e CRB p.162–165, HG p.28 (Missile Rack: 4D6 per missile)
+ * // MgT2e CRB p.162–165, HG p.28–31
  */
 
 import { useState } from 'react'
@@ -10,7 +10,10 @@ import { Modal }          from './Modal.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
 import { rollDice }       from '../../utils/dice.js'
 
-const DICE_PER_MISSILE = 4 // HG p.28 — Missile Rack 4D6
+/** // MgT2e HG p.28 (Missile Rack 4D), HG p.30 (Torpedo 6D) */
+function dicePerUnit(type) {
+  return type === 'Torpedo' ? 6 : 4
+}
 
 export function MissileImpactModal() {
   const pendingMissileImpacts = useBattleStore((s) => s.pendingMissileImpacts)
@@ -33,7 +36,8 @@ export function MissileImpactModal() {
   }
 
   const armor       = target.profile.armor ?? 0
-  const totalDice   = impact.count * DICE_PER_MISSILE
+  const diceEach    = dicePerUnit(impact.type)
+  const totalDice   = impact.count * diceEach
   const rolled      = parseInt(damageRolled, 10)
   const netDamage   = isNaN(rolled) ? null : Math.max(0, rolled - armor)
   const pending     = pendingMissileImpacts.length
@@ -61,7 +65,7 @@ export function MissileImpactModal() {
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="flex items-center justify-between">
           <h2 className="font-display text-amber-400 tracking-widest text-sm">
-            ⚡ MISSILE IMPACT
+            ⚡ {impact.type === 'Torpedo' ? 'TORPEDO IMPACT' : 'MISSILE IMPACT'}
           </h2>
           {pending > 1 && (
             <span className="font-mono text-xs text-slate-400">
@@ -97,8 +101,8 @@ export function MissileImpactModal() {
         {/* ── Damage roll ─────────────────────────────────────────── */}
         <div className="flex flex-col gap-2">
           <p className="font-mono text-xs text-slate-400 leading-relaxed">
-            Roll <span className="text-amber-300">{totalDice}D6</span> ({impact.count} missile{impact.count !== 1 ? 's' : ''} × {DICE_PER_MISSILE}D6).
-            Armour applies per missile independently.
+            Roll <span className="text-amber-300">{totalDice}D6</span> ({impact.count} {impact.type === 'Torpedo' ? 'torpedo' : 'missile'}{impact.count !== 1 ? 's' : ''} × {diceEach}D6).
+            Armour applies per {impact.type === 'Torpedo' ? 'torpedo' : 'missile'} independently.
           </p>
 
           <label className="flex flex-col gap-1">

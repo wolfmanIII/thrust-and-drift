@@ -17,7 +17,7 @@
  *   - notes:      Short rule clarification
  */
 
-/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'|'Pulse Laser Barbette'|'Beam Laser Barbette'|'Particle Barbette'|'Fusion Barbette'|'Plasma Barbette'|'Railgun Barbette'|'Missile Barbette'} WeaponType */
+/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'|'Pulse Laser Barbette'|'Beam Laser Barbette'|'Particle Barbette'|'Fusion Barbette'|'Plasma Barbette'|'Railgun Barbette'|'Missile Barbette'|'Torpedo'} WeaponType */
 
 /**
  * Weapon stat table.
@@ -130,6 +130,19 @@ export const WEAPONS = {
     notes: 'High-energy plasma stream.',
   },
 
+  'Torpedo': {
+    id: 'Torpedo',
+    label: 'Torpedo',
+    attackDM: 0,
+    damageDice: 6,         // HG p.30 — 6D per torpedo
+    damageBonus: 0,
+    maxRange: 'Special',   // Guided — no range cap
+    damageMultiple: 1,
+    traits: ['Smart'],
+    turretOnly: false,
+    bayOnly: false,
+    notes: 'Heavy anti-ship guided munition. 3 per barbette, no reload. // HG p.30–31',
+  },
   'Missile Barbette': {
     id: 'Missile Barbette',
     label: 'Missile Barbette',
