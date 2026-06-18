@@ -9,7 +9,31 @@ import { useRef, useCallback, useMemo } from 'react'
 import { useBattleStore }    from '../../store/battleStore.js'
 import { useUiStore }        from '../../store/uiStore.js'
 import { countMissileAmmoCapacity, countSandcasters } from '../../utils/combat.js'
-import { RANGE_BAND_ORDER }  from '../../data/rangeBands.js'
+import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST }  from '../../data/rangeBands.js'
+
+const MISSILE_BASIC_THRUST = 10  // MgT2e CRB p.162
+
+/** Estimate rounds until a basic-mode missile impacts its target. */
+function estimateRoundsToImpact(missile) {
+  if (!missile.basicRangeBand) return null
+  let band = missile.basicRangeBand
+  let accumulated = missile.basicThrustAccumulated ?? 0
+  let rounds = 0
+  const MAX = 99
+  while (band !== 'Adjacent' && rounds < MAX) {
+    rounds++
+    let budget = MISSILE_BASIC_THRUST
+    while (budget > 0) {
+      const idx = RANGE_BAND_ORDER.indexOf(band)
+      if (idx <= 0) { band = 'Adjacent'; break }
+      const cost  = RANGE_BAND_MOVE_COST[band] ?? 1
+      const total = accumulated + budget
+      if (total >= cost) { budget = total - cost; accumulated = 0; band = RANGE_BAND_ORDER[idx - 1] }
+      else { accumulated = total; budget = 0 }
+    }
+  }
+  return rounds
+}
 
 // ── Shared sub-components ─────────────────────────────────────────────────────
 
@@ -51,24 +75,28 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
     ? (ships.find((s) => s.id === ship.sensorLockOn)?.profile.name ?? '?')
     : null
 
-  // Group inbound missiles by launcher
+  // Group inbound missiles by launcher; track ETA per group
   const inboundByLauncher = useMemo(() => {
     const map = {}
     inbound.forEach((m) => {
       const name = ships.find((s) => s.id === m.launchedBy)?.profile.name ?? '?'
-      if (!map[name]) map[name] = { count: 0, type: m.type ?? 'Missile' }
+      const eta  = estimateRoundsToImpact(m)
+      if (!map[name]) map[name] = { count: 0, type: m.type ?? 'Missile', eta }
       map[name].count += m.count
+      if (eta !== null && (map[name].eta === null || eta < map[name].eta)) map[name].eta = eta
     })
     return Object.entries(map)
   }, [inbound, ships])
 
-  // Group launched missiles by target
+  // Group launched missiles by target; track ETA per group
   const launchedByTarget = useMemo(() => {
     const map = {}
     launched.forEach((m) => {
       const name = ships.find((s) => s.id === m.target)?.profile.name ?? '?'
-      if (!map[name]) map[name] = { count: 0, type: m.type ?? 'Missile' }
+      const eta  = estimateRoundsToImpact(m)
+      if (!map[name]) map[name] = { count: 0, type: m.type ?? 'Missile', eta }
       map[name].count += m.count
+      if (eta !== null && (map[name].eta === null || eta < map[name].eta)) map[name].eta = eta
     })
     return Object.entries(map)
   }, [launched, ships])
@@ -152,17 +180,19 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
             </StatusRow>
           )}
 
-          {inboundByLauncher.map(([name, { count, type }]) => (
+          {inboundByLauncher.map(([name, { count, type, eta }]) => (
             <StatusRow key={name} icon="⚡" className="text-amber-400">
               <span className="font-semibold">{count}× {type}</span>
               <span className="text-slate-400"> inbound ← {name}</span>
+              {eta !== null && <span className="ml-1 text-slate-500 text-[10px]">~{eta}r</span>}
             </StatusRow>
           ))}
 
-          {launchedByTarget.map(([name, { count, type }]) => (
+          {launchedByTarget.map(([name, { count, type, eta }]) => (
             <StatusRow key={name} icon="🚀" className="text-slate-300">
               <span className="font-semibold">{count}× {type}</span>
               <span className="text-slate-400"> away → {name}</span>
+              {eta !== null && <span className="ml-1 text-slate-500 text-[10px]">~{eta}r</span>}
             </StatusRow>
           ))}
 
