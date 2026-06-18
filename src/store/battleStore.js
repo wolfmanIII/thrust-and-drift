@@ -91,6 +91,7 @@ function buildNextRoundState(s) {
     round: s.round + 1,
     phase: 'initiative',
     currentActorIndex: 0,
+    pendingMissileImpacts: s.pendingMissileImpacts.map((i) => ({ ...i, ewAppliedThisRound: false })),
     ships: s.ships.map((sh) => {
       const ionNext = Math.max(0, (sh.ionRoundsLeft ?? 0) - 1)
       return {
@@ -568,6 +569,7 @@ const useBattleStore = create((set, get) => {
       target: m.target,
       count: m.count,
       type: m.type,
+      ewAppliedThisRound: false,
     }))
 
     const entries = movedShips.map((sh) => makeLogEntry({
@@ -636,9 +638,43 @@ const useBattleStore = create((set, get) => {
    */
   reopenMissileImpact: (impact) => {
     set((s) => ({
-      pendingMissileImpacts: [...s.pendingMissileImpacts, { id: uuidv7(), ...impact }],
+      pendingMissileImpacts: [...s.pendingMissileImpacts, { id: uuidv7(), ewAppliedThisRound: false, ...impact }],
     }))
   },
+
+  /**
+   * Apply Electronic Warfare to an in-flight missile salvo, removing missiles equal to Effect.
+   * A salvo may only be EW'd once per round. Removes the salvo entirely if count drops to 0.
+   * // MgT2e CRB p.173 — Electronic Warfare countermeasure, Difficult (10+) Electronics check
+   * @param {string} actorShipId  Ship performing EW
+   * @param {string} impactId     Target salvo id
+   * @param {number} effect       Effect of the Electronics check (min 1 applied)
+   */
+  applyMissileEW: wh(
+    (actorShipId, impactId) => {
+      const impact = get().pendingMissileImpacts.find((i) => i.id === impactId)
+      return !!(impact && !impact.ewAppliedThisRound)
+    },
+    (actorShipId, impactId, effect) => {
+      const { pendingMissileImpacts, ships, round, phase } = get()
+      const impact = pendingMissileImpacts.find((i) => i.id === impactId)
+      if (!impact) return
+      const actor = ships.find((s) => s.id === actorShipId)
+      const removed = Math.max(1, effect)
+      const newCount = impact.count - removed
+      const logMsg = newCount <= 0
+        ? `${actor?.profile.name ?? '?'} EW destroys entire salvo (${impact.count} missiles removed).`
+        : `${actor?.profile.name ?? '?'} EW removes ${removed} missile(s) — salvo reduced to ${newCount}.`
+      set((s) => ({
+        pendingMissileImpacts: newCount <= 0
+          ? s.pendingMissileImpacts.filter((i) => i.id !== impactId)
+          : s.pendingMissileImpacts.map((i) =>
+              i.id === impactId ? { ...i, count: newCount, ewAppliedThisRound: true } : i
+            ),
+        log: [...s.log, makeLogEntry({ round, phase, type: 'system', message: logMsg, shipId: actorShipId })],
+      }))
+    }
+  ),
 
   /**
    * Mark one side of a passing encounter as having fired.

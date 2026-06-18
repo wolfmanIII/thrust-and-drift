@@ -23,14 +23,18 @@ function useActionEffects() {
   const applyInitiativeBonus = useBattleStore((s) => s.applyInitiativeBonus)
   const overloadDrive        = useBattleStore((s) => s.overloadDrive)
   const reloadTurret         = useBattleStore((s) => s.reloadTurret)
+  const applyMissileEW       = useBattleStore((s) => s.applyMissileEW)
 
-  return (actionId, shipId, effect, targetShipId) => {
+  return (actionId, shipId, effect, targetShipId, targetImpactId) => {
     switch (actionId) {
       case 'sensor_lock':
         if (targetShipId) applySensorLock(shipId, targetShipId)
         break
       case 'electronic_warfare':
         clearSensorLock(shipId)
+        break
+      case 'missile_ew':
+        if (targetImpactId) applyMissileEW(shipId, targetImpactId, effect)
         break
       case 'repair_system':
         repairCritical(shipId)
@@ -77,9 +81,10 @@ function SkillBadges({ skills }) {
 export function ActionModal() {
   const closeModal   = useUiStore((s) => s.closeModal)
   const modalPayload = useUiStore((s) => s.modalPayload)
-  const ships               = useBattleStore((s) => s.ships)
-  const addLogEntry         = useBattleStore((s) => s.addLogEntry)
-  const markCrewMemberUsed  = useBattleStore((s) => s.markCrewMemberUsed)
+  const ships                  = useBattleStore((s) => s.ships)
+  const pendingMissileImpacts  = useBattleStore((s) => s.pendingMissileImpacts)
+  const addLogEntry            = useBattleStore((s) => s.addLogEntry)
+  const markCrewMemberUsed     = useBattleStore((s) => s.markCrewMemberUsed)
 
   const applyEffect  = useActionEffects()
 
@@ -88,6 +93,7 @@ export function ActionModal() {
   const [selectedMemberId, setSelectedMemberId] = useState(null)
   const [selectedAction, setSelectedAction]     = useState(null)
   const [targetShipId, setTargetShipId]         = useState(null)
+  const [targetImpactId, setTargetImpactId]     = useState(null)
   const [rollResult, setRollResult]             = useState(null)
   const [manualDice, setManualDice]             = useState(null)
   const [skillOverride, setSkillOverride]       = useState(null)
@@ -116,12 +122,14 @@ export function ActionModal() {
     setSelectedAction(null)
     setRollResult(null)
     setTargetShipId(null)
+    setTargetImpactId(null)
   }
 
   const handleSelectAction = (action) => {
     setSelectedAction(action)
     setRollResult(null)
     setTargetShipId(null)
+    setTargetImpactId(null)
     setManualDice(null)
     setSkillOverride(action.skillLevel)
   }
@@ -129,6 +137,7 @@ export function ActionModal() {
   const handleRoll = () => {
     if (!selectedAction) return
     if (selectedAction.requiresTarget && !targetShipId) return
+    if (selectedAction.requiresSalvoTarget && !targetImpactId) return
 
     let result
     if (selectedAction.difficulty === 'auto') {
@@ -146,12 +155,13 @@ export function ActionModal() {
     )
 
     if (result.success) {
-      applyEffect(selectedAction.id, ship.id, result.effect, targetShipId)
+      applyEffect(selectedAction.id, ship.id, result.effect, targetShipId, targetImpactId)
     }
   }
 
   const canRoll = selectedAction &&
     (!selectedAction.requiresTarget || targetShipId) &&
+    (!selectedAction.requiresSalvoTarget || targetImpactId) &&
     !(isPlayer && selectedAction.difficulty !== 'auto' && !manualDice)
 
   return (
@@ -180,6 +190,10 @@ export function ActionModal() {
               <p className="text-slate-400 font-mono text-xs text-center">
                 {selectedAction.id === 'sensor_lock'        && `Sensor lock acquired on ${ships.find(s => s.id === targetShipId)?.profile.name ?? '?'}.`}
                 {selectedAction.id === 'electronic_warfare' && 'Enemy sensor lock removed.'}
+                {selectedAction.id === 'missile_ew'         && (() => {
+                  const removed = Math.max(1, rollResult.effect)
+                  return `${removed} missile(s) removed from salvo.`
+                })()}
                 {selectedAction.id === 'repair_system'      && 'Critical hit removed.'}
                 {selectedAction.id === 'improve_initiative' && `+${rollResult.effect} to initiative next round.`}
                 {selectedAction.id === 'overload_drive'     && `+${rollResult.effect} Thrust available this round.`}
@@ -194,6 +208,7 @@ export function ActionModal() {
                   setSelectedMemberId(null)
                   setSelectedAction(null)
                   setTargetShipId(null)
+                  setTargetImpactId(null)
                   setManualDice(null)
                   setSkillOverride(null)
                 }}
@@ -274,7 +289,7 @@ export function ActionModal() {
               </div>
             )}
 
-            {/* Target selector */}
+            {/* Target ship selector */}
             {selectedAction?.requiresTarget && (
               <div>
                 <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">Target</p>
@@ -299,6 +314,43 @@ export function ActionModal() {
                       )}
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Salvo selector — missile EW target */}
+            {selectedAction?.requiresSalvoTarget && (
+              <div>
+                <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">Target Salvo</p>
+                <div className="space-y-0.5">
+                  {pendingMissileImpacts.length === 0 && (
+                    <p className="text-slate-400 font-mono text-xs italic">No in-flight salvos.</p>
+                  )}
+                  {pendingMissileImpacts.map((impact) => {
+                    const launcher = ships.find((s) => s.id === impact.launchedBy)
+                    const target   = ships.find((s) => s.id === impact.target)
+                    const alreadyEW = impact.ewAppliedThisRound
+                    return (
+                      <button
+                        key={impact.id}
+                        onClick={() => !alreadyEW && setTargetImpactId(impact.id)}
+                        disabled={alreadyEW}
+                        className={`w-full text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
+                          targetImpactId === impact.id
+                            ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
+                            : alreadyEW
+                              ? 'border-slate-800 text-slate-600 cursor-not-allowed'
+                              : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                        }`}
+                      >
+                        <span className="font-bold">{impact.count}× {impact.type}</span>
+                        <span className="text-slate-500 ml-2">
+                          {launcher?.profile.name ?? '?'} → {target?.profile.name ?? '?'}
+                        </span>
+                        {alreadyEW && <span className="ml-auto float-right text-slate-600">EW this round</span>}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}

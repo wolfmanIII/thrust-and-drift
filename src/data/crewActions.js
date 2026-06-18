@@ -46,6 +46,14 @@ export const CREW_ACTIONS = {
       skill: 'sensors',
       description: 'Electronics check. Success: negates enemy sensor lock. // MgT2e CRB p.167',
     },
+    {
+      id: 'missile_ew',
+      label: 'EW — Counter Missile',
+      difficulty: 10,
+      skill: 'sensors',
+      requiresSalvoTarget: true,
+      description: 'Difficult Electronics(comms) check. Success: removes Effect missiles (min 1) from one in-flight salvo. Cumulative across rounds; once per salvo per round. // MgT2e CRB p.173',
+    },
   ],
   gunner: [
     {
