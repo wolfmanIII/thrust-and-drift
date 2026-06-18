@@ -6,6 +6,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.20.3] — 2026-06-18
+
+### Fixed
+
+- **Sensor Lock now grants flat DM+2, not +Effect (CRB p.172)** — `applySensorLock` previously accepted a `dmBonus` parameter and stored the roll Effect directly. CRB p.172 states "Attacks made by the spacecraft against this target gain DM+2 until the sensor lock is broken." Fixed: `sensorLockDM` is now always 2. `dmBonus` parameter removed from store action, `ActionModal`, and `crewActions` description updated with correct citation (p.172).
+- **Acceleration phase reverse initiative: vectorial mode only (TC p.174)** — reverse initiative order during Acceleration was applied to both basic and vectorial modes. TC p.174 applies this rule to vectorial combat only; basic mode uses normal initiative order per CRB p.164. Gated on `combatMode === 'vectorial'` in `HUD`, `PhaseTracker`, `ContextMenu`, and `battleStore.advanceActor`.
+- **CRB p.161 citation corrected to TC p.174** — the reverse-initiative comment referenced the wrong page (p.161 = Ship Computers). All citations updated.
+
+### Known / Pending investigation
+
+- **TL field for Smart trait gating** — currently all missiles carry Smart trait unconditionally; proper TL-based gating not yet implemented.
+
+---
+
 ## [1.20.2] — 2026-06-17
 
 ### Fixed
