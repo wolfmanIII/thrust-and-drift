@@ -88,8 +88,6 @@ Each profile stores the ship's stats and named crew members.
 
 > **Design note — why TL on the ship, not the weapon:** CRB p.79 states that Smart munitions require a *fire control system* at TL9+ to guide them. All missile and torpedo weapons already carry the `Smart` trait in the weapon table — this correctly represents the *munition*'s capability. The TL field on the ship represents whether the vessel's targeting computer can actually exploit that capability. Separating the two avoids silent incorrect DMs when early-TL or pirate vessels appear alongside standard Imperial fleet ships.
 
-
-
 ---
 
 ## 3. Map Controls
@@ -612,6 +610,7 @@ Right-click ship → **Crew Action**. Steps:
    Already-used members are hidden until the next round.
 2. **Action** — the list shows only actions that match the member's skills.
 3. **Target** *(Sensor Lock only)* — select the ship to lock.
+   **Target Salvo** *(EW — Counter Missile only)* — select the in-flight salvo to jam.
 4. **Roll** — enter 2D6 for player ships; NPC ships have a 🎲 auto-roll button.
 
 After the roll the modal shows the result (SUCCESS / FAILED + Effect).
@@ -634,8 +633,9 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 | **Engineer** | **Overload M-Drive** | 8+ (Engineer) | +Effect Thrust available this round *(CRB p.167)* |
 | **Engineer** | **Repair System** | 8+ (Engineer) | Removes 1 critical hit from this ship *(CRB p.167)* |
 | **Gunner** | **Reload Turret** | Automatic | Reloads 1 missile turret; no roll required *(CRB p.167)* |
-| **Sensors** | **Sensor Lock** | 8+ (Electronics) | +Effect DM to all attacks against the selected target *(CRB p.167)* |
+| **Sensors** | **Sensor Lock** | 8+ (Electronics) | DM+2 flat to all attacks against the selected target *(CRB p.172)* |
 | **Sensors** | **Electronic Warfare** | 8+ (Electronics) | Removes an enemy sensor lock from this ship *(CRB p.167)* |
+| **Sensors** | **EW — Counter Missile** | 10+ (Electronics) | Removes **Effect** missiles (min 1) from one in-flight salvo. Cumulative across rounds; a salvo may only be EW'd once per round *(CRB p.173)* |
 
 > A skill level of 0 in a role grants **no actions** for that role.
 > Skills with level ≥ 1 unlock the role's full action list.
@@ -658,7 +658,7 @@ Ships have a list of **named crew members**, each with individual skill ratings.
 | **TAC** | Tactics | Initiative DM at start of battle (Initiative phase) |
 | **ENG** | Engineer | Overload M-Drive action, Repair System action |
 | **GNR** | Gunner | Attack DM, Reload Turret action |
-| **SEN** | Sensors | Sensor Lock action, Electronic Warfare action |
+| **SEN** | Sensors | Sensor Lock action, Electronic Warfare action, EW — Counter Missile action |
 
 Skill levels range from **0 to 5**.
 
