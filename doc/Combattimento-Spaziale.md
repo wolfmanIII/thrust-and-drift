@@ -341,9 +341,9 @@ Contro una salva di missili in arrivo sono disponibili tre contromisure:
 
 **Durante la Fase Azioni**, il sensor operator può neutralizzare i missili in arrivo verso la propria nave o verso qualsiasi nave entro distanza Close.
 
-Check **Difficult (10+) Electronics(sensors)**:
+Check **Difficult (10+) Electronics(comms)**:
 
-Formula: **2D6 + Electronics(sensors) + DM INT**
+Formula: **2D6 + Electronics(comms) + DM INT**
 
 **L'Effetto del check** indica il numero di missili eliminati dalla salva.
 
@@ -371,9 +371,12 @@ Formula: **2D6 + [numero di missili nella salva] [− 2 se lanciati da Distant]*
 
 Se il tiro di attacco ha successo, tira il danno di **un singolo missile** (4D) e sottrai l'Armatura. **Non aggiungere l'Effetto al danno.** Moltiplica invece il risultato per l'Effetto del tiro di attacco.
 
-Formula: **Danno finale = (4D − Armatura) × Effetto**
+Formula: **Danno finale = max(0, 4D − Armatura) × min(Effetto, missili rimasti)**
 
-> L'Effetto **non può superare il numero di missili rimasti nella salva** al momento dell'impatto.
+- `max(0, …)` impedisce che l'armatura generi danni negativi
+- `min(Effetto, missili rimasti)` limita il moltiplicatore al numero di missili ancora nella salva
+
+> Effetto 0 = 0 danni (RAW confermato da CRB Update 2022 FAQ, agosto 2024 — nessuna errata).
 
 ---
 
@@ -436,8 +439,11 @@ Azioni disponibili:
 - Reload Turret (Gunner)
 - Sensor Lock (Sensor Operator)
 - Electronic Warfare (Sensor Operator)
+- EW — Counter Missile (Sensor Operator)
 - Boarding Action (Marine)
 - Reassignment (Any)
+
+> **Thrust & Drift — azioni implementate:** Improve Initiative, Overload Drive, Repair System, Reload Turret, Sensor Lock, Electronic Warfare, EW — Counter Missile. Le azioni Jump, Offline System, Overload Plant, Boarding Action e Reassignment sono descritte nel CRB ma non sono implementate nell'app — vanno gestite dal GM fuori sistema.
 
 ### 10.1 Improve Initiative (Captain)
 
