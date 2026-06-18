@@ -110,11 +110,11 @@ function CrewMemberRow({ member, onChange, onRemove }) {
           </button>
         </Tooltip>
       </div>
-      <div className="grid grid-cols-5 gap-1.5">
+      <div className="grid grid-cols-3 gap-1.5">
         {CREW_SKILLS.map((skill) => (
           <label key={skill} className="flex flex-col gap-0.5">
-            <span className="font-mono text-[10px] text-slate-400 tracking-widest uppercase">
-              {skill.slice(0, 3).toUpperCase()}
+            <span className="font-mono text-[10px] text-slate-400 tracking-wide uppercase">
+              {skill.toUpperCase()}
             </span>
             <input
               type="number"
