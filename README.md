@@ -21,7 +21,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Reactions (CRB p.171)** | Defender reacts before each attack roll: Evasive Action (1 thrust → DM −Pilot skill), Point Defence (laser turret → Gunner check, removes missiles), Disperse Sand (sandcaster turret → Gunner check, +1D+Effect armour vs laser); player ships enter physical dice manually |
 | **Missile launch** | Three launcher types in the Attack modal: **Missile Rack** (count stepper, 12/rack, 4D per missile), **Missile Barbette** (fixed 5-missile salvo, 25 total, 4D per missile), **Torpedo** (1–3 per launch, 3 total, 6D per torpedo, red token) — no DM roll at launch; salvo token inherits launcher vector |
 | **Missile guidance** | Each round in the movement phase, all guided salvos home toward their target's predicted next position; up to 10 hex/round delta-v correction (MgT2e CRB p.162 — Thrust 10); drifts when 10-round fuel exhausted |
-| **Missile impact** | When a salvo reaches its target's hex, token consumed and **⚡ MISSILE IMPACT** modal opens in two steps per CRB p.173: (1) **Attack roll** — 2D6 + DM+1/missile + DM+2 (Smart) ± Evasive Action; Effect < 0 → miss; (2) **Damage** — roll 4D6/6D6 for one missile; formula `max(0, roll − armour) × min(Effect, count)`; APPLY DAMAGE or MISS/INTERCEPTED; multiple impacts queue sequentially |
+| **Missile impact** | When a salvo reaches its target's hex, token consumed and **⚡ MISSILE IMPACT** modal opens in two steps per CRB p.173: (1) **Attack roll** — 2D6 + DM+1/missile + DM+2 Smart (only when launcher TL ≥ 9, CRB p.79) ± Evasive Action; Effect < 0 → miss; (2) **Damage** — roll 4D6/6D6 for one missile; formula `max(0, roll − armour) × min(Effect, count)`; APPLY DAMAGE or MISS/INTERCEPTED; multiple impacts queue sequentially |
 | **Weapons expansion** | 11 new weapons (HG pp.28–31): Fusion Gun, Plasma Gun, Ion Cannon, Torpedo, Missile Barbette + 6 barbettes (Pulse/Beam/Particle/Fusion/Plasma/Railgun Barbette) |
 | **Barbette ×3 multiplier** | All barbette weapons apply `×3` to net hull damage after armour subtraction (HG p.29): `netDamage = max(0, roll + Effect − effectiveArmour) × 3` |
 | **AP trait** | `AP N` trait reduces effective armour before damage: `effectiveArmour = max(0, armour − apReduction)` — active on Railgun (4), Fusion Barbette (3), Plasma Barbette (2), Railgun Barbette (5) |
@@ -31,7 +31,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in on all roll steps (attack, damage, critical location, extra damage, reactions, crew actions, initiative); NPC ships auto-roll |
 | **Destroyed ships** | Hull = 0 → `isDestroyed` flag; token rendered at 35% opacity with ☠ badge; all combat actions blocked ("WRECK — no actions available"); ship skipped in initiative cycling; GM removes wreck manually |
 | **Crew assignments** | Right-click any ship → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner T1…Tn); unassigned roles contribute 0; turrets without a gunner cannot fire |
-| **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action |
+| **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action. Sensor operators have three actions: Sensor Lock (8+, DM+2 flat), Electronic Warfare (8+, breaks sensor lock), **EW — Counter Missile** (10+, Effect removes missiles from a salvo — CRB p.173) |
 | **Initiative** | 2D6 + Pilot + Thrust [+ Tactics Effect]; optional Tactics(naval) check (CRB p.160); player ships manual entry, NPC auto-rolled |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase AND when it is that ship's turn (initiative order enforced in Acceleration, Attack, Actions phases) |
@@ -157,7 +157,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-830 tests across utils, Zustand stores, hooks, and UI components. (v1.20.1)
+832 tests across utils, Zustand stores, hooks, and UI components. (v1.20.4)
 
 ---
 

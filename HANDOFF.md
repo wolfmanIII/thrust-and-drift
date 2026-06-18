@@ -9,22 +9,32 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.20.2 |
+| **Versione** | 1.20.4 |
 | **Branch** | main (clean) |
-| **Test** | 830 passing |
-| **Ultimo commit** | chore(release): v1.20.2 — basic mode manoeuvre fix |
+| **Test** | 832 passing |
+| **Ultimo commit** | chore(release): v1.20.4 |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Bug Reports CotI (v1.20.2)
+### Sessione corrente — Bug Reports CotI + Rules Fixes (v1.20.3–v1.20.4)
+
+1. **`fix(rules): sensor lock flat DM+2`** (`75677bc`) — CRB p.172 conferma flat +2, non +Effect. `applySensorLock` rimosso parametro `dmBonus`, `sensorLockDM: 2` fisso. Test aggiornati (3 casi).
+
+2. **`fix(rules): reverse initiative Acceleration solo vectorial`** (commit precedente) — TC p.174 è specifico per vectorial. Gating `combatMode === 'vectorial'` in HUD, PhaseTracker, ContextMenu, advanceActor. Citazione CRB p.161 → TC p.174.
+
+3. **`feat(rules): EW — Counter Missile`** (`b3e3b42`) — CRB p.173 COUNTERMEASURES implementata. Nuova crew action `missile_ew` (Difficult 10+, Electronics). Effect (min 1) rimuove missili da salvo selezionato. `ewAppliedThisRound` flag per-salvo, reset in `buildNextRoundState`. Salvo selector in ActionModal.
+
+4. **`feat(rules): Smart DM gating TL ≥ 9`** (commit TL gating) — CRB p.79. `computeMissileAttackDM(count, hasSmart, evasivePilot)`. Profilo nave: `tl: 12` default. `MissileImpactModal` calcola `hasSmart = launcher.profile.tl >= 9`. ShipProfileForm: campo TECH LVL (7–16).
+
+5. **`chore(release): v1.20.3`** (`6cbcf39`) e **`chore(release): v1.20.4`** (`b720ef6`).
+
+**Confermato RAW (CRB p.173 + FAQ Aug 2024):** Effect×0 = 0 danni. Nessuna errata. Working as intended.
+
+### Sessione precedente — Bug Reports CotI (v1.20.2)
 
 1. **`fix(basic): flat cost 1 per band change in BasicManoeuvreModal`** (`4048424`) — `RANGE_BAND_MOVE_COST` usava distanze hex (`Very Long=25`, `Distant=50`) → pulsante APPLY MANOEUVRE sempre grigio per navi con thrust normale. Sostituito con costante `BAND_CHANGE_COST = 1`. Import rimosso da `battleStore.js`.
-
-**Segnalazioni CotI ancora aperte:**
-- **Iniziativa invertita** — in Acceleration è corretto per RAW (lowest first); in Attack/Actions sarebbe un bug. In attesa di passi per riprodurre.
-- **TL field per Smart trait** — feature gap: il profilo nave non ha campo TL; tutti i missili hanno Smart trait incondizionatamente.
 
 ### Sessione precedente — Missile Impact RAW Fix (v1.20.1)
 
@@ -147,9 +157,9 @@
 
 ## Prossimo task
 
-Test manuali in app ancora da fare: dogfight e boarding (non testati da v1.17.1) e il nuovo flusso missile impact two-step.
+Test manuali in app ancora da fare: dogfight e boarding (non testati da v1.17.1), nuovo flusso missile impact two-step, e la nuova EW Counter Missile.
 
-Seguire up segnalazione CotI su iniziativa: chiedere in quale fase hanno visto la nave con iniziativa più bassa agire per prima (in Acceleration è corretto per RAW). Se confermato in Attack/Actions, investigare `advanceActor`.
+Deploy da fare da casa: `source ~/.nvm/nvm.sh && nvm use --lts && npm run build && netlify deploy --prod`
 
 Possibili aree di sviluppo future:
 

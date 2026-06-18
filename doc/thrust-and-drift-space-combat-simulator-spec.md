@@ -742,9 +742,9 @@ export function countSandcasters(profile) {
 
 // === MISSILE IMPACT (CRB p.173) ===
 // Attack roll DM per salvo missile all'impatto.
-// DM = count (salvo size, +1/missile) + 2 (Smart trait) − evasivePilot
-export function computeMissileAttackDM(count, evasivePilot = 0) {
-  return count + 2 - evasivePilot
+// DM = count (salvo size, +1/missile) + 2 (Smart, solo se launcher TL ≥ 9, CRB p.79) − evasivePilot
+export function computeMissileAttackDM(count, hasSmart = true, evasivePilot = 0) {
+  return count + (hasSmart ? 2 : 0) - evasivePilot
 }
 
 // Formula danno per salvo missile — CRB p.173 IMPACT.
@@ -1393,7 +1393,7 @@ Tutti gli effetti sono puramente decorativi — non bloccano input, non modifica
 | **Evasive aura** | `evasiveThrust > 0` dichiarato (fase Acceleration) | Alone giallo semi-trasparente attorno al token; scompare a fine round | TC p.170 — Evasive Action |
 | **Missile esaurito** | `thrustRemaining === 0` prima dell'impatto | Token missile sbiadito/grigio, traccia intermittente — segnala che non raggiungerà il bersaglio | TC p.175 |
 
-> **Nota:** L'effetto "Jamming signal / Electronic Warfare" è stato rimosso perché non corrisponde a una meccanica discreta del combattimento ufficiale MgT2e. L'EW offensiva non è un'azione separata nelle regole di combattimento spaziale (CRB pp.160–168, TC pp.169–186). Il Sensor Lock (TC p.182) è l'azione elettronica con effetti meccanici più vicina — ed è rappresentata dall'effetto **Sensor lock ring** qui sopra.
+> **Nota (aggiornata v1.20.4):** L'EW anti-missile è ora implementata come crew action separata (`missile_ew`, Difficult 10+) per CRB p.173 — si applica ai salvi in volo, non genera un effetto canvas persistente. Il **Sensor lock ring** resta l'unico effetto canvas legato all'EW offensiva.
 
 ### 13.3f Versione 1.3.5 — Modello Equipaggio Array ✅ COMPLETATA
 
@@ -1682,6 +1682,24 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Flusso two-step**: Step 1 (attack roll) → Step 2 (damage). `useEffect([impact.id])` resetta lo stato locale tra salve consecutive.
 - **`computeMissileAttackDM` / `computeMissileImpactDamage`** estratte in `combat.js` come pure functions.
 - 830 test (+15 da v1.20.0): 8 casi `computeMissileAttackDM`, 8 casi `computeMissileImpactDamage` — salvo DM, Smart, evasione, effect=0, cap effect/count, armour>roll.
+
+### 14.11 Versione 1.20.2 — Basic Mode Manoeuvre Fix ✅ COMPLETATA
+
+- **`RANGE_BAND_MOVE_COST` sostituito con costo piatto 1**: la costante usava distanze hex (`Very Long=25`, `Distant=50`) → pulsante APPLY MANOEUVRE sempre grigio per thrust normale. Sostituito con `BAND_CHANGE_COST = 1` per round per cambio di banda (CRB p.161 non-vectorial mode).
+
+### 14.12 Versione 1.20.3 — Rules Fixes (CotI) ✅ COMPLETATA
+
+- **Sensor Lock DM flat +2** (CRB p.172): `applySensorLock` accettava `dmBonus` dallo Effect del roll. CRB p.172: "gain DM+2 until the sensor lock is broken." `sensorLockDM` ora sempre 2. Parametro rimosso da store, ActionModal, crewActions.
+- **Reverse initiative Acceleration: solo vectorial** (TC p.174): l'ordine inverso era applicato a entrambi i modi. TC p.174 è specifico per vectorial; basic mode usa ordine normale (CRB p.164). Gating `combatMode === 'vectorial'` in `HUD`, `PhaseTracker`, `ContextMenu`, `advanceActor`.
+- **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
+- 832 test (+3 sensore lock flat).
+
+### 14.13 Versione 1.20.4 — EW Counter Missile + TL Smart Gating ✅ COMPLETATA
+
+- **EW — Counter Missile** (CRB p.173 COUNTERMEASURES): nuova crew action `missile_ew`, Difficult (10+) Electronics(comms). Effect (min 1) rimuove missili da un salvo in volo; salvo eliminato se count ≤ 0. Cumulativo tra round; un salvo può essere EW'd una sola volta per round (`ewAppliedThisRound: false` su ogni impatto, reset in `buildNextRoundState`). `ActionModal` aggiunge salvo selector con launcher→target e count; salvi già EW'd grayed-out.
+- **Smart DM gating su launcher TL ≥ 9** (CRB p.79): `computeMissileAttackDM(count, hasSmart, evasivePilot)` — il +2 è condizionale. Profilo nave aggiunge campo `tl: 12` (default). `MissileImpactModal` calcola `hasSmart = launcher.profile.tl >= 9`; sub-TL9 mostra `+0 (TL< 9)`. Retrocompatibilità: `tl ?? 12`. `ShipProfileForm` espone TECH LVL (7–16).
+- **Effect×0 confermato RAW** (CRB p.173 + CRB Update 2022 FAQ Aug 2024): nessuna errata. Damage = 0 con Effect 0 è intenzionale.
+- 832 test (+3 hasSmart cases).
 
 ### 14.7 Effetti Sonori — Sintesi Procedurale
 
