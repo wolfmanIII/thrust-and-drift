@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.20.4] — 2026-06-18
+
+### Added
+
+- **EW — Counter Missile crew action (CRB p.173)** — sensor operators can now use a Difficult (10+) Electronics(comms) check to destroy incoming missiles. Effect (min 1) removes that many missiles from a selected in-flight salvo; the salvo is eliminated entirely if count reaches 0. Effects are cumulative across rounds but a salvo may only be EW'd once per round (`ewAppliedThisRound` flag, reset at round boundary). `ActionModal` gains a salvo selector listing all in-flight salvos with launcher→target and count; salvos already EW'd this round are grayed-out.
+- **Smart missile DM gated on launcher TL ≥ 9 (CRB p.79)** — ship profiles gain a `tl` field (default 12). `computeMissileAttackDM` accepts `hasSmart` boolean; the DM+2 bonus applies only when the launching ship's TL ≥ 9. Sub-TL9 launchers show `+0 (TL< 9)` in the impact modal. Profiles without `tl` fall back to 12 — no regression. `ShipProfileForm` exposes a **TECH LVL** field (range 7–16).
+
+### Notes
+
+- **Missile damage Effect×0 is RAW** — CRB p.173 states "any damage is multiplied by the Effect of the attack roll." An attack that succeeds with Effect 0 deals 0 damage. Confirmed against the CRB Update 2022 FAQ (Aug 2024): no errata on this formula. Working as intended.
+
+---
+
 ## [1.20.3] — 2026-06-18
 
 ### Fixed
@@ -13,10 +26,6 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Sensor Lock now grants flat DM+2, not +Effect (CRB p.172)** — `applySensorLock` previously accepted a `dmBonus` parameter and stored the roll Effect directly. CRB p.172 states "Attacks made by the spacecraft against this target gain DM+2 until the sensor lock is broken." Fixed: `sensorLockDM` is now always 2. `dmBonus` parameter removed from store action, `ActionModal`, and `crewActions` description updated with correct citation (p.172).
 - **Acceleration phase reverse initiative: vectorial mode only (TC p.174)** — reverse initiative order during Acceleration was applied to both basic and vectorial modes. TC p.174 applies this rule to vectorial combat only; basic mode uses normal initiative order per CRB p.164. Gated on `combatMode === 'vectorial'` in `HUD`, `PhaseTracker`, `ContextMenu`, and `battleStore.advanceActor`.
 - **CRB p.161 citation corrected to TC p.174** — the reverse-initiative comment referenced the wrong page (p.161 = Ship Computers). All citations updated.
-
-### Known / Pending investigation
-
-- **TL field for Smart trait gating** — currently all missiles carry Smart trait unconditionally; proper TL-based gating not yet implemented.
 
 ---
 
