@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.20.6** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.20.7** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -132,7 +132,7 @@ Each card has three zones:
 | ---- | ------- |
 | **Header** | Ship name · faction colour dot · status badges: `☠ WRECK`, `DOGFIGHT`, `BOARDING`, `EVA N` (evasive thrust), `LOCKED` (sensor locked), `ION NR` (ion disruption active — blue) |
 | **Hull** | Hull bar (green → yellow → red) · "Hull N/M" · "Ini N" |
-| **Status** *(conditional)* | Sensor lock → target name (with DM if set); Locked by [attacker]; inbound missiles per launcher (⚡ N× type); inbound torpedoes; launched missiles per target (🚀 N× type); reloading turrets; critical hits list; missile ammo (🚀 N/max, yellow < 25%, red at 0); sand canisters (🪨 N/max, yellow < 25%, red at 0); ion disruption (⚡ −N thrust / NR remaining) |
+| **Status** *(conditional)* | Sensor lock → target name (with DM if set); Locked by [attacker]; inbound missiles per launcher (⚡ N× type, ~Xr ETA in basic mode); inbound torpedoes; launched missiles per target (🚀 N× type, ~Xr ETA in basic mode); reloading turrets; critical hits list; missile ammo (🚀 N/max, yellow < 25%, red at 0); sand canisters (🪨 N/max, yellow < 25%, red at 0); ion disruption (⚡ −N thrust / NR remaining) |
 
 The Status zone is hidden when none of these conditions are active.
 
