@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.20.5] — 2026-06-18
+
+### Fixed
+
+- **Missiles lose Smart at Adjacent range (CRB p.162)** — missiles fired at a target in the same hex (Adjacent/Close) no longer receive the DM+2 Smart bonus. `hasSmartGuidance` is now computed at launch time (`launcherTL ≥ 9 && rangeBand !== 'Adjacent'`) and stored on the missile object, then carried through to `pendingMissileImpact`. `MissileImpactModal` reads from the stored flag (backward-compat: missing field defaults to `true`) and shows the reason for Smart loss: `TL< 9` or `Adjacent/Close range`.
+- **Overload Drive — Difficult (10+), fixed +1 Thrust (CRB p.171)** — was incorrectly implemented as Average (8+) with +Effect Thrust. CRB p.171 is unambiguous: Difficult (10+) Engineer(m-drive) INT check, success grants +1 Thrust next round (fixed, not +Effect). Effect ≤ −6 triggers M-Drive critical Severity 1 — now surfaced as a GM warning in the result message. Verified absent from TC2024, HG2022, and FAQ.
+
+### Docs
+
+- **`Combattimento-Spaziale.md` corrected** — three errors fixed: EW Counter Missile skill changed from `Electronics(sensors)` to `Electronics(comms)` (CRB p.173); missile damage formula completed with `max(0, 4D − Armatura) × min(Effetto, missili rimasti)` and Effect 0 = 0 RAW note; §10 action list updated with EW Counter Missile and a scope note listing which CRB actions are not implemented in T&D.
+
+---
+
 ## [1.20.4] — 2026-06-18
 
 ### Added
