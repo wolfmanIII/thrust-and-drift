@@ -1694,6 +1694,13 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
 - 832 test (+3 sensore lock flat).
 
+### 14.16 Versione 1.20.7 — Basic Mode Fix: Missiles + Manoeuvre Cost ✅ COMPLETATA
+
+- **Missili basic mode: impatto funzionante** (CRB p.166): `resolveMovement()` è no-op in basic mode. Aggiunto `advanceBasicMissileOneRound()` in `battleStore.js`: ogni round il missile brucia fino a 10 thrust di guida contro la tabella Ship Movement (Short 2, Medium 5, Long 10, Very Long 25, Distant 50) con carry-over eccesso tra bande. Impatto al raggiungimento di Adjacent → `pendingMissileImpacts`. `launchMissile` aggiunge `basicRangeBand` e `basicThrustAccumulated` in basic mode. `buildNextRoundState` chiama `advanceBasicMissileOneRound` su tutti i missili basic mode.
+- **Manoeuvre costo RAW ripristinato + accumulo multi-round** (CRB p.166): v1.20.2 aveva erroneamente sostituito la tabella con flat-1. Ripristinata la tabella corretta. Aggiunto `basicBandPool: Record<pairKey, number>` in stato: accumula thrust firmato attraverso round e navi; banda avanza quando soglia raggiunta; eccesso portato avanti. Incluso in `pushHistory`, undo/redo, `removeShip`, `resetBattle`, export/import. `setRangeBand` (GM SET) azzera il pool. Label bottone: "ALLOCATE THRUST" (contributo parziale) / "APPLY MANOEUVRE" (soglia raggiunta).
+- **ETA missili su bento card**: `estimateRoundsToImpact` simula la guida contro la tabella; `ShipBentoCard` mostra `~Xr` sulle righe inbound/launched in basic mode.
+- 834 test (invariato — nessun nuovo caso aggiunto).
+
 ### 14.15 Versione 1.20.6 — Missile Effect 0 Multiplier Fix ✅ COMPLETATA
 
 - **Effect 0 moltiplica per 1, non per 0** (CRB p.173): `computeMissileImpactDamage` usa `max(1, min(effect, count))` come moltiplicatore. Effect 0 è un colpo andato a segno in Traveller — moltiplicare per 0 non ha senso meccanicamente. Fix proposto dalla community CotI. Nota precedente "Effect×0 = 0 RAW" ritrattata. Test aggiornato di conseguenza.

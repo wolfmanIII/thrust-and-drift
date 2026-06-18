@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.20.7] — 2026-06-19
+
+### Fixed
+
+- **Basic mode: missiles never reached their target** — `resolveMovement()` is a no-op in basic mode (no hex grid), so missile salvos sat in-flight forever. Missiles in basic mode now advance toward their target each round using the same Ship Movement cost table (CRB p.166): Thrust 10 guidance budget burns through bands (Short 2, Medium 5, Long 10, Very Long 25, Distant 50) with excess carrying to the next band. When a salvo reaches Adjacent range, it is consumed and `MissileImpactModal` opens at the start of the next round. `launchMissile` sets `basicRangeBand` and `basicThrustAccumulated` fields in basic mode; `buildNextRoundState` calls `advanceBasicMissileOneRound` on all basic-mode missiles.
+- **Basic mode: manoeuvre cost reverted to RAW Ship Movement table (CRB p.166)** — v1.20.2 replaced the per-band cost table with a flat "1 thrust per band change" which was incorrect. The CRB p.166 Ship Movement table is clear: Adjacent 1, Short 2, Medium 5, Long 10, Very Long 25, Distant 50. Thrust now **accumulates across rounds** and across both ships: each `applyBasicMovement` call adds the contributed thrust to a signed per-pair pool (`basicBandPool`); the band advances when the pool meets the threshold; excess carries to the next band. Pool persists across round boundaries, is included in undo/redo snapshots, and resets on GM SET. Button label switches to **ALLOCATE THRUST** when the band will not change this action (partial contribution), **APPLY MANOEUVRE** when the threshold is met and the band will advance.
+
+### Added
+
+- **Basic mode: missile ETA display on bento cards** — inbound and launched missile rows in `ShipBentoCard` now show `~Xr` (estimated rounds to impact) next to the salvo count, computed by simulating the guidance thrust against the Ship Movement table.
+
+---
+
 ## [1.20.6] — 2026-06-18
 
 ### Fixed

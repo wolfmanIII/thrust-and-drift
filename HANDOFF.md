@@ -9,16 +9,26 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.20.6 |
+| **Versione** | 1.20.7 |
 | **Branch** | main (clean) |
 | **Test** | 834 passing |
-| **Ultimo commit** | docs: sync README, HANDOFF, spec, field-manual to v1.20.6 |
+| **Ultimo commit** | docs: sync README, HANDOFF, spec, field-manual, HelpScreen to v1.20.7 |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Doc Audit + Rules Corrections (v1.20.5–v1.20.6)
+### Sessione corrente — Basic Mode Fix (v1.20.7)
+
+1. **`fix(basic): missile impact`** (`c946c92`) — `resolveMovement()` è no-op in basic mode, i missili non si muovevano mai. Aggiunto `advanceBasicMissileOneRound()` in battleStore: ogni round il missile brucia fino a 10 thrust di guida contro la tabella `RANGE_BAND_MOVE_COST` (Short 2, Medium 5, Long 10, Very Long 25, Distant 50), con carry-over eccesso tra bande. Impatto al raggiungimento di Adjacent → `pendingMissileImpacts`. `launchMissile` aggiunge `basicRangeBand` e `basicThrustAccumulated` in basic mode.
+
+2. **`fix(basic): manoeuvre usa tabella costi RAW + accumulo multi-round`** (`dfd68a3`) — v1.20.2 aveva rimpiazzato la tabella con flat-1, errato per CRB p.166. Ripristinata la tabella corretta. Aggiunto `basicBandPool: Record<pairKey, number>` nello store: accumula thrust firmato (positivo = avvicinamento) attraverso round e navi; la banda avanza quando la soglia è superata; GM SET azzera il pool. Incluso in undo/redo, export/import, removeShip. Bottone mostra "ALLOCATE THRUST" se contributo parziale, "APPLY MANOEUVRE" se soglia raggiunta.
+
+3. **`feat(basic): ETA missili su bento card`** (`5af786c`) — Righe "inbound" e "away" in `ShipBentoCard` mostrano `~Xr` stimato a impatto tramite simulazione `estimateRoundsToImpact`.
+
+**Segnalazione CotI:** due bug basic mode confermati e fixati. Il reporter aveva lanciato 5 missili a Distant al round 1 e al round 11 non erano ancora impattati — esattamente confermato: Distant (50÷10=5r) + Very Long (25÷10=3r) + Long (10÷10=1r) + Medium (5÷10 + acc=1r) + Short (2÷10 + acc=1r) = ~11 round totali.
+
+### Sessione precedente — Doc Audit + Rules Corrections (v1.20.5–v1.20.6)
 
 0. **`fix(rules): missile Effect 0 floors multiplier at ×1`** (`2980185`) — CotI community ha correttamente identificato che Effect 0 è un colpo andato a segno, non un miss. `computeMissileImpactDamage` usa ora `max(1, min(effect, count))`. Nota "Effect×0 = 0 RAW" ritrattata. Test aggiornato.
 

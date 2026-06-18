@@ -278,32 +278,40 @@ See §9.9 Reactions below.
 In Basic mode, **Apply Thrust** is replaced by **Manoeuvre…** in the context menu.
 Right-click a ship → **Manoeuvre…** during the Acceleration phase.
 
-The modal changes the range band between the moving ship and one enemy:
-
-Each ship manoeuvres **independently on its own initiative turn** — there is no combined thrust between ships.
+The modal contributes thrust toward a range band change between the moving ship and a
+selected enemy. Each ship acts independently on its own initiative turn.
 
 | Control | Description |
 | ------- | ----------- |
-| **Target** | Select which enemy ship this manoeuvre targets. |
-| **⬇ Approach / ⬆ Flee** | Direction of movement. |
-| **Thrust slider** | Thrust this ship commits (0 → available thrust). |
-| **APPLY MANOEUVRE** | Confirm and spend thrust — range band changes by one step if this ship's thrust meets the threshold. Disabled if thrust is below the cost. |
-| **GM SET** | Override: sets the result band directly without spending thrust. Use this for initial setup and whenever thrust costs are impractical (e.g. small ships at Very Long). |
+| **Target** | Select which enemy ship this manoeuvre targets. Pool status shown per target. |
+| **⬇ Approach / ⬆ Flee** | Direction of movement (positive or negative contribution to the pool). |
+| **Thrust slider** | Thrust this ship commits this action (0 → available thrust). Any amount ≥ 1 is valid. |
+| **APPLY MANOEUVRE** | Threshold met — band shifts and thrust is spent. |
+| **ALLOCATE THRUST** | Threshold not yet met — thrust is spent and added to the pool; band stays. |
+| **GM SET** | Override: sets the band directly without spending any thrust; resets the pool. Use this for initial setup and narrative jumps. |
 
-> If both ships want to approach on the same round, each opens the modal on its own
-> turn — the band closes by **two steps** in a single round.
+**Thrust accumulates** across rounds and across both ships *(CRB p.166)*: each
+contribution is added to a shared pool for the pair. When the pool reaches the threshold
+the band advances and excess carries to the next step.
 
-The threshold to change one band step depends on the current band
-*(MgT2e CRB p.161)*:
+> If both ships approach on the same round (each using the modal on their own turn),
+> their contributions are summed in the pool — the band may advance in a single round
+> or over two combined contributions.
 
-| Current band | Thrust required |
-| ------------ | --------------- |
-| Adjacent | 1 |
-| Short | 2 |
-| Medium | 5 |
-| Long | 10 |
-| Very Long | 25 |
-| Distant | 50 |
+The cost per band step *(MgT2e CRB p.166 — Ship Movement table)*:
+
+| Current band | Thrust required | Example |
+| ------------ | --------------- | ------- |
+| Adjacent | 1 | Docked ships |
+| Short | 2 | Ships in same orbital path |
+| Medium | 5 | Surface to orbit |
+| Long | 10 | Near to a planet |
+| Very Long | 25 | Within jump limit |
+| Distant | 50 | Distant ships |
+
+> Ships at Very Long (25) or Distant (50) cannot close the band in a single round
+> unless they have very high thrust. Contributions accumulate across multiple rounds.
+> Use **GM SET** for initial placement to avoid stranding small ships at extreme ranges.
 
 ---
 
@@ -325,7 +333,11 @@ triggered, the phase advances to **Attack** automatically.
 
 ### 8.1 Missile Impact
 
-If one or more missile salvos reach their target's hex during the movement step, each salvo is consumed and a **⚡ MISSILE IMPACT** modal opens automatically after the animation. Resolution follows CRB p.173 (IMPACT) in two steps.
+When a missile salvo reaches its target, the token is consumed and a **⚡ MISSILE IMPACT** modal opens. Resolution follows CRB p.173 (IMPACT) in two steps.
+
+**Vectorial mode:** impact is detected during the Movement phase when the salvo reaches the target hex.
+
+**Basic mode:** the Movement phase is skipped, but missiles still advance. Each round transition, every in-flight salvo spends up to **Thrust 10** guidance budget against the Ship Movement cost table *(CRB p.166)*. Excess carries to the next band. When the salvo reaches **Adjacent** range the modal opens at the start of the following round. Bento cards show **~Xr** (estimated rounds to impact) next to each salvo row.
 
 #### Step 1 — Attack Roll
 

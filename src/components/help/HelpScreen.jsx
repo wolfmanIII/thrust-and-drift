@@ -293,13 +293,13 @@ export function HelpScreen() {
 
           <Sub title="MANOEUVRE (BASIC MODE)">
             <p>In Basic mode, <span className="text-slate-200">Apply Thrust</span> is replaced by <span className="text-slate-200">Manoeuvre…</span> in the context menu.</p>
-            <p>The modal changes the range band between the maneuvering ship and a selected enemy. Each ship acts independently on its own initiative turn — there is no combined thrust between ships.</p>
-            <KV k="⬇ Approach" v="Spend this ship's thrust to move one band closer. If both ships approach on their respective turns, the band closes by two steps in a single round." />
-            <KV k="⬆ Flee" v="Spend this ship's thrust to move one band further away." />
-            <KV k="APPLY MANOEUVRE" v="Deducts thrust and shifts the band one step. Disabled if this ship's available thrust is below the threshold for the current band." />
-            <KV k="GM SET" v="Override — sets the band directly without spending any thrust. Use this for initial placement, narrative jumps, or whenever thrust costs are impractical (e.g. small ships at Very Long range)." />
-            <p className="text-slate-400">Thrust thresholds per band (CRB p.161): Adjacent 1 · Short 2 · Medium 5 · Long 10 · Very Long 25 · Distant 50.</p>
-            <Note>The costs at Very Long (25) and Distant (50) are designed for large ships with high-rated M-Drives. Small ships (Thrust 2–4) cannot normally meet these thresholds — use GM SET to set the engagement range at the start of the session instead of placing all ships at Very Long by default.</Note>
+            <p>Each ship acts on its own initiative turn. Thrust <span className="text-slate-200">accumulates across rounds</span> — a ship that cannot afford the full band cost in one round contributes a partial amount; the band advances when the pool meets the threshold <span className="text-slate-400">(CRB p.166)</span>.</p>
+            <KV k="⬇ Approach / ⬆ Flee" v="Direction of contribution. Both ships approaching sum their thrust in the same pool." />
+            <KV k="APPLY MANOEUVRE" v="Pool ≥ threshold — band shifts and thrust is spent." />
+            <KV k="ALLOCATE THRUST" v="Pool below threshold — thrust is spent and added to the pool; band stays. Progress bar shows % toward next band change." />
+            <KV k="GM SET" v="Override — sets the band directly without spending any thrust; resets the accumulated pool. Use for initial placement and narrative jumps." />
+            <p className="text-slate-400">Band costs (CRB p.166 Ship Movement table): Adjacent 1 · Short 2 · Medium 5 · Long 10 · Very Long 25 · Distant 50.</p>
+            <Note>Ships at Very Long (25) or Distant (50) cannot close the band in a single round at normal thrust — contributions accumulate across multiple rounds. Use GM SET for initial placement.</Note>
           </Sub>
         </Section>
 
@@ -316,7 +316,8 @@ export function HelpScreen() {
           <p>If no encounters or dogfights are triggered, the phase advances to Attack automatically.</p>
           <Note>Wrecks drift. A destroyed ship (☠ WRECK) retains its last velocity vector and continues to drift each Movement phase — it has no pilot or reactor and cannot spend thrust. Remove it manually via right-click → Remove from battle when no longer relevant.</Note>
           <Sub title="MISSILE IMPACT">
-            <p>If a missile salvo reaches its target's hex during movement, the token is consumed and a <span className="text-slate-200">⚡ MISSILE IMPACT</span> modal opens. Resolution follows CRB p.173 in two steps.</p>
+            <p>When a missile salvo reaches its target, the token is consumed and a <span className="text-slate-200">⚡ MISSILE IMPACT</span> modal opens. Resolution follows CRB p.173 in two steps.</p>
+            <p className="text-slate-400 text-xs italic">In vectorial mode this happens during the Movement phase when the salvo reaches the target hex. In basic mode, each missile advances up to 10 thrust/round against the Ship Movement cost table (CRB p.166) — the modal opens at the start of the round when the salvo reaches Adjacent range. Bento cards show <span className="text-slate-300">~Xr</span> (estimated rounds to impact).</p>
             <p className="font-mono text-xs text-slate-300 mt-1">STEP 1 — ATTACK ROLL</p>
             <KV k="Salvo DM" v="+1 per missile in the salvo (e.g. 3 missiles → DM+3)." />
             <KV k="Smart DM" v="+2 — all missile and torpedo weapons carry the Smart trait (CRB p.79). Active only when the launcher ship's Tech Level is 9 or higher. Sub-TL9 launchers do not receive this bonus." />
