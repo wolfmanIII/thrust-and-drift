@@ -286,14 +286,14 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
               <TextField
-                label="NOME *"
+                label="NAME *"
                 value={form.name}
                 onChange={(v) => set('name', v)}
                 placeholder="e.g. Far Trader"
               />
             </div>
             <TextField
-              label="CLASSE"
+              label="CLASS"
               value={form.shipClass}
               onChange={(v) => set('shipClass', v)}
               placeholder="e.g. Type A"
