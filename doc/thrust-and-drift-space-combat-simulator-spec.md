@@ -1694,6 +1694,13 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
 - 832 test (+3 sensore lock flat).
 
+### 14.14 Versione 1.20.5 — Rules Corrections (CRB p.162, p.171) ✅ COMPLETATA
+
+- **Smart-loss ad Adjacent range** (CRB p.162): missili lanciati a `rangeBand === 'Adjacent'` non ricevono DM+2 Smart, indipendentemente dal TL. `hasSmartGuidance` calcolato al lancio (`launcherTL ≥ 9 && rangeBand !== 'Adjacent'`), salvato sul missile e portato nel `pendingMissileImpact`. `MissileImpactModal` legge dal flag salvato (fallback `true` per retrocompatibilità). Label mostra la ragione: `TL< 9` o `Adjacent/Close range`.
+- **Overload Drive corretto** (CRB p.171): era Average (8+) + +Effect Thrust. Corretto a Difficult (10+) Engineer(m-drive) INT, +1 Thrust fisso per il round successivo. Effect ≤ −6 → avviso GM nella result message ("apply M-Drive critical Severity 1"). Verificato assente da TC2024, HG2022, FAQ.
+- **`Combattimento-Spaziale.md` corretto**: EW skill `Electronics(sensors)` → `Electronics(comms)` (§8.3.1); formula missili completata con `max(0,…)` e `min(Effetto, missili rimasti)` (§8.5); nota scope T&D con azioni non implementate (§10).
+- 834 test (+2: `hasSmartGuidance` stored on missile / defaults to true).
+
 ### 14.13 Versione 1.20.4 — EW Counter Missile + TL Smart Gating ✅ COMPLETATA
 
 - **EW — Counter Missile** (CRB p.173 COUNTERMEASURES): nuova crew action `missile_ew`, Difficult (10+) Electronics(comms). Effect (min 1) rimuove missili da un salvo in volo; salvo eliminato se count ≤ 0. Cumulativo tra round; un salvo può essere EW'd una sola volta per round (`ewAppliedThisRound: false` su ogni impatto, reset in `buildNextRoundState`). `ActionModal` aggiunge salvo selector con launcher→target e count; salvi già EW'd grayed-out.

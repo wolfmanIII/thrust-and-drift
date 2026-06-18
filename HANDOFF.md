@@ -9,16 +9,28 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.20.4 |
+| **Versione** | 1.20.5 |
 | **Branch** | main (clean) |
-| **Test** | 832 passing |
-| **Ultimo commit** | chore(release): v1.20.4 |
+| **Test** | 834 passing |
+| **Ultimo commit** | docs: sync README, HANDOFF, spec, field-manual to v1.20.5 |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Bug Reports CotI + Rules Fixes (v1.20.3–v1.20.4)
+### Sessione corrente — Doc Audit + Rules Corrections (v1.20.5)
+
+1. **`fix(rules): Smart-loss ad Adjacent range`** (`8b36168`) — CRB p.162: missili a `rangeBand === 'Adjacent'` non ricevono DM+2 Smart. `hasSmartGuidance` calcolato al lancio (`launcherTL ≥ 9 && rangeBand !== 'Adjacent'`), salvato sul missile e nel `pendingMissileImpact`. `MissileImpactModal` legge dal flag (fallback `true`). Label mostra `TL< 9` o `Adjacent/Close range`. +2 test.
+
+2. **`fix(rules): Overload Drive Difficult (10+), +1 fisso`** (`8e0f12f`) — CRB p.171: era Average (8+) + +Effect. Corretto a Difficult (10+), +1 Thrust per il round successivo. Avviso GM se Effect ≤ −6. Verificato assente da TC2024, HG2022, FAQ.
+
+3. **`docs: Combattimento-Spaziale.md corretto`** (`946f8cb`) — EW skill `Electronics(comms)` (§8.3.1); formula missili completata (§8.5); nota scope T&D (§10).
+
+4. **`chore(release): v1.20.5`** (`4c46305`).
+
+**Audit doc completato** (v1.20.5): design doc boarding e dogfight allineati al codice (deviazioni minori documentate: `getBoardingDM`→`getContactDM`, `PassingAttackModal` non nel design doc, hull-cut progress local state).
+
+### Sessione precedente — Bug Reports CotI + Rules Fixes (v1.20.3–v1.20.4)
 
 1. **`fix(rules): sensor lock flat DM+2`** (`75677bc`) — CRB p.172 conferma flat +2, non +Effect. `applySensorLock` rimosso parametro `dmBonus`, `sensorLockDM: 2` fisso. Test aggiornati (3 casi).
 
