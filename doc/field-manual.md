@@ -82,8 +82,13 @@ Each profile stores the ship's stats and named crew members.
 | ----- | ----------- |
 | **Name / Tonnage** | Display name and hull size (affects target size DM). |
 | **Hull / Thrust** | Max hull points and base manoeuvre drive rating. |
+| **Tech Level (TL)** | Ship's technology level (default **12**). Gates Smart guidance on all missile and torpedo weapons — the DM+2 Smart bonus applies only when the *launching* ship's TL ≥ 9 *(CRB p.79)*. Set to 8 or below for pre-stellar opponents or salvaged/primitive vessels. Most standard Traveller-era ships are TL 12–15. |
 | **Turrets** | Add weapon turrets: type, damage dice, range band, and special traits. Maximum 3 weapons per turret (triple turret, CRB p.163). |
 | **Crew** | Named crew members, each with individual skill levels (see [§ 11](#11-crew-system)). |
+
+> **Design note — why TL on the ship, not the weapon:** CRB p.79 states that Smart munitions require a *fire control system* at TL9+ to guide them. All missile and torpedo weapons already carry the `Smart` trait in the weapon table — this correctly represents the *munition*'s capability. The TL field on the ship represents whether the vessel's targeting computer can actually exploit that capability. Separating the two avoids silent incorrect DMs when early-TL or pirate vessels appear alongside standard Imperial fleet ships.
+
+
 
 ---
 
@@ -331,7 +336,7 @@ The attack roll happens at impact, not at launch *(CRB p.173)*.
 | DM | Source |
 | -- | ------ |
 | +1 per missile | Salvo size (e.g. 3 missiles → DM+3) |
-| +2 | Smart trait — all missile weapons carry this (CRB p.79) |
+| +2 | Smart trait — all missile/torpedo weapons carry this; active only when **launcher TL ≥ 9** *(CRB p.79)*. If the launcher is sub-TL9, the +2 is not applied and the modal shows the reason. |
 | −Pilot skill | Evasive Action *(optional, see below)* |
 
 Roll 2D6 + total DM against **8+**. Effect = total − 8.

@@ -167,6 +167,7 @@ export function HelpScreen() {
             <p>Each profile stores the ship's stats and named crew members.</p>
             <KV k="Name / Tonnage" v="Display name and hull size (affects target size DM)." />
             <KV k="Hull / Thrust" v="Max hull points and base manoeuvre drive rating." />
+            <KV k="Tech Level (TL)" v="Ship's technology level (default 12). Gates Smart guidance on missiles and torpedoes — DM+2 applies only when TL ≥ 9 (CRB p.79). Most Traveller-era vessels are TL 12–15; set lower for pre-stellar or primitive opponents." />
             <KV k="Turrets" v="Add weapon turrets — type, damage dice, range band, special traits. Maximum 3 weapons per turret (triple turret, CRB p.163)." />
             <KV k="Crew" v="Add named crew members, each with individual skill levels (Pilot, Leadership, Tactics, Engineer, Gunner, Sensors 0–5). One crew member can hold multiple skills — useful for single-seat fighters." />
           </Sub>
@@ -318,7 +319,7 @@ export function HelpScreen() {
             <p>If a missile salvo reaches its target's hex during movement, the token is consumed and a <span className="text-slate-200">⚡ MISSILE IMPACT</span> modal opens. Resolution follows CRB p.173 in two steps.</p>
             <p className="font-mono text-xs text-slate-300 mt-1">STEP 1 — ATTACK ROLL</p>
             <KV k="Salvo DM" v="+1 per missile in the salvo (e.g. 3 missiles → DM+3)." />
-            <KV k="Smart DM" v="+2 — all missile weapons carry the Smart trait (CRB p.79)." />
+            <KV k="Smart DM" v="+2 — all missile and torpedo weapons carry the Smart trait (CRB p.79). Active only when the launcher ship's Tech Level is 9 or higher. Sub-TL9 launchers do not receive this bonus." />
             <KV k="🛡 EVASIVE ACTION" v="If the target has unspent thrust, click to spend 1 thrust and apply DM −Pilot to this attack roll. Button disabled when no thrust available." />
             <p>Roll 2D6 + total DM vs 8+. Effect = total − 8. Effect &lt; 0 → MISS, modal closes. Effect ≥ 0 → proceed to damage.</p>
             <p className="font-mono text-xs text-slate-300 mt-1">STEP 2 — DAMAGE</p>
