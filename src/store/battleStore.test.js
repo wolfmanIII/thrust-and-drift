@@ -447,27 +447,18 @@ describe('spendReactionThrust', () => {
 })
 
 describe('applySensorLock / clearSensorLock', () => {
-  it('sets lock on attacker and target', () => {
+  it('sets lock on attacker and target with flat DM+2', () => {
     const store = useBattleStore.getState()
     store.addShip(makeProfile({ id: 'p1', name: 'Attacker' }), { q: 0, r: 0 }, 'players', '#0f0')
     store.addShip(makeProfile({ id: 'p2', name: 'Target'   }), { q: 1, r: 0 }, 'npc',     '#f00')
     const [att, tgt] = useBattleStore.getState().ships
-    useBattleStore.getState().applySensorLock(att.id, tgt.id, 3)
+    useBattleStore.getState().applySensorLock(att.id, tgt.id)
     const s = useBattleStore.getState()
     const attUpdated = s.ships.find(sh => sh.id === att.id)
     const tgtUpdated = s.ships.find(sh => sh.id === tgt.id)
     expect(attUpdated.sensorLockOn).toBe(tgt.id)
-    expect(attUpdated.sensorLockDM).toBe(3)
+    expect(attUpdated.sensorLockDM).toBe(2)
     expect(tgtUpdated.sensorLockedBy).toBe(att.id)
-  })
-
-  it('sensorLockDM clamped at 0 minimum', () => {
-    const store = useBattleStore.getState()
-    store.addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#0f0')
-    store.addShip(makeProfile({ id: 'p2', name: 'B' }), { q: 1, r: 0 }, 'npc',     '#f00')
-    const [att, tgt] = useBattleStore.getState().ships
-    useBattleStore.getState().applySensorLock(att.id, tgt.id, -2)
-    expect(useBattleStore.getState().ships.find(s => s.id === att.id).sensorLockDM).toBe(0)
   })
 
   it('clearSensorLock removes lock from both ships', () => {
@@ -475,7 +466,7 @@ describe('applySensorLock / clearSensorLock', () => {
     store.addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#0f0')
     store.addShip(makeProfile({ id: 'p2', name: 'B' }), { q: 1, r: 0 }, 'npc',     '#f00')
     const [att, tgt] = useBattleStore.getState().ships
-    useBattleStore.getState().applySensorLock(att.id, tgt.id, 2)
+    useBattleStore.getState().applySensorLock(att.id, tgt.id)
     useBattleStore.getState().clearSensorLock(tgt.id)
     const s = useBattleStore.getState()
     const attUpdated = s.ships.find(sh => sh.id === att.id)

@@ -438,7 +438,7 @@ export function HelpScreen() {
             <KV k="Captain (Leadership)" v="IMPROVE INITIATIVE — 2D6 + Leadership (8+). Effect added to this ship's initiative roll next round (CRB p.166)." />
             <KV k="Engineer" v="OVERLOAD M-DRIVE — 2D6 + Engineer (8+). +Effect Thrust available this round (CRB p.167). REPAIR SYSTEM — 2D6 + Engineer (8+). Removes 1 critical hit (CRB p.167)." />
             <KV k="Gunner" v="RELOAD TURRET — Automatic, no roll. Reloads 1 missile turret (CRB p.167)." />
-            <KV k="Sensors" v="SENSOR LOCK — 2D6 + Electronics (8+). +Effect DM to attacks vs locked target (CRB p.167). ELECTRONIC WARFARE — 2D6 + Electronics (8+). Removes an enemy sensor lock (CRB p.167)." />
+            <KV k="Sensors" v="SENSOR LOCK — 2D6 + Electronics (8+). Success: DM+2 flat to all attacks vs locked target (CRB p.172). ELECTRONIC WARFARE — 2D6 + Electronics (8+). Removes an enemy sensor lock (CRB p.172)." />
           </Sub>
 
           <Note>Player ships show empty dice inputs for all non-automatic rolls. NPC ships have a 🎲 auto-roll button. After each action, click ANOTHER ACTION to act with a second crew member or CLOSE to exit.</Note>

@@ -1034,20 +1034,19 @@ const useBattleStore = create((set, get) => {
 
   /**
    * Apply a sensor lock from one ship to another.
-   * Sets sensorLockDM to the Effect of the lock roll.
-   * // MgT2e CRB p.167 — Sensor Lock
+   * Grants a flat DM+2 to all attacks against the target (CRB p.172).
+   * // MgT2e CRB p.172 — Sensor Lock
    * @param {string} attackerId
    * @param {string} targetId
-   * @param {number} dmBonus  Effect of the sensor lock roll (>= 0)
    */
   applySensorLock: wh(
     (attackerId, targetId) => !!(get().ships.find((s) => s.id === attackerId) && get().ships.find((s) => s.id === targetId)),
-    (attackerId, targetId, dmBonus) => {
+    (attackerId, targetId) => {
       const attacker = get().ships.find((s) => s.id === attackerId)
       const target = get().ships.find((s) => s.id === targetId)
       set((s) => ({
         ships: s.ships.map((sh) => {
-          if (sh.id === attackerId) return { ...sh, sensorLockOn: targetId, sensorLockDM: Math.max(0, dmBonus) }
+          if (sh.id === attackerId) return { ...sh, sensorLockOn: targetId, sensorLockDM: 2 }
           if (sh.id === targetId)   return { ...sh, sensorLockedBy: attackerId }
           return sh
         }),
@@ -1055,7 +1054,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${attacker.profile.name}: Sensor Lock on ${target.profile.name} (DM +${Math.max(0, dmBonus)} to attacks).`,
+          message: `${attacker.profile.name}: Sensor Lock on ${target.profile.name} (DM +2 to attacks).`,
           shipId: attackerId,
         })],
     }))

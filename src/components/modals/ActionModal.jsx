@@ -27,7 +27,7 @@ function useActionEffects() {
   return (actionId, shipId, effect, targetShipId) => {
     switch (actionId) {
       case 'sensor_lock':
-        if (targetShipId) applySensorLock(shipId, targetShipId, effect)
+        if (targetShipId) applySensorLock(shipId, targetShipId)
         break
       case 'electronic_warfare':
         clearSensorLock(shipId)

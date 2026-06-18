@@ -37,7 +37,7 @@ export const CREW_ACTIONS = {
       difficulty: 8,
       skill: 'sensors',
       requiresTarget: true,
-      description: 'Electronics(sensors) check. Success: +Effect DM to attacks against target. // MgT2e CRB p.167',
+      description: 'Electronics(sensors) check. Success: DM+2 flat to all attacks against target. // MgT2e CRB p.172',
     },
     {
       id: 'electronic_warfare',
