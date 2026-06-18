@@ -347,7 +347,7 @@ Roll **4D6** (Missile) or **6D6** (Torpedo) for a **single** missile/torpedo —
 
 Formula *(CRB p.173)*:
 
-```
+```text
 net damage = max(0, roll − armour) × min(Effect, count)
 ```
 
