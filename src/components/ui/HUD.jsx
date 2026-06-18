@@ -106,8 +106,12 @@ export function HUD() {
     return () => window.removeEventListener('keydown', onKey)
   }, [handleUndo, handleRedo])
 
-  // Acceleration uses reverse initiative order (CRB p.161: lowest acts first)
-  const actorOrder     = phase === 'acceleration' ? [...initiativeOrder].reverse() : initiativeOrder
+  // Vectorial only: Acceleration uses reverse initiative order (TC p.174 — lowest acts first,
+  // so higher-initiative ships can react to slower ships' declared vectors).
+  // Basic mode Manoeuvre Step uses normal initiative order (CRB p.164).
+  const actorOrder     = (phase === 'acceleration' && combatMode === 'vectorial')
+    ? [...initiativeOrder].reverse()
+    : initiativeOrder
   const currentActorId = actorOrder[currentActorIndex] ?? null
   const currentActor   = ships.find((s) => s.id === currentActorId)
 

@@ -88,7 +88,11 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
   const initiativeOrder  = useBattleStore((s) => s.initiativeOrder)
   const currentActorIndex = useBattleStore((s) => s.currentActorIndex)
 
-  const actorOrder     = phase === 'acceleration' ? [...initiativeOrder].reverse() : initiativeOrder
+  // Vectorial only: Acceleration uses reverse initiative order (TC p.174).
+  // Basic mode Manoeuvre Step uses normal initiative order (CRB p.164).
+  const actorOrder     = (phase === 'acceleration' && combatMode === 'vectorial')
+    ? [...initiativeOrder].reverse()
+    : initiativeOrder
   const currentActorId = actorOrder[currentActorIndex] ?? null
   const isCurrentActor = !INITIATIVE_GATED_PHASES.includes(phase) || targetId === currentActorId
 

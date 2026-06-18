@@ -12,12 +12,16 @@ export function PhaseTracker() {
   const initiativeOrder   = useBattleStore((s) => s.initiativeOrder)
   const currentActorIndex = useBattleStore((s) => s.currentActorIndex)
   const phase             = useBattleStore((s) => s.phase)
+  const combatMode        = useBattleStore((s) => s.combatMode)
   const ships             = useBattleStore((s) => s.ships)
 
   if (initiativeOrder.length === 0) return null
 
-  // Acceleration uses reverse initiative order (CRB p.161)
-  const displayOrder = phase === 'acceleration' ? [...initiativeOrder].reverse() : initiativeOrder
+  // Vectorial only: Acceleration uses reverse initiative order (TC p.174).
+  // Basic mode Manoeuvre Step uses normal initiative order (CRB p.164).
+  const displayOrder = (phase === 'acceleration' && combatMode === 'vectorial')
+    ? [...initiativeOrder].reverse()
+    : initiativeOrder
   const shipMap = Object.fromEntries(ships.map((s) => [s.id, s]))
 
   return (

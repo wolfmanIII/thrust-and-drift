@@ -278,7 +278,7 @@ export function HelpScreen() {
 
         {/* ACCELERATION */}
         <Section id="acceleration" title="Acceleration Phase">
-          <p>Each ship in reverse initiative order adjusts its velocity vector.</p>
+          <p>Each ship adjusts its velocity vector. In <span className="text-slate-200">vectorial mode</span>, ships act in <span className="text-slate-200">reverse initiative order</span> — lowest first — so higher-initiative ships can react to slower ships' declared vectors <span className="text-slate-400">(TC p.174)</span>. In <span className="text-slate-200">basic mode</span>, the Manoeuvre Step uses normal initiative order, highest first <span className="text-slate-400">(CRB p.164)</span>.</p>
 
           <Sub title="APPLYING THRUST">
             <p>Right-click ship → <span className="text-slate-200">Apply Thrust</span>. The map enters targeting mode.</p>

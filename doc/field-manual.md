@@ -239,8 +239,12 @@ initiative roll — no manual input required.
 
 ## 7. Acceleration Phase
 
-Each ship in initiative order adjusts its velocity vector and optionally
-declares evasive action.
+Each ship adjusts its velocity vector and optionally declares evasive action.
+
+**Initiative order depends on combat mode:**
+
+- **Vectorial:** ships act in *reverse* initiative order — lowest first — so higher-initiative ships can react to slower ships' declared vectors *(TC p.174)*.
+- **Basic:** ships act in normal initiative order — highest first — same as the Attack and Actions steps *(CRB p.164)*.
 
 ### 7.1 Applying Thrust
 

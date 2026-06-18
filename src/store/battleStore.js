@@ -915,9 +915,12 @@ const useBattleStore = create((set, get) => {
   /** Mark the current actor as having acted; advance the actor index, skipping destroyed ships. */
   advanceActor: wh(() => {
     const { initiativeOrder, currentActorIndex, ships, phase } = get()
-    // Acceleration iterates lowest-initiative-first (reversed). HUD and ContextMenu do the
-    // same reversal when computing currentActorId — must use the same order here.
-    const order = phase === 'acceleration' ? [...initiativeOrder].reverse() : initiativeOrder
+    // Vectorial Acceleration iterates lowest-initiative-first (TC p.174); basic Manoeuvre
+    // Step uses normal order (CRB p.164). HUD/ContextMenu/PhaseTracker mirror this logic.
+    const { combatMode } = get()
+    const order = (phase === 'acceleration' && combatMode === 'vectorial')
+      ? [...initiativeOrder].reverse()
+      : initiativeOrder
     const shipId = order[currentActorIndex]
     if (shipId) {
       get().updateShip(shipId, { hasActedThisPhase: true })
