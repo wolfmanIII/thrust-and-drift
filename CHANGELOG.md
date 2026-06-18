@@ -6,6 +6,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.20.6] — 2026-06-18
+
+### Fixed
+
+- **Missile damage Effect 0 — multiplier floors at ×1 on a successful hit** — Effect 0 is a hit in Traveller, not a miss; multiplying by 0 makes no mechanical sense. `computeMissileImpactDamage` now uses `max(1, min(Effect, count))` as the multiplier when the attack succeeds. Previous note claiming Effect×0 = 0 as RAW has been retracted — community feedback from CotI correctly identified the flaw in that reading.
+
+---
+
 ## [1.20.5] — 2026-06-18
 
 ### Fixed

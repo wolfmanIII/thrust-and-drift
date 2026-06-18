@@ -321,7 +321,8 @@ export function computeMissileAttackDM(count, hasSmart = true, evasivePilot = 0)
 
 /**
  * Compute net missile salvo damage per CRB p.173 IMPACT formula.
- * Roll diceEach D6 for a single missile; multiply by min(Effect, count).
+ * A successful attack (effect ≥ 0) always multiplies by at least 1 —
+ * Effect 0 is a hit, not a miss; multiplying by 0 makes no mechanical sense.
  * // MgT2e CRB p.173
  * @param {number} roll    Damage roll for one missile/torpedo
  * @param {number} armour  Target armour value
@@ -330,5 +331,5 @@ export function computeMissileAttackDM(count, hasSmart = true, evasivePilot = 0)
  * @returns {number}
  */
 export function computeMissileImpactDamage(roll, armour, effect, count) {
-  return Math.max(0, roll - armour) * Math.min(effect, count)
+  return Math.max(0, roll - armour) * Math.max(1, Math.min(effect, count))
 }

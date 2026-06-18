@@ -586,9 +586,9 @@ describe('computeMissileImpactDamage', () => {
     expect(computeMissileImpactDamage(5, 10, 3, 3)).toBe(0)
   })
 
-  it('effect = 0 → multiplier 0 → 0 damage regardless of roll', () => {
-    // (20−0) × min(0,5) = 0
-    expect(computeMissileImpactDamage(20, 0, 0, 5)).toBe(0)
+  it('effect = 0 → multiplier min 1 on successful hit', () => {
+    // Effect 0 is a hit — multiplier floors at 1: (20−0) × 1 = 20
+    expect(computeMissileImpactDamage(20, 0, 0, 5)).toBe(20)
   })
 
   it('single missile, effect 1, roll exactly equals armour → 0', () => {
