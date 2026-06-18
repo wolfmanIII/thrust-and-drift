@@ -13,7 +13,7 @@ import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
 import { getCrewSkill, getEffectiveSkill, buildDefaultAssignments } from '../utils/crew.js'
 import { resolveDogfightChecks } from '../utils/dogfight.js'
-import { RANGE_BAND_ORDER } from '../data/rangeBands.js'
+import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST } from '../data/rangeBands.js'
 import { useUiStore } from './uiStore.js'
 import { emitEffect } from '../utils/effectQueue.js'
 
@@ -26,6 +26,36 @@ function pairKey(id1, id2) { return [id1, id2].sort().join('_') }
  * // Traveller Companion p.176 — Standard missile Thrust 10
  */
 const MISSILE_GUIDANCE_THRUST = 10 // MgT2e CRB p.162 — standard missile Thrust 10
+
+/**
+ * Advance a basic-mode missile toward its target by one round of guidance thrust.
+ * Spends MISSILE_GUIDANCE_THRUST points against the Ship Movement cost table (CRB p.166).
+ * Excess thrust carries over to the next closer band.
+ * @param {object} missile
+ * @returns {{ missile: object, impacted: boolean }}
+ */
+function advanceBasicMissileOneRound(missile) {
+  if (!missile.basicRangeBand) return { missile, impacted: false }
+  let band = missile.basicRangeBand
+  let accumulated = missile.basicThrustAccumulated ?? 0
+  if (band === 'Adjacent') return { missile: { ...missile, basicThrustAccumulated: 0 }, impacted: true }
+  let budget = MISSILE_GUIDANCE_THRUST
+  while (budget > 0) {
+    const idx = RANGE_BAND_ORDER.indexOf(band)
+    if (idx <= 0) { band = 'Adjacent'; break }
+    const cost = RANGE_BAND_MOVE_COST[band] ?? 1
+    const total = accumulated + budget
+    if (total >= cost) {
+      budget = total - cost
+      accumulated = 0
+      band = RANGE_BAND_ORDER[idx - 1]
+    } else {
+      accumulated = total
+      budget = 0
+    }
+  }
+  return { missile: { ...missile, basicRangeBand: band, basicThrustAccumulated: accumulated }, impacted: band === 'Adjacent' }
+}
 
 /**
  * Compute the guided vector for a missile homing toward its target.
@@ -87,11 +117,42 @@ const PHASE_ORDER = ['setup', 'initiative', 'acceleration', 'movement', 'attack'
  * @returns {object} State patch
  */
 function buildNextRoundState(s) {
+  // Advance basic-mode missiles toward their targets; detect impacts.
+  let updatedMissiles = s.missiles
+  let newImpacts = []
+  if (s.combatMode === 'basic' && s.missiles.length > 0) {
+    const results = s.missiles.map(advanceBasicMissileOneRound)
+    updatedMissiles = results.filter((r) => !r.impacted).map((r) => r.missile)
+    newImpacts = results.filter((r) => r.impacted).map((r) => ({
+      id: uuidv7(),
+      launchedBy: r.missile.launchedBy,
+      target: r.missile.target,
+      count: r.missile.count,
+      type: r.missile.type,
+      ewAppliedThisRound: false,
+      hasSmartGuidance: r.missile.hasSmartGuidance ?? true,
+    }))
+  }
+
+  const impactLogs = newImpacts.map((impact) => {
+    const launcher = s.ships.find((sh) => sh.id === impact.launchedBy)
+    const tgt      = s.ships.find((sh) => sh.id === impact.target)
+    return makeLogEntry({
+      round: s.round + 1, phase: 'initiative', type: 'attack',
+      message: `${launcher?.profile.name ?? '?'} — ${impact.count}× ${impact.type} reaches ${tgt?.profile.name ?? '?'}. Resolve damage.`,
+      shipId: impact.launchedBy, details: impact,
+    })
+  })
+
   return {
     round: s.round + 1,
     phase: 'initiative',
     currentActorIndex: 0,
-    pendingMissileImpacts: s.pendingMissileImpacts.map((i) => ({ ...i, ewAppliedThisRound: false })),
+    missiles: updatedMissiles,
+    pendingMissileImpacts: [
+      ...s.pendingMissileImpacts.map((i) => ({ ...i, ewAppliedThisRound: false })),
+      ...newImpacts,
+    ],
     ships: s.ships.map((sh) => {
       const ionNext = Math.max(0, (sh.ionRoundsLeft ?? 0) - 1)
       return {
@@ -106,12 +167,14 @@ function buildNextRoundState(s) {
         ionPenalty: ionNext > 0 ? (sh.ionPenalty ?? 0) : 0,
       }
     }),
-    log: [...s.log, makeLogEntry({
-      round: s.round + 1,
-      phase: 'initiative',
-      type: 'system',
-      message: `Round ${s.round + 1} begins.`,
-    })],
+    log: [
+      ...s.log,
+      ...impactLogs,
+      makeLogEntry({
+        round: s.round + 1, phase: 'initiative', type: 'system',
+        message: `Round ${s.round + 1} begins.`,
+      }),
+    ],
   }
 }
 
@@ -187,6 +250,8 @@ const useBattleStore = create((set, get) => {
 
   /** @type {Record<string, string>} Range band per ship pair (basic mode only). Key: pairKey(id1, id2). */
   rangeBands: {},
+  /** @type {Record<string, number>} Net thrust accumulated per pair toward band change (basic mode). Positive = approach, negative = flee. Persists across rounds until band changes. */
+  basicBandPool: {},
 
   /** @type {object[]} Undo history — snapshots of game state, capped at 20. */
   undoStack: [],
@@ -200,13 +265,14 @@ const useBattleStore = create((set, get) => {
    * Called internally before every user-facing mutation.
    */
   pushHistory: () => {
-    const { ships, missiles, dogfights, boardings, rangeBands, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, rangeBands, basicBandPool, round, phase, initiativeOrder, currentActorIndex } = get()
     const snapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
       dogfights: structuredClone(dogfights),
       boardings: structuredClone(boardings),
       rangeBands: { ...rangeBands },
+      basicBandPool: { ...basicBandPool },
       round,
       phase,
       initiativeOrder: [...initiativeOrder],
@@ -221,13 +287,14 @@ const useBattleStore = create((set, get) => {
     useUiStore.getState().clearMovementAnimation()
     const { undoStack, redoStack, log } = get()
     if (undoStack.length === 0) return
-    const { ships, missiles, dogfights, boardings, rangeBands, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, rangeBands, basicBandPool, round, phase, initiativeOrder, currentActorIndex } = get()
     const redoSnapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
       dogfights: structuredClone(dogfights),
       boardings: structuredClone(boardings),
       rangeBands: { ...rangeBands },
+      basicBandPool: { ...basicBandPool },
       round, phase,
       initiativeOrder: [...initiativeOrder],
       currentActorIndex,
@@ -248,13 +315,14 @@ const useBattleStore = create((set, get) => {
     useUiStore.getState().clearMovementAnimation()
     const { redoStack, undoStack, log } = get()
     if (redoStack.length === 0) return
-    const { ships, missiles, dogfights, boardings, rangeBands, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, rangeBands, basicBandPool, round, phase, initiativeOrder, currentActorIndex } = get()
     const undoSnapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
       dogfights: structuredClone(dogfights),
       boardings: structuredClone(boardings),
       rangeBands: { ...rangeBands },
+      basicBandPool: { ...basicBandPool },
       round, phase,
       initiativeOrder: [...initiativeOrder],
       currentActorIndex,
@@ -352,6 +420,9 @@ const useBattleStore = create((set, get) => {
         initiativeOrder: s.initiativeOrder.filter((id) => id !== shipId),
         rangeBands: Object.fromEntries(
           Object.entries(s.rangeBands).filter(([k]) => !k.split('_').includes(shipId))
+        ),
+        basicBandPool: Object.fromEntries(
+          Object.entries(s.basicBandPool ?? {}).filter(([k]) => !k.split('_').includes(shipId))
         ),
         log: [...s.log, makeLogEntry({
           round: s.round,
@@ -872,7 +943,8 @@ const useBattleStore = create((set, get) => {
    * @param {'Standard'|'Smart'|'Nuclear'|'Ortillery'} type
    */
   launchMissile: wh((launchedBy, target, count, position, vector, type = 'Standard', hasSmartGuidance = true) => {
-    const attacker = get().ships.find((s) => s.id === launchedBy)
+    const state = get()
+    const attacker = state.ships.find((s) => s.id === launchedBy)
     const missile = {
       id: uuidv7(),
       launchedBy,
@@ -883,6 +955,11 @@ const useBattleStore = create((set, get) => {
       thrustRemaining: 10,
       type,
       hasSmartGuidance,  // false when fired at Adjacent range (CRB p.162)
+      // Basic-mode tracking: missile advances via range bands, independent of ship positions.
+      ...(state.combatMode === 'basic' ? {
+        basicRangeBand: state.rangeBands[pairKey(launchedBy, target)] ?? 'Very Long',
+        basicThrustAccumulated: 0,
+      } : {}),
     }
     set((s) => ({
       missiles: [...s.missiles, missile],
@@ -1028,8 +1105,10 @@ const useBattleStore = create((set, get) => {
    * @param {string} band  Range band label from RANGE_BAND_ORDER
    */
   setRangeBand: wh((id1, id2, band) => {
+    const key = pairKey(id1, id2)
     set((s) => ({
-      rangeBands: { ...s.rangeBands, [pairKey(id1, id2)]: band },
+      rangeBands: { ...s.rangeBands, [key]: band },
+      basicBandPool: { ...s.basicBandPool, [key]: 0 },  // GM override resets accumulated thrust
       log: [...s.log, makeLogEntry({
         round: s.round, phase: s.phase, type: 'system',
         message: `Range set: ${s.ships.find(sh=>sh.id===id1)?.profile.name} vs ${s.ships.find(sh=>sh.id===id2)?.profile.name} → ${band}.`,
@@ -1038,34 +1117,56 @@ const useBattleStore = create((set, get) => {
   }),
 
   /**
-   * Apply basic-mode manoeuvre: spend thrust to change range band between two ships.
-   * CRB p.161 — cost = 1 thrust per band change (flat, non-vectorial mode).
+   * Apply basic-mode manoeuvre: contribute thrust toward a range band change.
+   * Thrust accumulates across rounds and across ships (CRB p.166 — "a ship can spend Thrust
+   * over multiple rounds"). When accumulated thrust meets the Ship Movement cost for the
+   * current band the band advances; excess carries to the next step.
+   * // MgT2e CRB p.166 — Ship Movement table
    * @param {string} movingShipId
    * @param {string} targetShipId
    * @param {'approach'|'flee'} direction
-   * @param {number} movingThrust  Thrust this ship commits
+   * @param {number} movingThrust  Thrust this ship commits this action
    */
   applyBasicMovement: wh((movingShipId, targetShipId, direction, movingThrust) => {
-    const { ships, rangeBands } = get()
+    const { ships, rangeBands, basicBandPool } = get()
     const moving = ships.find((s) => s.id === movingShipId)
     const target = ships.find((s) => s.id === targetShipId)
     if (!moving || !target) return
     const key = pairKey(movingShipId, targetShipId)
     const currentBand = rangeBands[key] ?? 'Very Long'
-    const idx = RANGE_BAND_ORDER.indexOf(currentBand)
-    const newIdx = direction === 'approach'
-      ? Math.max(0, idx - 1)
-      : Math.min(RANGE_BAND_ORDER.length - 1, idx + 1)
-    const newBand = RANGE_BAND_ORDER[newIdx]
+    const currentIdx  = RANGE_BAND_ORDER.indexOf(currentBand)
+    const cost        = RANGE_BAND_MOVE_COST[currentBand] ?? 1
+    // Positive pool = net approach; negative = net flee.
+    const oldPool  = basicBandPool[key] ?? 0
+    const delta    = direction === 'approach' ? movingThrust : -movingThrust
+    const newPool  = oldPool + delta
+
+    let newBand   = currentBand
+    let finalPool = newPool
+    let bandChanged = false
+
+    if (newPool >= cost && currentIdx > 0) {
+      newBand = RANGE_BAND_ORDER[currentIdx - 1]
+      finalPool = newPool - cost   // carry excess to next step
+      bandChanged = true
+    } else if (newPool <= -cost && currentIdx < RANGE_BAND_ORDER.length - 1) {
+      newBand = RANGE_BAND_ORDER[currentIdx + 1]
+      finalPool = newPool + cost
+      bandChanged = true
+    }
+
+    const logMsg = bandChanged
+      ? `${moving.profile.name} ${direction === 'approach' ? 'approaches' : 'flees from'} ${target.profile.name}: ${currentBand} → ${newBand}.`
+      : `${moving.profile.name} allocates ${movingThrust} thrust ${direction === 'approach' ? 'toward' : 'away from'} ${target.profile.name} (${Math.abs(finalPool)}/${cost} accumulated).`
+
     set((s) => ({
       rangeBands: { ...s.rangeBands, [key]: newBand },
-      ships: s.ships.map((sh) => {
-        if (sh.id === movingShipId) return { ...sh, thrustUsedThisRound: sh.thrustUsedThisRound + movingThrust }
-        return sh
-      }),
+      basicBandPool: { ...s.basicBandPool, [key]: finalPool },
+      ships: s.ships.map((sh) =>
+        sh.id === movingShipId ? { ...sh, thrustUsedThisRound: sh.thrustUsedThisRound + movingThrust } : sh
+      ),
       log: [...s.log, makeLogEntry({
-        round: s.round, phase: s.phase, type: 'movement',
-        message: `${moving.profile.name} ${direction === 'approach' ? 'approaches' : 'flees from'} ${target.profile.name}: ${currentBand} → ${newBand}.`,
+        round: s.round, phase: s.phase, type: 'movement', message: logMsg,
       })],
     }))
   }),
@@ -1575,6 +1676,7 @@ const useBattleStore = create((set, get) => {
     log: [],
     mapSettings: { scale: 1 },
     rangeBands: {},
+    basicBandPool: {},
     undoStack: [],
     redoStack: [],
     passingEncounters: [],
@@ -1584,8 +1686,8 @@ const useBattleStore = create((set, get) => {
   // === IMPORT / EXPORT ===
 
   exportBattleState: () => {
-    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands } = get()
-    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, savedAt: new Date().toISOString() })
+    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, basicBandPool } = get()
+    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, basicBandPool, savedAt: new Date().toISOString() })
   },
 
   /**
@@ -1609,6 +1711,7 @@ const useBattleStore = create((set, get) => {
       log: battle.log ?? [],
       mapSettings: battle.mapSettings ?? { scale: 1 },
       rangeBands: battle.rangeBands ?? {},
+      basicBandPool: battle.basicBandPool ?? {},
       undoStack: [],
       redoStack: [],
     })
