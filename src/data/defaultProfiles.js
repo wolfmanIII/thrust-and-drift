@@ -23,6 +23,7 @@ function makeProfile(overrides) {
     powerPlant: 0,
     turrets: [],
     bays: [],
+    tl: 12,
     computer: 0,
     sensors: 'Civilian',
     software: [],

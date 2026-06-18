@@ -77,9 +77,13 @@ export function MissileImpactModal() {
     - (target.evasiveThrust ?? 0)
   )
 
+  // Smart trait active only when launcher TL ≥ 9 (CRB p.79)
+  const launcherTL = launcher?.profile.tl ?? 12
+  const hasSmart   = launcherTL >= 9
+
   // Attack DMs — CRB p.173
-  const totalDM    = computeMissileAttackDM(impact.count, evasiveActive ? pilotSkill : 0)
-  const smartDM    = 2
+  const totalDM     = computeMissileAttackDM(impact.count, hasSmart, evasiveActive ? pilotSkill : 0)
+  const smartDM     = hasSmart ? 2 : 0
   const salvoSizeDM = impact.count
   const evasiveDM  = evasiveActive ? -pilotSkill : 0
 
@@ -185,8 +189,10 @@ export function MissileImpactModal() {
                   <span className="text-amber-300">{dmSign(salvoSizeDM)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Smart trait</span>
-                  <span className="text-amber-300">{dmSign(smartDM)}</span>
+                  <span className="text-slate-400">
+                    Smart trait{!hasSmart && <span className="text-slate-600 ml-1">(TL{launcherTL} &lt; 9)</span>}
+                  </span>
+                  <span className={hasSmart ? 'text-amber-300' : 'text-slate-600'}>{dmSign(smartDM)}</span>
                 </div>
                 {evasiveActive && (
                   <div className="flex justify-between">

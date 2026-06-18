@@ -22,6 +22,7 @@ function blankForm() {
     armor: 0,
     thrust: 2,
     jump: 0,
+    tl: 12,
     crew: [],
     turrets: [],
   }
@@ -42,6 +43,7 @@ function initForm(profile) {
     armor:     profile.armor     ?? 0,
     thrust:    profile.thrust    ?? 2,
     jump:      profile.jump      ?? 0,
+    tl:        profile.tl        ?? 12,
     crew,
     turrets: (profile.turrets ?? []).map((t) => ({ ...t, weapons: [...t.weapons] })),
   }
@@ -307,9 +309,12 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
           </h3>
           <div className="grid grid-cols-4 gap-3">
             <NumField label="HULL"    value={form.hull}   onChange={(v) => set('hull', v)}   min={1} max={9999} />
-            <NumField label="ARMOUR"   value={form.armor} onChange={(v) => set('armor', v)}  min={0} max={20} />
+            <NumField label="ARMOUR"  value={form.armor}  onChange={(v) => set('armor', v)}  min={0} max={20} />
             <NumField label="THRUST"  value={form.thrust} onChange={(v) => set('thrust', v)} min={1} max={9} />
             <NumField label="JUMP"    value={form.jump}   onChange={(v) => set('jump', v)}   min={0} max={6} />
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            <NumField label="TECH LVL" value={form.tl}    onChange={(v) => set('tl', v)}     min={7} max={16} />
           </div>
         </section>
 
