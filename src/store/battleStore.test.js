@@ -838,6 +838,22 @@ describe('launchMissile', () => {
     expect(m.thrustRemaining).toBe(10)
   })
 
+  it('stores hasSmartGuidance on missile', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 2, { q: 0, r: 0 }, { q: 0, r: 0 }, 'Standard', false)
+    expect(useBattleStore.getState().missiles[0].hasSmartGuidance).toBe(false)
+  })
+
+  it('defaults hasSmartGuidance to true when not provided', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 1, { q: 0, r: 0 }, { q: 0, r: 0 })
+    expect(useBattleStore.getState().missiles[0].hasSmartGuidance).toBe(true)
+  })
+
   it('increments turretsNeedingReload on attacker', () => {
     useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
     useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')

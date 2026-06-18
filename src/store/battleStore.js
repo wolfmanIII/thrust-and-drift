@@ -570,6 +570,7 @@ const useBattleStore = create((set, get) => {
       count: m.count,
       type: m.type,
       ewAppliedThisRound: false,
+      hasSmartGuidance: m.hasSmartGuidance ?? true,
     }))
 
     const entries = movedShips.map((sh) => makeLogEntry({
@@ -870,7 +871,7 @@ const useBattleStore = create((set, get) => {
    * @param {{ q: number, r: number }} vector    Initial vector (inherits attacker vector)
    * @param {'Standard'|'Smart'|'Nuclear'|'Ortillery'} type
    */
-  launchMissile: wh((launchedBy, target, count, position, vector, type = 'Standard') => {
+  launchMissile: wh((launchedBy, target, count, position, vector, type = 'Standard', hasSmartGuidance = true) => {
     const attacker = get().ships.find((s) => s.id === launchedBy)
     const missile = {
       id: uuidv7(),
@@ -881,6 +882,7 @@ const useBattleStore = create((set, get) => {
       vector: { ...vector },
       thrustRemaining: 10,
       type,
+      hasSmartGuidance,  // false when fired at Adjacent range (CRB p.162)
     }
     set((s) => ({
       missiles: [...s.missiles, missile],

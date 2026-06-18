@@ -1254,7 +1254,10 @@ export function AttackModal() {
   const handleLaunchMissile = () => {
     if (!target) return
     const missileType = weaponKey === 'Torpedo' ? 'Torpedo' : 'Standard'
-    launchMissile(attacker.id, target.id, missileCount, attacker.position, attacker.vector, missileType)
+    // Smart requires TL ≥ 9 AND range > Adjacent/Close (CRB p.79, p.162)
+    const launcherTL = attacker.profile.tl ?? 12
+    const hasSmartGuidance = launcherTL >= 9 && rangeBand !== 'Adjacent'
+    launchMissile(attacker.id, target.id, missileCount, attacker.position, attacker.vector, missileType, hasSmartGuidance)
     if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
     emitEffect('missile_launch', { duration: 2500, hex: attacker.position })
     closeModal()
