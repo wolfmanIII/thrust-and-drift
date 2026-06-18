@@ -43,7 +43,7 @@ function useActionEffects() {
         applyInitiativeBonus(shipId, effect)
         break
       case 'overload_drive':
-        overloadDrive(shipId, effect)
+        overloadDrive(shipId, 1)  // fixed +1 per CRB p.171 — not +Effect
         break
       case 'reload_turret':
         reloadTurret(shipId)
@@ -196,7 +196,7 @@ export function ActionModal() {
                 })()}
                 {selectedAction.id === 'repair_system'      && 'Critical hit removed.'}
                 {selectedAction.id === 'improve_initiative' && `+${rollResult.effect} to initiative next round.`}
-                {selectedAction.id === 'overload_drive'     && `+${rollResult.effect} Thrust available this round.`}
+                {selectedAction.id === 'overload_drive'     && `+1 Thrust next round.${rollResult.effect <= -6 ? ' ⚠ Effect ≤ −6: apply M-Drive critical Severity 1.' : ''}`}
                 {selectedAction.id === 'reload_turret'      && 'Turret reloaded.'}
               </p>
             )}

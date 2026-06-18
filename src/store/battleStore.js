@@ -1203,7 +1203,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${ship.profile.name}: M-Drive overloaded — +${applied} Thrust this round.`,
+          message: `${ship.profile.name}: M-Drive overloaded — +${applied} Thrust next round.`,
           shipId,
         })],
       }))

@@ -18,9 +18,9 @@ export const CREW_ACTIONS = {
     {
       id: 'overload_drive',
       label: 'Overload M-Drive',
-      difficulty: 8,
+      difficulty: 10,
       skill: 'engineer',
-      description: 'Engineer check. Success: +Effect Thrust this round. // MgT2e CRB p.167',
+      description: 'Difficult Engineer(m-drive) check (INT). Success: +1 Thrust next round. Effect ≤ −6: M-Drive critical Severity 1. Cumulative DM−2 per attempt. // MgT2e CRB p.171',
     },
     {
       id: 'repair_system',
