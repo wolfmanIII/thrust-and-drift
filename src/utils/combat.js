@@ -303,14 +303,20 @@ export function getApValue(traits) {
 
 /**
  * Compute the total attack DM for a missile salvo impact roll.
- * DM+1/missile (salvo size) + DM+2 (Smart trait) − Pilot (evasive action).
+ * DM+1/missile (salvo size) + DM+2 (Smart trait, requires launcher TL 9+) − Pilot (evasive action).
+ *
+ * Smart guidance requires TL9+ on the firing ship (CRB p.79). All missile/torpedo weapons
+ * carry the Smart trait in the weapon table, but the trait is only active when the launcher's
+ * tech level meets the threshold. This avoids giving anachronistic DMs to pre-TL9 vessels.
+ *
  * // MgT2e CRB p.173 (IMPACT), p.79 (Smart trait)
- * @param {number} count         Missiles remaining in salvo
- * @param {number} evasivePilot  Pilot skill of evading target (0 = not evading)
+ * @param {number}  count         Missiles remaining in salvo
+ * @param {boolean} hasSmart      True if launcher ship TL ≥ 9 (default true for safety)
+ * @param {number}  evasivePilot  Pilot skill of evading target (0 = not evading)
  * @returns {number}
  */
-export function computeMissileAttackDM(count, evasivePilot = 0) {
-  return count + 2 - evasivePilot   // salvoSize + Smart − evasive
+export function computeMissileAttackDM(count, hasSmart = true, evasivePilot = 0) {
+  return count + (hasSmart ? 2 : 0) - evasivePilot   // salvoSize + Smart − evasive
 }
 
 /**

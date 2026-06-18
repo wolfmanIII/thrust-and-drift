@@ -516,35 +516,50 @@ describe('countSandcasters', () => {
 // // MgT2e CRB p.173 — IMPACT
 
 describe('computeMissileAttackDM', () => {
-  // DM = count (salvo size) + 2 (Smart) − evasivePilot
+  // DM = count (salvo size) + 2 (Smart, if TL ≥ 9) − evasivePilot
 
-  it('1 missile, no evasion → DM+3', () => {
-    expect(computeMissileAttackDM(1, 0)).toBe(3)
+  it('1 missile, Smart active, no evasion → DM+3', () => {
+    expect(computeMissileAttackDM(1, true, 0)).toBe(3)
   })
 
-  it('3 missiles, no evasion → DM+5', () => {
-    expect(computeMissileAttackDM(3, 0)).toBe(5)
+  it('3 missiles, Smart active, no evasion → DM+5', () => {
+    expect(computeMissileAttackDM(3, true, 0)).toBe(5)
   })
 
-  it('5 missiles, no evasion → DM+7', () => {
-    expect(computeMissileAttackDM(5, 0)).toBe(7)
+  it('5 missiles, Smart active, no evasion → DM+7', () => {
+    expect(computeMissileAttackDM(5, true, 0)).toBe(7)
   })
 
-  it('evasive pilot 2, 3 missiles → DM+3', () => {
-    expect(computeMissileAttackDM(3, 2)).toBe(3)
+  it('evasive pilot 2, 3 missiles, Smart active → DM+3', () => {
+    expect(computeMissileAttackDM(3, true, 2)).toBe(3)
   })
 
-  it('evasive pilot 3, 3 missiles → DM+2', () => {
-    expect(computeMissileAttackDM(3, 3)).toBe(2)
+  it('evasive pilot 3, 3 missiles, Smart active → DM+2', () => {
+    expect(computeMissileAttackDM(3, true, 3)).toBe(2)
   })
 
   it('evasive pilot 0 = no DM penalty even if evading flag set', () => {
-    expect(computeMissileAttackDM(2, 0)).toBe(4)
+    expect(computeMissileAttackDM(2, true, 0)).toBe(4)
   })
 
   it('high pilot can reduce total DM below base', () => {
     // 1 missile + 2 Smart = base 3; pilot 4 → −4 → DM −1
-    expect(computeMissileAttackDM(1, 4)).toBe(-1)
+    expect(computeMissileAttackDM(1, true, 4)).toBe(-1)
+  })
+
+  it('Smart inactive (TL < 9): no +2 bonus', () => {
+    // 3 missiles, no Smart, no evasion → DM+3 (salvo only)
+    expect(computeMissileAttackDM(3, false, 0)).toBe(3)
+  })
+
+  it('Smart inactive with evasion: only salvo DM applies', () => {
+    // 3 missiles, no Smart, pilot 2 → 3 − 2 = DM+1
+    expect(computeMissileAttackDM(3, false, 2)).toBe(1)
+  })
+
+  it('hasSmart defaults to true', () => {
+    // calling with (count) only — backward-safe default
+    expect(computeMissileAttackDM(3)).toBe(5)
   })
 })
 
