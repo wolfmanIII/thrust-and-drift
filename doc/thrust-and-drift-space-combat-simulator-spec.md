@@ -1694,6 +1694,10 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
 - 832 test (+3 sensore lock flat).
 
+### 14.15 Versione 1.20.6 — Missile Effect 0 Multiplier Fix ✅ COMPLETATA
+
+- **Effect 0 moltiplica per 1, non per 0** (CRB p.173): `computeMissileImpactDamage` usa `max(1, min(effect, count))` come moltiplicatore. Effect 0 è un colpo andato a segno in Traveller — moltiplicare per 0 non ha senso meccanicamente. Fix proposto dalla community CotI. Nota precedente "Effect×0 = 0 RAW" ritrattata. Test aggiornato di conseguenza.
+
 ### 14.14 Versione 1.20.5 — Rules Corrections (CRB p.162, p.171) ✅ COMPLETATA
 
 - **Smart-loss ad Adjacent range** (CRB p.162): missili lanciati a `rangeBand === 'Adjacent'` non ricevono DM+2 Smart, indipendentemente dal TL. `hasSmartGuidance` calcolato al lancio (`launcherTL ≥ 9 && rangeBand !== 'Adjacent'`), salvato sul missile e portato nel `pendingMissileImpact`. `MissileImpactModal` legge dal flag salvato (fallback `true` per retrocompatibilità). Label mostra la ragione: `TL< 9` o `Adjacent/Close range`.

@@ -9,14 +9,18 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.20.5 |
+| **Versione** | 1.20.6 |
 | **Branch** | main (clean) |
 | **Test** | 834 passing |
-| **Ultimo commit** | docs: sync README, HANDOFF, spec, field-manual to v1.20.5 |
+| **Ultimo commit** | docs: sync README, HANDOFF, spec, field-manual to v1.20.6 |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
+
+### Sessione corrente — Doc Audit + Rules Corrections (v1.20.5–v1.20.6)
+
+0. **`fix(rules): missile Effect 0 floors multiplier at ×1`** (`2980185`) — CotI community ha correttamente identificato che Effect 0 è un colpo andato a segno, non un miss. `computeMissileImpactDamage` usa ora `max(1, min(effect, count))`. Nota "Effect×0 = 0 RAW" ritrattata. Test aggiornato.
 
 ### Sessione corrente — Doc Audit + Rules Corrections (v1.20.5)
 
