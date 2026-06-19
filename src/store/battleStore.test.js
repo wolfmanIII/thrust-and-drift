@@ -965,6 +965,71 @@ describe('removeMissile', () => {
   })
 })
 
+describe('interceptMissileSalvo', () => {
+  function launchScenario() {
+    useBattleStore.getState().addShip(makeProfile({ id: 'att' }), { q: 0, r: 0 }, 'npc',     '#f00')
+    useBattleStore.getState().addShip(makeProfile({ id: 'def' }), { q: 5, r: 0 }, 'players', '#fff')
+    const [att, def] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, def.id, 5, att.position, { q: 0, r: 0 })
+    return { att, def, missileId: useBattleStore.getState().missiles[0].id }
+  }
+
+  it('reduces missile count by removed amount', () => {
+    const { missileId } = launchScenario()
+    useBattleStore.getState().interceptMissileSalvo(missileId, 2)
+    expect(useBattleStore.getState().missiles[0].count).toBe(3)
+  })
+
+  it('removes salvo when count reaches 0', () => {
+    const { missileId } = launchScenario()
+    useBattleStore.getState().interceptMissileSalvo(missileId, 5)
+    expect(useBattleStore.getState().missiles).toHaveLength(0)
+  })
+
+  it('removes salvo when removed exceeds count', () => {
+    const { missileId } = launchScenario()
+    useBattleStore.getState().interceptMissileSalvo(missileId, 99)
+    expect(useBattleStore.getState().missiles).toHaveLength(0)
+  })
+
+  it('removed=0 (miss) leaves count unchanged', () => {
+    const { missileId } = launchScenario()
+    useBattleStore.getState().interceptMissileSalvo(missileId, 0)
+    expect(useBattleStore.getState().missiles[0].count).toBe(5)
+  })
+
+  it('adds log entry on partial intercept', () => {
+    const logsBefore = useBattleStore.getState().log.length
+    const { missileId } = launchScenario()
+    useBattleStore.getState().interceptMissileSalvo(missileId, 2)
+    expect(useBattleStore.getState().log.length).toBeGreaterThan(logsBefore)
+  })
+
+  it('adds log entry on full destruction', () => {
+    const logsBefore = useBattleStore.getState().log.length
+    const { missileId } = launchScenario()
+    useBattleStore.getState().interceptMissileSalvo(missileId, 5)
+    expect(useBattleStore.getState().log.length).toBeGreaterThan(logsBefore)
+  })
+
+  it('does not affect other salvos', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'att' }), { q: 0, r: 0 }, 'npc',     '#f00')
+    useBattleStore.getState().addShip(makeProfile({ id: 'def' }), { q: 5, r: 0 }, 'players', '#fff')
+    const [att, def] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, def.id, 4, att.position, { q: 0, r: 0 })
+    useBattleStore.getState().launchMissile(att.id, def.id, 3, att.position, { q: 0, r: 0 })
+    const [m1, m2] = useBattleStore.getState().missiles
+    useBattleStore.getState().interceptMissileSalvo(m1.id, 4)
+    expect(useBattleStore.getState().missiles).toHaveLength(1)
+    expect(useBattleStore.getState().missiles[0].id).toBe(m2.id)
+    expect(useBattleStore.getState().missiles[0].count).toBe(3)
+  })
+
+  it('unknown missileId is no-op', () => {
+    expect(() => useBattleStore.getState().interceptMissileSalvo('ghost', 3)).not.toThrow()
+  })
+})
+
 describe('applyMissileEW', () => {
   it('reduces count on in-flight missile by specified amount', () => {
     useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
