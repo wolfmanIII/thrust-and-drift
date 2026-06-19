@@ -53,7 +53,7 @@ export function InitiativeModal() {
   const previewTotal = (ship) => {
     const dice = playerDice[ship.id]
     if (!dice) return '?'
-    return dice.total + getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot') + ship.profile.thrust + tacticsEffect(ship)
+    return dice.total + getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot') + ship.profile.thrust + tacticsEffect(ship) + (ship.initiativeBonusNextRound ?? 0)
   }
 
   const handleConfirm = () => {
