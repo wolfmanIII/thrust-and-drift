@@ -83,6 +83,7 @@ export function ActionModal() {
   const modalPayload = useUiStore((s) => s.modalPayload)
   const ships                  = useBattleStore((s) => s.ships)
   const pendingMissileImpacts  = useBattleStore((s) => s.pendingMissileImpacts)
+  const missiles               = useBattleStore((s) => s.missiles)
   const addLogEntry            = useBattleStore((s) => s.addLogEntry)
   const markCrewMemberUsed     = useBattleStore((s) => s.markCrewMemberUsed)
 
@@ -323,30 +324,36 @@ export function ActionModal() {
               <div>
                 <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">Target Salvo</p>
                 <div className="space-y-0.5">
-                  {pendingMissileImpacts.length === 0 && (
+                  {missiles.length === 0 && pendingMissileImpacts.length === 0 && (
                     <p className="text-slate-400 font-mono text-xs italic">No in-flight salvos.</p>
                   )}
-                  {pendingMissileImpacts.map((impact) => {
-                    const launcher = ships.find((s) => s.id === impact.launchedBy)
-                    const target   = ships.find((s) => s.id === impact.target)
-                    const alreadyEW = impact.ewAppliedThisRound
+                  {[
+                    ...missiles.map((m) => ({ ...m, isPending: false })),
+                    ...pendingMissileImpacts.map((i) => ({ ...i, isPending: true })),
+                  ].map((salvo) => {
+                    const launcher  = ships.find((s) => s.id === salvo.launchedBy)
+                    const target    = ships.find((s) => s.id === salvo.target)
+                    const alreadyEW = salvo.ewAppliedThisRound
                     return (
                       <button
-                        key={impact.id}
-                        onClick={() => !alreadyEW && setTargetImpactId(impact.id)}
+                        key={salvo.id}
+                        onClick={() => !alreadyEW && setTargetImpactId(salvo.id)}
                         disabled={alreadyEW}
                         className={`w-full text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
-                          targetImpactId === impact.id
+                          targetImpactId === salvo.id
                             ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
                             : alreadyEW
                               ? 'border-slate-800 text-slate-600 cursor-not-allowed'
                               : 'border-slate-700 text-slate-400 hover:border-slate-500'
                         }`}
                       >
-                        <span className="font-bold">{impact.count}× {impact.type}</span>
+                        <span className="font-bold">{salvo.count}× {salvo.type}</span>
                         <span className="text-slate-500 ml-2">
                           {launcher?.profile.name ?? '?'} → {target?.profile.name ?? '?'}
                         </span>
+                        {salvo.isPending && !alreadyEW && (
+                          <span className="ml-2 text-orange-400 text-[10px] uppercase tracking-wider">⚡ impact</span>
+                        )}
                         {alreadyEW && <span className="ml-auto float-right text-slate-600">EW this round</span>}
                       </button>
                     )

@@ -122,7 +122,7 @@ function buildNextRoundState(s) {
   let newImpacts = []
   if (s.combatMode === 'basic' && s.missiles.length > 0) {
     const results = s.missiles.map(advanceBasicMissileOneRound)
-    updatedMissiles = results.filter((r) => !r.impacted).map((r) => r.missile)
+    updatedMissiles = results.filter((r) => !r.impacted).map((r) => ({ ...r.missile, ewAppliedThisRound: false }))
     newImpacts = results.filter((r) => r.impacted).map((r) => ({
       id: uuidv7(),
       launchedBy: r.missile.launchedBy,
@@ -132,6 +132,9 @@ function buildNextRoundState(s) {
       ewAppliedThisRound: false,
       hasSmartGuidance: r.missile.hasSmartGuidance ?? true,
     }))
+  } else if (s.missiles.length > 0) {
+    // vectorial mode: reset ewAppliedThisRound each round
+    updatedMissiles = s.missiles.map((m) => ({ ...m, ewAppliedThisRound: false }))
   }
 
   const impactLogs = newImpacts.map((impact) => {
@@ -723,25 +726,46 @@ const useBattleStore = create((set, get) => {
    * @param {number} effect       Effect of the Electronics check (min 1 applied)
    */
   applyMissileEW: wh(
-    (actorShipId, impactId) => {
-      const impact = get().pendingMissileImpacts.find((i) => i.id === impactId)
-      return !!(impact && !impact.ewAppliedThisRound)
+    (actorShipId, missileId) => {
+      const { pendingMissileImpacts, missiles } = get()
+      const impact = pendingMissileImpacts.find((i) => i.id === missileId)
+      if (impact) return !impact.ewAppliedThisRound
+      const missile = missiles.find((m) => m.id === missileId)
+      return !!(missile && !missile.ewAppliedThisRound)
     },
-    (actorShipId, impactId, effect) => {
-      const { pendingMissileImpacts, ships, round, phase } = get()
-      const impact = pendingMissileImpacts.find((i) => i.id === impactId)
-      if (!impact) return
+    (actorShipId, missileId, effect) => {
+      const { pendingMissileImpacts, missiles, ships, round, phase } = get()
       const actor = ships.find((s) => s.id === actorShipId)
       const removed = Math.max(1, effect)
-      const newCount = impact.count - removed
+
+      const impact = pendingMissileImpacts.find((i) => i.id === missileId)
+      if (impact) {
+        const newCount = impact.count - removed
+        const logMsg = newCount <= 0
+          ? `${actor?.profile.name ?? '?'} EW destroys entire salvo (${impact.count} missiles removed).`
+          : `${actor?.profile.name ?? '?'} EW removes ${removed} missile(s) — salvo reduced to ${newCount}.`
+        set((s) => ({
+          pendingMissileImpacts: newCount <= 0
+            ? s.pendingMissileImpacts.filter((i) => i.id !== missileId)
+            : s.pendingMissileImpacts.map((i) =>
+                i.id === missileId ? { ...i, count: newCount, ewAppliedThisRound: true } : i
+              ),
+          log: [...s.log, makeLogEntry({ round, phase, type: 'system', message: logMsg, shipId: actorShipId })],
+        }))
+        return
+      }
+
+      const missile = missiles.find((m) => m.id === missileId)
+      if (!missile) return
+      const newCount = missile.count - removed
       const logMsg = newCount <= 0
-        ? `${actor?.profile.name ?? '?'} EW destroys entire salvo (${impact.count} missiles removed).`
-        : `${actor?.profile.name ?? '?'} EW removes ${removed} missile(s) — salvo reduced to ${newCount}.`
+        ? `${actor?.profile.name ?? '?'} EW destroys entire in-flight salvo (${missile.count} missiles removed).`
+        : `${actor?.profile.name ?? '?'} EW removes ${removed} missile(s) — in-flight salvo reduced to ${newCount}.`
       set((s) => ({
-        pendingMissileImpacts: newCount <= 0
-          ? s.pendingMissileImpacts.filter((i) => i.id !== impactId)
-          : s.pendingMissileImpacts.map((i) =>
-              i.id === impactId ? { ...i, count: newCount, ewAppliedThisRound: true } : i
+        missiles: newCount <= 0
+          ? s.missiles.filter((m) => m.id !== missileId)
+          : s.missiles.map((m) =>
+              m.id === missileId ? { ...m, count: newCount, ewAppliedThisRound: true } : m
             ),
         log: [...s.log, makeLogEntry({ round, phase, type: 'system', message: logMsg, shipId: actorShipId })],
       }))
@@ -984,6 +1008,7 @@ const useBattleStore = create((set, get) => {
       thrustRemaining: 10,
       type,
       hasSmartGuidance,  // false when fired at Adjacent range (CRB p.162)
+      ewAppliedThisRound: false,
       // Basic-mode tracking: missile advances via range bands, independent of ship positions.
       ...(state.combatMode === 'basic' ? {
         basicRangeBand: state.rangeBands[pairKey(launchedBy, target)] ?? 'Very Long',
