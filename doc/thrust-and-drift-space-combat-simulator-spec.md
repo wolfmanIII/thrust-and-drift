@@ -1701,6 +1701,7 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **EW Counter Missile su missili in volo** (CRB p.173): `ewAppliedThisRound` aggiunto ai missili al lancio via `launchMissile`, resettato in `buildNextRoundState` (entrambi gli array). `applyMissileEW` cerca prima `pendingMissileImpacts` poi `missiles`. ActionModal salvo selector: lista unificata `[...missiles, ...pendingMissileImpacts]` con badge `⚡ impact` per i pending.
 - **Initiative breakdown visibile** (CRB p.160): `rollAllInitiative` salva `initiativeBreakdown: { roll, pilotSkill, thrust, tacticsEffect }` per nave. `InitiativeModal` post-confirm mostra riga dettaglio con badge verde Tactics se ≠ 0.
 - **Thrust delta persistente** (TC p.172): `addShip` aggiunge `lastThrustDelta: {q:0,r:0}`. `applyShipThrust` salva il delta applicato. `ThrustModal` lazy-inizializza da `ship.lastThrustDelta`.
+- **`basicBandPool` in autosave**: era incluso in undo/redo e JSON export/import ma mancava in `useAutosave.js`. Aggiunto a `extractBattleSnapshot`, `hasSignificantChange` e restore `setState`.
 - 834 test (invariato).
 
 ### 14.16 Versione 1.20.7 — Basic Mode Fix: Missiles + Manoeuvre Cost ✅ COMPLETATA

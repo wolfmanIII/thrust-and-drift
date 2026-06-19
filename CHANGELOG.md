@@ -6,6 +6,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.20.8] — 2026-06-19
+
+### Fixed
+
+- **Armour not reduced by Critical Damage (CRB p.170)** — all six Armour critical effects previously had `mechanic: 'descriptive'`, meaning the armour reduction was displayed as text but never applied to the ship. New mechanic codes introduced: `armour_reduce_fixed` (Sev 1: −1, no roll), `armour_reduce_d3` (Sev 2: roll 1D6, reduction = ⌈result/2⌉), `armour_reduce_xd` (Sev 3–4: roll 1D6; Sev 5–6: roll 2D6). New `reduceArmour(shipId, amount)` store action updates `profile.armor` (floor 0) and logs the reduction. `AttackCriticalStep` shows a contextual dice-roll input for mechanics that require a roll; Sev 1 applies immediately on confirm. Sev 5–6 "Hull +1 Severity" note remains descriptive — GM resolves manually, consistent with all other Hull-cascade effects in the table.
+- **Only one turret could perform Point Defence per attack** — once `pdResult` was set after the first PD roll, the roll UI disappeared regardless of remaining unfired laser turrets. `handlePdRoll` now resets `pdTurretSlot` to `null` after each roll; `ReactionsPanel` shows both the last result and the turret selector + roll button simultaneously as long as `targetPdTurrets.length > 0`. `DiceInput` key is tied to `pdResult.turretSlot` to force a reset between consecutive rolls. Ships with two or three laser turrets can now use all of them for PD on the same incoming salvo.
+- **EW — Counter Missile could not target in-flight salvos** — `ActionModal`'s salvo selector only listed `pendingMissileImpacts` (salvos already at the target hex, awaiting impact resolution), so missiles still in transit during the Actions phase appeared as "No in-flight salvos". `ewAppliedThisRound: false` is now set on missiles at launch (`launchMissile`) and reset each round in `buildNextRoundState` (both basic-mode advancement and vectorial round reset). `applyMissileEW` searches `pendingMissileImpacts` first, then `missiles`. The salvo selector now shows a unified list of all salvos from both arrays; salvos from `pendingMissileImpacts` carry a `⚡ impact` badge to distinguish them.
+- **basicBandPool not persisted in autosave** — the per-pair thrust accumulation pool used by basic mode was included in undo/redo and manual JSON export/import, but omitted from the IndexedDB autosave snapshot. Added to `extractBattleSnapshot`, `hasSignificantChange`, and the restore `setState` call in `useAutosave.js`.
+
+### Changed
+
+- **Initiative roll breakdown shown post-confirm** — `rollAllInitiative` now saves `initiativeBreakdown: { roll, pilotSkill, thrust, tacticsEffect }` on each ship. The post-confirm initiative order in `InitiativeModal` displays a sub-line with the breakdown; Tactics Effect appears in green if non-zero, making it transparent whether and how much it contributed.
+- **ThrustModal pre-populated with last applied delta** — `addShip` initialises `lastThrustDelta: { q: 0, r: 0 }` on each ship; `applyShipThrust` updates it. `ThrustModal` lazy-initialises its delta state from `ship.lastThrustDelta`, so re-opening the modal defaults to the same thrust allocation as the previous round. The user can confirm unchanged, adjust, or reset with the existing RESET button.
+
+---
+
 ## [1.20.7] — 2026-06-19
 
 ### Fixed

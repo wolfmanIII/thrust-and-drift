@@ -454,6 +454,7 @@ when the critical step closes, so they are visible on the canvas.
 | **Location** | 2D6 roll on the location table (Hull, M-Drive, J-Drive, Power Plant, Weapons, Sensors, Bridge, Fuel, Cargo, Crew, Computer). |
 | **Severity** | Effect − 5, clamped 1–6. Stacks with existing criticals on the same system. |
 | **M-Drive** | Sev 1 = no penalty. Sev 2–4 = −1 thrust/round. Sev 5–6 = thrust reduced to 0. |
+| **Armour** | Automated reduction applied immediately. Sev 1: −1 (no roll). Sev 2: roll 1D6, reduction = ⌈result/2⌉ (D3). Sev 3–4: roll 1D6. Sev 5–6: roll 2D6 + GM applies Hull +1 Severity manually. The app prompts for the dice roll where required and updates `profile.armor` in the store. |
 
 ### 9.5 Per-Turret Firing Limit
 
@@ -557,7 +558,7 @@ on the token shows when a ship has used reactions this round.
 | Reaction | Availability | Mechanic |
 | -------- | ------------ | -------- |
 | **Evasive Action** | All attacks | Toggle button: spend **1 thrust** to dodge this attack. The attack suffers **DM −Pilot skill** (fixed — not multiplied). *(CRB p.171)* |
-| **Point Defence** | Missile attacks only; target must have an unfired laser turret | Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Turret marked fired immediately. |
+| **Point Defence** | Missile attacks only; target must have at least one unfired laser turret | Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Turret marked fired immediately. **Multiple turrets can each roll PD** — the roll section stays visible after each attempt as long as unfired laser turrets remain; select the next turret slot before rolling. |
 | **Disperse Sand** | Laser (Pulse/Beam) attacks only; target must have an unfired sandcaster turret | Gunner (turret) check 2D6 + Gunner. On success: +1D+Effect added to armour for this attack only. Turret marked fired immediately. |
 
 > If Point Defence destroys all missiles (count reaches 0), the attack does not
@@ -647,7 +648,7 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 | **Gunner** | **Reload Turret** | Automatic | Reloads 1 missile turret; no roll required *(CRB p.167)* |
 | **Sensors** | **Sensor Lock** | 8+ (Electronics) | DM+2 flat to all attacks against the selected target *(CRB p.172)* |
 | **Sensors** | **Electronic Warfare** | 8+ (Electronics) | Removes an enemy sensor lock from this ship *(CRB p.167)* |
-| **Sensors** | **EW — Counter Missile** | 10+ (Electronics) | Removes **Effect** missiles (min 1) from one in-flight salvo. Cumulative across rounds; a salvo may only be EW'd once per round *(CRB p.173)* |
+| **Sensors** | **EW — Counter Missile** | 10+ (Electronics) | Removes **Effect** missiles (min 1) from one in-flight salvo. Targets **both** salvos still in transit (`missiles` array) and those awaiting impact resolution (`⚡ impact` badge). Cumulative across rounds; a salvo may only be EW'd once per round *(CRB p.173)* |
 
 > A skill level of 0 in a role grants **no actions** for that role.
 > Skills with level ≥ 1 unlock the role's full action list.
@@ -780,6 +781,8 @@ only when relevant.
 
 The app autosaves to IndexedDB after every significant action (ships
 added/removed, damage applied, phase advanced, etc.). No manual trigger needed.
+Persisted fields include ships, missiles, initiative order, range bands, the
+basic-mode thrust accumulation pool (`basicBandPool`), and the full battle log.
 
 On next visit, the **🔄 RESUME AUTOSAVE** button appears on the Dashboard with
 round, phase, and ship count.
