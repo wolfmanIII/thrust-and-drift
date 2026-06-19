@@ -11,8 +11,8 @@
 | --- | --- |
 | **Versione** | 1.20.8 |
 | **Branch** | main (clean) |
-| **Test** | 834 passing |
-| **Ultimo commit** | docs: sync README, HANDOFF, spec, field-manual, Dashboard to v1.20.8 |
+| **Test** | 857 passing |
+| **Ultimo commit** | test(v1.20.8): add coverage for all bug fixes (`40c3435`) |
 
 ---
 
@@ -29,6 +29,10 @@
 4. **`fix(initiative): show roll breakdown in post-confirm view`** (`b0fd58c`) — il bonus Tactics appariva nel totale ma non era visibile, causando dubbi sulla correttezza del calcolo. `rollAllInitiative` salva `initiativeBreakdown: r.roll.breakdown` per ogni nave. `InitiativeModal` post-confirm mostra riga `2D:{roll} + Pilot:{n} + T{n}` con badge verde `Tac:{effect}` quando il Tactics effect è ≠ 0. (CRB p.160)
 
 5. **`fix(thrust): pre-populate ThrustModal with last applied delta`** (`2bb05fe`) — `ThrustModal` usava `useState({q:0,r:0})` — ogni apertura resettava a zero. `addShip` inizializza `lastThrustDelta: {q:0,r:0}`. `applyShipThrust` salva `lastThrustDelta: {...delta}`. `ThrustModal` lazy-inizializza da `ship.lastThrustDelta`. (TC p.172)
+
+6. **`fix(autosave): basicBandPool missing from IndexedDB snapshot`** (inline nella sessione) — `basicBandPool` era in undo/redo e JSON export/import ma non in `extractBattleSnapshot` né in `hasSignificantChange` di `useAutosave.js`. Tre righe aggiunte.
+
+7. **`test(v1.20.8): add coverage for all bug fixes`** (`40c3435`) — 23 nuovi test in `criticalHits.test.js`, `battleStore.test.js`, `useAutosave.test.js`. Copertura: mechanic codes Armour Sev 1–6, `reduceArmour`, `applyMissileEW` in-flight + double-EW guard + pending impact, `ewAppliedThisRound` init/reset, `lastThrustDelta`, `initiativeBreakdown`, `basicBandPool` restore/snapshot.
 
 ### Sessione precedente — Basic Mode Fix (v1.20.7)
 
