@@ -44,14 +44,14 @@ const RING_CORNERS = [
  */
 function drawRangeBandRings(ctx, ship, size, ox, oy) {
   const { q: sq, r: sr } = ship.position
+  const fontSize = Math.max(10, Math.round(10 * size / 32))
   ctx.save()
-  ctx.setLineDash([4, 6])
-  ctx.lineWidth = 1
-  ctx.strokeStyle = 'rgba(56, 189, 248, 0.22)'
-  ctx.fillStyle = 'rgba(148, 163, 184, 0.6)'
+  ctx.setLineDash([6, 5])
+  ctx.lineWidth = 1.5
+  ctx.strokeStyle = 'rgba(56, 189, 248, 0.65)'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'bottom'
-  ctx.font = `${Math.max(8, Math.round(7 * size / 32))}px monospace`
+  ctx.font = `bold ${fontSize}px monospace`
 
   for (const { label, n } of RING_DEFS) {
     const pts = RING_CORNERS.map(({ q, r }) =>
@@ -62,8 +62,16 @@ function drawRangeBandRings(ctx, ship, size, ox, oy) {
     for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y)
     ctx.closePath()
     ctx.stroke()
-    // Label at top vertex (index 2 → axial (0, -n) → top of screen)
-    ctx.fillText(label, pts[2].x, pts[2].y - 3)
+
+    // Label at top vertex with dark background pill for legibility
+    const lx = pts[2].x
+    const ly = pts[2].y - 5
+    const tw = ctx.measureText(label).width
+    const pad = 3
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.75)'
+    ctx.fillRect(lx - tw / 2 - pad, ly - fontSize - pad, tw + pad * 2, fontSize + pad * 2)
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.95)'
+    ctx.fillText(label, lx, ly)
   }
   ctx.restore()
 }
