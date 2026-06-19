@@ -32,6 +32,7 @@ function extractBattleSnapshot(state) {
     dogfights: state.dogfights,
     boardings: state.boardings,
     rangeBands: state.rangeBands,
+    basicBandPool: state.basicBandPool,
     log: state.log,
     mapSettings: state.mapSettings,
     savedAt: new Date().toISOString(),
@@ -50,7 +51,8 @@ function hasSignificantChange(prev, next) {
     prev.initiativeOrder !== next.initiativeOrder ||
     prev.dogfights !== next.dogfights ||
     prev.boardings !== next.boardings ||
-    prev.rangeBands !== next.rangeBands
+    prev.rangeBands !== next.rangeBands ||
+    prev.basicBandPool !== next.basicBandPool
   )
 }
 
@@ -77,6 +79,7 @@ export function useAutosave() {
           dogfights: saved.dogfights ?? [],
           boardings: saved.boardings ?? [],
           rangeBands: saved.rangeBands ?? {},
+          basicBandPool: saved.basicBandPool ?? {},
           log: saved.log ?? [],
           mapSettings: saved.mapSettings ?? { scale: 1 },
         })
