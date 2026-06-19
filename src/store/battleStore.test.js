@@ -59,6 +59,7 @@ describe('addShip', () => {
     expect(ship.thrustPenalty).toBe(0)
     expect(ship.evasiveThrust).toBe(0)
     expect(ship.thrustUsedThisRound).toBe(0)
+    expect(ship.baseArmor).toBe(0) // default when profile has no armor field
   })
 
   it('snapshots profile (no reference sharing)', () => {
@@ -2196,6 +2197,21 @@ describe('ion disruption — round decrement', () => {
     const ship = useBattleStore.getState().ships[0]
     expect(ship.ionRoundsLeft).toBe(0)
     expect(ship.ionPenalty).toBe(0)
+  })
+
+  it('ionRoundsLeft=2 penalty persists two round boundaries then clears on third', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyIonDamage(id, 6, 2)
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].ionRoundsLeft).toBe(1)
+    expect(useBattleStore.getState().ships[0].ionPenalty).toBe(6)
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].ionRoundsLeft).toBe(0)
+    expect(useBattleStore.getState().ships[0].ionPenalty).toBe(6)
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].ionRoundsLeft).toBe(0)
+    expect(useBattleStore.getState().ships[0].ionPenalty).toBe(0)
   })
 
   it('no ion state: startNextRound is no-op on ion fields', () => {
