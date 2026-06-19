@@ -875,7 +875,13 @@ function AttackCriticalStep({
     : attackSeverity
 
   const effect = location ? getCriticalEffect(location, isMaxSeverity ? 6 : effectiveSeverity) : null
-  const extraDice = isMaxSeverity ? 6 : (effect?.mechanic === 'hull_extra_damage' ? effect.value : null)
+  const ARMOUR_ROLL_MECHANICS = ['armour_reduce_d3', 'armour_reduce_xd']
+  const isArmourRoll = !isMaxSeverity && ARMOUR_ROLL_MECHANICS.includes(effect?.mechanic)
+  const extraDice = isMaxSeverity ? 6
+    : (effect?.mechanic === 'hull_extra_damage' ? effect.value
+    : (effect?.mechanic === 'armour_reduce_d3' ? 1
+    : (effect?.mechanic === 'armour_reduce_xd' ? effect.value
+    : null)))
   const needsExtraRoll = extraDice !== null
   const canApply = critRoll !== null && (!needsExtraRoll || extraDamageResult !== null)
 
@@ -960,12 +966,16 @@ function AttackCriticalStep({
               </div>
             )}
 
-            {/* Extra damage roll (hull crit or max-severity overflow) */}
+            {/* Extra roll: hull extra damage, or armour reduction */}
             {needsExtraRoll && extraDamageResult === null && (
               isPlayer ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-3 bg-slate-800 rounded px-3 py-2">
-                    <span className="text-slate-400 font-mono text-xs">{extraDice}D6 total:</span>
+                    <span className="text-slate-400 font-mono text-xs">
+                      {isArmourRoll
+                        ? (effect?.mechanic === 'armour_reduce_d3' ? '1D6 (−D3 armour):' : `${extraDice}D6 (−armour):`)
+                        : `${extraDice}D6 total:`}
+                    </span>
                     <input
                       type="number"
                       min={extraDice}
@@ -980,7 +990,7 @@ function AttackCriticalStep({
                       onClick={() => { const r = rollDice(extraDice, 6); setManualExtra(r.total.toString()) }}
                       className="text-slate-400 hover:text-red-400 font-mono text-sm transition-colors"
                       title="Auto-roll"
-                      aria-label="Auto-roll extra damage"
+                      aria-label="Auto-roll"
                     >
                       🎲
                     </button>
@@ -990,7 +1000,7 @@ function AttackCriticalStep({
                     disabled={manualExtra === '' || isNaN(Number(manualExtra))}
                     className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
                   >
-                    CONFIRM {extraDice}D EXTRA DAMAGE
+                    {isArmourRoll ? 'CONFIRM ARMOUR REDUCTION' : `CONFIRM ${extraDice}D EXTRA DAMAGE`}
                   </button>
                 </div>
               ) : (
@@ -998,14 +1008,15 @@ function AttackCriticalStep({
                   onClick={handleExtraRoll}
                   className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors"
                 >
-                  🎲 ROLL {extraDice}D EXTRA DAMAGE
+                  {isArmourRoll ? `🎲 ROLL ARMOUR (${extraDice}D6)` : `🎲 ROLL ${extraDice}D EXTRA DAMAGE`}
                 </button>
               )
             )}
             {needsExtraRoll && extraDamageResult !== null && (
               <div className="bg-slate-800 rounded p-2 text-center font-mono text-xs">
-                Extra damage:{' '}
-                <span className="text-red-400 font-bold text-xl">{extraDamageResult}</span>
+                {isArmourRoll
+                  ? <>Armour reduction: <span className="text-orange-400 font-bold text-xl">−{effect?.mechanic === 'armour_reduce_d3' ? Math.ceil(extraDamageResult / 2) : extraDamageResult}</span></>
+                  : <>Extra damage: <span className="text-red-400 font-bold text-xl">{extraDamageResult}</span></>}
               </div>
             )}
 
@@ -1040,6 +1051,7 @@ export function AttackModal() {
   const applyIonDamage      = useBattleStore((s) => s.applyIonDamage)
   const spendSandAmmo       = useBattleStore((s) => s.spendSandAmmo)
   const addCriticalHit      = useBattleStore((s) => s.addCriticalHit)
+  const reduceArmour        = useBattleStore((s) => s.reduceArmour)
   const markTurretFired     = useBattleStore((s) => s.markTurretFired)
   const launchMissile       = useBattleStore((s) => s.launchMissile)
   const spendReactionThrust = useBattleStore((s) => s.spendReactionThrust)
@@ -1233,6 +1245,12 @@ export function AttackModal() {
       addCriticalHit(target.id, { system: location, severity: effectiveSeverity })
       if (effect?.mechanic === 'hull_extra_damage' && extraDamageResult !== null) {
         applyDamage(target.id, extraDamageResult, `Critical Hull (Sev. ${effectiveSeverity})`)
+      } else if (effect?.mechanic === 'armour_reduce_fixed') {
+        reduceArmour(target.id, effect.value)
+      } else if (effect?.mechanic === 'armour_reduce_d3' && extraDamageResult !== null) {
+        reduceArmour(target.id, Math.ceil(extraDamageResult / 2))
+      } else if (effect?.mechanic === 'armour_reduce_xd' && extraDamageResult !== null) {
+        reduceArmour(target.id, extraDamageResult)
       }
     }
     closeModal()

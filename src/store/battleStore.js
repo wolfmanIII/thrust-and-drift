@@ -931,6 +931,35 @@ const useBattleStore = create((set, get) => {
     }))
   },
 
+  /**
+   * Reduce a ship's armour rating. Called after an Armour critical hit.
+   * // MgT2e CRB p.170 — Armour critical effects
+   * @param {string} shipId
+   * @param {number} amount  Points to subtract (result clamped to ≥ 0)
+   */
+  reduceArmour: wh(
+    (shipId) => !!get().ships.find((s) => s.id === shipId),
+    (shipId, amount) => {
+      const ship = get().ships.find((s) => s.id === shipId)
+      const current = ship.profile.armor ?? 0
+      const reduced = Math.max(0, current - amount)
+      set((s) => ({
+        ships: s.ships.map((sh) =>
+          sh.id === shipId
+            ? { ...sh, profile: { ...sh.profile, armor: reduced } }
+            : sh
+        ),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'system',
+          message: `${ship.profile.name}: Armour reduced by −${amount} → ${reduced} (Critical).`,
+          shipId,
+        })],
+      }))
+    }
+  ),
+
   // === MISSILES ===
 
   /**

@@ -29,10 +29,13 @@ export function getCriticalLocation(total) {
 }
 
 // Mechanic codes (drive automated store effects):
-// 'descriptive'       — GM resolves narratively; no automated store effect
-// 'thrust_reduce'     — M-Drive sev 2–4: thrustPenalty set to max(current, value)
-// 'thrust_zero'       — M-Drive sev 5–6: thrustPenalty = profile.thrust
-// 'hull_extra_damage' — Hull: roll value×D6 extra damage (ignores armour)
+// 'descriptive'        — GM resolves narratively; no automated store effect
+// 'thrust_reduce'      — M-Drive sev 2–4: thrustPenalty set to max(current, value)
+// 'thrust_zero'        — M-Drive sev 5–6: thrustPenalty = profile.thrust
+// 'hull_extra_damage'  — Hull: roll value×D6 extra damage (ignores armour)
+// 'armour_reduce_fixed'— reduce armour by value (no roll)
+// 'armour_reduce_d3'   — roll 1D6, reduction = ceil(result/2)
+// 'armour_reduce_xd'   — roll value×D6, reduction = rolled total
 // MgT2e CRB p.170 — Critical Hit Effects table
 export const CRITICAL_HIT_EFFECTS = {
   Sensors: [
@@ -73,12 +76,12 @@ export const CRITICAL_HIT_EFFECTS = {
   ],
   Armour: [
     null,
-    { description: 'Armour reduced by −1', mechanic: 'descriptive' },
-    { description: 'Armour reduced by −D3', mechanic: 'descriptive' },
-    { description: 'Armour reduced by −1D', mechanic: 'descriptive' },
-    { description: 'Armour reduced by −1D', mechanic: 'descriptive' },
-    { description: 'Armour reduced by −2D. Hull +1 Severity', mechanic: 'descriptive' },
-    { description: 'Armour reduced by −2D. Hull +1 Severity', mechanic: 'descriptive' },
+    { description: 'Armour reduced by −1', mechanic: 'armour_reduce_fixed', value: 1 },
+    { description: 'Armour reduced by −D3', mechanic: 'armour_reduce_d3' },
+    { description: 'Armour reduced by −1D', mechanic: 'armour_reduce_xd', value: 1 },
+    { description: 'Armour reduced by −1D', mechanic: 'armour_reduce_xd', value: 1 },
+    { description: 'Armour reduced by −2D. Hull +1 Severity (apply manually)', mechanic: 'armour_reduce_xd', value: 2 },
+    { description: 'Armour reduced by −2D. Hull +1 Severity (apply manually)', mechanic: 'armour_reduce_xd', value: 2 },
   ],
   Hull: [
     null,
