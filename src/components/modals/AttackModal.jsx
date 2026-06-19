@@ -93,35 +93,45 @@ function ReactionsPanel({
       </div>
 
       {/* Point Defence — missile attacks + target has laser turret */}
-      {isMissile && pdTurrets.length > 0 && (
+      {isMissile && (pdTurrets.length > 0 || pdResult) && (
         <div className="border-t border-amber-700/20 pt-3 space-y-2">
           <div className="flex items-center justify-between font-mono text-xs text-slate-400">
             <span>Point Defence</span>
             <span>Gunner turret · removes Effect missiles</span>
           </div>
-          {pdTurrets.length > 1 && !pdResult && (
-            <div className="flex gap-1 flex-wrap">
-              {pdTurrets.map((t) => (
-                <button
-                  key={t.slot}
-                  onClick={() => setPdTurretSlot(t.slot)}
-                  className={`px-2 py-1 rounded font-mono text-xs border transition-colors ${
-                    pdTurretSlot === t.slot
-                      ? 'border-amber-500/60 bg-amber-900/30 text-amber-400'
-                      : 'border-slate-700 text-slate-400 hover:border-slate-500'
-                  }`}
-                >
-                  T{t.slot}{t.laserBonus > 0 && <span className="text-amber-500 ml-1">+{t.laserBonus}</span>}
-                </button>
-              ))}
+          {/* Show last PD result (if any) */}
+          {pdResult && (
+            <div className={`rounded p-2 font-mono text-xs ${pdResult.missilesRemoved > 0 ? 'bg-green-950/30 text-green-400' : 'bg-slate-800 text-slate-400'}`}>
+              T{pdResult.turretSlot} · Total {pdResult.total} · Effect {pdResult.effect >= 0 ? `+${pdResult.effect}` : pdResult.effect}
+              {pdResult.missilesRemoved > 0
+                ? ` → ${pdResult.missilesRemoved} missile${pdResult.missilesRemoved !== 1 ? 's' : ''} destroyed`
+                : ' → no missiles destroyed'}
             </div>
           )}
-          {!pdResult ? (
+          {/* Additional turrets still available — allow another roll */}
+          {pdTurrets.length > 0 && (
             <div className="space-y-1.5">
+              {pdTurrets.length > 1 && (
+                <div className="flex gap-1 flex-wrap">
+                  {pdTurrets.map((t) => (
+                    <button
+                      key={t.slot}
+                      onClick={() => setPdTurretSlot(t.slot)}
+                      className={`px-2 py-1 rounded font-mono text-xs border transition-colors ${
+                        pdTurretSlot === t.slot
+                          ? 'border-amber-500/60 bg-amber-900/30 text-amber-400'
+                          : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                      }`}
+                    >
+                      T{t.slot}{t.laserBonus > 0 && <span className="text-amber-500 ml-1">+{t.laserBonus}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
               {isPlayerTarget && (
                 <div className="flex items-center gap-2 bg-slate-800/60 rounded px-3 py-1.5">
                   <span className="text-slate-400 font-mono text-xs">2D6:</span>
-                  <DiceInput value={null} onChange={setPdManualDice} />
+                  <DiceInput value={null} key={pdResult?.turretSlot ?? 'pd-init'} onChange={setPdManualDice} />
                 </div>
               )}
               <button
@@ -131,13 +141,6 @@ function ReactionsPanel({
               >
                 {isPlayerTarget ? 'CONFIRM POINT DEFENCE' : '🎲 ROLL POINT DEFENCE'}
               </button>
-            </div>
-          ) : (
-            <div className={`rounded p-2 font-mono text-xs ${pdResult.missilesRemoved > 0 ? 'bg-green-950/30 text-green-400' : 'bg-slate-800 text-slate-400'}`}>
-              T{pdResult.turretSlot} · Total {pdResult.total} · Effect {pdResult.effect >= 0 ? `+${pdResult.effect}` : pdResult.effect}
-              {pdResult.missilesRemoved > 0
-                ? ` → ${pdResult.missilesRemoved} missile${pdResult.missilesRemoved !== 1 ? 's' : ''} destroyed`
-                : ' → no missiles destroyed'}
             </div>
           )}
         </div>
@@ -1146,7 +1149,7 @@ export function AttackModal() {
     const removed   = Math.max(0, effect)
     setMissileCount((prev) => Math.max(0, prev - removed))
     markTurretFired(target.id, slot)
-    setPdTurretSlot(slot)
+    setPdTurretSlot(null)  // reset — next turret must be explicitly selected
     setPdResult({ turretSlot: slot, roll: rollResult, gunner, laserBonus, total, effect, missilesRemoved: removed })
     addLogEntry(`${target.profile.name} Point Defence (T${slot}): total ${total}, Effect ${effect >= 0 ? `+${effect}` : effect} — ${removed} missile${removed !== 1 ? 's' : ''} destroyed.`)
   }
