@@ -157,7 +157,8 @@ function buildNextRoundState(s) {
       ...newImpacts,
     ],
     ships: s.ships.map((sh) => {
-      const ionNext = Math.max(0, (sh.ionRoundsLeft ?? 0) - 1)
+      const ionCurrent = sh.ionRoundsLeft ?? 0
+      const ionNext    = Math.max(0, ionCurrent - 1)
       return {
         ...sh,
         thrustUsedThisRound: 0,
@@ -167,7 +168,9 @@ function buildNextRoundState(s) {
         firedTurrets: [],
         usedCrewMembers: [],
         ionRoundsLeft: ionNext,
-        ionPenalty: ionNext > 0 ? (sh.ionPenalty ?? 0) : 0,
+        // Keep penalty while ionCurrent > 0: the hit applies to the *next* acceleration phase.
+        // Only clear when ionCurrent was already 0 (penalty fully expired). // HG p.30
+        ionPenalty: ionCurrent > 0 ? (sh.ionPenalty ?? 0) : 0,
       }
     }),
     log: [
@@ -361,6 +364,7 @@ const useBattleStore = create((set, get) => {
       vector: { q: 0, r: 0 },
       lastThrustDelta: { q: 0, r: 0 },
       hullCurrent: profile.hull,
+      baseArmor: profile.armor ?? 0,
       isDestroyed: false,
       thrustUsedThisRound: 0,
       thrustBonusThisRound: 0,
@@ -1298,14 +1302,20 @@ const useBattleStore = create((set, get) => {
     (shipId) => { const s = get().ships.find((sh) => sh.id === shipId); return !!s && s.criticalHits.length > 0 },
     (shipId) => {
       const ship = get().ships.find((s) => s.id === shipId)
-      const removed       = ship.criticalHits[0]
+      const removed        = ship.criticalHits[0]
       const remainingCrits = ship.criticalHits.slice(1)
-      const mDriveCrit    = remainingCrits.find((c) => c.system === 'M-Drive')
-      const thrustPenalty = computeThrustPenalty(mDriveCrit, ship.profile.thrust)
+      const mDriveCrit     = remainingCrits.find((c) => c.system === 'M-Drive')
+      const thrustPenalty  = computeThrustPenalty(mDriveCrit, ship.profile.thrust)
+      // Armour crit: restore profile.armor to the original value captured at addShip. // CRB p.167
+      const restoredArmor  = removed.system === 'Armour' ? (ship.baseArmor ?? ship.profile.armor ?? 0) : null
       set((s) => ({
-        ships: s.ships.map((sh) =>
-          sh.id === shipId ? { ...sh, criticalHits: remainingCrits, thrustPenalty } : sh
-        ),
+        ships: s.ships.map((sh) => {
+          if (sh.id !== shipId) return sh
+          const base = { ...sh, criticalHits: remainingCrits, thrustPenalty }
+          return restoredArmor !== null
+            ? { ...base, profile: { ...sh.profile, armor: restoredArmor } }
+            : base
+        }),
         log: [...s.log, makeLogEntry({
           round: s.round,
           phase: s.phase,
@@ -1313,7 +1323,7 @@ const useBattleStore = create((set, get) => {
           message: `${ship.profile.name}: ${removed.system} repaired (Sev. ${removed.severity} removed).`,
           shipId,
         })],
-    }))
+      }))
     },
   ),
 

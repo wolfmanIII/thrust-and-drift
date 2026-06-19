@@ -1072,6 +1072,42 @@ describe('repairCritical', () => {
     expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(1)
     expect(useBattleStore.getState().ships[0].criticalHits[0].system).toBe('M-Drive')
   })
+
+  // BUG-002: repairing an Armour crit must restore profile.armor to its original value.
+  // Previously repairCritical only removed the crit entry without undoing reduceArmour. // CRB p.167
+  it('addShip stores baseArmor equal to profile.armor', () => {
+    useBattleStore.getState().addShip(makeProfile({ armor: 6 }), { q: 0, r: 0 }, 'players', '#fff')
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.baseArmor).toBe(6)
+  })
+
+  it('repairing Armour crit restores profile.armor to baseArmor', () => {
+    useBattleStore.getState().addShip(makeProfile({ armor: 6 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'Armour', severity: 1 })
+    useBattleStore.getState().reduceArmour(id, 1)
+    expect(useBattleStore.getState().ships[0].profile.armor).toBe(5) // reduced
+    useBattleStore.getState().repairCritical(id)
+    expect(useBattleStore.getState().ships[0].profile.armor).toBe(6) // restored
+    expect(useBattleStore.getState().ships[0].criticalHits).toHaveLength(0)
+  })
+
+  it('repairing Armour crit restores armor even after multi-step reduction', () => {
+    useBattleStore.getState().addShip(makeProfile({ armor: 8 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'Armour', severity: 2 })
+    useBattleStore.getState().reduceArmour(id, 3) // reduced to 5
+    useBattleStore.getState().repairCritical(id)
+    expect(useBattleStore.getState().ships[0].profile.armor).toBe(8)
+  })
+
+  it('repairing non-Armour crit leaves profile.armor unchanged', () => {
+    useBattleStore.getState().addShip(makeProfile({ armor: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'Sensors', severity: 1 })
+    useBattleStore.getState().repairCritical(id)
+    expect(useBattleStore.getState().ships[0].profile.armor).toBe(4)
+  })
 })
 
 describe('applyInitiativeBonus', () => {
@@ -1087,6 +1123,28 @@ describe('applyInitiativeBonus', () => {
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().applyInitiativeBonus(id, -3)
+    expect(useBattleStore.getState().ships[0].initiativeBonusNextRound).toBe(0)
+  })
+
+  // BUG-003: rollAllInitiative must include initiativeBonusNextRound in the final total.
+  // With known dice (total=7), pilot=2, thrust=4, bonus=3 → expected 7+2+4+3=16. // CRB p.160, p.166
+  it('rollAllInitiative includes initiativeBonusNextRound in ship initiative total', () => {
+    useBattleStore.getState().addShip(
+      makeProfile({ thrust: 4, crew: { pilot: 2 } }),
+      { q: 0, r: 0 }, 'players', '#fff'
+    )
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyInitiativeBonus(id, 3)
+    // Dice override: 2D6 result = 7, so total = 7 + pilot(2) + thrust(4) + bonus(3) = 16
+    useBattleStore.getState().rollAllInitiative({}, { [id]: { total: 7, results: [4, 3] } })
+    expect(useBattleStore.getState().ships[0].initiative).toBe(16)
+  })
+
+  it('rollAllInitiative resets initiativeBonusNextRound to 0 after consuming it', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyInitiativeBonus(id, 5)
+    useBattleStore.getState().rollAllInitiative({}, { [id]: { total: 7, results: [4, 3] } })
     expect(useBattleStore.getState().ships[0].initiativeBonusNextRound).toBe(0)
   })
 })
@@ -2052,10 +2110,23 @@ describe('ion disruption — round decrement', () => {
     expect(useBattleStore.getState().ships[0].ionPenalty).toBe(4)
   })
 
-  it('ionPenalty cleared when ionRoundsLeft reaches 0', () => {
+  // BUG-001: ionPenalty with ionRoundsLeft=1 must survive the first round boundary
+  // so the target's acceleration phase in round N+1 is still penalised. // HG p.30
+  it('ionPenalty with ionRoundsLeft=1 persists through first round boundary', () => {
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().applyIonDamage(id, 4, 1)
+    useBattleStore.getState().startNextRound()
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.ionRoundsLeft).toBe(0)
+    expect(ship.ionPenalty).toBe(4)  // still active — round N+1 acceleration not yet resolved
+  })
+
+  it('ionPenalty clears after two round boundaries when ionRoundsLeft=1', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyIonDamage(id, 4, 1)
+    useBattleStore.getState().startNextRound()
     useBattleStore.getState().startNextRound()
     const ship = useBattleStore.getState().ships[0]
     expect(ship.ionRoundsLeft).toBe(0)
