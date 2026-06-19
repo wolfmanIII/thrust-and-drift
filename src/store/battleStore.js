@@ -394,6 +394,11 @@ const useBattleStore = create((set, get) => {
     set((s) => ({
       ships: [...s.ships, instance],
       rangeBands: { ...s.rangeBands, ...newRangeBands },
+      // If initiative has already been rolled this battle, append the new ship at the end
+      // so it can act this round (with initiative 0 — last in order). MgT2e CRB p.160.
+      initiativeOrder: s.initiativeOrder.length > 0
+        ? [...s.initiativeOrder, instance.id]
+        : s.initiativeOrder,
       log: [...s.log, makeLogEntry({
         round: s.round,
         phase: s.phase,
