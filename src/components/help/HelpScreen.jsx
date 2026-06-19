@@ -179,7 +179,7 @@ export function HelpScreen() {
           <KV k="Left-drag" v="Pan the map." />
           <KV k="Scroll wheel" v="Zoom in / out." />
           <KV k="Double-click" v="Centre the map on that hex." />
-          <KV k="Left-click token" v="Select the ship (highlights it)." />
+          <KV k="Left-click token" v="Select the ship (highlights it). Four dashed cyan range band rings appear centred on the ship — SHORT (2 hex), MEDIUM (15 hex), LONG (38 hex), VERY LONG (77 hex) — each labelled on a dark pill. Hidden while thrust targeting is active." />
           <KV k="Right-click hex" v="Open context menu — actions depend on what is in the hex and the current phase." />
           <KV k="🔊/🔇 button" v="Audio toggle (HUD, top-left) — enables or mutes procedural sound effects (laser, impact, thrust plume, missile launch)." />
           <KV k="Hover ship token" v="After 200 ms, a tooltip panel appears showing: name, hull bar, vector, available thrust, evasion DM, initiative, sensor lock → target (if active, with DM), Locked by [attacker] (if targeted), ⚡ N× missile inbound (if applicable), critical hits. Clears on pan or mouse-leave." />
@@ -202,7 +202,7 @@ export function HelpScreen() {
             <KV k="Barbette beams" v="Pulse Laser Barbette (sky blue, thicker), Beam Laser Barbette (blue, thicker), Particle Barbette (purple, thicker), Fusion Barbette (amber-white, thicker), Plasma Barbette (magenta, thicker), Railgun Barbette (orange, thicker) — all barbettes deal ×3 damage after armour." />
             <KV k="Hit effects" v="Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion Cannon hit)." />
             <KV k="Movement effects" v="Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line)." />
-            <KV k="Persistent indicators" v="Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + amber ring), Missile exhausted (×), Ion aura (pulsing blue ring — while ionRoundsLeft {'>'} 0)." />
+            <KV k="Persistent indicators" v="Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + amber ring), Missile exhausted (×), Ion aura (pulsing blue ring — while ionRoundsLeft {'>'} 0), Range band rings (dashed cyan hexagons — SHORT / MEDIUM / LONG / VERY LONG — shown on selected ship; hidden during thrust targeting)." />
           </Sub>
         </Section>
 

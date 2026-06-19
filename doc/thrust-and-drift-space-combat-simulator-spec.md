@@ -1694,6 +1694,12 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
 - 832 test (+3 sensore lock flat).
 
+### 14.18 Versione 1.20.9 — Mid-Battle Ship Initiative Fix + Range Band Rings ✅ COMPLETATA
+
+- **Navi piazzate mid-battle non entravano nell'initiative order**: `addShip` aggiungeva la nave a `ships` ma non a `initiativeOrder`. Le navi piazzate dopo il roll initiative venivano skippate in Acceleration/Attack/Actions. Fix: `addShip` appende l'ID alla fine di `initiativeOrder` se non è vuoto (initiative 0, ultimo in ordine — CRB p.160).
+- **Range band rings sul canvas vettoriale**: selezionare una nave disegna 4 esagoni tratteggiati cyan centrati sulla nave, marcando i confini esterni di SHORT (2 hex), MEDIUM (15 hex), LONG (38 hex), VERY LONG (77 hex). Vertici calcolati dagli assi assiali `(±N, 0)`, `(±N, ∓N)`, `(0, ±N)` scalati al confine di banda `maxDistance + 0.5`. Label su pill scuro alla cima di ogni esagono. Hidden durante thrust targeting. Implementato in `drawRangeBandRings()` in `useCanvasRenderer.js`; Layer 2 nel render loop.
+- 857 test (invariato).
+
 ### 14.17 Versione 1.20.8 — CotI Bug Fixes: Armour Critical, PD Multi-Turret, EW In-Flight, Initiative Breakdown, Thrust Persistence ✅ COMPLETATA
 
 - **Armour Critical automatizzato** (CRB p.170): aggiunto `armour_reduce_fixed/d3/xd` mechanic codes in `criticalHits.js`. Nuova action `reduceArmour` in `battleStore.js`. `AttackCriticalStep` gestisce roll extra (D3: `ceil(D6/2)`, XD: sum dice) e applica riduzione all'armatura del target via store.

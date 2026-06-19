@@ -9,16 +9,22 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.20.8 |
+| **Versione** | 1.20.9 |
 | **Branch** | main (clean) |
 | **Test** | 857 passing |
-| **Ultimo commit** | test(v1.20.8): add coverage for all bug fixes (`40c3435`) |
+| **Ultimo commit** | docs: sync to v1.20.9 |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — CotI Bug Fixes (v1.20.8)
+### Sessione corrente — CotI Bug Fix + Range Band Rings (v1.20.9)
+
+1. **`fix(battle): append mid-battle ships to initiativeOrder`** (`8b2591d`) — navi piazzate dopo il roll initiative non ricevevano turni. `addShip` ora appende l'ID a `initiativeOrder` se non è vuoto.
+
+2. **`feat(map): range band rings attorno alla nave selezionata`** (`fe0fd03`) + **`fix(map): visibilità migliorata`** (`1b7524c`) — selezionare una nave sul canvas vettoriale disegna 4 esagoni tratteggiati cyan (SHORT 2 / MEDIUM 15 / LONG 38 / VERY LONG 77 hex) con label su pill scuro. Nascosti durante thrust targeting. `drawRangeBandRings()` in `useCanvasRenderer.js`, Layer 2.
+
+### Sessione precedente — CotI Bug Fixes (v1.20.8)
 
 1. **`fix(critical): apply armour reduction when Armour system is hit`** (`3e0968d`) — tutti gli effetti critici Armour avevano `mechanic: 'descriptive'`, nessuna riduzione automatica. Aggiunti mechanic codes `armour_reduce_fixed/d3/xd` in `criticalHits.js`. Nuova action `reduceArmour` in `battleStore.js`. `AttackCriticalStep` in `AttackModal.jsx` gestisce il roll extra (D3 o XD) e applica la riduzione in armour del target. (CRB p.170)
 

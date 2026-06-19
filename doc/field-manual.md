@@ -99,7 +99,7 @@ The battle map is a **flat-top hex grid**. All interaction is mouse-driven.
 | **Left-drag** | Pan the map. |
 | **Scroll wheel** | Zoom in / out. |
 | **Double-click** | Centre the map on that hex. |
-| **Left-click token** | Select the ship (highlights it). |
+| **Left-click token** | Select the ship (highlights it). Range band rings appear centred on the selected ship (see below). |
 | **Right-click hex** | Open context menu — actions depend on the hex content and the current phase. |
 | **🔊/🔇 (HUD)** | Audio toggle — enables or mutes procedural sound effects (laser fire, impacts, thrust plume, missile launch). No audio files required. |
 
@@ -119,7 +119,7 @@ Click **📖 Legend** (fixed button, top-right of the battle screen) to open the
 | **Barbette beams** | Pulse Laser Barbette (sky blue, thicker), Beam Laser Barbette (blue, thicker), Particle Barbette (purple, thicker), Fusion Barbette (amber-white, thicker), Plasma Barbette (magenta, thicker), Railgun Barbette (orange, thicker) — all barbettes deal ×3 damage after armour |
 | **Hit effects** | Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion Cannon hit) |
 | **Movement effects** | Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line) |
-| **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + red ring), Missile exhausted (×), Ion aura (pulsing blue ring, while ionRoundsLeft > 0) |
+| **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + red ring), Missile exhausted (×), Ion aura (pulsing blue ring, while ionRoundsLeft > 0), **Range band rings** (dashed cyan hexagons — SHORT / MEDIUM / LONG / VERY LONG boundaries — shown when a ship is selected; hidden during thrust targeting) |
 
 ### 3.2 Basic Mode View
 

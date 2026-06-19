@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.20.9] — 2026-06-19
+
+### Fixed
+
+- **Ships placed mid-battle skipped in initiative order** — `addShip` appended the new ship instance to `ships` but never inserted it into `initiativeOrder`. Any ship placed after initiative had been rolled received no turns in Acceleration, Attack, or Actions phases until the next initiative roll. Fix: `addShip` now appends the new ship ID to the end of `initiativeOrder` when one already exists (initiative 0 — last in order, per CRB p.160).
+
+### Added
+
+- **Range band rings on vector map** — clicking a ship now draws four concentric dashed cyan hexagons centred on that ship, marking the outer boundaries of the SHORT (2 hex), MEDIUM (15 hex), LONG (38 hex), and VERY LONG (77 hex) range bands. Each ring is labelled with the band name on a dark pill. Rings are hidden while thrust targeting is active to avoid cluttering the delta-v overlay.
+
+---
+
 ## [1.20.8] — 2026-06-19
 
 ### Fixed
