@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.20.9** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.21.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -14,7 +14,7 @@
 6. [Initiative Phase](#6-initiative-phase)
 7. [Acceleration Phase](#7-acceleration-phase)
 8. [Movement Phase](#8-movement-phase) — includes §8.1 missile impact, §8.2 ships that pass in the night
-9. [Attack Phase](#9-attack-phase) — includes §9.5 per-turret limit, §9.6 missile launch, §9.9 reactions, §9.10 special weapon mechanics
+9. [Attack Phase](#9-attack-phase) — includes §9.5 per-turret limit, §9.6 missile launch, §9.9 reactions, §9.10 special weapon mechanics, §9.11 point defence active intercept
 10. [Actions Phase — Crew](#10-actions-phase--crew)
 11. [Crew System](#11-crew-system)
 12. [Undo / Redo](#12-undo--redo)
@@ -600,7 +600,9 @@ applies a **thrust penalty** to the target for the remainder of the current roun
 | Hit (any Effect) | Roll 2D6 → `ionPenalty` applied to target's available thrust for 1 round |
 | Hit, Effect ≥ 6 | Duration extends to D3 rounds instead of 1 |
 
-The penalty decays by 1 round at end-of-round via `buildNextRoundState`.
+The penalty decays by 1 round at end-of-round via `buildNextRoundState` — the
+penalty remains active throughout the current round and is only cleared once
+`ionRoundsLeft` reaches 0 at the end of that round.
 When `ionRoundsLeft` reaches 0, `ionPenalty` is cleared automatically.
 
 While active, the target's token shows a **pulsing blue aura** and the bento card
@@ -608,6 +610,33 @@ shows an **ION NR** badge. The bento card's status zone shows the current penalt
 (`⚡ −N thrust / NR remaining`).
 
 `thrustAvailable = max(0, thrust − ionPenalty − M-Drive penalty − reactionThrust)`
+
+### 9.11 Point Defence — Active Intercept
+
+In addition to the defensive Point Defence **reaction** (§9.9), a ship with
+unfired laser turrets may use its Attack phase turn to actively intercept an
+enemy missile salvo currently in flight — without waiting for the salvo to
+arrive at its target.
+
+**Procedure:**
+
+1. Right-click the active ship → **Attack**.
+2. In the Attack Config step, select a **Pulse Laser** or **Beam Laser** turret.
+3. Under *TARGET*, switch from a ship to an **enemy in-flight salvo** — the
+   dropdown lists all hostile salvos currently in the `missiles` array.
+4. Click **INTERCEPT** (replaces the PROCEED button when a missile salvo is
+   targeted).
+5. The **Point Defence — Active Intercept** step opens:
+   - Roll 2D6 + Gunner skill + laser turret bonus
+     (DM+1 for 2-laser turret, DM+2 for 3-laser turret).
+   - Effect (min 0) = number of missiles destroyed from the salvo.
+   - If `count − Effect ≤ 0`, the salvo is removed entirely.
+6. The firing turret is marked used; the result is logged in the Battle Log.
+
+> This action costs the attacker's full Attack turn for that turret. The
+> turret cannot be used again in the same round (for attack or PD reaction).
+> There is no restriction on which faction the salvo belongs to — a ship may
+> intercept salvos targeting allies.
 
 ---
 

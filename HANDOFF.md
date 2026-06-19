@@ -9,16 +9,32 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.20.9 |
-| **Branch** | main (clean) |
-| **Test** | 857 passing |
-| **Ultimo commit** | docs(pdf): regenerate field-manual.pdf for v1.20.9 (`431e91c`) |
+| **Versione** | 1.21.0 |
+| **Branch** | main (ahead of origin — push pending) |
+| **Test** | 873 passing |
+| **Ultimo commit** | chore(release): v1.21.0 docs + version bump |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — CotI Bug Fix + Range Band Rings (v1.20.9)
+### Sessione corrente — Reddit Bug Fixes + Point Defence Active Intercept (v1.21.0)
+
+1. **`fix(battle): ion penalty + repair armour fixes + tests`** (`08f3174`) — BUG-001: `buildNextRoundState` controllava `ionNext` (post-decrement) anziché `ionCurrent`; penalità veniva azzerata un round prima. BUG-002: `repairCritical` non ripristinava `profile.armor` alla rimozione di un critico Armour. `addShip` aggiunge `baseArmor`; `repairCritical` ripristina via `baseArmor`. BUG-003: fix solo UI in `InitiativeModal.previewTotal` — store sempre corretto.
+
+2. **`fix(ui): include leadership bonus in InitiativeModal preview total`** (`fcc3f2d`) — `previewTotal` non includeva `initiativeBonusNextRound`.
+
+3. **`docs(bug-tracker): add community bug analysis document`** (`ca41db6`) — `doc/bug-tracker.md` creato con analisi dettagliata di BUG-001, BUG-002, BUG-003, FEAT-001.
+
+4. **`feat(attack): target in-flight missile salvos with Point Defence`** (`cde198d`) — FEAT-001: nuova modalità intercept nel turno attacco. `LASER_PD` spostato a module scope; `AttackConfigStep` filtra per laser weapon + salvo target; nuovo `MissilePdStep`; store action `interceptMissileSalvo`; `inFlightHostileMissiles` derivato da faction confronto.
+
+5. **`test(battle): add interceptMissileSalvo test suite`** (`01fa79e`) — 8 test FEAT-001 su `interceptMissileSalvo`.
+
+6. **`test(battle): fill coverage gaps from v1.21.0 bugfixes`** (`8a24399`) — 8 test aggiuntivi: `baseArmor` default in addShip, ion 2-round, `previewTotal` store (passati subito — store era già corretto).
+
+7. **`chore(git): untrack .claude/settings.local.json`** (`851a790`) + **`chore(git): ignore .claude/settings.local.json`** (`0166900`) — rimosso da tracking git.
+
+### Sessione precedente — CotI Bug Fix + Range Band Rings (v1.20.9)
 
 1. **`fix(battle): append mid-battle ships to initiativeOrder`** (`8b2591d`) — navi piazzate dopo il roll initiative non ricevevano turni. `addShip` ora appende l'ID a `initiativeOrder` se non è vuoto.
 

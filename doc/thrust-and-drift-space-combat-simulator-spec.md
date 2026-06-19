@@ -1694,6 +1694,14 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
 - 832 test (+3 sensore lock flat).
 
+### 14.19 Versione 1.21.0 — Reddit Bug Fixes + Point Defence Active Intercept ✅ COMPLETATA
+
+- **BUG-001 — Ion Cannon penalty attivo per la durata sbagliata**: `buildNextRoundState` usava `ionNext` (post-decrement, già 0 con `ionRoundsLeft = 1`) per decidere se mantenere `ionPenalty`, azzerandolo un round in anticipo. Fix: controllare `ionCurrent > 0` (pre-decrement). La penalità rimane ora attiva per l'intero round in cui `ionRoundsLeft` scende a 0.
+- **BUG-002 — Repair Engineer non ripristinava Armour stat**: `repairCritical` ricalcolava `thrustPenalty` (M-Drive) ma non ripristinava `profile.armor` quando il critico rimosso era Armour. Fix: `addShip` ora registra `baseArmor: profile.armor ?? 0`; `repairCritical` ripristina `profile.armor` a `baseArmor` se `removed.system === 'Armour'`.
+- **BUG-003 — Leadership bonus assente dal preview initiativa**: `previewTotal` in `InitiativeModal` non includeva `ship.initiativeBonusNextRound`, mostrando un totale inferiore al reale. Fix: aggiunto il bonus al calcolo del preview. La logica di store e roll era sempre corretta.
+- **FEAT-001 — Point Defence Active Intercept**: nuova modalità nel turno di attacco — selezionare un laser turret + un salvo nemico in volo → pulsante INTERCEPT apre `MissilePdStep` (stessa formula PD reaction: 2D6 + Gunner + laser bonus). Effect missili distrutti; salvo rimosso se count ≤ 0. Nuova store action `interceptMissileSalvo`. `AttackConfigStep` filtrato per laser weapon + salvo target; mutually exclusive con target nave. `inFlightHostileMissiles` calcolato dal faction del launcher.
+- 873 test (+16: BUG-001 ×3, BUG-002 ×4, BUG-003 ×2, FEAT-001 ×8 + coverage gaps ×2 — 1 existing test corrected).
+
 ### 14.18 Versione 1.20.9 — Mid-Battle Ship Initiative Fix + Range Band Rings ✅ COMPLETATA
 
 - **Navi piazzate mid-battle non entravano nell'initiative order**: `addShip` aggiungeva la nave a `ships` ma non a `initiativeOrder`. Le navi piazzate dopo il roll initiative venivano skippate in Acceleration/Attack/Actions. Fix: `addShip` appende l'ID alla fine di `initiativeOrder` se non è vuoto (initiative 0, ultimo in ordine — CRB p.160).

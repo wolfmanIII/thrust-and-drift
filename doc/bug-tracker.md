@@ -4,10 +4,11 @@ Documento di analisi e tracciamento bug segnalati dalla community (Reddit, CotI,
 
 ---
 
-## BUG-001 — Ion Cannon: danno non applicato correttamente
+## BUG-001 — Ion Cannon: danno non applicato correttamente ✅ RISOLTO (v1.21.0)
 
 **Segnalato da:** Reddit (u/...), giugno 2026
 **Priorità:** Alta
+**Commit:** `08f3174`
 
 ### Comportamento attuale
 
@@ -20,31 +21,37 @@ Il danno Ion viene calcolato come `2D6` e sottratto dal Thrust disponibile, il c
 - Non riduce il Thrust permanente della nave (non è un danno strutturale).
 - La penalità deve essere **temporanea** e scadere automaticamente.
 
-### Stato attuale nel codice
+### Causa radice
 
-- `src/store/battleStore.js` — `ionRoundsLeft` e `ionPenalty` esistono già come campi sullo ship.
-- `buildNextRoundState()` (riga ~160) decrementa `ionRoundsLeft` correttamente e azzera `ionPenalty` quando scade.
-- **Problema 1**: Il calcolo del danno Ion in `AttackModal.jsx` o nella logica di applicazione usa probabilmente `2D6` invece di `Danno − Armatura`.
-- **Problema 2**: L'`ionPenalty` calcolato non viene scritto sullo ship al momento dell'applicazione, oppure `thrustRemaining` non lo considera.
+Il meccanismo di calcolo era corretto (2D6 roll → `ionPenalty`, durata 1 round o D3 se Effect ≥ 6). Il bug era in `buildNextRoundState`: la penalità veniva mantenuta controllando `ionNext > 0` (post-decrement) invece di `ionCurrent > 0` (pre-decrement). Con `ionRoundsLeft = 1`, `ionNext = 0` immediatamente, azzerando la penalità un round prima del dovuto.
 
-### File da esaminare
+### Fix applicato
 
-- `src/components/modals/AttackModal.jsx` — logica di applicazione danno Ion
-- `src/store/battleStore.js` — `applyIonDamage` o equivalente
-- `src/utils/combat.js` — eventuale funzione di calcolo danno Ion
+`battleStore.js` — `buildNextRoundState`:
 
-### Fix pianificato
+```js
+const ionCurrent = sh.ionRoundsLeft ?? 0
+const ionNext    = Math.max(0, ionCurrent - 1)
+return {
+  ...sh,
+  ionRoundsLeft: ionNext,
+  ionPenalty: ionCurrent > 0 ? (sh.ionPenalty ?? 0) : 0,
+}
+```
 
-- [ ] Verificare formula di calcolo Ion damage
-- [ ] Verificare che `ionPenalty` venga scritto su `ship.ionPenalty` al momento del colpo
-- [ ] Verificare che `thrustRemaining` al reset del round consideri `ionPenalty`
+### Fix checklist
+
+- [x] Verificare formula di calcolo Ion damage
+- [x] Verificare che `ionPenalty` venga scritto su `ship.ionPenalty` al momento del colpo
+- [x] Verificare che `thrustRemaining` al reset del round consideri `ionPenalty`
 
 ---
 
-## BUG-002 — Engineer Repair: ripristino statistiche non applicato
+## BUG-002 — Engineer Repair: ripristino statistiche non applicato ✅ RISOLTO (v1.21.0)
 
 **Segnalato da:** Reddit (u/...), giugno 2026
 **Priorità:** Alta
+**Commit:** `08f3174`
 
 ### Comportamento attuale
 
@@ -54,32 +61,42 @@ Quando l'Engineer ripara un critical hit, il critico viene rimosso dalla lista (
 
 - **MgT2e CRB p.167** — Repair System: una riparazione riuscita rimuove il critical hit **e ripristina** il sistema al suo stato precedente.
 - Per un Armour critical (Sev. 1 o 2), l'armatura ridotta deve tornare al valore base del profilo.
-- Per un M-Drive critical, `thrustPenalty` viene già ricalcolato correttamente (vedi riga 1304).
+- Per un M-Drive critical, `thrustPenalty` viene già ricalcolato correttamente.
 
-### Stato attuale nel codice
+### Causa radice
 
-- `repairCritical()` in `battleStore.js` (riga 1297) rimuove il crit e ricalcola `thrustPenalty` da M-Drive. Funziona per M-Drive.
-- **Problema**: Per i critical di tipo Armour, non ripristina `profile.armor` al valore originale.
-- Il valore originale dell'armatura è `ship.profile.armor` (già ridotto dal critico) — serve un campo separato per tracciare il valore base o un lookup dal profilo originale.
+`repairCritical()` ricalcolava `thrustPenalty` sommando le penalità M-Drive rimanenti, ma non ripristinava `profile.armor` quando il critico rimosso era di tipo Armour. `profile.armor` era già stato ridotto da `reduceArmour()`, e non c'era un riferimento al valore originale.
 
-### File da esaminare
+### Fix applicato
 
-- `src/store/battleStore.js` — `repairCritical()` e `reduceArmour()`
-- `src/data/criticalHits.js` — effetti per tipo di sistema
+`addShip` in `battleStore.js` — aggiunto `baseArmor: profile.armor ?? 0` all'istanza nave.
 
-### Fix pianificato
+`repairCritical()` in `battleStore.js` — dopo la rimozione del critico:
 
-- [ ] Identificare tutti i sistemi con effetti persistenti che `repairCritical` non ripristina (Armour, Bridge, Turrets?)
-- [ ] Aggiungere campo `baseArmor` sullo ship instance (copia al momento dell'addShip) oppure lookup da `defaultProfiles`
-- [ ] In `repairCritical()`: se il sistema rimosso è Armour, ripristinare `profile.armor` al valore base
-- [ ] Verificare gli altri sistemi (Bridge, Power Plant, ecc.)
+```js
+const restoredArmor = removed.system === 'Armour'
+  ? (ship.baseArmor ?? ship.profile.armor ?? 0)
+  : null
+// ...
+return restoredArmor !== null
+  ? { ...base, profile: { ...sh.profile, armor: restoredArmor } }
+  : base
+```
+
+### Fix checklist
+
+- [x] Identificare tutti i sistemi con effetti persistenti che `repairCritical` non ripristina
+- [x] Aggiungere campo `baseArmor` sullo ship instance (copia al momento dell'addShip)
+- [x] In `repairCritical()`: se il sistema rimosso è Armour, ripristinare `profile.armor` al valore base
+- [x] Verificare gli altri sistemi (Bridge, Power Plant — effetti solo descrittivi, nessun campo persistente da ripristinare)
 
 ---
 
-## BUG-003 — Captain Leadership: bonus iniziativa non applicato
+## BUG-003 — Captain Leadership: bonus iniziativa non applicato ✅ RISOLTO (v1.21.0)
 
 **Segnalato da:** Reddit (u/...), giugno 2026
 **Priorità:** Media
+**Commit:** `fcc3f2d`
 
 ### Comportamento attuale
 
@@ -90,47 +107,58 @@ L'azione Captain "Improve Initiative" (Leadership check) accredita il bonus su `
 - **MgT2e CRB p.166** — Captain Action: successo di un check Leadership (o Tactics) aumenta l'iniziativa della nave del prossimo round dell'Effect del tiro.
 - `initiativeBonusNextRound` viene consumato in `rollAllInitiative()` al round successivo.
 
-### Stato attuale nel codice
+### Causa radice
 
-- `applyInitiativeBonus()` (riga 1327): scrive su `initiativeBonusNextRound`. Sembra corretto.
-- `rollAllInitiative()` (riga 475): legge `initiativeBonusNextRound` e lo passa a `rollInitiative()`. Sembra corretto.
-- **Ipotesi**: L'azione in `ActionModal.jsx` potrebbe chiamare `applyInitiativeBonus` con il valore sbagliato (Effect = 0 invece di Effect del roll), oppure la UI non mostra l'aggiornamento.
-- **Ipotesi alternativa**: Il bonus viene applicato ma l'ordine di iniziativa non viene aggiornato visivamente finché non si fa il roll del round successivo (comportamento corretto, ma non chiaro per l'utente).
+Il bug era **solo nella UI di anteprima**. La logica store era sempre corretta: `applyInitiativeBonus` scriveva correttamente `initiativeBonusNextRound`, e `rollAllInitiative` lo consumava correttamente al round successivo. Il problema: `previewTotal` in `InitiativeModal.jsx` non includeva `initiativeBonusNextRound` nel totale preview pre-conferma, mostrando un totale inferiore all'effettivo.
 
-### File da esaminare
+### Fix applicato
 
-- `src/components/modals/ActionModal.jsx` — logica Captain action
-- `src/store/battleStore.js` — `applyInitiativeBonus()`, `rollAllInitiative()`
+`InitiativeModal.jsx` — `previewTotal`:
 
-### Fix pianificato
+```js
+const previewTotal = (ship) => {
+    const dice = playerDice[ship.id]
+    if (!dice) return '?'
+    return dice.total
+      + getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot')
+      + ship.profile.thrust
+      + tacticsEffect(ship)
+      + (ship.initiativeBonusNextRound ?? 0)  // ← aggiunto
+}
+```
 
-- [ ] Leggere `ActionModal.jsx` per verificare il valore passato a `applyInitiativeBonus`
-- [ ] Verificare che `rollAllInitiative` consumi correttamente `initiativeBonusNextRound`
-- [ ] Se il comportamento è corretto ma non chiaro: aggiungere feedback visivo nel log / HUD
+### Fix checklist
+
+- [x] Leggere `ActionModal.jsx` per verificare il valore passato a `applyInitiativeBonus` (corretto)
+- [x] Verificare che `rollAllInitiative` consumi correttamente `initiativeBonusNextRound` (corretto)
+- [x] Fix feedback visivo nel preview `InitiativeModal`
 
 ---
 
-## FEAT-001 — Target missili in volo durante fase Attack
+## FEAT-001 — Target missili in volo durante fase Attack ✅ IMPLEMENTATO (v1.21.0)
 
 **Segnalato da:** Reddit (u/...), giugno 2026
 **Priorità:** Media
+**Commit:** `cde198d` (feat) + `01fa79e` (test)
 
 ### Descrizione
 
 Permettere di selezionare un salvo missili in volo come bersaglio durante la fase Attack (Point Defence), non solo come reazione al lancio. Questo riflette le regole RAW per l'intercettazione.
 
-### Stato attuale
+### Implementazione
 
-- I missili in volo sono entità nel campo `missiles[]` dello store.
-- La Point Defence attuale funziona solo come reazione immediata al lancio.
-- `AttackModal.jsx` lista solo navi come bersagli.
+- `AttackModal.jsx` — `LASER_PD` spostato a module scope; `AttackConfigStep` filtra `visibleWeapons` per laser se `isMissilePdMode`; sezione missile target (amber styling); pulsante INTERCEPT; nuovo step `missile_pd`.
+- `MissilePdStep` — nuovo componente nel flow di `AttackModal`; stessa formula PD reaction (2D6 + Gunner + laser bonus); Effect missili distrutti.
+- `battleStore.js` — nuova action `interceptMissileSalvo(missileId, removed)`: riduce count o rimuove il salvo; log entry.
+- `inFlightHostileMissiles` — calcolato su launcher faction ≠ attacker faction; arricchito con `launcherName` e `targetName`.
+- `targetMissileId` — stato locale in `AttackModal`, mutually exclusive con `targetId`.
 
-### Fix pianificato
+### Fix checklist
 
-- [ ] Aggiungere i missili in volo come target selezionabili in `AttackModal.jsx`
-- [ ] Definire la logica di attacco contro missili (solo armi PD? tutte?)
-- [ ] Definire la risoluzione: hit = salvo distrutto o ridotto
-- [ ] Aggiornare `BattleLog` con il risultato
+- [x] Aggiungere i missili in volo come target selezionabili in `AttackModal.jsx`
+- [x] Definire la logica di attacco contro missili (solo Pulse/Beam Laser)
+- [x] Definire la risoluzione: Effect missili distrutti; salvo rimosso se count ≤ 0
+- [x] Aggiornare `BattleLog` con il risultato
 
 ---
 

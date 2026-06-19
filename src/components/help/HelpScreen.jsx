@@ -418,6 +418,12 @@ export function HelpScreen() {
             <p><span className="text-slate-200">Sandcaster ammo</span> — 20 canisters per sandcaster slot. Decremented each time Disperse Sand reaction is used. Shown as 🪨 N/max on bento cards (yellow {'<'} 25%, red at 0) and on the ship detail modal and tooltip.</p>
           </Sub>
 
+          <Sub title="POINT DEFENCE — ACTIVE INTERCEPT">
+            <p>A ship with unfired laser turrets may use its Attack turn to intercept an enemy missile salvo currently in flight, before it reaches its target.</p>
+            <p>Select a <span className="text-slate-200">Pulse Laser</span> or <span className="text-slate-200">Beam Laser</span> turret in the Attack Config step, then choose an enemy in-flight salvo as the target. Click <span className="text-slate-200">INTERCEPT</span> to open the intercept step. Roll 2D6 + Gunner + laser bonus (DM+1 for 2-laser, DM+2 for 3-laser). Effect (min 0) missiles are destroyed; the salvo is removed if count reaches 0. The turret is marked fired; result is logged.</p>
+            <Note>This consumes the attacker's Attack turn for that turret — the same turret cannot be used for attack or PD reaction in the same round. May target salvos threatening allied ships.</Note>
+          </Sub>
+
           <Sub title="SENSOR LOCK">
             <p>Acquired via the Sensors crew action. Grants a +DM to attacks against the locked target. Shown as an animated cyan ring on the locked ship.</p>
           </Sub>

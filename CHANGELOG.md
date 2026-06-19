@@ -6,6 +6,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.21.0] — 2026-06-20
+
+### Fixed
+
+- **Ion Cannon penalty active for wrong duration** (BUG-001) — with `ionRoundsLeft = 1`, the penalty was checked against `ionNext` (post-decrement, already 0) instead of `ionCurrent`, so it cleared one round early. `buildNextRoundState` now checks `ionCurrent > 0` (pre-decrement) to decide whether to keep `ionPenalty` active this round.
+- **Engineer Repair did not restore Armour stat** (BUG-002) — `repairCritical` recomputed M-Drive thrust penalty on repair but never restored `profile.armor` when an Armour critical was removed. `addShip` now stores `baseArmor: profile.armor ?? 0` on each ship instance; removing an Armour critical hit restores `profile.armor` to `baseArmor`.
+- **Leadership bonus missing from initiative preview** (BUG-003) — `previewTotal` in `InitiativeModal` did not include `ship.initiativeBonusNextRound`, so the running total shown before confirming was always lower by the Leadership bonus amount. The confirm action itself was always correct.
+
+### Added
+
+- **Point Defence — Active Intercept** (FEAT-001) — during the Attack phase, a ship with unfired laser turrets may now use Point Defence offensively to intercept enemy missile salvos currently in flight. In the Attack Config step, selecting a laser weapon and switching to an enemy salvo target reveals an INTERCEPT button; confirming opens a dedicated `MissilePdStep` that rolls 2D6 + Gunner + laser turret bonus (same formula as PD reaction). Effect ≥ 0 destroys Effect missiles from the salvo; the salvo is removed entirely if count reaches 0. The attacker's turret is marked fired; all results are logged.
+
+---
+
 ## [1.20.9] — 2026-06-19
 
 ### Fixed
