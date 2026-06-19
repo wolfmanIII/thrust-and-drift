@@ -1694,6 +1694,15 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
 - 832 test (+3 sensore lock flat).
 
+### 14.17 Versione 1.20.8 — CotI Bug Fixes: Armour Critical, PD Multi-Turret, EW In-Flight, Initiative Breakdown, Thrust Persistence ✅ COMPLETATA
+
+- **Armour Critical automatizzato** (CRB p.170): aggiunto `armour_reduce_fixed/d3/xd` mechanic codes in `criticalHits.js`. Nuova action `reduceArmour` in `battleStore.js`. `AttackCriticalStep` gestisce roll extra (D3: `ceil(D6/2)`, XD: sum dice) e applica riduzione all'armatura del target via store.
+- **Point Defense multi-torretta** (CRB p.173): `ReactionsPanel` in `AttackModal` ora mostra risultato + roll section in parallelo finché `pdTurrets.length > 0`. `handlePdRoll` resetta `pdTurretSlot` a `null` dopo ogni roll (non al turret corrente). `key` su `DiceInput` forza reset tra roll consecutivi.
+- **EW Counter Missile su missili in volo** (CRB p.173): `ewAppliedThisRound` aggiunto ai missili al lancio via `launchMissile`, resettato in `buildNextRoundState` (entrambi gli array). `applyMissileEW` cerca prima `pendingMissileImpacts` poi `missiles`. ActionModal salvo selector: lista unificata `[...missiles, ...pendingMissileImpacts]` con badge `⚡ impact` per i pending.
+- **Initiative breakdown visibile** (CRB p.160): `rollAllInitiative` salva `initiativeBreakdown: { roll, pilotSkill, thrust, tacticsEffect }` per nave. `InitiativeModal` post-confirm mostra riga dettaglio con badge verde Tactics se ≠ 0.
+- **Thrust delta persistente** (TC p.172): `addShip` aggiunge `lastThrustDelta: {q:0,r:0}`. `applyShipThrust` salva il delta applicato. `ThrustModal` lazy-inizializza da `ship.lastThrustDelta`.
+- 834 test (invariato).
+
 ### 14.16 Versione 1.20.7 — Basic Mode Fix: Missiles + Manoeuvre Cost ✅ COMPLETATA
 
 - **Missili basic mode: impatto funzionante** (CRB p.166): `resolveMovement()` è no-op in basic mode. Aggiunto `advanceBasicMissileOneRound()` in `battleStore.js`: ogni round il missile brucia fino a 10 thrust di guida contro la tabella Ship Movement (Short 2, Medium 5, Long 10, Very Long 25, Distant 50) con carry-over eccesso tra bande. Impatto al raggiungimento di Adjacent → `pendingMissileImpacts`. `launchMissile` aggiunge `basicRangeBand` e `basicThrustAccumulated` in basic mode. `buildNextRoundState` chiama `advanceBasicMissileOneRound` su tutti i missili basic mode.

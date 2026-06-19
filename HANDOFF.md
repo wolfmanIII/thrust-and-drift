@@ -9,16 +9,28 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.20.7 |
+| **Versione** | 1.20.8 |
 | **Branch** | main (clean) |
 | **Test** | 834 passing |
-| **Ultimo commit** | docs: sync README, HANDOFF, spec, field-manual, HelpScreen to v1.20.7 |
+| **Ultimo commit** | docs: sync README, HANDOFF, spec, field-manual, Dashboard to v1.20.8 |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Basic Mode Fix (v1.20.7)
+### Sessione corrente — CotI Bug Fixes (v1.20.8)
+
+1. **`fix(critical): apply armour reduction when Armour system is hit`** (`3e0968d`) — tutti gli effetti critici Armour avevano `mechanic: 'descriptive'`, nessuna riduzione automatica. Aggiunti mechanic codes `armour_reduce_fixed/d3/xd` in `criticalHits.js`. Nuova action `reduceArmour` in `battleStore.js`. `AttackCriticalStep` in `AttackModal.jsx` gestisce il roll extra (D3 o XD) e applica la riduzione in armour del target. (CRB p.170)
+
+2. **`fix(attack): allow multiple PD rolls — one per available laser turret`** (`6d517c2`) — dopo il primo roll PD, `pdResult !== null` nascondeva l'intera sezione di roll: le torrette rimanenti non potevano sparare. `handlePdRoll` resettava `pdTurretSlot` al turret corrente invece di `null`. Fix: mostrare il risultato E la sezione di roll insieme quando `pdTurrets.length > 0`; reset slot a `null` dopo ogni roll; `key` su DiceInput per forzare reset tra roll. (CRB p.173)
+
+3. **`fix(ew): EW Counter Missile targets in-flight salvos in missiles array`** (`2938102`) — `applyMissileEW` cercava solo in `pendingMissileImpacts`; missili in volo in `missiles` array non erano targetabili. `ewAppliedThisRound` flag aggiunto ai missili al lancio e resettato in `buildNextRoundState`. `applyMissileEW` ora cerca entrambi gli array. ActionModal salvo selector mostra lista unificata con badge `⚡ impact` per i missili in arrivo nel round corrente. (CRB p.173)
+
+4. **`fix(initiative): show roll breakdown in post-confirm view`** (`b0fd58c`) — il bonus Tactics appariva nel totale ma non era visibile, causando dubbi sulla correttezza del calcolo. `rollAllInitiative` salva `initiativeBreakdown: r.roll.breakdown` per ogni nave. `InitiativeModal` post-confirm mostra riga `2D:{roll} + Pilot:{n} + T{n}` con badge verde `Tac:{effect}` quando il Tactics effect è ≠ 0. (CRB p.160)
+
+5. **`fix(thrust): pre-populate ThrustModal with last applied delta`** (`2bb05fe`) — `ThrustModal` usava `useState({q:0,r:0})` — ogni apertura resettava a zero. `addShip` inizializza `lastThrustDelta: {q:0,r:0}`. `applyShipThrust` salva `lastThrustDelta: {...delta}`. `ThrustModal` lazy-inizializza da `ship.lastThrustDelta`. (TC p.172)
+
+### Sessione precedente — Basic Mode Fix (v1.20.7)
 
 1. **`fix(basic): missile impact`** (`c946c92`) — `resolveMovement()` è no-op in basic mode, i missili non si muovevano mai. Aggiunto `advanceBasicMissileOneRound()` in battleStore: ogni round il missile brucia fino a 10 thrust di guida contro la tabella `RANGE_BAND_MOVE_COST` (Short 2, Medium 5, Long 10, Very Long 25, Distant 50), con carry-over eccesso tra bande. Impatto al raggiungimento di Adjacent → `pendingMissileImpacts`. `launchMissile` aggiunge `basicRangeBand` e `basicThrustAccumulated` in basic mode.
 
