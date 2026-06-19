@@ -9,6 +9,7 @@ import { useEffect, useCallback, useRef } from 'react'
 import { hexToPixel, hexAdd, hexDistance, computeClampedDelta } from '../../utils/hex.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore } from '../../store/uiStore.js'
+import { RANGE_BANDS } from '../../data/rangeBands.js'
 import {
   drawShipToken,
   drawShipLabel,
@@ -16,6 +17,56 @@ import {
   drawGhostToken,
   drawMissileToken,
 } from './tokenRenderers.js'
+
+// === RANGE BAND RINGS ===
+
+// Outer boundary of each named band, drawn at maxDistance + 0.5 so the ring
+// sits between the last hex of the band and the first hex of the next.
+const RING_DEFS = RANGE_BANDS
+  .filter((b) => b.maxDistance !== Infinity)
+  .map((b) => ({ label: b.label.toUpperCase(), n: b.maxDistance + 0.5 }))
+
+// The 6 axial-direction unit vectors that, scaled by N, give the vertices of
+// the hexagonal ring boundary at hex-distance N from the origin.
+const RING_CORNERS = [
+  { q: 1, r: 0 }, { q: 1, r: -1 }, { q: 0, r: -1 },
+  { q: -1, r: 0 }, { q: -1, r: 1 }, { q: 0, r: 1 },
+]
+
+/**
+ * Draw concentric hexagonal range-band outlines centred on a selected ship.
+ * Shown only when a ship is selected and thrust-targeting is inactive.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {{ position: { q: number, r: number } }} ship
+ * @param {number} size  hex size in pixels
+ * @param {number} ox    canvas x offset
+ * @param {number} oy    canvas y offset
+ */
+function drawRangeBandRings(ctx, ship, size, ox, oy) {
+  const { q: sq, r: sr } = ship.position
+  ctx.save()
+  ctx.setLineDash([4, 6])
+  ctx.lineWidth = 1
+  ctx.strokeStyle = 'rgba(56, 189, 248, 0.22)'
+  ctx.fillStyle = 'rgba(148, 163, 184, 0.6)'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'bottom'
+  ctx.font = `${Math.max(8, Math.round(7 * size / 32))}px monospace`
+
+  for (const { label, n } of RING_DEFS) {
+    const pts = RING_CORNERS.map(({ q, r }) =>
+      hexToPixel(sq + q * n, sr + r * n, size, ox, oy)
+    )
+    ctx.beginPath()
+    ctx.moveTo(pts[0].x, pts[0].y)
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y)
+    ctx.closePath()
+    ctx.stroke()
+    // Label at top vertex (index 2 → axial (0, -n) → top of screen)
+    ctx.fillText(label, pts[2].x, pts[2].y - 3)
+  }
+  ctx.restore()
+}
 
 // === ANIMATION UTILITIES ===
 
@@ -217,6 +268,12 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
     // startMovementAnimation (uiStore) fires before the battleStore set() that moves
     // the tokens, causing lerpHex(pre, pre, t) → no visible movement.
     const { ships: liveShips, missiles: liveMissiles } = useBattleStore.getState()
+
+    // --- Layer 2: Range band rings (selected ship, non-targeting mode) ---
+    if (selectedShipId && !thrustTargeting) {
+      const sel = liveShips.find((s) => s.id === selectedShipId)
+      if (sel) drawRangeBandRings(ctx, sel, size, ox, oy)
+    }
 
     // --- Layer 3: Ghost positions — only during acceleration (thrust preview) ---
     if (phase === 'acceleration') {
