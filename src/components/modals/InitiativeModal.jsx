@@ -186,12 +186,25 @@ export function InitiativeModal() {
               {initiativeOrder.map((id, idx) => {
                 const ship = ships.find((s) => s.id === id)
                 if (!ship) return null
+                const bd = ship.initiativeBreakdown
                 return (
-                  <li key={id} className="flex items-center gap-3 bg-slate-800 rounded px-3 py-1.5">
-                    <span className="text-slate-400 font-mono text-xs w-4">{idx + 1}.</span>
-                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
-                    <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.profile.name}</span>
-                    <span className="text-(--neon-cyan) font-mono text-sm font-bold">{ship.initiative}</span>
+                  <li key={id} className="bg-slate-800 rounded px-3 py-1.5">
+                    <div className="flex items-center gap-3">
+                      <span className="text-slate-400 font-mono text-xs w-4">{idx + 1}.</span>
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
+                      <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.profile.name}</span>
+                      <span className="text-(--neon-cyan) font-mono text-sm font-bold">{ship.initiative}</span>
+                    </div>
+                    {bd && (
+                      <div className="flex items-center gap-1 mt-0.5 ml-7 font-mono text-[10px] text-slate-500">
+                        <span>2D:{bd.roll}</span>
+                        <span>+ Pilot:{bd.pilotSkill}</span>
+                        <span>+ T{bd.thrust}</span>
+                        {bd.tacticsEffect !== 0 && (
+                          <span className="text-green-400">+ Tac:{bd.tacticsEffect}</span>
+                        )}
+                      </div>
+                    )}
                   </li>
                 )
               })}

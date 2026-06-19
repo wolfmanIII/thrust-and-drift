@@ -500,7 +500,7 @@ const useBattleStore = create((set, get) => {
     set((s) => ({
       ships: s.ships.map((sh) => {
         const r = rolled.find((r) => r.id === sh.id)
-        return r ? { ...sh, initiative: r.initiative, initiativeBonusNextRound: 0 } : sh
+        return r ? { ...sh, initiative: r.initiative, initiativeBonusNextRound: 0, initiativeBreakdown: r.roll.breakdown } : sh
       }),
       initiativeOrder: sorted.map((r) => r.id),
       currentActorIndex: 0,
