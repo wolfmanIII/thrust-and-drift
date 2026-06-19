@@ -359,6 +359,7 @@ const useBattleStore = create((set, get) => {
       color,
       position: { ...position },
       vector: { q: 0, r: 0 },
+      lastThrustDelta: { q: 0, r: 0 },
       hullCurrent: profile.hull,
       isDestroyed: false,
       thrustUsedThisRound: 0,
@@ -525,7 +526,7 @@ const useBattleStore = create((set, get) => {
       set((s) => ({
         ships: s.ships.map((sh) =>
           sh.id === shipId
-            ? { ...sh, vector: newVector, thrustUsedThisRound: sh.thrustUsedThisRound + cost }
+            ? { ...sh, vector: newVector, lastThrustDelta: { ...delta }, thrustUsedThisRound: sh.thrustUsedThisRound + cost }
             : sh
         ),
         log: [...s.log, makeLogEntry({

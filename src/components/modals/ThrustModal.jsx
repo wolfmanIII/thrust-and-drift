@@ -20,7 +20,7 @@ export function ThrustModal() {
 
   const ship = ships.find((s) => s.id === modalPayload?.shipId)
 
-  const [delta, setDelta] = useState({ q: 0, r: 0 })
+  const [delta, setDelta] = useState(() => ship?.lastThrustDelta ?? { q: 0, r: 0 })
 
   if (!ship) return null
 
