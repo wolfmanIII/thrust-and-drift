@@ -12,7 +12,7 @@
 | **Versione** | 1.20.9 |
 | **Branch** | main (clean) |
 | **Test** | 857 passing |
-| **Ultimo commit** | docs: sync to v1.20.9 |
+| **Ultimo commit** | docs(pdf): regenerate field-manual.pdf for v1.20.9 (`431e91c`) |
 
 ---
 
