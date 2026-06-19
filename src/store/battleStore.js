@@ -1050,6 +1050,32 @@ const useBattleStore = create((set, get) => {
     set((s) => ({ missiles: s.missiles.filter((m) => m.id !== missileId) }))
   },
 
+  /**
+   * Reduce a missile salvo's count via Point Defence during the Attack phase.
+   * Removes the salvo entry entirely when count reaches 0.
+   * // MgT2e CRB p.161 — Point Defence (attack phase)
+   * @param {string} missileId
+   * @param {number} removed  Missiles destroyed (Effect of PD roll; 0 = miss)
+   */
+  interceptMissileSalvo: wh(
+    (missileId) => !!get().missiles.find((m) => m.id === missileId),
+    (missileId, removed) => {
+      const { missiles, ships } = get()
+      const missile  = missiles.find((m) => m.id === missileId)
+      const launcher = ships.find((s) => s.id === missile.launchedBy)
+      const newCount = Math.max(0, missile.count - removed)
+      const msg = newCount === 0
+        ? `${launcher?.profile.name ?? '?'} missile salvo (${missile.type}) fully destroyed by Point Defence.`
+        : `${launcher?.profile.name ?? '?'} missile salvo reduced: ${missile.count} → ${newCount} (${removed} destroyed by PD).`
+      set((s) => ({
+        missiles: newCount === 0
+          ? s.missiles.filter((m) => m.id !== missileId)
+          : s.missiles.map((m) => m.id !== missileId ? m : { ...m, count: newCount }),
+        log: [...s.log, makeLogEntry({ round: s.round, phase: s.phase, type: 'attack', message: msg })],
+      }))
+    },
+  ),
+
   // === PHASE / ROUND PROGRESSION ===
 
   /** Advance to the next phase in sequence. Drives all transitions via PHASE_ORDER. */

@@ -26,8 +26,10 @@ const BEAM_WEAPONS = [
 ]
 /** Laser weapon types that Disperse Sand can block (CRB p.171). */
 const LASER_TYPES = ['Pulse Laser', 'Beam Laser', 'Pulse Laser Barbette', 'Beam Laser Barbette']
+/** Laser types usable as Point Defence against missiles. // CRB p.161 */
+const LASER_PD = ['Pulse Laser', 'Beam Laser']
 
-/** @typedef {'config'|'roll'|'damage'|'critical'} AttackStep */
+/** @typedef {'config'|'roll'|'damage'|'critical'|'missile_pd'} AttackStep */
 
 // ── UI primitive ──────────────────────────────────────────────────────────
 
@@ -230,21 +232,31 @@ function AttackConfigStep({
   combatMode, storedBand, manualRangeBand, setManualRangeBand,
   outOfRange,
   isMissile, isMissileBarbette, missileCount, setMissileCount, ammoLeft,
+  inFlightMissiles, targetMissileId, setTargetMissileId,
   reactions,
   onNext, onClose,
 }) {
   const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
+  const isMissilePdMode = !!targetMissileId
+  // When targeting a missile, only PD weapons are valid
+  const visibleWeapons  = isMissilePdMode
+    ? availableWeapons.filter((w) => LASER_PD.includes(w.weaponName))
+    : availableWeapons
   return (
     <Modal title="Attack" onClose={onClose}>
       <div className="space-y-4">
         {/* Weapon select */}
         <div>
-          <p className="text-slate-400 font-mono text-xs mb-1.5">Weapon</p>
+          <p className="text-slate-400 font-mono text-xs mb-1.5">
+            Weapon{isMissilePdMode ? ' — Point Defence only' : ''}
+          </p>
           <div className="flex flex-col gap-1">
-            {availableWeapons.length === 0 && (
-              <p className="text-slate-400 font-mono text-xs italic">No offensive weapons available.</p>
+            {visibleWeapons.length === 0 && (
+              <p className="text-slate-400 font-mono text-xs italic">
+                {isMissilePdMode ? 'No PD lasers available (Pulse/Beam only).' : 'No offensive weapons available.'}
+              </p>
             )}
-            {availableWeapons.map((w) => {
+            {visibleWeapons.map((w) => {
               const wDef = WEAPONS[w.weaponName]
               const wOutOfRange = target && wDef ? isOutOfRange(wDef.maxRange, rangeBand) : false
               const isSelected  = weaponKey === w.weaponName && selectedTurretSlot === w.turretSlot
@@ -309,6 +321,30 @@ function AttackConfigStep({
               </button>
             ))}
           </div>
+
+          {/* In-flight hostile missile salvos — Point Defence targets */}
+          {inFlightMissiles.length > 0 && (
+            <div className="mt-2">
+              <p className="text-slate-500 font-mono text-xs mb-1">— Missile salvos in flight (PD) —</p>
+              <div className="flex flex-col gap-1">
+                {inFlightMissiles.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setTargetMissileId(m.id)}
+                    className={`flex items-center gap-2 text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
+                      targetMissileId === m.id
+                        ? 'border-amber-500/60 bg-amber-900/20 text-amber-300'
+                        : 'border-slate-700 text-slate-400 hover:border-amber-700/50'
+                    }`}
+                  >
+                    <span className="text-amber-400">🚀</span>
+                    <span>{m.launcherName} · {m.count}× {m.type}</span>
+                    <span className="ml-auto text-slate-500">→ {m.targetName}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Missile count */}
@@ -435,7 +471,15 @@ function AttackConfigStep({
           </p>
         )}
 
-        {isMissile ? (
+        {isMissilePdMode ? (
+          <button
+            onClick={onNext}
+            disabled={!weapon || !targetMissileId || !LASER_PD.includes(weaponKey)}
+            className="w-full py-2 bg-blue-900/30 border border-blue-700/50 text-blue-400 font-mono text-sm tracking-widest rounded hover:bg-blue-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
+          >
+            🛡 INTERCEPT →
+          </button>
+        ) : isMissile ? (
           missileCount === 0 ? (
             <button
               onClick={onNext}
@@ -714,6 +758,121 @@ function IonDamageStep({ targetName, attackEffect, isPlayer, onApply, onClose })
               className="w-full py-3 bg-blue-900/40 border border-blue-600/60 text-blue-300 font-mono text-sm tracking-widest rounded hover:bg-blue-800/50 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
             >
               ⚡ APPLY ION DISRUPTION
+            </button>
+          </div>
+        )}
+      </div>
+    </Modal>
+  )
+}
+
+// ── Step 3-pd: Point Defence against in-flight missile salvo ─────────────
+
+/**
+ * Standalone PD attack step used when a player targets an in-flight missile
+ * salvo during the Attack phase. Same mechanic as the PD reaction.
+ * // MgT2e CRB p.161 — Point Defence (Attack phase)
+ * @param {{
+ *   missile:      object,
+ *   launcherName: string,
+ *   targetName:   string,
+ *   attacker:     object,
+ *   weaponKey:    string,
+ *   turretSlot:   number|null,
+ *   isPlayer:     boolean,
+ *   onApply:      (removed: number) => void,
+ *   onClose:      Function,
+ * }} props
+ */
+function MissilePdStep({ missile, launcherName, targetName, attacker, weaponKey, turretSlot, isPlayer, onApply, onClose }) {
+  const [pdRoll,     setPdRoll]     = useState(null)
+  const [manualRaw,  setManualRaw]  = useState('')
+
+  const turret     = attacker.profile.turrets?.find((t) => t.slot === turretSlot)
+  const gunner     = getEffectiveSkill(attacker.profile.crew, attacker.crewAssignments, 'gunner', turretSlot)
+  const laserBonus = Math.max(0, (turret?.weapons?.filter((w) => LASER_PD.includes(w)).length ?? 0) - 1)
+
+  const total    = pdRoll !== null ? pdRoll + gunner + laserBonus : null
+  const effect   = total !== null ? total - 8 : null
+  const removed  = effect !== null ? Math.max(0, effect) : null
+  const canApply = removed !== null
+
+  const handleAutoRoll = () => setPdRoll(roll2D6().total)
+  const handleManualConfirm = () => {
+    const v = Number(manualRaw)
+    if (v >= 2 && v <= 12) setPdRoll(v)
+  }
+
+  return (
+    <Modal title="Point Defence — In-flight Intercept" onClose={onClose}>
+      <div className="space-y-4">
+        <div className="bg-blue-950/30 border border-blue-700/40 rounded px-4 py-3 font-mono text-xs text-blue-300 text-center">
+          🎯 TARGETING IN-FLIGHT MISSILE SALVO<br />
+          <span className="text-slate-400">
+            {launcherName} · {missile.count} × {missile.type} · targeting {targetName}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 text-center font-mono text-xs">
+          <div className="bg-slate-800 rounded p-2">
+            <p className="text-slate-400">Gunner</p>
+            <p className="text-(--neon-cyan) font-bold">{gunner >= 0 ? `+${gunner}` : gunner}</p>
+          </div>
+          <div className="bg-slate-800 rounded p-2">
+            <p className="text-slate-400">T{turretSlot} laser bonus</p>
+            <p className="text-(--neon-cyan) font-bold">{laserBonus >= 0 ? `+${laserBonus}` : laserBonus}</p>
+          </div>
+          <div className="bg-slate-800 rounded p-2">
+            <p className="text-slate-400">Target</p>
+            <p className="text-(--neon-cyan) font-bold">8+</p>
+          </div>
+        </div>
+
+        {pdRoll === null ? (
+          isPlayer ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 bg-slate-800 rounded px-4 py-3">
+                <span className="text-slate-400 font-mono text-xs">2D6:</span>
+                <input
+                  type="number" min="2" max="12" value={manualRaw}
+                  onChange={(e) => setManualRaw(e.target.value)}
+                  className="w-20 bg-slate-700 border border-slate-600 text-(--neon-cyan) font-mono text-lg rounded text-center px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
+                  placeholder="—"
+                />
+              </div>
+              <button
+                onClick={handleManualConfirm}
+                disabled={!manualRaw}
+                className="w-full py-2 bg-blue-900/30 border border-blue-700/50 text-blue-400 font-mono text-sm tracking-widest rounded hover:bg-blue-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
+              >
+                CONFIRM
+              </button>
+            </div>
+          ) : (
+            <button onClick={handleAutoRoll} className="w-full py-3 bg-blue-900/30 border border-blue-700/50 text-blue-400 font-mono text-lg tracking-widest rounded hover:bg-blue-900/40 transition-colors">
+              🎲 ROLL PD ATTACK
+            </button>
+          )
+        ) : (
+          <div className="space-y-3">
+            <div className="bg-slate-800 rounded p-4 text-center font-mono">
+              <p className="text-slate-400 text-xs">2D6 ({pdRoll}) + Gunner ({gunner}) + Bonus ({laserBonus}) = <span className="text-white font-bold">{total}</span></p>
+              <p className={`font-bold text-2xl mt-1 ${removed > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {removed > 0 ? `HIT — ${removed} missile${removed !== 1 ? 's' : ''} destroyed` : 'MISS'}
+              </p>
+              {removed > 0 && missile.count - removed <= 0 && (
+                <p className="text-green-400 text-xs mt-1">✅ Salvo fully destroyed</p>
+              )}
+            </div>
+            <button onClick={() => { setPdRoll(null); setManualRaw('') }} className="w-full py-1.5 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500">
+              REROLL
+            </button>
+            <button
+              disabled={!canApply}
+              onClick={() => onApply(removed)}
+              className="w-full py-3 bg-blue-900/40 border border-blue-600/60 text-blue-300 font-mono text-sm tracking-widest rounded hover:bg-blue-800/50 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
+            >
+              🛡 APPLY PD RESULT
             </button>
           </div>
         )}
@@ -1048,20 +1207,24 @@ function AttackCriticalStep({
 // ── Root component — owns state, computes derived DMs ────────────────────
 
 export function AttackModal() {
-  const closeModal          = useUiStore((s) => s.closeModal)
-  const modalPayload        = useUiStore((s) => s.modalPayload)
-  const applyDamage         = useBattleStore((s) => s.applyDamage)
-  const applyIonDamage      = useBattleStore((s) => s.applyIonDamage)
-  const spendSandAmmo       = useBattleStore((s) => s.spendSandAmmo)
-  const addCriticalHit      = useBattleStore((s) => s.addCriticalHit)
-  const reduceArmour        = useBattleStore((s) => s.reduceArmour)
-  const markTurretFired     = useBattleStore((s) => s.markTurretFired)
-  const launchMissile       = useBattleStore((s) => s.launchMissile)
-  const spendReactionThrust = useBattleStore((s) => s.spendReactionThrust)
-  const addLogEntry         = useBattleStore((s) => s.addLogEntry)
+  const closeModal              = useUiStore((s) => s.closeModal)
+  const modalPayload            = useUiStore((s) => s.modalPayload)
+  const applyDamage             = useBattleStore((s) => s.applyDamage)
+  const applyIonDamage          = useBattleStore((s) => s.applyIonDamage)
+  const spendSandAmmo           = useBattleStore((s) => s.spendSandAmmo)
+  const addCriticalHit          = useBattleStore((s) => s.addCriticalHit)
+  const reduceArmour            = useBattleStore((s) => s.reduceArmour)
+  const markTurretFired         = useBattleStore((s) => s.markTurretFired)
+  const launchMissile           = useBattleStore((s) => s.launchMissile)
+  const spendReactionThrust     = useBattleStore((s) => s.spendReactionThrust)
+  const addLogEntry             = useBattleStore((s) => s.addLogEntry)
+  const interceptMissileSalvo   = useBattleStore((s) => s.interceptMissileSalvo)
+  const missiles                = useBattleStore((s) => s.missiles)
+  const allShips                = useBattleStore((s) => s.ships)
 
   const [step, setStep]                       = useState('config')
   const [targetId, setTargetId]               = useState('')
+  const [targetMissileId, setTargetMissileId] = useState(null)
   const [weaponKey, setWeaponKey]             = useState('')
   const [selectedTurretSlot, setSelectedTurretSlot] = useState(null)
   const [attackResult, setAttackResult]       = useState(null)
@@ -1091,7 +1254,21 @@ export function AttackModal() {
     setMissileCount(name === 'Missile Barbette' ? 5 : 1)
     resetReactions()
   }
-  const handleTargetChange = (id) => { setTargetId(id); resetReactions() }
+  const handleTargetChange = (id) => {
+    setTargetId(id)
+    setTargetMissileId(null)
+    resetReactions()
+  }
+  const handleMissileTargetChange = (id) => {
+    setTargetMissileId(id)
+    setTargetId('')
+    // If current weapon is not PD-capable, clear it
+    if (!LASER_PD.includes(weaponKey)) {
+      setWeaponKey('')
+      setSelectedTurretSlot(null)
+    }
+    resetReactions()
+  }
 
   const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, storedBand, combatMode, outOfRange, dmBreakdown } =
     useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand, selectedTurretSlot)
@@ -1100,6 +1277,23 @@ export function AttackModal() {
 
   const ammoLeft          = isMissile ? (attacker.missileAmmoTotal ?? 0) : 0
   const isMissileBarbette = weaponKey === 'Missile Barbette'
+
+  // ── In-flight missile targeting (FEAT-001) ────────────────────────────
+  // Hostile missiles: those targeting ships of the same faction as the attacker
+  const inFlightHostileMissiles = missiles
+    .filter((m) => {
+      const tShip = allShips.find((s) => s.id === m.target)
+      return tShip && tShip.faction === attacker.faction && m.count > 0
+    })
+    .map((m) => ({
+      ...m,
+      launcherName: allShips.find((s) => s.id === m.launchedBy)?.profile.name ?? '?',
+      targetName:   allShips.find((s) => s.id === m.target)?.profile.name ?? '?',
+    }))
+  const targetMissile = targetMissileId
+    ? inFlightHostileMissiles.find((m) => m.id === targetMissileId) ?? null
+    : null
+  const handleAdvanceToMissilePd = () => setStep('missile_pd')
 
   // ── Reaction-derived values ────────────────────────────────────────────
   const targetPilotSkill = target ? getEffectiveSkill(target.profile.crew, target.crewAssignments, 'pilot') : 0
@@ -1110,7 +1304,6 @@ export function AttackModal() {
     - (target.evasiveThrust ?? 0)
   ) : 0
 
-  const LASER_PD = ['Pulse Laser', 'Beam Laser']
   const targetPdTurrets = target ? (target.profile.turrets ?? [])
     .filter((t) => !(target.firedTurrets ?? []).includes(t.slot))
     .filter((t) => t.weapons?.some((w) => LASER_PD.includes(w)))
@@ -1309,6 +1502,9 @@ export function AttackModal() {
         missileCount={missileCount}
         setMissileCount={setMissileCount}
         ammoLeft={ammoLeft}
+        inFlightMissiles={inFlightHostileMissiles}
+        targetMissileId={targetMissileId}
+        setTargetMissileId={handleMissileTargetChange}
         reactions={{
           evasion:         reactionEvasion,
           setEvasion:      setReactionEvasion,
@@ -1326,7 +1522,11 @@ export function AttackModal() {
           sandResult,
           onSandRoll:      handleSandRoll,
         }}
-        onNext={isMissile ? (missileCount === 0 ? handleAllIntercepted : handleLaunchMissile) : handleAdvanceToRoll}
+        onNext={
+          targetMissileId ? handleAdvanceToMissilePd :
+          isMissile ? (missileCount === 0 ? handleAllIntercepted : handleLaunchMissile) :
+          handleAdvanceToRoll
+        }
         onClose={closeModal}
       />
     )
@@ -1361,6 +1561,30 @@ export function AttackModal() {
           if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
           emitEffect('ion_burst', { duration: 1500, hex: target.position })
           addLogEntry(`${attacker.profile.name} → ${target.profile.name}: Ion Cannon hit — −${ionPower} thrust for ${ionRounds} round${ionRounds !== 1 ? 's' : ''}.`)
+          closeModal()
+        }}
+        onClose={closeModal}
+      />
+    )
+  }
+
+  if (step === 'missile_pd') {
+    if (!targetMissile) return null
+    return (
+      <MissilePdStep
+        missile={targetMissile}
+        launcherName={targetMissile.launcherName}
+        targetName={targetMissile.targetName}
+        attacker={attacker}
+        weaponKey={weaponKey}
+        turretSlot={selectedTurretSlot}
+        isPlayer={attacker.faction === 'players'}
+        onApply={(removed) => {
+          interceptMissileSalvo(targetMissile.id, removed)
+          if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
+          addLogEntry(
+            `${attacker.profile.name} PD (T${selectedTurretSlot}) vs ${targetMissile.launcherName} salvo: ${removed} missile${removed !== 1 ? 's' : ''} destroyed.`
+          )
           closeModal()
         }}
         onClose={closeModal}
