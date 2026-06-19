@@ -301,6 +301,49 @@ describe('addCriticalHit', () => {
   })
 })
 
+describe('reduceArmour', () => {
+  it('reduces armor by specified amount', () => {
+    useBattleStore.getState().addShip(makeProfile({ armor: 6 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().reduceArmour(id, 2)
+    expect(useBattleStore.getState().ships[0].profile.armor).toBe(4)
+  })
+
+  it('clamps armor to 0 when reduction exceeds current value', () => {
+    useBattleStore.getState().addShip(makeProfile({ armor: 1 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().reduceArmour(id, 5)
+    expect(useBattleStore.getState().ships[0].profile.armor).toBe(0)
+  })
+
+  it('treats missing armor field as 0', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().reduceArmour(id, 3)
+    expect(useBattleStore.getState().ships[0].profile.armor).toBe(0)
+  })
+
+  it('appends log entry', () => {
+    useBattleStore.getState().addShip(makeProfile({ armor: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    const logBefore = useBattleStore.getState().log.length
+    useBattleStore.getState().reduceArmour(id, 1)
+    expect(useBattleStore.getState().log.length).toBeGreaterThan(logBefore)
+  })
+
+  it('unknown shipId is no-op', () => {
+    expect(() => useBattleStore.getState().reduceArmour('ghost', 2)).not.toThrow()
+  })
+
+  it('does not affect other ships', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', armor: 5 }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', armor: 5 }), { q: 1, r: 0 }, 'npc',     '#f00')
+    const [s1] = useBattleStore.getState().ships
+    useBattleStore.getState().reduceArmour(s1.id, 2)
+    expect(useBattleStore.getState().ships[1].profile.armor).toBe(5)
+  })
+})
+
 // === PHASE FLOW ===
 
 describe('advancePhase', () => {
@@ -386,6 +429,21 @@ describe('startNextRound', () => {
     expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(1)
     useBattleStore.getState().startNextRound()
     expect(useBattleStore.getState().ships[0].thrustPenalty).toBe(1)
+  })
+
+  it('resets ewAppliedThisRound to false on in-flight missiles', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 2, { q: 0, r: 0 }, { q: 1, r: 0 })
+    // Simulate EW having been applied this round
+    const missileId = useBattleStore.getState().missiles[0].id
+    useBattleStore.setState((s) => ({
+      missiles: s.missiles.map((m) => m.id === missileId ? { ...m, ewAppliedThisRound: true } : m),
+    }))
+    expect(useBattleStore.getState().missiles[0].ewAppliedThisRound).toBe(true)
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().missiles[0].ewAppliedThisRound).toBe(false)
   })
 })
 
@@ -575,6 +633,19 @@ describe('rollAllInitiative', () => {
     expect(ships.find((s) => s.id === manualId).initiative).toBe(3)  // 3 + pilot0 + thrust0
     expect(ships.find((s) => s.id !== manualId).initiative).toBe(8)  // 8 + 0 + 0 from mock
   })
+
+  it('saves initiativeBreakdown with roll, pilotSkill, thrust and tacticsEffect', () => {
+    useBattleStore.getState().addShip(
+      makeProfile({ thrust: 3, crew: { pilot: 2 } }), { q: 0, r: 0 }, 'players', '#fff'
+    )
+    useBattleStore.getState().rollAllInitiative()
+    const { initiativeBreakdown } = useBattleStore.getState().ships[0]
+    expect(initiativeBreakdown).toBeDefined()
+    expect(typeof initiativeBreakdown.roll).toBe('number')
+    expect(initiativeBreakdown.pilotSkill).toBe(2)
+    expect(initiativeBreakdown.thrust).toBe(3)
+    expect(typeof initiativeBreakdown.tacticsEffect).toBe('number')
+  })
 })
 
 // === THRUST ===
@@ -613,6 +684,13 @@ describe('applyShipThrust', () => {
     const logBefore = useBattleStore.getState().log.length
     useBattleStore.getState().applyShipThrust(id, { q: 1, r: 0 }, 1)
     expect(useBattleStore.getState().log.length).toBeGreaterThan(logBefore)
+  })
+
+  it('saves lastThrustDelta on ship', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyShipThrust(id, { q: 2, r: -1 }, 2)
+    expect(useBattleStore.getState().ships[0].lastThrustDelta).toEqual({ q: 2, r: -1 })
   })
 })
 
@@ -861,6 +939,14 @@ describe('launchMissile', () => {
     useBattleStore.getState().launchMissile(att.id, tgt.id, 1, { q: 0, r: 0 }, { q: 0, r: 0 })
     expect(useBattleStore.getState().ships[0].turretsNeedingReload).toBe(1)
   })
+
+  it('initialises ewAppliedThisRound to false', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 2, { q: 0, r: 0 }, { q: 1, r: 0 })
+    expect(useBattleStore.getState().missiles[0].ewAppliedThisRound).toBe(false)
+  })
 })
 
 describe('removeMissile', () => {
@@ -876,6 +962,66 @@ describe('removeMissile', () => {
 
   it('unknown id is no-op', () => {
     expect(() => useBattleStore.getState().removeMissile('ghost')).not.toThrow()
+  })
+})
+
+describe('applyMissileEW', () => {
+  it('reduces count on in-flight missile by specified amount', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 5, { q: 0, r: 0 }, { q: 1, r: 0 })
+    const { id: mId } = useBattleStore.getState().missiles[0]
+    useBattleStore.getState().applyMissileEW(tgt.id, mId, 2)
+    expect(useBattleStore.getState().missiles[0].count).toBe(3)
+  })
+
+  it('marks ewAppliedThisRound on in-flight missile', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 3, { q: 0, r: 0 }, { q: 1, r: 0 })
+    const { id: mId } = useBattleStore.getState().missiles[0]
+    useBattleStore.getState().applyMissileEW(tgt.id, mId, 1)
+    expect(useBattleStore.getState().missiles[0].ewAppliedThisRound).toBe(true)
+  })
+
+  it('removes in-flight missile when count drops to 0', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 2, { q: 0, r: 0 }, { q: 1, r: 0 })
+    const { id: mId } = useBattleStore.getState().missiles[0]
+    useBattleStore.getState().applyMissileEW(tgt.id, mId, 2)
+    expect(useBattleStore.getState().missiles).toHaveLength(0)
+  })
+
+  it('is blocked when ewAppliedThisRound is already true (double-EW guard)', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 4, { q: 0, r: 0 }, { q: 1, r: 0 })
+    const { id: mId } = useBattleStore.getState().missiles[0]
+    useBattleStore.getState().applyMissileEW(tgt.id, mId, 1)  // first EW: count 4→3, flag set
+    useBattleStore.getState().applyMissileEW(tgt.id, mId, 1)  // second EW: blocked by guard
+    expect(useBattleStore.getState().missiles[0].count).toBe(3)
+  })
+
+  it('reduces count on pending missile impact', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [, tgt] = useBattleStore.getState().ships
+    // Inject a pending impact directly into the store
+    const impact = { id: 'imp-1', attackerId: 'p1', targetId: 'p2', count: 3, type: 'Standard', ewAppliedThisRound: false }
+    useBattleStore.setState((s) => ({ pendingMissileImpacts: [...s.pendingMissileImpacts, impact] }))
+    useBattleStore.getState().applyMissileEW(tgt.id, 'imp-1', 1)
+    expect(useBattleStore.getState().pendingMissileImpacts[0].count).toBe(2)
+  })
+
+  it('unknown missileId is no-op', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    const [ship] = useBattleStore.getState().ships
+    expect(() => useBattleStore.getState().applyMissileEW(ship.id, 'ghost', 1)).not.toThrow()
   })
 })
 

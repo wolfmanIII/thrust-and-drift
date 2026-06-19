@@ -96,6 +96,33 @@ describe('getCriticalEffect', () => {
     expect(getCriticalEffect('M-Drive', 6).mechanic).toBe('thrust_zero')
   })
 
+  it('Armour Sev 1 = armour_reduce_fixed, value 1', () => {
+    const e = getCriticalEffect('Armour', 1)
+    expect(e.mechanic).toBe('armour_reduce_fixed')
+    expect(e.value).toBe(1)
+  })
+
+  it('Armour Sev 2 = armour_reduce_d3', () => {
+    const e = getCriticalEffect('Armour', 2)
+    expect(e.mechanic).toBe('armour_reduce_d3')
+  })
+
+  it('Armour Sev 3–4 = armour_reduce_xd value 1', () => {
+    for (const sev of [3, 4]) {
+      const e = getCriticalEffect('Armour', sev)
+      expect(e.mechanic).toBe('armour_reduce_xd')
+      expect(e.value).toBe(1)
+    }
+  })
+
+  it('Armour Sev 5–6 = armour_reduce_xd value 2', () => {
+    for (const sev of [5, 6]) {
+      const e = getCriticalEffect('Armour', sev)
+      expect(e.mechanic).toBe('armour_reduce_xd')
+      expect(e.value).toBe(2)
+    }
+  })
+
   it('every system/severity has a non-empty description string', () => {
     const SYSTEMS = [
       'Sensors', 'Power Plant', 'Fuel', 'Weapon', 'Armour',

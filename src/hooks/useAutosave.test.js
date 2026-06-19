@@ -138,6 +138,37 @@ describe('restore on mount', () => {
     expect(state.rangeBands).toEqual(rangeBands)
   })
 
+  it('restores basicBandPool from IndexedDB', async () => {
+    const basicBandPool = { 's1_s2': 2, 's1_s3': -1 }
+    mockStore['battle:current'] = {
+      id: 'battle-3', name: 'Test', round: 1, combatMode: 'basic',
+      phase: 'attack', initiativeOrder: [], currentActorIndex: 0,
+      ships: [makeShip()], missiles: [], log: [], mapSettings: { scale: 1 },
+      basicBandPool,
+    }
+
+    const { unmount } = renderHook(() => useAutosave())
+    await act(async () => {})
+    unmount()
+
+    expect(useBattleStore.getState().basicBandPool).toEqual(basicBandPool)
+  })
+
+  it('defaults basicBandPool to {} when not present in saved data', async () => {
+    mockStore['battle:current'] = {
+      id: 'battle-4', name: 'Test', round: 1, combatMode: 'basic',
+      phase: 'attack', initiativeOrder: [], currentActorIndex: 0,
+      ships: [makeShip()], missiles: [], log: [], mapSettings: { scale: 1 },
+      // no basicBandPool field
+    }
+
+    const { unmount } = renderHook(() => useAutosave())
+    await act(async () => {})
+    unmount()
+
+    expect(useBattleStore.getState().basicBandPool).toEqual({})
+  })
+
   it('does not restore profiles when saved array is empty', async () => {
     mockStore['profiles:all'] = []
     useProfilesStore.setState({ profiles: [{ id: 'p1', name: 'Existing' }] })
@@ -226,5 +257,18 @@ describe('autosave on significant changes', () => {
 
     const call = dbPut.mock.calls.find(([store]) => store === 'battle')
     expect(call[2]).toMatchObject({ dogfights, boardings, rangeBands })
+  })
+
+  it('includes basicBandPool in persisted snapshot', async () => {
+    const { unmount } = renderHook(() => useAutosave())
+    await act(async () => {})
+
+    const basicBandPool = { 's1_s2': 3 }
+    act(() => { useBattleStore.setState({ round: 2, basicBandPool }) })
+    await act(async () => {})
+    unmount()
+
+    const call = dbPut.mock.calls.find(([store]) => store === 'battle')
+    expect(call[2]).toMatchObject({ basicBandPool })
   })
 })
