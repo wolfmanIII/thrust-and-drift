@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { detectDogfightGroups, useDogfightDetection } from './useDogfightDetection.js'
+import { detectDogfightGroups, detectDogfightGroupsBasic, useDogfightDetection } from './useDogfightDetection.js'
 import { useBattleStore } from '../../store/battleStore.js'
 
 function ship(id, q, r, faction, inDogfight = null, inBoarding = null) {
@@ -165,5 +165,54 @@ describe('detectDogfightGroups', () => {
     expect(groups).toHaveLength(1)
     expect(groups[0].shipIds).toEqual(expect.arrayContaining(['a', 'b']))
     expect(groups[0].shipIds).not.toContain('c')
+  })
+})
+
+// ── detectDogfightGroupsBasic pure function ──────────────────────────────────
+
+function basicShip(id, faction, inDogfight = null, inBoarding = null) {
+  return { id, faction, inDogfight, inBoarding, isDestroyed: false, profile: { name: id } }
+}
+
+describe('detectDogfightGroupsBasic', () => {
+  it('returns empty when no pairs', () =>
+    expect(detectDogfightGroupsBasic([], {})).toEqual([]))
+
+  it('returns empty when no pair is Adjacent', () => {
+    const ships = [basicShip('a', 'players'), basicShip('b', 'npc')]
+    expect(detectDogfightGroupsBasic(ships, { 'a_b': 'Short' })).toEqual([])
+  })
+
+  it('detects group when pair is Adjacent and factions differ', () => {
+    const ships = [basicShip('a', 'players'), basicShip('b', 'npc')]
+    const groups = detectDogfightGroupsBasic(ships, { 'a_b': 'Adjacent' })
+    expect(groups).toHaveLength(1)
+    expect(groups[0].shipIds).toEqual(expect.arrayContaining(['a', 'b']))
+  })
+
+  it('ignores Adjacent pair with same faction', () => {
+    const ships = [basicShip('a', 'players'), basicShip('b', 'players')]
+    expect(detectDogfightGroupsBasic(ships, { 'a_b': 'Adjacent' })).toEqual([])
+  })
+
+  it('ignores ships already in dogfight', () => {
+    const ships = [basicShip('a', 'players', 'group-x'), basicShip('b', 'npc')]
+    expect(detectDogfightGroupsBasic(ships, { 'a_b': 'Adjacent' })).toEqual([])
+  })
+
+  it('fires on movement→attack in basic mode with Adjacent pair', () => {
+    useBattleStore.getState().resetBattle('basic')
+    useBattleStore.setState({
+      phase: 'movement',
+      round: 1,
+      ships: [
+        { id: 's1', faction: 'players', inDogfight: null, inBoarding: null, isDestroyed: false, profile: { name: 'A', thrust: 2, tonnage: 100, crew: [] } },
+        { id: 's2', faction: 'npc',     inDogfight: null, inBoarding: null, isDestroyed: false, profile: { name: 'B', thrust: 2, tonnage: 100, crew: [] } },
+      ],
+      rangeBands: { 's1_s2': 'Adjacent' },
+    })
+    const { result } = renderHook(() => useDogfightDetection())
+    act(() => { useBattleStore.setState({ phase: 'attack' }) })
+    expect(result.current.detectedGroups).toHaveLength(1)
   })
 })

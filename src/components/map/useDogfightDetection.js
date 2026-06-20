@@ -1,7 +1,7 @@
 /**
  * useDogfightDetection — detects potential dogfight groups after movement.
- * Watches for phase transition movement→attack and scans ships in same hex
- * with different factions. Returns groups for the notification modal.
+ * Watches for phase transition movement→attack and scans for hostile ships
+ * at Adjacent range. Returns groups for the notification modal.
  * @see dogfight-system-design.md §2
  */
 
@@ -10,7 +10,7 @@ import { useBattleStore } from '../../store/battleStore.js'
 import { hexDistance } from '../../utils/hex.js'
 
 /**
- * Scan active ships for same-hex, different-faction pairs.
+ * Scan active ships for same-hex, different-faction pairs (vectorial mode).
  * Groups all ships occupying the same hex into one entry.
  * Ships already in a dogfight are excluded.
  * @param {object[]} ships  ShipInstance array
@@ -43,33 +43,63 @@ export function detectDogfightGroups(ships) {
 }
 
 /**
+ * Scan active ships for Adjacent-band, different-faction pairs (basic mode).
+ * Uses rangeBands store: triggers when any pair reaches 'Adjacent' range.
+ * @param {object[]} ships       ShipInstance array
+ * @param {object}   rangeBands  { pairKey: bandLabel }
+ * @returns {{ shipIds: string[] }[]}
+ */
+export function detectDogfightGroupsBasic(ships, rangeBands) {
+  const active = ships.filter((s) => !s.inDogfight && !s.inBoarding && !s.isDestroyed)
+  const groups = []
+
+  for (const [pairKey, band] of Object.entries(rangeBands)) {
+    if (band !== 'Adjacent') continue
+    const [idA, idB] = pairKey.split('_')
+    const shipA = active.find((s) => s.id === idA)
+    const shipB = active.find((s) => s.id === idB)
+    if (!shipA || !shipB) continue
+    if (shipA.faction === shipB.faction) continue
+    groups.push({ shipIds: [shipA.id, shipB.id] })
+  }
+
+  return groups
+}
+
+/**
  * Detects dogfight conditions after the movement→attack phase transition.
- * Only active in vectorial combat mode.
+ * Active in both vectorial (same-hex detection) and basic (Adjacent band) modes.
  * @returns {{ detectedGroups: { shipIds: string[] }[], clearDetected: Function }}
  */
 export function useDogfightDetection() {
   const phase      = useBattleStore((s) => s.phase)
   const ships      = useBattleStore((s) => s.ships)
   const combatMode = useBattleStore((s) => s.combatMode)
+  const rangeBands = useBattleStore((s) => s.rangeBands)
   const round      = useBattleStore((s) => s.round)
 
   const prevPhaseRef      = useRef(phase)
   const shipsRef          = useRef(ships)
+  const rangeBandsRef     = useRef(rangeBands)
   const lastDetectedRound = useRef(-1)
   const [detectedGroups, setDetectedGroups] = useState([])
 
-  useEffect(() => { shipsRef.current = ships }, [ships])
+  useEffect(() => { shipsRef.current = ships },          [ships])
+  useEffect(() => { rangeBandsRef.current = rangeBands }, [rangeBands])
 
   useEffect(() => {
     const prevPhase = prevPhaseRef.current
     prevPhaseRef.current = phase
 
     if (prevPhase !== 'movement' || phase !== 'attack') return
-    if (combatMode !== 'vectorial') return
+    if (combatMode !== 'vectorial' && combatMode !== 'basic') return
     // One detection per round — undo+redo of the phase transition must not re-open the modal
     if (round === lastDetectedRound.current) return
 
-    const groups = detectDogfightGroups(shipsRef.current)
+    const groups = combatMode === 'basic'
+      ? detectDogfightGroupsBasic(shipsRef.current, rangeBandsRef.current)
+      : detectDogfightGroups(shipsRef.current)
+
     if (groups.length > 0) {
       lastDetectedRound.current = round
       setDetectedGroups(groups)
