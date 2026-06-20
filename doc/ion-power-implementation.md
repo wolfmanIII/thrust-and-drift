@@ -61,7 +61,7 @@ Valore di default nel form (nuove navi): **100**.
 
 ### 3.3 Formula danno Ion
 
-```
+```text
 ionDamage = roll_2D × 10   (ignora armatura — HG p.30)
 currentPower = max(0, ship.currentPower − ionDamage)
 ```
@@ -84,6 +84,7 @@ export function computeIonThrustEffect(baseThrust, currentPower, maxPower) {
 ```
 
 Esempio: nave con Thrust 4, maxPower 100, colpita da Ion per 70 Power:
+
 - `currentPower = 30`, `ratio = 0.3`, `effectiveThrust = floor(4 × 0.3) = 1`
 
 Tutti i riferimenti al calcolo thrust disponibile sostituiscono `- (ship.ionPenalty ?? 0)` con:
@@ -99,7 +100,7 @@ const ionThrustCap = computeIonThrustEffect(ship.profile.thrust, ship.currentPow
 
 Se la stessa nave riceve più colpi Ion nello stesso round (o in round diversi durante la durata):
 
-```
+```text
 ship.ionPowerReduction += newIonDamage         // si sommano
 ship.ionRoundsLeft = max(existing, newDuration) // durata = la più lunga
 ship.currentPower = max(0, ship.basePower − ship.ionPowerReduction)
@@ -146,6 +147,7 @@ Il campo `ionPenalty` (thrust penalty raw) viene **rimosso**. Sostituito da:
 ### 5.1 `src/data/weapons.js`
 
 **Ion Cannon** — cambiamenti:
+
 - `damageDice: 2` — invariato (roll 2D)
 - `damageMultiple: 10` — **cambia** da 1 a 10 (il ×10 dalla tabella HG p.30)
 - Aggiungere campo `barbetteOnly: true` — **nuovo**
@@ -180,6 +182,7 @@ Aggiornare `DEFENSIVE_WEAPON_IDS` se Ion Cannon vi è incluso (non dovrebbe, ma 
 ### 5.2 `src/data/defaultProfiles.js`
 
 In `makeProfile` defaults, aggiungere:
+
 ```js
 maxPower: 100,   // default generico
 ```
@@ -200,7 +203,9 @@ Aggiungere `maxPower` a ciascun profilo preset con valori dal §3.2.
 ### 5.4 `src/store/battleStore.js`
 
 #### `addShip`
+
 Aggiungere all'istanza nave:
+
 ```js
 basePower:         profile.maxPower ?? 100,
 currentPower:      profile.maxPower ?? 100,
@@ -209,7 +214,9 @@ ionPowerReduction: 0,
 ```
 
 #### `buildNextRoundState` (funzione pura, riga ~119)
+
 Sostituire la logica `ionPenalty`:
+
 ```js
 const ionCurrent = sh.ionRoundsLeft ?? 0
 const ionNext    = Math.max(0, ionCurrent - 1)
@@ -226,7 +233,9 @@ return {
 ```
 
 #### `applyIonDamage` (riga ~920)
+
 Nuova firma: `applyIonDamage(targetId, ionDamage, ionRounds)` — `ionDamage` è il risultato `2D × 10`.
+
 ```js
 applyIonDamage: (targetId, ionDamage, ionRounds) => {
   // ...wh guard...
@@ -245,7 +254,9 @@ applyIonDamage: (targetId, ionDamage, ionRounds) => {
 ```
 
 #### `spendReactionThrust` e tutti i calcoli thrust (riga ~1160 e simili)
+
 Importare `computeIonThrustEffect` da `utils/combat.js`. Sostituire:
+
 ```js
 // PRIMA
 - (ship.ionPenalty ?? 0)
@@ -260,6 +271,7 @@ Tutte le occorrenze `ionPenalty` nel file vanno rimosse/sostituite.
 ### 5.5 `src/utils/combat.js`
 
 Aggiungere funzione esportata:
+
 ```js
 /**
  * Effective thrust given current Ion Power reduction.
@@ -280,6 +292,7 @@ export function computeIonThrustEffect(baseThrust, currentPower, maxPower) {
 ### 5.6 `src/components/modals/AttackModal.jsx`
 
 #### `IonDamageStep` (riga ~660)
+
 - Label roll: `"2D × 10 ion power:"` (non `"2D6 ion power:"`)
 - Formula: `ionDamage = ionRoll * 10` (moltiplicare il risultato grezzo per 10)
 - Display risultato: `−${ionDamage} Power` e mostrare Power rimanente stimato
@@ -287,6 +300,7 @@ export function computeIonThrustEffect(baseThrust, currentPower, maxPower) {
 - Note: "Ion bypassa armatura — HG p.30"
 
 Nel body `AttackModal` (riga ~1552):
+
 ```js
 onApply={(ionDamage, ionRounds) => {
   applyIonDamage(target.id, ionDamage, ionRounds)
@@ -298,11 +312,13 @@ onApply={(ionDamage, ionRounds) => {
 ```
 
 #### `AttackModal` — calcolo thrustAvailable reazione (riga ~1300)
+
 Sostituire `- target.ionPenalty ?? 0` con il calcolo via `computeIonThrustEffect`.
 
 ### 5.7 `src/components/map/useCanvasRenderer.js` (riga ~176)
 
 Importare `computeIonThrustEffect`. Sostituire:
+
 ```js
 // PRIMA
 - (ship.ionPenalty ?? 0)
@@ -363,6 +379,7 @@ ratio < 0.25  → bg-red-600
 ```
 
 Mostrata in:
+
 - `ShipTooltip.jsx` — riga compatta con percentuale
 - `ShipDetailModal.jsx` — barra completa
 - `BasicBattleView.jsx` — status zone (solo quando Ion attivo)
@@ -381,6 +398,7 @@ Le sessioni salvate in formato JSON prima di v1.22.0 non hanno `currentPower`, `
 - Navi che avevano `ionPenalty` attivo: al restore, il valore viene ignorato (perso). Non critico — la sessione riparte con Power pieno.
 
 Aggiungere `currentPower`, `basePower`, `ionPowerReduction` ai campi inclusi in:
+
 - `extractBattleSnapshot` (useAutosave.js)
 - `hasSignificantChange` (useAutosave.js)
 - JSON export/import (io.js o battleStore)
@@ -448,7 +466,7 @@ Dopo l'implementazione (parte del commit `chore(release): v1.22.0`):
 
 **Commit suggeriti (uno per step logico):**
 
-```
+```text
 feat(weapons): Ion Cannon barbette-only, damageMultiple 10, ignoresArmour flag
 feat(power): add maxPower field to ship profiles and ShipProfileForm
 feat(battle): ship Power stat — addShip, applyIonDamage, buildNextRoundState
