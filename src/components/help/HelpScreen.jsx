@@ -198,9 +198,9 @@ export function HelpScreen() {
           <Sub title="LEGEND">
             <p>Click <span className="text-slate-200">📖 Legend</span> (fixed button, top-right of the battle screen) to open the visual reference panel. Also accessible via right-click any empty hex → Legend.</p>
             <KV k="Tokens" v="Ship silhouette (6 shapes: delta, needle, freighter, gunship, cruiser, capital — each rotates to face velocity direction; shape chosen at placement); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — count + thrust arc; hover for launcher/target/thrust tooltip); torpedo (red/amber silhouette — separate salvo type)." />
-            <KV k="Turret beams" v="Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange), Fusion Gun (amber-white), Plasma Gun (magenta), Ion Cannon (electric blue — applies thrust penalty, no hull damage)." />
+            <KV k="Turret beams" v="Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange), Fusion Gun (amber-white), Plasma Gun (magenta)." />
             <KV k="Barbette beams" v="Pulse Laser Barbette (sky blue, thicker), Beam Laser Barbette (blue, thicker), Particle Barbette (purple, thicker), Fusion Barbette (amber-white, thicker), Plasma Barbette (magenta, thicker), Railgun Barbette (orange, thicker) — all barbettes deal ×3 damage after armour." />
-            <KV k="Hit effects" v="Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion Cannon hit)." />
+            <KV k="Hit effects" v="Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion weapon hit)." />
             <KV k="Movement effects" v="Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line)." />
             <KV k="Persistent indicators" v="Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + amber ring), Missile exhausted (×), Ion aura (pulsing blue ring — while ionRoundsLeft {'>'} 0), Range band rings (dashed cyan hexagons — SHORT / MEDIUM / LONG / VERY LONG — shown on selected ship; hidden during thrust targeting)." />
           </Sub>
@@ -400,7 +400,10 @@ export function HelpScreen() {
             <KV k="Fusion Barbette" v="Medium (AP 3, Radiation)" />
             <KV k="Plasma Gun" v="Medium" />
             <KV k="Plasma Barbette" v="Medium (AP 2)" />
-            <KV k="Ion Cannon" v="Medium (no hull damage — applies thrust penalty)" />
+            <KV k="Ion Cannon" v="Medium (barbette — 2D×10 Power damage, ignores armour)" />
+            <KV k="Ion Cannon Bay (Small)" v="Medium (bay — 6D×10 Power damage, ignores armour)" />
+            <KV k="Ion Cannon Bay (Medium)" v="Medium (bay — 8D×20 Power damage, ignores armour)" />
+            <KV k="Ion Cannon Bay (Large)" v="Long (bay — 10D×100 Power damage, ignores armour)" />
             <KV k="Pulse Laser" v="Long" />
             <KV k="Pulse Laser Barbette" v="Long" />
             <KV k="Particle Beam" v="Very Long (Radiation)" />

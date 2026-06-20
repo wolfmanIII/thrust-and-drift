@@ -25,7 +25,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Weapons expansion** | 11 new weapons (HG pp.28–31): Fusion Gun, Plasma Gun, Ion Cannon, Torpedo, Missile Barbette + 6 barbettes (Pulse/Beam/Particle/Fusion/Plasma/Railgun Barbette) |
 | **Barbette ×3 multiplier** | All barbette weapons apply `×3` to net hull damage after armour subtraction (HG p.29): `netDamage = max(0, roll + Effect − effectiveArmour) × 3` |
 | **AP trait** | `AP N` trait reduces effective armour before damage: `effectiveArmour = max(0, armour − apReduction)` — active on Railgun (4), Fusion Barbette (3), Plasma Barbette (2), Railgun Barbette (5) |
-| **Ion Cannon** | No hull damage on hit — applies `ionPenalty` (2D6 roll) to target thrust for 1 round (D3 rounds if Effect ≥ 6); blue burst/aura canvas effects; ION NR badge on bento card (HG p.30) |
+| **Ion Weapons** | Barbette (2D×10) and Bay (Small 6D×10 / Medium 8D×20 / Large 10D×100) — no hull damage; ignores armour; reduces target Power and computer bandwidth; thrust cap = `floor(baseThrust × currentPower / maxPower)`; stacking hits; hardened (/fib) computers immune; blue burst/aura canvas effects; ION NR badge + COMMS DOWN warning (HG p.30–33, FAQ HG 2022 p.1) |
 | **Sandcaster ammo** | 20 canisters per sandcaster slot; depleted by Disperse Sand reaction; shown as 🪨 N/max on bento cards, ship detail modal, and tooltip |
 | **Sound effects** | Procedural synthesis via Web Audio API — laser, impact, critical, missile launch, thrust plume; 🔊/🔇 mute toggle in HUD; no audio files required |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in on all roll steps (attack, damage, critical location, extra damage, reactions, crew actions, initiative); NPC ships auto-roll |
@@ -158,7 +158,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-873 tests across utils, Zustand stores, hooks, and UI components. (v1.21.0)
+907 tests across utils, Zustand stores, hooks, and UI components. (v1.22.0)
 
 ---
 

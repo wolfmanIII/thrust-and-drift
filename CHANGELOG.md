@@ -6,6 +6,30 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.22.0] — 2026-06-20
+
+### Added
+
+- **Ion Weapons — Power stat (v1.22.0)** *(HG p.30–33, FAQ HG 2022 p.1)*
+  - Ion Cannon reclassified as **barbette-only** (`barbetteOnly: true`); removed from turret weapon picker.
+  - Three new **Ion Cannon Bay** variants: Small (6D×10), Medium (8D×20), Large (10D×100); `bayOnly: true`, excluded from turret and barbette pickers.
+  - All Ion weapons: `ignoresArmour: true`; `damageMultiple` is now the actual × multiplier (barbette ×10, bay per-tabling).
+  - New ship-profile fields: **MAX POWER** (`maxPower`), **COMPUTER BW** (`computerBandwidth`), **HARDENED** (`hardened: true/false`) — editable in ShipProfileForm Power Plant section.
+  - Battle instance fields: `basePower`, `currentPower`, `ionPowerReduction`, `baseBandwidth`, `currentBandwidth`, `bandwidthReduction`, `hardened`.
+  - Thrust effect: `effectiveThrust = floor(baseThrust × currentPower / maxPower)` — linear mapping via `computeIonThrustEffect()` in `combat.js`.
+  - Stacking hits: `ionPowerReduction` is additive; `ionRoundsLeft = max(existing, new)`.
+  - **Computer bandwidth** (FAQ): same Power reduction amount deducted from `currentBandwidth`; while `currentBandwidth ≤ 0` and `baseBandwidth > 0`, all attacks suffer DM-2 (shown as COMMS DOWN).
+  - **Hardened guard**: ships with `hardened: true` are immune — `applyIonDamage` returns ship unchanged; IonDamageStep shows immune banner.
+  - `IonDamageStep` in AttackModal generalised: reads `weapon.damageDice` and `weapon.damageMultiple` dynamically — works for all Ion mounts without hardcoded logic.
+  - UI: ION NR badge + `⚡ ION NR — −X PWR · COMMS DOWN` status row in BasicBattleView; Power bar and bandwidth warning in ShipTooltip; ShipDetailModal shows Power/bandwidth rows.
+  - 25 new tests: 12 battleStore (Power stacking, hardened, bandwidth, round restore), 6 combat (computeIonThrustEffect boundaries), 7 weapons (barbetteOnly, bayOnly, damageMultiple, ignoresArmour).
+
+### Fixed
+
+- **BUG-001 regression** — `buildNextRoundState` was clearing `ionPowerReduction` when `ionNext = 0` instead of `ionCurrent = 0`, so Power restored one round too early. Guard now uses `ionCurrent > 0` (pre-decrement), matching the documented BUG-001 fix semantics.
+
+---
+
 ## [1.21.0] — 2026-06-20
 
 ### Fixed

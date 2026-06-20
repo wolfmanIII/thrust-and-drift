@@ -163,11 +163,11 @@ Suite Vitest collocata accanto ai file sorgente (`*.test.js` / `*.test.jsx`):
 | File | Coverage |
 | ---- | -------- |
 | `utils/hex.test.js` | `hex.js` — coordinate, distanza, pixel↔hex, range band |
-| `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco, getApValue, countMissileAmmoCapacity, countSandcasters, computeMissileAttackDM, computeMissileImpactDamage |
+| `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco, getApValue, countMissileAmmoCapacity, countSandcasters, computeMissileAttackDM, computeMissileImpactDamage, computeIonThrustEffect |
 | `utils/dice.test.js` | `dice.js` — rollDice, formatDiceResults, formatCheckResult |
 | `utils/crew.test.js` | `crew.js` — getCrewSkill, getEffectiveSkill, getAssignedSkill, buildDefaultAssignments, migrateCrew, blankCrewMember |
-| `data/weapons.test.js` | `weapons.js` — completezza catalogo WEAPON_IDS, campi obbligatori per ogni arma, barbette damageMultiple=3, turret damageMultiple=1, Ion Cannon invariants, Torpedo invariants, Missile Barbette invariants, AP cross-check, missile maxRange=Special, DEFENSIVE_WEAPONS |
-| `store/battleStore.test.js` | battleStore — tutte le azioni, export/import, sandcaster ammo init, spendSandAmmo, missile ammo init (barbette/torpedo), applyIonDamage, ion round decrement, spendReactionThrust+ionPenalty |
+| `data/weapons.test.js` | `weapons.js` — completezza catalogo WEAPON_IDS, campi obbligatori per ogni arma, barbette damageMultiple=3, turret damageMultiple=1, Ion Cannon (barbette, bayOnly, damageMultiple, ignoresArmour), bay variants S/M/L, Torpedo, Missile Barbette, AP cross-check, missile maxRange=Special, DEFENSIVE_WEAPONS |
+| `store/battleStore.test.js` | battleStore — tutte le azioni, export/import, sandcaster ammo init, spendSandAmmo, missile ammo init (barbette/torpedo), applyIonDamage (Power/bandwidth stacking, hardened guard), ion Power round restore, spendReactionThrust+Ion Power |
 | `store/profilesStore.test.js` | profilesStore — CRUD, import/export |
 | `store/uiStore.test.js` | uiStore — screen, modal, selection, contextMenu |
 | `components/map/BasicBattleView.test.jsx` | BasicBattleView — bento card (badge, status zone, ammo Rack/Barbette/Torpedo, sandcaster, ION badge, ion status row) |
@@ -267,17 +267,21 @@ type WeaponType =
   | "Railgun"
   | "Fusion Gun"      // HG p.28 — AP —, Radiation
   | "Plasma Gun"      // HG p.28
-  | "Ion Cannon"      // HG p.30 — no hull damage; applies ionPenalty
-  // Barbette weapons (damageMultiple: 3 — HG p.29)
+  // Barbette weapons (damageMultiple: 3 — HG p.29, except Ion: barbetteOnly)
+  | "Ion Cannon"                // HG p.30 — barbetteOnly; 2D×10 Power damage; ignores armour
   | "Pulse Laser Barbette"
   | "Beam Laser Barbette"
-  | "Particle Barbette"    // Radiation
-  | "Fusion Barbette"      // AP 3, Radiation
-  | "Plasma Barbette"      // AP 2
-  | "Railgun Barbette"     // AP 5
+  | "Particle Barbette"         // Radiation
+  | "Fusion Barbette"           // AP 3, Radiation
+  | "Plasma Barbette"           // AP 2
+  | "Railgun Barbette"          // AP 5
+  // Bay weapons (bayOnly: true)
+  | "Ion Cannon Bay (Small)"    // HG p.32 — 6D×10 Power, Medium
+  | "Ion Cannon Bay (Medium)"   // HG p.33 — 8D×20 Power, Medium
+  | "Ion Cannon Bay (Large)"    // HG p.33 — 10D×100 Power, Long
   // Launcher weapons
-  | "Missile Barbette"     // HG p.29 — fixed 5-missile salvo, 25 total
-  | "Torpedo"              // HG p.30–31 — 6D, 3 total, Smart trait
+  | "Missile Barbette"          // HG p.29 — fixed 5-missile salvo, 25 total
+  | "Torpedo"                   // HG p.30–31 — 6D, 3 total, Smart trait
 ```
 
 ### 4.2 Istanza Nave in Battaglia (ShipInstance)
@@ -314,9 +318,15 @@ interface ShipInstance {
   sensorLockedBy: string | null // id nave che ha sensor lock su di essa
   sensorLockDM: number          // DM attacco bonus da sensor lock (effetto del tiro)
 
-  // ION CANNON — HG p.30
-  ionPenalty: number            // Thrust penalty attivo (2D6 roll); 0 se non ionizzata
-  ionRoundsLeft: number         // Round rimanenti con penalità attiva; decrementato da buildNextRoundState
+  // ION WEAPONS — HG p.30–33, FAQ HG 2022 p.1
+  basePower: number             // Snapshot maxPower al momento addShip (per ripristino)
+  currentPower: number          // Power corrente; ridotto da colpi Ion; ripristinato su scadenza ionRoundsLeft
+  ionPowerReduction: number     // Riduzione cumulativa Power da colpi Ion attivi
+  ionRoundsLeft: number         // Round rimanenti con riduzione attiva; decrementato da buildNextRoundState
+  baseBandwidth: number         // Snapshot computerBandwidth al momento addShip
+  currentBandwidth: number      // Bandwidth corrente; mirror di currentPower (stessa riduzione)
+  bandwidthReduction: number    // Riduzione cumulativa bandwidth da colpi Ion attivi
+  hardened: boolean             // true = immune a Ion weapons (/fib computers)
 
   // MUNIZIONI
   missileAmmoTotal: number      // Missili rimanenti (tutti i launcher missile/torpedo combinati)
@@ -1693,6 +1703,21 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Reverse initiative Acceleration: solo vectorial** (TC p.174): l'ordine inverso era applicato a entrambi i modi. TC p.174 è specifico per vectorial; basic mode usa ordine normale (CRB p.164). Gating `combatMode === 'vectorial'` in `HUD`, `PhaseTracker`, `ContextMenu`, `advanceActor`.
 - **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
 - 832 test (+3 sensore lock flat).
+
+### 14.20 Versione 1.22.0 — Ion Weapons Power Stat ✅ COMPLETATA
+
+- **Ion Cannon** reclassificata `barbetteOnly: true`; rimossa dal turret weapon picker.
+- **Ion Cannon Bay** S/M/L aggiunte: `bayOnly: true`; Small 6D×10/Medium 8D×20/Large 10D×100; escluse da turret e barbette picker.
+- Tutti i weapon Ion: `ignoresArmour: true`; `damageMultiple` ora è il multiplo effettivo (barbette ×10, bay per HG p.31).
+- **ShipProfile**: nuovi campi `maxPower`, `computerBandwidth`, `hardened`; visibili in ShipProfileForm sezione Power Plant.
+- **ShipInstance**: nuovi campi `basePower`, `currentPower`, `ionPowerReduction`, `ionRoundsLeft`, `baseBandwidth`, `currentBandwidth`, `bandwidthReduction`, `hardened`.
+- **`computeIonThrustEffect(baseThrust, currentPower, maxPower)`** in `combat.js`: `floor(baseThrust × currentPower / maxPower)`; capped a `baseThrust`.
+- **`applyIonDamage`**: riduzione Power e bandwidth additiva; `ionRoundsLeft = max(existing, new)`; guard `hardened` → no-op.
+- **Computer bandwidth** (FAQ HG 2022 p.1): stessa riduzione Power dedotta da `currentBandwidth`; quando ≤ 0 e `baseBandwidth > 0` → DM-2 a tutti gli attacchi (COMMS DOWN).
+- **`buildNextRoundState`**: guard su `ionCurrent > 0` (fix BUG-001 reale — pre-decrement) per ripristino Power/bandwidth.
+- **IonDamageStep** generalizzata: legge `weapon.damageDice` e `weapon.damageMultiple` — nessuna logica hardcoded per mount type.
+- UI: badge ION NR, status row `⚡ ION NR — −X PWR · COMMS DOWN` in BasicBattleView; Power bar + bandwidth warning in ShipTooltip; righe Power/bandwidth in ShipDetailModal.
+- 907 test (+34 rispetto a v1.21.0: 12 battleStore, 6 combat, 7 weapons, 9 aggiornamenti test UI e battleStore esistenti).
 
 ### 14.19 Versione 1.21.0 — Reddit Bug Fixes + Point Defence Active Intercept ✅ COMPLETATA
 

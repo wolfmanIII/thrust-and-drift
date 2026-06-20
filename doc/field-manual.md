@@ -115,9 +115,9 @@ Click **📖 Legend** (fixed button, top-right of the battle screen) to open the
 | Category | Symbols |
 | -------- | ------- |
 | **Tokens** | Ship silhouette (6 shapes: delta, needle, freighter, gunship, cruiser, capital — each rotates to face velocity direction); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — rotates to face velocity direction; count + thrust arc shown; hover for launcher/target/thrust tooltip); torpedo (red/amber silhouette — separate salvo type) |
-| **Turret beams** | Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange), Fusion Gun (amber-white), Plasma Gun (magenta), Ion Cannon (electric blue — no hull damage, applies thrust penalty) |
+| **Turret beams** | Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange), Fusion Gun (amber-white), Plasma Gun (magenta) |
 | **Barbette beams** | Pulse Laser Barbette (sky blue, thicker), Beam Laser Barbette (blue, thicker), Particle Barbette (purple, thicker), Fusion Barbette (amber-white, thicker), Plasma Barbette (magenta, thicker), Railgun Barbette (orange, thicker) — all barbettes deal ×3 damage after armour |
-| **Hit effects** | Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion Cannon hit) |
+| **Hit effects** | Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion weapon hit) |
 | **Movement effects** | Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line) |
 | **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + red ring), Missile exhausted (×), Ion aura (pulsing blue ring, while ionRoundsLeft > 0), **Range band rings** (dashed cyan hexagons — SHORT / MEDIUM / LONG / VERY LONG boundaries — shown when a ship is selected; hidden during thrust targeting) |
 
@@ -525,7 +525,10 @@ Each weapon has a **maximum range band** beyond which it cannot fire
 | Fusion Barbette | Barbette | Medium |
 | Plasma Gun | Turret | Medium |
 | Plasma Barbette | Barbette | Medium |
-| Ion Cannon | Turret | Medium |
+| Ion Cannon | Barbette | Medium |
+| Ion Cannon Bay (Small) | Bay | Medium |
+| Ion Cannon Bay (Medium) | Bay | Medium |
+| Ion Cannon Bay (Large) | Bay | Long |
 | Pulse Laser | Turret | Long |
 | Pulse Laser Barbette | Barbette | Long |
 | Particle Beam | Turret | Very Long |
@@ -589,27 +592,53 @@ Formula: `netDamage = max(0, roll + Effect − effectiveArmour) × 3`
 > deals zero damage regardless of the ×3. Missile and torpedo barbettes are
 > excluded: their damage is per-projectile and uses the Smart trait salvo mechanic.
 
-#### Ion Cannon *(HG p.30)*
+#### Ion Weapons *(HG p.30–33, FAQ HG 2022 p.1)*
 
-The Ion Cannon does **not** deal hull damage on a hit. Instead, a successful attack
-applies a **thrust penalty** to the target for the remainder of the current round
-(and possibly longer):
+Ion weapons do **not** deal hull damage. A successful hit temporarily reduces the
+target's **Power** — disrupting thrust, computers, and critical systems.
+
+**Mounts and damage:**
+
+| Weapon | Mount | Damage formula | Max Range |
+| ------ | ----- | -------------- | --------- |
+| Ion Cannon | Barbette | 2D × 10 | Medium |
+| Ion Cannon Bay (Small) | Bay | 6D × 10 | Medium |
+| Ion Cannon Bay (Medium) | Bay | 8D × 20 | Medium |
+| Ion Cannon Bay (Large) | Bay | 10D × 100 | Long |
+
+**Mechanics:**
 
 | Outcome | Effect |
 | ------- | ------ |
-| Hit (any Effect) | Roll 2D6 → `ionPenalty` applied to target's available thrust for 1 round |
-| Hit, Effect ≥ 6 | Duration extends to D3 rounds instead of 1 |
+| Hit (any Effect) | Roll NbD, multiply by damageMultiple → deduct from target Power for 1 round |
+| Hit, Effect ≥ 6 | Duration extends to D3 rounds |
 
-The penalty decays by 1 round at end-of-round via `buildNextRoundState` — the
-penalty remains active throughout the current round and is only cleared once
-`ionRoundsLeft` reaches 0 at the end of that round.
-When `ionRoundsLeft` reaches 0, `ionPenalty` is cleared automatically.
+Ion weapons **ignore armour**. Multiple Ion hits on the same target stack additively
+(`ionPowerReduction += newDamage`); duration takes the longer of the two.
 
-While active, the target's token shows a **pulsing blue aura** and the bento card
-shows an **ION NR** badge. The bento card's status zone shows the current penalty
-(`⚡ −N thrust / NR remaining`).
+**Power → Thrust mapping** (T&D design decision — RAW does not specify the formula):
 
-`thrustAvailable = max(0, thrust − ionPenalty − M-Drive penalty − reactionThrust)`
+```
+effectiveThrust = floor(baseThrust × currentPower / maxPower)
+thrustAvailable = max(0, effectiveThrust + bonusThisRound − thrustUsed − mDrivePenalty − reactionThrust)
+```
+
+Example: Thrust 4, maxPower 100, Ion hit for 70 Power → currentPower 30 → effectiveThrust 1.
+
+**Computer bandwidth** *(FAQ HG 2022 p.1)*: the same Power reduction amount is also
+deducted from the target's computer bandwidth. While `currentBandwidth ≤ 0` and
+`baseBandwidth > 0`, all attack rolls suffer **DM-2** (displayed as COMMS DOWN).
+
+**Hardened computers** (`/fib` designation): ships with `hardened: true` in their
+profile are **immune** to Ion weapons — the attack roll is made normally but no
+Power or bandwidth is deducted.
+
+**Duration:** reduction persists until `ionRoundsLeft` ticks down to 0 *and* one
+additional round boundary passes. Power and bandwidth restore to base values at
+that point.
+
+While active, the target's token shows a **pulsing blue aura**; the bento card shows
+an **ION NR** badge and a status row (`⚡ ION NR — −X PWR · COMMS DOWN` when depleted).
 
 ### 9.11 Point Defence — Active Intercept
 
