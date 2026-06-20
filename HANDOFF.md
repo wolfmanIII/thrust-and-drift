@@ -9,30 +9,28 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.21.0 |
-| **Branch** | main (ahead of origin — push pending) |
-| **Test** | 873 passing |
-| **Ultimo commit** | chore(release): v1.21.0 docs + version bump |
+| **Versione** | 1.22.1 |
+| **Branch** | main (in sync con origin) |
+| **Test** | 907 passing |
+| **Ultimo commit** | chore(release): bump version to v1.22.1 and update all docs |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Reddit Bug Fixes + Point Defence Active Intercept (v1.21.0)
+### Sessione corrente — Ion Power + Weapon Picker + Label Rename + ESLint (v1.22.0 → v1.22.1)
 
-1. **`fix(battle): ion penalty + repair armour fixes + tests`** (`08f3174`) — BUG-001: `buildNextRoundState` controllava `ionNext` (post-decrement) anziché `ionCurrent`; penalità veniva azzerata un round prima. BUG-002: `repairCritical` non ripristinava `profile.armor` alla rimozione di un critico Armour. `addShip` aggiunge `baseArmor`; `repairCritical` ripristina via `baseArmor`. BUG-003: fix solo UI in `InitiativeModal.previewTotal` — store sempre corretto.
+1. **Ion Weapons Power stat (v1.22.0)** — `maxPower`, `computerBandwidth`, `hardened` nei profili; `currentPower`/`currentBandwidth` nell'istanza; `computeIonThrustEffect`; `applyIonDamage` additiva; `buildNextRoundState` ripristina Power su `ionCurrent > 0` (BUG-001 fix). 25 nuovi test.
 
-2. **`fix(ui): include leadership bonus in InitiativeModal preview total`** (`fcc3f2d`) — `previewTotal` non includeva `initiativeBonusNextRound`.
+2. **Ion Cannon nel weapon picker** (`7d44fa6`) — rimosso `barbetteOnly: true`; Ion Cannon e Ion Cannon Bay S/M/L selezionabili da qualsiasi weapon slot. Mount type (barbette/bay) è regola RAW, non vincolo del picker.
 
-3. **`docs(bug-tracker): add community bug analysis document`** (`ca41db6`) — `doc/bug-tracker.md` creato con analisi dettagliata di BUG-001, BUG-002, BUG-003, FEAT-001.
+3. **Rename Turret → Weapon** (`bb943ae`) — tutti i label UI: `Weapon {n}`, `W1`/`W2`…, `per-slot firing limit`, `All weapons fired`, `Gunner (W{n})`. Termini RAW invariati (`Gunner (turret)`, `Reload Turret`, `triple turret`).
 
-4. **`feat(attack): target in-flight missile salvos with Point Defence`** (`cde198d`) — FEAT-001: nuova modalità intercept nel turno attacco. `LASER_PD` spostato a module scope; `AttackConfigStep` filtra per laser weapon + salvo target; nuovo `MissilePdStep`; store action `interceptMissileSalvo`; `inFlightHostileMissiles` derivato da faction confronto.
+4. **ESLint cleanup** (`75faa09`, `e671b0b`) — hook condizionali corretti in `ActionModal` e `DogfightNotificationModal`; import/var inutilizzati; eslint-disable stale; `phase` aggiunto ai deps canvas renderer (bugfix canvas); `pendingMissileImpacts` aggiunto ai deps HUD callback.
 
-5. **`test(battle): add interceptMissileSalvo test suite`** (`01fa79e`) — 8 test FEAT-001 su `interceptMissileSalvo`.
+5. **Doc update + v1.22.1 bump** — CHANGELOG corretto (rimossa claim `barbetteOnly: true` errata), README, field-manual, HelpScreen, spec, HANDOFF sincronizzati.
 
-6. **`test(battle): fill coverage gaps from v1.21.0 bugfixes`** (`8a24399`) — 8 test aggiuntivi: `baseArmor` default in addShip, ion 2-round, `previewTotal` store (passati subito — store era già corretto).
-
-7. **`chore(git): untrack .claude/settings.local.json`** (`851a790`) + **`chore(git): ignore .claude/settings.local.json`** (`0166900`) — rimosso da tracking git.
+### Sessione precedente — Reddit Bug Fixes + Point Defence Active Intercept (v1.21.0)
 
 ### Sessione precedente — CotI Bug Fix + Range Band Rings (v1.20.9)
 

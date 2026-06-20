@@ -267,8 +267,8 @@ type WeaponType =
   | "Railgun"
   | "Fusion Gun"      // HG p.28 — AP —, Radiation
   | "Plasma Gun"      // HG p.28
-  // Barbette weapons (damageMultiple: 3 — HG p.29, except Ion: barbetteOnly)
-  | "Ion Cannon"                // HG p.30 — barbetteOnly; 2D×10 Power damage; ignores armour
+  // Barbette weapons (damageMultiple: 3 — HG p.29)
+  | "Ion Cannon"                // HG p.30 — barbette mount, 2D×10 Power damage; ignores armour
   | "Pulse Laser Barbette"
   | "Beam Laser Barbette"
   | "Particle Barbette"         // Radiation
@@ -1704,10 +1704,17 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
 - 832 test (+3 sensore lock flat).
 
+### 14.21 Versione 1.22.1 — Weapon Picker Fix + Label Rename ✅ COMPLETATA
+
+- **Ion Cannon nel weapon picker**: rimosso flag `barbetteOnly: true`; il picker non filtra per mount type. Ion Cannon (barbette, 2D×10) e Ion Cannon Bay S/M/L selezionabili da qualsiasi weapon slot — la scelta del mount è discrezione del GM.
+- **Rename Turret → Weapon in tutti i label UI**: ship profile form (`Weapon 1`, `max 3 weapons`, `Remove weapon slot`), ship detail sheet (`Weapon {n}:`), crew assignment (`Gunner (W{n})`), context menu (`All weapons fired`), HelpScreen, field manual (`W1`, `W2…`, `per-slot firing limit`). Termini RAW invariati (`Gunner (turret)`, `Reload Turret`, `triple turret`).
+- **ESLint cleanup**: hook condizionali corretti (`useMemo`/`useEffect` spostati prima degli early return in `ActionModal` e `DogfightNotificationModal`); import/var inutilizzati rimossi; eslint-disable stale rimossi; `phase` aggiunto ai deps di `useCanvasRenderer` (bugfix reale: canvas non si ridisegnava al cambio fase); `pendingMissileImpacts` aggiunto ai deps di `HUD.handleAdvancePhase`.
+- 907 test (invariato — nessuna nuova meccanica).
+
 ### 14.20 Versione 1.22.0 — Ion Weapons Power Stat ✅ COMPLETATA
 
-- **Ion Cannon** reclassificata `barbetteOnly: true`; rimossa dal turret weapon picker.
-- **Ion Cannon Bay** S/M/L aggiunte: `bayOnly: true`; Small 6D×10/Medium 8D×20/Large 10D×100; escluse da turret e barbette picker.
+- **Ion Cannon** disponibile nel weapon picker; mount type barbette per HG p.30 RAW.
+- **Ion Cannon Bay** S/M/L aggiunte: Small 6D×10/Medium 8D×20/Large 10D×100; selezionabili nel picker.
 - Tutti i weapon Ion: `ignoresArmour: true`; `damageMultiple` ora è il multiplo effettivo (barbette ×10, bay per HG p.31).
 - **ShipProfile**: nuovi campi `maxPower`, `computerBandwidth`, `hardened`; visibili in ShipProfileForm sezione Power Plant.
 - **ShipInstance**: nuovi campi `basePower`, `currentPower`, `ionPowerReduction`, `ionRoundsLeft`, `baseBandwidth`, `currentBandwidth`, `bandwidthReduction`, `hardened`.

@@ -15,9 +15,9 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Hex grid map** | Flat-top axial hex grid with pan & zoom |
 | **Vectorial movement** | Ships have velocity vectors; thrust modifies them |
 | **Thrust targeting** | Rubber-band canvas interaction during Acceleration: right-click → *Apply Thrust* → move cursor to aim; dashed line + ghost preview + `cost/max` badge; line turns orange at thrust cap; click to confirm, ESC to cancel |
-| **Ship profiles** | Full CRUD — create, edit, duplicate, delete (with confirmation); turret weapon slots capped at 3 (triple turret, CRB p.163) |
+| **Ship profiles** | Full CRUD — create, edit, duplicate, delete (with confirmation); weapon slots capped at 3 (triple turret, CRB p.163) |
 | **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
-| **Attack resolution** | 4-step flow: weapon/target config → 2D6 roll → damage → critical; per-turret firing limit (CRB p.164) — each turret fires once per round, slot badge (T1, T2…) shown in weapon list |
+| **Attack resolution** | 4-step flow: weapon/target config → 2D6 roll → damage → critical; per-slot firing limit (CRB p.164) — each slot fires once per round, slot badge (W1, W2…) shown in weapon list |
 | **Reactions (CRB p.171)** | Defender reacts before each attack roll: Evasive Action (1 thrust → DM −Pilot skill), Point Defence (laser turret → Gunner check, removes missiles), Disperse Sand (sandcaster turret → Gunner check, +1D+Effect armour vs laser); player ships enter physical dice manually |
 | **Missile launch** | Three launcher types in the Attack modal: **Missile Rack** (count stepper, 12/rack, 4D per missile), **Missile Barbette** (fixed 5-missile salvo, 25 total, 4D per missile), **Torpedo** (1–3 per launch, 3 total, 6D per torpedo, red token) — no DM roll at launch; salvo token inherits launcher vector |
 | **Missile guidance** | Each round in the movement phase, all guided salvos home toward their target's predicted next position; up to 10 hex/round delta-v correction (MgT2e CRB p.162 — Thrust 10); drifts when 10-round fuel exhausted |
@@ -30,7 +30,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Sound effects** | Procedural synthesis via Web Audio API — laser, impact, critical, missile launch, thrust plume; 🔊/🔇 mute toggle in HUD; no audio files required |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in on all roll steps (attack, damage, critical location, extra damage, reactions, crew actions, initiative); NPC ships auto-roll |
 | **Destroyed ships** | Hull = 0 → `isDestroyed` flag; token rendered at 35% opacity with ☠ badge; all combat actions blocked ("WRECK — no actions available"); ship skipped in initiative cycling; GM removes wreck manually |
-| **Crew assignments** | Right-click any ship → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner T1…Tn); unassigned roles contribute 0; turrets without a gunner cannot fire |
+| **Crew assignments** | Right-click any ship → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner W1…Wn); unassigned roles contribute 0; weapon slots without a gunner cannot fire |
 | **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action. Sensor operators have three actions: Sensor Lock (8+, DM+2 flat), Electronic Warfare (8+, breaks sensor lock), **EW — Counter Missile** (10+, Effect removes missiles from a salvo — CRB p.173) |
 | **Initiative** | 2D6 + Pilot + Thrust [+ Tactics Effect]; optional Tactics(naval) check (CRB p.160); player ships manual entry, NPC auto-rolled |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
@@ -102,7 +102,7 @@ A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 - Empty hex → **Add ship here**
 - Ship hex → actions valid for the **current phase** AND **current actor** only:
   - *Acceleration*: Apply Thrust (current actor only)
-  - *Attack*: Attack (current actor only; disappears when all turrets fired)
+  - *Attack*: Attack (current actor only; disappears when all weapon slots fired)
   - *Actions*: Crew Action (current actor only)
   - *Always*: Ship Sheet, Remove from battle
 
@@ -122,7 +122,7 @@ The HUD (top-left) shows the current round and phase.
 | **Initiative** | Open right-click menu → roll initiative via modal |
 | **Acceleration** | Each ship in turn: right-click → Thrust |
 | **Movement** | Click **NEXT PHASE** — all ships move by their vector |
-| **Attack** | Each ship in turn: right-click → Attack (select weapon/turret; Missile Rack shows count stepper + LAUNCH SALVO) |
+| **Attack** | Each ship in turn: right-click → Attack (select weapon/slot; Missile Rack shows count stepper + LAUNCH SALVO) |
 | **Actions** | Each ship in turn: right-click → Crew Action |
 | **End of Round** | Click **NEXT PHASE** to start the next round |
 
@@ -158,7 +158,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-907 tests across utils, Zustand stores, hooks, and UI components. (v1.22.0)
+907 tests across utils, Zustand stores, hooks, and UI components. (v1.22.1)
 
 ---
 
