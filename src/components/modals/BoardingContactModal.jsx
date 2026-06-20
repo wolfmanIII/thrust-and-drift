@@ -135,7 +135,7 @@ export function BoardingContactModal() {
   const {
     ships, boardings,
     setContactMethod, toggleDefenderRotation, toggleForcedLinkage,
-    advanceBoardingPhase,
+    advanceBoardingPhase, applyBoardingCutDamage,
   } = useBattleStore()
 
   const [dice, setDice] = useState(null)
@@ -157,11 +157,7 @@ export function BoardingContactModal() {
   const needsRoll = method && method.check !== null && boarding.contactMethod !== 'hull_cut'
 
   function handleApplyCutDamage(dmg) {
-    useBattleStore.setState((s) => ({
-      boardings: s.boardings.map((b) =>
-        b.id !== boarding.id ? b : { ...b, hullDamageSoFar: (b.hullDamageSoFar ?? 0) + dmg }
-      ),
-    }))
+    applyBoardingCutDamage(boarding.id, dmg)
   }
 
   const difficulty  = method?.difficulty ?? 8

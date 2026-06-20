@@ -1769,6 +1769,23 @@ const useBattleStore = create((set, get) => {
   ),
 
   /**
+   * Accumulate hull-cut damage for a boarding in progress.
+   * Routes through wh so the change enters the undo stack.
+   * @param {string} boardingId
+   * @param {number} dmg  Amount to add to hullDamageSoFar
+   */
+  applyBoardingCutDamage: wh(
+    (boardingId) => !!get().boardings.find((b) => b.id === boardingId && b.outcome === null),
+    (boardingId, dmg) => {
+      set((s) => ({
+        boardings: s.boardings.map((b) =>
+          b.id !== boardingId ? b : { ...b, hullDamageSoFar: (b.hullDamageSoFar ?? 0) + dmg }
+        ),
+      }))
+    },
+  ),
+
+  /**
    * Change a ship's faction (used after boarding outcome 'attacker_wins').
    * @param {string} shipId
    * @param {'players'|'npc'|'neutral'} newFaction
