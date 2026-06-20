@@ -25,7 +25,7 @@ function useActionEffects() {
   const reloadTurret         = useBattleStore((s) => s.reloadTurret)
   const applyMissileEW       = useBattleStore((s) => s.applyMissileEW)
 
-  return (actionId, shipId, effect, targetShipId, targetImpactId) => {
+  return (actionId, shipId, effect, targetShipId, targetImpactId, critIndex) => {
     switch (actionId) {
       case 'sensor_lock':
         if (targetShipId) applySensorLock(shipId, targetShipId)
@@ -37,7 +37,7 @@ function useActionEffects() {
         if (targetImpactId) applyMissileEW(shipId, targetImpactId, effect)
         break
       case 'repair_system':
-        repairCritical(shipId)
+        repairCritical(shipId, critIndex ?? 0)
         break
       case 'improve_initiative':
         applyInitiativeBonus(shipId, effect)
@@ -98,6 +98,7 @@ export function ActionModal() {
   const [rollResult, setRollResult]             = useState(null)
   const [manualDice, setManualDice]             = useState(null)
   const [skillOverride, setSkillOverride]       = useState(null)
+  const [selectedCritIndex, setSelectedCritIndex] = useState(0)
 
   // Memoised — migrateCrew calls uuidv7() so must not run on every render
   const crewArray = useMemo(() => {
@@ -133,7 +134,26 @@ export function ActionModal() {
     setTargetImpactId(null)
     setManualDice(null)
     setSkillOverride(action.skillLevel)
+    setSelectedCritIndex(0)
   }
+
+  // Repair difficulty scales with severity — CRB p.167
+  function repairDifficulty(severity) {
+    if (severity <= 2) return 8
+    if (severity <= 4) return 10
+    return 12
+  }
+  function repairDifficultyLabel(severity) {
+    if (severity <= 2) return 'Average (8+)'
+    if (severity <= 4) return 'Difficult (10+)'
+    return 'Very Difficult (12+)'
+  }
+
+  const isRepairAction = selectedAction?.id === 'repair_system'
+  const selectedCrit   = isRepairAction ? (ship.criticalHits[selectedCritIndex] ?? null) : null
+  const effectiveDifficulty = isRepairAction && selectedCrit
+    ? repairDifficulty(selectedCrit.severity)
+    : selectedAction?.difficulty
 
   const handleRoll = () => {
     if (!selectedAction) return
@@ -141,12 +161,12 @@ export function ActionModal() {
     if (selectedAction.requiresSalvoTarget && !targetImpactId) return
 
     let result
-    if (selectedAction.difficulty === 'auto') {
+    if (effectiveDifficulty === 'auto') {
       result = { display: 'Automatic', success: true, effect: 0, finalTotal: 8 }
     } else {
       const roll = isPlayer ? manualDice : roll2D6()
       const dm   = skillOverride ?? selectedAction.skillLevel
-      result = formatCheckResult(roll, dm, selectedAction.difficulty)
+      result = formatCheckResult(roll, dm, effectiveDifficulty)
     }
 
     if (selectedMember) markCrewMemberUsed(ship.id, selectedMember.id)
@@ -156,14 +176,15 @@ export function ActionModal() {
     )
 
     if (result.success) {
-      applyEffect(selectedAction.id, ship.id, result.effect, targetShipId, targetImpactId)
+      applyEffect(selectedAction.id, ship.id, result.effect, targetShipId, targetImpactId, selectedCritIndex)
     }
   }
 
   const canRoll = selectedAction &&
     (!selectedAction.requiresTarget || targetShipId) &&
     (!selectedAction.requiresSalvoTarget || targetImpactId) &&
-    !(isPlayer && selectedAction.difficulty !== 'auto' && !manualDice)
+    !(isRepairAction && ship.criticalHits.length === 0) &&
+    !(isPlayer && effectiveDifficulty !== 'auto' && !manualDice)
 
   return (
     <Modal title={`Actions — ${ship.profile.name}`} onClose={closeModal}>
@@ -269,23 +290,31 @@ export function ActionModal() {
                   <p className="text-slate-400 font-mono text-xs italic">No actions available for this crew member.</p>
                 )}
                 <div className="space-y-1 max-h-40 overflow-y-auto">
-                  {memberActions.map((action) => (
-                    <button
-                      key={action.id}
-                      onClick={() => handleSelectAction(action)}
-                      className={`w-full text-left px-3 py-2 rounded font-mono text-xs border transition-colors ${
-                        selectedAction?.id === action.id
-                          ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
-                          : 'border-slate-700 text-slate-300 hover:border-slate-500'
-                      }`}
-                    >
-                      <span className="font-bold">{action.label}</span>
-                      <span className="text-slate-400 ml-2">
-                        {action.difficulty === 'auto' ? 'Automatic' : `Target ${action.difficulty}+`}
-                        {' · '}Skill {action.skillLevel}
-                      </span>
-                    </button>
-                  ))}
+                  {memberActions.map((action) => {
+                    const isRepair = action.id === 'repair_system'
+                    const noCrits  = isRepair && ship.criticalHits.length === 0
+                    return (
+                      <button
+                        key={action.id}
+                        onClick={() => !noCrits && handleSelectAction(action)}
+                        disabled={noCrits}
+                        className={`w-full text-left px-3 py-2 rounded font-mono text-xs border transition-colors ${
+                          selectedAction?.id === action.id
+                            ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
+                            : noCrits
+                              ? 'border-slate-800 text-slate-600 cursor-not-allowed'
+                              : 'border-slate-700 text-slate-300 hover:border-slate-500'
+                        }`}
+                      >
+                        <span className="font-bold">{action.label}</span>
+                        <span className="text-slate-400 ml-2">
+                          {action.difficulty === 'auto' ? 'Automatic' : `Target ${action.difficulty}+`}
+                          {' · '}Skill {action.skillLevel}
+                        </span>
+                        {noCrits && <span className="ml-2 text-slate-600">— no criticals</span>}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -362,15 +391,43 @@ export function ActionModal() {
               </div>
             )}
 
+            {/* Critical selector — repair_system with multiple criticals */}
+            {isRepairAction && ship.criticalHits.length > 0 && (
+              <div>
+                <p className="font-mono text-xs text-slate-400 tracking-widest uppercase mb-1.5">
+                  Critical to Repair
+                </p>
+                <div className="space-y-0.5">
+                  {ship.criticalHits.map((c, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedCritIndex(i)}
+                      className={`w-full text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
+                        selectedCritIndex === i
+                          ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
+                          : 'border-slate-700 text-slate-300 hover:border-slate-500'
+                      }`}
+                    >
+                      <span className="font-bold">{c.system}</span>
+                      <span className="text-slate-400 ml-2">Sev. {c.severity}</span>
+                      <span className="text-slate-500 ml-2">· {repairDifficultyLabel(c.severity)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Action description */}
             {selectedAction && (
               <p className="text-slate-400 font-mono text-xs leading-relaxed border-l-2 border-slate-700 pl-3">
-                {selectedAction.description}
+                {isRepairAction && selectedCrit
+                  ? `Engineer check (${repairDifficultyLabel(selectedCrit.severity)}). Success: removes ${selectedCrit.system} Sev.${selectedCrit.severity}. // MgT2e CRB p.167`
+                  : selectedAction.description}
               </p>
             )}
 
             {/* Skill level override — always shown when non-auto action selected */}
-            {selectedAction && selectedAction.difficulty !== 'auto' && (
+            {selectedAction && effectiveDifficulty !== 'auto' && (
               <div className="flex items-center gap-2 bg-slate-800/60 rounded px-3 py-1.5">
                 <span className="text-slate-400 font-mono text-xs flex-1">Skill DM</span>
                 <input
@@ -396,11 +453,11 @@ export function ActionModal() {
             )}
 
             {/* Player manual dice entry — shown when an action requiring a roll is selected */}
-            {isPlayer && selectedAction && selectedAction.difficulty !== 'auto' && (
+            {isPlayer && selectedAction && effectiveDifficulty !== 'auto' && (
               <div className="flex items-center gap-3 bg-slate-800 rounded px-3 py-2">
                 <span className="text-slate-400 font-mono text-xs">2D6:</span>
                 <DiceInput
-                  key={selectedAction.id}
+                  key={`${selectedAction.id}-${selectedCritIndex}`}
                   value={null}
                   onChange={setManualDice}
                 />
@@ -412,7 +469,7 @@ export function ActionModal() {
               disabled={!canRoll}
               className="w-full py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-sm tracking-widest rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
             >
-              {isPlayer && selectedAction?.difficulty !== 'auto' ? 'CONFIRM ROLL' : '🎲 EXECUTE ACTION'}
+              {isPlayer && effectiveDifficulty !== 'auto' ? 'CONFIRM ROLL' : '🎲 EXECUTE ACTION'}
             </button>
           </>
         )}

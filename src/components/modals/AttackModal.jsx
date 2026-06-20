@@ -1171,6 +1171,13 @@ function AttackCriticalStep({
               </div>
             )}
 
+            {/* Manual application banner for descriptive effects */}
+            {effect?.mechanic === 'descriptive' && (
+              <div className="bg-amber-950/40 border border-amber-500/40 rounded px-3 py-2 font-mono text-xs text-amber-400">
+                ⚠ MANUAL — Apply this effect to the ship before closing.
+              </div>
+            )}
+
             {/* Extra roll: hull extra damage, or armour reduction */}
             {needsExtraRoll && extraDamageResult === null && (
               isPlayer ? (

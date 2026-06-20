@@ -1358,17 +1358,19 @@ const useBattleStore = create((set, get) => {
   ),
 
   /**
-   * Remove the first critical hit from a ship (Engineer repair).
+   * Remove a critical hit from a ship (Engineer repair).
    * Recomputes thrustPenalty from remaining M-Drive crit, if any.
    * // MgT2e CRB p.167 — Repair System
    * @param {string} shipId
+   * @param {number} [critIndex=0]  Index into criticalHits array to repair
    */
   repairCritical: wh(
     (shipId) => { const s = get().ships.find((sh) => sh.id === shipId); return !!s && s.criticalHits.length > 0 },
-    (shipId) => {
+    (shipId, critIndex = 0) => {
       const ship = get().ships.find((s) => s.id === shipId)
-      const removed        = ship.criticalHits[0]
-      const remainingCrits = ship.criticalHits.slice(1)
+      const idx            = Math.min(critIndex, ship.criticalHits.length - 1)
+      const removed        = ship.criticalHits[idx]
+      const remainingCrits = ship.criticalHits.filter((_, i) => i !== idx)
       const mDriveCrit     = remainingCrits.find((c) => c.system === 'M-Drive')
       const thrustPenalty  = computeThrustPenalty(mDriveCrit, ship.profile.thrust)
       // Armour crit: restore profile.armor to the original value captured at addShip. // CRB p.167
