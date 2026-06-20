@@ -99,17 +99,17 @@ export function ActionModal() {
   const [manualDice, setManualDice]             = useState(null)
   const [skillOverride, setSkillOverride]       = useState(null)
 
+  // Memoised — migrateCrew calls uuidv7() so must not run on every render
+  const crewArray = useMemo(() => {
+    if (!ship) return []
+    return Array.isArray(ship.profile.crew)
+      ? ship.profile.crew
+      : migrateCrew(ship.profile.crew ?? {})
+  }, [ship?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!ship) return null
 
   const isPlayer = ship.faction === 'players'
-
-  // Memoised — migrateCrew calls uuidv7() so must not run on every render
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const crewArray = useMemo(() =>
-    Array.isArray(ship.profile.crew)
-      ? ship.profile.crew
-      : migrateCrew(ship.profile.crew ?? {}),
-  [ship.id])
 
   const usedCrewMembers = ship.usedCrewMembers ?? []
   const availableCrew   = crewArray.filter((m) => !usedCrewMembers.includes(m.id))
