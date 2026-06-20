@@ -1604,7 +1604,11 @@ const useBattleStore = create((set, get) => {
       const { ships } = get()
       const attacker = ships.find((s) => s.id === attackerId)
       const defender = ships.find((s) => s.id === defenderId)
-      return !!(attacker && defender && attacker.faction !== defender.faction)
+      return !!(
+        attacker && defender &&
+        attacker.faction !== defender.faction &&
+        !attacker.inBoarding && !defender.inBoarding
+      )
     },
     (attackerId, defenderId) => {
       const { round, phase } = get()

@@ -100,6 +100,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
 
   const boardingTargets = combatMode === 'vectorial' ? ships.filter((t) => {
     if (t.faction === ship.faction) return false
+    if (ship.inBoarding || t.inBoarding) return false
     if (hexDistance(ship.position, t.position) > 1) return false
     const mDriveDisabled = t.criticalHits?.some((c) => c.system === 'm-drive' && c.disabled)
     return mDriveDisabled || ship.profile.thrust >= t.profile.thrust
