@@ -1749,9 +1749,15 @@ const useBattleStore = create((set, get) => {
           boardings: s.boardings.map((b) =>
             b.id !== boardingId ? b : { ...b, outcome, phase: 'security' }
           ),
-          ships: s.ships.map((sh) =>
-            sh.inBoarding === boardingId ? { ...sh, inBoarding: null } : sh
-          ),
+          ships: s.ships.map((sh) => {
+            if (sh.inBoarding !== boardingId) return sh
+            const destroyed = outcome === 'ship_destroyed' && sh.id === boarding?.defenderId
+            return {
+              ...sh,
+              inBoarding: null,
+              ...(destroyed ? { isDestroyed: true, hullCurrent: 0 } : {}),
+            }
+          }),
           log: [...s.log, makeLogEntry({
             round, phase, type: 'system',
             message: `⚔ Boarding resolved — ${label}. ${boarding ? `(${s.ships.find((sh) => sh.id === boarding.attackerId)?.profile.name ?? ''} → ${s.ships.find((sh) => sh.id === boarding.defenderId)?.profile.name ?? ''})` : ''}`,
