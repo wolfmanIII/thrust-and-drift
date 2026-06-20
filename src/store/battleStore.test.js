@@ -1174,6 +1174,55 @@ describe('repairCritical', () => {
     useBattleStore.getState().repairCritical(id)
     expect(useBattleStore.getState().ships[0].profile.armor).toBe(4)
   })
+
+  // FIX-03: critIndex selects which crit to repair, not always the first.
+  it('removes crit at specified critIndex', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'Sensors', severity: 1 })
+    useBattleStore.getState().addCriticalHit(id, { system: 'Hull',    severity: 2 })
+    useBattleStore.getState().addCriticalHit(id, { system: 'Fuel',    severity: 3 })
+    useBattleStore.getState().repairCritical(id, 1)
+    const crits = useBattleStore.getState().ships[0].criticalHits
+    expect(crits).toHaveLength(2)
+    expect(crits[0].system).toBe('Sensors')
+    expect(crits[1].system).toBe('Fuel')
+  })
+
+  it('critIndex out of bounds is clamped to last entry', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().addCriticalHit(id, { system: 'Sensors', severity: 1 })
+    useBattleStore.getState().addCriticalHit(id, { system: 'Hull',    severity: 2 })
+    useBattleStore.getState().repairCritical(id, 99)
+    const crits = useBattleStore.getState().ships[0].criticalHits
+    expect(crits).toHaveLength(1)
+    expect(crits[0].system).toBe('Sensors')
+  })
+})
+
+// FIX-04: spendMissileAmmo deducts ammo from attacker when PD intercepts full salvo.
+describe('spendMissileAmmo', () => {
+  it('deducts count from missileAmmoTotal', () => {
+    const profile = makeProfile({ turrets: [{ weapons: ['Missile Rack'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(12)
+    useBattleStore.getState().spendMissileAmmo(id, 3)
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(9)
+  })
+
+  it('floors missileAmmoTotal at 0', () => {
+    const profile = makeProfile({ turrets: [{ weapons: ['Missile Rack'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().spendMissileAmmo(id, 20)
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(0)
+  })
+
+  it('unknown shipId is no-op', () => {
+    expect(() => useBattleStore.getState().spendMissileAmmo('ghost', 5)).not.toThrow()
+  })
 })
 
 describe('applyInitiativeBonus', () => {
@@ -1212,6 +1261,32 @@ describe('applyInitiativeBonus', () => {
     useBattleStore.getState().applyInitiativeBonus(id, 5)
     useBattleStore.getState().rollAllInitiative({}, { [id]: { total: 7, results: [4, 3] } })
     expect(useBattleStore.getState().ships[0].initiativeBonusNextRound).toBe(0)
+  })
+
+  // FIX-06: bonus applies immediately to initiative this round (not deferred). // CRB p.166
+  it('immediately applies bonus to ship.initiative', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4, crew: { pilot: 2 } }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().rollAllInitiative({}, { [id]: { total: 7, results: [4, 3] } }) // 7+2+4 = 13
+    useBattleStore.getState().applyInitiativeBonus(id, 3)
+    expect(useBattleStore.getState().ships[0].initiative).toBe(16)
+  })
+
+  it('sets initiativeTemporaryBonus equal to applied amount', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyInitiativeBonus(id, 4)
+    expect(useBattleStore.getState().ships[0].initiativeTemporaryBonus).toBe(4)
+  })
+
+  it('startNextRound subtracts initiativeTemporaryBonus from initiative and clears it', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4, crew: { pilot: 2 } }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().rollAllInitiative({}, { [id]: { total: 7, results: [4, 3] } }) // initiative = 13
+    useBattleStore.getState().applyInitiativeBonus(id, 3) // initiative = 16, temporaryBonus = 3
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].initiative).toBe(13)
+    expect(useBattleStore.getState().ships[0].initiativeTemporaryBonus).toBe(0)
   })
 })
 
