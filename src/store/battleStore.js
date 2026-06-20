@@ -7,7 +7,7 @@
 import { create } from 'zustand'
 import { v7 as uuidv7 } from 'uuid'
 import { exportBattle, importBattle } from '../utils/io.js'
-import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount, countMissileAmmoCapacity, countSandcasters } from '../utils/combat.js'
+import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount, countMissileAmmoCapacity, countSandcasters, computeIonThrustEffect } from '../utils/combat.js'
 import { hexAdd, hexDistance, segmentMinDistance } from '../utils/hex.js'
 import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
@@ -157,20 +157,26 @@ function buildNextRoundState(s) {
       ...newImpacts,
     ],
     ships: s.ships.map((sh) => {
-      const ionCurrent = sh.ionRoundsLeft ?? 0
-      const ionNext    = Math.max(0, ionCurrent - 1)
+      const ionCurrent    = sh.ionRoundsLeft ?? 0
+      const ionNext       = Math.max(0, ionCurrent - 1)
+      const ionReduction  = ionCurrent > 0 ? (sh.ionPowerReduction ?? 0) : 0
+      const restoredPower = sh.basePower ?? sh.profile.maxPower ?? 100
+      const baseBw        = sh.baseBandwidth ?? sh.profile.computerBandwidth ?? 0
+      const bwReduction   = ionCurrent > 0 ? (sh.bandwidthReduction ?? 0) : 0
       return {
         ...sh,
-        thrustUsedThisRound: 0,
+        thrustUsedThisRound:  0,
         thrustBonusThisRound: 0,
-        hasActedThisPhase: false,
-        evasiveThrust: 0,
-        firedTurrets: [],
-        usedCrewMembers: [],
-        ionRoundsLeft: ionNext,
-        // Keep penalty while ionCurrent > 0: the hit applies to the *next* acceleration phase.
-        // Only clear when ionCurrent was already 0 (penalty fully expired). // HG p.30
-        ionPenalty: ionCurrent > 0 ? (sh.ionPenalty ?? 0) : 0,
+        hasActedThisPhase:    false,
+        evasiveThrust:        0,
+        firedTurrets:         [],
+        usedCrewMembers:      [],
+        ionRoundsLeft:        ionNext,
+        // Power + bandwidth restore on expiry. // HG p.30, FAQ HG 2022 p.1
+        ionPowerReduction:  ionNext > 0 ? ionReduction : 0,
+        currentPower:       ionNext > 0 ? Math.max(0, restoredPower - ionReduction) : restoredPower,
+        bandwidthReduction: ionNext > 0 ? bwReduction : 0,
+        currentBandwidth:   ionNext > 0 ? Math.max(0, baseBw - bwReduction) : baseBw,
       }
     }),
     log: [
@@ -385,6 +391,14 @@ const useBattleStore = create((set, get) => {
       inDogfight: null,
       inBoarding: null,
       crewAssignments: buildDefaultAssignments(profile.crew, profile.turrets),
+      // Ion Power stat — HG p.30, FAQ HG 2022 p.1
+      basePower:          profile.maxPower ?? 100,
+      currentPower:       profile.maxPower ?? 100,
+      ionPowerReduction:  0,
+      baseBandwidth:      profile.computerBandwidth ?? 0,
+      currentBandwidth:   profile.computerBandwidth ?? 0,
+      bandwidthReduction: 0,
+      hardened:           profile.hardened ?? false,
     }
     const { ships: existing, combatMode } = get()
     const newRangeBands = {}
@@ -895,15 +909,6 @@ const useBattleStore = create((set, get) => {
   },
 
   /**
-   * Apply ion disruption to a ship. Does not damage hull.
-   * Reduces thrustAvailable by ionPower for ionRounds rounds.
-   * Clears automatically via buildNextRoundState at round boundary.
-   * // MgT2e HG p.30 — Ion weapons
-   * @param {string} targetId
-   * @param {number} ionPower   Thrust penalty (2D6 roll result)
-   * @param {number} ionRounds  Duration in rounds (1, or D3 if effect ≥ 6)
-   */
-  /**
    * Consume one sandcaster canister on the given ship.
    * // MgT2e HG p.28 — 20 canisters per sandcaster
    * @param {string} shipId
@@ -917,12 +922,36 @@ const useBattleStore = create((set, get) => {
     }))
   },
 
-  applyIonDamage: (targetId, ionPower, ionRounds) => {
+  /**
+   * Apply Ion weapon hit to a ship — reduces Power and computer bandwidth.
+   * Hardened (/fib) ships are immune. Stacking: reductions are additive,
+   * duration = max(existing, new). // HG p.30, FAQ HG 2022 p.1
+   * @param {string} targetId
+   * @param {number} ionDamage  Result of NbD × damageMultiple (already computed)
+   * @param {number} ionRounds  Duration in rounds (1 or D3 if Effect ≥ 6)
+   */
+  applyIonDamage: (targetId, ionDamage, ionRounds) => {
     set((s) => ({
-      ships: s.ships.map((sh) => sh.id !== targetId ? sh : {
-        ...sh,
-        ionPenalty:    ionPower,
-        ionRoundsLeft: ionRounds,
+      ships: s.ships.map((sh) => {
+        if (sh.id !== targetId) return sh
+        if (sh.hardened) return sh                                    // /fib — immune
+        const basePower         = sh.basePower ?? sh.profile.maxPower ?? 100
+        const prevPwrReduction  = sh.ionPowerReduction ?? 0
+        const newPwrReduction   = prevPwrReduction + ionDamage
+        const newRoundsLeft     = Math.max(sh.ionRoundsLeft ?? 0, ionRounds)
+        const newCurrentPower   = Math.max(0, basePower - newPwrReduction)
+        const baseBw            = sh.baseBandwidth ?? sh.profile.computerBandwidth ?? 0
+        const prevBwReduction   = sh.bandwidthReduction ?? 0
+        const newBwReduction    = prevBwReduction + ionDamage
+        const newCurrentBw      = Math.max(0, baseBw - newBwReduction)
+        return {
+          ...sh,
+          ionPowerReduction:  newPwrReduction,
+          currentPower:       newCurrentPower,
+          ionRoundsLeft:      newRoundsLeft,
+          bandwidthReduction: newBwReduction,
+          currentBandwidth:   newCurrentBw,
+        }
       }),
     }))
   },
@@ -1160,11 +1189,12 @@ const useBattleStore = create((set, get) => {
     (shipId, amount) => {
       const ship = get().ships.find((s) => s.id === shipId)
       const spent = ship.evasiveThrust ?? 0
+      const basePow  = ship.basePower ?? ship.profile.maxPower ?? 100
+      const ionCap   = computeIonThrustEffect(ship.profile.thrust, ship.currentPower ?? basePow, basePow)
       const maxReaction = Math.max(0,
-        ship.profile.thrust + (ship.thrustBonusThisRound ?? 0)
+        ionCap + (ship.thrustBonusThisRound ?? 0)
         - ship.thrustUsedThisRound
         - (ship.thrustPenalty ?? 0)
-        - (ship.ionPenalty ?? 0)
         - spent
       )
       const clamped = Math.max(0, Math.min(amount, maxReaction))
