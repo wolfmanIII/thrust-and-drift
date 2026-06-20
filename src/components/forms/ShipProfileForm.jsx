@@ -86,12 +86,12 @@ function CheckboxField({ label, checked, onChange, tooltip }) {
         onChange={(e) => onChange(e.target.checked)}
         className="w-3.5 h-3.5 accent-(--neon-cyan) cursor-pointer"
       />
-      <span className="font-mono text-xs text-slate-400 tracking-widest">
-        {label}
-        {tooltip && (
-          <span className="ml-1 text-slate-500" title={tooltip}>(?)</span>
-        )}
-      </span>
+      <span className="font-mono text-xs text-slate-400 tracking-widest">{label}</span>
+      {tooltip && (
+        <Tooltip label={tooltip} position="top">
+          <span className="text-slate-500 cursor-help">(?)</span>
+        </Tooltip>
+      )}
     </label>
   )
 }
