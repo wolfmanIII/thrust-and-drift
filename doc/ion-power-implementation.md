@@ -7,13 +7,14 @@
 
 ## 1. Motivazione e riferimenti RAW
 
-La nostra implementazione attuale di Ion Cannon è **non conforme** a RAW su tre punti:
+La nostra implementazione attuale di Ion Cannon è **non conforme** a RAW su quattro punti:
 
-| Punto | Attuale (errato) | RAW (HG p.30) |
+| Punto | Attuale (errato) | RAW (HG p.30–33) |
 | ----- | --------------- | -------------- |
-| Montaggio | Turret (qualsiasi) | **Barbette only** |
+| Montaggio | Turret (qualsiasi) | **Barbette e Bay** — turret non ha Ion |
 | Stat bersaglio | Thrust | **Power** |
-| Formula danno | 2D6 grezzo = penalità thrust | **2D × 10, ignorando armatura** |
+| Formula danno | 2D6 grezzo = penalità thrust | **2D × 10** (barbette) / **NbD × multiplo bay** (bay) |
+| Armi mancanti | Solo Ion Cannon (barbette) | **Ion Cannon Bay** esiste in 3 taglie (Small/Medium/Large) |
 
 **FAQ HG 2022 p.1 — errata su Weapon Trait: Ion (p.30):**
 > "At the end of the third paragraph, add: Deduct the same amount of damage from the computer bandwidth. Hardened computers (those with the /fib designation) are immune to Ion weapons."
@@ -30,13 +31,44 @@ La nostra implementazione attuale di Ion Cannon è **non conforme** a RAW su tre
 | ------ | -- | ----- | ----- | ------ | ------ |
 | Ion Cannon | 12 | Medium | 10 | **2D × 10** | Ion |
 
+Il ×10 è esplicito nella colonna Damage e **sovrascrive** il barbette damage multiple ×3 standard (il quale si applica ai danni scafo, non ai danni Power).
+
+**Tabella Small Bay Weapons (HG p.32):**
+
+| Weapon | TL | Range | Power | Damage | Traits |
+| ------ | -- | ----- | ----- | ------ | ------ |
+| Ion Cannon Bay | 12 | Medium | 20 | **6D** | Ion |
+
+Power ridotto effettivo: 6D × 10 (bay damage multiple Small = 10 — HG p.31).
+
+**Tabella Medium Bay Weapons (HG p.33):**
+
+| Weapon | TL | Range | Power | Damage | Traits |
+| ------ | -- | ----- | ----- | ------ | ------ |
+| Ion Cannon Bay | 12 | Medium | 30 | **8D** | Ion |
+
+Power ridotto effettivo: 8D × 20 (bay damage multiple Medium = 20 — HG p.31).
+
+**Tabella Large Bay Weapons (HG p.33):**
+
+| Weapon | TL | Range | Power | Damage | Traits |
+| ------ | -- | ----- | ----- | ------ | ------ |
+| Ion Cannon Bay | 12 | Long | 40 | **10D** | Ion |
+
+Power ridotto effettivo: 10D × 100 (bay damage multiple Large = 100 — HG p.31).
+
 ---
 
 ## 3. Decisioni di design per T&D
 
-### 3.1 Ion Cannon → Barbette only
+### 3.1 Ion Cannon → Barbette e Bay, mai Turret
 
-Ion Cannon non compare nella tabella Turret Weapons (HG p.28). Non è un'arma da torretta. In T&D va rimossa dai weapon picker dei turret slot.
+Ion Cannon non compare nella tabella Turret Weapons (HG p.28). Esiste solo come:
+
+- **Barbette** (HG p.30) — flag `barbetteOnly: true` in weapons.js
+- **Small/Medium/Large Bay** (HG p.32–33) — flag `bayOnly: true`, tre entry separate
+
+In T&D il weapon picker dei turret slot esclude tutte le armi con `barbetteOnly: true` o `bayOnly: true`. Il weapon picker dei barbette slot esclude `bayOnly: true`. I bay slot (se implementati) accettano solo `bayOnly: true`.
 
 ### 3.2 Power come nuova stat di battaglia
 
@@ -59,14 +91,23 @@ T&D non traccia Power come stat. L'implementazione aggiunge:
 
 Valore di default nel form (nuove navi): **100**.
 
-### 3.3 Formula danno Ion
+### 3.3 Formula danno Ion per tipo di montaggio
+
+Ogni variante Ion usa la stessa meccanica (ignora armatura, deduce da Power) ma dice e multiplo variano:
+
+| Arma | damageDice | damageMultiple | Formula Power reduction |
+| ---- | ---------- | -------------- | ----------------------- |
+| Ion Cannon (barbette) | 2 | 10 | 2D × 10 (esplicito HG p.30) |
+| Ion Cannon Bay (Small) | 6 | 10 | 6D × 10 (bay multiple HG p.31) |
+| Ion Cannon Bay (Medium) | 8 | 20 | 8D × 20 (bay multiple HG p.31) |
+| Ion Cannon Bay (Large) | 10 | 100 | 10D × 100 (bay multiple HG p.31) |
 
 ```text
-ionDamage = roll_2D × 10   (ignora armatura — HG p.30)
+ionDamage = rollNbD(weapon.damageDice) × weapon.damageMultiple   (ignora armatura — HG p.30)
 currentPower = max(0, ship.currentPower − ionDamage)
 ```
 
-Il `damageDice` in `weapons.js` resta 2 (`damageDice: 2`). Il `damageMultiple` diventa 10 per rappresentare il ×10 dalla tabella. Armatura ignorata (flag `ignoresArmour: true` o logica implicita nel modal Ion).
+`IonDamageStep` in AttackModal legge `weapon.damageDice` e `weapon.damageMultiple` dall'entry WEAPONS — nessuna logica hardcoded sul numero di dadi.
 
 ### 3.4 Effetti di Power sui sistemi T&D
 
@@ -119,13 +160,83 @@ const currentPower = ionCurrent > 0
   : (sh.basePower ?? sh.profile.maxPower ?? 100)   // ripristino completo
 ```
 
-### 3.7 Computer bandwidth (FAQ)
+### 3.7 Computer bandwidth (FAQ HG 2022 p.1)
 
-La FAQ aggiunge: detrarre la stessa quantità anche dalla **computer bandwidth**. T&D non traccia bandwidth — fuori scope. Documentato nel field-manual come nota.
+La FAQ aggiunge: detrarre la **stessa quantità** di Power anche dalla **computer bandwidth**.
+
+Il bandwidth di un computer in HG è tipicamente un valore piccolo (es. Computer/5 = bandwidth 5). Anche il colpo minimo di un Ion Cannon barbette (2D×10, min 20) azzera quasi sempre il bandwidth. L'effetto è quindi quasi binario: Ion hit → bandwidth esaurito.
+
+**Implementazione T&D:**
+
+Nuovi campi profilo:
+- `profile.computerBandwidth` — numero intero (0 = non tracciato). Valore tipico: `5`–`30` per navi militari, `0` per navi civili senza computer avanzato.
+
+Nuovi campi runtime:
+- `ship.baseBandwidth` — snapshot di `profile.computerBandwidth` all'`addShip`
+- `ship.currentBandwidth` — bandwidth corrente (ridotto da Ion, ripristinato con Power)
+- `ship.bandwidthReduction` — riduzione cumulativa (stacking identico a `ionPowerReduction`)
+
+Effetto meccanico: se `ship.currentBandwidth ≤ 0` **e** `ship.baseBandwidth > 0`:
+- DM-2 a tutti i tiri attacco (fire control offline)
+- Badge visivo `COMMS DOWN` nella bento card / ship tooltip
+
+Recupero: il bandwidth si ripristina contestualmente al Power (fine di `ionRoundsLeft`).
+
+`applyIonDamage` aggiornato:
+
+```js
+applyIonDamage: (targetId, ionDamage, ionRounds) => {
+  set((s) => ({
+    ships: s.ships.map((sh) => {
+      if (sh.id !== targetId) return sh
+      if (sh.hardened) return sh                              // /fib immune — §3.8
+      const basePower          = sh.basePower ?? sh.profile.maxPower ?? 100
+      const prevPwrReduction   = sh.ionPowerReduction ?? 0
+      const newPwrReduction    = prevPwrReduction + ionDamage
+      const newRoundsLeft      = Math.max(sh.ionRoundsLeft ?? 0, ionRounds)
+      const newCurrentPower    = Math.max(0, basePower - newPwrReduction)
+      // bandwidth
+      const baseBandwidth      = sh.baseBandwidth ?? sh.profile.computerBandwidth ?? 0
+      const prevBwReduction    = sh.bandwidthReduction ?? 0
+      const newBwReduction     = prevBwReduction + ionDamage
+      const newCurrentBw       = Math.max(0, baseBandwidth - newBwReduction)
+      return {
+        ...sh,
+        ionPowerReduction:  newPwrReduction,
+        currentPower:       newCurrentPower,
+        ionRoundsLeft:      newRoundsLeft,
+        bandwidthReduction: newBwReduction,
+        currentBandwidth:   newCurrentBw,
+      }
+    }),
+  }))
+},
+```
+
+Se `profile.computerBandwidth === 0` (non tracciato) la riduzione avviene ma `currentBandwidth` rimane 0 — il check `baseBandwidth > 0` impedisce l'applicazione del DM-2 per quelle navi.
 
 ### 3.8 Hardened systems (/fib)
 
-La FAQ specifica che i computer con designazione `/fib` sono immuni ai colpi Ion. T&D semplifica: nessun campo `hardened` implementato in v1.22.0. Il GM gestisce narrativamente. Documentato nel field-manual.
+La FAQ specifica che i computer con designazione `/fib` sono **immuni** ai colpi Ion.
+
+**Implementazione T&D:**
+
+Nuovo campo profilo: `profile.hardened` — booleano (default `false`).
+
+Nuovo campo runtime: `ship.hardened` — copiato da `profile.hardened` in `addShip`.
+
+Effetto: in `applyIonDamage`, se `sh.hardened === true` il metodo ritorna `sh` invariato e logga `"Ion: no effect (hardened systems)"`.
+
+Nel weapon picker di AttackModal, se il bersaglio ha `hardened: true`, la sezione Ion mostra un avviso `SISTEMI HARDENIZZATI — Ion inefficace` e blocca il pulsante Apply.
+
+Nuovi campi in `addShip`:
+
+```js
+hardened:          profile.hardened ?? false,
+baseBandwidth:     profile.computerBandwidth ?? 0,
+currentBandwidth:  profile.computerBandwidth ?? 0,
+bandwidthReduction: 0,
+```
 
 ---
 
@@ -146,20 +257,13 @@ Il campo `ionPenalty` (thrust penalty raw) viene **rimosso**. Sostituito da:
 
 ### 5.1 `src/data/weapons.js`
 
-**Ion Cannon** — cambiamenti:
+**Ion Cannon (barbette)** — cambiamenti all'entry esistente:
 
-- `damageDice: 2` — invariato (roll 2D)
 - `damageMultiple: 10` — **cambia** da 1 a 10 (il ×10 dalla tabella HG p.30)
-- Aggiungere campo `barbetteOnly: true` — **nuovo**
-- Aggiungere campo `ignoresArmour: true` — **nuovo** (Ion bypassa armatura)
-- Aggiornare `notes`: citare HG p.30 + FAQ correttamente
-- `attackDM: 0` — invariato
-- `maxRange: 'Medium'` — invariato
-
-Aggiungere al `@typedef WeaponType`:
-nessuna modifica — Ion Cannon è già presente.
-
-Aggiungere ai `WEAPON_DEFS` un campo strutturale per filtrare:
+- Aggiungere `barbetteOnly: true` — **nuovo**
+- Aggiungere `ignoresArmour: true` — **nuovo**
+- Aggiornare `notes`: citare HG p.30 + FAQ
+- Tutti gli altri campi invariati
 
 ```js
 'Ion Cannon': {
@@ -169,15 +273,65 @@ Aggiungere ai `WEAPON_DEFS` un campo strutturale per filtrare:
   damageDice: 2,
   damageBonus: 0,
   maxRange: 'Medium',
-  damageMultiple: 10,      // 2D × 10 — HG p.30
+  damageMultiple: 10,      // 2D × 10 — HG p.30 (overrides barbette ×3)
   traits: ['Ion'],
-  barbetteOnly: true,      // HG p.30 — solo slot barbetta
+  barbetteOnly: true,      // HG p.30 — assente da turret table
   ignoresArmour: true,     // Ion ignora armatura — HG p.30
-  notes: 'No hull damage. Roll 2D×10 ignoring armour; deduct from target Power. Duration: 1 round (D3 if Effect ≥ 6). // HG p.30, FAQ HG 2022 p.1',
+  notes: 'No hull damage. Roll 2D×10 ignoring armour; deduct from target Power + bandwidth. Duration: 1 round (D3 if Effect ≥ 6). // HG p.30, FAQ HG 2022 p.1',
 },
 ```
 
-Aggiornare `DEFENSIVE_WEAPON_IDS` se Ion Cannon vi è incluso (non dovrebbe, ma verificare).
+**Nuove entry Bay** — aggiungere dopo Ion Cannon:
+
+```js
+'Ion Cannon Bay (Small)': {
+  id: 'Ion Cannon Bay (Small)',
+  label: 'Ion Cannon Bay (S)',
+  attackDM: 0,
+  damageDice: 6,           // HG p.32
+  damageBonus: 0,
+  maxRange: 'Medium',      // HG p.32
+  damageMultiple: 10,      // Small Bay damage multiple — HG p.31
+  traits: ['Ion'],
+  bayOnly: true,
+  ignoresArmour: true,
+  notes: 'No hull damage. Roll 6D×10 ignoring armour; deduct from target Power + bandwidth. // HG p.32, FAQ HG 2022 p.1',
+},
+'Ion Cannon Bay (Medium)': {
+  id: 'Ion Cannon Bay (Medium)',
+  label: 'Ion Cannon Bay (M)',
+  attackDM: 0,
+  damageDice: 8,           // HG p.33
+  damageBonus: 0,
+  maxRange: 'Medium',      // HG p.33
+  damageMultiple: 20,      // Medium Bay damage multiple — HG p.31
+  traits: ['Ion'],
+  bayOnly: true,
+  ignoresArmour: true,
+  notes: 'No hull damage. Roll 8D×20 ignoring armour; deduct from target Power + bandwidth. // HG p.33, FAQ HG 2022 p.1',
+},
+'Ion Cannon Bay (Large)': {
+  id: 'Ion Cannon Bay (Large)',
+  label: 'Ion Cannon Bay (L)',
+  attackDM: 0,
+  damageDice: 10,          // HG p.33
+  damageBonus: 0,
+  maxRange: 'Long',        // HG p.33
+  damageMultiple: 100,     // Large Bay damage multiple — HG p.31
+  traits: ['Ion'],
+  bayOnly: true,
+  ignoresArmour: true,
+  notes: 'No hull damage. Roll 10D×100 ignoring armour; deduct from target Power + bandwidth. // HG p.33, FAQ HG 2022 p.1',
+},
+```
+
+**`@typedef WeaponType`** — aggiungere i 3 nuovi ID all'union:
+
+```js
+/** @typedef {'Pulse Laser'|...|'Ion Cannon'|'Ion Cannon Bay (Small)'|'Ion Cannon Bay (Medium)'|'Ion Cannon Bay (Large)'} WeaponType */
+```
+
+Verificare `DEFENSIVE_WEAPON_IDS` — Ion non deve comparire (nessun trait `'Defensive'`).
 
 ### 5.2 `src/data/defaultProfiles.js`
 
@@ -195,10 +349,16 @@ Aggiungere `maxPower` a ciascun profilo preset con valori dal §3.2.
    - `min={10}`, `max={9999}`, default `100`
    - Tooltip: "Potenza massima del Power Plant (HG p.30 — rilevante per Ion Cannon)"
 
-2. Nel weapon picker dei turret slot: escludere le armi con `barbetteOnly: true`.
-   - Usare il flag `WEAPON_DEFS[weaponId].barbetteOnly` nel filtro.
+2. Aggiungere `NumField` per `COMPUTER BANDWIDTH` nella sezione avanzata (opzionale, default `0` = non tracciato).
+   - `min={0}`, `max={999}`, default `0`
+   - Tooltip: "Bandwidth del computer di bordo (HG — 0 = non tracciato, immune al DM-2 bandwidth)"
 
-3. Aggiornare `initialForm` e il merge `profile → form` per includere `maxPower`.
+3. Aggiungere `CheckboxField` per `HARDENED SYSTEMS (/fib)`.
+   - Tooltip: "Computer con designazione /fib — immune a Ion weapons (FAQ HG 2022 p.1)"
+
+4. Nel weapon picker dei turret slot: escludere le armi con `barbetteOnly: true` **o** `bayOnly: true`.
+
+5. Aggiornare `initialForm` e il merge `profile → form` per includere `maxPower`, `computerBandwidth`, `hardened`.
 
 ### 5.4 `src/store/battleStore.js`
 
@@ -207,9 +367,13 @@ Aggiungere `maxPower` a ciascun profilo preset con valori dal §3.2.
 Aggiungere all'istanza nave:
 
 ```js
-basePower:         profile.maxPower ?? 100,
-currentPower:      profile.maxPower ?? 100,
-ionPowerReduction: 0,
+basePower:          profile.maxPower ?? 100,
+currentPower:       profile.maxPower ?? 100,
+ionPowerReduction:  0,
+baseBandwidth:      profile.computerBandwidth ?? 0,
+currentBandwidth:   profile.computerBandwidth ?? 0,
+bandwidthReduction: 0,
+hardened:           profile.hardened ?? false,
 // rimuovere: ionPenalty (non più usato)
 ```
 
@@ -218,40 +382,31 @@ ionPowerReduction: 0,
 Sostituire la logica `ionPenalty`:
 
 ```js
-const ionCurrent = sh.ionRoundsLeft ?? 0
-const ionNext    = Math.max(0, ionCurrent - 1)
-const ionReduction = ionCurrent > 0 ? (sh.ionPowerReduction ?? 0) : 0
+const ionCurrent    = sh.ionRoundsLeft ?? 0
+const ionNext       = Math.max(0, ionCurrent - 1)
+const ionReduction  = ionCurrent > 0 ? (sh.ionPowerReduction ?? 0) : 0
 const restoredPower = sh.basePower ?? sh.profile.maxPower ?? 100
+const baseBw        = sh.baseBandwidth ?? sh.profile.computerBandwidth ?? 0
+const bwReduction   = ionCurrent > 0 ? (sh.bandwidthReduction ?? 0) : 0
 return {
   ...sh,
-  ionRoundsLeft:     ionNext,
-  ionPowerReduction: ionNext > 0 ? ionReduction : 0,
-  currentPower:      ionNext > 0
+  ionRoundsLeft:      ionNext,
+  ionPowerReduction:  ionNext > 0 ? ionReduction : 0,
+  currentPower:       ionNext > 0
     ? Math.max(0, restoredPower - ionReduction)
     : restoredPower,
+  bandwidthReduction: ionNext > 0 ? bwReduction : 0,
+  currentBandwidth:   ionNext > 0
+    ? Math.max(0, baseBw - bwReduction)
+    : baseBw,
 }
 ```
 
 #### `applyIonDamage` (riga ~920)
 
-Nuova firma: `applyIonDamage(targetId, ionDamage, ionRounds)` — `ionDamage` è il risultato `2D × 10`.
+Nuova firma: `applyIonDamage(targetId, ionDamage, ionRounds)` — `ionDamage` è il risultato `NbD × damageMultiple` (già calcolato da IonDamageStep).
 
-```js
-applyIonDamage: (targetId, ionDamage, ionRounds) => {
-  // ...wh guard...
-  set((s) => ({
-    ships: s.ships.map((sh) => {
-      if (sh.id !== targetId) return sh
-      const basePower       = sh.basePower ?? sh.profile.maxPower ?? 100
-      const prevReduction   = sh.ionPowerReduction ?? 0
-      const newReduction    = prevReduction + ionDamage          // stacking
-      const newRoundsLeft   = Math.max(sh.ionRoundsLeft ?? 0, ionRounds)
-      const newCurrentPower = Math.max(0, basePower - newReduction)
-      return { ...sh, ionPowerReduction: newReduction, currentPower: newCurrentPower, ionRoundsLeft: newRoundsLeft }
-    }),
-  }))
-},
-```
+Vedi implementazione completa al §3.7 — include Power reduction, bandwidth reduction, guard `/fib` (`sh.hardened`).
 
 #### `spendReactionThrust` e tutti i calcoli thrust (riga ~1160 e simili)
 
@@ -293,11 +448,15 @@ export function computeIonThrustEffect(baseThrust, currentPower, maxPower) {
 
 #### `IonDamageStep` (riga ~660)
 
-- Label roll: `"2D × 10 ion power:"` (non `"2D6 ion power:"`)
-- Formula: `ionDamage = ionRoll * 10` (moltiplicare il risultato grezzo per 10)
-- Display risultato: `−${ionDamage} Power` e mostrare Power rimanente stimato
-- `onApply(ionDamage, ionRounds)` — parametro è il danno Power (non la penalità thrust)
-- Note: "Ion bypassa armatura — HG p.30"
+Generalizzato per supportare qualsiasi arma Ion (barbette e bay):
+
+- Label roll: `"${weapon.damageDice}D × ${weapon.damageMultiple} ion power:"` (dinamico)
+- Formula: `ionDamage = ionRoll * weapon.damageMultiple` dove `ionRoll` è la somma di `weapon.damageDice` dadi
+- Display risultato: `−${ionDamage} Power` + Power rimanente stimato
+- Se bersaglio `hardened`: mostrare banner `SISTEMI HARDENIZZATI — Ion inefficace`, bloccare Apply
+- Se `target.profile.computerBandwidth > 0`: mostrare anche `−${ionDamage} Bandwidth (${Math.max(0, currentBw - ionDamage)} remaining)`
+- `onApply(ionDamage, ionRounds)` — parametro è il danno Power/bandwidth calcolato
+- Note: "Ion bypassa armatura — HG p.30; deducted from Power + bandwidth (FAQ HG 2022 p.1)"
 
 Nel body `AttackModal` (riga ~1552):
 
@@ -305,7 +464,7 @@ Nel body `AttackModal` (riga ~1552):
 onApply={(ionDamage, ionRounds) => {
   applyIonDamage(target.id, ionDamage, ionRounds)
   const remaining = Math.max(0, (target.currentPower ?? target.profile.maxPower ?? 100) - ionDamage)
-  addLogEntry(`${attacker.profile.name} → ${target.profile.name}: Ion Cannon — −${ionDamage} Power (${remaining} remaining, ${ionRounds}R).`)
+  addLogEntry(`${attacker.profile.name} → ${target.profile.name}: ${weapon.label} — −${ionDamage} Power (${remaining} remaining, ${ionRounds}R).`)
   emitEffect('ion_burst', { duration: 1500, hex: target.position })
   closeModal()
 }}
@@ -390,17 +549,27 @@ Il badge **ION NR** sulla bento card in basic mode mantiene la stessa visibilit�
 
 ## 7. Backward compatibility — sessioni esistenti
 
-Le sessioni salvate in formato JSON prima di v1.22.0 non hanno `currentPower`, `basePower`, `ionPowerReduction`, `maxPower`. Il restore deve gestire i valori mancanti:
+Le sessioni salvate prima di v1.22.0 non hanno i nuovi campi. Il restore gestisce i valori mancanti con fallback:
 
-- `ship.basePower ?? ship.profile.maxPower ?? 100` — fallback ovunque
-- `ship.currentPower ?? ship.basePower ?? 100` — fallback ovunque
-- `ship.ionPowerReduction ?? 0` — fallback ovunque
-- Navi che avevano `ionPenalty` attivo: al restore, il valore viene ignorato (perso). Non critico — la sessione riparte con Power pieno.
+| Campo mancante | Fallback |
+| -------------- | -------- |
+| `ship.basePower` | `ship.profile.maxPower ?? 100` |
+| `ship.currentPower` | `ship.basePower ?? 100` |
+| `ship.ionPowerReduction` | `0` |
+| `ship.baseBandwidth` | `ship.profile.computerBandwidth ?? 0` |
+| `ship.currentBandwidth` | `ship.baseBandwidth ?? 0` |
+| `ship.bandwidthReduction` | `0` |
+| `ship.hardened` | `ship.profile.hardened ?? false` |
+| `profile.maxPower` | `100` |
+| `profile.computerBandwidth` | `0` |
+| `profile.hardened` | `false` |
 
-Aggiungere `currentPower`, `basePower`, `ionPowerReduction` ai campi inclusi in:
+Navi con `ionPenalty` attivo al restore: valore ignorato (perso). Non critico — la sessione riparte con Power pieno.
+
+Aggiungere i nuovi campi ship ai snapshot inclusi in:
 
 - `extractBattleSnapshot` (useAutosave.js)
-- `hasSignificantChange` (useAutosave.js)
+- `hasSignificantChange` (useAutosave.js) — aggiungere `currentPower`, `currentBandwidth` al check
 - JSON export/import (io.js o battleStore)
 - `pushHistory` / snapshot undo-redo
 
@@ -412,26 +581,41 @@ Aggiungere `currentPower`, `basePower`, `ionPowerReduction` ai campi inclusi in:
 
 | # | Test | Atteso |
 | - | ---- | ------ |
-| 1 | `addShip` con profilo `maxPower: 80` | `ship.basePower === 80`, `ship.currentPower === 80` |
-| 2 | `addShip` senza `maxPower` | `ship.basePower === 100`, `ship.currentPower === 100` |
-| 3 | `applyIonDamage(shipId, 60, 1)` | `ionPowerReduction: 60`, `currentPower: 40`, `ionRoundsLeft: 1` |
-| 4 | Ion hit su nave con `currentPower` già ridotto (stacking) | `ionPowerReduction` addizionato, `currentPower` ridotto ulteriormente |
+| 1 | `addShip` con `maxPower: 80`, `computerBandwidth: 10` | `basePower: 80`, `currentPower: 80`, `baseBandwidth: 10`, `currentBandwidth: 10` |
+| 2 | `addShip` senza `maxPower`/`computerBandwidth` | `basePower: 100`, `baseBandwidth: 0` |
+| 3 | `applyIonDamage(id, 60, 1)` su nave con `basePower: 100`, `baseBandwidth: 10` | `ionPowerReduction: 60`, `currentPower: 40`, `bandwidthReduction: 60`, `currentBandwidth: 0`, `ionRoundsLeft: 1` |
+| 4 | Ion stacking — secondo colpo Ion su nave già ridotta | `ionPowerReduction` addizionato, `currentPower` ridotto ulteriormente |
 | 5 | `currentPower` non va sotto 0 | `currentPower: 0` se `ionPowerReduction >= basePower` |
-| 6 | `buildNextRoundState` con `ionRoundsLeft: 1` | Power ripristinato a `basePower`, `ionPowerReduction: 0` |
+| 6 | `buildNextRoundState` con `ionRoundsLeft: 1` | Power + bandwidth ripristinati, riduzioni azzerate |
 | 7 | `buildNextRoundState` con `ionRoundsLeft: 2` | Power ancora ridotto, `ionRoundsLeft: 1` |
-| 8 | `buildNextRoundState` con `ionRoundsLeft: 0` | Power invariato (nessun Ion) |
-| 9 | Ion con `ionRoundsLeft` maggiore (D3=2 rounds) | `ionRoundsLeft: 2`, Power ridotto per 2 round |
+| 8 | `buildNextRoundState` con `ionRoundsLeft: 0` | Power/bandwidth invariati |
+| 9 | Ion con D3=2 rounds (Effect ≥ 6) | `ionRoundsLeft: 2`, Power ridotto per 2 round |
+| 10 | `applyIonDamage` su nave `hardened: true` | Ship invariata, nessun effetto |
+| 11 | `applyIonDamage` su nave con `computerBandwidth: 0` | Power ridotto, `currentBandwidth: 0` (no DM-2 applicato) |
+| 12 | `ionRoundsLeft` stacking — secondo colpo con durata maggiore | `ionRoundsLeft = max(existing, new)` |
 
 ### `src/utils/combat.test.js`
 
 | # | Test | Atteso |
 | - | ---- | ------ |
-| 10 | `computeIonThrustEffect(4, 100, 100)` | `4` (Power pieno) |
-| 11 | `computeIonThrustEffect(4, 50, 100)` | `2` (50% → floor(4×0.5)) |
-| 12 | `computeIonThrustEffect(4, 0, 100)` | `0` (Power a 0) |
-| 13 | `computeIonThrustEffect(4, 25, 100)` | `1` (25% → floor(4×0.25)) |
-| 14 | `computeIonThrustEffect(4, 100, 0)` | `4` (maxPower=0 → nessun effetto) |
-| 15 | `computeIonThrustEffect(6, 30, 40)` | `4` (75% → floor(6×0.75)) |
+| 13 | `computeIonThrustEffect(4, 100, 100)` | `4` (Power pieno) |
+| 14 | `computeIonThrustEffect(4, 50, 100)` | `2` (50% → floor(4×0.5)) |
+| 15 | `computeIonThrustEffect(4, 0, 100)` | `0` (Power a 0) |
+| 16 | `computeIonThrustEffect(4, 25, 100)` | `1` (25% → floor(4×0.25)) |
+| 17 | `computeIonThrustEffect(4, 100, 0)` | `4` (maxPower=0 → nessun effetto) |
+| 18 | `computeIonThrustEffect(6, 30, 40)` | `4` (75% → floor(6×0.75)) |
+
+### `src/data/weapons.test.js` (o weapons.spec.js)
+
+| # | Test | Atteso |
+| - | ---- | ------ |
+| 19 | `WEAPONS['Ion Cannon'].barbetteOnly` | `true` |
+| 20 | `WEAPONS['Ion Cannon'].damageMultiple` | `10` |
+| 21 | `WEAPONS['Ion Cannon Bay (Small)'].bayOnly` | `true` |
+| 22 | `WEAPONS['Ion Cannon Bay (Small)'].damageDice` | `6` |
+| 23 | `WEAPONS['Ion Cannon Bay (Medium)'].damageMultiple` | `20` |
+| 24 | `WEAPONS['Ion Cannon Bay (Large)'].maxRange` | `'Long'` |
+| 25 | Nessuna arma Ion ha trait `'Defensive'` | `DEFENSIVE_WEAPONS` non include ID Ion |
 
 ---
 
@@ -453,26 +637,29 @@ Dopo l'implementazione (parte del commit `chore(release): v1.22.0`):
 ## 10. Ordine di implementazione consigliato
 
 1. `src/utils/combat.js` — `computeIonThrustEffect` (funzione pura, testabile subito)
-2. `src/data/weapons.js` — flag `barbetteOnly`, `ignoresArmour`, `damageMultiple: 10`
-3. `src/data/defaultProfiles.js` — aggiungere `maxPower` ai preset
-4. `src/components/forms/ShipProfileForm.jsx` — campo MAX POWER + filtro barbette
-5. `src/store/battleStore.js` — `addShip`, `buildNextRoundState`, `applyIonDamage`, rimozione `ionPenalty`
-6. Tutti i riferimenti a `ionPenalty` negli altri file store (cerca-sostituisci)
-7. `src/components/modals/AttackModal.jsx` — `IonDamageStep` + logica chiamata
+2. `src/data/weapons.js` — aggiornare Ion Cannon barbette + aggiungere 3 entry Bay; aggiornare typedef
+3. `src/data/defaultProfiles.js` — aggiungere `maxPower`, `computerBandwidth`, `hardened` ai preset
+4. `src/components/forms/ShipProfileForm.jsx` — campi MAX POWER, COMPUTER BANDWIDTH, HARDENED; filtri mount slot
+5. `src/store/battleStore.js` — `addShip`, `buildNextRoundState`, `applyIonDamage` (Power + bandwidth + hardened guard), rimozione `ionPenalty`
+6. Tutti i riferimenti a `ionPenalty` negli altri file (grep + sostituisci con `computeIonThrustEffect`)
+7. `src/components/modals/AttackModal.jsx` — `IonDamageStep` generalizzato (usa `weapon.damageDice` + `weapon.damageMultiple`); guard hardened; display bandwidth
 8. UI displays: `ShipTooltip`, `BasicBattleView`, `ShipDetailModal`, `ThrustModal`, `MissileImpactModal`
 9. Canvas: `useCanvasRenderer`, `useMapInteraction`
-10. Test suite
-11. Doc update
+10. Test suite (25 test cases — §8)
+11. Doc update + v1.22.0
+
+**File da modificare (totale):** 14 file come in precedenza + nessuno aggiuntivo (i nuovi campi ricadono sugli stessi file).
 
 **Commit suggeriti (uno per step logico):**
 
 ```text
-feat(weapons): Ion Cannon barbette-only, damageMultiple 10, ignoresArmour flag
-feat(power): add maxPower field to ship profiles and ShipProfileForm
-feat(battle): ship Power stat — addShip, applyIonDamage, buildNextRoundState
 feat(combat): computeIonThrustEffect utility function
-feat(ui): Ion display — Power bar in tooltip, detail modal, bento card
-fix(attack): IonDamageStep rolls 2D×10 deducted from Power
-test(power): ion Power stat — applyIonDamage stacking, recovery, thrust effect
+feat(weapons): Ion Cannon barbette-only, bay variants (S/M/L), ignoresArmour, damageMultiple
+feat(power): maxPower, computerBandwidth, hardened fields — profiles and ShipProfileForm
+feat(battle): ship Power + bandwidth stat — addShip, applyIonDamage, buildNextRoundState
+refactor(ion): replace ionPenalty references with computeIonThrustEffect across all files
+feat(attack): IonDamageStep — NbD×multiple formula, hardened guard, bandwidth display
+feat(ui): Ion display — Power/bandwidth bars in tooltip, detail modal, bento card
+test(ion): Power stat, bandwidth, hardened, bay weapons — 25 test cases
 chore(release): v1.22.0 docs + version bump
 ```
