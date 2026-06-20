@@ -32,6 +32,12 @@ const OUTCOMES = [
   },
 ]
 
+const OUTCOME_STYLES = {
+  emerald: { selected: 'bg-emerald-900/30 border-emerald-500', icon: 'text-emerald-400', label: 'text-emerald-400' },
+  red:     { selected: 'bg-red-900/30 border-red-500',         icon: 'text-red-400',     label: 'text-red-400'     },
+  amber:   { selected: 'bg-amber-900/30 border-amber-500',     icon: 'text-amber-400',   label: 'text-amber-400'   },
+}
+
 const FACTION_COLORS = {
   players: 'text-blue-400',
   npc:     'text-red-400',
@@ -106,15 +112,15 @@ export function BoardingOutcomeModal() {
               onClick={() => setSelectedOutcome(o.key)}
               className={`w-full flex items-start gap-3 px-3 py-2.5 rounded border transition-colors text-left ${
                 selectedOutcome === o.key
-                  ? `bg-${o.color}-900/30 border-${o.color}-500`
+                  ? OUTCOME_STYLES[o.color].selected
                   : 'bg-slate-800 border-slate-600 hover:border-slate-400'
               }`}
             >
-              <span className={`text-lg shrink-0 mt-0.5 ${selectedOutcome === o.key ? `text-${o.color}-400` : 'text-slate-400'}`}>
+              <span className={`text-lg shrink-0 mt-0.5 ${selectedOutcome === o.key ? OUTCOME_STYLES[o.color].icon : 'text-slate-400'}`}>
                 {selectedOutcome === o.key ? '◉' : '○'}
               </span>
               <div className="flex-1 min-w-0">
-                <p className={`font-mono text-xs font-bold ${selectedOutcome === o.key ? `text-${o.color}-400` : 'text-slate-300'}`}>
+                <p className={`font-mono text-xs font-bold ${selectedOutcome === o.key ? OUTCOME_STYLES[o.color].label : 'text-slate-300'}`}>
                   {o.label}
                 </p>
                 <p className="text-slate-400 font-mono text-[10px] mt-0.5">{o.desc}</p>
