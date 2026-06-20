@@ -54,11 +54,12 @@ export function HUD() {
   // true when advancing to the next phase is allowed
   const canAdvancePhase = useMemo(() => {
     if (pendingMissileImpacts.length > 0) return false
+    if (activeDogfights.length > 0) return false
     if (phase === 'setup')      return ships.length > 0
     if (phase === 'initiative') return initiativeOrder.length > 0
     if (ACTOR_TURN_PHASES.has(phase)) return currentActorIndex >= initiativeOrder.length
     return true
-  }, [phase, ships, currentActorIndex, initiativeOrder, pendingMissileImpacts])
+  }, [phase, ships, currentActorIndex, initiativeOrder, pendingMissileImpacts, activeDogfights])
 
   // clear the warning once the condition is satisfied
   useEffect(() => {
@@ -70,6 +71,8 @@ export function HUD() {
     if (!canAdvancePhase) {
       if (pendingMissileImpacts.length > 0) {
         setPhaseBlockMsg(`Resolve ${pendingMissileImpacts.length} pending missile impact${pendingMissileImpacts.length !== 1 ? 's' : ''} first.`)
+      } else if (activeDogfights.length > 0) {
+        setPhaseBlockMsg(`Resolve ${activeDogfights.length} active dogfight${activeDogfights.length !== 1 ? 's' : ''} first.`)
       } else if (phase === 'setup') {
         setPhaseBlockMsg('Place at least one ship first.')
       } else if (phase === 'initiative') {
@@ -82,7 +85,7 @@ export function HUD() {
     }
     setPhaseBlockMsg(null)
     advancePhase()
-  }, [canAdvancePhase, advancePhase, phase, initiativeOrder, currentActorIndex, pendingMissileImpacts])
+  }, [canAdvancePhase, advancePhase, phase, initiativeOrder, currentActorIndex, pendingMissileImpacts, activeDogfights])
 
   const handleUndo = useCallback(() => {
     if (canUndo) undoLastAction()
