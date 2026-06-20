@@ -117,22 +117,24 @@ export function InitiativeModal() {
                             {previewTotal(ship)}
                           </span>
                         </div>
-                        {/* Tactics check row — only if captain has Tactics skill */}
-                        {tacticsSkill > 0 && (
+                        {/* Tactics check row — appears after main dice are entered */}
+                        {tacticsSkill > 0 && playerDice[ship.id] !== null && (
                           <div className="flex items-center gap-2 pl-4 border-l border-slate-700">
-                            <span className="text-slate-400 font-mono text-xs w-24 shrink-0">
+                            <span className="text-slate-400 font-mono text-xs shrink-0">
                               Tactics {tacticsSkill} (opt.)
                             </span>
-                            <DiceInput
-                              key={`tac-${ship.id}-${rerollCount}`}
-                              value={null}
-                              onChange={(d) => setShipTactics(ship.id, d)}
-                            />
-                            {tacticsDice[ship.id] && (
-                              <span className={`font-mono text-xs font-bold ${effect >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                Effect {effect >= 0 ? '+' : ''}{effect}
-                              </span>
-                            )}
+                            <div className="ml-auto flex items-center gap-2">
+                              <DiceInput
+                                key={`tac-${ship.id}-${rerollCount}`}
+                                value={null}
+                                onChange={(d) => setShipTactics(ship.id, d)}
+                              />
+                              {tacticsDice[ship.id] && (
+                                <span className={`font-mono text-xs font-bold w-14 ${effect >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  Effect {effect >= 0 ? '+' : ''}{effect}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
