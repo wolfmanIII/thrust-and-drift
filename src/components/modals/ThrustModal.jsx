@@ -9,7 +9,7 @@ import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { hexDistance, hexAdd, HEX_DIRECTIONS } from '../../utils/hex.js'
-import { isValidThrustDelta } from '../../utils/combat.js'
+import { isValidThrustDelta, computeIonThrustEffect } from '../../utils/combat.js'
 import { emitEffect } from '../../utils/effectQueue.js'
 
 export function ThrustModal() {
@@ -24,7 +24,9 @@ export function ThrustModal() {
 
   if (!ship) return null
 
-  const thrustAvailable = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0) - (ship.ionPenalty ?? 0))
+  const _basePow = ship.basePower ?? ship.profile.maxPower ?? 100
+  const _ionCap  = computeIonThrustEffect(ship.profile.thrust, ship.currentPower ?? _basePow, _basePow)
+  const thrustAvailable = Math.max(0, _ionCap + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0))
   const cost = hexDistance({ q: 0, r: 0 }, delta)
   const isValid = isValidThrustDelta(delta, thrustAvailable)
   const newVector = hexAdd(ship.vector, delta)

@@ -8,6 +8,7 @@ import { createPortal } from 'react-dom'
 import { useUiStore }    from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { hexMagnitude }  from '../../utils/hex.js'
+import { computeIonThrustEffect } from '../../utils/combat.js'
 
 const FACTION_LABEL = { players: 'PLAYERS', npc: 'NPC', neutral: 'NEUTRAL' }
 const FACTION_COLOR = { players: '#22d3ee', npc: '#f87171', neutral: '#94a3b8' }
@@ -54,7 +55,9 @@ export function ShipTooltip() {
   const ship = ships.find((s) => s.id === hoveredShip.shipId)
   if (!ship) return null
 
-  const thrustAvail  = Math.max(0, ship.profile.thrust + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0) - (ship.ionPenalty ?? 0))
+  const _basePow    = ship.basePower ?? ship.profile.maxPower ?? 100
+  const _ionCap     = computeIonThrustEffect(ship.profile.thrust, ship.currentPower ?? _basePow, _basePow)
+  const thrustAvail = Math.max(0, _ionCap + (ship.thrustBonusThisRound ?? 0) - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0))
   const vectorMag    = hexMagnitude(ship.vector)
   const factionColor = FACTION_COLOR[ship.faction] ?? FACTION_COLOR.neutral
   const inbound      = missiles.filter((m) => m.target === ship.id)
@@ -116,7 +119,17 @@ export function ShipTooltip() {
           <StatRow label="Locked by" value={lockerName} />
         )}
         {(ship.ionRoundsLeft ?? 0) > 0 && (
-          <StatRow label="Ion disruption" value={`-${ship.ionPenalty ?? 0} thrust (${ship.ionRoundsLeft}R)`} accent />
+          <StatRow label="Ion disruption" value={`-${ship.ionPowerReduction ?? 0} PWR (${ship.ionRoundsLeft}R)`} accent />
+        )}
+        {(ship.ionRoundsLeft ?? 0) > 0 && (ship.basePower ?? 0) > 0 && (
+          <StatRow
+            label="Power"
+            value={`${ship.currentPower ?? _basePow} / ${_basePow}`}
+            accent
+          />
+        )}
+        {(ship.ionRoundsLeft ?? 0) > 0 && (ship.baseBandwidth ?? 0) > 0 && (ship.currentBandwidth ?? ship.baseBandwidth ?? 0) <= 0 && (
+          <StatRow label="Bandwidth" value="DEPLETED — DM-2 attacks" accent />
         )}
         {(() => {
           const mc = inbound.filter((m) => m.type !== 'Torpedo').reduce((n, m) => n + m.count, 0)

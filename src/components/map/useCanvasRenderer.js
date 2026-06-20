@@ -7,6 +7,7 @@
 
 import { useEffect, useCallback, useRef } from 'react'
 import { hexToPixel, hexAdd, hexDistance, computeClampedDelta } from '../../utils/hex.js'
+import { computeIonThrustEffect } from '../../utils/combat.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore } from '../../store/uiStore.js'
 import { RANGE_BANDS } from '../../data/rangeBands.js'
@@ -171,9 +172,11 @@ function drawGrid(ctx, width, height, offset, zoom) {
  * @param {number} oy  Canvas y offset
  */
 function drawThrustTargeting(ctx, ship, mouseHex, size, ox, oy) {
+  const _basePow = ship.basePower ?? ship.profile.maxPower ?? 100
+  const _ionCap  = computeIonThrustEffect(ship.profile.thrust, ship.currentPower ?? _basePow, _basePow)
   const thrustAvailable = Math.max(0,
-    ship.profile.thrust + (ship.thrustBonusThisRound ?? 0)
-    - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0) - (ship.ionPenalty ?? 0)
+    _ionCap + (ship.thrustBonusThisRound ?? 0)
+    - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0)
   )
   const delta     = computeClampedDelta(mouseHex, ship.position, thrustAvailable)
   const cost      = hexDistance({ q: 0, r: 0 }, delta)

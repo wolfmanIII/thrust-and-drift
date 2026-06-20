@@ -10,7 +10,7 @@ import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS } from '../../data/weapons.js'
 import { RANGE_BANDS } from '../../data/rangeBands.js'
-import { rollAttack, isCriticalHit, getCriticalSeverity, isOutOfRange, getApValue } from '../../utils/combat.js'
+import { rollAttack, isCriticalHit, getCriticalSeverity, isOutOfRange, getApValue, computeIonThrustEffect } from '../../utils/combat.js'
 import { rollDice, roll2D6 } from '../../utils/dice.js'
 import { getCriticalLocation, getCriticalEffect } from '../../data/criticalHits.js'
 import { useAttackSetup } from './useAttackSetup.js'
@@ -1297,9 +1297,11 @@ export function AttackModal() {
 
   // ── Reaction-derived values ────────────────────────────────────────────
   const targetPilotSkill = target ? getEffectiveSkill(target.profile.crew, target.crewAssignments, 'pilot') : 0
+  const _tBasePow = target ? (target.basePower ?? target.profile.maxPower ?? 100) : 100
+  const _tIonCap  = target ? computeIonThrustEffect(target.profile.thrust, target.currentPower ?? _tBasePow, _tBasePow) : 0
   const availableReactionThrust = target ? Math.max(0,
-    target.profile.thrust + (target.thrustBonusThisRound ?? 0)
-    - target.thrustUsedThisRound - (target.ionPenalty ?? 0)
+    _tIonCap + (target.thrustBonusThisRound ?? 0)
+    - target.thrustUsedThisRound
     - (target.thrustPenalty ?? 0)
     - (target.evasiveThrust ?? 0)
   ) : 0

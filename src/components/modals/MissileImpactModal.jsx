@@ -20,7 +20,7 @@ import { Modal }                                         from './Modal.jsx'
 import { useBattleStore }                                from '../../store/battleStore.js'
 import { rollDice }                                      from '../../utils/dice.js'
 import { getEffectiveSkill }                             from '../../utils/crew.js'
-import { computeMissileAttackDM, computeMissileImpactDamage } from '../../utils/combat.js'
+import { computeMissileAttackDM, computeMissileImpactDamage, computeIonThrustEffect } from '../../utils/combat.js'
 
 // MgT2e HG p.28 (Missile Rack 4D), HG p.30 (Torpedo 6D)
 function dicePerUnit(type) {
@@ -68,12 +68,13 @@ export function MissileImpactModal() {
   const pilotSkill = getEffectiveSkill(target.profile.crew, target.crewAssignments, 'pilot')
 
   // Compute remaining reaction thrust available to the target
+  const _tBasePow = target.basePower ?? target.profile.maxPower ?? 100
+  const _tIonCap  = computeIonThrustEffect(target.profile.thrust, target.currentPower ?? _tBasePow, _tBasePow)
   const thrustAvailable = Math.max(0,
-    target.profile.thrust
+    _tIonCap
     + (target.thrustBonusThisRound ?? 0)
     - target.thrustUsedThisRound
     - (target.thrustPenalty ?? 0)
-    - (target.ionPenalty ?? 0)
     - (target.evasiveThrust ?? 0)
   )
 

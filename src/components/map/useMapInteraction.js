@@ -8,6 +8,7 @@
 
 import { useRef, useCallback } from 'react'
 import { pixelToHex, hexDistance, computeClampedDelta } from '../../utils/hex.js'
+import { computeIonThrustEffect } from '../../utils/combat.js'
 import { emitEffect } from '../../utils/effectQueue.js'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
@@ -134,9 +135,11 @@ export function useMapInteraction({ hexSize, canvasRef, mouseHexRef }) {
     if (thrustTargeting) {
       const ship = ships.find((s) => s.id === thrustTargeting.shipId)
       if (ship) {
+        const _basePow = ship.basePower ?? ship.profile.maxPower ?? 100
+        const _ionCap  = computeIonThrustEffect(ship.profile.thrust, ship.currentPower ?? _basePow, _basePow)
         const thrustAvailable = Math.max(0,
-          ship.profile.thrust + (ship.thrustBonusThisRound ?? 0)
-          - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0) - (ship.ionPenalty ?? 0)
+          _ionCap + (ship.thrustBonusThisRound ?? 0)
+          - ship.thrustUsedThisRound - (ship.thrustPenalty ?? 0)
         )
         const delta = computeClampedDelta(mouseHexRef.current, ship.position, thrustAvailable)
         const cost  = hexDistance({ q: 0, r: 0 }, delta)

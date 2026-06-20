@@ -212,7 +212,8 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
 
           {(ship.ionRoundsLeft ?? 0) > 0 && (
             <StatusRow icon="⚡" className="text-blue-400">
-              Ion disruption — -{ship.ionPenalty ?? 0} thrust ({ship.ionRoundsLeft} round{ship.ionRoundsLeft !== 1 ? 's' : ''})
+              ION {ship.ionRoundsLeft}R — -{ship.ionPowerReduction ?? 0} PWR
+              {(ship.baseBandwidth ?? 0) > 0 && (ship.currentBandwidth ?? ship.baseBandwidth ?? 0) <= 0 && ' · COMMS DOWN'}
             </StatusRow>
           )}
 

@@ -165,10 +165,10 @@ describe('ShipBentoCard', () => {
   })
 
   it('shows ION badge when ionRoundsLeft > 0', () => {
-    const ship = makeShip({ ionRoundsLeft: 2, ionPenalty: 4 })
+    const ship = makeShip({ ionRoundsLeft: 2, ionPowerReduction: 40 })
     useBattleStore.setState({ ships: [ship], missiles: [] })
     render(<BasicBattleView />)
-    expect(screen.getByText('ION 2R')).toBeTruthy()
+    expect(screen.getByText(/ION 2R/)).toBeTruthy()
   })
 
   it('does not show ION badge when ionRoundsLeft is 0 or absent', () => {
@@ -177,11 +177,11 @@ describe('ShipBentoCard', () => {
     expect(screen.queryByText(/ION/)).toBeNull()
   })
 
-  it('shows ion disruption status row with penalty and rounds', () => {
-    const ship = makeShip({ ionRoundsLeft: 1, ionPenalty: 6 })
+  it('shows ion disruption status row with Power reduction and rounds', () => {
+    const ship = makeShip({ ionRoundsLeft: 1, ionPowerReduction: 60, basePower: 100, currentPower: 40 })
     useBattleStore.setState({ ships: [ship], missiles: [] })
     render(<BasicBattleView />)
-    expect(screen.getByText(/Ion disruption/)).toBeTruthy()
-    expect(screen.getByText(/-6 thrust/)).toBeTruthy()
+    expect(screen.getByText(/ION 1R/)).toBeTruthy()
+    expect(screen.getByText(/-60 PWR/)).toBeTruthy()
   })
 })
