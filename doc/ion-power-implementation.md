@@ -169,14 +169,17 @@ Il bandwidth di un computer in HG è tipicamente un valore piccolo (es. Computer
 **Implementazione T&D:**
 
 Nuovi campi profilo:
+
 - `profile.computerBandwidth` — numero intero (0 = non tracciato). Valore tipico: `5`–`30` per navi militari, `0` per navi civili senza computer avanzato.
 
 Nuovi campi runtime:
+
 - `ship.baseBandwidth` — snapshot di `profile.computerBandwidth` all'`addShip`
 - `ship.currentBandwidth` — bandwidth corrente (ridotto da Ion, ripristinato con Power)
 - `ship.bandwidthReduction` — riduzione cumulativa (stacking identico a `ionPowerReduction`)
 
 Effetto meccanico: se `ship.currentBandwidth ≤ 0` **e** `ship.baseBandwidth > 0`:
+
 - DM-2 a tutti i tiri attacco (fire control offline)
 - Badge visivo `COMMS DOWN` nella bento card / ship tooltip
 
