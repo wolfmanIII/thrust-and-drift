@@ -9,16 +9,30 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.22.3 |
+| **Versione** | 1.23.0 |
 | **Branch** | main (da pushare) |
 | **Test** | 933 passing |
-| **Ultimo commit** | docs(release): sync CHANGELOG, README, HANDOFF for v1.22.3 test coverage |
+| **Ultimo commit** | chore(release): bump version to v1.23.0 |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Test coverage gaps + doc sync (v1.22.3)
+### Sessione corrente — Reddit bug fixes (v1.23.0)
+
+7 fix implementati da segnalazioni Reddit:
+
+1. **FIX-01** (`0376b50`) — Banner `⚠ MANUAL` sui critici descrittivi in AttackModal.
+2. **FIX-02** (`0376b50`) — Repair check difficulty scala con severity: Average 8+ (Sev 1–2), Difficult 10+ (3–4), Very Difficult 12+ (5–6).
+3. **FIX-03** (`0376b50`) — Selector critico in ActionModal; `repairCritical(shipId, critIndex)` invece di sempre index 0.
+4. **FIX-04** (`b5df149`) — `spendMissileAmmo` chiamato in `handleAllIntercepted`; ammo detratta anche quando PD intercetta tutto prima del lancio.
+5. **FIX-05** (`4128e56`) — `currentPower ≤ 0` svuota weapon list in `useAttackSetup` e blocca sensori in `ActionModal`. Banner rosso `⚡ POWER OFFLINE` in AttackModal.
+6. **FIX-06** (`c447bcc`) — Leadership bonus dura 1 round: applicato subito a `initiative`, rimosso da `buildNextRoundState`. Badge `↑ini` in PhaseTracker.
+7. **FIX-07** (`ff957a0`) — Display ion power mostra round rimanenti e `OFFLINE` quando Power = 0.
+
+FIX-08 (hardened per-sistema) differito a v1.24.0.
+
+### Sessione precedente — Test coverage gaps + doc sync (v1.22.3)
 
 1. **test(dogfight): 16 nuovi test** (`5029962`) — coprono i gap rimasti dopo v1.22.2/v1.22.3: `dexDM` in `rollDogfightPilot` (parametro e `breakdown sums to total`); suite complete per `freeThrust`, `computeShipDMs`, `bestPilot`, `escapeCheckTotals` (estratte da `DogfightRoundModal` in REF-01 ma mai testate). `dogfightDM` verificato in `rollAttack` (combat.test.js).
 2. **fix(dogfight): `extraEnemyDM` non ritorna più IEEE-754 `−0`** (stessa commit) — `computeShipDMs` usava `-(Math.max(0, n))` che produce `−0` con un solo nemico; sostituito con ternario esplicito.

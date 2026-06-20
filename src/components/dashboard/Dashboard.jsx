@@ -771,7 +771,7 @@ export function Dashboard() {
               SPACE COMBAT SIMULATOR
             </span>
           </div>
-          <span className="ml-auto text-slate-400 font-mono text-xs">v1.22.3</span>
+          <span className="ml-auto text-slate-400 font-mono text-xs">v1.23.0</span>
         </header>
 
         <main className="flex-1 overflow-hidden">

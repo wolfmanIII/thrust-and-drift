@@ -6,6 +6,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.23.0] — 2026-06-21
+
+### Fixed
+
+- **Critical hit manual effects — GM prompt** — descriptive critical effects (Sensors, Fuel Tank, Weapon, Bridge, Power Plant) now show a `⚠ MANUAL — Apply this effect to the ship before closing` banner in the AttackModal. Previously no feedback distinguished auto-applied from manual effects.
+- **Repair check difficulty scales with severity** — `Repair System` action now uses Average (8+) for Sev. 1–2, Difficult (10+) for Sev. 3–4, Very Difficult (12+) for Sev. 5–6. Was a fixed Average 8+ regardless of severity. *(CRB p.167)*
+- **Engineer can choose which critical to repair** — ActionModal now shows a selector when a ship has multiple critical hits; the selected critical determines repair difficulty. `repairCritical(shipId, critIndex)` replaces always-removing index 0.
+- **Missile ammo deducted when salvo fully intercepted by PD** — when Point Defence destroys all missiles before launch, `spendMissileAmmo` is now called to deduct the original count from the attacker's inventory. Previously the turret was marked fired but ammo stayed intact.
+- **Ion Power = 0 blocks weapons and sensors** — when `currentPower` reaches 0, all offensive weapons are removed from the AttackModal weapon list and sensor actions (Sensor Lock, EW, Counter Missile) are disabled in ActionModal with a `⚡ power offline` label. *(HG p.30)*
+- **Leadership initiative bonus lasts exactly 1 round** — `applyInitiativeBonus` now immediately applies the bonus to `ship.initiative` (actor order changes this round) and sets `initiativeTemporaryBonus`. `buildNextRoundState` subtracts and clears it at the round boundary. PhaseTracker shows `↑ini` badge on affected ships. *(CRB p.166)*
+- **Ion power display shows remaining rounds and OFFLINE state** — ShipDetailModal and ShipTooltip now show `−N PWR · Xr remaining` for active ion disruption, and an `OFFLINE` label when `currentPower` reaches 0.
+
+---
+
 ## [1.22.3] — 2026-06-20
 
 ### Fixed
