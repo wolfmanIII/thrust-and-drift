@@ -503,6 +503,7 @@ export function HelpScreen() {
           <KV k="↪️ Redo" v="Re-apply an undone action. Appears in HUD when redo stack is non-empty. Shortcut: Ctrl+Y / Cmd+Shift+Z." />
           <p>Both buttons are hidden when their respective stacks are empty — they appear only when relevant.</p>
           <Note>The battle log is not rolled back on undo. Instead, an ↩ Undo entry is appended to the log so the history remains readable.</Note>
+          <p>The Battle Log panel sits at the bottom-left of the screen. Click <span className="text-slate-200">▲ BATTLE LOG</span> to expand it; click ▼ to collapse. When expanded, a drag handle at the top lets you resize it by dragging upward (80 px min, 600 px max). Height is remembered for the session.</p>
         </Section>
 
         {/* SAVE & RESUME */}

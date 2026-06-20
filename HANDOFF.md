@@ -12,13 +12,21 @@
 | **Versione** | 1.22.1 |
 | **Branch** | main (in sync con origin) |
 | **Test** | 907 passing |
-| **Ultimo commit** | docs(changelog): add BasicManoeuvreModal Ion fix to v1.22.1 |
+| **Ultimo commit** | feat(ui): resizable BattleLog — drag handle expands panel upward |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Verifica Ion Power + doc RAW + bugfix basic mode (v1.22.1)
+### Sessione corrente — BattleLog resizable + doc sync (v1.22.1)
+
+1. **feat(ui): BattleLog resizable** (`7934eb1`) — drag handle in cima al pannello espanso; drag verso l'alto aumenta l'altezza (80 px min, 600 px max, default 160 px). `dragState` ref + `mousemove`/`mouseup` su `window`. Altezza mantenuta per la sessione; collapse/re-expand ripristina la dimensione precedente.
+
+2. **Doc sync** — CHANGELOG v1.22.1 Added section; field-manual §12 e HelpScreen aggiornati con descrizione drag handle.
+
+3. **Nota progettuale** — discusso JSON versioning: pianificata (non implementata) la feature di versione app nel JSON export + modale avviso file obsoleto. Nessun blocco del caricamento, solo warning. Salvato in memory `project-json-versioning.md`.
+
+### Sessione precedente — Verifica Ion Power + doc RAW + bugfix basic mode (v1.22.1)
 
 1. **Verifica Ion Power completa** — confermata implementazione al 100%: `computeIonThrustEffect`, `applyIonDamage`, `buildNextRoundState`, `addShip`, `ShipProfileForm` (MAX POWER / COMPUTER BW / HARDENED), `AttackModal IonDamageStep`, `ThrustModal`, `MissileImpactModal`, `useCanvasRenderer`, `useMapInteraction`, `ShipTooltip`, `BasicBattleView`, `ShipDetailModal`. `ionPenalty` rimosso ovunque. 907 test, 0 errori ESLint.
 

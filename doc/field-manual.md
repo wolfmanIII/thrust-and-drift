@@ -843,6 +843,8 @@ only when relevant.
 > The battle log is **not** rolled back on undo. Instead, a `↩️ Undo` entry is
 > appended to the log so the action history remains readable.
 
+The Battle Log panel sits at the bottom-left of the screen. Click **▲ BATTLE LOG** to expand it; click **▼** to collapse. When expanded, a drag handle (thin bar at the top of the panel) lets you resize it by dragging upward. Height ranges from 80 px to 600 px and is remembered for the session.
+
 ---
 
 ## 13. Save & Resume

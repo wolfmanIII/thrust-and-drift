@@ -8,6 +8,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [1.22.1] — 2026-06-20
 
+### Added
+
+- **Battle Log resizable** — when expanded, a drag handle appears at the top of the Battle Log panel; dragging upward increases height (80 px min, 600 px max). Height persists for the session; collapsing and re-expanding restores the last-set size.
+
 ### Fixed
 
 - **Ion Cannon available in weapon picker** — `barbetteOnly: true` flag removed from Ion Cannon data; weapon picker no longer filters by mount type. Ion Cannon (barbette, 2D×10) and all Ion Cannon Bay variants (S/M/L) are selectable in any weapon slot per GM discretion. Mount type remains barbette/bay per HG p.30 RAW.
