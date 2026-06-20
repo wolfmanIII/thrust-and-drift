@@ -139,7 +139,6 @@ export const WEAPONS = {
     maxRange: 'Medium',      // HG p.30
     damageMultiple: 10,      // 2D × 10 — overrides standard barbette ×3. // HG p.30
     traits: ['Ion'],
-    barbetteOnly: true,      // absent from turret table — HG p.28 vs p.30
     turretOnly: false,
     bayOnly: false,
     ignoresArmour: true,     // HG p.30 — Ion bypasses armour

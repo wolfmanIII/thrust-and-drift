@@ -160,7 +160,6 @@ function CrewMemberRow({ member, onChange, onRemove }) {
   )
 }
 
-/** All selectable weapons — turrets, barbettes, bays all stored in profile.turrets slots. */
 const TURRET_WEAPON_IDS = WEAPON_IDS
 
 /** Turret row: slot number, weapon chips, add weapon dropdown, remove turret. */
@@ -197,11 +196,9 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
           className="bg-slate-700 border border-slate-600 text-slate-400 font-mono text-xs rounded px-1.5 py-0.5 focus:outline-none focus:border-(--neon-cyan)/60 cursor-pointer"
         >
           <option value="">+ weapon</option>
-          {TURRET_WEAPON_IDS.map((w) => {
-            const wDef = WEAPONS[w]
-            const suffix = wDef?.barbetteOnly ? ' (Barbette)' : wDef?.bayOnly ? ' (Bay)' : ''
-            return <option key={w} value={w}>{w}{suffix}</option>
-          })}
+          {TURRET_WEAPON_IDS.map((w) => (
+            <option key={w} value={w}>{w}</option>
+          ))}
         </select>
       )}
       {turret.weapons.length >= 3 && (

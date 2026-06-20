@@ -98,8 +98,8 @@ describe('Ion Cannon (barbette)', () => {
     expect(WEAPONS['Ion Cannon'].maxRange).toBe('Medium')
   })
 
-  it('barbetteOnly: true — excluded from turret picker', () => {
-    expect(WEAPONS['Ion Cannon'].barbetteOnly).toBe(true)
+  it('barbetteOnly is not set — Ion Cannon appears in the weapon picker like other barbettes', () => {
+    expect(WEAPONS['Ion Cannon'].barbetteOnly).toBeFalsy()
   })
 
   it('ignoresArmour: true', () => {
