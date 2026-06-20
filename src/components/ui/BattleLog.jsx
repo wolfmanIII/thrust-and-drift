@@ -3,11 +3,14 @@
  * Shows the last N entries; auto-scrolls to bottom on new entries.
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore }     from '../../store/uiStore.js'
 
 const MAX_VISIBLE = 60
+const DEFAULT_HEIGHT = 160
+const MIN_HEIGHT     = 80
+const MAX_HEIGHT     = 600
 
 const TYPE_COLORS = {
   move:   'text-blue-400',
@@ -29,13 +32,15 @@ const TYPE_PREFIX = {
 
 export function BattleLog() {
   const [collapsed, setCollapsed] = useState(true)
+  const [height, setHeight]       = useState(DEFAULT_HEIGHT)
   const log                   = useBattleStore((s) => s.log)
   const clearLog              = useBattleStore((s) => s.clearLog)
   const reopenMissileImpact   = useBattleStore((s) => s.reopenMissileImpact)
   const pendingMissileImpacts = useBattleStore((s) => s.pendingMissileImpacts)
   const activeModal           = useUiStore((s) => s.activeModal)
   const impactBusy            = pendingMissileImpacts.length > 0 || activeModal !== null
-  const listRef             = useRef(null)
+  const listRef               = useRef(null)
+  const dragState             = useRef(null) // { startY, startH }
 
   const visible = log.slice(-MAX_VISIBLE)
 
@@ -46,13 +51,43 @@ export function BattleLog() {
     }
   }, [log.length, collapsed])
 
+  const onDragStart = useCallback((e) => {
+    dragState.current = { startY: e.clientY, startH: height }
+    e.preventDefault()
+  }, [height])
+
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!dragState.current) return
+      const delta = dragState.current.startY - e.clientY
+      setHeight(Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, dragState.current.startH + delta)))
+    }
+    const onUp = () => { dragState.current = null }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [])
+
   return (
     <div
-      className={`absolute bottom-7 left-0 z-10 w-1/3 transition-all duration-200 ${
-        collapsed ? 'h-8' : 'h-40'
-      }`}
+      className="absolute bottom-7 left-0 z-10 w-1/3 transition-[height] duration-200"
+      style={{ height: collapsed ? 32 : height }}
     >
       <div className="h-full bg-slate-950/85 border-t border-slate-700 backdrop-blur-sm flex flex-col">
+        {/* Resize handle — drag upward to expand */}
+        {!collapsed && (
+          <div
+            onMouseDown={onDragStart}
+            className="shrink-0 h-1.5 w-full cursor-ns-resize group"
+            title="Drag to resize"
+          >
+            <div className="mx-auto mt-px w-10 h-0.5 rounded-full bg-slate-700 group-hover:bg-slate-500 transition-colors" />
+          </div>
+        )}
+
         {/* Header bar */}
         <div className="flex items-center gap-3 px-3 py-1 border-b border-slate-800 shrink-0">
           <button
