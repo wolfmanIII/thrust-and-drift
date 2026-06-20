@@ -606,6 +606,8 @@ target's **Power** — disrupting thrust, computers, and critical systems.
 | Ion Cannon Bay (Medium) | Bay | 8D × 20 | Medium |
 | Ion Cannon Bay (Large) | Bay | 10D × 100 | Long |
 
+> **Naming note:** HG uses two different names for these weapons depending on chapter. The standard space combat chapter (HG pp.29–30, 32–33) lists them as **Ion Cannon** (barbette) and **Ion Cannon Bay** (bay) — the names T&D uses. The Fleet Combat chapter (HG p.112) refers to the same weapons as *Ion Barbette*, *Small Ion Bay*, *Medium Ion Bay*, *Large Ion Bay*, with a completely different damage system (effect-per-weapon × count ÷ Hull Points → Ion Damage table; no Power stat, no thrust formula). T&D implements standard space combat only; the fleet combat names and mechanics are out of scope.
+
 **Mechanics:**
 
 | Outcome | Effect |
