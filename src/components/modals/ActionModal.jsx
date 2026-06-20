@@ -149,6 +149,12 @@ export function ActionModal() {
     return 'Very Difficult (12+)'
   }
 
+  // Ion Power: sensors and EW are offline when currentPower <= 0 (HG p.30)
+  const basePower = ship.profile.maxPower ?? 100
+  const noPower   = (ship.currentPower ?? basePower) <= 0
+
+  const SENSOR_ACTIONS = ['sensor_lock', 'electronic_warfare', 'missile_ew']
+
   const isRepairAction = selectedAction?.id === 'repair_system'
   const selectedCrit   = isRepairAction ? (ship.criticalHits[selectedCritIndex] ?? null) : null
   const effectiveDifficulty = isRepairAction && selectedCrit
@@ -291,17 +297,19 @@ export function ActionModal() {
                 )}
                 <div className="space-y-1 max-h-40 overflow-y-auto">
                   {memberActions.map((action) => {
-                    const isRepair = action.id === 'repair_system'
-                    const noCrits  = isRepair && ship.criticalHits.length === 0
+                    const isRepair    = action.id === 'repair_system'
+                    const noCrits     = isRepair && ship.criticalHits.length === 0
+                    const sensorBlocked = noPower && SENSOR_ACTIONS.includes(action.id)
+                    const disabled    = noCrits || sensorBlocked
                     return (
                       <button
                         key={action.id}
-                        onClick={() => !noCrits && handleSelectAction(action)}
-                        disabled={noCrits}
+                        onClick={() => !disabled && handleSelectAction(action)}
+                        disabled={disabled}
                         className={`w-full text-left px-3 py-2 rounded font-mono text-xs border transition-colors ${
                           selectedAction?.id === action.id
                             ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
-                            : noCrits
+                            : disabled
                               ? 'border-slate-800 text-slate-600 cursor-not-allowed'
                               : 'border-slate-700 text-slate-300 hover:border-slate-500'
                         }`}
@@ -311,7 +319,8 @@ export function ActionModal() {
                           {action.difficulty === 'auto' ? 'Automatic' : `Target ${action.difficulty}+`}
                           {' · '}Skill {action.skillLevel}
                         </span>
-                        {noCrits && <span className="ml-2 text-slate-600">— no criticals</span>}
+                        {noCrits       && <span className="ml-2 text-slate-600">— no criticals</span>}
+                        {sensorBlocked && <span className="ml-2 text-red-800">— ⚡ power offline</span>}
                       </button>
                     )
                   })}

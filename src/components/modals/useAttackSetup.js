@@ -97,6 +97,11 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     ? availableWeapons.filter((w) => (WEAPONS[w.weaponName]?.mount ?? 'turret') === 'turret')
     : availableWeapons
 
+  // Ion Power: when currentPower <= 0 all powered systems are offline (HG p.30)
+  const basePower  = attacker?.profile.maxPower ?? 100
+  const noPower    = attacker ? (attacker.currentPower ?? basePower) <= 0 : false
+  const availableWeaponsFinal = noPower ? [] : availableWeaponsFiltered
+
   const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM
   const outOfRange  = weapon ? isOutOfRange(weapon.maxRange, rangeBand) : false
 
@@ -105,13 +110,14 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     enemies,
     target,
     weapon,
-    availableWeapons: availableWeaponsFiltered,
+    availableWeapons: availableWeaponsFinal,
     distance,
     rangeBand,
     storedBand,
     combatMode,
     outOfRange,
     dogfightTie,
+    noPower,
     dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, dogfightDM, totalDM },
   }
 }

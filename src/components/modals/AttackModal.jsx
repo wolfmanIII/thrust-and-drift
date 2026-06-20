@@ -230,7 +230,7 @@ function AttackConfigStep({
   weaponKey, selectedTurretSlot, setWeaponSelection, targetId, setTargetId,
   target, weapon, rangeBand, distance, dmBreakdown,
   combatMode, storedBand, manualRangeBand, setManualRangeBand,
-  outOfRange, dogfightTie,
+  outOfRange, dogfightTie, noPower,
   isMissile, isMissileBarbette, missileCount, setMissileCount, ammoLeft,
   inFlightMissiles, targetMissileId, setTargetMissileId,
   reactions,
@@ -245,6 +245,11 @@ function AttackConfigStep({
   return (
     <Modal title="Attack" onClose={onClose}>
       <div className="space-y-4">
+        {noPower && (
+          <div className="bg-red-950/40 border border-red-500/40 rounded px-3 py-2 font-mono text-xs text-red-400">
+            ⚡ POWER OFFLINE — all weapons unavailable. Restore power before attacking. (HG p.30)
+          </div>
+        )}
         {dogfightTie && (
           <div className="bg-amber-950/40 border border-amber-500/40 rounded px-3 py-2 font-mono text-xs text-amber-400">
             ⚠ Dogfight tie — fixed weapons unavailable (barbettes, bays)
@@ -1322,7 +1327,7 @@ export function AttackModal() {
     resetReactions()
   }
 
-  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, storedBand, combatMode, outOfRange, dogfightTie, dmBreakdown } =
+  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, storedBand, combatMode, outOfRange, dogfightTie, noPower, dmBreakdown } =
     useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand, selectedTurretSlot)
 
   if (!attacker) return null
@@ -1553,6 +1558,7 @@ export function AttackModal() {
         setManualRangeBand={setManualRangeBand}
         outOfRange={outOfRange}
         dogfightTie={dogfightTie}
+        noPower={noPower}
         dmBreakdown={augmentedDmBreakdown}
         isMissile={isMissile}
         isMissileBarbette={isMissileBarbette}
