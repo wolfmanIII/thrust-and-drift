@@ -10,10 +10,13 @@ import { Modal } from './Modal.jsx'
 import { useUiStore }     from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST } from '../../data/rangeBands.js'
+import { computeIonThrustEffect } from '../../utils/combat.js'
 
 function availableThrust(ship) {
+  const basePow = ship.basePower ?? ship.profile.maxPower ?? 100
+  const ionCap  = computeIonThrustEffect(ship.profile.thrust, ship.currentPower ?? basePow, basePow)
   return Math.max(0,
-    ship.profile.thrust
+    ionCap
     + (ship.thrustBonusThisRound ?? 0)
     - (ship.thrustUsedThisRound ?? 0)
     - (ship.thrustPenalty ?? 0)
