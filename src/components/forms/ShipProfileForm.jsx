@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useProfilesStore } from '../../store/profilesStore.js'
-import { WEAPON_IDS } from '../../data/weapons.js'
+import { WEAPON_IDS, WEAPONS } from '../../data/weapons.js'
 import { CREW_SKILLS, blankCrewMember, migrateCrew } from '../../utils/crew.js'
 import { Tooltip } from '../ui/Tooltip.jsx'
 
@@ -23,6 +23,9 @@ function blankForm() {
     thrust: 2,
     jump: 0,
     tl: 12,
+    maxPower: 100,
+    computerBandwidth: 0,
+    hardened: false,
     crew: [],
     turrets: [],
   }
@@ -36,14 +39,17 @@ function initForm(profile) {
     ? rawCrew.map((m) => ({ ...m, skills: { ...m.skills } }))
     : migrateCrew(rawCrew)
   return {
-    name:      profile.name      ?? '',
-    shipClass: profile.shipClass ?? '',
-    tonnage:   profile.tonnage   ?? 100,
-    hull:      profile.hull      ?? 20,
-    armor:     profile.armor     ?? 0,
-    thrust:    profile.thrust    ?? 2,
-    jump:      profile.jump      ?? 0,
-    tl:        profile.tl        ?? 12,
+    name:              profile.name              ?? '',
+    shipClass:         profile.shipClass         ?? '',
+    tonnage:           profile.tonnage           ?? 100,
+    hull:              profile.hull              ?? 20,
+    armor:             profile.armor             ?? 0,
+    thrust:            profile.thrust            ?? 2,
+    jump:              profile.jump              ?? 0,
+    tl:                profile.tl                ?? 12,
+    maxPower:          profile.maxPower          ?? 100,
+    computerBandwidth: profile.computerBandwidth ?? 0,
+    hardened:          profile.hardened          ?? false,
     crew,
     turrets: (profile.turrets ?? []).map((t) => ({ ...t, weapons: [...t.weapons] })),
   }
@@ -64,6 +70,26 @@ function NumField({ label, value, onChange, min = 0, max = 99 }) {
         onChange={(e) => onChange(Math.max(min, Math.min(max, Number(e.target.value) || 0)))}
         className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-sm rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
       />
+    </label>
+  )
+}
+
+/** Labelled checkbox input. */
+function CheckboxField({ label, checked, onChange, tooltip }) {
+  return (
+    <label className="flex items-center gap-2 cursor-pointer select-none">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="w-3.5 h-3.5 accent-(--neon-cyan) cursor-pointer"
+      />
+      <span className="font-mono text-xs text-slate-400 tracking-widest">
+        {label}
+        {tooltip && (
+          <span className="ml-1 text-slate-500" title={tooltip}>(?)</span>
+        )}
+      </span>
     </label>
   )
 }
@@ -134,6 +160,11 @@ function CrewMemberRow({ member, onChange, onRemove }) {
   )
 }
 
+/** Weapons valid for turret slots (not barbette-only, not bay-only). */
+const TURRET_WEAPON_IDS = WEAPON_IDS.filter(
+  (id) => !WEAPONS[id]?.barbetteOnly && !WEAPONS[id]?.bayOnly
+)
+
 /** Turret row: slot number, weapon chips, add weapon dropdown, remove turret. */
 function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurret }) {
   return (
@@ -168,7 +199,7 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
           className="bg-slate-700 border border-slate-600 text-slate-400 font-mono text-xs rounded px-1.5 py-0.5 focus:outline-none focus:border-(--neon-cyan)/60 cursor-pointer"
         >
           <option value="">+ weapon</option>
-          {WEAPON_IDS.map((w) => (
+          {TURRET_WEAPON_IDS.map((w) => (
             <option key={w} value={w}>{w}</option>
           ))}
         </select>
@@ -316,6 +347,35 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
           <div className="grid grid-cols-4 gap-3">
             <NumField label="TECH LVL" value={form.tl}    onChange={(v) => set('tl', v)}     min={7} max={16} />
           </div>
+        </section>
+
+        {/* Power Plant — Ion Cannon target stat */}
+        <section className="space-y-3">
+          <h3 className="font-mono text-xs text-slate-400 tracking-widest uppercase border-b border-slate-800 pb-1">
+            Power Plant
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            <NumField
+              label="MAX POWER"
+              value={form.maxPower}
+              onChange={(v) => set('maxPower', v)}
+              min={10}
+              max={9999}
+            />
+            <NumField
+              label="COMPUTER BW"
+              value={form.computerBandwidth}
+              onChange={(v) => set('computerBandwidth', v)}
+              min={0}
+              max={999}
+            />
+          </div>
+          <CheckboxField
+            label="HARDENED SYSTEMS (/fib)"
+            checked={form.hardened}
+            onChange={(v) => set('hardened', v)}
+            tooltip="Computer with /fib designation — immune to Ion weapons (FAQ HG 2022 p.1)"
+          />
         </section>
 
         {/* Crew Manifest */}
