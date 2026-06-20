@@ -12,13 +12,23 @@
 | **Versione** | 1.22.1 |
 | **Branch** | main (in sync con origin) |
 | **Test** | 907 passing |
-| **Ultimo commit** | chore(release): bump version to v1.22.1 and update all docs |
+| **Ultimo commit** | docs(changelog): add BasicManoeuvreModal Ion fix to v1.22.1 |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Ion Power + Weapon Picker + Label Rename + ESLint (v1.22.0 → v1.22.1)
+### Sessione corrente — Verifica Ion Power + doc RAW + bugfix basic mode (v1.22.1)
+
+1. **Verifica Ion Power completa** — confermata implementazione al 100%: `computeIonThrustEffect`, `applyIonDamage`, `buildNextRoundState`, `addShip`, `ShipProfileForm` (MAX POWER / COMPUTER BW / HARDENED), `AttackModal IonDamageStep`, `ThrustModal`, `MissileImpactModal`, `useCanvasRenderer`, `useMapInteraction`, `ShipTooltip`, `BasicBattleView`, `ShipDetailModal`. `ionPenalty` rimosso ovunque. 907 test, 0 errori ESLint.
+
+2. **Bugfix — Ion Power thrust cap mancante in basic mode** (`1d85a45`) — `BasicManoeuvreModal.availableThrust()` non chiamava `computeIonThrustEffect`: nave Ion-debuffata poteva allocare più thrust di quanto consentito dalla Power ridotta. Allineato a `ThrustModal`, `MissileImpactModal`, `battleStore`.
+
+3. **Doc — Ion Cannon vs Ion Barbette RAW disambiguation** (`ae7dbf6`, `fd2b807`) — HG usa nomi e meccaniche diversi per le armi Ion a seconda del capitolo. Standard space combat (HG pp.29–30, 32–33): **Ion Cannon** / **Ion Cannon Bay** con meccanica Power-reduction. Fleet Combat (HG p.112): *Ion Barbette* / *Small·Medium·Large Ion Bay* con formula completamente diversa (effect-per-weapon × count ÷ Hull Points → Ion Damage table; nessun Power stat). Fleet Combat è **out of scope** per T&D. Tabella comparativa aggiunta in field-manual §9.10, note in CHANGELOG v1.22.1 e HelpScreen.
+
+4. **Verifica I/O profili** — save/CRUD, export (`exportAll`), import (`importFromFile`, merge per id), export/import battle state: tutto corretto. No autosave by design (no persistence layer per spec). Nota: import profili skipa (non aggiorna) profili con id già esistente.
+
+### Sessione precedente — Ion Power + Weapon Picker + Label Rename + ESLint (v1.22.0 → v1.22.1)
 
 1. **Ion Weapons Power stat (v1.22.0)** — `maxPower`, `computerBandwidth`, `hardened` nei profili; `currentPower`/`currentBandwidth` nell'istanza; `computeIonThrustEffect`; `applyIonDamage` additiva; `buildNextRoundState` ripristina Power su `ionCurrent > 0` (BUG-001 fix). 25 nuovi test.
 
@@ -219,7 +229,9 @@
 
 ## Prossimo task
 
-Test manuali in app ancora da fare: dogfight e boarding (non testati da v1.17.1), nuovo flusso missile impact two-step, e la nuova EW Counter Missile.
+- **Deploy Netlify** — manuale da CLI: `source ~/.nvm/nvm.sh && nvm use --lts && npm run build && netlify deploy --prod`
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg dopo le modifiche a §9.10 (naming note + tabella comparativa Fleet Combat)
+- **Test manuali in app** — dogfight e boarding (non testati da v1.17.1), flusso missile impact two-step, EW Counter Missile
 
 Deploy da fare da casa: `source ~/.nvm/nvm.sh && nvm use --lts && npm run build && netlify deploy --prod`
 
