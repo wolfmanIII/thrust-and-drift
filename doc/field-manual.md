@@ -630,7 +630,7 @@ Ion weapons **ignore armour**. Multiple Ion hits on the same target stack additi
 
 **Power → Thrust mapping** (T&D design decision — RAW does not specify the formula):
 
-```
+```text
 effectiveThrust = floor(baseThrust × currentPower / maxPower)
 thrustAvailable = max(0, effectiveThrust + bonusThisRound − thrustUsed − mDrivePenalty − reactionThrust)
 ```
