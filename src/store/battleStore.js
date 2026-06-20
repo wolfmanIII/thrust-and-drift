@@ -11,7 +11,7 @@ import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount, 
 import { hexAdd, hexDistance, segmentMinDistance } from '../utils/hex.js'
 import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
-import { getCrewSkill, getEffectiveSkill, buildDefaultAssignments } from '../utils/crew.js'
+import { getEffectiveSkill, buildDefaultAssignments } from '../utils/crew.js'
 import { resolveDogfightChecks } from '../utils/dogfight.js'
 import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST } from '../data/rangeBands.js'
 import { useUiStore } from './uiStore.js'

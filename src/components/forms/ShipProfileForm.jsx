@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useProfilesStore } from '../../store/profilesStore.js'
-import { WEAPON_IDS, WEAPONS } from '../../data/weapons.js'
+import { WEAPON_IDS } from '../../data/weapons.js'
 import { CREW_SKILLS, blankCrewMember, migrateCrew } from '../../utils/crew.js'
 import { Tooltip } from '../ui/Tooltip.jsx'
 

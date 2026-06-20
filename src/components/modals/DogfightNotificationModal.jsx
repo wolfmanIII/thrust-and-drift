@@ -77,6 +77,16 @@ export function DogfightNotificationModal({ groups, onDone }) {
   const [outcome, setOutcome]         = useState(null)   // 'dogfight' | 'shortrange'
   const [pursuitData, setPursuitData] = useState(null)   // computed check result
 
+  // Reset local state when moving to a new group
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional batch reset on group change
+    setIntents({})
+    setPhase('intent')
+    setPursuitDice({})
+    setOutcome(null)
+    setPursuitData(null)
+  }, [groupIdx])
+
   const safeIdx    = Math.min(groupIdx, groups.length - 1)
   const group      = groups[safeIdx]
   if (!group) return null   // groups became empty (e.g. after undo)
@@ -84,15 +94,6 @@ export function DogfightNotificationModal({ groups, onDone }) {
     .map((id) => ships.find((s) => s.id === id))
     .filter(Boolean)
   const total = groups.length
-
-  // Reset local state when moving to a new group
-  useEffect(() => {
-    setIntents({})
-    setPhase('intent')
-    setPursuitDice({})
-    setOutcome(null)
-    setPursuitData(null)
-  }, [groupIdx])
 
   const setIntent = (shipId, value) =>
     setIntents((prev) => ({ ...prev, [shipId]: value }))

@@ -21,13 +21,6 @@ const ROLE_LABELS = {
 
 const NON_GUNNER_ROLES = ['pilot', 'leadership', 'tactics', 'engineer', 'sensors']
 
-/** Skill badge shown next to a crew member's name. */
-function SkillBadge({ member, role }) {
-  const level = member.skills?.[role] ?? 0
-  if (level === 0) return <span className="text-slate-400 font-mono text-xs">—</span>
-  return <span className="text-(--neon-cyan) font-mono text-xs">{role} {level}</span>
-}
-
 export function CrewAssignmentModal() {
   const closeModal         = useUiStore((s) => s.closeModal)
   const modalPayload       = useUiStore((s) => s.modalPayload)
@@ -36,12 +29,12 @@ export function CrewAssignmentModal() {
 
   const ship = ships.find((s) => s.id === modalPayload?.shipId)
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Memoised — migrateCrew calls uuidv7() so must not run on every render
   const crewArray = useMemo(() =>
     Array.isArray(ship?.profile.crew)
       ? ship.profile.crew
       : migrateCrew(ship?.profile.crew ?? {}),
-  [ship?.id])
+  [ship?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const turrets = ship?.profile.turrets ?? []
 

@@ -342,7 +342,10 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
     if (anim && (now - anim.startTime) >= anim.duration) {
       useUiStore.getState().clearMovementAnimation()
     }
-  }, [canvasRef, ships, missiles, selectedShipId, offset, zoom, timestampRef, thrustTargeting, mouseHexRef])
+  // ships/missiles are read fresh via getState() inside render, but kept in deps to
+  // trigger useCallback recreation → useEffect([render]) fires → canvas redraws on store change.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canvasRef, ships, missiles, phase, selectedShipId, offset, zoom, timestampRef, thrustTargeting, mouseHexRef])
 
   // Render on state changes
   useEffect(() => {

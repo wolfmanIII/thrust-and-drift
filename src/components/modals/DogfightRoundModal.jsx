@@ -390,7 +390,6 @@ export function DogfightRoundModal() {
             </p>
             <div className="space-y-2">
               {groupShips.map((ship) => {
-                const autoOk   = isAutoEscape(ship)
                 const isFleeing = fleeingIds.has(ship.id)
                 const notPursued = enemiesNotPursuing.has(ship.id)
                 const enemyThrusts = getEnemyThrusts(ship)

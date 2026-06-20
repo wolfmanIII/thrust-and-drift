@@ -2088,7 +2088,7 @@ describe('spendSandAmmo', () => {
     const sandProfile = makeProfile({ turrets: [{ slot: 1, weapons: ['Sandcaster'] }] })
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
     useBattleStore.getState().addShip(sandProfile, { q: 1, r: 0 }, 'npc', '#f00')
-    const [s1, s2] = useBattleStore.getState().ships
+    const [, s2] = useBattleStore.getState().ships
     useBattleStore.getState().spendSandAmmo(s2.id)
     expect(useBattleStore.getState().ships[0].sandAmmoTotal).toBe(0)
     expect(useBattleStore.getState().ships[1].sandAmmoTotal).toBe(19)

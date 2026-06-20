@@ -2,8 +2,8 @@
  * Tests for PassingAttackModal — passing encounter window.
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { PassingAttackModal } from './PassingAttackModal.jsx'
 import { useBattleStore }     from '../../store/battleStore.js'
 import { useUiStore }         from '../../store/uiStore.js'

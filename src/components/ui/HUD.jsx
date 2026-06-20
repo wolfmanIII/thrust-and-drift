@@ -62,6 +62,7 @@ export function HUD() {
 
   // clear the warning once the condition is satisfied
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clears stale block message when advance becomes possible
     if (canAdvancePhase) setPhaseBlockMsg(null)
   }, [canAdvancePhase])
 
@@ -81,7 +82,7 @@ export function HUD() {
     }
     setPhaseBlockMsg(null)
     advancePhase()
-  }, [canAdvancePhase, advancePhase, phase, initiativeOrder, currentActorIndex])
+  }, [canAdvancePhase, advancePhase, phase, initiativeOrder, currentActorIndex, pendingMissileImpacts])
 
   const handleUndo = useCallback(() => {
     if (canUndo) undoLastAction()

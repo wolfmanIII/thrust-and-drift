@@ -820,7 +820,7 @@ function IonDamageStep({ weapon, target, attackEffect, isPlayer, onApply, onClos
  *   onClose:      Function,
  * }} props
  */
-function MissilePdStep({ missile, launcherName, targetName, attacker, weaponKey, turretSlot, isPlayer, onApply, onClose }) {
+function MissilePdStep({ missile, launcherName, targetName, attacker, turretSlot, isPlayer, onApply, onClose }) {
   const [pdRoll,     setPdRoll]     = useState(null)
   const [manualRaw,  setManualRaw]  = useState('')
 

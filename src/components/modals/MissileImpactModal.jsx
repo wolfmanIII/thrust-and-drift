@@ -44,6 +44,7 @@ export function MissileImpactModal() {
 
   // Reset all local state whenever a new impact becomes active
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional batch reset on impact change
     setStep('attack')
     setDie1('')
     setDie2('')
