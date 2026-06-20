@@ -164,6 +164,21 @@ export function getCharDM(value) {
 // === THRUST / MOVEMENT ===
 
 /**
+ * Effective thrust ceiling given current Ion Power reduction.
+ * Linear scaling: floor(baseThrust × currentPower / maxPower).
+ * Returns baseThrust unchanged when maxPower is 0 or falsy (not tracked).
+ * // HG p.30 — Ion reduces Power; T&D maps Power → Thrust proportionally (design decision)
+ * @param {number} baseThrust
+ * @param {number} currentPower
+ * @param {number} maxPower
+ * @returns {number}
+ */
+export function computeIonThrustEffect(baseThrust, currentPower, maxPower) {
+  if (!maxPower || maxPower <= 0) return baseThrust
+  return Math.floor(baseThrust * Math.max(0, currentPower) / maxPower)
+}
+
+/**
  * Validate a thrust delta against available thrust.
  * Uses hex distance (Chebyshev) — NOT Manhattan distance.
  * // Traveller Companion p.172 — vectorial thrust constraint
