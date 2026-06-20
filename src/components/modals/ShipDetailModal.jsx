@@ -115,7 +115,7 @@ export function ShipDetailModal() {
             )}
             {(profile.turrets ?? []).map((t) => (
               <div key={t.slot} className="py-0.5">
-                <span className="text-slate-400 font-mono text-xs">Turret {t.slot}: </span>
+                <span className="text-slate-400 font-mono text-xs">Weapon {t.slot}: </span>
                 <span className="text-slate-300 font-mono text-xs">
                   {t.weapons.join(', ')}
                 </span>

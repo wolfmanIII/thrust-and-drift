@@ -386,8 +386,8 @@ export function HelpScreen() {
             <p>All salvos show <span className="text-red-400">🚨 NO AMMO</span> and disable the launch button when the magazine is empty. Missiles and torpedoes have <span className="text-slate-200">Thrust 10</span> and <span className="text-slate-200">10 rounds of guided flight</span> — homing toward the target's predicted position each Movement phase until fuel is exhausted.</p>
           </Sub>
 
-          <Sub title="PER-TURRET FIRING LIMIT">
-            <p>Each turret may fire <span className="text-slate-200">once per round</span> (CRB p.164). The weapon list shows only unfired turrets, identified by slot badge (T1, T2…). Once all offensive turrets have fired, the Attack… option disappears from the context menu.</p>
+          <Sub title="PER-SLOT FIRING LIMIT">
+            <p>Each weapon slot may fire <span className="text-slate-200">once per round</span> (CRB p.164). The weapon list shows only unfired slots, identified by slot badge (W1, W2…). Once all offensive slots have fired, the Attack… option disappears from the context menu.</p>
           </Sub>
 
           <Sub title="WEAPON RANGE LIMITS">
@@ -473,7 +473,7 @@ export function HelpScreen() {
             <p>Right-click ship → <span className="text-slate-200">Assign Crew…</span> to open the assignment modal.</p>
             <p>The modal has two sections:</p>
             <p><span className="text-slate-200">Roles</span> — one dropdown per non-gunner slot: Pilot, Leadership (LDR), Tactics (TAC), Engineer, Sensors.</p>
-            <p><span className="text-slate-200">Gunners</span> — one dropdown per turret (T1, T2…), with weapon names shown next to the slot label.</p>
+            <p><span className="text-slate-200">Gunners</span> — one dropdown per weapon slot (W1, W2…), with weapon names shown next to the slot label.</p>
             <p>Each dropdown lists all named crew members. The relevant skill level is shown in brackets — e.g. <span className="text-(--neon-cyan)">Mira Vasquez [pilot 1]</span> or <span className="text-slate-400">Joko Hendrik [no skill]</span>. Select <span className="text-slate-400">— unassigned —</span> to leave the slot empty.</p>
             <KV k="CLEAR ALL" v="Reset every slot to unassigned." />
             <KV k="SAVE ASSIGNMENTS" v="Commit selections to the ship and close." />
@@ -483,9 +483,9 @@ export function HelpScreen() {
             <KV k="Leadership" v="Improve Initiative action not available." />
             <KV k="Tactics" v="No Tactics(naval) check at initiative." />
             <KV k="Engineer" v="Engineer actions use skill 0." />
-            <KV k="Gunner (T1, T2…)" v="That turret cannot fire." />
+            <KV k="Gunner (W1, W2…)" v="That weapon slot cannot fire." />
             <KV k="Sensors" v="Sensors actions use skill 0." />
-            <p>One crew member can cover multiple slots (e.g. same person as Pilot and Gunner T1 on a light fighter). On placement the app auto-assigns the best-skilled member per role — adjust any time before or during combat.</p>
+            <p>One crew member can cover multiple slots (e.g. same person as Pilot and Gunner W1 on a light fighter). On placement the app auto-assigns the best-skilled member per role — adjust any time before or during combat.</p>
           </Sub>
 
           <Sub title="EDITING CREW">

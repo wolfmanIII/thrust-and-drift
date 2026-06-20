@@ -146,7 +146,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
         <>
           {hasUnfiredOffensiveTurret(ship)
             ? <MenuItem icon="🎯" label="Attack…" onClick={() => open('attack', { shipId: targetId })} />
-            : <MenuItemDisabled icon="🎯" label="Attack…" reason="All turrets fired" />
+            : <MenuItemDisabled icon="🎯" label="Attack…" reason="All weapons fired" />
           }
           <MenuDivider />
         </>

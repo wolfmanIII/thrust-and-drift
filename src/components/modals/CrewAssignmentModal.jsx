@@ -130,7 +130,7 @@ export function CrewAssignmentModal() {
                   {turrets.map((t) => (
                     <div key={t.slot} className="flex items-center gap-2">
                       <span className="font-mono text-xs text-slate-400 w-36 shrink-0">
-                        Gunner (T{t.slot})
+                        Gunner (W{t.slot})
                         <span className="text-slate-400 ml-1">
                           {(t.weapons ?? []).join(', ')}
                         </span>

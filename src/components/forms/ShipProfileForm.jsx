@@ -167,7 +167,7 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
   return (
     <div className="flex flex-wrap items-center gap-1.5 bg-slate-800 rounded px-2 py-1.5">
       <span className="text-slate-400 font-mono text-xs shrink-0 w-16">
-        Turret {turret.slot}
+        Weapon {turret.slot}
       </span>
 
       {/* Weapon chips */}
@@ -202,16 +202,16 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
         </select>
       )}
       {turret.weapons.length >= 3 && (
-        <span className="text-slate-400 font-mono text-xs italic">triple turret</span>
+        <span className="text-slate-400 font-mono text-xs italic">max 3 weapons</span>
       )}
 
       {/* Remove turret */}
-      <Tooltip label="Remove turret" position="top">
+      <Tooltip label="Remove weapon slot" position="top">
         <button
           type="button"
           onClick={() => onRemoveTurret(slotIdx)}
           className="ml-auto text-slate-400 hover:text-red-400 font-mono text-sm leading-none transition-colors px-1"
-          aria-label="Remove turret"
+          aria-label="Remove weapon slot"
         >
           ✕
         </button>
@@ -408,7 +408,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
         <section className="space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800 pb-1">
             <h3 className="font-mono text-xs text-slate-400 tracking-widest uppercase">
-              Turrets ({form.turrets.length})
+              Weapons ({form.turrets.length})
             </h3>
             <button
               type="button"
@@ -419,7 +419,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
             </button>
           </div>
           {form.turrets.length === 0 && (
-            <p className="text-slate-400 font-mono text-xs italic">No turrets.</p>
+            <p className="text-slate-400 font-mono text-xs italic">No weapon slots.</p>
           )}
           <div className="space-y-1.5">
             {form.turrets.map((t, idx) => (

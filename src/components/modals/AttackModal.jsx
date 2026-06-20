@@ -125,7 +125,7 @@ function ReactionsPanel({
                           : 'border-slate-700 text-slate-400 hover:border-slate-500'
                       }`}
                     >
-                      T{t.slot}{t.laserBonus > 0 && <span className="text-amber-500 ml-1">+{t.laserBonus}</span>}
+                      W{t.slot}{t.laserBonus > 0 && <span className="text-amber-500 ml-1">+{t.laserBonus}</span>}
                     </button>
                   ))}
                 </div>
@@ -167,7 +167,7 @@ function ReactionsPanel({
                       : 'border-slate-700 text-slate-400 hover:border-slate-500'
                   }`}
                 >
-                  T{t.slot}
+                  W{t.slot}
                 </button>
               ))}
             </div>
@@ -272,7 +272,7 @@ function AttackConfigStep({
                 >
                   <span className="flex items-center justify-between gap-2">
                     <span>
-                      <span className="text-slate-400 mr-1.5">T{w.turretSlot}</span>
+                      <span className="text-slate-400 mr-1.5">W{w.turretSlot}</span>
                       {w.weaponName}
                     </span>
                     {wOutOfRange && (
