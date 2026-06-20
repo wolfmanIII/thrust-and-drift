@@ -9,16 +9,21 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.22.2 |
+| **Versione** | 1.22.3 |
 | **Branch** | main (da pushare) |
 | **Test** | 915 passing |
-| **Ultimo commit** | refactor(boarding): use boardingId in modal payload instead of attackerId+phase lookup |
+| **Ultimo commit** | chore(release): bump version to v1.22.3 and update CHANGELOG |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Dogfight/boarding RAW compliance (v1.22.2)
+### Sessione corrente — UX fixes post-code-review (v1.22.3)
+
+1. **fix(ui): Tooltip component su checkbox HARDENED** (`0f22a79`) — `(?)` usava `title` nativo; sostituito con `<Tooltip>` come tutti gli altri tooltip del form.
+2. **fix(initiative): Tactics roll dopo main dice** (`2dabf07`) — riga Tactics visibile solo dopo l'inserimento del tiro principale; risolve il bug per cui rollare Tactics prima ignorava l'Effect nel totale preview. Layout corretto con `ml-auto`.
+
+### Sessione precedente — Dogfight/boarding RAW compliance (v1.22.2)
 
 Code review completa su dogfight e boarding → 13 fix implementati in 5 fasi:
 

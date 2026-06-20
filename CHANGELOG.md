@@ -6,6 +6,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.22.3] — 2026-06-20
+
+### Fixed
+
+- **Initiative — Tactics roll appears only after main dice are entered** — the optional Tactics(naval) check row was visible immediately, allowing the GM to roll tactics before the initiative dice. This caused the Tactics Effect to be ignored in the preview total. The row now appears only after the main 2D6 are entered, enforcing correct roll order. Row layout also corrected: DiceInput and Effect badge pushed right with `ml-auto`.
+- **Hardened checkbox tooltip uses Tooltip component** — the `(?)` hint next to *HARDENED SYSTEMS (/fib)* in the ship profile form was using a native `title` attribute instead of the `<Tooltip>` component; updated to match all other tooltips in the form.
+
+---
+
 ## [1.22.2] — 2026-06-20
 
 ### Changed
