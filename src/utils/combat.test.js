@@ -313,6 +313,14 @@ describe('rollAttack', () => {
     expect(r.roll).toBe(override)
     expect(r.hit).toBe(false)
   })
+
+  it('dogfightDM adds to total and appears in breakdown', () => {
+    // roll=8 (mocked), base all zeros → total=8; with dogfightDM=+2 → total=10
+    const base   = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0 })
+    const winner = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0, dogfightDM: 2 })
+    expect(winner.total).toBe(base.total + 2)
+    expect(winner.breakdown.dogfightDM).toBe(2)
+  })
 })
 
 // === ROLL INITIATIVE ===

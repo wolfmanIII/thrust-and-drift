@@ -88,7 +88,7 @@ export function computeShipDMs(ship, groupShips, group) {
   const thrustDM       = freeThrust(ship)
   const dexDM          = ship.profile.dexDM ?? 0
   const enemies        = groupShips.filter((s) => s.faction !== ship.faction)
-  const extraEnemyDM   = -(Math.max(0, enemies.length - 1))
+  const extraEnemyDM   = enemies.length > 1 ? 1 - enemies.length : 0
   const prevRoundBonus = ship.id === group.roundWinnerId ? group.roundWinnerMargin : 0
   return { pilotSkill, tonnageDM, thrustDM, dexDM, extraEnemyDM, prevRoundBonus }
 }
