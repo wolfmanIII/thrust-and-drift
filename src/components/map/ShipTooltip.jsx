@@ -119,12 +119,12 @@ export function ShipTooltip() {
           <StatRow label="Locked by" value={lockerName} />
         )}
         {(ship.ionRoundsLeft ?? 0) > 0 && (
-          <StatRow label="Ion disruption" value={`-${ship.ionPowerReduction ?? 0} PWR (${ship.ionRoundsLeft}R)`} accent />
+          <StatRow label="Ion disruption" value={`−${ship.ionPowerReduction ?? 0} PWR · ${ship.ionRoundsLeft}R remaining`} accent />
         )}
         {(ship.ionRoundsLeft ?? 0) > 0 && (ship.basePower ?? 0) > 0 && (
           <StatRow
             label="Power"
-            value={`${ship.currentPower ?? _basePow} / ${_basePow}`}
+            value={`${ship.currentPower ?? _basePow} / ${_basePow}${(ship.currentPower ?? _basePow) <= 0 ? ' — OFFLINE' : ''}`}
             accent
           />
         )}

@@ -62,10 +62,13 @@ export function ShipDetailModal() {
             <StatRow label="Initiative" value={initiative} />
             <StatRow label="Evading" value={evasiveThrust > 0 ? `${evasiveThrust} thrust used` : '—'} />
             {(ship.ionRoundsLeft ?? 0) > 0 && (
-              <StatRow label="Ion disruption" value={`-${ship.ionPowerReduction ?? 0} PWR / ${ship.ionRoundsLeft}R`} />
+              <StatRow label="Ion disruption" value={`−${ship.ionPowerReduction ?? 0} PWR · ${ship.ionRoundsLeft}R remaining`} />
             )}
             {(ship.ionRoundsLeft ?? 0) > 0 && (ship.basePower ?? 0) > 0 && (
-              <StatRow label="Power" value={`${ship.currentPower ?? ship.basePower} / ${ship.basePower ?? ship.profile.maxPower ?? 100}`} />
+              <StatRow
+                label="Power"
+                value={`${ship.currentPower ?? ship.basePower} / ${ship.basePower ?? ship.profile.maxPower ?? 100}${(ship.currentPower ?? ship.basePower ?? 1) <= 0 ? ' — OFFLINE' : ''}`}
+              />
             )}
             {(ship.ionRoundsLeft ?? 0) > 0 && (ship.baseBandwidth ?? 0) > 0 && (
               <StatRow
