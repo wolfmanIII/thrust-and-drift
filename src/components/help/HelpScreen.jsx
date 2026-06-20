@@ -168,7 +168,7 @@ export function HelpScreen() {
             <KV k="Name / Tonnage" v="Display name and hull size (affects target size DM)." />
             <KV k="Hull / Thrust" v="Max hull points and base manoeuvre drive rating." />
             <KV k="Tech Level (TL)" v="Ship's technology level (default 12). Gates Smart guidance on missiles and torpedoes — DM+2 applies only when TL ≥ 9 (CRB p.79). Most Traveller-era vessels are TL 12–15; set lower for pre-stellar or primitive opponents." />
-            <KV k="Turrets" v="Add weapon turrets — type, damage dice, range band, special traits. Maximum 3 weapons per turret (triple turret, CRB p.163)." />
+            <KV k="Weapons" v="Add weapon slots — type, damage dice, range band, special traits. Maximum 3 weapons per slot (triple turret, CRB p.163)." />
             <KV k="Crew" v="Add named crew members, each with individual skill levels (Pilot, Leadership, Tactics, Engineer, Gunner, Sensors 0–5). One crew member can hold multiple skills — useful for single-seat fighters." />
           </Sub>
         </Section>
@@ -355,8 +355,8 @@ export function HelpScreen() {
           <Sub title="REACTIONS (CRB p.171)">
             <p>The defender can declare Reactions in Step 1 before the attack roll.</p>
             <KV k="Evasive Action" v="Toggle: spend 1 thrust to dodge this attack. The attack suffers DM −Pilot skill (fixed). Button disabled if no thrust remains or Pilot skill is 0." />
-            <KV k="Point Defence" v="Missile attacks only. Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Turret marked fired." />
-            <KV k="Disperse Sand" v="Laser attacks only. Gunner (turret) check — on success adds 1D+Effect to armour for this attack only. Turret marked fired." />
+            <KV k="Point Defence" v="Missile attacks only. Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Weapon slot marked fired." />
+            <KV k="Disperse Sand" v="Laser attacks only. Gunner (turret) check — on success adds 1D+Effect to armour for this attack only. Slot marked fired." />
             <p className="text-slate-400 italic text-xs">Player-controlled defending ships enter physical dice manually for PD and Sand rolls.</p>
           </Sub>
 
@@ -379,7 +379,7 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="LAUNCHING MISSILES">
-            <p>Three launcher types are available — all selected in the Attack modal weapon list. No dice roll required at launch. The turret is marked as fired immediately.</p>
+            <p>Three launcher types are available — all selected in the Attack modal weapon list. No dice roll required at launch. The weapon slot is marked as fired immediately.</p>
             <p><span className="text-slate-200">Missile Rack</span> (CRB p.162) — adjust salvo count using the stepper (capped at remaining magazine, 12 per rack). Damage: 4D6 per missile.</p>
             <p><span className="text-slate-200">Missile Barbette</span> (HG p.29) — fixed 5-missile salvo, 25 total canisters (5 salvos). Damage: 4D6 per missile. Barbette ×3 multiplier does <em>not</em> apply to missile weapons.</p>
             <p><span className="text-slate-200">Torpedo</span> (HG p.30–31) — 1–3 torpedoes per launch, 3 per barbette. Rendered as a red/amber token. Damage: 6D6 per torpedo.</p>
@@ -417,14 +417,14 @@ export function HelpScreen() {
           <Sub title="SPECIAL WEAPON MECHANICS">
             <p><span className="text-slate-200">AP (Armour Piercing) trait</span> — reduces effective armour before damage: <code className="text-(--neon-cyan)">effectiveArmour = max(0, armour − apReduction)</code>. Weapons: Railgun AP 4, Fusion Barbette AP 3, Plasma Barbette AP 2, Railgun Barbette AP 5.</p>
             <p><span className="text-slate-200">Barbette ×3 multiplier</span> (HG p.29) — applied after armour: <code className="text-(--neon-cyan)">netDamage = max(0, roll + Effect − effectiveArmour) × 3</code>. A roll fully absorbed by armour deals zero damage regardless of the multiplier. Does not apply to missile or torpedo weapons.</p>
-            <p><span className="text-slate-200">Ion weapons</span> (HG p.30, FAQ HG 2022 p.1) — no hull damage. Available as <span className="text-blue-400">Ion Cannon</span> (barbette only, 2D×10) and <span className="text-blue-400">Ion Cannon Bay</span> Small/Medium/Large (6D×10 / 8D×20 / 10D×100). On hit, ignoring armour: deducts roll×multiple from target <span className="text-blue-400">Power</span> and <span className="text-blue-400">computer bandwidth</span>. Duration: 1 round; D3 rounds if Effect ≥ 6. Power restores on <code className="text-(--neon-cyan)">ionRoundsLeft</code> expiry. Token shows pulsing blue aura. Bento card shows <span className="text-blue-400">ION NR — -X PWR</span>. Thrust cap: <code className="text-(--neon-cyan)">effectiveThrust = floor(baseThrust × currentPower / maxPower)</code>. Bandwidth depletion: DM-2 to all attacks while <code className="text-(--neon-cyan)">currentBandwidth ≤ 0</code> (shown as COMMS DOWN). Hardened systems (/fib): immune to Ion weapons.</p>
+            <p><span className="text-slate-200">Ion weapons</span> (HG p.30, FAQ HG 2022 p.1) — no hull damage. Available as <span className="text-blue-400">Ion Cannon</span> (barbette, 2D×10) and <span className="text-blue-400">Ion Cannon Bay</span> Small/Medium/Large (6D×10 / 8D×20 / 10D×100). On hit, ignoring armour: deducts roll×multiple from target <span className="text-blue-400">Power</span> and <span className="text-blue-400">computer bandwidth</span>. Duration: 1 round; D3 rounds if Effect ≥ 6. Power restores on <code className="text-(--neon-cyan)">ionRoundsLeft</code> expiry. Token shows pulsing blue aura. Bento card shows <span className="text-blue-400">ION NR — -X PWR</span>. Thrust cap: <code className="text-(--neon-cyan)">effectiveThrust = floor(baseThrust × currentPower / maxPower)</code>. Bandwidth depletion: DM-2 to all attacks while <code className="text-(--neon-cyan)">currentBandwidth ≤ 0</code> (shown as COMMS DOWN). Hardened systems (/fib): immune to Ion weapons.</p>
             <p><span className="text-slate-200">Sandcaster ammo</span> — 20 canisters per sandcaster slot. Decremented each time Disperse Sand reaction is used. Shown as 🪨 N/max on bento cards (yellow {'<'} 25%, red at 0) and on the ship detail modal and tooltip.</p>
           </Sub>
 
           <Sub title="POINT DEFENCE — ACTIVE INTERCEPT">
-            <p>A ship with unfired laser turrets may use its Attack turn to intercept an enemy missile salvo currently in flight, before it reaches its target.</p>
-            <p>Select a <span className="text-slate-200">Pulse Laser</span> or <span className="text-slate-200">Beam Laser</span> turret in the Attack Config step, then choose an enemy in-flight salvo as the target. Click <span className="text-slate-200">INTERCEPT</span> to open the intercept step. Roll 2D6 + Gunner + laser bonus (DM+1 for 2-laser, DM+2 for 3-laser). Effect (min 0) missiles are destroyed; the salvo is removed if count reaches 0. The turret is marked fired; result is logged.</p>
-            <Note>This consumes the attacker's Attack turn for that turret — the same turret cannot be used for attack or PD reaction in the same round. May target salvos threatening allied ships.</Note>
+            <p>A ship with unfired laser weapon slots may use its Attack turn to intercept an enemy missile salvo currently in flight, before it reaches its target.</p>
+            <p>Select a <span className="text-slate-200">Pulse Laser</span> or <span className="text-slate-200">Beam Laser</span> slot in the Attack Config step, then choose an enemy in-flight salvo as the target. Click <span className="text-slate-200">INTERCEPT</span> to open the intercept step. Roll 2D6 + Gunner + laser bonus (DM+1 for 2-laser, DM+2 for 3-laser). Effect (min 0) missiles are destroyed; the salvo is removed if count reaches 0. The weapon slot is marked fired; result is logged.</p>
+            <Note>This consumes the attacker&apos;s Attack turn for that weapon slot — the same slot cannot be used for attack or PD reaction in the same round. May target salvos threatening allied ships.</Note>
           </Sub>
 
           <Sub title="SENSOR LOCK">
@@ -448,7 +448,7 @@ export function HelpScreen() {
           <Sub title="AVAILABLE ACTIONS">
             <KV k="Captain (Leadership)" v="IMPROVE INITIATIVE — 2D6 + Leadership (8+). Effect added to this ship's initiative roll next round (CRB p.166)." />
             <KV k="Engineer" v="OVERLOAD M-DRIVE — 2D6 + Engineer (8+). +Effect Thrust available this round (CRB p.167). REPAIR SYSTEM — 2D6 + Engineer (8+). Removes 1 critical hit (CRB p.167)." />
-            <KV k="Gunner" v="RELOAD TURRET — Automatic, no roll. Reloads 1 missile turret (CRB p.167)." />
+            <KV k="Gunner" v="RELOAD TURRET — Automatic, no roll. Reloads 1 missile weapon slot (CRB p.167)." />
             <KV k="Sensors" v="SENSOR LOCK — 2D6 + Electronics (8+). Success: DM+2 flat to all attacks vs locked target (CRB p.172). ELECTRONIC WARFARE — 2D6 + Electronics (8+). Removes an enemy sensor lock (CRB p.167). EW — COUNTER MISSILE — 2D6 + Electronics (10+). Success: removes Effect missiles (min 1) from one in-flight salvo. Cumulative across rounds; a salvo may only be EW'd once per round (CRB p.173)." />
           </Sub>
 

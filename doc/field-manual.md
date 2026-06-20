@@ -14,7 +14,7 @@
 6. [Initiative Phase](#6-initiative-phase)
 7. [Acceleration Phase](#7-acceleration-phase)
 8. [Movement Phase](#8-movement-phase) — includes §8.1 missile impact, §8.2 ships that pass in the night
-9. [Attack Phase](#9-attack-phase) — includes §9.5 per-turret limit, §9.6 missile launch, §9.9 reactions, §9.10 special weapon mechanics, §9.11 point defence active intercept
+9. [Attack Phase](#9-attack-phase) — includes §9.5 per-slot firing limit, §9.6 missile launch, §9.9 reactions, §9.10 special weapon mechanics, §9.11 point defence active intercept
 10. [Actions Phase — Crew](#10-actions-phase--crew)
 11. [Crew System](#11-crew-system)
 12. [Undo / Redo](#12-undo--redo)
@@ -83,7 +83,7 @@ Each profile stores the ship's stats and named crew members.
 | **Name / Tonnage** | Display name and hull size (affects target size DM). |
 | **Hull / Thrust** | Max hull points and base manoeuvre drive rating. |
 | **Tech Level (TL)** | Ship's technology level (default **12**). Gates Smart guidance on all missile and torpedo weapons — the DM+2 Smart bonus applies only when the *launching* ship's TL ≥ 9 *(CRB p.79)*. Set to 8 or below for pre-stellar opponents or salvaged/primitive vessels. Most standard Traveller-era ships are TL 12–15. |
-| **Turrets** | Add weapon turrets: type, damage dice, range band, and special traits. Maximum 3 weapons per turret (triple turret, CRB p.163). |
+| **Weapons** | Add weapon slots: type, damage dice, range band, and special traits. Maximum 3 weapons per slot (triple turret, CRB p.163). |
 | **Crew** | Named crew members, each with individual skill levels (see [§ 11](#11-crew-system)). |
 
 > **Design note — why TL on the ship, not the weapon:** CRB p.79 states that Smart munitions require a *fire control system* at TL9+ to guide them. All missile and torpedo weapons already carry the `Smart` trait in the weapon table — this correctly represents the *munition*'s capability. The TL field on the ship represents whether the vessel's targeting computer can actually exploit that capability. Separating the two avoids silent incorrect DMs when early-TL or pirate vessels appear alongside standard Imperial fleet ships.
@@ -456,19 +456,19 @@ when the critical step closes, so they are visible on the canvas.
 | **M-Drive** | Sev 1 = no penalty. Sev 2–4 = −1 thrust/round. Sev 5–6 = thrust reduced to 0. |
 | **Armour** | Automated reduction applied immediately. Sev 1: −1 (no roll). Sev 2: roll 1D6, reduction = ⌈result/2⌉ (D3). Sev 3–4: roll 1D6. Sev 5–6: roll 2D6 + GM applies Hull +1 Severity manually. The app prompts for the dice roll where required and updates `profile.armor` in the store. |
 
-### 9.5 Per-Turret Firing Limit
+### 9.5 Per-Slot Firing Limit
 
-Each turret may fire **once per round** *(CRB p.164)*.
+Each weapon slot may fire **once per round** *(CRB p.164)*.
 
-The Attack modal weapon list shows only turrets that have not yet fired this
-round, identified by their slot number (`T1`, `T2`…). Once all offensive turrets
+The Attack modal weapon list shows only slots that have not yet fired this
+round, identified by their slot number (`W1`, `W2`…). Once all offensive slots
 have fired, the **Attack…** option disappears from the context menu until the
 next Attack phase or the start of a new round.
 
 ### 9.6 Launching Missiles
 
 Three launcher types are available. All are selected in the Attack modal weapon list.
-No dice roll is required at launch — the turret is immediately marked as fired.
+No dice roll is required at launch — the weapon slot is immediately marked as fired.
 
 #### Missile Rack *(CRB p.162)*
 
@@ -501,9 +501,9 @@ rendered in red/amber on the map, separate from missile salvos.
 
 Damage: **6D6 per torpedo** (vs 4D6 per missile) *(HG p.31)*.
 
-> The launching turret is marked as fired after any launch. Launcher entries
+> The launching weapon slot is marked as fired after any launch. Launcher entries
 > disappear from the Attack weapon list once ammo is empty, consistent with the
-> per-turret limit.
+> per-slot firing limit.
 
 ### 9.7 Sensor Lock
 
@@ -561,11 +561,11 @@ on the token shows when a ship has used reactions this round.
 | Reaction | Availability | Mechanic |
 | -------- | ------------ | -------- |
 | **Evasive Action** | All attacks | Toggle button: spend **1 thrust** to dodge this attack. The attack suffers **DM −Pilot skill** (fixed — not multiplied). *(CRB p.171)* |
-| **Point Defence** | Missile attacks only; target must have at least one unfired laser turret | Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Turret marked fired immediately. **Multiple turrets can each roll PD** — the roll section stays visible after each attempt as long as unfired laser turrets remain; select the next turret slot before rolling. |
-| **Disperse Sand** | Laser (Pulse/Beam) attacks only; target must have an unfired sandcaster turret | Gunner (turret) check 2D6 + Gunner. On success: +1D+Effect added to armour for this attack only. Turret marked fired immediately. |
+| **Point Defence** | Missile attacks only; target must have at least one unfired laser weapon slot | Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Weapon slot marked fired immediately. **Multiple slots can each roll PD** — the roll section stays visible after each attempt as long as unfired laser slots remain; select the next weapon slot before rolling. |
+| **Disperse Sand** | Laser (Pulse/Beam) attacks only; target must have an unfired sandcaster slot | Gunner (turret) check 2D6 + Gunner. On success: +1D+Effect added to armour for this attack only. Slot marked fired immediately. |
 
 > If Point Defence destroys all missiles (count reaches 0), the attack does not
-> proceed — click **MARK FIRED & CLOSE** to mark the attacker's turret and close.
+> proceed — click **MARK FIRED & CLOSE** to mark the attacker's weapon slot and close.
 
 ### 9.10 Special Weapon Mechanics
 
