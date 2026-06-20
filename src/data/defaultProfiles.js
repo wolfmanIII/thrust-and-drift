@@ -31,6 +31,9 @@ function makeProfile(overrides) {
     cargo: 0,
     passengers: 0,
     crew: [],
+    maxPower: 100,          // Ion Cannon Power target — HG p.30
+    computerBandwidth: 0,   // 0 = not tracked (no DM-2 on bandwidth depletion)
+    hardened: false,        // /fib immunity to Ion — FAQ HG 2022 p.1
     ...overrides,
   }
 }
@@ -63,6 +66,8 @@ export const DEFAULT_PROFILES = [
     ],
     fuel: 21,
     cargo: 81,
+    maxPower: 80,
+    computerBandwidth: 0,
   }),
 
   makeProfile({
@@ -86,6 +91,8 @@ export const DEFAULT_PROFILES = [
     ],
     fuel: 20,
     cargo: 3,
+    maxPower: 80,
+    computerBandwidth: 5,
   }),
 
   makeProfile({
@@ -107,6 +114,8 @@ export const DEFAULT_PROFILES = [
     ],
     fuel: 0,
     cargo: 0,
+    maxPower: 40,
+    computerBandwidth: 5,
   }),
 
   makeProfile({
@@ -132,6 +141,8 @@ export const DEFAULT_PROFILES = [
     ],
     fuel: 80,
     cargo: 40,
+    maxPower: 120,
+    computerBandwidth: 10,
   }),
 
   makeProfile({
@@ -151,5 +162,7 @@ export const DEFAULT_PROFILES = [
     ],
     fuel: 41,
     cargo: 65,
+    maxPower: 80,
+    computerBandwidth: 0,
   }),
 ]
