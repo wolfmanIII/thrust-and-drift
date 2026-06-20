@@ -1267,6 +1267,7 @@ export function AttackModal() {
   const markTurretFired         = useBattleStore((s) => s.markTurretFired)
   const launchMissile           = useBattleStore((s) => s.launchMissile)
   const spendReactionThrust     = useBattleStore((s) => s.spendReactionThrust)
+  const spendMissileAmmo        = useBattleStore((s) => s.spendMissileAmmo)
   const addLogEntry             = useBattleStore((s) => s.addLogEntry)
   const interceptMissileSalvo   = useBattleStore((s) => s.interceptMissileSalvo)
   const missiles                = useBattleStore((s) => s.missiles)
@@ -1283,6 +1284,7 @@ export function AttackModal() {
   const [critRoll, setCritRoll]               = useState(null)
   const [extraDamageResult, setExtraDamageResult] = useState(null)
   const [missileCount, setMissileCount]       = useState(1)
+  const [pdDestroyedTotal, setPdDestroyedTotal] = useState(0)
 
   // Reaction state (CRB p.171)
   const [reactionEvasion, setReactionEvasion] = useState(false)
@@ -1295,7 +1297,7 @@ export function AttackModal() {
 
   const resetReactions = () => {
     setReactionEvasion(false); setPdTurretSlot(null); setPdResult(null)
-    setSandTurretSlot(null); setSandResult(null)
+    setSandTurretSlot(null); setSandResult(null); setPdDestroyedTotal(0)
   }
 
   const setWeaponSelection = (name, turretSlot) => {
@@ -1393,6 +1395,7 @@ export function AttackModal() {
     const effect    = total - 8
     const removed   = Math.max(0, effect)
     setMissileCount((prev) => Math.max(0, prev - removed))
+    setPdDestroyedTotal((prev) => prev + removed)
     markTurretFired(target.id, slot)
     setPdTurretSlot(null)  // reset — next turret must be explicitly selected
     setPdResult({ turretSlot: slot, roll: rollResult, gunner, laserBonus, total, effect, missilesRemoved: removed })
@@ -1423,6 +1426,7 @@ export function AttackModal() {
 
   const handleAllIntercepted = () => {
     if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
+    if (pdDestroyedTotal > 0) spendMissileAmmo(attacker.id, pdDestroyedTotal)
     addLogEntry(`${attacker.profile.name}: missile salvo fully intercepted by ${target?.profile.name ?? '?'} Point Defence.`)
     closeModal()
   }

@@ -1088,6 +1088,22 @@ const useBattleStore = create((set, get) => {
   },
 
   /**
+   * Deduct missile ammo without launching (used when all missiles intercepted before launch).
+   * // MgT2e CRB p.161 — attacker commits ammo when declaring the attack
+   * @param {string} shipId
+   * @param {number} count
+   */
+  spendMissileAmmo: (shipId, count) => {
+    set((s) => ({
+      ships: s.ships.map((sh) =>
+        sh.id === shipId
+          ? { ...sh, missileAmmoTotal: Math.max(0, (sh.missileAmmoTotal ?? countMissileAmmoCapacity(sh.profile)) - count) }
+          : sh
+      ),
+    }))
+  },
+
+  /**
    * Reduce a missile salvo's count via Point Defence during the Attack phase.
    * Removes the salvo entry entirely when count reaches 0.
    * // MgT2e CRB p.161 — Point Defence (attack phase)
