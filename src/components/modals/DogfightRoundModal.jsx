@@ -29,10 +29,11 @@ function computeShipDMs(ship, groupShips, group) {
   const pilotSkill    = getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot')
   const tonnageDM     = getTonnageDM(ship.profile.tonnage)
   const thrustDM      = Math.max(0, (ship.profile.thrust ?? 0) - (ship.thrustUsedThisRound ?? 0))
+  const dexDM         = ship.profile.dexDM ?? 0
   const enemies       = groupShips.filter((s) => s.faction !== ship.faction)
   const extraEnemyDM  = -(Math.max(0, enemies.length - 1))
   const prevRoundBonus = ship.id === group.roundWinnerId ? group.roundWinnerMargin : 0
-  return { pilotSkill, tonnageDM, thrustDM, extraEnemyDM, prevRoundBonus }
+  return { pilotSkill, tonnageDM, thrustDM, dexDM, extraEnemyDM, prevRoundBonus }
 }
 
 /** Best pilot among a list of ships (for representative checks). */
@@ -46,15 +47,16 @@ function bestPilot(shipList) {
 // ── Sub-components ──────────────────────────────────────────────────────────
 
 function ShipCheckRow({ ship, dms, dice, onDice }) {
-  const { pilotSkill, tonnageDM, thrustDM, extraEnemyDM, prevRoundBonus } = dms
+  const { pilotSkill, tonnageDM, thrustDM, dexDM, extraEnemyDM, prevRoundBonus } = dms
   const total = dice !== null
-    ? dice.total + pilotSkill + tonnageDM + thrustDM + extraEnemyDM + prevRoundBonus
+    ? dice.total + pilotSkill + tonnageDM + thrustDM + dexDM + extraEnemyDM + prevRoundBonus
     : null
 
   const dmParts = [
     `Pilot ${pilotSkill >= 0 ? '+' : ''}${pilotSkill}`,
     `Tonnage ${tonnageDM >= 0 ? '+' : ''}${tonnageDM}`,
     `Thrust +${thrustDM}`,
+    dexDM !== 0 && `DEX ${dexDM >= 0 ? '+' : ''}${dexDM}`,
     extraEnemyDM < 0 && `Extra enemies ${extraEnemyDM}`,
     prevRoundBonus > 0 && `Bonus round +${prevRoundBonus}`,
   ].filter(Boolean).join(' / ')
@@ -338,7 +340,7 @@ export function DogfightRoundModal() {
     ? activeGroupShips.map((s) => {
         const dms  = computeShipDMs(s, activeGroupShips, group)
         const dice = rolls[s.id]
-        const total = dice.total + dms.pilotSkill + dms.tonnageDM + dms.thrustDM + dms.extraEnemyDM + dms.prevRoundBonus
+        const total = dice.total + dms.pilotSkill + dms.tonnageDM + dms.thrustDM + dms.dexDM + dms.extraEnemyDM + dms.prevRoundBonus
         return { shipId: s.id, total }
       })
     : null

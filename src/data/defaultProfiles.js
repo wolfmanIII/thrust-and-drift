@@ -31,6 +31,7 @@ function makeProfile(overrides) {
     cargo: 0,
     passengers: 0,
     crew: [],
+    dexDM: 0,               // Pilot DEX characteristic modifier — MgT2e CRB p.57
     maxPower: 100,          // Ion Cannon Power target — HG p.30
     computerBandwidth: 0,   // 0 = not tracked (no DM-2 on bandwidth depletion)
     hardened: false,        // /fib immunity to Ion — FAQ HG 2022 p.1

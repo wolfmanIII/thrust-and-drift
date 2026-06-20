@@ -23,6 +23,7 @@ function blankForm() {
     thrust: 2,
     jump: 0,
     tl: 12,
+    dexDM: 0,
     maxPower: 100,
     computerBandwidth: 0,
     hardened: false,
@@ -47,6 +48,7 @@ function initForm(profile) {
     thrust:            profile.thrust            ?? 2,
     jump:              profile.jump              ?? 0,
     tl:                profile.tl                ?? 12,
+    dexDM:             profile.dexDM             ?? 0,
     maxPower:          profile.maxPower          ?? 100,
     computerBandwidth: profile.computerBandwidth ?? 0,
     hardened:          profile.hardened          ?? false,
@@ -343,6 +345,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
           </div>
           <div className="grid grid-cols-4 gap-3">
             <NumField label="TECH LVL" value={form.tl}    onChange={(v) => set('tl', v)}     min={7} max={16} />
+            <NumField label="PILOT DEX DM" value={form.dexDM} onChange={(v) => set('dexDM', v)} min={-3} max={3} />
           </div>
         </section>
 

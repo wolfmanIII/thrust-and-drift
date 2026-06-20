@@ -28,14 +28,14 @@ export function getTonnageDM(tonnage) {
  * @param {object|null} [params.diceOverride=null] pre-rolled {results, total}
  * @returns {{ results: number[], total: number, breakdown: object }}
  */
-export function rollDogfightPilot({ pilotSkill, tonnage, thrustDM = 0, extraEnemyDM = 0, diceOverride = null }) {
+export function rollDogfightPilot({ pilotSkill, tonnage, thrustDM = 0, extraEnemyDM = 0, dexDM = 0, diceOverride = null }) {
   const roll       = diceOverride ?? roll2D6()
   const tonnageDM  = getTonnageDM(tonnage)
-  const total      = roll.total + pilotSkill + tonnageDM + thrustDM + extraEnemyDM
+  const total      = roll.total + pilotSkill + tonnageDM + thrustDM + extraEnemyDM + dexDM
   return {
     results: roll.results,
     total,
-    breakdown: { dice: roll.total, pilotSkill, tonnageDM, thrustDM, extraEnemyDM },
+    breakdown: { dice: roll.total, pilotSkill, tonnageDM, thrustDM, extraEnemyDM, dexDM },
   }
 }
 
