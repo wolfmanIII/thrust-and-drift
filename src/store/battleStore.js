@@ -1580,23 +1580,24 @@ const useBattleStore = create((set, get) => {
    * End a dogfight group: mark inactive, clear inDogfight on all ships.
    * @param {string} groupId
    */
-  endDogfight: (groupId) => {
-    const { round, phase } = get()
-    const group = get().dogfights.find((g) => g.id === groupId)
-    if (!group) return
-    set((s) => ({
-      dogfights: s.dogfights.map((g) =>
-        g.id !== groupId ? g : { ...g, active: false }
-      ),
-      ships: s.ships.map((sh) =>
-        sh.inDogfight === groupId ? { ...sh, inDogfight: null } : sh
-      ),
-      log: [...s.log, makeLogEntry({
-        round, phase, type: 'system',
-        message: `⚔ Dogfight ended.`,
-      })],
-    }))
-  },
+  endDogfight: wh(
+    (groupId) => !!get().dogfights.find((g) => g.id === groupId),
+    (groupId) => {
+      const { round, phase } = get()
+      set((s) => ({
+        dogfights: s.dogfights.map((g) =>
+          g.id !== groupId ? g : { ...g, active: false }
+        ),
+        ships: s.ships.map((sh) =>
+          sh.inDogfight === groupId ? { ...sh, inDogfight: null } : sh
+        ),
+        log: [...s.log, makeLogEntry({
+          round, phase, type: 'system',
+          message: `⚔ Dogfight ended.`,
+        })],
+      }))
+    }
+  ),
 
   // === BOARDING ===
   // HG 2022 pp.125–135
