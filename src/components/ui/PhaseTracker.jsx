@@ -58,7 +58,12 @@ export function PhaseTracker() {
                   >
                     {ship.profile.name}
                   </span>
-                  <span className="ml-auto font-mono text-xs text-slate-400">{ship.initiative}</span>
+                  <span className="ml-auto font-mono text-xs text-slate-400 flex items-center gap-1">
+                    {ship.initiative}
+                    {(ship.initiativeTemporaryBonus ?? 0) > 0 && (
+                      <span className="text-amber-400 text-[10px]">↑ini</span>
+                    )}
+                  </span>
                 </li>
               )
             })}
