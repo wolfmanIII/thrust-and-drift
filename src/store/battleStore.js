@@ -1157,14 +1157,15 @@ const useBattleStore = create((set, get) => {
       ? [...initiativeOrder].reverse()
       : initiativeOrder
     const shipId = order[currentActorIndex]
-    if (shipId) {
+    const currentShip = ships.find((s) => s.id === shipId)
+    if (shipId && !currentShip?.inDogfight) {
       get().updateShip(shipId, { hasActedThisPhase: true })
     }
-    // Skip over destroyed ships so their turn is never surfaced
+    // Skip over destroyed ships and ships mid-dogfight so their turn is never surfaced
     let next = currentActorIndex + 1
     while (next < order.length) {
       const nextShip = ships.find((s) => s.id === order[next])
-      if (!nextShip?.isDestroyed) break
+      if (!nextShip?.isDestroyed && !nextShip?.inDogfight) break
       next++
     }
     set({ currentActorIndex: next })
