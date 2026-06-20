@@ -606,7 +606,17 @@ target's **Power** — disrupting thrust, computers, and critical systems.
 | Ion Cannon Bay (Medium) | Bay | 8D × 20 | Medium |
 | Ion Cannon Bay (Large) | Bay | 10D × 100 | Long |
 
-> **Naming note:** HG uses two different names for these weapons depending on chapter. The standard space combat chapter (HG pp.29–30, 32–33) lists them as **Ion Cannon** (barbette) and **Ion Cannon Bay** (bay) — the names T&D uses. The Fleet Combat chapter (HG p.112) refers to the same weapons as *Ion Barbette*, *Small Ion Bay*, *Medium Ion Bay*, *Large Ion Bay*, with a completely different damage system (effect-per-weapon × count ÷ Hull Points → Ion Damage table; no Power stat, no thrust formula). T&D implements standard space combat only; the fleet combat names and mechanics are out of scope.
+> **Naming and scope note:** HG contains two separate combat systems. *Standard space combat* (HG pp.28–86, CRB) covers tactical ship-vs-ship engagements tracked hex by hex — the system T&D implements. *Fleet Combat* (HG pp.104–124) is an abstracted ruleset for large-scale fleet engagements where ships become simplified stat blocks and weapons are aggregated. Ion weapons appear in both with different names and entirely different mechanics:
+>
+> | | Standard space combat (T&D scope) | Fleet Combat (out of scope) |
+> | - | --------------------------------- | --------------------------- |
+> | Barbette name | **Ion Cannon** (HG p.30) | *Ion Barbette* (HG p.112) |
+> | Bay names | **Ion Cannon Bay** S/M/L (HG p.32–33) | *Small/Medium/Large Ion Bay* (HG p.112) |
+> | Damage system | Power reduction (this section) | effect-per-weapon × count ÷ Hull Points → Ion Damage table |
+> | Power stat | Yes — `currentPower`, `basePower` | No |
+> | Thrust formula | `floor(baseThrust × currentPower / maxPower)` | Reduce Thrust by fixed value from table |
+>
+> Fleet Combat mechanics are out of scope for T&D. "Ion Cannon" and "Ion Cannon Bay" are the correct canonical names for standard space combat.
 
 **Mechanics:**
 
