@@ -18,7 +18,7 @@ function setupBoarding() {
   const [a, b] = useBattleStore.getState().ships
   useBattleStore.getState().startBoarding(a.id, b.id)
   const boarding = useBattleStore.getState().boardings[0]
-  useUiStore.setState({ activeModal: 'boarding-contact', modalPayload: { boardingAttackerId: a.id } })
+  useUiStore.setState({ activeModal: 'boarding-contact', modalPayload: { boardingId: boarding.id } })
   return { a, b, boarding }
 }
 
@@ -34,7 +34,7 @@ describe('BoardingContactModal — guard', () => {
   })
 
   it('renders null when no active boarding found', () => {
-    useUiStore.setState({ activeModal: 'boarding-contact', modalPayload: { boardingAttackerId: 'ghost' } })
+    useUiStore.setState({ activeModal: 'boarding-contact', modalPayload: { boardingId: 'ghost-id' } })
     const { container } = render(<BoardingContactModal />)
     expect(container.firstChild).toBeNull()
   })

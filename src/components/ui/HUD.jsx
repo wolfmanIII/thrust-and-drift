@@ -311,7 +311,7 @@ export function HUD() {
               </span>
             </div>
             <button
-              onClick={() => openModal(modalId, { boardingAttackerId: boarding.attackerId })}
+              onClick={() => openModal(modalId, { boardingId: boarding.id })}
               className="w-full py-1 bg-red-500/10 border border-red-500/40 text-red-300 font-mono text-xs tracking-widest rounded hover:bg-red-500/20 transition-colors"
             >
               {phaseLabel} →

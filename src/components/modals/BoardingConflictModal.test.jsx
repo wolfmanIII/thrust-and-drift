@@ -19,7 +19,7 @@ function setupConflict() {
   useBattleStore.getState().startBoarding(a.id, b.id)
   const bid = useBattleStore.getState().boardings[0].id
   useBattleStore.getState().advanceBoardingPhase(bid) // → conflict
-  useUiStore.setState({ activeModal: 'boarding-conflict', modalPayload: { boardingAttackerId: a.id } })
+  useUiStore.setState({ activeModal: 'boarding-conflict', modalPayload: { boardingId: bid } })
   return { a, b, bid }
 }
 
@@ -35,7 +35,7 @@ describe('BoardingConflictModal — guard', () => {
   })
 
   it('renders null when no active conflict boarding found', () => {
-    useUiStore.setState({ activeModal: 'boarding-conflict', modalPayload: { boardingAttackerId: 'ghost' } })
+    useUiStore.setState({ activeModal: 'boarding-conflict', modalPayload: { boardingId: 'ghost-id' } })
     const { container } = render(<BoardingConflictModal />)
     expect(container.firstChild).toBeNull()
   })

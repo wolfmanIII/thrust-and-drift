@@ -20,7 +20,7 @@ function setupSecurity() {
   const bid = useBattleStore.getState().boardings[0].id
   useBattleStore.getState().advanceBoardingPhase(bid) // → conflict
   useBattleStore.getState().advanceBoardingPhase(bid) // → security
-  useUiStore.setState({ activeModal: 'boarding-outcome', modalPayload: { boardingAttackerId: a.id } })
+  useUiStore.setState({ activeModal: 'boarding-outcome', modalPayload: { boardingId: bid } })
   return { a, b, bid }
 }
 
@@ -36,7 +36,7 @@ describe('BoardingOutcomeModal — guard', () => {
   })
 
   it('renders null when no security-phase boarding', () => {
-    useUiStore.setState({ activeModal: 'boarding-outcome', modalPayload: { boardingAttackerId: 'ghost' } })
+    useUiStore.setState({ activeModal: 'boarding-outcome', modalPayload: { boardingId: 'ghost-id' } })
     const { container } = render(<BoardingOutcomeModal />)
     expect(container.firstChild).toBeNull()
   })

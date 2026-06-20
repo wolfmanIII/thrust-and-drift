@@ -211,7 +211,7 @@ export function BoardingContactModal() {
   if (!isOpen) return null
 
   const boarding = boardings.find(
-    (b) => b.attackerId === modalPayload?.boardingAttackerId && b.phase === 'contact' && b.outcome === null,
+    (b) => b.id === modalPayload?.boardingId && b.phase === 'contact' && b.outcome === null,
   )
   if (!boarding) return null
 

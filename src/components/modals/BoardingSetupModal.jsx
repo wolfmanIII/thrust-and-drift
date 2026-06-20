@@ -44,8 +44,11 @@ export function BoardingSetupModal() {
 
   function handleConfirm(defenderId) {
     startBoarding(attacker.id, defenderId)
+    const newBoarding = useBattleStore.getState().boardings.find(
+      (b) => b.attackerId === attacker.id && b.defenderId === defenderId && b.outcome === null
+    )
     closeModal()
-    openModal('boarding-contact', { boardingAttackerId: attacker.id, boardingDefenderId: defenderId })
+    openModal('boarding-contact', { boardingId: newBoarding?.id })
   }
 
   return (

@@ -90,7 +90,7 @@ export function BoardingConflictModal() {
   if (!isOpen) return null
 
   const boarding = boardings.find(
-    (b) => b.attackerId === modalPayload?.boardingAttackerId && b.phase === 'conflict' && b.outcome === null,
+    (b) => b.id === modalPayload?.boardingId && b.phase === 'conflict' && b.outcome === null,
   )
   if (!boarding) return null
 
