@@ -650,36 +650,48 @@ function AttackRollStep({
 
 /**
  * @param {{
- *   targetName: string,
+ *   weapon: object,
+ *   target: object,
  *   attackEffect: number,
  *   isPlayer: boolean,
- *   onApply: (ionPower: number, ionRounds: number) => void,
+ *   onApply: (ionDamage: number, ionRounds: number) => void,
  *   onClose: Function,
  * }} props
  */
-function IonDamageStep({ targetName, attackEffect, isPlayer, onApply, onClose }) {
-  const [ionRoll, setIonRoll]       = useState(null)   // raw 2D6 result
+function IonDamageStep({ weapon, target, attackEffect, isPlayer, onApply, onClose }) {
+  const [ionRoll, setIonRoll]       = useState(null)   // raw NbD sum
   const [roundsRoll, setRoundsRoll] = useState(null)   // D3 if effect ≥ 6
   const [manualRaw, setManualRaw]   = useState('')
   const [manualRounds, setManualRounds] = useState('')
 
+  const damageDice     = weapon?.damageDice     ?? 2
+  const damageMultiple = weapon?.damageMultiple ?? 10
+  const minRoll        = damageDice
+  const maxRoll        = damageDice * 6
+  const rollLabel      = `${damageDice}D × ${damageMultiple}`
+
   // Effect ≥ 6 → duration is D3 rounds. // MgT2e HG p.30
   const needsRoundsRoll = attackEffect >= 6
-  const ionPower  = ionRoll ?? 0
+  const ionDamage = ionRoll !== null ? ionRoll * damageMultiple : 0
   const ionRounds = needsRoundsRoll ? (roundsRoll ?? null) : 1
-  const canApply  = ionPower > 0 && ionRounds !== null
+  const canApply  = ionRoll !== null && ionRounds !== null
+
+  const isHardened = target?.hardened ?? false
+  const basePow    = target?.basePower ?? target?.profile?.maxPower ?? 100
+  const curPow     = target?.currentPower ?? basePow
+  const baseBw     = target?.baseBandwidth ?? target?.profile?.computerBandwidth ?? 0
+  const curBw      = target?.currentBandwidth ?? baseBw
 
   const handleAutoRoll = () => {
-    const r = rollDice(2, 6)
+    const r = rollDice(damageDice, 6)
     setIonRoll(r.total)
     if (!needsRoundsRoll) return
-    const d3 = Math.ceil(Math.random() * 3)
-    setRoundsRoll(d3)
+    setRoundsRoll(Math.ceil(Math.random() * 3))
   }
 
   const handleManualConfirm = () => {
     const raw = Number(manualRaw)
-    if (!raw) return
+    if (!raw || raw < minRoll || raw > maxRoll) return
     setIonRoll(raw)
     if (needsRoundsRoll) {
       const r = Number(manualRounds)
@@ -688,78 +700,102 @@ function IonDamageStep({ targetName, attackEffect, isPlayer, onApply, onClose })
     }
   }
 
+  const targetName = target?.profile?.name ?? '?'
+  const weaponLabel = weapon?.label ?? 'Ion Cannon'
+
   return (
     <Modal title="Ion Disruption" onClose={onClose}>
       <div className="space-y-4">
-        <div className="bg-blue-950/30 border border-blue-700/40 rounded px-4 py-3 text-center font-mono text-xs text-blue-300">
-          ⚡ ION CANNON HIT — no hull damage<br />
-          <span className="text-slate-400">Thrust penalty for {needsRoundsRoll ? 'D3 rounds (Effect ≥ 6)' : '1 round'}</span>
-        </div>
-
-        <div className="text-center font-mono text-xs text-slate-400">
-          Roll 2D6 → thrust penalty on {targetName}
-        </div>
-
-        {ionRoll === null ? (
-          isPlayer ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 bg-slate-800 rounded px-4 py-3">
-                <span className="text-slate-400 font-mono text-xs">2D6 ion power:</span>
-                <input
-                  type="number" min="2" max="12" value={manualRaw}
-                  onChange={(e) => setManualRaw(e.target.value)}
-                  className="w-20 bg-slate-700 border border-slate-600 text-(--neon-cyan) font-mono text-lg rounded text-center px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
-                  placeholder="—"
-                />
-              </div>
-              {needsRoundsRoll && (
-                <div className="flex items-center gap-3 bg-slate-800 rounded px-4 py-3">
-                  <span className="text-slate-400 font-mono text-xs">D3 rounds:</span>
-                  <input
-                    type="number" min="1" max="3" value={manualRounds}
-                    onChange={(e) => setManualRounds(e.target.value)}
-                    className="w-20 bg-slate-700 border border-slate-600 text-(--neon-cyan) font-mono text-lg rounded text-center px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
-                    placeholder="—"
-                  />
-                </div>
-              )}
-              <button
-                onClick={handleManualConfirm}
-                disabled={!manualRaw || (needsRoundsRoll && !manualRounds)}
-                className="w-full py-2 bg-blue-900/30 border border-blue-700/50 text-blue-400 font-mono text-sm tracking-widest rounded hover:bg-blue-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
-              >
-                CONFIRM
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={handleAutoRoll}
-              className="w-full py-3 bg-blue-900/30 border border-blue-700/50 text-blue-400 font-mono text-lg tracking-widest rounded hover:bg-blue-900/40 transition-colors"
-            >
-              🎲 ROLL ION POWER
-            </button>
-          )
-        ) : (
-          <div className="space-y-3">
-            <div className="bg-slate-800 rounded p-4 text-center font-mono text-xs">
-              <p className="text-slate-400">2D6 = {ionPower} thrust penalty · {ionRounds} round{ionRounds !== 1 ? 's' : ''}</p>
-              <p className="text-blue-400 font-bold text-2xl mt-1">−{ionPower} THRUST</p>
-              <p className="text-slate-400">for {ionRounds} round{ionRounds !== 1 ? 's' : ''}</p>
-            </div>
-            <button
-              onClick={() => { setIonRoll(null); setRoundsRoll(null); setManualRaw(''); setManualRounds('') }}
-              className="w-full py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500"
-            >
-              REROLL
-            </button>
-            <button
-              disabled={!canApply}
-              onClick={() => onApply(ionPower, ionRounds)}
-              className="w-full py-3 bg-blue-900/40 border border-blue-600/60 text-blue-300 font-mono text-sm tracking-widest rounded hover:bg-blue-800/50 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
-            >
-              ⚡ APPLY ION DISRUPTION
-            </button>
+        {isHardened ? (
+          <div className="bg-slate-800 border border-slate-600 rounded px-4 py-3 text-center font-mono text-xs text-slate-400">
+            🛡 HARDENED SYSTEMS — Ion weapons have no effect on {targetName}.<br />
+            <span className="text-slate-500">/fib computer designation (FAQ HG 2022 p.1)</span>
           </div>
+        ) : (
+          <>
+            <div className="bg-blue-950/30 border border-blue-700/40 rounded px-4 py-3 text-center font-mono text-xs text-blue-300">
+              ⚡ {weaponLabel.toUpperCase()} HIT — no hull damage<br />
+              <span className="text-slate-400">
+                Roll {rollLabel} ignoring armour — deducted from Power + bandwidth.<br />
+                Duration: {needsRoundsRoll ? 'D3 rounds (Effect ≥ 6)' : '1 round'} (HG p.30)
+              </span>
+            </div>
+
+            <div className="text-center font-mono text-xs text-slate-400">
+              Roll {rollLabel} → Power reduction on {targetName}
+            </div>
+
+            {ionRoll === null ? (
+              isPlayer ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 bg-slate-800 rounded px-4 py-3">
+                    <span className="text-slate-400 font-mono text-xs">{rollLabel} ion power:</span>
+                    <input
+                      type="number" min={minRoll} max={maxRoll} value={manualRaw}
+                      onChange={(e) => setManualRaw(e.target.value)}
+                      className="w-20 bg-slate-700 border border-slate-600 text-(--neon-cyan) font-mono text-lg rounded text-center px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
+                      placeholder="—"
+                    />
+                  </div>
+                  {needsRoundsRoll && (
+                    <div className="flex items-center gap-3 bg-slate-800 rounded px-4 py-3">
+                      <span className="text-slate-400 font-mono text-xs">D3 rounds:</span>
+                      <input
+                        type="number" min="1" max="3" value={manualRounds}
+                        onChange={(e) => setManualRounds(e.target.value)}
+                        className="w-20 bg-slate-700 border border-slate-600 text-(--neon-cyan) font-mono text-lg rounded text-center px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
+                        placeholder="—"
+                      />
+                    </div>
+                  )}
+                  <button
+                    onClick={handleManualConfirm}
+                    disabled={!manualRaw || (needsRoundsRoll && !manualRounds)}
+                    className="w-full py-2 bg-blue-900/30 border border-blue-700/50 text-blue-400 font-mono text-sm tracking-widest rounded hover:bg-blue-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
+                  >
+                    CONFIRM
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleAutoRoll}
+                  className="w-full py-3 bg-blue-900/30 border border-blue-700/50 text-blue-400 font-mono text-lg tracking-widest rounded hover:bg-blue-900/40 transition-colors"
+                >
+                  🎲 ROLL ION POWER
+                </button>
+              )
+            ) : (
+              <div className="space-y-3">
+                <div className="bg-slate-800 rounded p-4 text-center font-mono text-xs space-y-1">
+                  <p className="text-slate-400">{rollLabel}: roll {ionRoll} × {damageMultiple}</p>
+                  <p className="text-blue-400 font-bold text-2xl">−{ionDamage} POWER</p>
+                  <p className="text-slate-400">
+                    Power: {curPow} → {Math.max(0, curPow - ionDamage)} / {basePow}
+                  </p>
+                  {baseBw > 0 && (
+                    <p className="text-slate-400">
+                      Bandwidth: {curBw} → {Math.max(0, curBw - ionDamage)} / {baseBw}
+                      {curBw - ionDamage <= 0 ? ' — COMMS DOWN' : ''}
+                    </p>
+                  )}
+                  <p className="text-slate-400">for {ionRounds} round{ionRounds !== 1 ? 's' : ''}</p>
+                </div>
+                <button
+                  onClick={() => { setIonRoll(null); setRoundsRoll(null); setManualRaw(''); setManualRounds('') }}
+                  className="w-full py-2 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500"
+                >
+                  REROLL
+                </button>
+                <button
+                  disabled={!canApply}
+                  onClick={() => onApply(ionDamage, ionRounds)}
+                  className="w-full py-3 bg-blue-900/40 border border-blue-600/60 text-blue-300 font-mono text-sm tracking-widest rounded hover:bg-blue-800/50 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
+                >
+                  ⚡ APPLY ION DISRUPTION
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </Modal>
@@ -1554,15 +1590,21 @@ export function AttackModal() {
   if (step === 'ion') {
     return (
       <IonDamageStep
-        targetName={target?.profile.name ?? '?'}
+        weapon={weapon}
+        target={target}
         attackEffect={attackResult?.effect ?? 0}
         isPlayer={attacker.faction === 'players'}
-        onApply={(ionPower, ionRounds) => {
+        onApply={(ionDamage, ionRounds) => {
           if (!target) return
-          applyIonDamage(target.id, ionPower, ionRounds)
+          if (!target.hardened) {
+            applyIonDamage(target.id, ionDamage, ionRounds)
+            emitEffect('ion_burst', { duration: 1500, hex: target.position })
+            const remaining = Math.max(0, (target.currentPower ?? target.profile.maxPower ?? 100) - ionDamage)
+            addLogEntry(`${attacker.profile.name} → ${target.profile.name}: ${weapon?.label ?? 'Ion Cannon'} hit — −${ionDamage} Power (${remaining} remaining, ${ionRounds}R).`)
+          } else {
+            addLogEntry(`${attacker.profile.name} → ${target.profile.name}: ${weapon?.label ?? 'Ion Cannon'} — no effect (hardened systems).`)
+          }
           if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
-          emitEffect('ion_burst', { duration: 1500, hex: target.position })
-          addLogEntry(`${attacker.profile.name} → ${target.profile.name}: Ion Cannon hit — −${ionPower} thrust for ${ionRounds} round${ionRounds !== 1 ? 's' : ''}.`)
           closeModal()
         }}
         onClose={closeModal}
