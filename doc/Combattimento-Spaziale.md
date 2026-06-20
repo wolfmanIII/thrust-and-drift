@@ -447,7 +447,7 @@ Azioni disponibili:
 
 ### 10.1 Improve Initiative (Captain)
 
-Il capitano esegue un **Leadership check**. L'effetto (positivo o negativo) si aggiunge all'iniziativa della nave **solo per il round successivo**.
+Il capitano esegue un **Leadership check**. Il bonus (solo valori positivi) si applica **immediatamente** all'iniziativa della nave, modificando l'ordine di azione già nel round corrente. Il bonus scade al confine di round successivo — viene rimosso automaticamente dall'app all'inizio del round seguente. *(CRB p.166)*
 
 ### 10.2 Jump (Engineer)
 
@@ -483,9 +483,17 @@ Formula: **2D6 + Engineer(power) + DM INT**
 
 ### 10.6 Repair System (Engineer)
 
-L'ingegnere tenta una riparazione rapida di un sistema colpito da un colpo critico. Check **Average (8+) Engineer(sistema colpito)** (1 round, INT o EDU):
+L'ingegnere tenta una riparazione rapida di un sistema colpito da un colpo critico. La difficoltà scala con la severity del critico selezionato *(CRB p.167)*:
 
-Formula: **2D6 + Engineer(sistema colpito) + DM INT o EDU − Severity del sistema**
+| Severity | Difficoltà |
+| -------- | ---------- |
+| 1–2 | Average (8+) |
+| 3–4 | Difficult (10+) |
+| 5–6 | Very Difficult (12+) |
+
+Formula: **2D6 + Engineer(sistema colpito) + DM INT o EDU**
+
+Quando la nave ha più critici attivi, il GM seleziona quale riparare — la difficoltà viene calcolata automaticamente in base alla severity di quel critico.
 
 - DM **cumulativo +1** per ogni round consecutivo dedicato alla stessa riparazione
 - Se il sistema subisce un **nuovo colpo critico** alla stessa posizione durante la riparazione, si ricomincia da capo (DM accumulato azzerato)

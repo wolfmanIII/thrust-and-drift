@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 1.22.3** · Mongoose Traveller 2e Space Combat Simulator
+**Version 1.23.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -132,7 +132,7 @@ Each card has three zones:
 | ---- | ------- |
 | **Header** | Ship name · faction colour dot · status badges: `☠ WRECK`, `DOGFIGHT`, `BOARDING`, `EVA N` (evasive thrust), `LOCKED` (sensor locked), `ION NR` (ion disruption active — blue) |
 | **Hull** | Hull bar (green → yellow → red) · "Hull N/M" · "Ini N" |
-| **Status** *(conditional)* | Sensor lock → target name (with DM if set); Locked by [attacker]; inbound missiles per launcher (⚡ N× type, ~Xr ETA in basic mode); inbound torpedoes; launched missiles per target (🚀 N× type, ~Xr ETA in basic mode); reloading turrets; critical hits list; missile ammo (🚀 N/max, yellow < 25%, red at 0); sand canisters (🪨 N/max, yellow < 25%, red at 0); ion disruption (⚡ −N thrust / NR remaining) |
+| **Status** *(conditional)* | Sensor lock → target name (with DM if set); Locked by [attacker]; inbound missiles per launcher (⚡ N× type, ~Xr ETA in basic mode); inbound torpedoes; launched missiles per target (🚀 N× type, ~Xr ETA in basic mode); reloading turrets; critical hits list; missile ammo (🚀 N/max, yellow < 25%, red at 0); sand canisters (🪨 N/max, yellow < 25%, red at 0); ion disruption (`−N PWR · Xr remaining`; `OFFLINE` label when `currentPower` reaches 0) |
 
 The Status zone is hidden when none of these conditions are active.
 
@@ -231,12 +231,14 @@ NPC ships with Tactics > 0 auto-roll their Tactics check on confirm.
 
 ### 6.2 Initiative Bonus
 
-If the Captain uses **Improve Initiative** in the Actions phase of the previous
-round, the Effect is stored on the ship and added automatically to its next
-initiative roll — no manual input required.
+If the Captain uses **Improve Initiative** in the Actions phase of any round,
+the bonus is applied **immediately** to the ship's current initiative value,
+changing its position in the acting order for the rest of this round. The bonus
+expires at the next round boundary — it is subtracted automatically by
+`buildNextRoundState`. No manual input required.
 
-> The Phase Tracker (right side of screen) shows the initiative order with the
-> current actor highlighted.
+> The Phase Tracker (right side of screen) shows an **↑ini** amber badge on
+> ships that currently carry an active initiative bonus.
 
 ---
 
@@ -455,6 +457,8 @@ when the critical step closes, so they are visible on the canvas.
 | **Severity** | Effect − 5, clamped 1–6. Stacks with existing criticals on the same system. |
 | **M-Drive** | Sev 1 = no penalty. Sev 2–4 = −1 thrust/round. Sev 5–6 = thrust reduced to 0. |
 | **Armour** | Automated reduction applied immediately. Sev 1: −1 (no roll). Sev 2: roll 1D6, reduction = ⌈result/2⌉ (D3). Sev 3–4: roll 1D6. Sev 5–6: roll 2D6 + GM applies Hull +1 Severity manually. The app prompts for the dice roll where required and updates `profile.armor` in the store. |
+
+**Manual effects:** criticals to Sensors, Fuel Tank, Weapons, Bridge, and Power Plant produce a narrative description that the GM must apply at the table. The modal displays a `⚠ MANUAL — Apply this effect before closing` amber banner to remind the GM that no automated change has occurred in the store.
 
 ### 9.5 Per-Slot Firing Limit
 
@@ -712,9 +716,9 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 
 | Role | Action | Difficulty | Effect on success |
 | ---- | ------ | ---------- | ----------------- |
-| **Captain** | **Improve Initiative** | 8+ (Leadership) | +Effect added to this ship's initiative roll next round *(CRB p.166)* |
+| **Captain** | **Improve Initiative** | 8+ (Leadership) | +Effect applied immediately to this ship's initiative (lasts this round only) *(CRB p.166)* |
 | **Engineer** | **Overload M-Drive** | 8+ (Engineer) | +Effect Thrust available this round *(CRB p.167)* |
-| **Engineer** | **Repair System** | 8+ (Engineer) | Removes 1 critical hit from this ship *(CRB p.167)* |
+| **Engineer** | **Repair System** | Average 8+ (Sev 1–2) / Difficult 10+ (Sev 3–4) / Very Difficult 12+ (Sev 5–6) (Engineer) | Removes 1 critical hit from this ship. The GM selects which critical to repair when multiple are present *(CRB p.167)* |
 | **Gunner** | **Reload Turret** | Automatic | Reloads 1 missile turret; no roll required *(CRB p.167)* |
 | **Sensors** | **Sensor Lock** | 8+ (Electronics) | DM+2 flat to all attacks against the selected target *(CRB p.172)* |
 | **Sensors** | **Electronic Warfare** | 8+ (Electronics) | Removes an enemy sensor lock from this ship *(CRB p.167)* |
@@ -722,6 +726,11 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 
 > A skill level of 0 in a role grants **no actions** for that role.
 > Skills with level ≥ 1 unlock the role's full action list.
+>
+> **Ion Power = 0:** when a ship's `currentPower` reaches 0, sensor actions
+> (Sensor Lock, Electronic Warfare, EW — Counter Missile) are disabled in the
+> Actions modal with a `⚡ power offline` label. All offensive weapons are
+> simultaneously removed from the Attack modal weapon list. *(HG p.30)*
 >
 > **NPC ships** resolve all non-automatic rolls automatically when the GM
 > clicks 🎲 EXECUTE ACTION.

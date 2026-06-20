@@ -1704,6 +1704,29 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
 - 832 test (+3 sensore lock flat).
 
+### 14.24 Versione 1.23.0 — Reddit Bug Fixes ✅ COMPLETATA
+
+- **FIX-01 — Banner `⚠ MANUAL` per critici descrittivi**: `AttackModal` mostra un banner amber quando `effect.mechanic === 'descriptive'` (Sensors, Fuel Tank, Weapons, Bridge, Power Plant). Nessun effetto automatico viene applicato — il GM deve farlo manualmente.
+- **FIX-02 — Repair System scala con severity**: `repairDifficulty(severity)` in `ActionModal` restituisce Average 8+ (Sev 1–2), Difficult 10+ (Sev 3–4), Very Difficult 12+ (Sev 5–6). Precedentemente fisso a 8+. *(CRB p.167)*
+- **FIX-03 — Selector critico in Repair**: `ActionModal` mostra un dropdown con tutti i critici attivi; `repairCritical(shipId, critIndex)` accetta l'indice — non rimuove più sempre il primo. Difficoltà aggiornata dinamicamente al critico selezionato.
+- **FIX-04 — Ammo missili detratta con intercettazione totale PD**: `handleAllIntercepted` in `AttackModal` chiama `spendMissileAmmo(attackerId, originalCount)`. Nuova store action `spendMissileAmmo` (senza wh, non undoable — PD non è un'azione ship). Precedentemente il turret veniva segnato come fired ma l'ammo restava intatta.
+- **FIX-05 — Power = 0 blocca armi e sensori**: `useAttackSetup` svuota `availableWeaponsFiltered` quando `currentPower ≤ 0`; `AttackModal` mostra banner rosso `⚡ POWER OFFLINE`. `ActionModal` disabilita sensor actions (Sensor Lock, EW, Counter Missile) con label `⚡ power offline`. *(HG p.30)*
+- **FIX-06 — Leadership bonus dura esattamente 1 round**: `applyInitiativeBonus` applica immediatamente `ship.initiative += applied` e imposta `initiativeTemporaryBonus`. `buildNextRoundState` sottrae e azzera `initiativeTemporaryBonus`. `PhaseTracker` mostra badge `↑ini` amber sulle navi con bonus attivo. *(CRB p.166)*
+- **FIX-07 — Display ion power migliorato**: `ShipDetailModal` e `ShipTooltip` mostrano `−N PWR · Xr remaining`; aggiungono suffisso `OFFLINE` quando `currentPower ≤ 0`.
+- 941 test (+8 rispetto a v1.22.3: critIndex, spendMissileAmmo ×3, applyInitiativeBonus FIX-06 ×3 + buildNextRound expiry).
+
+### 14.23 Versione 1.22.3 — Test Coverage + IEEE-754 Fix ✅ COMPLETATA
+
+- **`extraEnemyDM` IEEE-754 -0**: `-(Math.max(0, 0))` restituiva `-0`; `toBe` usa `Object.is` che distingue `-0` da `0`. Fix: `enemies.length > 1 ? 1 - enemies.length : 0`.
+- Test coverage gaps riempiti: `dexDM` in `rollDogfightPilot`; suite complete per `freeThrust`, `computeShipDMs`, `bestPilot`, `escapeCheckTotals`; `dogfightDM` in `rollAttack`.
+- 933 test (+26 rispetto a v1.22.2).
+
+### 14.22 Versione 1.22.2 — MANIFESTO + Doc ✅ COMPLETATA
+
+- `MANIFESTO.md` — filosofia e motivazioni del progetto (versione inglese + italiana).
+- Linkato da `README.md` sopra il subtitle.
+- 907 test (invariato).
+
 ### 14.21 Versione 1.22.1 — Weapon Picker Fix + Label Rename ✅ COMPLETATA
 
 - **Ion Cannon nel weapon picker**: rimosso flag `barbetteOnly: true`; il picker non filtra per mount type. Ion Cannon (barbette, 2D×10) e Ion Cannon Bay S/M/L selezionabili da qualsiasi weapon slot — la scelta del mount è discrezione del GM.

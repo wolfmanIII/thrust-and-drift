@@ -135,6 +135,131 @@ const previewTotal = (ship) => {
 
 ---
 
+## FIX-07 — Display ion power — round rimanenti e OFFLINE ✅ IMPLEMENTATO (v1.23.0)
+
+**Segnalato da:** Reddit (u/...), giugno 2026
+**Priorità:** Bassa
+**Commit:** `ff957a0`
+
+### Descrizione
+
+`ShipDetailModal` e `ShipTooltip` mostravano solo il numero di round residui per l'ion disruption, senza indicare la riduzione di Power né segnalare quando la nave è completamente offline.
+
+### Fix
+
+- Formato aggiornato a `−N PWR · Xr remaining` (Power reduction + round rimanenti).
+- Aggiunto suffisso `OFFLINE` quando `currentPower ≤ 0`.
+
+---
+
+## FIX-06 — Leadership bonus dura esattamente 1 round ✅ IMPLEMENTATO (v1.23.0)
+
+**Segnalato da:** Reddit (u/...), giugno 2026
+**Priorità:** Alta
+**Commit:** `c447bcc`
+
+### Descrizione
+
+`applyInitiativeBonus` aggiungeva il bonus a `initiativeBonusNextRound`, consumato una sola volta in `rollAllInitiative` (chiamato all'inizio del combattimento). Il bonus non aveva mai effetto nei round successivi.
+
+### Fix
+
+- `applyInitiativeBonus` applica immediatamente `initiative += applied` e imposta `initiativeTemporaryBonus`.
+- `buildNextRoundState` sottrae `initiativeTemporaryBonus` da `initiative` e lo azzera — il bonus dura esattamente 1 round. *(CRB p.166)*
+- `PhaseTracker` mostra badge `↑ini` amber sulle navi con bonus attivo.
+
+---
+
+## FIX-05 — Power = 0 blocca armi e sensori ✅ IMPLEMENTATO (v1.23.0)
+
+**Segnalato da:** Reddit (u/...), giugno 2026
+**Priorità:** Alta
+**Commit:** `4128e56`
+
+### Descrizione
+
+Con `currentPower = 0` (per ion disruption), la nave poteva ancora selezionare armi e usare azioni sensore nell'app, violando HG p.30.
+
+### Fix
+
+- `useAttackSetup`: `availableWeaponsFiltered` svuotato quando `currentPower ≤ 0`; restituisce flag `noPower`.
+- `AttackModal`: banner rosso `⚡ POWER OFFLINE` quando `noPower`.
+- `ActionModal`: sensor actions (Sensor Lock, EW, Counter Missile) disabilitate con label `⚡ power offline` quando `currentPower ≤ 0`. *(HG p.30)*
+
+---
+
+## FIX-04 — Ammo missili non detratta con intercettazione totale PD ✅ IMPLEMENTATO (v1.23.0)
+
+**Segnalato da:** Reddit (u/...), giugno 2026
+**Priorità:** Media
+**Commit:** `b5df149`
+
+### Descrizione
+
+Quando il Point Defence distruggeva tutti i missili prima del lancio (`missileCount === 0`), `handleAllIntercepted` chiudeva il modale senza detrarre ammo dall'attaccante. Il turret veniva segnato come fired ma l'ammo restava intatta.
+
+### Fix
+
+- `AttackModal`: stato `pdDestroyedTotal` accumula i missili intercettati durante `handlePdRoll`; `handleAllIntercepted` chiama `spendMissileAmmo(attacker.id, pdDestroyedTotal)`.
+- `battleStore`: nuova action `spendMissileAmmo(shipId, count)` — non wh-wrapped (PD non è azione ship, non undoable).
+
+---
+
+## FIX-03 — Engineer sceglie quale critico riparare ✅ IMPLEMENTATO (v1.23.0)
+
+**Segnalato da:** Reddit (u/...), giugno 2026
+**Priorità:** Media
+**Commit:** `0376b50`
+
+### Descrizione
+
+`repairCritical` rimuoveva sempre il critico all'indice 0. Con più critici attivi, l'ingegnere non poteva scegliere quale riparare.
+
+### Fix
+
+- `ActionModal`: selector dropdown con tutti i critici attivi; `critIndex` passato a `useActionEffects`.
+- `battleStore`: `repairCritical(shipId, critIndex = 0)` accetta l'indice; usa `Math.min(critIndex, length - 1)` per sicurezza.
+
+---
+
+## FIX-02 — Repair System scala difficoltà con severity ✅ IMPLEMENTATO (v1.23.0)
+
+**Segnalato da:** Reddit (u/...), giugno 2026
+**Priorità:** Media
+**Commit:** `0376b50`
+
+### Descrizione
+
+`Repair System` usava difficoltà fissa Average (8+) indipendentemente dalla severity del critico, violando CRB p.167.
+
+### Fix
+
+`repairDifficulty(severity)` in `ActionModal`:
+
+| Severity | Difficoltà |
+| -------- | ---------- |
+| 1–2 | Average (8+) |
+| 3–4 | Difficult (10+) |
+| 5–6 | Very Difficult (12+) |
+
+---
+
+## FIX-01 — Banner `⚠ MANUAL` per critici descrittivi ✅ IMPLEMENTATO (v1.23.0)
+
+**Segnalato da:** Reddit (u/...), giugno 2026
+**Priorità:** Alta
+**Commit:** `0376b50`
+
+### Descrizione
+
+I critici descrittivi (Sensors, Fuel Tank, Weapons, Bridge, Power Plant) non fornivano alcun feedback visivo che distinguesse effetti automatici da effetti manuali. Il GM poteva perdere l'effetto senza rendersene conto.
+
+### Fix
+
+`AttackModal` mostra un banner amber `⚠ MANUAL — Apply this effect to the ship before closing` quando `effect?.mechanic === 'descriptive'`.
+
+---
+
 ## FEAT-001 — Target missili in volo durante fase Attack ✅ IMPLEMENTATO (v1.21.0)
 
 **Segnalato da:** Reddit (u/...), giugno 2026

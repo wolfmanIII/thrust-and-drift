@@ -189,7 +189,7 @@ export function HelpScreen() {
             <p>In Basic mode there is no hex map. Ships appear as bento cards grouped by faction. Each card has three zones:</p>
             <KV k="Header" v="Ship name · faction dot · status badges: ☠ WRECK, DOGFIGHT, BOARDING, EVA N (evasive thrust), LOCKED (sensor locked by enemy), ION NR (ion disruption active — blue)." />
             <KV k="Hull" v="Hull bar (green → yellow → red) · Hull N/M · Initiative." />
-            <KV k="Status" v="Conditional zone — shown only when active: sensor lock target (with DM), locked-by attacker, inbound missiles per launcher, inbound torpedoes (separate row), launched missiles per target, reloading turrets, critical hits, missile ammo (🚀 N/max, yellow < 25%, red at 0), sand canisters (🪨 N/max, yellow < 25%, red at 0), ion disruption (⚡ −N thrust / NR remaining). Hidden when none apply." />
+            <KV k="Status" v="Conditional zone — shown only when active: sensor lock target (with DM), locked-by attacker, inbound missiles per launcher, inbound torpedoes (separate row), launched missiles per target, reloading turrets, critical hits, missile ammo (🚀 N/max, yellow < 25%, red at 0), sand canisters (🪨 N/max, yellow < 25%, red at 0), ion disruption (−N PWR · Xr remaining; OFFLINE when currentPower = 0). Hidden when none apply." />
             <KV k="DISTANCES panel" v="Lists every cross-faction pair with its current range band. ⬇ / ⬆ buttons adjust the band directly (GM override — no thrust spent)." />
             <p>Right-click a card to open the context menu. Right-click anywhere in the background for the global menu (Roll Initiative, Add ship here).</p>
             <Note>Ships are placed at Very Long range by default when added to a basic mode session.</Note>
@@ -271,10 +271,9 @@ export function HelpScreen() {
             <p>If the assigned Tactics crew member has <span className="text-slate-200">Tactics ≥ 1</span>, an optional secondary dice row appears. Roll 2D6 + Tactics — the Effect (total − 8, can be negative) is added to the initiative total. Leaving it blank applies no bonus.</p>
             <p>NPC ships with Tactics &gt; 0 auto-roll their Tactics check on confirm.</p>
           </Sub>
-          <Sub title="INITIATIVE BONUS (previous round)">
-            <p>If the Captain uses <span className="text-slate-200">Improve Initiative</span> in the previous Actions phase, the Effect is stored on the ship and added automatically to its next initiative roll — no manual input required.</p>
+          <Sub title="INITIATIVE BONUS">
+            <p>If the Captain uses <span className="text-slate-200">Improve Initiative</span> in the Actions phase of any round, the bonus is applied <span className="text-slate-200">immediately</span> to the ship&apos;s current initiative, changing its position in the acting order for the rest of this round. The bonus expires at the next round boundary and is removed automatically. The Phase Tracker shows an <span className="text-amber-400">↑ini</span> badge on affected ships.</p>
           </Sub>
-          <Note>The Phase Tracker (right side of screen) shows the initiative order with the current actor highlighted.</Note>
         </Section>
 
         {/* ACCELERATION */}
@@ -446,8 +445,8 @@ export function HelpScreen() {
           </Sub>
 
           <Sub title="AVAILABLE ACTIONS">
-            <KV k="Captain (Leadership)" v="IMPROVE INITIATIVE — 2D6 + Leadership (8+). Effect added to this ship's initiative roll next round (CRB p.166)." />
-            <KV k="Engineer" v="OVERLOAD M-DRIVE — 2D6 + Engineer (8+). +Effect Thrust available this round (CRB p.167). REPAIR SYSTEM — 2D6 + Engineer (8+). Removes 1 critical hit (CRB p.167)." />
+            <KV k="Captain (Leadership)" v="IMPROVE INITIATIVE — 2D6 + Leadership (8+). +Effect applied immediately to this ship's initiative (lasts this round only) (CRB p.166)." />
+            <KV k="Engineer" v="OVERLOAD M-DRIVE — 2D6 + Engineer (8+). +Effect Thrust available this round (CRB p.167). REPAIR SYSTEM — difficulty scales with severity: Avg 8+ (Sev 1–2) / Diff 10+ (Sev 3–4) / Very Diff 12+ (Sev 5–6). GM selects which critical to repair. Removes 1 critical hit (CRB p.167)." />
             <KV k="Gunner" v="RELOAD TURRET — Automatic, no roll. Reloads 1 missile weapon slot (CRB p.167)." />
             <KV k="Sensors" v="SENSOR LOCK — 2D6 + Electronics (8+). Success: DM+2 flat to all attacks vs locked target (CRB p.172). ELECTRONIC WARFARE — 2D6 + Electronics (8+). Removes an enemy sensor lock (CRB p.167). EW — COUNTER MISSILE — 2D6 + Electronics (10+). Success: removes Effect missiles (min 1) from one in-flight salvo. Cumulative across rounds; a salvo may only be EW'd once per round (CRB p.173)." />
           </Sub>
