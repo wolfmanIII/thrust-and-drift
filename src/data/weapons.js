@@ -17,7 +17,7 @@
  *   - notes:      Short rule clarification
  */
 
-/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'|'Pulse Laser Barbette'|'Beam Laser Barbette'|'Particle Barbette'|'Fusion Barbette'|'Plasma Barbette'|'Railgun Barbette'|'Missile Barbette'|'Torpedo'|'Ion Cannon'} WeaponType */
+/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'|'Pulse Laser Barbette'|'Beam Laser Barbette'|'Particle Barbette'|'Fusion Barbette'|'Plasma Barbette'|'Railgun Barbette'|'Missile Barbette'|'Torpedo'|'Ion Cannon'|'Ion Cannon Bay (Small)'|'Ion Cannon Bay (Medium)'|'Ion Cannon Bay (Large)'} WeaponType */
 
 /**
  * Weapon stat table.
@@ -134,14 +134,61 @@ export const WEAPONS = {
     id: 'Ion Cannon',
     label: 'Ion Cannon',
     attackDM: 0,
-    damageDice: 2,         // 2D6 → thrust penalty (not hull damage). // HG p.30
+    damageDice: 2,           // HG p.30 — 2D, explicit ×10 in Damage column
     damageBonus: 0,
-    maxRange: 'Medium',    // HG p.30
-    damageMultiple: 1,
+    maxRange: 'Medium',      // HG p.30
+    damageMultiple: 10,      // 2D × 10 — overrides standard barbette ×3. // HG p.30
     traits: ['Ion'],
+    barbetteOnly: true,      // absent from turret table — HG p.28 vs p.30
     turretOnly: false,
     bayOnly: false,
-    notes: 'Does not damage hull. On hit: reduces target thrust by 2D6 for 1 round (D3 if Effect ≥ 6). HG p.30.',
+    ignoresArmour: true,     // HG p.30 — Ion bypasses armour
+    notes: 'No hull damage. Roll 2D×10 ignoring armour; deduct from target Power + bandwidth. Duration: 1 round (D3 if Effect ≥ 6). // HG p.30, FAQ HG 2022 p.1',
+  },
+  'Ion Cannon Bay (Small)': {
+    id: 'Ion Cannon Bay (Small)',
+    label: 'Ion Cannon Bay (S)',
+    attackDM: 0,
+    damageDice: 6,           // HG p.32
+    damageBonus: 0,
+    maxRange: 'Medium',      // HG p.32
+    damageMultiple: 10,      // Small Bay damage multiple. // HG p.31
+    traits: ['Ion'],
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    ignoresArmour: true,
+    notes: 'No hull damage. Roll 6D×10 ignoring armour; deduct from target Power + bandwidth. Duration: 1 round (D3 if Effect ≥ 6). // HG p.32, FAQ HG 2022 p.1',
+  },
+  'Ion Cannon Bay (Medium)': {
+    id: 'Ion Cannon Bay (Medium)',
+    label: 'Ion Cannon Bay (M)',
+    attackDM: 0,
+    damageDice: 8,           // HG p.33
+    damageBonus: 0,
+    maxRange: 'Medium',      // HG p.33
+    damageMultiple: 20,      // Medium Bay damage multiple. // HG p.31
+    traits: ['Ion'],
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    ignoresArmour: true,
+    notes: 'No hull damage. Roll 8D×20 ignoring armour; deduct from target Power + bandwidth. Duration: 1 round (D3 if Effect ≥ 6). // HG p.33, FAQ HG 2022 p.1',
+  },
+  'Ion Cannon Bay (Large)': {
+    id: 'Ion Cannon Bay (Large)',
+    label: 'Ion Cannon Bay (L)',
+    attackDM: 0,
+    damageDice: 10,          // HG p.33
+    damageBonus: 0,
+    maxRange: 'Long',        // HG p.33
+    damageMultiple: 100,     // Large Bay damage multiple. // HG p.31
+    traits: ['Ion'],
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    ignoresArmour: true,
+    notes: 'No hull damage. Roll 10D×100 ignoring armour; deduct from target Power + bandwidth. Duration: 1 round (D3 if Effect ≥ 6). // HG p.33, FAQ HG 2022 p.1',
   },
   'Torpedo': {
     id: 'Torpedo',
