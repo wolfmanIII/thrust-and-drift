@@ -62,6 +62,7 @@ export function rollAttack({
   targetSizeDM,
   evasiveDM,
   sensorLockDM = 0,
+  dogfightDM = 0,
   diceOverride = null,
 }) {
   const roll = diceOverride ?? roll2D6()
@@ -74,7 +75,8 @@ export function rollAttack({
     weaponDM +
     targetSizeDM +
     evasiveDM +
-    sensorLockDM
+    sensorLockDM +
+    dogfightDM
   return {
     roll,
     total,
@@ -90,6 +92,7 @@ export function rollAttack({
       targetSizeDM,
       evasiveDM,
       sensorLockDM,
+      dogfightDM,
     },
   }
 }

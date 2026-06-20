@@ -34,6 +34,7 @@ export const WEAPONS = {
     maxRange: 'Long',     // HG p.28, CRB p.168
     damageMultiple: 1,
     traits: [],
+    mount: 'turret',
     turretOnly: false,
     bayOnly: false,
     notes: 'Standard offensive laser. Short-duration pulses.',
@@ -47,6 +48,7 @@ export const WEAPONS = {
     maxRange: 'Medium',    // HG p.28, CRB p.168 — shorter ranged than Pulse
     damageMultiple: 1,
     traits: [],
+    mount: 'turret',
     turretOnly: false,
     bayOnly: false,
     notes: 'Higher accuracy, lower damage. Shorter range than Pulse Laser.',
@@ -60,6 +62,7 @@ export const WEAPONS = {
     maxRange: 'Special',   // Guided — no hard range cap
     damageMultiple: 1,
     traits: ['Smart'],
+    mount: 'turret',
     turretOnly: false,
     bayOnly: false,
     notes: 'Guided munitions. Each missile in the salvo rolls damage independently.',
@@ -73,6 +76,7 @@ export const WEAPONS = {
     maxRange: 'Special',   // Defensive — range not applicable
     damageMultiple: 1,
     traits: ['Defensive'],
+    mount: 'turret',
     turretOnly: false,
     bayOnly: false,
     notes: 'Defensive only. Provides Armor +1D vs lasers per sandcaster firing.',
@@ -86,6 +90,7 @@ export const WEAPONS = {
     maxRange: 'Very Long',   // HG p.28, CRB p.168
     damageMultiple: 1,
     traits: ['Radiation'],   // HG p.28 — turret version has no AP (only Particle Barbette does)
+    mount: 'turret',
     turretOnly: false,
     bayOnly: false,
     notes: 'Radiation trait causes crew damage on critical hits.',
@@ -99,6 +104,7 @@ export const WEAPONS = {
     maxRange: 'Short',     // HG p.28 — short-range kinetic weapon
     damageMultiple: 1,
     traits: ['AP 4'],      // HG p.28
+    mount: 'turret',
     turretOnly: false,
     bayOnly: false,
     notes: 'Kinetic weapon. AP 4. Effective only at Short range and closer.',
@@ -112,6 +118,7 @@ export const WEAPONS = {
     maxRange: 'Medium',      // HG p.28
     damageMultiple: 1,
     traits: ['Radiation'],   // HG p.28
+    mount: 'turret',
     turretOnly: false,
     bayOnly: false,
     notes: 'Radiation trait: crew damage on critical hits.',
@@ -125,6 +132,7 @@ export const WEAPONS = {
     maxRange: 'Medium',    // HG p.28
     damageMultiple: 1,
     traits: [],
+    mount: 'turret',
     turretOnly: false,
     bayOnly: false,
     notes: 'High-energy plasma stream.',
@@ -139,6 +147,7 @@ export const WEAPONS = {
     maxRange: 'Medium',      // HG p.30
     damageMultiple: 10,      // 2D × 10 — overrides standard barbette ×3. // HG p.30
     traits: ['Ion'],
+    mount: 'barbette',
     turretOnly: false,
     bayOnly: false,
     ignoresArmour: true,     // HG p.30 — Ion bypasses armour
@@ -153,6 +162,7 @@ export const WEAPONS = {
     maxRange: 'Medium',      // HG p.32
     damageMultiple: 10,      // Small Bay damage multiple. // HG p.31
     traits: ['Ion'],
+    mount: 'bay',
     barbetteOnly: false,
     turretOnly: false,
     bayOnly: true,
@@ -168,6 +178,7 @@ export const WEAPONS = {
     maxRange: 'Medium',      // HG p.33
     damageMultiple: 20,      // Medium Bay damage multiple. // HG p.31
     traits: ['Ion'],
+    mount: 'bay',
     barbetteOnly: false,
     turretOnly: false,
     bayOnly: true,
@@ -183,6 +194,7 @@ export const WEAPONS = {
     maxRange: 'Long',        // HG p.33
     damageMultiple: 100,     // Large Bay damage multiple. // HG p.31
     traits: ['Ion'],
+    mount: 'bay',
     barbetteOnly: false,
     turretOnly: false,
     bayOnly: true,
@@ -198,6 +210,7 @@ export const WEAPONS = {
     maxRange: 'Special',   // Guided — no range cap
     damageMultiple: 1,
     traits: ['Smart'],
+    mount: 'barbette',
     turretOnly: false,
     bayOnly: false,
     notes: 'Heavy anti-ship guided munition. 3 per barbette, no reload. // HG p.30–31',
@@ -211,6 +224,7 @@ export const WEAPONS = {
     maxRange: 'Special',    // Guided — no range cap
     damageMultiple: 1,      // missile damage is per-missile, not multiplied
     traits: ['Smart'],
+    mount: 'barbette',
     turretOnly: false,
     bayOnly: false,
     notes: 'Fixed salvo of 5 missiles. Holds 25 total (5 salvos). // HG p.30–31',
@@ -228,6 +242,7 @@ export const WEAPONS = {
     maxRange: 'Long',     // HG p.30
     damageMultiple: 3,
     traits: [],
+    mount: 'barbette',
     turretOnly: false,
     bayOnly: false,
     notes: 'Barbette: (3D + Effect − Armour) × 3. Cannot be used for Point Defence.',
@@ -241,6 +256,7 @@ export const WEAPONS = {
     maxRange: 'Medium',    // HG p.30
     damageMultiple: 3,
     traits: [],
+    mount: 'barbette',
     turretOnly: false,
     bayOnly: false,
     notes: 'Barbette: (2D + Effect − Armour) × 3. Cannot be used for Point Defence.',
@@ -254,6 +270,7 @@ export const WEAPONS = {
     maxRange: 'Very Long',   // HG p.30
     damageMultiple: 3,
     traits: ['Radiation'],
+    mount: 'barbette',
     turretOnly: false,
     bayOnly: false,
     notes: 'Barbette: (4D + Effect − Armour) × 3. Radiation trait.',
@@ -267,6 +284,7 @@ export const WEAPONS = {
     maxRange: 'Medium',    // HG p.30
     damageMultiple: 3,
     traits: ['AP 3', 'Radiation'],
+    mount: 'barbette',
     turretOnly: false,
     bayOnly: false,
     notes: 'Barbette: (5D + Effect − Armour) × 3. AP 3, Radiation.',
@@ -280,6 +298,7 @@ export const WEAPONS = {
     maxRange: 'Medium',    // HG p.30
     damageMultiple: 3,
     traits: ['AP 2'],
+    mount: 'barbette',
     turretOnly: false,
     bayOnly: false,
     notes: 'Barbette: (4D + Effect − Armour) × 3. AP 2.',
@@ -293,6 +312,7 @@ export const WEAPONS = {
     maxRange: 'Medium',    // HG p.30
     damageMultiple: 3,
     traits: ['AP 5'],
+    mount: 'barbette',
     turretOnly: false,
     bayOnly: false,
     notes: 'Barbette: (3D + Effect − Armour) × 3. AP 5.',

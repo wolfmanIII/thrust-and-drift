@@ -230,13 +230,13 @@ function AttackConfigStep({
   weaponKey, selectedTurretSlot, setWeaponSelection, targetId, setTargetId,
   target, weapon, rangeBand, distance, dmBreakdown,
   combatMode, storedBand, manualRangeBand, setManualRangeBand,
-  outOfRange,
+  outOfRange, dogfightTie,
   isMissile, isMissileBarbette, missileCount, setMissileCount, ammoLeft,
   inFlightMissiles, targetMissileId, setTargetMissileId,
   reactions,
   onNext, onClose,
 }) {
-  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
+  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, dogfightDM = 0, totalDM } = dmBreakdown
   const isMissilePdMode = !!targetMissileId
   // When targeting a missile, only PD weapons are valid
   const visibleWeapons  = isMissilePdMode
@@ -245,6 +245,11 @@ function AttackConfigStep({
   return (
     <Modal title="Attack" onClose={onClose}>
       <div className="space-y-4">
+        {dogfightTie && (
+          <div className="bg-amber-950/40 border border-amber-500/40 rounded px-3 py-2 font-mono text-xs text-amber-400">
+            ⚠ Dogfight tie — fixed weapons unavailable (barbettes, bays)
+          </div>
+        )}
         {/* Weapon select */}
         <div>
           <p className="text-slate-400 font-mono text-xs mb-1.5">
@@ -427,6 +432,7 @@ function AttackConfigStep({
             <DmRow label="Target size" value={sizeDM} />
             {evasiveDM !== 0 && <DmRow label="Evasion" value={evasiveDM} />}
             {sensorLockDM !== 0 && <DmRow label="Sensor Lock" value={sensorLockDM} />}
+            {dogfightDM !== 0 && <DmRow label="Dogfight" value={dogfightDM} />}
             <div className="border-t border-slate-700 mt-1 pt-1">
               <DmRow label="Total DM" value={totalDM} highlight />
             </div>
@@ -531,7 +537,7 @@ function AttackRollStep({
   dmBreakdown,
   attackResult, setAttackResult, onNext, onClose, onMissClose,
 }) {
-  const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, totalDM } = dmBreakdown
+  const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, dogfightDM = 0, totalDM } = dmBreakdown
   const [manualDice, setManualDice] = useState(null)
 
   const handleRoll = (diceOverride = null) => {
@@ -544,6 +550,7 @@ function AttackRollStep({
       targetSizeDM: sizeDM,
       evasiveDM,
       sensorLockDM,
+      dogfightDM,
       diceOverride,
     })
     setAttackResult(result)
@@ -1306,7 +1313,7 @@ export function AttackModal() {
     resetReactions()
   }
 
-  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, storedBand, combatMode, outOfRange, dmBreakdown } =
+  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, storedBand, combatMode, outOfRange, dogfightTie, dmBreakdown } =
     useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand, selectedTurretSlot)
 
   if (!attacker) return null
@@ -1534,6 +1541,7 @@ export function AttackModal() {
         manualRangeBand={manualRangeBand}
         setManualRangeBand={setManualRangeBand}
         outOfRange={outOfRange}
+        dogfightTie={dogfightTie}
         dmBreakdown={augmentedDmBreakdown}
         isMissile={isMissile}
         isMissileBarbette={isMissileBarbette}

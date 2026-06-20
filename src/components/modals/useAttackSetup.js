@@ -9,6 +9,7 @@ import { WEAPONS, DEFENSIVE_WEAPONS } from '../../data/weapons.js'
 import { hexDistance, getRangeBand } from '../../utils/hex.js'
 import { getRangeDM, getTargetSizeDM, isOutOfRange } from '../../utils/combat.js'
 import { getEffectiveSkill } from '../../utils/crew.js'
+import { dogfightAttackDM } from '../../utils/dogfight.js'
 
 /**
  * @param {string|null} attackerShipId   ID of the attacking ship
@@ -42,6 +43,7 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const ships      = useBattleStore((s) => s.ships)
   const combatMode = useBattleStore((s) => s.combatMode)
   const rangeBands = useBattleStore((s) => s.rangeBands)
+  const dogfights  = useBattleStore((s) => s.dogfights)
 
   const attacker = ships.find((s) => s.id === attackerShipId)
   const enemies  = ships.filter((s) => s.id !== attackerShipId)
@@ -79,7 +81,23 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const sensorLockDM = attacker?.sensorLockOn === targetId ? (attacker.sensorLockDM ?? 0) : 0
   const gunnerSkill = getEffectiveSkill(attacker?.profile.crew, assignments, 'gunner', turretSlot)
   const weaponDM    = weapon?.attackDM ?? 0
-  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM
+
+  // Dogfight attack DM: +2 winner, −2 loser, 0 tie (CRB p.138)
+  const attackerGroup  = attacker?.inDogfight
+    ? dogfights.find((g) => g.id === attacker.inDogfight && g.active)
+    : null
+  const dogfightDM     = attackerGroup
+    ? dogfightAttackDM(attacker.id, attackerGroup.roundWinnerId)
+    : 0
+  // Tie: roundWinnerId null AND an active dogfight round has been resolved (microRound > 1)
+  const dogfightTie    = !!(attackerGroup && attackerGroup.roundWinnerId === null && attackerGroup.microRound > 1)
+
+  // On a dogfight tie, fixed-mount weapons (barbettes, bays) cannot fire (Companion p.174)
+  const availableWeaponsFiltered = dogfightTie
+    ? availableWeapons.filter((w) => (WEAPONS[w.weaponName]?.mount ?? 'turret') === 'turret')
+    : availableWeapons
+
+  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM
   const outOfRange  = weapon ? isOutOfRange(weapon.maxRange, rangeBand) : false
 
   return {
@@ -87,12 +105,13 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     enemies,
     target,
     weapon,
-    availableWeapons,
+    availableWeapons: availableWeaponsFiltered,
     distance,
     rangeBand,
     storedBand,
     combatMode,
     outOfRange,
-    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, totalDM },
+    dogfightTie,
+    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, dogfightDM, totalDM },
   }
 }
