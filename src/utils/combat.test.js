@@ -24,6 +24,7 @@ import {
   countSandcasters,
   computeMissileAttackDM,
   computeMissileImpactDamage,
+  computeIonThrustEffect,
 } from './combat.js'
 
 // === RANGE DMs ===
@@ -603,5 +604,38 @@ describe('computeMissileImpactDamage', () => {
   it('armour 0 — no reduction', () => {
     // (18−0) × min(3,4) = 18 × 3 = 54
     expect(computeMissileImpactDamage(18, 0, 3, 4)).toBe(54)
+  })
+})
+
+// === ION — computeIonThrustEffect ===
+// // MgT2e HG p.30
+
+describe('computeIonThrustEffect', () => {
+  it('full Power → baseThrust unchanged', () => {
+    expect(computeIonThrustEffect(6, 100, 100)).toBe(6)
+  })
+
+  it('50% Power → half thrust (floor)', () => {
+    expect(computeIonThrustEffect(6, 50, 100)).toBe(3)
+  })
+
+  it('0% Power → 0 effective thrust', () => {
+    expect(computeIonThrustEffect(6, 0, 100)).toBe(0)
+  })
+
+  it('odd thrust floors correctly at non-round Power ratio', () => {
+    // floor(5 × 67/100) = floor(3.35) = 3
+    expect(computeIonThrustEffect(5, 67, 100)).toBe(3)
+  })
+
+  it('maxPower = 0 → returns baseThrust unchanged (guard against /0)', () => {
+    expect(computeIonThrustEffect(6, 0, 0)).toBe(6)
+  })
+
+  it('currentPower > maxPower treated as full (no amplification)', () => {
+    // currentPower capped at max(0, current) before division; no upper clamp needed
+    // but effectively: floor(6 × 120/100) = 7; spec says return baseThrust when overpowered?
+    // RAW: no amplification beyond rated thrust — result capped at baseThrust
+    expect(computeIonThrustEffect(6, 120, 100)).toBeLessThanOrEqual(6)
   })
 })

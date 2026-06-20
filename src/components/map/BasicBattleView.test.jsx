@@ -168,7 +168,7 @@ describe('ShipBentoCard', () => {
     const ship = makeShip({ ionRoundsLeft: 2, ionPowerReduction: 40 })
     useBattleStore.setState({ ships: [ship], missiles: [] })
     render(<BasicBattleView />)
-    expect(screen.getByText(/ION 2R/)).toBeTruthy()
+    expect(screen.getAllByText(/ION 2R/).length).toBeGreaterThan(0)
   })
 
   it('does not show ION badge when ionRoundsLeft is 0 or absent', () => {
@@ -181,7 +181,7 @@ describe('ShipBentoCard', () => {
     const ship = makeShip({ ionRoundsLeft: 1, ionPowerReduction: 60, basePower: 100, currentPower: 40 })
     useBattleStore.setState({ ships: [ship], missiles: [] })
     render(<BasicBattleView />)
-    expect(screen.getByText(/ION 1R/)).toBeTruthy()
+    expect(screen.getAllByText(/ION 1R/).length).toBeGreaterThan(0)
     expect(screen.getByText(/-60 PWR/)).toBeTruthy()
   })
 })

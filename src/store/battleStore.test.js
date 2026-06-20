@@ -2127,119 +2127,163 @@ describe('missile ammo initialisation — barbette and torpedo', () => {
   })
 })
 
-// === ION CANNON — applyIonDamage ===
-// // MgT2e HG p.30
+// === ION CANNON — applyIonDamage (Power + bandwidth) ===
+// // MgT2e HG p.30, FAQ HG 2022 p.1
 
 describe('applyIonDamage', () => {
-  it('sets ionPenalty and ionRoundsLeft on target', () => {
-    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+  it('reduces currentPower and sets ionPowerReduction + ionRoundsLeft', () => {
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100 }), { q: 0, r: 0 }, 'npc', '#f00')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().applyIonDamage(id, 5, 2)
+    useBattleStore.getState().applyIonDamage(id, 60, 1)
     const ship = useBattleStore.getState().ships[0]
-    expect(ship.ionPenalty).toBe(5)
-    expect(ship.ionRoundsLeft).toBe(2)
+    expect(ship.ionPowerReduction).toBe(60)
+    expect(ship.currentPower).toBe(40)
+    expect(ship.ionRoundsLeft).toBe(1)
   })
 
-  it('overwrites previous ion state (new hit replaces old)', () => {
-    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+  it('stacks Ion hits — ionPowerReduction is additive', () => {
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100 }), { q: 0, r: 0 }, 'npc', '#f00')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().applyIonDamage(id, 3, 1)
-    useBattleStore.getState().applyIonDamage(id, 8, 3)
+    useBattleStore.getState().applyIonDamage(id, 30, 1)
+    useBattleStore.getState().applyIonDamage(id, 40, 2)
     const ship = useBattleStore.getState().ships[0]
-    expect(ship.ionPenalty).toBe(8)
-    expect(ship.ionRoundsLeft).toBe(3)
+    expect(ship.ionPowerReduction).toBe(70)
+    expect(ship.currentPower).toBe(30)
+    expect(ship.ionRoundsLeft).toBe(2)         // max(1, 2) = 2
+  })
+
+  it('currentPower does not go below 0', () => {
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100 }), { q: 0, r: 0 }, 'npc', '#f00')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyIonDamage(id, 150, 1)
+    expect(useBattleStore.getState().ships[0].currentPower).toBe(0)
+  })
+
+  it('also reduces currentBandwidth when baseBandwidth > 0', () => {
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100, computerBandwidth: 10 }), { q: 0, r: 0 }, 'npc', '#f00')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyIonDamage(id, 60, 1)
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.bandwidthReduction).toBe(60)
+    expect(ship.currentBandwidth).toBe(0)      // max(0, 10 - 60) = 0
+  })
+
+  it('hardened ship is immune — no fields modified', () => {
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100, hardened: true }), { q: 0, r: 0 }, 'npc', '#f00')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyIonDamage(id, 80, 1)
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.currentPower).toBe(100)
+    expect(ship.ionPowerReduction ?? 0).toBe(0)
+    expect(ship.ionRoundsLeft ?? 0).toBe(0)
   })
 
   it('does not affect other ships', () => {
-    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
-    useBattleStore.getState().addShip(makeProfile(), { q: 1, r: 0 }, 'npc',     '#f00')
-    const [s1, s2] = useBattleStore.getState().ships
-    useBattleStore.getState().applyIonDamage(s2.id, 6, 1)
-    expect(useBattleStore.getState().ships[0].ionPenalty  ?? 0).toBe(0)
-    expect(useBattleStore.getState().ships[0].ionRoundsLeft ?? 0).toBe(0)
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100 }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100 }), { q: 1, r: 0 }, 'npc', '#f00')
+    const [, s2] = useBattleStore.getState().ships
+    useBattleStore.getState().applyIonDamage(s2.id, 60, 1)
+    expect(useBattleStore.getState().ships[0].ionPowerReduction ?? 0).toBe(0)
+    expect(useBattleStore.getState().ships[0].currentPower).toBe(100)
   })
 
   it('unknown shipId is no-op', () => {
-    expect(() => useBattleStore.getState().applyIonDamage('ghost', 4, 1)).not.toThrow()
+    expect(() => useBattleStore.getState().applyIonDamage('ghost', 60, 1)).not.toThrow()
   })
 })
 
-// === ION STATE — round decrement via startNextRound ===
+// === ION STATE — Power/bandwidth restore via startNextRound ===
+// BUG-001 regression: Power reduction must persist through first round boundary so the
+// target's acceleration phase in round N+1 is still penalised. // HG p.30
 
-describe('ion disruption — round decrement', () => {
-  it('ionRoundsLeft decrements by 1 each round', () => {
-    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+describe('ion disruption — Power restore via round decrement', () => {
+  it('ionRoundsLeft decrements by 1 each round, Power stays reduced', () => {
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100 }), { q: 0, r: 0 }, 'npc', '#f00')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().applyIonDamage(id, 4, 3)
+    useBattleStore.getState().applyIonDamage(id, 60, 3)
     useBattleStore.getState().startNextRound()
-    expect(useBattleStore.getState().ships[0].ionRoundsLeft).toBe(2)
-    expect(useBattleStore.getState().ships[0].ionPenalty).toBe(4)
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.ionRoundsLeft).toBe(2)
+    expect(ship.ionPowerReduction).toBe(60)
+    expect(ship.currentPower).toBe(40)
   })
 
-  // BUG-001: ionPenalty with ionRoundsLeft=1 must survive the first round boundary
-  // so the target's acceleration phase in round N+1 is still penalised. // HG p.30
-  it('ionPenalty with ionRoundsLeft=1 persists through first round boundary', () => {
-    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+  it('Power reduction persists through first round boundary when ionRoundsLeft=1', () => {
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100 }), { q: 0, r: 0 }, 'npc', '#f00')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().applyIonDamage(id, 4, 1)
+    useBattleStore.getState().applyIonDamage(id, 60, 1)
     useBattleStore.getState().startNextRound()
     const ship = useBattleStore.getState().ships[0]
     expect(ship.ionRoundsLeft).toBe(0)
-    expect(ship.ionPenalty).toBe(4)  // still active — round N+1 acceleration not yet resolved
+    expect(ship.ionPowerReduction).toBe(60)  // still active — round N+1 acceleration not yet resolved
+    expect(ship.currentPower).toBe(40)
   })
 
-  it('ionPenalty clears after two round boundaries when ionRoundsLeft=1', () => {
-    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+  it('Power restores after two round boundaries when ionRoundsLeft=1', () => {
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100 }), { q: 0, r: 0 }, 'npc', '#f00')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().applyIonDamage(id, 4, 1)
+    useBattleStore.getState().applyIonDamage(id, 60, 1)
     useBattleStore.getState().startNextRound()
     useBattleStore.getState().startNextRound()
     const ship = useBattleStore.getState().ships[0]
     expect(ship.ionRoundsLeft).toBe(0)
-    expect(ship.ionPenalty).toBe(0)
+    expect(ship.ionPowerReduction).toBe(0)
+    expect(ship.currentPower).toBe(100)
   })
 
-  it('ionRoundsLeft=2 penalty persists two round boundaries then clears on third', () => {
-    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'npc', '#f00')
+  it('bandwidth also restores on Power recovery', () => {
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100, computerBandwidth: 10 }), { q: 0, r: 0 }, 'npc', '#f00')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().applyIonDamage(id, 6, 2)
+    useBattleStore.getState().applyIonDamage(id, 60, 1)
+    useBattleStore.getState().startNextRound()
+    useBattleStore.getState().startNextRound()
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.currentBandwidth).toBe(10)
+    expect(ship.bandwidthReduction).toBe(0)
+  })
+
+  it('ionRoundsLeft=2: Power reduced for 2 round boundaries, restores on 3rd', () => {
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 100 }), { q: 0, r: 0 }, 'npc', '#f00')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyIonDamage(id, 60, 2)
     useBattleStore.getState().startNextRound()
     expect(useBattleStore.getState().ships[0].ionRoundsLeft).toBe(1)
-    expect(useBattleStore.getState().ships[0].ionPenalty).toBe(6)
+    expect(useBattleStore.getState().ships[0].ionPowerReduction).toBe(60)
     useBattleStore.getState().startNextRound()
     expect(useBattleStore.getState().ships[0].ionRoundsLeft).toBe(0)
-    expect(useBattleStore.getState().ships[0].ionPenalty).toBe(6)
+    expect(useBattleStore.getState().ships[0].ionPowerReduction).toBe(60)
     useBattleStore.getState().startNextRound()
     expect(useBattleStore.getState().ships[0].ionRoundsLeft).toBe(0)
-    expect(useBattleStore.getState().ships[0].ionPenalty).toBe(0)
+    expect(useBattleStore.getState().ships[0].ionPowerReduction).toBe(0)
+    expect(useBattleStore.getState().ships[0].currentPower).toBe(100)
   })
 
-  it('no ion state: startNextRound is no-op on ion fields', () => {
-    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+  it('no ion state: startNextRound leaves Power fields unchanged', () => {
+    useBattleStore.getState().addShip(makeProfile({ maxPower: 80 }), { q: 0, r: 0 }, 'players', '#fff')
     useBattleStore.getState().startNextRound()
     const ship = useBattleStore.getState().ships[0]
     expect(ship.ionRoundsLeft ?? 0).toBe(0)
-    expect(ship.ionPenalty  ?? 0).toBe(0)
+    expect(ship.ionPowerReduction ?? 0).toBe(0)
+    expect(ship.currentPower).toBe(80)
   })
 })
 
-describe('spendReactionThrust — ionPenalty reduces available pool', () => {
-  it('ionPenalty subtracts from available reaction thrust', () => {
-    // thrust=6, ionPenalty=3 → available=3
-    useBattleStore.getState().addShip(makeProfile({ thrust: 6 }), { q: 0, r: 0 }, 'players', '#fff')
+describe('spendReactionThrust — Ion Power reduces thrust ceiling', () => {
+  it('50% Power → 50% effective thrust (floor)', () => {
+    // thrust=6, maxPower=100, ionDamage=50 → currentPower=50 → ionCap=floor(6×0.5)=3
+    useBattleStore.getState().addShip(makeProfile({ thrust: 6, maxPower: 100 }), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().applyIonDamage(id, 3, 2)
+    useBattleStore.getState().applyIonDamage(id, 50, 2)
     useBattleStore.getState().spendReactionThrust(id, 6)
-    // max = thrust(6) - ionPenalty(3) = 3
     expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(3)
   })
 
-  it('ionPenalty + thrustPenalty combine to reduce available thrust', () => {
-    // thrust=6, thrustPenalty=2, ionPenalty=2 → available=2
-    useBattleStore.getState().addShip(makeProfile({ thrust: 6 }), { q: 0, r: 0 }, 'players', '#fff')
+  it('Ion Power + thrustPenalty both reduce available reaction thrust', () => {
+    // thrust=6, maxPower=100, ionDamage=33 → currentPower=67 → ionCap=floor(6×0.67)=4 → available=4-2=2
+    useBattleStore.getState().addShip(makeProfile({ thrust: 6, maxPower: 100 }), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().updateShip(id, { thrustPenalty: 2 })
-    useBattleStore.getState().applyIonDamage(id, 2, 1)
+    useBattleStore.getState().applyIonDamage(id, 33, 1)
     useBattleStore.getState().spendReactionThrust(id, 10)
     expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(2)
   })

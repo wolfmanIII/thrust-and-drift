@@ -172,11 +172,12 @@ function buildNextRoundState(s) {
         firedTurrets:         [],
         usedCrewMembers:      [],
         ionRoundsLeft:        ionNext,
-        // Power + bandwidth restore on expiry. // HG p.30, FAQ HG 2022 p.1
-        ionPowerReduction:  ionNext > 0 ? ionReduction : 0,
-        currentPower:       ionNext > 0 ? Math.max(0, restoredPower - ionReduction) : restoredPower,
-        bandwidthReduction: ionNext > 0 ? bwReduction : 0,
-        currentBandwidth:   ionNext > 0 ? Math.max(0, baseBw - bwReduction) : baseBw,
+        // Penalty persists while ionCurrent > 0 (survives one boundary for N+1 acceleration).
+        // Clears only when ionCurrent reaches 0. // HG p.30, FAQ HG 2022 p.1 — BUG-001
+        ionPowerReduction:  ionCurrent > 0 ? ionReduction : 0,
+        currentPower:       ionCurrent > 0 ? Math.max(0, restoredPower - ionReduction) : restoredPower,
+        bandwidthReduction: ionCurrent > 0 ? bwReduction : 0,
+        currentBandwidth:   ionCurrent > 0 ? Math.max(0, baseBw - bwReduction) : baseBw,
       }
     }),
     log: [

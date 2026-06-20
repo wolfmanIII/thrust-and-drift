@@ -10,7 +10,7 @@ import { getApValue } from '../utils/combat.js'
 
 const TURRET_WEAPONS = [
   'Pulse Laser', 'Beam Laser', 'Missile Rack', 'Sandcaster',
-  'Particle Beam', 'Railgun', 'Fusion Gun', 'Plasma Gun', 'Ion Cannon',
+  'Particle Beam', 'Railgun', 'Fusion Gun', 'Plasma Gun',
 ]
 
 const BARBETTE_WEAPONS = [
@@ -78,24 +78,74 @@ describe('turret weapons — damageMultiple is 1', () => {
   }
 })
 
-// === ION CANNON ===
-// // MgT2e HG p.30
+// === ION CANNON (barbette) ===
+// // MgT2e HG p.30 — 2D×10 Power damage, barbette mount, ignores armour
 
-describe('Ion Cannon', () => {
+describe('Ion Cannon (barbette)', () => {
   it('has Ion trait', () => {
     expect(WEAPONS['Ion Cannon'].traits).toContain('Ion')
   })
 
-  it('damageMultiple is 1 (penalty applied separately, not ×3)', () => {
-    expect(WEAPONS['Ion Cannon'].damageMultiple).toBe(1)
+  it('damageMultiple is 10 (barbette Ion ×10 multiplier)', () => {
+    expect(WEAPONS['Ion Cannon'].damageMultiple).toBe(10)
   })
 
-  it('damageDice is 2 (2D6 thrust penalty roll)', () => {
+  it('damageDice is 2 (2D)', () => {
     expect(WEAPONS['Ion Cannon'].damageDice).toBe(2)
   })
 
   it('maxRange is Medium', () => {
     expect(WEAPONS['Ion Cannon'].maxRange).toBe('Medium')
+  })
+
+  it('barbetteOnly: true — excluded from turret picker', () => {
+    expect(WEAPONS['Ion Cannon'].barbetteOnly).toBe(true)
+  })
+
+  it('ignoresArmour: true', () => {
+    expect(WEAPONS['Ion Cannon'].ignoresArmour).toBe(true)
+  })
+})
+
+// === ION CANNON BAYS ===
+// // MgT2e HG p.31-32 — Small 6D×10, Medium 8D×20, Large 10D×100
+
+describe('Ion Cannon Bay variants', () => {
+  const BAY_VARIANTS = [
+    { id: 'Ion Cannon Bay (Small)',  damageDice: 6, damageMultiple: 10, maxRange: 'Medium' },
+    { id: 'Ion Cannon Bay (Medium)', damageDice: 8, damageMultiple: 20, maxRange: 'Medium' },
+    { id: 'Ion Cannon Bay (Large)',  damageDice: 10, damageMultiple: 100, maxRange: 'Long'  },
+  ]
+
+  it('all three variants are in WEAPON_IDS', () => {
+    for (const { id } of BAY_VARIANTS) expect(WEAPON_IDS).toContain(id)
+  })
+
+  for (const { id, damageDice, damageMultiple, maxRange } of BAY_VARIANTS) {
+    describe(id, () => {
+      it(`damageDice is ${damageDice}`, () => {
+        expect(WEAPONS[id].damageDice).toBe(damageDice)
+      })
+      it(`damageMultiple is ${damageMultiple}`, () => {
+        expect(WEAPONS[id].damageMultiple).toBe(damageMultiple)
+      })
+      it(`maxRange is ${maxRange}`, () => {
+        expect(WEAPONS[id].maxRange).toBe(maxRange)
+      })
+      it('bayOnly: true — excluded from turret and barbette pickers', () => {
+        expect(WEAPONS[id].bayOnly).toBe(true)
+      })
+      it('ignoresArmour: true', () => {
+        expect(WEAPONS[id].ignoresArmour).toBe(true)
+      })
+      it('has Ion trait', () => {
+        expect(WEAPONS[id].traits).toContain('Ion')
+      })
+    })
+  }
+
+  it('bay weapons are NOT in DEFENSIVE_WEAPONS', () => {
+    for (const { id } of BAY_VARIANTS) expect(DEFENSIVE_WEAPONS).not.toContain(id)
   })
 })
 

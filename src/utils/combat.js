@@ -175,7 +175,7 @@ export function getCharDM(value) {
  */
 export function computeIonThrustEffect(baseThrust, currentPower, maxPower) {
   if (!maxPower || maxPower <= 0) return baseThrust
-  return Math.floor(baseThrust * Math.max(0, currentPower) / maxPower)
+  return Math.min(baseThrust, Math.floor(baseThrust * Math.max(0, currentPower) / maxPower))
 }
 
 /**
