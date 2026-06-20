@@ -936,13 +936,14 @@ At the start of each micro-round the GM may declare that a ship wants to flee.
 
 #### Step 2 — Pilot check
 
-Each remaining ship rolls **2D6 + Pilot + Tonnage DM + Thrust + previous round bonus**.
+Each remaining ship rolls **2D6 + Pilot + Tonnage DM + Thrust + DEX DM + previous round bonus**.
 
 | DM | Source |
 | -- | ------ |
 | Pilot skill | `getCrewSkill(crew, 'pilot')` |
 | Tonnage DM | See §14.3 table |
 | Thrust | Profile thrust − thrust used this round |
+| DEX DM | Pilot's DEX characteristic modifier (set in ship profile, −3 to +3) |
 | Extra enemies | −(number of enemy ships − 1) when outnumbered |
 | Round bonus | Previous round winner's margin carries forward as a +DM |
 
@@ -954,7 +955,7 @@ Each remaining ship rolls **2D6 + Pilot + Tonnage DM + Thrust + previous round b
 | Loser | **−2 DM** to all attacks |
 | Tie | Fixed weapons cannot fire; turrets OK; no positional DM |
 
-Apply the attack DMs shown in the modal when opening the **Attack** panel.
+> **App automation:** the dogfight result DM (+2/−2/0) is **pre-filled automatically** in the Attack modal when the attacker is in a dogfight. On a tied round, barbettes and bay-mounted weapons are removed from the weapon list and a warning banner appears — the app enforces the fixed-weapon restriction.
 
 #### Step 4 — Advance
 
@@ -1035,7 +1036,7 @@ The **⚔️ CONTACT** modal opens. The GM selects the entry method:
 
 **Modifiers:**
 
-- **🌀 Tumbling** — defender rotating the ship: DM −1 to all Contact checks
+- **🌀 Tumbling** — defender rotating the ship: DM −1 to all Contact checks. Click **🌀 TUMBLING** in the Contact modal to initiate: roll Pilot (DEX) Routine (6+); if successful, select the D3 result (1–3 rounds) — the app tracks the countdown and clears tumbling automatically. *(HG p.127)*
 - **🔗 Forced Linkage** — DM +2 to all Contact checks; defender cannot manoeuvre
 
 **Hull Cut tracker:** select component (Hatch / Airlock / Hull) and cutting tool, roll each round. Damage reduces component Resilience; breach achieved when damage ≥ breach threshold.

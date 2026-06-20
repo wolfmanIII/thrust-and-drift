@@ -548,8 +548,8 @@ export function HelpScreen() {
           <Sub title="MICRO-ROUND FLOW">
             <p>Open the round from the <span className="text-slate-200">⚔️ DOGFIGHT</span> badge in the HUD.</p>
             <KV k="Step 1 — Escape" v="Declare which ships attempt to flee. Auto-escape if thrust advantage or enemies not pursuing. Otherwise, pursuit check." />
-            <KV k="Step 2 — Pilot check" v="2D6 + Pilot + Tonnage DM + Thrust + previous round bonus DM." />
-            <KV k="Step 3 — Result" v="Winner: +2 DM to attacks. Loser: −2 DM. Tie: fixed weapons cannot fire, turrets OK." />
+            <KV k="Step 2 — Pilot check" v="2D6 + Pilot + Tonnage DM + Thrust + DEX DM + previous round bonus DM. DEX DM set in ship profile (−3 to +3)." />
+            <KV k="Step 3 — Result" v="Winner: +2 DM to attacks. Loser: −2 DM. Tie: fixed weapons cannot fire, turrets OK. The app pre-fills the DM automatically in the Attack modal and blocks barbettes/bays on tie." />
             <KV k="Step 4 — Advance" v="ADVANCE → MICRO-ROUND N+1/6. After round 6 the dogfight ends automatically." />
           </Sub>
 
@@ -593,7 +593,7 @@ export function HelpScreen() {
             <KV k="Breaching Tube" v="No check — &lt; 2 min. No decompression." />
             <KV k="Forced Linkage" v="Pilot (DEX) 8+ — DM +2 to all Contact checks. Locks defender movement." />
             <KV k="Hull Cut" v="Mechanic (DEX) 8+/round — reduces component Resilience until breach. 🚨 Decompression risk." />
-            <p>Modifiers: <span className="text-red-400">🌀 Tumbling</span> (DM −1) · <span className="text-emerald-400">🔗 Forced Linkage</span> (DM +2)</p>
+            <p>Modifiers: <span className="text-red-400">🌀 Tumbling</span> (DM −1 — click the Tumbling button; roll Pilot DEX Routine 6+, then select D3 result 1–3 rounds; app auto-clears when rounds expire) · <span className="text-emerald-400">🔗 Forced Linkage</span> (DM +2)</p>
           </Sub>
 
           <Sub title="PHASE 3 — CONFLICT">

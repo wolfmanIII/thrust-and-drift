@@ -6,6 +6,31 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.22.2] — 2026-06-20
+
+### Changed
+
+- **Boarding modal payload uses `boardingId`** — all three boarding modals (`BoardingContactModal`, `BoardingConflictModal`, `BoardingOutcomeModal`) and the HUD tracker now pass `boardingId` in the modal payload; lookup by `attackerId + phase` removed. Eliminates collision risk when multiple boardings exist between the same ships.
+- **`endDogfight` wrapped in undo stack** — action is now covered by the `wh` wrapper, so GM can undo forced dogfight exits.
+- **Dogfight utility functions extracted to `utils/dogfight.js`** — `computeShipDMs`, `bestPilot`, `freeThrust`, `escapeCheckTotals` moved from `DogfightRoundModal` to the utility module; fully unit-testable and reusable.
+- **`mount` field added to all weapons** — `'turret'`, `'barbette'`, or `'bay'`. Used by dogfight fixed-weapon block; replaces implicit string-matching.
+
+### Fixed
+
+- **Dogfight attack DM pre-filled in AttackModal** — when the attacker is in an active dogfight, the AttackModal now automatically applies the round-result DM: +2 for the winner, −2 for the loser, 0 on a tie. Shown in the DM Summary row; factored into `rollAttack()`. *(Companion p.174)*
+- **Fixed weapons blocked on dogfight tie** — on a tied dogfight Pilot check, barbette- and bay-mounted weapons are removed from the weapon list and a warning banner appears. *(Companion p.174 — "a tie is not sufficient to fire fixed weapons")*
+- **Pilot DEX DM applied to dogfight Pilot check** — `dexDM` (DEX characteristic modifier, −3 to +3) now added to `rollDogfightPilot()` and displayed per-ship in `DogfightRoundModal`. Field added to ship profile form (PILOT DEX DM) and `defaultProfiles`. *(MgT2e CRB p.57)*
+- **Dogfight detection works in basic combat mode** — `useDogfightDetection` previously returned early for non-vectorial modes. A new `detectDogfightGroupsBasic` function scans `rangeBands` for 'Adjacent' pairs with different factions, firing the dogfight-notification flow in basic mode too.
+- **Tumbling (defender rotating) requires Pilot check and D3 duration** — replaces a simple toggle. GM selects D3 result (1–3 rounds); the `applyDefenderRotation(boardingId, rounds)` store action sets `defenderRotating: true` and `rotatingRoundsLeft`. `buildNextRoundState` decrements each boarding round; rotation clears automatically when it reaches 0. `clearDefenderRotation` available for manual cancel. *(HG p.127)*
+- **Boarding hull-cut damage routed through `applyBoardingCutDamage`** — previously called `useBattleStore.setState` directly (bypassed undo stack). New `wh`-wrapped store action used instead.
+- **`advanceActor` (initiative order) skips ships in dogfight** — ships with `inDogfight` set are now treated the same as destroyed ships; the actor cursor passes them during normal initiative advancement.
+- **Phase advance blocked while active dogfight pending** — `canAdvancePhase` in HUD now returns `false` when any active dogfight group exists; NEXT PHASE button is disabled with a tooltip.
+- **`resolveBoarding` clears `inBoarding` on all participants** — previously only the defender/attacker inBoarding field was cleared; ships with `inBoarding === boardingId` were not always reset. Now all ships in the boarding group are updated.
+- **Boarding double-initiation prevented** — `startBoarding` precondition rejects the call if either ship is already `inBoarding`; `boardingTargets` in `ContextMenu` and `canBoard()` in `BoardingSetupModal` also exclude ships with `inBoarding` set.
+- **Tailwind dynamic class interpolations removed from `BoardingOutcomeModal`** — `bg-${o.color}-900/30` and similar patterns never scanned by Tailwind v4; replaced with a static `OUTCOME_STYLES` lookup map.
+
+---
+
 ## [1.22.1] — 2026-06-20
 
 ### Added

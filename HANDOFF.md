@@ -9,16 +9,46 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.22.1 |
-| **Branch** | main (in sync con origin) |
-| **Test** | 907 passing |
-| **Ultimo commit** | feat(ui): resizable BattleLog — drag handle expands panel upward |
+| **Versione** | 1.22.2 |
+| **Branch** | main (da pushare) |
+| **Test** | 915 passing |
+| **Ultimo commit** | refactor(boarding): use boardingId in modal payload instead of attackerId+phase lookup |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — BattleLog resizable + doc sync (v1.22.1)
+### Sessione corrente — Dogfight/boarding RAW compliance (v1.22.2)
+
+Code review completa su dogfight e boarding → 13 fix implementati in 5 fasi:
+
+**Phase 1 — Production + data integrity (FIX-01…03):**
+- FIX-01: `BoardingOutcomeModal` — sostituiti class interpolation dinamici con `OUTCOME_STYLES` lookup map (Tailwind v4 scan).
+- FIX-02: Boarding double-initiation bloccata — guard in `startBoarding`, `ContextMenu`, `BoardingSetupModal`.
+- FIX-03: `resolveBoarding` ora resetta `inBoarding` su tutti i partecipanti (non solo attacker/defender).
+
+**Phase 2 — Game flow (FIX-04…08):**
+- FIX-04: `canAdvancePhase` in HUD blocca NEXT PHASE se ci sono dogfight attivi.
+- FIX-05: `advanceActor` salta navi con `inDogfight`.
+- FIX-06: Danno hull-cut instradato tramite `applyBoardingCutDamage` (undo stack).
+- FIX-07: Tumbling con check Pilot DEX + durata D3; `applyDefenderRotation`/`clearDefenderRotation`; countdown automatico in `buildNextRoundState`.
+- FIX-08: Dogfight detection in basic mode tramite `detectDogfightGroupsBasic`.
+
+**Phase 3 — RAW compliance (FIX-09):**
+- FIX-09: DEX DM (−3/+3) aggiunto a `rollDogfightPilot`, `computeShipDMs`, `ShipCheckRow`, `checkResults`. Campo "PILOT DEX DM" in `ShipProfileForm` e `defaultProfiles`.
+
+**Phase 4 — AttackModal integration (FIX-10/11):**
+- FIX-10: Dogfight attack DM (+2/−2/0) pre-fill automatico in `useAttackSetup` + mostrato in DM Summary.
+- FIX-11: Fixed weapons (barbette/bay) bloccate su tie; banner `⚠ Dogfight tie` in AttackModal.
+
+**Phase 5 — Refactor (REF-01…03):**
+- REF-01: `computeShipDMs`, `bestPilot`, `freeThrust`, `escapeCheckTotals` estratti da `DogfightRoundModal` a `utils/dogfight.js`.
+- REF-02: `endDogfight` wrappato in `wh`.
+- REF-03: Payload boarding modali usa `boardingId` invece di `boardingAttackerId + phase`.
+
+**Doc sync parziale** — CHANGELOG v1.22.2, field-manual §14/§15, HelpScreen aggiornati. PDF non ancora rigenerato. **Da pushare.**
+
+### Sessione precedente — BattleLog resizable + doc sync (v1.22.1)
 
 1. **feat(ui): BattleLog resizable** (`7934eb1`) — drag handle in cima al pannello espanso; drag verso l'alto aumenta l'altezza (80 px min, 600 px max, default 160 px). `dragState` ref + `mousemove`/`mouseup` su `window`. Altezza mantenuta per la sessione; collapse/re-expand ripristina la dimensione precedente.
 
