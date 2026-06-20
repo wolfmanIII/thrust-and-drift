@@ -6,13 +6,23 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.22.1] — 2026-06-20
+
+### Fixed
+
+- **Ion Cannon available in weapon picker** — `barbetteOnly: true` flag removed from Ion Cannon data; weapon picker no longer filters by mount type. Ion Cannon (barbette, 2D×10) and all Ion Cannon Bay variants (S/M/L) are selectable in any weapon slot per GM discretion. Mount type remains barbette/bay per HG p.30 RAW.
+- **Weapon slot labels renamed Turret → Weapon** — all user-facing strings updated: ship profile form (`Weapon 1`, `max 3 weapons`, `Remove weapon slot`), ship detail sheet (`Weapon {n}:`), crew assignment modal (`Gunner (W{n})`), context menu (`All weapons fired`), HelpScreen and field manual (`W1`, `W2…`, per-slot firing limit). Game-mechanic terms (`Gunner (turret)` skill, `Reload Turret` action, `triple turret` CRB term) unchanged.
+- **ESLint cleanup** — conditional hook calls (useMemo/useEffect after early return) in `ActionModal` and `DogfightNotificationModal`; unused imports/vars (`WEAPONS`, `getCrewSkill`, `SkillBadge`, `autoOk`, `weaponKey`, `s1`, `vi`/`afterEach`/`act`); stale eslint-disable directives; missing deps (`phase` in `useCanvasRenderer` render callback — real bug where canvas did not re-render on phase change; `pendingMissileImpacts` in `HUD.handleAdvancePhase`).
+
+---
+
 ## [1.22.0] — 2026-06-20
 
 ### Added
 
 - **Ion Weapons — Power stat (v1.22.0)** *(HG p.30–33, FAQ HG 2022 p.1)*
-  - Ion Cannon reclassified as **barbette-only** (`barbetteOnly: true`); removed from turret weapon picker.
-  - Three new **Ion Cannon Bay** variants: Small (6D×10), Medium (8D×20), Large (10D×100); `bayOnly: true`, excluded from turret and barbette pickers.
+  - Ion Cannon available in weapon picker; classified as barbette mount per HG p.30 RAW.
+  - Three new **Ion Cannon Bay** variants: Small (6D×10), Medium (8D×20), Large (10D×100); all selectable in weapon picker.
   - All Ion weapons: `ignoresArmour: true`; `damageMultiple` is now the actual × multiplier (barbette ×10, bay per-tabling).
   - New ship-profile fields: **MAX POWER** (`maxPower`), **COMPUTER BW** (`computerBandwidth`), **HARDENED** (`hardened: true/false`) — editable in ShipProfileForm Power Plant section.
   - Battle instance fields: `basePower`, `currentPower`, `ionPowerReduction`, `baseBandwidth`, `currentBandwidth`, `bandwidthReduction`, `hardened`.
@@ -22,7 +32,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   - **Hardened guard**: ships with `hardened: true` are immune — `applyIonDamage` returns ship unchanged; IonDamageStep shows immune banner.
   - `IonDamageStep` in AttackModal generalised: reads `weapon.damageDice` and `weapon.damageMultiple` dynamically — works for all Ion mounts without hardcoded logic.
   - UI: ION NR badge + `⚡ ION NR — −X PWR · COMMS DOWN` status row in BasicBattleView; Power bar and bandwidth warning in ShipTooltip; ShipDetailModal shows Power/bandwidth rows.
-  - 25 new tests: 12 battleStore (Power stacking, hardened, bandwidth, round restore), 6 combat (computeIonThrustEffect boundaries), 7 weapons (barbetteOnly, bayOnly, damageMultiple, ignoresArmour).
+  - 25 new tests: 12 battleStore (Power stacking, hardened, bandwidth, round restore), 6 combat (computeIonThrustEffect boundaries), 7 weapons (damageMultiple, ignoresArmour, bay variants).
 
 ### Fixed
 
@@ -1004,6 +1014,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Canvas visual effects system** — non-blocking animations on a separate overlay canvas (`pointer-events: none`, `requestAnimationFrame`); purely decorative, zero game state changes — Spec §13.4
 
 **One-shot effects (event-triggered, auto-fade):**
+
 - `laser_ray` — animated ray Attacker→Target for Pulse/Beam Laser, Particle Beam, Railgun; weapon-specific color + glow; 300ms
 - `impact_burst` — 8 radial sparks on the hit token (confirmed hit); 500ms
 - `thrust_plume` — amber triangle in the direction opposite to the applied delta-v; 400ms
@@ -1012,12 +1023,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - `chaff` — 24 scatter fragments when a sandcaster intervenes; 200ms
 
 **Persistent effects (from store state, every frame):**
+
 - `sensor_lock_ring` — animated dashed cyan line + pulsing ring on locked target
 - `evasive_aura` — pulsing yellow halo around token with `evasiveThrust > 0`
 - `missile_exhausted` — grey overlay + dashed ring on missile with `thrustRemaining === 0`
 - `dogfight_alert` — pulsing orange "DOGFIGHT" text when 2+ ships share the same hex
 
 **Architecture:**
+
 - `src/utils/effectQueue.js` — module-level queue with no React dependencies; `emitEffect` / `drainEffects`
 - `src/components/map/effectRenderers.js` — pure Canvas 2D functions (pixel coords + progress `t`); save/restore on every draw
 - `src/components/map/useCanvasEffects.js` — hook with rAF loop; reads store via refs to avoid loop restarts; detects missile movement from array diff
