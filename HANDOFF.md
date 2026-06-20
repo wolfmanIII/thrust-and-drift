@@ -11,14 +11,20 @@
 | --- | --- |
 | **Versione** | 1.22.3 |
 | **Branch** | main (da pushare) |
-| **Test** | 915 passing |
-| **Ultimo commit** | chore(release): bump version to v1.22.3 and update CHANGELOG |
+| **Test** | 933 passing |
+| **Ultimo commit** | docs(release): sync CHANGELOG, README, HANDOFF for v1.22.3 test coverage |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — UX fixes post-code-review (v1.22.3)
+### Sessione corrente — Test coverage gaps + doc sync (v1.22.3)
+
+1. **test(dogfight): 16 nuovi test** (`5029962`) — coprono i gap rimasti dopo v1.22.2/v1.22.3: `dexDM` in `rollDogfightPilot` (parametro e `breakdown sums to total`); suite complete per `freeThrust`, `computeShipDMs`, `bestPilot`, `escapeCheckTotals` (estratte da `DogfightRoundModal` in REF-01 ma mai testate). `dogfightDM` verificato in `rollAttack` (combat.test.js).
+2. **fix(dogfight): `extraEnemyDM` non ritorna più IEEE-754 `−0`** (stessa commit) — `computeShipDMs` usava `-(Math.max(0, n))` che produce `−0` con un solo nemico; sostituito con ternario esplicito.
+3. **docs(release): doc sync** — CHANGELOG v1.22.3 aggiornato (sezione Tests + fix −0); README test count 907 → 933; HANDOFF aggiornato. 933 test, 0 errori.
+
+### Sessione precedente — UX fixes post-code-review (v1.22.3)
 
 1. **fix(ui): Tooltip component su checkbox HARDENED** (`0f22a79`) — `(?)` usava `title` nativo; sostituito con `<Tooltip>` come tutti gli altri tooltip del form.
 2. **fix(initiative): Tactics roll dopo main dice** (`2dabf07`) — riga Tactics visibile solo dopo l'inserimento del tiro principale; risolve il bug per cui rollare Tactics prima ignorava l'Effect nel totale preview. Layout corretto con `ml-auto`.

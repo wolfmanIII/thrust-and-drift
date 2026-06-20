@@ -12,6 +12,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 - **Initiative — Tactics roll appears only after main dice are entered** — the optional Tactics(naval) check row was visible immediately, allowing the GM to roll tactics before the initiative dice. This caused the Tactics Effect to be ignored in the preview total. The row now appears only after the main 2D6 are entered, enforcing correct roll order. Row layout also corrected: DiceInput and Effect badge pushed right with `ml-auto`.
 - **Hardened checkbox tooltip uses Tooltip component** — the `(?)` hint next to *HARDENED SYSTEMS (/fib)* in the ship profile form was using a native `title` attribute instead of the `<Tooltip>` component; updated to match all other tooltips in the form.
+- **`extraEnemyDM` no longer returns IEEE-754 `−0`** — `computeShipDMs` used `-(Math.max(0, n))` which produces negative zero when the penalty is absent; replaced with an explicit ternary returning `0`.
+
+### Tests
+
+- **`dogfight.test.js`** — 16 new tests: `dexDM` applied in `rollDogfightPilot`; `breakdown sums to total` now includes `dexDM`; full suites for `freeThrust` (4 cases), `computeShipDMs` (4 cases), `bestPilot` (3 cases), `escapeCheckTotals` (5 cases) — all functions extracted from `DogfightRoundModal` in v1.22.2 but previously untested.
+- **`combat.test.js`** — `dogfightDM` parameter verified in `rollAttack`: adds to total and appears in breakdown.
 
 ---
 

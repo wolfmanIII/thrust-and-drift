@@ -158,7 +158,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-907 tests across utils, Zustand stores, hooks, and UI components. (v1.22.1)
+933 tests across utils, Zustand stores, hooks, and UI components. (v1.22.3)
 
 ---
 
