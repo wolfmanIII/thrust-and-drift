@@ -160,10 +160,8 @@ function CrewMemberRow({ member, onChange, onRemove }) {
   )
 }
 
-/** Weapons valid for turret slots (not barbette-only, not bay-only). */
-const TURRET_WEAPON_IDS = WEAPON_IDS.filter(
-  (id) => !WEAPONS[id]?.barbetteOnly && !WEAPONS[id]?.bayOnly
-)
+/** Weapons selectable in turret/barbette slots. Bay weapons excluded (no bay slot UI yet). */
+const TURRET_WEAPON_IDS = WEAPON_IDS.filter((id) => !WEAPONS[id]?.bayOnly)
 
 /** Turret row: slot number, weapon chips, add weapon dropdown, remove turret. */
 function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurret }) {
