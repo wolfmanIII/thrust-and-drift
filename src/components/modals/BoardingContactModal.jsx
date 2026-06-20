@@ -20,6 +20,73 @@ import {
 } from '../../utils/boarding.js'
 
 // ---------------------------------------------------------------------------
+// Tumbling sub-component — Pilot (DEX) Routine (6+) check + D3 duration
+// HG 2022 p.127
+// ---------------------------------------------------------------------------
+
+function TumblingControl({ boarding, onApply, onClear }) {
+  const [dice, setDice]         = useState(null)
+  const [duration, setDuration] = useState(1)
+
+  if (boarding.defenderRotating) {
+    return (
+      <div className="flex-1 py-2 px-3 rounded border bg-red-900/30 border-red-500 text-red-400 font-mono text-xs space-y-1">
+        <p className="font-bold">🌀 TUMBLING</p>
+        <p className="text-[10px] text-slate-400">{boarding.rotatingRoundsLeft ?? 1}r remaining · DM −1 Contact</p>
+        <button
+          onClick={onClear}
+          className="mt-1 w-full py-1 bg-slate-800 border border-slate-600 text-slate-400 hover:text-slate-200 font-mono text-[10px] rounded transition-colors"
+        >
+          DEACTIVATE
+        </button>
+      </div>
+    )
+  }
+
+  const checkTotal = dice ? dice.total : null
+  const passed     = checkTotal !== null && checkTotal >= 6
+
+  return (
+    <div className="flex-1 py-2 px-3 rounded border bg-slate-800 border-slate-600 font-mono text-xs space-y-2">
+      <p className="text-slate-400 font-bold">🌀 Tumbling</p>
+      <p className="text-[10px] text-slate-400">Pilot (DEX) Routine (6+)</p>
+      <DiceInput value={dice} onChange={setDice} />
+      {checkTotal !== null && (
+        <p className={passed ? 'text-emerald-400' : 'text-red-400'}>
+          {checkTotal} — {passed ? 'SUCCESS' : 'FAILED'}
+        </p>
+      )}
+      {passed && (
+        <div className="flex items-center gap-2">
+          <span className="text-slate-400 text-[10px]">D3 duration:</span>
+          {[1, 2, 3].map((n) => (
+            <button
+              key={n}
+              onClick={() => setDuration(n)}
+              className={`w-6 h-6 rounded font-mono text-xs border transition-colors ${
+                duration === n
+                  ? 'bg-(--neon-cyan)/10 border-(--neon-cyan) text-(--neon-cyan)'
+                  : 'border-slate-600 text-slate-400 hover:border-slate-400'
+              }`}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+      )}
+      {passed && (
+        <button
+          onClick={() => onApply(duration)}
+          className="w-full py-1 bg-red-900/30 border border-red-500 text-red-400 font-mono text-[10px] rounded transition-colors hover:bg-red-900/50"
+        >
+          ACTIVATE ({duration}r)
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Cut-tracker sub-component
 // ---------------------------------------------------------------------------
 
@@ -134,7 +201,7 @@ export function BoardingContactModal() {
   const { activeModal, modalPayload, closeModal } = useUiStore()
   const {
     ships, boardings,
-    setContactMethod, toggleDefenderRotation, toggleForcedLinkage,
+    setContactMethod, applyDefenderRotation, clearDefenderRotation, toggleForcedLinkage,
     advanceBoardingPhase, applyBoardingCutDamage,
   } = useBattleStore()
 
@@ -216,18 +283,12 @@ export function BoardingContactModal() {
         </div>
 
         {/* Modifiers */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => toggleDefenderRotation(boarding.id)}
-            className={`flex-1 py-2 font-mono text-xs rounded border transition-colors ${
-              boarding.defenderRotating
-                ? 'bg-red-900/30 border-red-500 text-red-400'
-                : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-400'
-            }`}
-          >
-            {boarding.defenderRotating ? '🌀 TUMBLING' : '🌀 Tumbling'}
-            <span className="block text-[10px] text-slate-400">DM −1 Contact</span>
-          </button>
+        <div className="flex gap-2 items-stretch">
+          <TumblingControl
+            boarding={boarding}
+            onApply={(dur) => applyDefenderRotation(boarding.id, dur)}
+            onClear={() => clearDefenderRotation(boarding.id)}
+          />
           <button
             onClick={() => toggleForcedLinkage(boarding.id)}
             className={`flex-1 py-2 font-mono text-xs rounded border transition-colors ${

@@ -1746,15 +1746,37 @@ describe('boarding', () => {
     expect(useBattleStore.getState().boardings[0].contactMethod).toBeNull()
   })
 
-  it('toggleDefenderRotation toggles flag', () => {
+  it('applyDefenderRotation sets defenderRotating and rotatingRoundsLeft', () => {
     const [a, b] = addTwo()
     useBattleStore.getState().startBoarding(a, b)
     const bid = useBattleStore.getState().boardings[0].id
     expect(useBattleStore.getState().boardings[0].defenderRotating).toBe(false)
-    useBattleStore.getState().toggleDefenderRotation(bid)
-    expect(useBattleStore.getState().boardings[0].defenderRotating).toBe(true)
-    useBattleStore.getState().toggleDefenderRotation(bid)
-    expect(useBattleStore.getState().boardings[0].defenderRotating).toBe(false)
+    useBattleStore.getState().applyDefenderRotation(bid, 2)
+    const after = useBattleStore.getState().boardings[0]
+    expect(after.defenderRotating).toBe(true)
+    expect(after.rotatingRoundsLeft).toBe(2)
+  })
+
+  it('clearDefenderRotation deactivates tumbling', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    useBattleStore.getState().applyDefenderRotation(bid, 3)
+    useBattleStore.getState().clearDefenderRotation(bid)
+    const after = useBattleStore.getState().boardings[0]
+    expect(after.defenderRotating).toBe(false)
+    expect(after.rotatingRoundsLeft).toBe(0)
+  })
+
+  it('buildNextRoundState decrements rotatingRoundsLeft and clears at 0', () => {
+    const [a, b] = addTwo()
+    useBattleStore.getState().startBoarding(a, b)
+    const bid = useBattleStore.getState().boardings[0].id
+    useBattleStore.getState().applyDefenderRotation(bid, 1)
+    useBattleStore.getState().startNextRound()
+    const after = useBattleStore.getState().boardings[0]
+    expect(after.defenderRotating).toBe(false)
+    expect(after.rotatingRoundsLeft).toBe(0)
   })
 
   it('toggleForcedLinkage toggles flag', () => {

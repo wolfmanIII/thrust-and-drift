@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { BoardingContactModal } from './BoardingContactModal.jsx'
 import { useBattleStore }       from '../../store/battleStore.js'
 import { useUiStore }           from '../../store/uiStore.js'
@@ -74,11 +74,13 @@ describe('BoardingContactModal — actions', () => {
     expect(useBattleStore.getState().boardings.find((b) => b.id === boarding.id).contactMethod).toBe('breaching_tube')
   })
 
-  it('toggling tumbling updates store', () => {
+  it('activating tumbling via store action shows TUMBLING state in UI', () => {
     const { boarding } = setupBoarding()
     render(<BoardingContactModal />)
-    fireEvent.click(screen.getAllByText(/Tumbling/i)[0])
+    // Activate via store action (UI activation requires dice roll interaction)
+    act(() => { useBattleStore.getState().applyDefenderRotation(boarding.id, 2) })
     expect(useBattleStore.getState().boardings.find((b) => b.id === boarding.id).defenderRotating).toBe(true)
+    expect(screen.getByText(/TUMBLING/i)).toBeTruthy()
   })
 
   it('toggling forced linkage updates store', () => {

@@ -180,6 +180,13 @@ function buildNextRoundState(s) {
         currentBandwidth:   ionCurrent > 0 ? Math.max(0, baseBw - bwReduction) : baseBw,
       }
     }),
+    boardings: s.boardings.map((b) => {
+      if (!b.defenderRotating || b.outcome !== null) return b
+      const left = (b.rotatingRoundsLeft ?? 1) - 1
+      return left > 0
+        ? { ...b, rotatingRoundsLeft: left }
+        : { ...b, defenderRotating: false, rotatingRoundsLeft: 0 }
+    }),
     log: [
       ...s.log,
       ...impactLogs,
@@ -1621,6 +1628,7 @@ const useBattleStore = create((set, get) => {
         phase: 'contact',
         contactMethod: null,
         defenderRotating: false,
+        rotatingRoundsLeft: 0,
         forcedLinkage: false,
         hullResilience: null,
         hullDamageSoFar: 0,
@@ -1682,15 +1690,32 @@ const useBattleStore = create((set, get) => {
   ),
 
   /**
-   * Toggle the defender's tumbling-rotation countermeasure (DM −1 to contact checks).
+   * Activate defender tumbling after a successful Routine (6+) Pilot check.
+   * // HG 2022 p.127 — Tumbling: Pilot (DEX) Routine (6+), lasts D3 rounds
+   * @param {string} boardingId
+   * @param {number} durationRounds  D3 roll result (1–3)
+   */
+  applyDefenderRotation: wh(
+    (boardingId) => !!get().boardings.find((b) => b.id === boardingId && b.phase === 'contact' && !b.defenderRotating),
+    (boardingId, durationRounds) => {
+      set((s) => ({
+        boardings: s.boardings.map((b) =>
+          b.id !== boardingId ? b : { ...b, defenderRotating: true, rotatingRoundsLeft: Math.max(1, durationRounds) }
+        ),
+      }))
+    },
+  ),
+
+  /**
+   * Deactivate defender tumbling (manual GM override or expired).
    * @param {string} boardingId
    */
-  toggleDefenderRotation: wh(
-    (boardingId) => !!get().boardings.find((b) => b.id === boardingId && b.phase === 'contact'),
+  clearDefenderRotation: wh(
+    (boardingId) => !!get().boardings.find((b) => b.id === boardingId && b.defenderRotating),
     (boardingId) => {
       set((s) => ({
         boardings: s.boardings.map((b) =>
-          b.id !== boardingId ? b : { ...b, defenderRotating: !b.defenderRotating }
+          b.id !== boardingId ? b : { ...b, defenderRotating: false, rotatingRoundsLeft: 0 }
         ),
       }))
     },
