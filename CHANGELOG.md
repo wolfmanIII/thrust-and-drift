@@ -18,6 +18,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Leadership initiative bonus activates next round and lasts exactly 1 round** — bonus is stored in `initiativeBonusNextRound` with no immediate effect. At the next round boundary, `buildNextRoundState` applies it to `ship.initiative` and re-sorts `initiativeOrder`; the following boundary removes it and re-sorts again. PhaseTracker shows `↑ini` badge on ships with an active bonus. *(CRB p.166)*
 - **Ion power display shows remaining rounds and OFFLINE state** — ShipDetailModal and ShipTooltip now show `−N PWR · Xr remaining` for active ion disruption, and an `OFFLINE` label when `currentPower` reaches 0.
 
+### Not a bug
+
+- **Hardened systems (`/fib`) — ship-wide immunity is RAW-correct** — a Reddit report claimed that `hardened: boolean` was incorrect because `/fib` should protect only the computer, not the Power Plant or M-Drive. Verified against FAQ HG 2022 p.1 (*"Hardened computers (those with the /fib designation) are immune to Ion weapons"*): the immunity is total, not system-specific. No change required.
+
 ---
 
 ## [1.22.3] — 2026-06-20
