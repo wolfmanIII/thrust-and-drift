@@ -164,8 +164,9 @@ const previewTotal = (ship) => {
 
 ### Fix
 
-- `applyInitiativeBonus` applica immediatamente `initiative += applied` e imposta `initiativeTemporaryBonus`.
-- `buildNextRoundState` sottrae `initiativeTemporaryBonus` da `initiative` e lo azzera — il bonus dura esattamente 1 round. *(CRB p.166)*
+- `applyInitiativeBonus` salva il bonus in `initiativeBonusNextRound` (nessun effetto nel round corrente).
+- `buildNextRoundState` applica `initiativeBonusNextRound` a `initiative`, ri-ordina `initiativeOrder` per il round successivo, imposta `initiativeTemporaryBonus`, azzera `initiativeBonusNextRound`. *(CRB p.166)*
+- Al boundary successivo, `buildNextRoundState` sottrae `initiativeTemporaryBonus` e ri-ordina di nuovo.
 - `PhaseTracker` mostra badge `↑ini` amber sulle navi con bonus attivo.
 
 ---

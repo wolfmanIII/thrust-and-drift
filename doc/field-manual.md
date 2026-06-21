@@ -231,14 +231,14 @@ NPC ships with Tactics > 0 auto-roll their Tactics check on confirm.
 
 ### 6.2 Initiative Bonus
 
-If the Captain uses **Improve Initiative** in the Actions phase of any round,
-the bonus is applied **immediately** to the ship's current initiative value,
-changing its position in the acting order for the rest of this round. The bonus
-expires at the next round boundary — it is subtracted automatically by
-`buildNextRoundState`. No manual input required.
+If the Captain uses **Improve Initiative** in the Actions phase of round N,
+the bonus takes effect at the **start of round N+1**: `buildNextRoundState`
+adds it to the ship's initiative value and re-sorts the acting order before
+anyone acts. The bonus lasts exactly one round and is removed automatically at
+the start of round N+2. No manual input required. *(CRB p.166)*
 
-> The Phase Tracker (right side of screen) shows an **↑ini** amber badge on
-> ships that currently carry an active initiative bonus.
+> The Phase Tracker shows an **↑ini** amber badge on ships whose bonus is
+> active in the current round.
 
 ---
 
@@ -716,7 +716,7 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 
 | Role | Action | Difficulty | Effect on success |
 | ---- | ------ | ---------- | ----------------- |
-| **Captain** | **Improve Initiative** | 8+ (Leadership) | +Effect applied immediately to this ship's initiative (lasts this round only) *(CRB p.166)* |
+| **Captain** | **Improve Initiative** | 8+ (Leadership) | +Effect added to this ship's initiative at the start of next round (lasts 1 round) *(CRB p.166)* |
 | **Engineer** | **Overload M-Drive** | 8+ (Engineer) | +Effect Thrust available this round *(CRB p.167)* |
 | **Engineer** | **Repair System** | Average 8+ (Sev 1–2) / Difficult 10+ (Sev 3–4) / Very Difficult 12+ (Sev 5–6) (Engineer) | Removes 1 critical hit from this ship. The GM selects which critical to repair when multiple are present *(CRB p.167)* |
 | **Gunner** | **Reload Turret** | Automatic | Reloads 1 missile turret; no roll required *(CRB p.167)* |

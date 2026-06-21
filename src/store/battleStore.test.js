@@ -1263,30 +1263,52 @@ describe('applyInitiativeBonus', () => {
     expect(useBattleStore.getState().ships[0].initiativeBonusNextRound).toBe(0)
   })
 
-  // FIX-06: bonus applies immediately to initiative this round (not deferred). // CRB p.166
-  it('immediately applies bonus to ship.initiative', () => {
+  // FIX-06 RAW: bonus takes effect at start of NEXT round, not immediately. // CRB p.166
+  it('does not change ship.initiative immediately', () => {
     useBattleStore.getState().addShip(makeProfile({ thrust: 4, crew: { pilot: 2 } }), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().rollAllInitiative({}, { [id]: { total: 7, results: [4, 3] } }) // 7+2+4 = 13
     useBattleStore.getState().applyInitiativeBonus(id, 3)
-    expect(useBattleStore.getState().ships[0].initiative).toBe(16)
+    expect(useBattleStore.getState().ships[0].initiative).toBe(13)
+    expect(useBattleStore.getState().ships[0].initiativeTemporaryBonus).toBe(0)
   })
 
-  it('sets initiativeTemporaryBonus equal to applied amount', () => {
-    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
-    const { id } = useBattleStore.getState().ships[0]
-    useBattleStore.getState().applyInitiativeBonus(id, 4)
-    expect(useBattleStore.getState().ships[0].initiativeTemporaryBonus).toBe(4)
-  })
-
-  it('startNextRound subtracts initiativeTemporaryBonus from initiative and clears it', () => {
+  it('startNextRound applies initiativeBonusNextRound to initiative', () => {
     useBattleStore.getState().addShip(makeProfile({ thrust: 4, crew: { pilot: 2 } }), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().rollAllInitiative({}, { [id]: { total: 7, results: [4, 3] } }) // initiative = 13
-    useBattleStore.getState().applyInitiativeBonus(id, 3) // initiative = 16, temporaryBonus = 3
+    useBattleStore.getState().applyInitiativeBonus(id, 3)
     useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].initiative).toBe(16)
+    expect(useBattleStore.getState().ships[0].initiativeTemporaryBonus).toBe(3)
+    expect(useBattleStore.getState().ships[0].initiativeBonusNextRound).toBe(0)
+  })
+
+  it('second startNextRound removes the bonus and clears initiativeTemporaryBonus', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 4, crew: { pilot: 2 } }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().rollAllInitiative({}, { [id]: { total: 7, results: [4, 3] } }) // initiative = 13
+    useBattleStore.getState().applyInitiativeBonus(id, 3)
+    useBattleStore.getState().startNextRound() // bonus activates: initiative = 16
+    useBattleStore.getState().startNextRound() // bonus expires: initiative = 13
     expect(useBattleStore.getState().ships[0].initiative).toBe(13)
     expect(useBattleStore.getState().ships[0].initiativeTemporaryBonus).toBe(0)
+  })
+
+  it('startNextRound re-sorts initiativeOrder when bonus activates', () => {
+    useBattleStore.getState().addShip(makeProfile({ thrust: 2, crew: { pilot: 0 } }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ thrust: 2, crew: { pilot: 0 } }), { q: 1, r: 0 }, 'npc', '#f00')
+    const [a, b] = useBattleStore.getState().ships.map((s) => s.id)
+    // ship A gets ini 5, ship B gets ini 10 → order is [B, A]
+    useBattleStore.getState().rollAllInitiative({}, {
+      [a]: { total: 3, results: [2, 1] }, // 3+0+2 = 5
+      [b]: { total: 8, results: [4, 4] }, // 8+0+2 = 10
+    })
+    expect(useBattleStore.getState().initiativeOrder).toEqual([b, a])
+    // A gets +8 bonus → next round A initiative = 13 > B = 10 → order flips
+    useBattleStore.getState().applyInitiativeBonus(a, 8)
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().initiativeOrder).toEqual([a, b])
   })
 })
 

@@ -447,7 +447,7 @@ Azioni disponibili:
 
 ### 10.1 Improve Initiative (Captain)
 
-Il capitano esegue un **Leadership check**. Il bonus (solo valori positivi) si applica **immediatamente** all'iniziativa della nave, modificando l'ordine di azione già nel round corrente. Il bonus scade al confine di round successivo — viene rimosso automaticamente dall'app all'inizio del round seguente. *(CRB p.166)*
+Il capitano esegue un **Leadership check**. Il bonus (solo valori positivi) viene applicato all'iniziativa della nave all'**inizio del round successivo**, ri-ordinando l'ordine di azione prima che chiunque agisca. Il bonus dura esattamente 1 round e viene rimosso automaticamente all'inizio del round seguente. *(CRB p.166)*
 
 ### 10.2 Jump (Engineer)
 

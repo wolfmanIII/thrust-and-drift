@@ -147,44 +147,60 @@ function buildNextRoundState(s) {
     })
   })
 
+  const updatedShips = s.ships.map((sh) => {
+    const ionCurrent    = sh.ionRoundsLeft ?? 0
+    const ionNext       = Math.max(0, ionCurrent - 1)
+    const ionReduction  = ionCurrent > 0 ? (sh.ionPowerReduction ?? 0) : 0
+    const restoredPower = sh.basePower ?? sh.profile.maxPower ?? 100
+    const baseBw        = sh.baseBandwidth ?? sh.profile.computerBandwidth ?? 0
+    const bwReduction   = ionCurrent > 0 ? (sh.bandwidthReduction ?? 0) : 0
+    // Leadership bonus: pending bonus activates this boundary; active bonus expires. // CRB p.166
+    const bonusActivating = sh.initiativeBonusNextRound ?? 0
+    const bonusExpiring   = sh.initiativeTemporaryBonus ?? 0
+    return {
+      ...sh,
+      thrustUsedThisRound:  0,
+      thrustBonusThisRound: 0,
+      hasActedThisPhase:    false,
+      evasiveThrust:        0,
+      firedTurrets:         [],
+      usedCrewMembers:      [],
+      ionRoundsLeft:        ionNext,
+      // Penalty persists while ionCurrent > 0 (survives one boundary for N+1 acceleration).
+      // Clears only when ionCurrent reaches 0. // HG p.30, FAQ HG 2022 p.1 — BUG-001
+      ionPowerReduction:  ionCurrent > 0 ? ionReduction : 0,
+      currentPower:       ionCurrent > 0 ? Math.max(0, restoredPower - ionReduction) : restoredPower,
+      bandwidthReduction: ionCurrent > 0 ? bwReduction : 0,
+      currentBandwidth:   ionCurrent > 0 ? Math.max(0, baseBw - bwReduction) : baseBw,
+      initiative:               (sh.initiative ?? 0) - bonusExpiring + bonusActivating,
+      initiativeTemporaryBonus: bonusActivating,
+      initiativeBonusNextRound: 0,
+    }
+  })
+
+  // Re-sort initiativeOrder if any ship's initiative changed at this boundary. // CRB p.166
+  const anyBonusChange = s.ships.some(
+    (sh) => (sh.initiativeBonusNextRound ?? 0) > 0 || (sh.initiativeTemporaryBonus ?? 0) > 0
+  )
+  const newInitiativeOrder = anyBonusChange && s.initiativeOrder.length > 0
+    ? [...s.initiativeOrder].sort((a, b) => {
+        const ia = updatedShips.find((sh) => sh.id === a)?.initiative ?? 0
+        const ib = updatedShips.find((sh) => sh.id === b)?.initiative ?? 0
+        return ib - ia
+      })
+    : s.initiativeOrder
+
   return {
     round: s.round + 1,
     phase: 'initiative',
     currentActorIndex: 0,
     missiles: updatedMissiles,
+    initiativeOrder: newInitiativeOrder,
     pendingMissileImpacts: [
       ...s.pendingMissileImpacts.map((i) => ({ ...i, ewAppliedThisRound: false })),
       ...newImpacts,
     ],
-    ships: s.ships.map((sh) => {
-      const ionCurrent    = sh.ionRoundsLeft ?? 0
-      const ionNext       = Math.max(0, ionCurrent - 1)
-      const ionReduction  = ionCurrent > 0 ? (sh.ionPowerReduction ?? 0) : 0
-      const restoredPower = sh.basePower ?? sh.profile.maxPower ?? 100
-      const baseBw        = sh.baseBandwidth ?? sh.profile.computerBandwidth ?? 0
-      const bwReduction   = ionCurrent > 0 ? (sh.bandwidthReduction ?? 0) : 0
-      return {
-        ...sh,
-        thrustUsedThisRound:  0,
-        thrustBonusThisRound: 0,
-        hasActedThisPhase:    false,
-        evasiveThrust:        0,
-        firedTurrets:         [],
-        usedCrewMembers:      [],
-        ionRoundsLeft:        ionNext,
-        // Penalty persists while ionCurrent > 0 (survives one boundary for N+1 acceleration).
-        // Clears only when ionCurrent reaches 0. // HG p.30, FAQ HG 2022 p.1 — BUG-001
-        ionPowerReduction:  ionCurrent > 0 ? ionReduction : 0,
-        currentPower:       ionCurrent > 0 ? Math.max(0, restoredPower - ionReduction) : restoredPower,
-        bandwidthReduction: ionCurrent > 0 ? bwReduction : 0,
-        currentBandwidth:   ionCurrent > 0 ? Math.max(0, baseBw - bwReduction) : baseBw,
-        // Leadership bonus expires after 1 round — subtract from initiative and clear. // CRB p.166
-        initiative:               sh.initiativeTemporaryBonus > 0
-          ? (sh.initiative ?? 0) - (sh.initiativeTemporaryBonus ?? 0)
-          : (sh.initiative ?? 0),
-        initiativeTemporaryBonus: 0,
-      }
-    }),
+    ships: updatedShips,
     boardings: s.boardings.map((b) => {
       if (!b.defenderRotating || b.outcome !== null) return b
       const left = (b.rotatingRoundsLeft ?? 1) - 1
@@ -1431,12 +1447,9 @@ const useBattleStore = create((set, get) => {
       set((s) => ({
         ships: s.ships.map((sh) => {
           if (sh.id !== shipId) return sh
-          // Apply immediately to initiative so actor order changes this round.
-          // initiativeTemporaryBonus is removed by buildNextRoundState after 1 round. // CRB p.166
+          // Bonus activates at start of next round, lasts exactly 1 round. // CRB p.166
           return {
             ...sh,
-            initiative: (sh.initiative ?? 0) + applied,
-            initiativeTemporaryBonus: (sh.initiativeTemporaryBonus ?? 0) + applied,
             initiativeBonusNextRound: (sh.initiativeBonusNextRound ?? 0) + applied,
           }
         }),
@@ -1444,7 +1457,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${ship.profile.name}: Initiative improved by +${applied} (lasts 1 round).`,
+          message: `${ship.profile.name}: Initiative improved by +${applied} (takes effect next round, lasts 1 round).`,
           shipId,
         })],
       }))
