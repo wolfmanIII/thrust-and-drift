@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { importProfiles, importBattle, parseBattleFile } from './io.js'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { importProfiles, importBattle, parseBattleFile, exportProfiles, exportBattle } from './io.js'
 
 // Helper: build a mock File from a plain object (or raw string for malformed JSON)
 function makeFile(content) {
@@ -28,6 +28,81 @@ function battlePayload(overrides = {}) {
     ...overrides,
   }
 }
+
+// ── exportProfiles / exportBattle ─────────────────────────────────────────────
+
+describe('exportProfiles', () => {
+  let clickSpy, createSpy, revokespy
+
+  beforeEach(() => {
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn(() => 'blob:mock-url'),
+      revokeObjectURL: vi.fn(),
+    })
+    const anchor = { href: '', download: '', click: vi.fn() }
+    clickSpy  = anchor.click
+    createSpy = vi.spyOn(document, 'createElement').mockReturnValue(anchor)
+    revokespy = URL.revokeObjectURL
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+  })
+
+  it('triggers a download by clicking an anchor element', () => {
+    exportProfiles([{ id: 'p1', name: 'Scout' }])
+    expect(clickSpy).toHaveBeenCalledOnce()
+  })
+
+  it('sets download filename containing "traveller-profiles"', () => {
+    const anchor = { href: '', download: '', click: vi.fn() }
+    createSpy.mockReturnValue(anchor)
+    exportProfiles([])
+    expect(anchor.download).toMatch(/traveller-profiles/)
+  })
+
+  it('revokes the object URL after click', () => {
+    exportProfiles([])
+    expect(revokespy).toHaveBeenCalledOnce()
+  })
+})
+
+describe('exportBattle', () => {
+  let clickSpy, createSpy
+
+  beforeEach(() => {
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn(() => 'blob:mock-url'),
+      revokeObjectURL: vi.fn(),
+    })
+    const anchor = { href: '', download: '', click: vi.fn() }
+    clickSpy  = anchor.click
+    createSpy = vi.spyOn(document, 'createElement').mockReturnValue(anchor)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+  })
+
+  it('triggers a download by clicking an anchor element', () => {
+    exportBattle({ round: 2, ships: [] })
+    expect(clickSpy).toHaveBeenCalledOnce()
+  })
+
+  it('filename includes the round number', () => {
+    const anchor = { href: '', download: '', click: vi.fn() }
+    createSpy.mockReturnValue(anchor)
+    exportBattle({ round: 5, ships: [] })
+    expect(anchor.download).toMatch(/round5/)
+  })
+
+  it('revokes the object URL after click', () => {
+    exportBattle({ round: 1, ships: [] })
+    expect(URL.revokeObjectURL).toHaveBeenCalledOnce()
+  })
+})
 
 // ── importProfiles ────────────────────────────────────────────────────────────
 

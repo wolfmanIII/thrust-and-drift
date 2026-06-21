@@ -3,8 +3,8 @@
  * // Spec §13.4 — Canvas Visual Effects
  */
 
-import { describe, it, expect, beforeEach } from 'vitest'
-import { emitEffect, drainEffects } from './effectQueue.js'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { emitEffect, drainEffects, subscribeEffects } from './effectQueue.js'
 
 // Reset the queue before every test (drainEffects clears it)
 beforeEach(() => { drainEffects() })
@@ -78,5 +78,63 @@ describe('effectQueue', () => {
       expect(second).toHaveLength(1)
       expect(second[0].type).toBe('critical_flash')
     })
+  })
+})
+
+describe('subscribeEffects', () => {
+  it('listener is called when an effect is emitted', () => {
+    const fn = vi.fn()
+    const unsub = subscribeEffects(fn)
+    emitEffect('laser_ray', { duration: 300 })
+    expect(fn).toHaveBeenCalledOnce()
+    expect(fn.mock.calls[0][0].type).toBe('laser_ray')
+    unsub()
+    drainEffects()
+  })
+
+  it('listener receives the full effect object', () => {
+    const fn = vi.fn()
+    const unsub = subscribeEffects(fn)
+    emitEffect('impact_burst', { duration: 500, hex: { q: 1, r: 2 } })
+    const received = fn.mock.calls[0][0]
+    expect(received.duration).toBe(500)
+    expect(received.hex).toEqual({ q: 1, r: 2 })
+    unsub()
+    drainEffects()
+  })
+
+  it('multiple listeners all receive the effect', () => {
+    const a = vi.fn()
+    const b = vi.fn()
+    const unsubA = subscribeEffects(a)
+    const unsubB = subscribeEffects(b)
+    emitEffect('critical_flash', { duration: 600 })
+    expect(a).toHaveBeenCalledOnce()
+    expect(b).toHaveBeenCalledOnce()
+    unsubA()
+    unsubB()
+    drainEffects()
+  })
+
+  it('unsubscribe stops listener from receiving further effects', () => {
+    const fn = vi.fn()
+    const unsub = subscribeEffects(fn)
+    unsub()
+    emitEffect('laser_ray', { duration: 300 })
+    expect(fn).not.toHaveBeenCalled()
+    drainEffects()
+  })
+
+  it('unsubscribing one listener does not affect others', () => {
+    const a = vi.fn()
+    const b = vi.fn()
+    const unsubA = subscribeEffects(a)
+    const unsubB = subscribeEffects(b)
+    unsubA()
+    emitEffect('chaff', { duration: 200 })
+    expect(a).not.toHaveBeenCalled()
+    expect(b).toHaveBeenCalledOnce()
+    unsubB()
+    drainEffects()
   })
 })

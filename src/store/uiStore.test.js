@@ -14,6 +14,10 @@ beforeEach(() => {
     contextMenu:       null,
     pendingPlacement:  null,
     movementAnimation: null,
+    hoveredShip:       null,
+    hoveredMissile:    null,
+    thrustTargeting:   null,
+    audioEnabled:      true,
   })
 })
 
@@ -170,5 +174,50 @@ describe('thrustTargeting', () => {
     useUiStore.getState().startThrustTargeting('ship-42')
     useUiStore.getState().cancelThrustTargeting()
     expect(useUiStore.getState().thrustTargeting).toBeNull()
+  })
+})
+
+describe('hoveredShip', () => {
+  it('setHoveredShip stores shipId and position', () => {
+    useUiStore.getState().setHoveredShip({ shipId: 'abc', x: 100, y: 200 })
+    expect(useUiStore.getState().hoveredShip).toEqual({ shipId: 'abc', x: 100, y: 200 })
+  })
+
+  it('clearHoveredShip resets to null', () => {
+    useUiStore.getState().setHoveredShip({ shipId: 'abc', x: 100, y: 200 })
+    useUiStore.getState().clearHoveredShip()
+    expect(useUiStore.getState().hoveredShip).toBeNull()
+  })
+
+  it('setHoveredShip replaces previous value', () => {
+    useUiStore.getState().setHoveredShip({ shipId: 'abc', x: 10, y: 20 })
+    useUiStore.getState().setHoveredShip({ shipId: 'xyz', x: 50, y: 60 })
+    expect(useUiStore.getState().hoveredShip.shipId).toBe('xyz')
+  })
+})
+
+describe('hoveredMissile', () => {
+  it('setHoveredMissile stores missileId and position', () => {
+    useUiStore.getState().setHoveredMissile({ missileId: 'm1', x: 300, y: 400 })
+    expect(useUiStore.getState().hoveredMissile).toEqual({ missileId: 'm1', x: 300, y: 400 })
+  })
+
+  it('clearHoveredMissile resets to null', () => {
+    useUiStore.getState().setHoveredMissile({ missileId: 'm1', x: 300, y: 400 })
+    useUiStore.getState().clearHoveredMissile()
+    expect(useUiStore.getState().hoveredMissile).toBeNull()
+  })
+})
+
+describe('toggleAudio', () => {
+  it('toggleAudio turns audio off when enabled', () => {
+    useUiStore.getState().toggleAudio()
+    expect(useUiStore.getState().audioEnabled).toBe(false)
+  })
+
+  it('toggleAudio turns audio back on when disabled', () => {
+    useUiStore.setState({ audioEnabled: false })
+    useUiStore.getState().toggleAudio()
+    expect(useUiStore.getState().audioEnabled).toBe(true)
   })
 })
