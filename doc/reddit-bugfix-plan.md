@@ -263,36 +263,34 @@ Nessuna modifica alla logica. Solo display:
 
 ---
 
-## FIX-08 — Hardened: per-sistema (DIFFERITO)
+## FIX-08 — Hardened: per-sistema ✗ NON È UN BUG
 
-**Priorità:** Bassa  
-**Complessità:** Alta  
-**File:** `src/data/defaultProfiles.js`, `src/components/forms/ShipProfileForm.jsx`, `src/store/battleStore.js`, `src/components/modals/AttackModal.jsx`
+**Priorità:** —  
+**Complessità:** —
 
-### Problema
+### Problema originale
 
-`hardened: boolean` è un toggle ship-wide. Per RAW, `/fib` protegge solo il computer, non l'M-Drive o il Power Plant.
+`hardened: boolean` è un toggle ship-wide. Si ipotizzava che per RAW `/fib` proteggesse solo il computer, non l'M-Drive o il Power Plant.
 
-### Decisione
+### Verifica RAW
 
-**Differire a v1.24+.** Il refactor richiede:
-- Cambiare il tipo di `hardened` da `boolean` a `{ computer, mDrive, powerPlant, sensors }` in tutti i profili (breaking change al JSON)
-- UI per selezionare quali sistemi sono hardened
-- Logica Ion: verificare quale sistema è colpito, applicare hardening solo se quel sistema è protetto
+**FAQ HG 2022 p.1 — WEAPON TRAIT: ION (PAGE 30):**
 
-Per ora, documentare il limite nel tooltip del campo HARDENED: *"Simplified: protects all systems. RAW: only systems explicitly hardened are immune."*
+> *"Hardened computers (those with the /fib designation) are immune to Ion weapons."*
+
+L'immunità è **totale** — non limitata alla bandwidth. L'implementazione `hardened: boolean` è già RAW-corretta. Nessun refactor necessario.
 
 ---
 
 ## Ordine di implementazione
 
-| # | Fix | Versione target |
-| --- | --- | --- |
-| FIX-01 | Critical hits manual banner | v1.23.0 |
-| FIX-02 | Repair difficulty dinamica | v1.23.0 |
-| FIX-03 | Scegliere quale critico riparare | v1.23.0 |
-| FIX-04 | Missile PD aggiorna count salvo | v1.23.0 |
-| FIX-05 | Ion power blocca armi/sensori | v1.23.0 |
-| FIX-06 | Leadership durata 1 round | v1.23.0 |
-| FIX-07 | Ion display tally | v1.23.0 |
-| FIX-08 | Hardened per-sistema | v1.24.0 |
+| # | Fix | Versione target | Stato |
+| --- | --- | --- | --- |
+| FIX-01 | Critical hits manual banner | v1.23.0 | ✅ |
+| FIX-02 | Repair difficulty dinamica | v1.23.0 | ✅ |
+| FIX-03 | Scegliere quale critico riparare | v1.23.0 | ✅ |
+| FIX-04 | Missile PD aggiorna count salvo | v1.23.0 | ✅ |
+| FIX-05 | Ion power blocca armi/sensori | v1.23.0 | ✅ |
+| FIX-06 | Leadership durata 1 round | v1.23.0 | ✅ |
+| FIX-07 | Ion display tally | v1.23.0 | ✅ |
+| FIX-08 | Hardened per-sistema | — | ✗ non è un bug (FAQ HG 2022 p.1) |
