@@ -11,7 +11,7 @@
 | --- | --- |
 | **Versione** | 1.23.0 |
 | **Branch** | main (da pushare) |
-| **Test** | 942 passing |
+| **Test** | 960 passing |
 | **Ultimo commit** | fix(initiative): leadership bonus activates start of next round, re-sorts order |
 
 ---
