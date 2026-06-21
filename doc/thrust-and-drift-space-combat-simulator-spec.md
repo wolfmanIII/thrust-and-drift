@@ -1713,7 +1713,7 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **FIX-05 — Power = 0 blocca armi e sensori**: `useAttackSetup` svuota `availableWeaponsFiltered` quando `currentPower ≤ 0`; `AttackModal` mostra banner rosso `⚡ POWER OFFLINE`. `ActionModal` disabilita sensor actions (Sensor Lock, EW, Counter Missile) con label `⚡ power offline`. *(HG p.30)*
 - **FIX-06 — Leadership bonus dura esattamente 1 round**: `applyInitiativeBonus` salva in `initiativeBonusNextRound` (nessun effetto nel round corrente). `buildNextRoundState` applica il bonus a `ship.initiative`, ri-ordina `initiativeOrder`, imposta `initiativeTemporaryBonus`, azzera `initiativeBonusNextRound`. Al boundary successivo sottrae, ri-ordina di nuovo e azzera `initiativeTemporaryBonus`. `PhaseTracker` mostra badge `↑ini` amber. *(CRB p.166)*
 - **FIX-07 — Display ion power migliorato**: `ShipDetailModal` e `ShipTooltip` mostrano `−N PWR · Xr remaining`; aggiungono suffisso `OFFLINE` quando `currentPower ≤ 0`.
-- 941 test (+8 rispetto a v1.22.3: critIndex, spendMissileAmmo ×3, applyInitiativeBonus FIX-06 ×3 + buildNextRound expiry).
+- 942 test (+9 rispetto a v1.22.3: critIndex, spendMissileAmmo ×3, applyInitiativeBonus FIX-06 ×4 + initiativeOrder re-sort).
 
 ### 14.23 Versione 1.22.3 — Test Coverage + IEEE-754 Fix ✅ COMPLETATA
 

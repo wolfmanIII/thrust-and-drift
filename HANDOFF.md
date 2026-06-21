@@ -11,8 +11,8 @@
 | --- | --- |
 | **Versione** | 1.23.0 |
 | **Branch** | main (da pushare) |
-| **Test** | 933 passing |
-| **Ultimo commit** | chore(release): bump version to v1.23.0 |
+| **Test** | 942 passing |
+| **Ultimo commit** | fix(initiative): leadership bonus activates start of next round, re-sorts order |
 
 ---
 
@@ -27,7 +27,7 @@
 3. **FIX-03** (`0376b50`) — Selector critico in ActionModal; `repairCritical(shipId, critIndex)` invece di sempre index 0.
 4. **FIX-04** (`b5df149`) — `spendMissileAmmo` chiamato in `handleAllIntercepted`; ammo detratta anche quando PD intercetta tutto prima del lancio.
 5. **FIX-05** (`4128e56`) — `currentPower ≤ 0` svuota weapon list in `useAttackSetup` e blocca sensori in `ActionModal`. Banner rosso `⚡ POWER OFFLINE` in AttackModal.
-6. **FIX-06** (`c447bcc`) — Leadership bonus dura 1 round: applicato subito a `initiative`, rimosso da `buildNextRoundState`. Badge `↑ini` in PhaseTracker.
+6. **FIX-06** (`c447bcc` + `20a0fa7`) — Leadership bonus RAW: attiva all'inizio del round successivo, dura 1 round. `buildNextRoundState` applica `initiativeBonusNextRound`, ri-ordina `initiativeOrder`, imposta `initiativeTemporaryBonus`; boundary dopo rimuove e ri-ordina di nuovo. Badge `↑ini` in PhaseTracker.
 7. **FIX-07** (`ff957a0`) — Display ion power mostra round rimanenti e `OFFLINE` quando Power = 0.
 
 FIX-08 (hardened per-sistema) differito a v1.24.0.
