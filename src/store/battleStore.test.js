@@ -213,6 +213,25 @@ describe('applyDamage — threshold criticals', () => {
     useBattleStore.getState().applyDamage(id, 10, 'Hull crit extra', true)
     expect(useBattleStore.getState().ships[0].criticalHits).toHaveLength(0)
   })
+
+  it('threshold Armour crit reduces profile.armor by 1 (Sev.1 = armour_reduce_fixed)', () => {
+    // random=0.34 → each D6=3 → 2D6=6 → Armour location; Sev.1 = −1 fixed
+    vi.spyOn(Math, 'random').mockReturnValue(0.34)
+    useBattleStore.getState().addShip(makeProfile({ hull: 20, armor: 4 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyDamage(id, 2, 'Laser')
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.criticalHits[0].system).toBe('Armour')
+    expect(ship.profile.armor).toBe(3)
+  })
+
+  it('threshold Armour crit clamps armor at 0', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.34)
+    useBattleStore.getState().addShip(makeProfile({ hull: 20, armor: 0 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyDamage(id, 2, 'Laser')
+    expect(useBattleStore.getState().ships[0].profile.armor).toBe(0)
+  })
 })
 
 describe('addCriticalHit', () => {

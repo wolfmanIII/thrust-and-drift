@@ -930,9 +930,18 @@ const useBattleStore = create((set, get) => {
           : 1
         get().addCriticalHit(shipId, { system: location, severity: effectiveSeverity }, { _skipHistory: true })
         const effect = getCriticalEffect(location, effectiveSeverity)
+        // MgT2e CRB p.169 — Sustained Damage uses same Critical Hit Effects table as manual crits
         if (effect?.mechanic === 'hull_extra_damage') {
           const extra = rollDice(effect.value, 6)
           get().applyDamage(shipId, extra.total, `Critical Hull Sev.${effectiveSeverity} (threshold)`, true)
+        } else if (effect?.mechanic === 'armour_reduce_fixed') {
+          get().reduceArmour(shipId, effect.value, { _skipHistory: true })
+        } else if (effect?.mechanic === 'armour_reduce_d3') {
+          const extra = rollDice(1, 6)
+          get().reduceArmour(shipId, Math.ceil(extra.total / 2), { _skipHistory: true })
+        } else if (effect?.mechanic === 'armour_reduce_xd') {
+          const extra = rollDice(effect.value, 6)
+          get().reduceArmour(shipId, extra.total, { _skipHistory: true })
         }
       }
     }
@@ -1029,29 +1038,29 @@ const useBattleStore = create((set, get) => {
    * // MgT2e CRB p.170 — Armour critical effects
    * @param {string} shipId
    * @param {number} amount  Points to subtract (result clamped to ≥ 0)
+   * @param {{ _skipHistory?: boolean }} [opts]
    */
-  reduceArmour: wh(
-    (shipId) => !!get().ships.find((s) => s.id === shipId),
-    (shipId, amount) => {
-      const ship = get().ships.find((s) => s.id === shipId)
-      const current = ship.profile.armor ?? 0
-      const reduced = Math.max(0, current - amount)
-      set((s) => ({
-        ships: s.ships.map((sh) =>
-          sh.id === shipId
-            ? { ...sh, profile: { ...sh.profile, armor: reduced } }
-            : sh
-        ),
-        log: [...s.log, makeLogEntry({
-          round: s.round,
-          phase: s.phase,
-          type: 'system',
-          message: `${ship.profile.name}: Armour reduced by −${amount} → ${reduced} (Critical).`,
-          shipId,
-        })],
-      }))
-    }
-  ),
+  reduceArmour: (shipId, amount, { _skipHistory = false } = {}) => {
+    const ship = get().ships.find((s) => s.id === shipId)
+    if (!ship) return
+    if (!_skipHistory) get().pushHistory()
+    const current = ship.profile.armor ?? 0
+    const reduced = Math.max(0, current - amount)
+    set((s) => ({
+      ships: s.ships.map((sh) =>
+        sh.id === shipId
+          ? { ...sh, profile: { ...sh.profile, armor: reduced } }
+          : sh
+      ),
+      log: [...s.log, makeLogEntry({
+        round: s.round,
+        phase: s.phase,
+        type: 'system',
+        message: `${ship.profile.name}: Armour reduced by −${amount} → ${reduced} (Critical).`,
+        shipId,
+      })],
+    }))
+  },
 
   // === MISSILES ===
 
