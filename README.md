@@ -3,7 +3,8 @@
 > Virtual tabletop tool for **Mongoose Traveller 2e** space combat.  
 > GM-operated · browser-only · no installation required.
 
-→ [Read the Manifesto](MANIFESTO.md)
+→ [Read the Manifesto](MANIFESTO.md)  
+→ [Live app](https://tad.nav-fi-3.space)
 
 Implements the core space combat rules (MgT2e CRB pp.160–168) and the
 optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
