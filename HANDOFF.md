@@ -9,10 +9,10 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.23.0 |
-| **Branch** | main (da pushare) |
-| **Test** | 960 passing |
-| **Ultimo commit** | fix(initiative): leadership bonus activates start of next round, re-sorts order |
+| **Versione** | 1.23.1 |
+| **Branch** | main |
+| **Test** | 962 passing |
+| **Ultimo commit** | fix(crits): threshold Armour crits now reduce profile.armor (CRB p.169) |
 
 ---
 

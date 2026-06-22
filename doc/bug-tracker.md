@@ -245,6 +245,26 @@ Quando il Point Defence distruggeva tutti i missili prima del lancio (`missileCo
 
 ---
 
+## BUG-009 — Threshold Armour crits non riducono `profile.armor` ✅ RISOLTO (v1.23.1)
+
+**Segnalato da:** CotI, giugno 2026
+**Priorità:** Alta
+**Commit:** `1fc85ad`
+
+### Comportamento attuale
+
+I critici Armour generati dal path **Sustained Damage** (CRB p.169 — ogni 10% di Hull perso) aggiungevano correttamente il critico a `criticalHits[]`, ma non riducevano `profile.armor`. Il valore Armour restava invariato in `ShipDetailModal` nonostante la voce critica fosse visibile.
+
+### Causa
+
+In `applyDamage`, il loop threshold chiamava `addCriticalHit` e poi gestiva solo `hull_extra_damage`. I mechanic `armour_reduce_fixed`, `armour_reduce_d3`, `armour_reduce_xd` erano ignorati. Il path manuale (AttackModal → `handleApplyCritical`) era invece già corretto.
+
+### Fix
+
+Aggiunto handling dei tre mechanic armour nel loop threshold, con `_skipHistory: true` per non duplicare le entry nell'undo stack. `reduceArmour` refactored da `wh()` a pattern `_skipHistory` esplicito. *(CRB p.169–170)*
+
+---
+
 ## FIX-01 — Banner `⚠ MANUAL` per critici descrittivi ✅ IMPLEMENTATO (v1.23.0)
 
 **Segnalato da:** Reddit (u/...), giugno 2026

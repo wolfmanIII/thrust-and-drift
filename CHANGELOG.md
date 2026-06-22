@@ -6,6 +6,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.23.1] — 2026-06-22
+
+### Fixed
+
+- **Threshold Armour crits now reduce `profile.armor`** — `applyDamage` threshold path (Sustained Damage, CRB p.169) was calling `addCriticalHit` for Armour locations but never applying the reduction effect. `armour_reduce_fixed`, `armour_reduce_d3`, and `armour_reduce_xd` mechanics are now applied in the threshold loop, matching the behaviour of the manual attack path. `reduceArmour` refactored from `wh()` wrapper to explicit `_skipHistory` parameter to avoid spurious undo history entries. *(CRB p.169–170)*
+
+---
+
 ## [1.23.0] — 2026-06-21
 
 ### Fixed

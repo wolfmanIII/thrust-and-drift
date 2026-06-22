@@ -1704,6 +1704,12 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
 - 832 test (+3 sensore lock flat).
 
+### 14.25 Versione 1.23.1 — Threshold Armour Crit Fix ✅ COMPLETATA
+
+- **BUG — Threshold Armour crits non riducevano `profile.armor`**: il path Sustained Damage in `applyDamage` chiamava `addCriticalHit` per i critici Armour ma non applicava l'effetto di riduzione. Fix: aggiunto handling per `armour_reduce_fixed`, `armour_reduce_d3`, `armour_reduce_xd` nel loop threshold, con `_skipHistory: true` per evitare entry extra nell'undo stack. `reduceArmour` refactored da `wh()` a pattern `_skipHistory` esplicito. *(CRB p.169–170)*
+- Segnalato da CotI — confermato con CRB p.169.
+- 962 test (+2: threshold Armour crit riduce armor, clamp a 0).
+
 ### 14.24 Versione 1.23.0 — Reddit Bug Fixes ✅ COMPLETATA
 
 - **FIX-01 — Banner `⚠ MANUAL` per critici descrittivi**: `AttackModal` mostra un banner amber quando `effect.mechanic === 'descriptive'` (Sensors, Fuel Tank, Weapons, Bridge, Power Plant). Nessun effetto automatico viene applicato — il GM deve farlo manualmente.
