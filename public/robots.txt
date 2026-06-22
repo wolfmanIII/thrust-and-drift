@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tad.nav-fi-3.space/sitemap.xml

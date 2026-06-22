@@ -1,5 +1,7 @@
 {
   "name": "thrust-and-drift",
+  "description": "Browser-based virtual tabletop for Mongoose Traveller 2e space combat",
+  "homepage": "https://tad.nav-fi-3.space",
   "private": true,
   "version": "1.23.0",
   "type": "module",
