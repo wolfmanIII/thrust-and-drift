@@ -42,8 +42,10 @@ export function HUD() {
   const openModal           = useUiStore((s) => s.openModal)
   const audioEnabled        = useUiStore((s) => s.audioEnabled)
   const toggleAudio         = useUiStore((s) => s.toggleAudio)
-  const dogfights           = useBattleStore((s) => s.dogfights)
-  const boardings           = useBattleStore((s) => s.boardings)
+  const dogfights               = useBattleStore((s) => s.dogfights)
+  const boardings               = useBattleStore((s) => s.boardings)
+  const obstaclesEnabled        = useBattleStore((s) => s.obstaclesEnabled)
+  const toggleObstaclesEnabled  = useBattleStore((s) => s.toggleObstaclesEnabled)
 
   const activeDogfights  = dogfights.filter((g) => g.active)
   const activeBoardings  = boardings.filter((b) => b.outcome === null)
@@ -169,6 +171,20 @@ export function HUD() {
         <p className="font-mono text-xs text-amber-400 animate-pulse pointer-events-none">
           ⚡ {pendingMissileImpacts.length} impact{pendingMissileImpacts.length !== 1 ? 's' : ''} unresolved
         </p>
+      )}
+
+      {/* Obstacles toggle — setup phase + vectorial mode only */}
+      {phase === 'setup' && combatMode === 'vectorial' && (
+        <button
+          onClick={toggleObstaclesEnabled}
+          className={`pointer-events-auto bg-slate-800/80 border rounded px-3 py-1.5 backdrop-blur-sm transition-colors font-mono text-xs tracking-widest ${
+            obstaclesEnabled
+              ? 'border-amber-600/60 text-amber-400 hover:border-amber-500/70'
+              : 'border-slate-700 text-slate-500 hover:border-slate-500 hover:text-slate-300'
+          }`}
+        >
+          {obstaclesEnabled ? '🪨 OBSTACLES ON' : '🪨 OBSTACLES OFF'}
+        </button>
       )}
 
       {/* Phase advance — skip movement phase in basic mode (no vectors) */}
