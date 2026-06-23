@@ -12,7 +12,7 @@
 | **Versione** | 1.23.1 |
 | **Branch** | main |
 | **Test** | 962 passing |
-| **Ultimo commit** | fix(crits): threshold Armour crits now reduce profile.armor (CRB p.169) |
+| **Ultimo commit** | chore(release): bump Dashboard version to v1.23.1 (`4190509`) |
 
 ---
 
