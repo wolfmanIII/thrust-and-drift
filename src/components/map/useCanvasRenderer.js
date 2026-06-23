@@ -5,12 +5,13 @@
  * // Spec §9 — Rendering Canvas layer order
  */
 
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useMemo } from 'react'
 import { hexToPixel, hexAdd, hexDistance, computeClampedDelta } from '../../utils/hex.js'
 import { computeIonThrustEffect } from '../../utils/combat.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore } from '../../store/uiStore.js'
 import { RANGE_BANDS } from '../../data/rangeBands.js'
+import { getHexesInRadius } from '../../utils/obstacles.js'
 import {
   drawShipToken,
   drawShipLabel,
@@ -18,6 +19,7 @@ import {
   drawGhostToken,
   drawMissileToken,
 } from './tokenRenderers.js'
+import { drawObstacleLayer } from './obstacleRenderers.js'
 
 // === RANGE BAND RINGS ===
 
@@ -243,11 +245,28 @@ function drawThrustTargeting(ctx, ship, mouseHex, size, ox, oy) {
  * }} params
  */
 export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
-  const ships          = useBattleStore((s) => s.ships)
-  const missiles       = useBattleStore((s) => s.missiles)
-  const phase          = useBattleStore((s) => s.phase)
-  const selectedShipId  = useUiStore((s) => s.selectedShipId)
-  const thrustTargeting = useUiStore((s) => s.thrustTargeting)
+  const ships             = useBattleStore((s) => s.ships)
+  const missiles          = useBattleStore((s) => s.missiles)
+  const phase             = useBattleStore((s) => s.phase)
+  const obstacles         = useBattleStore((s) => s.obstacles)
+  const obstaclesEnabled  = useBattleStore((s) => s.obstaclesEnabled)
+  const selectedShipId    = useUiStore((s) => s.selectedShipId)
+  const thrustTargeting   = useUiStore((s) => s.thrustTargeting)
+
+  /**
+   * Spatial hash: hex key `"q,r"` → ObstacleToken.
+   * O(1) lookup per hex during the 60fps render loop. // Obstacles System Design §2.4
+   */
+  const obstacleHexMap = useMemo(() => {
+    if (!obstaclesEnabled || obstacles.length === 0) return new Map()
+    const map = new Map()
+    for (const o of obstacles) {
+      for (const hex of getHexesInRadius(o.position, o.radius)) {
+        map.set(`${hex.q},${hex.r}`, o)
+      }
+    }
+    return map
+  }, [obstacles, obstaclesEnabled])
 
   /** rAF timestamp in ms — used for dogfight pulse animation. */
   const timestampRef = useRef(0)
@@ -278,7 +297,12 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
     // Read ships and missiles fresh from the store — avoids stale-closure race where
     // startMovementAnimation (uiStore) fires before the battleStore set() that moves
     // the tokens, causing lerpHex(pre, pre, t) → no visible movement.
-    const { ships: liveShips, missiles: liveMissiles } = useBattleStore.getState()
+    const { ships: liveShips, missiles: liveMissiles, obstacles: liveObstacles, obstaclesEnabled: liveObstaclesEnabled } = useBattleStore.getState()
+
+    // --- Layer 1b: Obstacle zones (fields, gravity wells, nebulae) ---
+    if (liveObstaclesEnabled && liveObstacles.length > 0) {
+      drawObstacleLayer(ctx, liveObstacles, size, ox, oy)
+    }
 
     // --- Layer 2: Range band rings (selected ship, non-targeting mode) ---
     if (selectedShipId && !thrustTargeting) {
@@ -342,10 +366,10 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
     if (anim && (now - anim.startTime) >= anim.duration) {
       useUiStore.getState().clearMovementAnimation()
     }
-  // ships/missiles are read fresh via getState() inside render, but kept in deps to
+  // ships/missiles/obstacles are read fresh via getState() inside render, but kept in deps to
   // trigger useCallback recreation → useEffect([render]) fires → canvas redraws on store change.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canvasRef, ships, missiles, phase, selectedShipId, offset, zoom, timestampRef, thrustTargeting, mouseHexRef])
+  }, [canvasRef, ships, missiles, phase, obstacles, obstaclesEnabled, selectedShipId, offset, zoom, timestampRef, thrustTargeting, mouseHexRef])
 
   // Render on state changes
   useEffect(() => {
