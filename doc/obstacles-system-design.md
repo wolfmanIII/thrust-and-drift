@@ -543,6 +543,15 @@ Backward compatibility: sessioni salvate senza `obstacles` leggono `battle.obsta
 
 ---
 
+## 13.1 Note UI — Da Implementare
+
+- **Legenda carosello** — con token dedicati per ogni tipo/sottotipo di ostacolo
+  (asteroid light, asteroid dense, debris, gravity well, nebula), il pannello legenda
+  attuale diventa troppo denso. Convertire in carosello o tab orizzontali al momento
+  dell'implementazione. Da rivedere insieme al repulisti generale della UI.
+
+---
+
 ## 14. Interazione con il Dogfight
 
 ### 14.1 Danno da ostacoli durante il dogfight
