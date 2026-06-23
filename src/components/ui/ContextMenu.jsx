@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react'
 import { useUiStore }    from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { hexDistance }   from '../../utils/hex.js'
+import { getObstacleAt } from '../../utils/obstacles.js'
 import { DEFENSIVE_WEAPONS } from '../../data/weapons.js'
 
 // === SHARED PRIMITIVES ===
@@ -226,13 +227,17 @@ function MissileContextMenu({ x, y, menuRef, missile, targetId, close }) {
 // === EMPTY CELL CONTEXT ===
 
 function EmptyContextMenu({ x, y, menuRef, hex, close }) {
-  const openModal    = useUiStore((s) => s.openModal)
-  const advancePhase = useBattleStore((s) => s.advancePhase)
-  const phase        = useBattleStore((s) => s.phase)
+  const openModal       = useUiStore((s) => s.openModal)
+  const advancePhase    = useBattleStore((s) => s.advancePhase)
+  const phase           = useBattleStore((s) => s.phase)
+  const obstaclesEnabled = useBattleStore((s) => s.obstaclesEnabled)
 
   return (
     <MenuShell x={x} y={y} menuRef={menuRef}>
       <MenuItem icon="➕" label="Add ship here"    onClick={() => { openModal('addShip',     { hex }); close() }} />
+      {obstaclesEnabled && (
+        <MenuItem icon="🪨" label="Place obstacle here" onClick={() => { openModal('placeObstacle', { hex }); close() }} />
+      )}
       <MenuDivider />
       <MenuItem icon="📂" label="Load profiles"    onClick={() => { openModal('shipProfile', { mode: 'import' }); close() }} />
       <MenuItem icon="💾" label="Save profiles"    onClick={() => { openModal('shipProfile', { mode: 'export' }); close() }} />
@@ -246,6 +251,31 @@ function EmptyContextMenu({ x, y, menuRef, hex, close }) {
         </>
       )}
       <MenuItem icon="🔄" label="Next phase"       onClick={() => { advancePhase(); close() }} />
+    </MenuShell>
+  )
+}
+
+// === OBSTACLE CONTEXT ===
+
+function ObstacleContextMenu({ x, y, menuRef, obstacle, close }) {
+  const openModal      = useUiStore((s) => s.openModal)
+  const removeObstacle = useBattleStore((s) => s.removeObstacle)
+
+  const typeLabel = {
+    asteroid_field: obstacle.density === 'dense' ? 'Dense Asteroid Field' : 'Light Asteroid Field',
+    debris_field:   'Debris Field',
+    gravity_well:   'Gravity Well',
+    nebula:         'Nebula',
+  }[obstacle.type] ?? obstacle.type
+
+  return (
+    <MenuShell x={x} y={y} menuRef={menuRef}>
+      <div className="px-3 py-2 border-b border-slate-700/50">
+        <p className="font-mono text-xs text-slate-200">{typeLabel}{obstacle.label ? ` — ${obstacle.label}` : ''}</p>
+        <p className="font-mono text-xs text-slate-500">Radius: {obstacle.radius} hex</p>
+      </div>
+      <MenuItem icon="✏️" label="Edit obstacle"   onClick={() => { openModal('placeObstacle', { obstacle, hex: obstacle.position }); close() }} />
+      <MenuItem icon="🗑️" label="Remove obstacle" danger onClick={() => { removeObstacle(obstacle.id); close() }} />
     </MenuShell>
   )
 }
@@ -264,11 +294,13 @@ const MENU_MAP = {
 }
 
 export function ContextMenu() {
-  const contextMenu     = useUiStore((s) => s.contextMenu)
-  const hideContextMenu = useUiStore((s) => s.hideContextMenu)
-  const ships           = useBattleStore((s) => s.ships)
-  const missiles        = useBattleStore((s) => s.missiles)
-  const menuRef         = useRef(null)
+  const contextMenu      = useUiStore((s) => s.contextMenu)
+  const hideContextMenu  = useUiStore((s) => s.hideContextMenu)
+  const ships            = useBattleStore((s) => s.ships)
+  const missiles         = useBattleStore((s) => s.missiles)
+  const obstacles        = useBattleStore((s) => s.obstacles)
+  const obstaclesEnabled = useBattleStore((s) => s.obstaclesEnabled)
+  const menuRef          = useRef(null)
 
   // Close on outside click
   useEffect(() => {
@@ -288,6 +320,14 @@ export function ContextMenu() {
   const ship    = ships.find((s) => s.id === targetId)    ?? null
   const missile = missiles.find((m) => m.id === targetId) ?? null
   const close   = () => hideContextMenu()
+
+  // Obstacle right-click takes priority over empty-cell menu when obstaclesEnabled
+  if (type === 'empty' && obstaclesEnabled && hex) {
+    const obstacle = getObstacleAt(obstacles, hex)
+    if (obstacle) {
+      return <ObstacleContextMenu x={x} y={y} menuRef={menuRef} close={close} obstacle={obstacle} />
+    }
+  }
 
   const entry = MENU_MAP[type]
   if (!entry) return null

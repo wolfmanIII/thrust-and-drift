@@ -23,6 +23,7 @@ import { DogfightRoundModal }        from './components/modals/DogfightRoundModa
 import { PassingAttackModal }        from './components/modals/PassingAttackModal.jsx'
 import { MissileImpactModal }        from './components/modals/MissileImpactModal.jsx'
 import { ObstacleCollisionModal }   from './components/modals/ObstacleCollisionModal.jsx'
+import { PlaceObstacleModal }       from './components/modals/PlaceObstacleModal.jsx'
 import { BoardingSetupModal }    from './components/modals/BoardingSetupModal.jsx'
 import { BoardingContactModal }  from './components/modals/BoardingContactModal.jsx'
 import { BoardingConflictModal } from './components/modals/BoardingConflictModal.jsx'
@@ -55,6 +56,7 @@ const MODAL_MAP = {
   legend:           LegendModal,
   crewAssignment:   CrewAssignmentModal,
   basicManoeuvre:   BasicManoeuvreModal,
+  placeObstacle:    PlaceObstacleModal,
 }
 
 function LegendButton() {
