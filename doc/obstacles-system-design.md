@@ -587,14 +587,19 @@ Backward compatibility: sessioni salvate senza `obstacles` leggono `battle.obsta
   attuale diventa troppo denso. Convertire in carosello o tab orizzontali al momento
   dell'implementazione. Da rivedere insieme al repulisti generale della UI.
 
-- **Campo `sensors` nel profilo nave** — il campo `sensors` (Basic / Civilian / Military /
-  Improved / Advanced) esiste già nel modello dati ed è visibile nel CatalogPanel, ma non
-  ha ancora un campo editabile nella UI di profilo. Quando viene aggiunto:
-  - Deve riportare una nota esplicita: *"Used only in Vectorial Combat with Obstacles System enabled"*
+- **Campo `densitometer` nel profilo nave** — sostituisce il precedente campo `sensors`
+  (grade string). Il campo è un **boolean**: `true` se la nave monta un Densitometro,
+  `false` altrimenti. Solo sensori **Improved** (TL12+) o **Advanced** (TL15) lo includono
+  (CRB p.181). Il grado completo del sensore non è rilevante per il motore di combattimento.
+
+  Quando il campo viene esposto nella UI di profilo:
+  - Checkbox o toggle: *"Densitometer — detect asteroid field density"*
+  - Nota esplicita: *"Used only in Vectorial Combat with Obstacles System enabled"*
   - Il campo è irrilevante in combattimento standard (range band) e quando `obstaclesEnabled = false`
-  - Valore default per profili nuovi: `'Basic'` (minimo garantito RAW — CRB p.181)
-  - Solo sensori **Improved** (TL12) o **Advanced** (TL15) includono il Densitometro (CRB p.181)
-    e consentono di rilevare la densità di un campo asteroidi prima di entrarci
+  - Default per profili nuovi: `false`
+  - Navi del catalogo: `true` solo per Improved/Advanced (Light Fighter, Heavy Fighter,
+    Troop Transport, Torpedo Boat, SDB TL15, Lab Ship, Fleet Courier, Survey Scout Donosev,
+    SDB Dragon, Corsair)
 
 ---
 
