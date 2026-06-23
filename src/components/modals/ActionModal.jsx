@@ -12,6 +12,7 @@ import { roll2D6, formatCheckResult } from '../../utils/dice.js'
 import { CREW_ACTIONS } from '../../data/crewActions.js'
 import { migrateCrew, CREW_SKILLS } from '../../utils/crew.js'
 import { DiceInput } from '../forms/DiceInput.jsx'
+import { getObstacleAt } from '../../utils/obstacles.js'
 
 /**
  * Apply the mechanical effect of a successful action to the battle state.
@@ -86,6 +87,8 @@ export function ActionModal() {
   const missiles               = useBattleStore((s) => s.missiles)
   const addLogEntry            = useBattleStore((s) => s.addLogEntry)
   const markCrewMemberUsed     = useBattleStore((s) => s.markCrewMemberUsed)
+  const obstacles              = useBattleStore((s) => s.obstacles)
+  const obstaclesEnabled       = useBattleStore((s) => s.obstaclesEnabled)
 
   const applyEffect  = useActionEffects()
 
@@ -152,6 +155,11 @@ export function ActionModal() {
   // Ion Power: sensors and EW are offline when currentPower <= 0 (HG p.30)
   const basePower = ship.profile.maxPower ?? 100
   const noPower   = (ship.currentPower ?? basePower) <= 0
+
+  // Nebula blocks sensor lock for ships inside it. // Obstacles System Design §3.4, §9
+  const actorInNebula  = obstaclesEnabled && !!ship.position && getObstacleAt(obstacles, ship.position)?.type === 'nebula'
+  const targetShip     = ships.find((s) => s.id === targetShipId)
+  const targetInNebula = obstaclesEnabled && !!targetShip?.position && getObstacleAt(obstacles, targetShip.position)?.type === 'nebula'
 
   const SENSOR_ACTIONS = ['sensor_lock', 'electronic_warfare', 'missile_ew']
 
@@ -300,7 +308,8 @@ export function ActionModal() {
                     const isRepair    = action.id === 'repair_system'
                     const noCrits     = isRepair && ship.criticalHits.length === 0
                     const sensorBlocked = noPower && SENSOR_ACTIONS.includes(action.id)
-                    const disabled    = noCrits || sensorBlocked
+                    const nebulaBlocked = action.id === 'sensor_lock' && (actorInNebula || targetInNebula)
+                    const disabled    = noCrits || sensorBlocked || nebulaBlocked
                     return (
                       <button
                         key={action.id}
@@ -321,6 +330,7 @@ export function ActionModal() {
                         </span>
                         {noCrits       && <span className="ml-2 text-slate-600">— no criticals</span>}
                         {sensorBlocked && <span className="ml-2 text-red-800">— ⚡ power offline</span>}
+                        {nebulaBlocked && <span className="ml-2 text-sky-700">— ☁ nebula interference</span>}
                       </button>
                     )
                   })}
