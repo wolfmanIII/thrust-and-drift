@@ -131,9 +131,13 @@ Se il budget di movimento si esaurisce mentre la nave è **dentro** il campo (no
 raggiungere un hex libero), la nave si ferma nell'hex di campo e subisce danno da collisione:
 
 ```text
-danno collisione = 1D6  (ignora Armor)
+danno collisione = 1D6  (ridotto da Armor come danno normale)
 se density === 'dense': 2D6
 ```
+
+Il danno è cinetico — analogo a un impatto missile — quindi l'armatura si applica normalmente
+(`max(0, danno - armor)`). A differenza del gravity well (impatto atmosferico a velocità
+orbitale), la collisione con detriti è un urto fisicamente attenuabile dallo scafo.
 
 Il sistema rileva la collisione in `resolveMovement` dopo aver calcolato la posizione finale:
 se la posizione finale è in un field hex, viene applicato `applyDamage` con `_skipHistory: true`.
@@ -154,7 +158,7 @@ Variante più densa di Asteroid Field. Stessi hex e stessa logica, parametri div
 | ----------- | --------------- | -------------- |
 | density fissa | light o dense | sempre dense |
 | DM copertura | −1 / −2 | −2 |
-| danno collisione | 1D6 / 2D6 | 2D6 |
+| danno collisione | 1D6 / 2D6 (ridotto da Armor) | 2D6 (ridotto da Armor) |
 | costo movimento | 2 punti movimento per hex | 2 punti movimento per hex |
 | origine tipica | naturale | nave distrutta |
 
