@@ -172,25 +172,36 @@ const fieldCoverDM = targetInField?.type === 'asteroid_field'
 #### Collisione
 
 Se il budget di movimento si esaurisce mentre la nave è **dentro** il campo (non riesce a
-raggiungere un hex libero), la nave si ferma nell'hex di campo e subisce danno da collisione:
+raggiungere un hex libero), la nave si ferma nell'hex di campo. Il pilota può tentare di
+navigare i detriti ed evitare danni:
 
 ```text
-danno collisione = 1D6  (ridotto da Armor come danno normale)
-se density === 'dense': 2D6
+Tiro pilota (Pilot, DEX):
+  light field → Average (8+)
+  dense field → Difficult (10+)
+
+Successo → nessun danno
+Fallimento → danno collisione (ridotto da Armor):
+  light: 1D6
+  dense: 2D6
 ```
 
 Il danno è cinetico — analogo a un impatto missile — quindi l'armatura si applica normalmente
 (`max(0, danno - armor)`). A differenza del gravity well (impatto atmosferico a velocità
 orbitale), la collisione con detriti è un urto fisicamente attenuabile dallo scafo.
 
+La posizione della nave non cambia indipendentemente dall'esito del tiro: il vettore di inerzia
+resta invariato. Il tiro determina solo se i detriti causano danno strutturale.
+
 Il sistema rileva la collisione in `resolveMovement` dopo aver calcolato la posizione finale:
-se la posizione finale è in un field hex, viene applicato `applyDamage` con `_skipHistory: true`.
-Non serve nessun flag `paidFieldCost` — la collisione si determina esclusivamente dalla
-posizione di arrivo.
+se la posizione finale è in un field hex, viene generato un evento collisione. Il GM risolve
+il tiro pilota in `PlaceObstacleModal` (o tramite prompt contestuale) e conferma l'esito —
+`applyDamage` viene chiamato solo in caso di fallimento, con `_skipHistory: true`.
 
 > **Nota GM:** una nave con vettore sufficiente attraversa il campo senza danni, perché
-> riesce a raggiungere un hex libero dall'altra parte. Il danno scatta solo quando il vettore
-> non è abbastanza per uscire dal campo in quel round.
+> riesce a raggiungere un hex libero dall'altra parte. Il tiro pilota scatta solo quando il
+> vettore non è abbastanza per uscire dal campo in quel round — e anche allora un pilota
+> capace (8+ o 10+) può navigare i detriti senza subire danno strutturale.
 
 ---
 
@@ -202,7 +213,8 @@ Variante più densa di Asteroid Field. Stessi hex e stessa logica, parametri div
 | ----------- | --------------- | -------------- |
 | density fissa | light o dense | sempre dense |
 | DM copertura | −1 / −2 | −2 |
-| danno collisione | 1D6 / 2D6 (ridotto da Armor) | 2D6 (ridotto da Armor) |
+| tiro pilota collisione | Average (8+) / Difficult (10+) | Difficult (10+) |
+| danno collisione (fallimento) | 1D6 / 2D6 (ridotto da Armor) | 2D6 (ridotto da Armor) |
 | costo movimento | 2 punti movimento per hex | 2 punti movimento per hex |
 | origine tipica | naturale | nave distrutta |
 
