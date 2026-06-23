@@ -22,6 +22,7 @@ import { DogfightNotificationModal } from './components/modals/DogfightNotificat
 import { DogfightRoundModal }        from './components/modals/DogfightRoundModal.jsx'
 import { PassingAttackModal }        from './components/modals/PassingAttackModal.jsx'
 import { MissileImpactModal }        from './components/modals/MissileImpactModal.jsx'
+import { ObstacleCollisionModal }   from './components/modals/ObstacleCollisionModal.jsx'
 import { BoardingSetupModal }    from './components/modals/BoardingSetupModal.jsx'
 import { BoardingContactModal }  from './components/modals/BoardingContactModal.jsx'
 import { BoardingConflictModal } from './components/modals/BoardingConflictModal.jsx'
@@ -145,6 +146,9 @@ export function App() {
 
       {/* ── Missile impact resolution ────────────────────────────────── */}
       <MissileImpactModal />
+
+      {/* ── Obstacle field collision resolution ──────────────────────── */}
+      <ObstacleCollisionModal />
 
       {/* ── Boarding modals ──────────────────────────────────────────── */}
       <BoardingSetupModal />
