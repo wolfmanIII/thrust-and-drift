@@ -5,13 +5,12 @@
  * // Spec §9 — Rendering Canvas layer order
  */
 
-import { useEffect, useCallback, useRef, useMemo } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import { hexToPixel, hexAdd, hexDistance, computeClampedDelta } from '../../utils/hex.js'
 import { computeIonThrustEffect } from '../../utils/combat.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore } from '../../store/uiStore.js'
 import { RANGE_BANDS } from '../../data/rangeBands.js'
-import { getHexesInRadius } from '../../utils/obstacles.js'
 import {
   drawShipToken,
   drawShipLabel,
@@ -253,20 +252,6 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
   const selectedShipId    = useUiStore((s) => s.selectedShipId)
   const thrustTargeting   = useUiStore((s) => s.thrustTargeting)
 
-  /**
-   * Spatial hash: hex key `"q,r"` → ObstacleToken.
-   * O(1) lookup per hex during the 60fps render loop. // Obstacles System Design §2.4
-   */
-  const obstacleHexMap = useMemo(() => {
-    if (!obstaclesEnabled || obstacles.length === 0) return new Map()
-    const map = new Map()
-    for (const o of obstacles) {
-      for (const hex of getHexesInRadius(o.position, o.radius)) {
-        map.set(`${hex.q},${hex.r}`, o)
-      }
-    }
-    return map
-  }, [obstacles, obstaclesEnabled])
 
   /** rAF timestamp in ms — used for dogfight pulse animation. */
   const timestampRef = useRef(0)

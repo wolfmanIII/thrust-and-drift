@@ -46,6 +46,7 @@ export function ObstacleCollisionModal() {
   const event = pendingObstacleCollisions[0]
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional batch reset on collision event change
     setStep('check')
     setRolled('')
   }, [event?.id])
@@ -61,7 +62,7 @@ export function ObstacleCollisionModal() {
   }
 
   const pending = pendingObstacleCollisions.length
-  const { target, difficulty, damageDice, label } = fieldParams(event.obstacle)
+  const { difficulty, damageDice, label } = fieldParams(event.obstacle)
   const armor   = ship.profile.armor ?? 0
   const rawRoll = parseInt(rolled, 10)
   const net     = isNaN(rawRoll) ? null : Math.max(0, rawRoll - armor)
