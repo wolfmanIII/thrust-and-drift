@@ -82,19 +82,26 @@ function getObstaclesInPath(obstacles, hexList) {
 
 #### Costo movimento
 
-Attraversare un hex di campo asteroidi costa **+1 thrust** aggiuntivo rispetto al normale.
-Questo viene sommato al thrust già speso nel round.
+Attraversare un hex di campo asteroidi costa **2 punti movimento** invece di 1.
+Il budget di movimento per round è uguale alla magnitudine del vettore (`|v|`).
 
 ```text
-se nave.nextPosition è dentro asteroid_field:
-  thrustCost += 1
-  se thrustUsedThisRound + thrustCost > thrustDisponibile:
-    → la nave non può attraversare il campo in questo round
-    → ThrustModal mostra avviso "Asteroid field: +1 thrust required"
+budget = |v|  (magnitudine vettore)
+
+per ogni hex nel percorso (in ordine):
+  costo = (hex è in asteroid_field) ? 2 : 1
+  se budget - costo >= 0:
+    budget -= costo
+    la nave avanza di un hex
+  altrimenti:
+    la nave si ferma sull'ultimo hex raggiungibile
+    → applica danno collisione (vedi sotto)
 ```
 
-Il costo si applica solo se la posizione finale è nel campo. Transitare attraverso senza fermarsi
-(vettore porta oltre) applica comunque il costo se almeno un hex del percorso è nel campo.
+Il campo rallenta la nave indipendentemente da quant'è il thrust: anche una nave con thrust 6
+che ha esaurito il thrust del round si muove con il vettore accumulato e paga il costo in hex.
+Una nave già dentro il campo che vuole uscire paga il costo sull'hex di uscita, non su quelli
+interni già attraversati — la priorità è sempre raggiungere il bordo.
 
 #### Copertura — attacchi
 
@@ -120,22 +127,22 @@ const fieldCoverDM = targetInField?.type === 'asteroid_field'
 
 #### Collisione
 
-Se una nave **termina il movimento** in un hex di campo asteroidi senza aver speso il +1 thrust
-(es. vettore incontrollato che porta nel campo), subisce danno da collisione automatico.
+Se il budget di movimento si esaurisce mentre la nave è **dentro** il campo (non riesce a
+raggiungere un hex libero), la nave si ferma nell'hex di campo e subisce danno da collisione:
 
 ```text
 danno collisione = 1D6  (ignora Armor)
 se density === 'dense': 2D6
 ```
 
-Il sistema rileva la collisione in `resolveMovement`, dopo aver aggiornato le posizioni,
-confrontando la nuova posizione di ogni nave con gli ostacoli. Se la nave non ha pagato
-il costo extra di thrust (controllato da flag `paidFieldCost` impostato in `applyThrust`),
-viene applicato il danno tramite `applyDamage` con `_skipHistory: true`.
+Il sistema rileva la collisione in `resolveMovement` dopo aver calcolato la posizione finale:
+se la posizione finale è in un field hex, viene applicato `applyDamage` con `_skipHistory: true`.
+Non serve nessun flag `paidFieldCost` — la collisione si determina esclusivamente dalla
+posizione di arrivo.
 
-> **Nota GM:** il campo asteroidi non blocca il movimento in assoluto. Una nave con thrust
-> sufficiente può sempre attraversarlo pagando il costo. Il rischio collisione scatta solo
-> quando il vettore porta la nave nel campo senza thrust residuo disponibile.
+> **Nota GM:** una nave con vettore sufficiente attraversa il campo senza danni, perché
+> riesce a raggiungere un hex libero dall'altra parte. Il danno scatta solo quando il vettore
+> non è abbastanza per uscire dal campo in quel round.
 
 ---
 
@@ -148,7 +155,7 @@ Variante più densa di Asteroid Field. Stessi hex e stessa logica, parametri div
 | density fissa | light o dense | sempre dense |
 | DM copertura | −1 / −2 | −2 |
 | danno collisione | 1D6 / 2D6 | 2D6 |
-| costo movimento | +1 thrust | +1 thrust |
+| costo movimento | 2 punti movimento per hex | 2 punti movimento per hex |
 | origine tipica | naturale | nave distrutta |
 
 Il Debris Field viene posizionato automaticamente quando una nave viene distrutta in battaglia
@@ -241,8 +248,9 @@ updateObstacle(id: string, patch: Partial<ObstacleToken>): void
 `resolveMovement` viene esteso con passaggi aggiuntivi nell'ordine:
 
 ```text
-1. Aggiorna posizioni (esistente)
-2. Controlla collisioni asteroid/debris — applica danno se paidFieldCost = false
+1. Per ogni nave: calcola posizione finale applicando il budget di movimento (|v|)
+   con costo 2 per hex di campo asteroid/debris, 1 per hex normale (vedi §3.1)
+2. Controlla collisioni asteroid/debris — applica danno se la posizione finale è in un field hex
 3. Controlla impatto gravity well — blocca nave al bordo, applica danno atmosferico;
    se la nave è in dogfight, chiama endDogfight prima del danno (vedi §14.3)
 4. Rimuovi sensor lock per navi entrate in nebula
@@ -388,9 +396,9 @@ Modale semplice a step:
 ThrustModal legge `obstacles` dallo store e mostra avvisi contestuali nel pannello di anteprima:
 
 ```text
-se nextPosition in asteroid_field o debris_field:
-  → banner giallo: "⚠ Asteroid field — +1 thrust required"
-  → thrust disponibile mostrato come (thrust - thrustUsed - 1)
+se il percorso del ghost token attraversa hex di asteroid_field o debris_field:
+  → banner giallo: "⚠ Asteroid field — movement cost ×2 per field hex"
+  → mostra stima "Estimated range: N hex" calcolata con il budget a 2 punti per field hex
 
 se ghost token è nella fascia di avviso gravity well (raggio + 1):
   → banner arancione: "⚠ Approaching [label] — exclusion zone ahead"
@@ -476,7 +484,7 @@ Backward compatibility: sessioni salvate senza `obstacles` leggono `battle.obsta
 | File | Suite |
 | ------ | ------- |
 | `utils/obstacles.test.js` | `getObstacleAt` (hit, miss, raggio 0, raggio N), `getObstaclesInPath`, `computeObstacleCoverDM` per tutti i tipi |
-| `store/battleStore.test.js` | `addObstacle` / `removeObstacle` / `updateObstacle` in undo/redo; `resolveMovement` + collisione asteroid/debris (con e senza paidFieldCost); impatto gravity well; nebula rimuove sensor lock |
+| `store/battleStore.test.js` | `addObstacle` / `removeObstacle` / `updateObstacle` in undo/redo; `resolveMovement` + budget movimento con field hex (nave che attraversa, nave che si ferma dentro, danno collisione); impatto gravity well; nebula rimuove sensor lock |
 | `components/modals/PlaceObstacleModal.test.jsx` | render step 1, selezione tipo aggiorna step 2, confirm chiama addObstacle, gravity well non mostra campo mass |
 
 ---
