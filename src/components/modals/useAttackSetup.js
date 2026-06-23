@@ -10,6 +10,7 @@ import { hexDistance, getRangeBand } from '../../utils/hex.js'
 import { getRangeDM, getTargetSizeDM, isOutOfRange } from '../../utils/combat.js'
 import { getEffectiveSkill } from '../../utils/crew.js'
 import { dogfightAttackDM } from '../../utils/dogfight.js'
+import { getObstacleAt, computeObstacleCoverDM } from '../../utils/obstacles.js'
 
 /**
  * @param {string|null} attackerShipId   ID of the attacking ship
@@ -40,10 +41,12 @@ import { dogfightAttackDM } from '../../utils/dogfight.js'
  * }}
  */
 export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeBand = null, turretSlot = null) {
-  const ships      = useBattleStore((s) => s.ships)
-  const combatMode = useBattleStore((s) => s.combatMode)
-  const rangeBands = useBattleStore((s) => s.rangeBands)
-  const dogfights  = useBattleStore((s) => s.dogfights)
+  const ships            = useBattleStore((s) => s.ships)
+  const combatMode       = useBattleStore((s) => s.combatMode)
+  const rangeBands       = useBattleStore((s) => s.rangeBands)
+  const dogfights        = useBattleStore((s) => s.dogfights)
+  const obstacles        = useBattleStore((s) => s.obstacles)
+  const obstaclesEnabled = useBattleStore((s) => s.obstaclesEnabled)
 
   const attacker = ships.find((s) => s.id === attackerShipId)
   const enemies  = ships.filter((s) => s.id !== attackerShipId)
@@ -102,7 +105,13 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const noPower    = attacker ? (attacker.currentPower ?? basePower) <= 0 : false
   const availableWeaponsFinal = noPower ? [] : availableWeaponsFiltered
 
-  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM
+  // Obstacle cover DM: negative DM applied to attacks against target inside a field or nebula.
+  // Applies in vectorial mode when obstacles are enabled. // Obstacles System Design §3.1, §8
+  const obstacleCoverDM = (obstaclesEnabled && combatMode === 'vectorial' && target)
+    ? computeObstacleCoverDM(getObstacleAt(obstacles, target.position))
+    : 0
+
+  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM + obstacleCoverDM
   const outOfRange  = weapon ? isOutOfRange(weapon.maxRange, rangeBand) : false
 
   return {
@@ -118,6 +127,6 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     outOfRange,
     dogfightTie,
     noPower,
-    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, dogfightDM, totalDM },
+    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, dogfightDM, obstacleCoverDM, totalDM },
   }
 }
