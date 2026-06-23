@@ -26,6 +26,23 @@ Gli ostacoli vengono piazzati dal GM prima o durante la battaglia tramite contex
 
 ---
 
+## 1.1 Attivazione — Setup Screen
+
+Il sistema ostacoli è **disattivato per default**. Il GM lo abilita nella schermata di setup
+prima di avviare la battaglia, tramite un toggle `obstaclesEnabled`.
+
+Regole:
+- Il toggle è disponibile solo nella fase `setup`, prima di avanzare alla fase successiva.
+- Una volta avanzata la fase, `obstaclesEnabled` diventa immutabile per tutta la battaglia —
+  coerente con il comportamento di `combatMode`.
+- Quando disattivato: il context menu non mostra "Place obstacle", il canvas non renderizza
+  nulla, `resolveMovement` salta tutta la logica ostacoli.
+
+**Store:** campo `obstaclesEnabled: boolean` in `battleStore`, default `false`.
+Incluso negli snapshot undo/redo e nel payload export/import.
+
+---
+
 ## 2. Modello Dati
 
 ### 2.1 ObstacleToken
@@ -50,11 +67,12 @@ type ObstacleType = 'asteroid_field' | 'debris_field' | 'gravity_well' | 'nebula
 ```typescript
 interface BattleState {
   // ... campi esistenti ...
+  obstaclesEnabled: boolean      // default false — immutabile dopo la fase setup
   obstacles: ObstacleToken[]
 }
 ```
 
-`obstacles` viene incluso negli snapshot undo/redo e nei file di export/import.
+`obstaclesEnabled` e `obstacles` vengono inclusi negli snapshot undo/redo e nei file di export/import.
 
 ### 2.3 Funzione helper — hex in ostacolo
 
