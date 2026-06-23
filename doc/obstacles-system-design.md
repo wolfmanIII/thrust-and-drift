@@ -170,15 +170,24 @@ Il GM può eliminarlo manualmente.
 
 ### 3.3 Gravity Well
 
-**Definizione:** corpo celeste massiccio (pianeta, luna, gigante gassoso) rappresentato sulla
-mappa come **zona di esclusione statica**. Non esercita pull meccanico sui vettori delle navi.
+**Definizione:** corpo celeste minore (luna, planetoide, stazione orbitale massiccia)
+rappresentato sulla mappa come **zona di esclusione statica**. Non esercita pull meccanico
+sui vettori delle navi.
+
+**Scope:** il gravity well in T&D rappresenta corpi minori, non pianeti abitabili.
+Un pianeta vero a questa scala sarebbe largo decine di hex e la battaglia non si svolgerebbe
+nelle sue vicinanze — se il GM vuole simularne uno, usa semplicemente un raggio molto grande
+e considera l'intera zona come non giocabile. Il danno da impatto (2D6) è calibrato per corpi
+minori: serio per un caccia, gestibile per una fregata. Per un pianeta vero il danno sarebbe
+accademico — la nave è comunque persa.
 
 **Motivazione:** il combattimento vettoriale si svolge su scala di 6 minuti per round, con hex
-da ~648 km ciascuno. A questa scala e distanza, l'accelerazione gravitazionale di un pianeta
-è dell'ordine di mm/s² — trascurabile rispetto al thrust delle navi. Il pull gravitazionale
-è rilevante per la navigazione interplanetaria (scala di ore/giorni), non per lo scontro tattico.
+da ~648 km ciascuno. A questa scala e distanza, l'accelerazione gravitazionale di un corpo
+minore è dell'ordine di mm/s² — trascurabile rispetto al thrust delle navi. Il pull
+gravitazionale è rilevante per la navigazione interplanetaria (scala di ore/giorni), non per
+lo scontro tattico.
 
-**Raggio tipico:** 2–5 hex (rappresenta il corpo fisico + atmosfera/anelli).
+**Raggio tipico:** 2–5 hex (rappresenta il corpo fisico + eventuale atmosfera rarefatta).
 
 #### Zona proibita
 
