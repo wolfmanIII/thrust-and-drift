@@ -587,6 +587,15 @@ Backward compatibility: sessioni salvate senza `obstacles` leggono `battle.obsta
   attuale diventa troppo denso. Convertire in carosello o tab orizzontali al momento
   dell'implementazione. Da rivedere insieme al repulisti generale della UI.
 
+- **Campo `sensors` nel profilo nave** — il campo `sensors` (Basic / Civilian / Military /
+  Improved / Advanced) esiste già nel modello dati ed è visibile nel CatalogPanel, ma non
+  ha ancora un campo editabile nella UI di profilo. Quando viene aggiunto:
+  - Deve riportare una nota esplicita: *"Used only in Vectorial Combat with Obstacles System enabled"*
+  - Il campo è irrilevante in combattimento standard (range band) e quando `obstaclesEnabled = false`
+  - Valore default: `'Basic'` (coerente con CRB p.181 — tutte le navi hanno sensori Basic di serie)
+  - Solo sensori **Improved** (TL12) o **Advanced** (TL15) includono il Densitometro (CRB p.181)
+    e consentono di rilevare la densità di un campo asteroidi prima di entrarci
+
 ---
 
 ## 14. Interazione con il Dogfight
