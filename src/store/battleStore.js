@@ -9,6 +9,7 @@ import { v7 as uuidv7 } from 'uuid'
 import { exportBattle, importBattle } from '../utils/io.js'
 import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount, countMissileAmmoCapacity, countSandcasters, computeIonThrustEffect } from '../utils/combat.js'
 import { hexAdd, hexDistance, segmentMinDistance } from '../utils/hex.js'
+import { getObstacleAt, applyMovementWithObstacles } from '../utils/obstacles.js'
 import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
 import { getEffectiveSkill, buildDefaultAssignments } from '../utils/crew.js'
@@ -294,6 +295,14 @@ const useBattleStore = create((set, get) => {
   /** @type {Record<string, number>} Net thrust accumulated per pair toward band change (basic mode). Positive = approach, negative = flee. Persists across rounds until band changes. */
   basicBandPool: {},
 
+  // === OBSTACLES (vectorial only, obstaclesEnabled immutable after setup phase) ===
+  /** @type {boolean} */
+  obstaclesEnabled: false,
+  /** @type {object[]} ObstacleToken[] */
+  obstacles: [],
+  /** @type {object[]} Field collision events pending GM pilot-roll resolution. */
+  pendingObstacleCollisions: [],
+
   /** @type {object[]} Undo history — snapshots of game state, capped at 20. */
   undoStack: [],
   /** @type {object[]} Redo history — populated by undoLastAction, cleared on any new action. */
@@ -306,7 +315,7 @@ const useBattleStore = create((set, get) => {
    * Called internally before every user-facing mutation.
    */
   pushHistory: () => {
-    const { ships, missiles, dogfights, boardings, rangeBands, basicBandPool, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, rangeBands, basicBandPool, round, phase, initiativeOrder, currentActorIndex, obstaclesEnabled, obstacles } = get()
     const snapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
@@ -317,6 +326,8 @@ const useBattleStore = create((set, get) => {
       round,
       phase,
       initiativeOrder: [...initiativeOrder],
+      obstaclesEnabled,
+      obstacles: structuredClone(obstacles),
       currentActorIndex,
     }
     // Any new user action invalidates the redo stack.
@@ -328,7 +339,7 @@ const useBattleStore = create((set, get) => {
     useUiStore.getState().clearMovementAnimation()
     const { undoStack, redoStack, log } = get()
     if (undoStack.length === 0) return
-    const { ships, missiles, dogfights, boardings, rangeBands, basicBandPool, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, rangeBands, basicBandPool, round, phase, initiativeOrder, currentActorIndex, obstaclesEnabled, obstacles } = get()
     const redoSnapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
@@ -339,6 +350,8 @@ const useBattleStore = create((set, get) => {
       round, phase,
       initiativeOrder: [...initiativeOrder],
       currentActorIndex,
+      obstaclesEnabled,
+      obstacles: structuredClone(obstacles),
     }
     const stack = [...undoStack]
     const snapshot = stack.pop()
@@ -356,7 +369,7 @@ const useBattleStore = create((set, get) => {
     useUiStore.getState().clearMovementAnimation()
     const { redoStack, undoStack, log } = get()
     if (redoStack.length === 0) return
-    const { ships, missiles, dogfights, boardings, rangeBands, basicBandPool, round, phase, initiativeOrder, currentActorIndex } = get()
+    const { ships, missiles, dogfights, boardings, rangeBands, basicBandPool, round, phase, initiativeOrder, currentActorIndex, obstaclesEnabled, obstacles } = get()
     const undoSnapshot = {
       ships: structuredClone(ships),
       missiles: structuredClone(missiles),
@@ -367,6 +380,8 @@ const useBattleStore = create((set, get) => {
       round, phase,
       initiativeOrder: [...initiativeOrder],
       currentActorIndex,
+      obstaclesEnabled,
+      obstacles: structuredClone(obstacles),
     }
     const stack = [...redoStack]
     const snapshot = stack.pop()
@@ -377,6 +392,65 @@ const useBattleStore = create((set, get) => {
       message: `↷ Redo — restored to Round ${snapshot.round}, ${snapshot.phase.toUpperCase()}.`,
     })
     set({ ...snapshot, undoStack: [...undoStack, undoSnapshot].slice(-20), redoStack: stack, log: [...log, redoEntry] })
+  },
+
+  // === OBSTACLES ===
+
+  /**
+   * Toggle obstaclesEnabled. Only allowed during setup phase — immutable after.
+   * // Obstacles System Design §1.1
+   */
+  toggleObstaclesEnabled: () => {
+    const { phase } = get()
+    if (phase !== 'setup') return
+    set((s) => ({ obstaclesEnabled: !s.obstaclesEnabled }))
+  },
+
+  /**
+   * Add an obstacle token to the map.
+   * @param {{ type: string, position: {q:number,r:number}, radius?: number, density?: string, label?: string }} fields
+   */
+  addObstacle: wh((fields) => {
+    const obstacle = {
+      id: uuidv7(),
+      radius: 0,
+      ...fields,
+    }
+    set((s) => ({
+      obstacles: [...s.obstacles, obstacle],
+      log: [...s.log, makeLogEntry({
+        round: s.round, phase: s.phase, type: 'system',
+        message: `Obstacle placed: ${obstacle.type.replace('_', ' ')}${obstacle.label ? ` — ${obstacle.label}` : ''}.`,
+      })],
+    }))
+  }),
+
+  /**
+   * Remove an obstacle by id.
+   * @param {string} id
+   */
+  removeObstacle: wh(
+    (id) => !!get().obstacles.find((o) => o.id === id),
+    (id) => {
+      set((s) => ({ obstacles: s.obstacles.filter((o) => o.id !== id) }))
+    }
+  ),
+
+  /**
+   * Update obstacle properties (density, radius, label).
+   * @param {string} id
+   * @param {Partial<object>} patch
+   */
+  updateObstacle: wh(
+    (id) => !!get().obstacles.find((o) => o.id === id),
+    (id, patch) => {
+      set((s) => ({ obstacles: s.obstacles.map((o) => o.id === id ? { ...o, ...patch } : o) }))
+    }
+  ),
+
+  /** Dismiss a resolved obstacle collision event. */
+  dismissObstacleCollision: (id) => {
+    set((s) => ({ pendingObstacleCollisions: s.pendingObstacleCollisions.filter((c) => c.id !== id) }))
   },
 
   // === SHIP MANAGEMENT ===
@@ -629,7 +703,7 @@ const useBattleStore = create((set, get) => {
 
   /** Move all ships and missiles by their current vector (movement phase). */
   resolveMovement: wh(() => {
-    const { ships, missiles, round, combatMode } = get()
+    const { ships, missiles, round, combatMode, obstaclesEnabled, obstacles } = get()
     // Basic mode has no hex map — movement is managed via range bands in advancePhase.
     if (combatMode === 'basic') return
 
@@ -661,10 +735,65 @@ const useBattleStore = create((set, get) => {
     missiles.forEach((m) => { startPositions[m.id] = { ...m.position } })
     useUiStore.getState().startMovementAnimation(startPositions)
 
-    const movedShips = ships.map((sh) => ({
-      ...sh,
-      position: applyMovement(sh.position, sh.vector),
-    }))
+    // === OBSTACLE-AWARE MOVEMENT ===
+    // gravityImpacts: ships that hit an impassable gravity well
+    // fieldCollisions: ships whose budget runs out inside a field (pilot check needed)
+    const gravityImpacts  = []
+    const fieldCollisions = []
+
+    let movedShips = ships.map((sh) => {
+      if (!obstaclesEnabled) {
+        return { ...sh, position: applyMovement(sh.position, sh.vector) }
+      }
+      const { finalPosition, collision, gravityImpact } = applyMovementWithObstacles(sh.position, sh.vector, obstacles)
+      if (gravityImpact) {
+        gravityImpacts.push({
+          shipId:          sh.id,
+          shipName:        sh.profile.name,
+          dogfightGroupId: sh.inDogfight ?? null,
+          obstacle:        gravityImpact.obstacle,
+          armor:           sh.profile.armor ?? 0,
+        })
+      }
+      if (collision) {
+        fieldCollisions.push({
+          id:       uuidv7(),
+          shipId:   sh.id,
+          shipName: sh.profile.name,
+          obstacle: collision.obstacle,
+          position: collision.position,
+        })
+      }
+      return { ...sh, position: finalPosition }
+    })
+
+    // Clear sensor locks for ships entering a nebula (both directions). // Obstacles System Design §3.4
+    if (obstaclesEnabled) {
+      const nebulaLockerIds = new Set(
+        movedShips
+          .filter((sh) => sh.sensorLockOn && getObstacleAt(obstacles, sh.position)?.type === 'nebula')
+          .map((sh) => sh.id)
+      )
+      if (nebulaLockerIds.size > 0) {
+        movedShips = movedShips.map((sh) => {
+          if (nebulaLockerIds.has(sh.id)) return { ...sh, sensorLockOn: null, sensorLockDM: 0 }
+          if (sh.sensorLockedBy && nebulaLockerIds.has(sh.sensorLockedBy)) return { ...sh, sensorLockedBy: null }
+          return sh
+        })
+      }
+    }
+
+    // Terminate dogfights for ships hitting a gravity well (inline — endDogfight is wh-wrapped).
+    // // Obstacles System Design §14.3
+    const terminatedDogfightIds = new Set(
+      gravityImpacts.filter((gi) => gi.dogfightGroupId).map((gi) => gi.dogfightGroupId)
+    )
+    if (terminatedDogfightIds.size > 0) {
+      movedShips = movedShips.map((sh) =>
+        terminatedDogfightIds.has(sh.inDogfight) ? { ...sh, inDogfight: null } : sh
+      )
+    }
+
     const movedMissiles = missiles.map((m) => {
       const targetShip  = ships.find((s) => s.id === m.target)
       const guidedVector = computeMissileGuidance(m, targetShip)
@@ -728,23 +857,42 @@ const useBattleStore = create((set, get) => {
     // modal + sound after the animation completes.
     const impactedIds = impactedMissiles.map((m) => m.id)
 
+    const gravityLogEntries = gravityImpacts.map((gi) =>
+      makeLogEntry({
+        round, phase: 'movement', type: 'system',
+        message: `${gi.shipName} impacts ${gi.obstacle.label ?? gi.obstacle.type.replace(/_/g, ' ')} — atmospheric entry.${gi.dogfightGroupId ? ' Dogfight terminated.' : ''}`,
+        shipId: gi.shipId,
+      })
+    )
+
     set((s) => ({
       ships: movedShips,
+      dogfights: terminatedDogfightIds.size > 0
+        ? s.dogfights.map((g) => (terminatedDogfightIds.has(g.id) ? { ...g, active: false } : g))
+        : s.dogfights,
       missiles: [
         ...survivingMissiles.filter((m) => m.thrustRemaining >= 0),
         ...impactedMissiles,  // kept alive for animation, removed below
       ],
-      log: [...s.log, ...entries, ...impactLogEntries],
+      log: [...s.log, ...entries, ...impactLogEntries, ...gravityLogEntries],
       passingEncounters: [],  // deferred below — must not appear before animation ends
     }))
 
+    // Gravity well impact damage — 4D6 reduced by Armor. // Obstacles System Design §3.3
+    gravityImpacts.forEach((gi) => {
+      const roll   = rollDice(4, 6)
+      const damage = Math.max(0, roll.total - gi.armor)
+      get().applyDamage(gi.shipId, damage, `${gi.obstacle.label ?? gi.obstacle.type.replace(/_/g, ' ')} — atmospheric impact`, true)
+    })
+
     const animDuration = useUiStore.getState().movementAnimation?.duration ?? 2000
-    if (newImpacts.length > 0 || encounters.length > 0) {
+    if (newImpacts.length > 0 || encounters.length > 0 || fieldCollisions.length > 0) {
       setTimeout(() => {
         set((s) => ({
           missiles: s.missiles.filter((m) => !impactedIds.includes(m.id)),
           pendingMissileImpacts: [...s.pendingMissileImpacts, ...newImpacts],
           passingEncounters: encounters,
+          pendingObstacleCollisions: [...s.pendingObstacleCollisions, ...fieldCollisions],
         }))
         newImpacts.forEach(() => emitEffect('impact_burst', {}))
       }, animDuration + 100)
@@ -1921,8 +2069,8 @@ const useBattleStore = create((set, get) => {
   // === IMPORT / EXPORT ===
 
   exportBattleState: () => {
-    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, basicBandPool } = get()
-    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, basicBandPool, savedAt: new Date().toISOString() })
+    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, basicBandPool, obstaclesEnabled, obstacles, pendingObstacleCollisions } = get()
+    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, basicBandPool, obstaclesEnabled, obstacles, pendingObstacleCollisions, savedAt: new Date().toISOString() })
   },
 
   /**
@@ -1947,6 +2095,9 @@ const useBattleStore = create((set, get) => {
       mapSettings: battle.mapSettings ?? { scale: 1 },
       rangeBands: battle.rangeBands ?? {},
       basicBandPool: battle.basicBandPool ?? {},
+      obstaclesEnabled: battle.obstaclesEnabled ?? false,
+      obstacles: battle.obstacles ?? [],
+      pendingObstacleCollisions: battle.pendingObstacleCollisions ?? [],
       undoStack: [],
       redoStack: [],
     })
