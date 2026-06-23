@@ -592,7 +592,7 @@ Backward compatibility: sessioni salvate senza `obstacles` leggono `battle.obsta
   ha ancora un campo editabile nella UI di profilo. Quando viene aggiunto:
   - Deve riportare una nota esplicita: *"Used only in Vectorial Combat with Obstacles System enabled"*
   - Il campo è irrilevante in combattimento standard (range band) e quando `obstaclesEnabled = false`
-  - Valore default: `'Basic'` (coerente con CRB p.181 — tutte le navi hanno sensori Basic di serie)
+  - Valore default per profili nuovi: `'Basic'` (minimo garantito RAW — CRB p.181)
   - Solo sensori **Improved** (TL12) o **Advanced** (TL15) includono il Densitometro (CRB p.181)
     e consentono di rilevare la densità di un campo asteroidi prima di entrarci
 
