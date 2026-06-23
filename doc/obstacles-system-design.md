@@ -32,6 +32,7 @@ Il sistema ostacoli è **disattivato per default**. Il GM lo abilita nella scher
 prima di avviare la battaglia, tramite un toggle `obstaclesEnabled`.
 
 Regole:
+
 - Il toggle è disponibile solo nella fase `setup`, prima di avanzare alla fase successiva.
 - Una volta avanzata la fase, `obstaclesEnabled` diventa immutabile per tutta la battaglia —
   coerente con il comportamento di `combatMode`.
