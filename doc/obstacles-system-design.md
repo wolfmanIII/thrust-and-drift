@@ -89,6 +89,31 @@ function getObstaclesInPath(obstacles, hexList) {
 }
 ```
 
+### 2.4 Spatial Hash — rendering canvas
+
+`getObstacleAt` itera linearmente su tutti gli ostacoli. A scala di T&D (2–5 ostacoli,
+4–8 navi) il costo in `resolveMovement` è trascurabile — viene chiamato una volta per round.
+
+Il renderer invece gira a 60fps: iterare su tutti gli ostacoli per ogni hex visibile
+ogni frame scala male. Soluzione: spatial hash pre-calcolato in `useCanvasRenderer`,
+aggiornato solo quando la reference `obstacles` cambia:
+
+```javascript
+// in useCanvasRenderer.js
+const obstacleHexMap = useMemo(() => {
+  const map = new Map()
+  for (const o of obstacles) {
+    for (const hex of getHexesInRadius(o.position, o.radius)) {
+      map.set(`${hex.q},${hex.r}`, o)
+    }
+  }
+  return map
+}, [obstacles])
+```
+
+Lookup O(1) per hex nel renderer. `getObstacleAt` rimane invariata per la logica di store
+e combat — iterazione lineare su array piccolo, più leggibile e sufficiente.
+
 ---
 
 ## 3. Meccaniche per Tipo
