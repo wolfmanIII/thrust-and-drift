@@ -2064,6 +2064,9 @@ const useBattleStore = create((set, get) => {
     redoStack: [],
     passingEncounters: [],
     pendingMissileImpacts: [],
+    obstaclesEnabled: false,
+    obstacles: [],
+    pendingObstacleCollisions: [],
   }),
 
   // === IMPORT / EXPORT ===

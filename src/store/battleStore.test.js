@@ -2426,3 +2426,332 @@ describe('spendReactionThrust — Ion Power reduces thrust ceiling', () => {
     expect(useBattleStore.getState().ships[0].evasiveThrust).toBe(2)
   })
 })
+
+// ════════════════════════════════════════════════════════════════════
+// OBSTACLES SYSTEM — battleStore integration
+// // Obstacles System Design §1.1, §3.1–3.4, §5, §6, §11
+// ════════════════════════════════════════════════════════════════════
+
+describe('toggleObstaclesEnabled', () => {
+  it('toggles to true during setup phase', () => {
+    expect(useBattleStore.getState().obstaclesEnabled).toBe(false)
+    useBattleStore.getState().toggleObstaclesEnabled()
+    expect(useBattleStore.getState().obstaclesEnabled).toBe(true)
+  })
+
+  it('toggles back to false on second call', () => {
+    useBattleStore.getState().toggleObstaclesEnabled()
+    useBattleStore.getState().toggleObstaclesEnabled()
+    expect(useBattleStore.getState().obstaclesEnabled).toBe(false)
+  })
+
+  it('is a no-op after setup phase (immutable after phase advance)', () => {
+    useBattleStore.getState().toggleObstaclesEnabled()
+    // Advance past setup by adding a ship and advancing initiative
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.setState({ phase: 'movement' })
+    useBattleStore.getState().toggleObstaclesEnabled()
+    expect(useBattleStore.getState().obstaclesEnabled).toBe(true)  // unchanged
+  })
+})
+
+describe('addObstacle / removeObstacle / updateObstacle', () => {
+  it('addObstacle appends a new obstacle with auto-assigned id', () => {
+    useBattleStore.getState().addObstacle({
+      type: 'asteroid_field', position: { q: 3, r: 0 }, radius: 1, density: 'light',
+    })
+    const obs = useBattleStore.getState().obstacles
+    expect(obs).toHaveLength(1)
+    expect(obs[0].id).toBeDefined()
+    expect(obs[0].type).toBe('asteroid_field')
+  })
+
+  it('addObstacle defaults radius to 0 when omitted', () => {
+    useBattleStore.getState().addObstacle({ type: 'gravity_well', position: { q: 0, r: 0 } })
+    expect(useBattleStore.getState().obstacles[0].radius).toBe(0)
+  })
+
+  it('addObstacle pushes to undoStack (wh-wrapped)', () => {
+    const before = useBattleStore.getState().undoStack.length
+    useBattleStore.getState().addObstacle({ type: 'nebula', position: { q: 0, r: 0 }, radius: 2 })
+    expect(useBattleStore.getState().undoStack.length).toBe(before + 1)
+  })
+
+  it('removeObstacle deletes the obstacle by id', () => {
+    useBattleStore.getState().addObstacle({ type: 'debris_field', position: { q: 1, r: 0 }, radius: 1 })
+    const { id } = useBattleStore.getState().obstacles[0]
+    useBattleStore.getState().removeObstacle(id)
+    expect(useBattleStore.getState().obstacles).toHaveLength(0)
+  })
+
+  it('removeObstacle is a no-op for unknown id', () => {
+    useBattleStore.getState().addObstacle({ type: 'nebula', position: { q: 0, r: 0 }, radius: 2 })
+    useBattleStore.getState().removeObstacle('no-such-id')
+    expect(useBattleStore.getState().obstacles).toHaveLength(1)
+  })
+
+  it('removeObstacle pushes to undoStack', () => {
+    useBattleStore.getState().addObstacle({ type: 'nebula', position: { q: 0, r: 0 }, radius: 2 })
+    const { id } = useBattleStore.getState().obstacles[0]
+    const before = useBattleStore.getState().undoStack.length
+    useBattleStore.getState().removeObstacle(id)
+    expect(useBattleStore.getState().undoStack.length).toBe(before + 1)
+  })
+
+  it('undoLastAction after addObstacle removes the obstacle', () => {
+    useBattleStore.getState().addObstacle({ type: 'nebula', position: { q: 5, r: 0 }, radius: 3 })
+    expect(useBattleStore.getState().obstacles).toHaveLength(1)
+    useBattleStore.getState().undoLastAction()
+    expect(useBattleStore.getState().obstacles).toHaveLength(0)
+  })
+
+  it('updateObstacle patches fields on the matching obstacle', () => {
+    useBattleStore.getState().addObstacle({
+      type: 'asteroid_field', position: { q: 0, r: 0 }, radius: 1, density: 'light',
+    })
+    const { id } = useBattleStore.getState().obstacles[0]
+    useBattleStore.getState().updateObstacle(id, { density: 'dense', radius: 2 })
+    const obs = useBattleStore.getState().obstacles[0]
+    expect(obs.density).toBe('dense')
+    expect(obs.radius).toBe(2)
+  })
+
+  it('updateObstacle is a no-op for unknown id', () => {
+    useBattleStore.getState().addObstacle({ type: 'nebula', position: { q: 0, r: 0 }, radius: 1 })
+    useBattleStore.getState().updateObstacle('ghost', { radius: 99 })
+    expect(useBattleStore.getState().obstacles[0].radius).toBe(1)
+  })
+})
+
+describe('dismissObstacleCollision', () => {
+  it('removes the event with the matching id from pendingObstacleCollisions', () => {
+    useBattleStore.setState({
+      pendingObstacleCollisions: [
+        { id: 'c1', shipId: 's1', obstacle: { type: 'asteroid_field' }, position: { q: 0, r: 0 } },
+        { id: 'c2', shipId: 's2', obstacle: { type: 'debris_field' },   position: { q: 1, r: 0 } },
+      ],
+    })
+    useBattleStore.getState().dismissObstacleCollision('c1')
+    const pending = useBattleStore.getState().pendingObstacleCollisions
+    expect(pending).toHaveLength(1)
+    expect(pending[0].id).toBe('c2')
+  })
+
+  it('is a no-op for unknown id', () => {
+    useBattleStore.setState({
+      pendingObstacleCollisions: [
+        { id: 'c1', shipId: 's1', obstacle: { type: 'debris_field' }, position: { q: 0, r: 0 } },
+      ],
+    })
+    useBattleStore.getState().dismissObstacleCollision('ghost')
+    expect(useBattleStore.getState().pendingObstacleCollisions).toHaveLength(1)
+  })
+})
+
+describe('resolveMovement — obstacle-aware (vectorial)', () => {
+  // All resolveMovement obstacle tests require obstaclesEnabled=true.
+  // Math.random mocked for deterministic 4D6 gravity-well damage.
+
+  beforeEach(() => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    useBattleStore.getState().toggleObstaclesEnabled()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('ship traverses open space normally when obstacles present but not in path', () => {
+    useBattleStore.getState().addObstacle({ type: 'nebula', position: { q: 10, r: 0 }, radius: 0 })
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { vector: { q: 3, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    expect(useBattleStore.getState().ships[0].position).toEqual({ q: 3, r: 0 })
+  })
+
+  it('ship with sufficient budget exits an asteroid field cleanly — no collision queued', () => {
+    vi.useFakeTimers()
+    // Field at q:2 radius 0. Budget = |{q:4,r:0}| = 4.
+    // Path: 0→1(cost1)→2(field,cost2)→3(cost1). Total=4=budget → stops at q:3 outside field.
+    useBattleStore.getState().addObstacle({
+      type: 'asteroid_field', position: { q: 2, r: 0 }, radius: 0, density: 'light',
+    })
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { vector: { q: 4, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    vi.runAllTimers()
+    // Ship stops at q:3 (budget exhausted), not inside field (q:2) → no collision
+    expect(useBattleStore.getState().ships[0].position).toEqual({ q: 3, r: 0 })
+    expect(useBattleStore.getState().pendingObstacleCollisions).toHaveLength(0)
+    vi.useRealTimers()
+  })
+
+  it('ship stranded inside field → pendingObstacleCollisions queued after animation', () => {
+    vi.useFakeTimers()
+    // Field at q:1 radius 1 (covers q:0..q:2). Budget = |{q:2,r:0}| = 2.
+    // Path: 0→1(field,cost2): pays 2, stops at q:1 inside field → collision.
+    useBattleStore.getState().addObstacle({
+      type: 'asteroid_field', position: { q: 1, r: 0 }, radius: 1, density: 'light',
+    })
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { vector: { q: 2, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    // Before timer flush — not queued yet
+    expect(useBattleStore.getState().pendingObstacleCollisions).toHaveLength(0)
+    vi.runAllTimers()
+    const collisions = useBattleStore.getState().pendingObstacleCollisions
+    expect(collisions).toHaveLength(1)
+    expect(collisions[0].shipId).toBe(id)
+    expect(collisions[0].obstacle.type).toBe('asteroid_field')
+    vi.useRealTimers()
+  })
+
+  it('gravity well stops ship at border and deals 4D6 − Armor damage immediately', () => {
+    // Math.random = 0.5 → each D6 = Math.floor(0.5×6)+1 = 4 → 4D6 = 16. Armor = 0 → 16 damage.
+    // GW at q:3 radius 0. Budget = |{q:5,r:0}| = 5. Ship reaches q:2 (stops before q:3).
+    useBattleStore.getState().addObstacle({ type: 'gravity_well', position: { q: 3, r: 0 }, radius: 0 })
+    useBattleStore.getState().addShip(makeProfile({ hull: 20, armor: 0 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { vector: { q: 5, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.position).toEqual({ q: 2, r: 0 })
+    // 4D6 = 16, armor 0 → 16 damage → hull 20−16 = 4
+    expect(ship.hullCurrent).toBe(4)
+  })
+
+  it('gravity well damage is reduced by ship Armor', () => {
+    // Math.random = 0.5 → 4D6 = 16. Armor = 6 → net = max(0, 16-6) = 10 → hull 20−10 = 10.
+    useBattleStore.getState().addObstacle({ type: 'gravity_well', position: { q: 3, r: 0 }, radius: 0 })
+    useBattleStore.getState().addShip(makeProfile({ hull: 20, armor: 6 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { vector: { q: 5, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    expect(useBattleStore.getState().ships[0].hullCurrent).toBe(10)
+  })
+
+  it('gravity well terminates dogfight for involved ships (inline, no double history)', () => {
+    // Ship A (index 0) in dogfight 'dg1' → hits gravity well → inDogfight cleared, dogfight deactivated.
+    useBattleStore.getState().addObstacle({ type: 'gravity_well', position: { q: 3, r: 0 }, radius: 0 })
+    useBattleStore.getState().addShip(makeProfile({ hull: 20, armor: 0 }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ hull: 20, armor: 0 }), { q: 1, r: 0 }, 'npc',     '#f00')
+    const [shipA, shipB] = useBattleStore.getState().ships
+    // Set up a fake dogfight using actual instance IDs
+    useBattleStore.setState({
+      dogfights: [{ id: 'dg1', active: true, shipAId: shipA.id, shipBId: shipB.id }],
+      ships: [{ ...shipA, inDogfight: 'dg1' }, { ...shipB, inDogfight: 'dg1' }],
+    })
+    useBattleStore.getState().updateShip(shipA.id, { vector: { q: 5, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    const ships = useBattleStore.getState().ships
+    const dogfights = useBattleStore.getState().dogfights
+    expect(ships.find((s) => s.id === shipA.id).inDogfight).toBeNull()
+    expect(ships.find((s) => s.id === shipB.id).inDogfight).toBeNull()
+    expect(dogfights[0].active).toBe(false)
+  })
+
+  it('nebula entry clears sensor lock on the locking ship', () => {
+    // Ship A has sensorLockOn: B. A moves into nebula → lock cleared on A and B.
+    useBattleStore.getState().addObstacle({ type: 'nebula', position: { q: 3, r: 0 }, radius: 0 })
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile(), { q: 8, r: 0 }, 'npc',     '#f00')
+    const [shipA, shipB] = useBattleStore.getState().ships
+    // Inject sensor lock using actual instance IDs
+    useBattleStore.setState({
+      ships: [
+        { ...shipA, sensorLockOn: shipB.id, sensorLockDM: 2 },
+        { ...shipB, sensorLockedBy: shipA.id },
+      ],
+    })
+    // shipA vector {q:3,r:0} → lands on nebula hex → lock cleared
+    useBattleStore.getState().updateShip(shipA.id, { vector: { q: 3, r: 0 } })
+    useBattleStore.getState().updateShip(shipB.id, { vector: { q: 0, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    const ships = useBattleStore.getState().ships
+    const a = ships.find((s) => s.id === shipA.id)
+    const b = ships.find((s) => s.id === shipB.id)
+    expect(a.sensorLockOn).toBeNull()
+    expect(a.sensorLockDM).toBe(0)
+    expect(b.sensorLockedBy).toBeNull()
+  })
+
+  it('obstaclesEnabled=false: ship moves through gravity well hex without stopping', () => {
+    // Disable obstacles again (beforeEach already toggled it on)
+    useBattleStore.getState().toggleObstaclesEnabled()
+    expect(useBattleStore.getState().obstaclesEnabled).toBe(false)
+    useBattleStore.getState().addObstacle({ type: 'gravity_well', position: { q: 2, r: 0 }, radius: 0 })
+    useBattleStore.getState().addShip(makeProfile({ hull: 20, armor: 0 }), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { vector: { q: 4, r: 0 } })
+    useBattleStore.getState().resolveMovement()
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.position).toEqual({ q: 4, r: 0 })
+    expect(ship.hullCurrent).toBe(ship.profile.hull)
+  })
+})
+
+describe('exportBattleState / importBattleState — obstacle fields', () => {
+  it('export includes obstaclesEnabled, obstacles, pendingObstacleCollisions', () => {
+    useBattleStore.getState().toggleObstaclesEnabled()
+    useBattleStore.getState().addObstacle({
+      type: 'nebula', position: { q: 5, r: -2 }, radius: 2, label: 'Zhodani Shroud',
+    })
+    useBattleStore.setState({
+      pendingObstacleCollisions: [
+        { id: 'ev1', shipId: 'x', obstacle: { type: 'debris_field' }, position: { q: 0, r: 0 } },
+      ],
+    })
+    useBattleStore.getState().exportBattleState()
+    const callArg = exportBattle.mock.calls.at(-1)[0]
+    expect(callArg.obstaclesEnabled).toBe(true)
+    expect(callArg.obstacles).toHaveLength(1)
+    expect(callArg.obstacles[0].type).toBe('nebula')
+    expect(callArg.pendingObstacleCollisions).toHaveLength(1)
+  })
+
+  it('import restores obstaclesEnabled, obstacles, pendingObstacleCollisions', async () => {
+    const fakeObstacle = { id: 'o99', type: 'asteroid_field', position: { q: 3, r: 0 }, radius: 1, density: 'dense' }
+    importBattle.mockResolvedValueOnce({
+      id: 'battle-import-test',
+      name: 'Import Test',
+      round: 2,
+      combatMode: 'vectorial',
+      phase: 'movement',
+      ships: [],
+      missiles: [],
+      dogfights: [],
+      boardings: [],
+      log: [],
+      mapSettings: null,
+      rangeBands: null,
+      basicBandPool: null,
+      initiativeOrder: [],
+      currentActorIndex: 0,
+      obstaclesEnabled: true,
+      obstacles: [fakeObstacle],
+      pendingObstacleCollisions: [],
+    })
+    await useBattleStore.getState().importBattleState(null)
+    expect(useBattleStore.getState().obstaclesEnabled).toBe(true)
+    expect(useBattleStore.getState().obstacles).toHaveLength(1)
+    expect(useBattleStore.getState().obstacles[0].type).toBe('asteroid_field')
+    expect(useBattleStore.getState().pendingObstacleCollisions).toHaveLength(0)
+  })
+
+  it('import with missing obstacle fields defaults gracefully', () => {
+    importBattle.mockReturnValueOnce({
+      id: 'x', name: 'X', round: 1, combatMode: 'vectorial', phase: 'setup',
+      ships: [], missiles: [], dogfights: [], boardings: [], log: [],
+      mapSettings: null, rangeBands: null, basicBandPool: null,
+      initiativeOrder: [], currentActorIndex: 0,
+      // obstaclesEnabled / obstacles / pendingObstacleCollisions intentionally absent
+    })
+    useBattleStore.getState().importBattleState(null)
+    expect(useBattleStore.getState().obstaclesEnabled).toBe(false)
+    expect(useBattleStore.getState().obstacles).toEqual([])
+    expect(useBattleStore.getState().pendingObstacleCollisions).toEqual([])
+  })
+})
