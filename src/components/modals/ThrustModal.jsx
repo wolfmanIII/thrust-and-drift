@@ -11,12 +11,16 @@ import { useBattleStore } from '../../store/battleStore.js'
 import { hexDistance, hexAdd, HEX_DIRECTIONS } from '../../utils/hex.js'
 import { isValidThrustDelta, computeIonThrustEffect } from '../../utils/combat.js'
 import { emitEffect } from '../../utils/effectQueue.js'
+import { getObstacleAt, hexLineDraw } from '../../utils/obstacles.js'
 
 export function ThrustModal() {
   const closeModal   = useUiStore((s) => s.closeModal)
   const modalPayload = useUiStore((s) => s.modalPayload)
   const ships        = useBattleStore((s) => s.ships)
   const applyShipThrust = useBattleStore((s) => s.applyShipThrust)
+
+  const obstacles        = useBattleStore((s) => s.obstacles)
+  const obstaclesEnabled = useBattleStore((s) => s.obstaclesEnabled)
 
   const ship = ships.find((s) => s.id === modalPayload?.shipId)
 
@@ -54,6 +58,42 @@ export function ThrustModal() {
   }
 
   const handleReset = () => setDelta({ q: 0, r: 0 })
+
+  // Obstacle path analysis — only in vectorial mode with obstacles enabled
+  // // Obstacles System Design §7
+  let obstacleWarning = null  // null | 'field' | 'gravity_approach' | 'gravity_collision'
+  let gravityWellLabel = null
+  if (obstaclesEnabled && newVector && ship.position) {
+    const ghostPos  = hexAdd(ship.position, newVector)
+    const pathHexes = hexLineDraw(ship.position, ghostPos)
+
+    for (const hex of pathHexes) {
+      const obstacle = getObstacleAt(obstacles, hex)
+      if (obstacle?.type === 'gravity_well') {
+        obstacleWarning = 'gravity_collision'
+        gravityWellLabel = obstacle.label ?? 'gravity well'
+        break
+      }
+      // Warning ring: hex within radius+1 but outside radius
+      const nearGravity = obstacles.find(
+        (o) => o.type === 'gravity_well' &&
+          hexDistance(hex, o.position) === o.radius + 1
+      )
+      if (nearGravity && obstacleWarning !== 'gravity_collision') {
+        obstacleWarning = 'gravity_approach'
+        gravityWellLabel = nearGravity.label ?? 'exclusion zone'
+      }
+      if (!obstacle && obstacleWarning !== 'gravity_approach' && obstacleWarning !== 'gravity_collision') {
+        // pass — no field obstacle
+      }
+      if ((obstacle?.type === 'asteroid_field' || obstacle?.type === 'debris_field') &&
+          obstacleWarning === null) {
+        obstacleWarning = 'field'
+      }
+    }
+  }
+
+  const gravityCollisionBlocks = obstacleWarning === 'gravity_collision'
 
   return (
     <Modal title={`Thrust — ${ship.profile.name}`} onClose={closeModal}>
@@ -148,6 +188,23 @@ export function ThrustModal() {
           </p>
         )}
 
+        {/* Obstacle warnings */}
+        {obstacleWarning === 'field' && (
+          <p className="text-amber-400 font-mono text-xs text-center">
+            ⚠ Asteroid field — movement cost ×2 per field hex
+          </p>
+        )}
+        {obstacleWarning === 'gravity_approach' && (
+          <p className="text-orange-400 font-mono text-xs text-center">
+            ⚠ Approaching {gravityWellLabel} — exclusion zone ahead
+          </p>
+        )}
+        {obstacleWarning === 'gravity_collision' && (
+          <p className="text-red-400 font-mono text-xs text-center animate-pulse">
+            🚨 COLLISION — trajectory enters exclusion zone of {gravityWellLabel}
+          </p>
+        )}
+
         {/* Actions */}
         <div className="flex gap-2">
           <button
@@ -158,7 +215,7 @@ export function ThrustModal() {
           </button>
           <button
             onClick={handleConfirm}
-            disabled={!isValid || cost === 0}
+            disabled={!isValid || cost === 0 || gravityCollisionBlocks}
             className="flex-1 py-2 bg-(--neon-cyan)/10 border border-(--neon-cyan)/40 text-(--neon-cyan) font-mono text-xs rounded hover:bg-(--neon-cyan)/20 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
           >
             APPLY THRUST
