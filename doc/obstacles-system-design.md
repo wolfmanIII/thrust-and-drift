@@ -251,10 +251,10 @@ Tutti gli hex entro il raggio del gravity well sono **non attraversabili**:
 
 - ThrustModal non permette di impostare un vettore che porterebbe la nave dentro il raggio
 - Se il vettore corrente porterebbe la nave dentro la zona (nessun thrust disponibile per correggere),
-  `resolveMovement` blocca la nave sull'hex di bordo più vicino e applica danno da impatto atmosferico:
+  `resolveMovement` blocca la nave sull'hex di bordo più vicino e applica danno da impatto:
 
 ```text
-danno impatto = 2D6  (ignora Armor)
+danno impatto = 4D6  (ridotto da Armor)
 log entry: "[nave] impatta [label] — atmospheric entry"
 ```
 
@@ -637,7 +637,7 @@ In questo caso:
 - `resolveMovement` termina il dogfight automaticamente (`endDogfight(sh.inDogfight)`)
   **prima** di applicare il danno da impatto — la nave è in emergenza atmosferica e non
   può più manovrare
-- Il danno da impatto atmosferico (4D6, ignora Armor) viene applicato una sola volta
+- Il danno da impatto atmosferico (4D6, ridotto da Armor) viene applicato una sola volta
   per round macroscopico come da §3.3
 - Log entry: `"[nave] trascina fuori dal dogfight per impatto con [label]"`
 
