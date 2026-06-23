@@ -189,7 +189,7 @@ Tutti gli hex entro il raggio del gravity well sono **non attraversabili**:
   `resolveMovement` blocca la nave sull'hex di bordo più vicino e applica danno da impatto atmosferico:
 
 ```text
-danno impatto = 4D6  (ignora Armor)
+danno impatto = 2D6  (ignora Armor)
 log entry: "[nave] impatta [label] — atmospheric entry"
 ```
 
