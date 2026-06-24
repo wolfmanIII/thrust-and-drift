@@ -4,6 +4,7 @@
 
 import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
+import { useBattleStore } from '../../store/battleStore.js'
 
 // ── Primitives ────────────────────────────────────────────────────────────────
 
@@ -244,10 +245,69 @@ function ExplosionIcon() {
   )
 }
 
+// ── Obstacle icons ────────────────────────────────────────────────────────────
+// Flat-top hex centred at (20,20), size=14 → points "34,20 27,32 13,32 6,20 13,8 27,8"
+
+function AsteroidFieldIcon({ density = 'light' }) {
+  const fill   = density === 'dense' ? 'rgba(161,138,104,0.30)' : 'rgba(161,138,104,0.18)'
+  const stroke = density === 'dense' ? 'rgba(161,138,104,0.70)' : 'rgba(161,138,104,0.50)'
+  const label  = density === 'dense' ? 'AST-D' : 'AST'
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40">
+      <polygon points="34,20 27,32 13,32 6,20 13,8 27,8"
+        fill={fill} stroke={stroke} strokeWidth="1.5" strokeDasharray="4 3" />
+      <text x="20" y="24" textAnchor="middle" fontSize="7.5" fill={stroke}
+        fontFamily="monospace" fontWeight="bold">{label}</text>
+    </svg>
+  )
+}
+
+function DebrisFieldIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40">
+      <polygon points="34,20 27,32 13,32 6,20 13,8 27,8"
+        fill="rgba(100,100,120,0.28)" stroke="rgba(150,150,180,0.60)"
+        strokeWidth="1.5" strokeDasharray="4 3" />
+      <text x="20" y="24" textAnchor="middle" fontSize="7.5" fill="rgba(150,150,180,0.80)"
+        fontFamily="monospace" fontWeight="bold">DEB</text>
+    </svg>
+  )
+}
+
+function GravityWellIcon() {
+  // Zone hex size=9 centred at (20,20) → "29,20 24.5,28 15.5,28 11,20 15.5,12 24.5,12"
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40">
+      {/* Warning ring — outer orange dashed circle */}
+      <circle cx="20" cy="20" r="17"
+        fill="rgba(251,146,60,0.08)" stroke="rgba(251,146,60,0.40)"
+        strokeWidth="1" strokeDasharray="3 3" />
+      {/* Exclusion zone hex — solid purple */}
+      <polygon points="29,20 24.5,28 15.5,28 11,20 15.5,12 24.5,12"
+        fill="rgba(139,92,246,0.22)" stroke="rgba(139,92,246,0.70)" strokeWidth="1.5" />
+      {/* Core token — filled circle */}
+      <circle cx="20" cy="20" r="5.5" fill="rgba(139,92,246,0.85)" />
+    </svg>
+  )
+}
+
+function NebulaIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40">
+      <polygon points="34,20 27,32 13,32 6,20 13,8 27,8"
+        fill="rgba(56,189,248,0.10)" stroke="rgba(56,189,248,0.30)"
+        strokeWidth="1.5" strokeDasharray="4 3" />
+      <text x="20" y="24" textAnchor="middle" fontSize="7.5" fill="rgba(56,189,248,0.55)"
+        fontFamily="monospace" fontWeight="bold">NEB</text>
+    </svg>
+  )
+}
+
 // ── Modal ─────────────────────────────────────────────────────────────────────
 
 export function LegendModal() {
-  const closeModal = useUiStore((s) => s.closeModal)
+  const closeModal       = useUiStore((s) => s.closeModal)
+  const obstaclesEnabled = useBattleStore((s) => s.obstaclesEnabled)
 
   return (
     <Modal title="Legend" onClose={closeModal} width="max-w-2xl">
@@ -315,6 +375,35 @@ export function LegendModal() {
         </div>
 
       </div>
+
+      {obstaclesEnabled && (
+        <>
+          <hr className="border-slate-800 my-1" />
+          <Section title="Obstacles ✦ — optional, non-RAW, vectorial mode">
+            <div className="grid grid-cols-2 gap-x-6">
+              <div className="space-y-1">
+                <Row icon={<AsteroidFieldIcon density="light" />}
+                  label="Asteroid Field (light)"
+                  description="movement ×2 · 1D6−Armor collision · DM−1 cover" />
+                <Row icon={<AsteroidFieldIcon density="dense" />}
+                  label="Asteroid Field (dense)"
+                  description="movement ×2 · 2D6−Armor collision · DM−2 cover" />
+                <Row icon={<DebrisFieldIcon />}
+                  label="Debris Field"
+                  description="movement ×2 · 2D6−Armor collision · auto-spawns on ship kill" />
+              </div>
+              <div className="space-y-1">
+                <Row icon={<GravityWellIcon />}
+                  label="Gravity Well"
+                  description="exclusion zone · 4D6−Armor impact · orange ring = warning" />
+                <Row icon={<NebulaIcon />}
+                  label="Nebula"
+                  description="sensor lock blocked · DM−2 attacks & sensors" />
+              </div>
+            </div>
+          </Section>
+        </>
+      )}
     </Modal>
   )
 }
