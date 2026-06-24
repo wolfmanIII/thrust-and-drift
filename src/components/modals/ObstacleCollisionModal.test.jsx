@@ -3,7 +3,7 @@
  * // Obstacles System Design §3.1–3.2
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, fireEvent }             from '@testing-library/react'
 import { ObstacleCollisionModal } from './ObstacleCollisionModal.jsx'
 import { useBattleStore }         from '../../store/battleStore.js'

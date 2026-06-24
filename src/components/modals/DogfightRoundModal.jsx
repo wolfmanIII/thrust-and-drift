@@ -13,7 +13,6 @@ import { useBattleStore } from '../../store/battleStore.js'
 import { getEffectiveSkill } from '../../utils/crew.js'
 import {
   getTonnageDM,
-  rollDogfightPilot,
   resolveDogfightChecks,
   dogfightAttackDM,
   canEscape,
