@@ -204,13 +204,14 @@ export function HelpScreen({ onBack } = {}) {
           </Sub>
 
           <Sub title="LEGEND">
-            <p>Click <span className="text-slate-200">📖 Legend</span> (fixed button, top-right of the battle screen) to open the visual reference panel. Also accessible via right-click any empty hex → Legend.</p>
+            <p>Click <span className="text-slate-200">📖 Legend</span> (fixed button, top-right of the battle screen) to open the visual reference panel. Also accessible via right-click any empty hex → Legend. The adjacent <span className="text-slate-200">?</span> button opens this Field Manual as an in-app overlay.</p>
             <KV k="Tokens" v="Ship silhouette (6 shapes: delta, needle, freighter, gunship, cruiser, capital — each rotates to face velocity direction; shape chosen at placement); HP arc (green/yellow/red); missile salvo (three staggered yellow silhouettes — count + thrust arc; hover for launcher/target/thrust tooltip); torpedo (red/amber silhouette — separate salvo type)." />
             <KV k="Turret beams" v="Pulse Laser (sky blue), Beam Laser (blue), Particle Beam (purple), Railgun (orange), Fusion Gun (amber-white), Plasma Gun (magenta)." />
             <KV k="Barbette beams" v="Pulse Laser Barbette (sky blue, thicker), Beam Laser Barbette (blue, thicker), Particle Barbette (purple, thicker), Fusion Barbette (amber-white, thicker), Plasma Barbette (magenta, thicker), Railgun Barbette (orange, thicker) — all barbettes deal ×3 damage after armour." />
             <KV k="Hit effects" v="Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion weapon hit)." />
             <KV k="Movement effects" v="Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line)." />
             <KV k="Persistent indicators" v="Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + amber ring), Missile exhausted (×), Ion aura (pulsing blue ring — while ionRoundsLeft {'>'} 0), Range band rings (dashed cyan hexagons — SHORT / MEDIUM / LONG / VERY LONG — shown on selected ship; hidden during thrust targeting)." />
+            <KV k="Obstacle zones" v="Asteroid Field (dashed amber border; AST light / AST-D dense at centre); Debris Field (dashed gray-blue; DEB); Gravity Well (solid purple zone, filled purple circle at centre — dashed orange warning ring at radius + 1); Nebula (dashed cyan; NEB). Type label coloured like the zone border; custom label appended if set. Vectorial mode — obstacles enabled only." />
           </Sub>
         </Section>
 

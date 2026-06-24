@@ -111,7 +111,7 @@ The battle map is a **flat-top hex grid**. All interaction is mouse-driven.
 
 ### 3.1 Legend
 
-Click **📖 Legend** (fixed button, top-right of the battle screen) to open the visual reference panel. Also accessible via right-click any **empty hex** → **Legend**.
+Click **📖 Legend** (fixed button, top-right of the battle screen) to open the visual reference panel. Also accessible via right-click any **empty hex** → **Legend**. The adjacent **?** button opens this Field Manual as an in-app overlay.
 
 | Category | Symbols |
 | -------- | ------- |
@@ -121,6 +121,7 @@ Click **📖 Legend** (fixed button, top-right of the battle screen) to open the
 | **Hit effects** | Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion weapon hit) |
 | **Movement effects** | Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line) |
 | **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + red ring), Missile exhausted (×), Ion aura (pulsing blue ring, while ionRoundsLeft > 0), **Range band rings** (dashed cyan hexagons — SHORT / MEDIUM / LONG / VERY LONG boundaries — shown when a ship is selected; hidden during thrust targeting) |
+| **Obstacle zones** | Asteroid Field (dashed amber border; `AST` light / `AST-D` dense at centre hex); Debris Field (dashed gray-blue border; `DEB`); Gravity Well (solid purple zone, filled purple circle at centre — dashed orange warning ring at radius + 1); Nebula (dashed cyan border; `NEB`). Type label coloured like the zone border; custom label appended if set. *(vectorial mode — obstacles enabled only)* |
 
 ### 3.2 Basic Mode View
 
