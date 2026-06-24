@@ -244,9 +244,12 @@ console.log('  Ships:', await page.evaluate(async () => {
 for (const [tx, ty] of [[attackerPx.x, attackerPx.y], [attackerPx.x + 16, attackerPx.y], [attackerPx.x - 16, attackerPx.y]]) {
   await page.mouse.click(tx, ty, { button: 'right' })
   await page.waitForTimeout(300)
-  const menuText = await page.locator('body').textContent()
-  if (/hull|name|faction/i.test(menuText)) {
-    const hasBoardAgain = /BOARD/i.test(menuText)
+  // Only inspect the context menu element, not body (body contains "BOARDING" HUD badge)
+  const ctxMenu = page.locator('.absolute.z-50').first()
+  if (await ctxMenu.isVisible().catch(() => false)) {
+    const ctxText = await ctxMenu.textContent()
+    // "Board <Name>…" is the menu item label; "BOARDING" in HUD is not a menu item
+    const hasBoardAgain = /^Board /m.test(ctxText)
     console.log(hasBoardAgain
       ? '  ⚠️  BOARD option still visible for ship already in boarding'
       : '  ✅ BOARD option correctly absent for ship in boarding')
