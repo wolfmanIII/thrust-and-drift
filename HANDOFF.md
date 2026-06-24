@@ -9,16 +9,32 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.23.1 |
+| **Versione** | 1.24.0 |
 | **Branch** | main |
-| **Test** | 962 passing |
-| **Ultimo commit** | chore(release): bump Dashboard version to v1.23.1 (`4190509`) |
+| **Test** | 1050 passing |
+| **Ultimo commit** | docs(field-manual): add §16 Obstacles — optional, non-RAW, vectorial only (`d191d6c`) |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Reddit bug fixes (v1.23.0)
+### Sessione corrente — Obstacles system (v1.24.0)
+
+Implementazione completa del sistema ostacoli (house-rule, vectorial only, off by default):
+
+1. **`utils/obstacles.js`** (`61ab6b4`) — spatial queries, budget movimento (2pt/field hex), cover DM.
+2. **`battleStore.js`** (`7efc32b`) — `addObstacle/removeObstacle/updateObstacle`, `toggleObstaclesEnabled` (phase guard: solo setup), `resolveMovement` obstacle-aware, `pendingObstacleCollisions`, export/import.
+3. **Canvas** (`9301fea`) — `obstacleRenderers.js` + layer 1b in `useCanvasRenderer`; spatial hash `useMemo` per O(1) lookup a 60fps.
+4. **`ObstacleCollisionModal`** (`95d7356`) — pilot check + danno a due step; 4 tipi/densità.
+5. **`PlaceObstacleModal` + `ObstacleContextMenu`** (`3815155`) — add/edit/remove via context menu.
+6. **HUD toggle** (`b05a713`) — `obstaclesEnabled` visibile solo in setup/vectorial.
+7. **Attack DM** (`08f5dab`) — cover DM da ostacoli in `useAttackSetup`.
+8. **ActionModal** (`1a73af6`) — sensor lock disabilitato in nebula.
+9. **ThrustModal** (`cd7220b`) — banner path warnings per field e gravity well.
+10. **Test** (`80ceab2`, `fbd1a0e`) — 33 test in `obstacles.test.js`, +329 righe in `battleStore.test.js`, 211 in `ObstacleCollisionModal.test.jsx`, 190 in `PlaceObstacleModal.test.jsx`. 1050 test totali.
+11. **Doc** — `obstacles-system-design.md` aggiornato (non-RAW, movement budget, armor ruling, gravity well scope); `field-manual.md` §16 aggiunto; CHANGELOG v1.24.0; HelpScreen §Obstacles.
+
+### Sessione precedente — Reddit bug fixes (v1.23.0)
 
 7 fix implementati da segnalazioni Reddit:
 

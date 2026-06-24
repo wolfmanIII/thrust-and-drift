@@ -22,6 +22,7 @@ const SECTIONS = [
   { id: 'save-resume',   label: 'Save & Resume' },
   { id: 'dogfight',      label: 'Dogfight' },
   { id: 'boarding',      label: 'Boarding' },
+  { id: 'obstacles',     label: 'Obstacles ✦' },
 ]
 
 function Section({ id, title, children }) {
@@ -612,6 +613,36 @@ export function HelpScreen() {
           </Sub>
 
           <Note>Active boardings show a ⚔️ BOARDING badge in the HUD. Click it to reopen the current phase modal. Ships in a boarding do not participate in the standard Attack phase. A ship already in a dogfight cannot be boarded — it must exit the dogfight first. A ship with Forced Linkage active cannot use thrust to manoeuvre. Normal rounds continue in parallel — the GM can advance phases and resolve the boarding on its own timeline.</Note>
+        </Section>
+
+        <Section id="obstacles" title="Obstacles ✦">
+          <Note>✦ Optional system — not part of official MgT2e rules. House-rule extension for vectorial combat only. Disabled by default.</Note>
+          <p>
+            Enable from the HUD <b>OBSTACLES</b> toggle during Setup phase. Once the battle advances past Setup the toggle is locked for the rest of the battle.
+            Right-click any empty hex → <b>Place obstacle here</b> to open the placement modal.
+          </p>
+          <Sub title="Asteroid Field">
+            <KV k="Movement" v="Each field hex costs 2 movement points (budget = |v|). Ship stops if budget runs out inside — collision triggered." />
+            <KV k="Cover" v="DM −1 (light) or −2 (dense) against ships inside the field." />
+            <KV k="Collision" v="Pilot check Average 8+ (light) or Difficult 10+ (dense). Failure: 1D6 or 2D6 − Armor damage." />
+          </Sub>
+          <Sub title="Debris Field">
+            <KV k="Mechanics" v="Dense asteroid field variant. Always DM −2 cover, 2D6 − Armor on collision." />
+            <KV k="Auto-spawn" v="A radius-0 debris field appears on the hex of any destroyed ship." />
+          </Sub>
+          <Sub title="Gravity Well">
+            <KV k="Zone" v="All hexes within radius are impassable. ThrustModal blocks vectors that enter the zone." />
+            <KV k="Impact" v="If an uncontrolled vector drags a ship inside, it stops at the border and takes 4D6 − Armor." />
+            <KV k="Dogfight" v="Active dogfight is terminated automatically before impact damage is applied." />
+            <KV k="Warning ring" v="Hex ring at radius + 1 highlighted in orange on the map." />
+            <KV k="Scope" v="Represents minor bodies (moon, planetoid) — not full-sized planets." />
+          </Sub>
+          <Sub title="Nebula">
+            <KV k="Movement" v="No cost, no collision risk." />
+            <KV k="Sensor lock" v="Cannot be acquired or maintained while either ship is inside. Existing lock cleared on entry." />
+            <KV k="Cover" v="DM −2 to attacks from outside against ships inside the nebula." />
+            <KV k="Sensors" v="DM −2 to all Electronics(sensors) rolls for ships inside." />
+          </Sub>
         </Section>
 
       </main>

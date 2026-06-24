@@ -6,6 +6,28 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.24.0] — 2026-06-24
+
+### Added
+
+- **Obstacles system** *(optional, vectorial mode only, non-RAW house-rule extension)* — four environmental obstacle types placeable on the hex map by the GM:
+  - **Asteroid Field** (light/dense) — movement cost ×2 per field hex (budget = `|v|`); cover DM −1/−2 against ships inside; collision on budget exhaustion inside field (pilot check Average 8+ / Difficult 10+, 1D6/2D6 − Armor on failure).
+  - **Debris Field** — dense variant of Asteroid Field; auto-spawns on the last hex of a destroyed ship (radius 0).
+  - **Gravity Well** — impassable exclusion zone; ships dragged in by uncontrolled vector are blocked at the border and take 4D6 − Armor; active dogfights terminated before impact.
+  - **Nebula** — no movement cost; sensor lock impossible for ships inside; DM −2 to attacks from outside; DM −2 to Electronics(sensors) rolls inside.
+- **`obstaclesEnabled` toggle** in HUD — visible during Setup phase (vectorial only); locked immutable once the battle advances past Setup. Off by default.
+- **PlaceObstacleModal** — two-step type → config flow; radius slider, density toggle (Asteroid only), optional label; supports add and edit.
+- **ObstacleContextMenu** — right-click on obstacle hex → Edit / Remove.
+- **ObstacleCollisionModal** — two-step pilot check + damage roll for field collisions.
+- **Canvas obstacle layer** — drawn between grid and rings; spatial hash (`useMemo`) for O(1) per-frame hex lookup; gravity well warning ring at radius + 1.
+- **`utils/obstacles.js`** — `getObstacleAt`, `getObstaclesInPath`, `computeObstacleCoverDM`, `applyMovementWithObstacles`, `hexLineDraw`.
+- **Attack DM — field cover** — `useAttackSetup` applies obstacle cover DM to the breakdown when the target is inside a field or nebula.
+- **Nebula blocks sensor lock** — ActionModal disables Sensor Lock when either ship is in a nebula; existing locks cleared on nebula entry.
+- **ThrustModal path warnings** — banner when ghost trajectory crosses a field (movement estimate shown) or approaches/enters gravity well exclusion zone.
+- **Export / Import** — `obstaclesEnabled`, `obstacles`, `pendingObstacleCollisions` included in battle state payload with backward-compat defaults.
+
+---
+
 ## [1.23.1] — 2026-06-22
 
 ### Fixed
