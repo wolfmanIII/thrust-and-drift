@@ -1590,11 +1590,10 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 Asteroid field (light/dense), debris field, gravity well, nebula — sistema opzionale, non-RAW, vectorial only.
 Vedi [obstacles-system-design.md](obstacles-system-design.md) per la specifica completa.
 
-### 13.10 Versione 3.0 — Future
+### 13.10 Versione 2.0 — Roadmap
 
-- Scale mappa multiple con transizione
-- Asse Z opzionale (3D)
-- Esporta resoconto battaglia in PDF
+- **Scale mappa discrete con transizione** — 3 livelli nominati (CLOSE / TACTICAL / STRATEGIC) con salto animato via `requestAnimationFrame`; pulsanti HUD o shortcut tastiera; rendering adattivo per livello (coordinate hex, label token). Puramente presentazionale — nessun impatto su store o matematica hex.
+- **Resoconto battaglia in PDF** — componente `BattleReportView` con intestazione sessione, roster navi (stato finale: hull, criticals, fazione), battle log raggruppato per round; esportazione via `window.print()` con `@media print` CSS. Zero dipendenze aggiuntive. Dati già disponibili in store (`log`, `ships`).
 
 ---
 
