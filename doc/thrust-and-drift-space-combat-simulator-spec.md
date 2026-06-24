@@ -1585,9 +1585,9 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - **Fix**: `resolveMovement` rimuove `pendingMissileImpacts` dal `set()` sincrono; gli impatti vengono aggiunti via `setTimeout(animDuration + 100 ms)` dopo la fine dell'animazione. `MissileImpactModal` elimina la guardia `movementAnimation` e l'import `useUiStore`. Test aggiornato con `vi.useFakeTimers()` / `vi.runAllTimers()`.
 - 692 test (invariato).
 
-### 13.9 Versione 2.0 — Ostacoli Ambientali
+### 13.9 Ostacoli Ambientali ✅ COMPLETATA (v1.24.0–1.24.2)
 
-Asteroid field, debris field, gravity well (zona proibita), nebula.
+Asteroid field (light/dense), debris field, gravity well, nebula — sistema opzionale, non-RAW, vectorial only.
 Vedi [obstacles-system-design.md](obstacles-system-design.md) per la specifica completa.
 
 ### 13.10 Versione 3.0 — Future
@@ -1703,6 +1703,12 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Reverse initiative Acceleration: solo vectorial** (TC p.174): l'ordine inverso era applicato a entrambi i modi. TC p.174 è specifico per vectorial; basic mode usa ordine normale (CRB p.164). Gating `combatMode === 'vectorial'` in `HUD`, `PhaseTracker`, `ContextMenu`, `advanceActor`.
 - **Citazione CRB p.161 → TC p.174**: tutti i commenti sul reverse initiative corretto.
 - 832 test (+3 sensore lock flat).
+
+### 14.26 Versioni 1.24.0–1.24.2 — Obstacles System + UX Polish ✅ COMPLETATA
+
+- **v1.24.0 — Obstacles system**: `utils/obstacles.js` (spatial queries, movement budget 2pt/field hex, cover DM); `battleStore` esteso con `addObstacle/removeObstacle/updateObstacle`, `toggleObstaclesEnabled` (phase guard: solo setup, immutabile dopo), `resolveMovement` obstacle-aware, `pendingObstacleCollisions`; `obstacleRenderers.js` + layer 1b canvas (spatial hash `useMemo`); `ObstacleCollisionModal` (pilot check + danno 2-step); `PlaceObstacleModal` + context menu edit/remove; HUD toggle; `obstacleCoverDM` in `useAttackSetup`; sensor lock disabilitato in nebula (`ActionModal`); path warnings `ThrustModal`; export/import. 1050 test.
+- **v1.24.1 — UX Polish**: pulsante `?` in `TopRightControls` (App.jsx) apre HelpScreen come dialog modale — accessibile durante la sessione senza lasciare la battaglia; `HelpScreen` riceve prop `onBack` opzionale; abbreviazione tipo ostacolo fissa al centro hex (`AST`/`AST-D`/`DEB`/`NEB`); lint cleanup.
+- **v1.24.2 — Legend carousel**: sezione "Obstacles ✦" in `LegendModal` con 5 icone SVG per tipo/sottotipo (Asteroid Light/Dense, Debris, Gravity Well, Nebula); fill/stroke/dash identici al canvas renderer; sempre visibile.
 
 ### 14.25 Versione 1.23.1 — Threshold Armour Crit Fix ✅ COMPLETATA
 

@@ -6,6 +6,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.24.2] — 2026-06-24
+
+### Added
+
+- **Legend — Obstacles section** — 5 token SVG (Asteroid Light, Asteroid Dense, Debris Field, Gravity Well, Nebula) sempre visibili in fondo alla leggenda; icone fedeli al canvas renderer (fill/stroke/dash identici); descrizione meccanica sintetica per ogni tipo.
+
+---
+
 ## [1.24.1] — 2026-06-24
 
 ### Added

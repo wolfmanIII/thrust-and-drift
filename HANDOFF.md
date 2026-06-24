@@ -9,20 +9,21 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.24.1 |
+| **Versione** | 1.24.2 |
 | **Branch** | main |
 | **Test** | 1050 passing |
-| **Ultimo commit** | feat(obstacles): show type abbreviation at obstacle centre hex (`9e0c1d6`) |
+| **Ultimo commit** | fix(legend): always show Obstacles section — remove obstaclesEnabled guard (`53b005f`) |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — UX polish (v1.24.1)
+### Sessione corrente — UX polish + Legend carousel (v1.24.1–1.24.2)
 
 1. **Field Manual overlay** (`768b9d7`, `5673892`) — pulsante `?` in `TopRightControls` (App.jsx, accanto a Legend); apre HelpScreen come dialog modale. `HelpScreen` riceve prop `onBack` opzionale per non navigare al dashboard quando aperto in overlay. Rimosso dall'HUD action row (sovrapponeva le ship cards in basic combat con undo/redo visibili).
 2. **Obstacle abbreviations** (`9e0c1d6`) — `obstacleRenderers.js`: tutte le zone non-gravity mostrano abbreviazione fissa al centro (`AST`/`AST-D`/`DEB`/`NEB`); label GM affiancato se presente.
 3. **Lint** (`bf53aa6`) — rimossi import inutilizzati (`rollDogfightPilot`, `vi`).
+4. **Legend — Obstacles section** (`f52c62b`, `53b005f`) — 5 icone SVG per tipo ostacolo in `LegendModal`; fill/stroke/dash identici al canvas renderer; sezione sempre visibile (non condizionata a `obstaclesEnabled`).
 
 ### Sessione precedente — Obstacles system (v1.24.0)
 
