@@ -41,7 +41,7 @@ function PursuitRow({ label, ship, pilotSkill, tonnageDM, thrustFree, dice, onDi
         {' / '}
         Tonnage {tonnageDM >= 0 ? '+' : ''}{tonnageDM}
         {' / '}
-        Thrust libero +{Math.max(0, thrustFree)}
+        Thrust free +{Math.max(0, thrustFree)}
       </p>
       <div className="flex items-center gap-3">
         <DiceInput value={null} onChange={onDice} />
@@ -262,7 +262,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
               Pursuit check — one party wants to avoid contact
             </p>
             <p className="text-slate-400 font-mono text-xs">
-              Formula: 2D6 + Pilot + Tonnage DM + Thrust libero // MgT2e CRB p.138
+              Formula: 2D6 + Pilot + Tonnage DM + Thrust free // MgT2e CRB p.138
             </p>
 
             <div className="space-y-3">
@@ -291,7 +291,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
               }`}>
                 {computedCheck.pursuerWins
                   ? `PURSUER WINS (+${computedCheck.margin}) — DOGFIGHT ACTIVE`
-                  : `FUGGITIVO EVADE (+${computedCheck.margin === 0 ? 0 : computedCheck.margin}) — SHORT RANGE`
+                  : `EVADER ESCAPES (+${computedCheck.margin === 0 ? 0 : computedCheck.margin}) — SHORT RANGE`
                 }
               </div>
             )}
