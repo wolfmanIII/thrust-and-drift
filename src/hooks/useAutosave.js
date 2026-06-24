@@ -35,6 +35,8 @@ function extractBattleSnapshot(state) {
     basicBandPool: state.basicBandPool,
     log: state.log,
     mapSettings: state.mapSettings,
+    obstaclesEnabled: state.obstaclesEnabled,
+    obstacles: state.obstacles,
     savedAt: new Date().toISOString(),
   }
 }
@@ -52,7 +54,9 @@ function hasSignificantChange(prev, next) {
     prev.dogfights !== next.dogfights ||
     prev.boardings !== next.boardings ||
     prev.rangeBands !== next.rangeBands ||
-    prev.basicBandPool !== next.basicBandPool
+    prev.basicBandPool !== next.basicBandPool ||
+    prev.obstaclesEnabled !== next.obstaclesEnabled ||
+    prev.obstacles !== next.obstacles
   )
 }
 
@@ -82,6 +86,8 @@ export function useAutosave() {
           basicBandPool: saved.basicBandPool ?? {},
           log: saved.log ?? [],
           mapSettings: saved.mapSettings ?? { scale: 1 },
+          obstaclesEnabled: saved.obstaclesEnabled ?? false,
+          obstacles: saved.obstacles ?? [],
         })
       }
     }).catch(() => {/* IndexedDB unavailable — no recovery */})
