@@ -6,6 +6,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.24.1] — 2026-06-24
+
+### Added
+
+- **Field Manual overlay** — pulsante `?` in alto a destra (accanto a Legend) apre HelpScreen come dialog modale sopra la mappa; accessibile durante la sessione senza uscire dalla battaglia.
+- **Obstacle type abbreviation** — ogni zona ostacolo mostra sempre un'abbreviazione al centro hex (`AST` / `AST-D` / `DEB` / `NEB`); se il GM ha impostato un label, viene affiancato (`AST · Belt-1`). Gravity well invariato.
+
+### Fixed
+
+- Rimossi import inutilizzati (`rollDogfightPilot` in `DogfightRoundModal`, `vi` in `ObstacleCollisionModal.test`).
+
+---
+
 ## [1.24.0] — 2026-06-24
 
 ### Added

@@ -9,16 +9,22 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.24.0 |
+| **Versione** | 1.24.1 |
 | **Branch** | main |
 | **Test** | 1050 passing |
-| **Ultimo commit** | docs(field-manual): add §16 Obstacles — optional, non-RAW, vectorial only (`d191d6c`) |
+| **Ultimo commit** | feat(obstacles): show type abbreviation at obstacle centre hex (`9e0c1d6`) |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Obstacles system (v1.24.0)
+### Sessione corrente — UX polish (v1.24.1)
+
+1. **Field Manual overlay** (`768b9d7`, `5673892`) — pulsante `?` in `TopRightControls` (App.jsx, accanto a Legend); apre HelpScreen come dialog modale. `HelpScreen` riceve prop `onBack` opzionale per non navigare al dashboard quando aperto in overlay. Rimosso dall'HUD action row (sovrapponeva le ship cards in basic combat con undo/redo visibili).
+2. **Obstacle abbreviations** (`9e0c1d6`) — `obstacleRenderers.js`: tutte le zone non-gravity mostrano abbreviazione fissa al centro (`AST`/`AST-D`/`DEB`/`NEB`); label GM affiancato se presente.
+3. **Lint** (`bf53aa6`) — rimossi import inutilizzati (`rollDogfightPilot`, `vi`).
+
+### Sessione precedente — Obstacles system (v1.24.0)
 
 Implementazione completa del sistema ostacoli (house-rule, vectorial only, off by default):
 
