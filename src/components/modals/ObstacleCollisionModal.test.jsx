@@ -162,18 +162,16 @@ describe('ObstacleCollisionModal — damage resolution', () => {
   })
 
   it('APPLY DAMAGE applies damage and dismisses event', () => {
-    // Use hull=100 so damage=4 (4%) stays below 10% threshold — no crit cascade.
-    useBattleStore.getState().addShip(makeShip({ hull: 100, armor: 0 }), { q: 0, r: 0 }, 'players', '#fff')
+    // hull=20, damage=1 → 1/20 = 5% < 10% threshold — no crit cascade, deterministic.
+    useBattleStore.getState().addShip(makeShip({ hull: 20, armor: 0 }), { q: 0, r: 0 }, 'players', '#fff')
     injectCollision({ type: 'asteroid_field', density: 'light' })
     render(<ObstacleCollisionModal />)
     fireEvent.click(screen.getByRole('button', { name: /PILOT FAILED/i }))
     const input = screen.getByRole('spinbutton')
-    fireEvent.change(input, { target: { value: '4' } })
-    fireEvent.click(screen.getByRole('button', { name: /APPLY 4 DAMAGE/i }))
-    // Event dismissed
+    fireEvent.change(input, { target: { value: '1' } })
+    fireEvent.click(screen.getByRole('button', { name: /APPLY 1 DAMAGE/i }))
     expect(useBattleStore.getState().pendingObstacleCollisions).toHaveLength(0)
-    // Hull reduced by 4 (armor 0), no threshold crits below 10%
-    expect(useBattleStore.getState().ships[0].hullCurrent).toBe(96)
+    expect(useBattleStore.getState().ships[0].hullCurrent).toBe(19)
   })
 
   it('armor cannot make net damage negative (clamped to 0)', () => {
