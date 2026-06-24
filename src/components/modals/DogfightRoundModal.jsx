@@ -330,7 +330,7 @@ export function DogfightRoundModal() {
         {phase === 'declare' && (
           <>
             <p className="text-slate-400 font-mono text-xs">
-              Dichiara le intenzioni di fuga prima del check Pilot. // MgT2e CRB p.138 §6.4
+              Declare escape intent before the Pilot check. // MgT2e CRB p.138 §6.4
             </p>
             <div className="space-y-2">
               {groupShips.map((ship) => {
@@ -463,7 +463,7 @@ export function DogfightRoundModal() {
             )}
 
             <p className="text-slate-400 font-mono text-xs">
-              2D6 + Pilot + Tonnage + Thrust + DM round precedente // MgT2e CRB p.138
+              2D6 + Pilot + Tonnage + Thrust + DM previous round // MgT2e CRB p.138
             </p>
             <div className="space-y-3">
               {activeGroupShips.map((ship) => (

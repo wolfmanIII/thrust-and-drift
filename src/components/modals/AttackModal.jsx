@@ -567,7 +567,7 @@ function AttackRollStep({
     <Modal title="Attack Roll" onClose={onClose}>
       <div className="space-y-4">
         <div className="text-center font-mono text-xs text-slate-400">
-          {attackerName} → {targetName} con {weaponKey}
+          {attackerName} → {targetName} with {weaponKey}
         </div>
 
         {!attackResult ? (

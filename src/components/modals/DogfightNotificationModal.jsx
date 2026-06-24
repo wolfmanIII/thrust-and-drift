@@ -185,8 +185,8 @@ export function DogfightNotificationModal({ groups, onDone }) {
   // ── Title ──
 
   const modalTitle = total > 1
-    ? `⚔️ CONTATTO RAVVICINATO — ${groupIdx + 1}/${total}`
-    : '⚔️ CONTATTO RAVVICINATO'
+    ? `⚔️ CLOSE CONTACT — ${groupIdx + 1}/${total}`
+    : '⚔️ CLOSE CONTACT'
 
   // ── Render ──
 
@@ -196,7 +196,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
 
         {/* Ships involved */}
         <p className="text-slate-400 font-mono text-xs">
-          {groupShips.map((s) => s.profile.name).join(' e ')} si trovano nella stessa cella.
+          {groupShips.map((s) => s.profile.name).join(' and ')} are in the same hex.
         </p>
 
         {/* ── PHASE: INTENT ── */}
