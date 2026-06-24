@@ -9,16 +9,24 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.24.2 |
+| **Versione** | 1.24.3 |
 | **Branch** | main |
 | **Test** | 1050 passing |
-| **Ultimo commit** | fix(legend): always show Obstacles section — remove obstaclesEnabled guard (`53b005f`) |
+| **Ultimo commit** | test(playwright): add obstacles system end-to-end script (`247c909`) |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — UX polish + Legend carousel (v1.24.1–1.24.2)
+### Sessione corrente — i18n + Playwright e2e (v1.24.3)
+
+1. **i18n — DogfightNotificationModal** (`ba217d2`) — 3 stringhe italiane residue tradotte: "Thrust libero" → "Thrust free", "FUGGITIVO EVADE" → "EVADER ESCAPES".
+2. **Playwright dogfight** (`4228196`) — `playwright/test-dogfight.mjs`: headless Chrome, flusso completo DogfightNotificationModal → HUD tracker → DogfightRoundModal → pilot check → probe attack-phase exclusion.
+3. **Playwright boarding** (`4228196`, `19ddc9b`) — `playwright/test-boarding.mjs`: ships a (5,3)/(6,3) per evitare canvas center (offset={0,0}); flusso BOARD → BoardingSetupModal → ContactModal → ConflictModal → OutcomeModal; probe re-board assente per navi già in boarding (fix false positive: usa `.absolute.z-50` + regex `^Board ` invece di `body.textContent()`).
+4. **Playwright obstacles** (`247c909`) — `playwright/test-obstacles.mjs`: piazzamento via context menu, canvas thrust targeting (start/ESC), movement collision (wait 2500ms per setTimeout), nebula sensor lock in ActionModal, rimozione ostacolo.
+   - Finding: `ThrustModal.jsx` è dead code — non nel MODAL_MAP, obstacle path warnings mai mostrate; canvas targeting è il sistema reale.
+
+### Sessione precedente — UX polish + Legend carousel (v1.24.1–1.24.2)
 
 1. **Field Manual overlay** (`768b9d7`, `5673892`) — pulsante `?` in `TopRightControls` (App.jsx, accanto a Legend); apre HelpScreen come dialog modale. `HelpScreen` riceve prop `onBack` opzionale per non navigare al dashboard quando aperto in overlay. Rimosso dall'HUD action row (sovrapponeva le ship cards in basic combat con undo/redo visibili).
 2. **Obstacle abbreviations** (`9e0c1d6`) — `obstacleRenderers.js`: tutte le zone non-gravity mostrano abbreviazione fissa al centro (`AST`/`AST-D`/`DEB`/`NEB`); label GM affiancato se presente.

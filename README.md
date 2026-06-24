@@ -162,7 +162,8 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-962 tests across utils, Zustand stores, hooks, and UI components. (v1.23.1)
+1050 tests across utils, Zustand stores, hooks, and UI components (v1.24.0).
+Playwright end-to-end scripts in `playwright/` cover dogfight, boarding, and obstacles flows (headless Chrome, `node playwright/test-*.mjs` with dev server running).
 
 ---
 

@@ -1710,6 +1710,15 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **v1.24.1 — UX Polish**: pulsante `?` in `TopRightControls` (App.jsx) apre HelpScreen come dialog modale — accessibile durante la sessione senza lasciare la battaglia; `HelpScreen` riceve prop `onBack` opzionale; abbreviazione tipo ostacolo fissa al centro hex (`AST`/`AST-D`/`DEB`/`NEB`); lint cleanup.
 - **v1.24.2 — Legend carousel**: sezione "Obstacles ✦" in `LegendModal` con 5 icone SVG per tipo/sottotipo (Asteroid Light/Dense, Debris, Gravity Well, Nebula); fill/stroke/dash identici al canvas renderer; sempre visibile.
 
+### 14.27 Versione 1.24.3 — i18n + Playwright E2E ✅ COMPLETATA
+
+- **i18n — DogfightNotificationModal**: 3 stringhe italiane residue tradotte ("Thrust libero" → "Thrust free"; "FUGGITIVO EVADE" → "EVADER ESCAPES"). UI completamente in inglese.
+- **Playwright e2e scripts** — `playwright/test-dogfight.mjs`, `playwright/test-boarding.mjs`, `playwright/test-obstacles.mjs`: script headless (Chrome) per test manuali dei sistemi principali. Non integrati in Vitest; eseguiti con `node playwright/test-*.mjs` con dev server attivo.
+  - **Dogfight**: DogfightNotificationModal → HUD tracker → DogfightRoundModal → pilot check → probe exclusion fase attack.
+  - **Boarding**: BOARD via context menu (ships a hex (5,3)/(6,3)) → BoardingSetupModal → ContactModal → ConflictModal → OutcomeModal; probe re-board assente per navi `inBoarding`.
+  - **Obstacles**: piazzamento → canvas thrust targeting (start/ESC) → movement collision (2500ms wait per setTimeout interno) → nebula sensor lock in ActionModal → rimozione.
+- **Finding — ThrustModal.jsx dead code**: il file esiste ma non è nel `MODAL_MAP` di `App.jsx` e non è importato da nessun componente. Le obstacle path warnings (`obstacleWarning: 'field'|'gravity_approach'|'gravity_collision'`) non vengono mai mostrate. Il thrust usa esclusivamente il canvas targeting (`thrustTargeting` in uiStore + `drawThrustTargeting` in `useCanvasRenderer`). Da discutere prima di integrare.
+
 ### 14.25 Versione 1.23.1 — Threshold Armour Crit Fix ✅ COMPLETATA
 
 - **BUG — Threshold Armour crits non riducevano `profile.armor`**: il path Sustained Damage in `applyDamage` chiamava `addCriticalHit` per i critici Armour ma non applicava l'effetto di riduzione. Fix: aggiunto handling per `armour_reduce_fixed`, `armour_reduce_d3`, `armour_reduce_xd` nel loop threshold, con `_skipHistory: true` per evitare entry extra nell'undo stack. `reduceArmour` refactored da `wh()` a pattern `_skipHistory` esplicito. *(CRB p.169–170)*

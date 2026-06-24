@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.24.3] — 2026-06-24
+
+### Fixed
+
+- **i18n — DogfightNotificationModal**: 3 stringhe italiane residue tradotte in inglese ("Thrust libero" → "Thrust free"; "FUGGITIVO EVADE" → "EVADER ESCAPES").
+
+### Added
+
+- **Playwright e2e scripts** — `playwright/test-dogfight.mjs`, `playwright/test-boarding.mjs`, `playwright/test-obstacles.mjs`: script headless per testare manualmente dogfight, boarding (setup → contact → conflict → outcome) e obstacles (piazzamento, canvas thrust targeting, collision budget, nebula sensor lock, rimozione).
+
+---
+
 ## [1.24.2] — 2026-06-24
 
 ### Added
