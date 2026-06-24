@@ -1,9 +1,9 @@
 # Obstacles System Design — Thrust & Drift
 
 > Specifica implementativa per gli ostacoli ambientali sulla mappa di combattimento.
-> Regole di riferimento: MgT2e CRB pp.160–168, Traveller Companion 2024 pp.169–186.
-> Le meccaniche di collisione e danno da detriti non hanno regole RAW esplicite — vengono
-> trattate come estensioni ragionevoli del sistema vettoriale.
+> **Questo sistema non fa parte delle regole ufficiali MgT2e** — è un'estensione house-rule
+> al sistema vettoriale. È completamente opzionale e disattivato per default.
+> Regole di riferimento per il sistema di base: MgT2e CRB pp.160–168, Traveller Companion 2024 pp.169–186.
 
 ---
 

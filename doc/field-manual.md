@@ -21,6 +21,7 @@
 13. [Save & Resume](#13-save--resume)
 14. [Dogfight](#14-dogfight)
 15. [Boarding](#15-boarding)
+16. [Obstacles *(optional)*](#16-obstacles-optional) — includes §16.1 enable, §16.2 placing, §16.3 asteroid/debris field, §16.4 gravity well, §16.5 nebula
 
 ---
 
@@ -199,6 +200,14 @@ adjust which crew member covers each role and turret (see [§ 11.3](#113-crew-ro
 ### 5.2 Removing a Ship
 
 Right-click a ship token → **Remove from battle**. Available in all phases.
+
+### 5.3 Enabling Obstacles *(vectorial mode only)*
+
+The HUD shows an **OBSTACLES** toggle during the Setup phase when vectorial combat
+mode is active. Off by default. Once the battle advances past Setup, the toggle is
+locked for the rest of the battle.
+
+See [§ 16](#16-obstacles-optional) for full obstacle mechanics.
 
 > **Note:** Ships start with zero velocity. Their first Acceleration phase is
 > used to build up speed.
@@ -1113,7 +1122,97 @@ Click the phase button to reopen the relevant modal at any time.
 
 ---
 
-## 16. Further Reading
+## 16. Obstacles *(optional)*
+
+> **This system is entirely optional and is not part of the official MgT2e rules.**
+> It is a house-rule extension designed to add environmental variety to vectorial
+> combat. It is disabled by default and must be explicitly enabled before the battle
+> begins. All standard combat works normally without it. Obstacles are only available
+> in **vectorial combat mode**.
+
+Environmental obstacles are fixed zones on the hex map that affect movement and
+combat. They have no initiative and take no actions — they simply modify the
+behaviour of ships that move through or near them.
+
+### 16.1 Enabling and Placing
+
+Enable obstacles from the HUD toggle during the **Setup phase** (see [§ 5.3](#53-enabling-obstacles-vectorial-mode-only)).
+Once enabled, right-click any empty hex → **Place obstacle here**.
+
+A two-step modal opens:
+
+1. **Type** — select one of the four obstacle types.
+2. **Config** — set radius (in hexes), density (Asteroid Field only), and an
+   optional label.
+
+To edit or remove a placed obstacle, right-click its hex → **Edit obstacle** or
+**Remove obstacle**.
+
+### 16.2 Obstacle Types at a Glance
+
+| Type | Movement cost | Attack DM vs ships inside | Damage on collision |
+| ---- | ------------- | ------------------------- | ------------------- |
+| Asteroid Field (light) | 2 pts/hex | −1 | 1D6 − Armor |
+| Asteroid Field (dense) | 2 pts/hex | −2 | 2D6 − Armor |
+| Debris Field | 2 pts/hex | −2 | 2D6 − Armor |
+| Gravity Well | impassable | — | 4D6 − Armor |
+| Nebula | none | −2 (from outside) | none |
+
+### 16.3 Asteroid Field and Debris Field
+
+**Movement budget.** Each ship moves a number of hexes equal to its velocity
+vector magnitude (`|v|`). Normal hexes cost 1 point; field hexes cost 2 points.
+A ship with `|v| = 3` traversing one field hex can move 2 hexes total (2 pts for
+field + 1 pt for the next hex = 3).
+
+**Cover.** A ship inside a field receives a DM penalty to all attacks made
+against it from outside. The penalty does not apply to attacks made *from* inside
+the field.
+
+**Collision.** If a ship's movement budget runs out while it is still inside a
+field, it stops in that field hex and a collision is triggered. A
+**ObstacleCollisionModal** opens:
+
+- The GM declares whether the Pilot check succeeds (Average 8+ for light,
+  Difficult 10+ for dense/debris).
+- On failure, roll the damage dice. Damage is reduced by the ship's Armor
+  normally.
+
+**Debris Field origin.** When a ship is destroyed (hull → 0), a Debris Field
+token with radius 0 automatically appears on its last hex. The GM can remove it
+manually.
+
+### 16.4 Gravity Well
+
+Represents a minor celestial body — moon, planetoid, or massive orbital station.
+**Not intended for full-sized planets** (which would be tens of hexes wide and
+outside the combat area entirely).
+
+**Exclusion zone.** All hexes within the gravity well radius are impassable.
+ThrustModal prevents setting a vector that would enter the zone. If a ship's
+current vector would carry it inside (no thrust available to correct), it is
+blocked at the nearest border hex and takes **4D6 − Armor damage** (atmospheric
+entry). If the ship was in an active dogfight, the dogfight ends automatically
+before damage is applied.
+
+**Warning ring.** The hex ring at radius + 1 is highlighted in orange — a visual
+caution border visible on the map at all times.
+
+### 16.5 Nebula
+
+A large zone of gas and interstellar dust. No movement cost, no collision risk.
+
+**Effects:**
+
+- Sensor lock cannot be acquired or maintained while either ship is inside the nebula.
+  Any existing lock is cleared when a ship enters.
+- DM −2 to all attacks made *from outside* against a ship *inside* the nebula.
+  Ships fighting within the nebula are unaffected.
+- DM −2 to all Electronics(sensors) rolls for ships inside the nebula.
+
+---
+
+## 17. Further Reading
 
 | Document | Contents |
 | -------- | -------- |
