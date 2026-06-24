@@ -4,7 +4,6 @@
 
 import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
-import { useBattleStore } from '../../store/battleStore.js'
 
 // ── Primitives ────────────────────────────────────────────────────────────────
 
@@ -306,8 +305,7 @@ function NebulaIcon() {
 // ── Modal ─────────────────────────────────────────────────────────────────────
 
 export function LegendModal() {
-  const closeModal       = useUiStore((s) => s.closeModal)
-  const obstaclesEnabled = useBattleStore((s) => s.obstaclesEnabled)
+  const closeModal = useUiStore((s) => s.closeModal)
 
   return (
     <Modal title="Legend" onClose={closeModal} width="max-w-2xl">
@@ -376,34 +374,30 @@ export function LegendModal() {
 
       </div>
 
-      {obstaclesEnabled && (
-        <>
-          <hr className="border-slate-800 my-1" />
-          <Section title="Obstacles ✦ — optional, non-RAW, vectorial mode">
-            <div className="grid grid-cols-2 gap-x-6">
-              <div className="space-y-1">
-                <Row icon={<AsteroidFieldIcon density="light" />}
-                  label="Asteroid Field (light)"
-                  description="movement ×2 · 1D6−Armor collision · DM−1 cover" />
-                <Row icon={<AsteroidFieldIcon density="dense" />}
-                  label="Asteroid Field (dense)"
-                  description="movement ×2 · 2D6−Armor collision · DM−2 cover" />
-                <Row icon={<DebrisFieldIcon />}
-                  label="Debris Field"
-                  description="movement ×2 · 2D6−Armor collision · auto-spawns on ship kill" />
-              </div>
-              <div className="space-y-1">
-                <Row icon={<GravityWellIcon />}
-                  label="Gravity Well"
-                  description="exclusion zone · 4D6−Armor impact · orange ring = warning" />
-                <Row icon={<NebulaIcon />}
-                  label="Nebula"
-                  description="sensor lock blocked · DM−2 attacks & sensors" />
-              </div>
-            </div>
-          </Section>
-        </>
-      )}
+      <hr className="border-slate-800 my-1" />
+      <Section title="Obstacles ✦ — optional, non-RAW, vectorial mode">
+        <div className="grid grid-cols-2 gap-x-6">
+          <div className="space-y-1">
+            <Row icon={<AsteroidFieldIcon density="light" />}
+              label="Asteroid Field (light)"
+              description="movement ×2 · 1D6−Armor collision · DM−1 cover" />
+            <Row icon={<AsteroidFieldIcon density="dense" />}
+              label="Asteroid Field (dense)"
+              description="movement ×2 · 2D6−Armor collision · DM−2 cover" />
+            <Row icon={<DebrisFieldIcon />}
+              label="Debris Field"
+              description="movement ×2 · 2D6−Armor collision · auto-spawns on ship kill" />
+          </div>
+          <div className="space-y-1">
+            <Row icon={<GravityWellIcon />}
+              label="Gravity Well"
+              description="exclusion zone · 4D6−Armor impact · orange ring = warning" />
+            <Row icon={<NebulaIcon />}
+              label="Nebula"
+              description="sensor lock blocked · DM−2 attacks & sensors" />
+          </div>
+        </div>
+      </Section>
     </Modal>
   )
 }
