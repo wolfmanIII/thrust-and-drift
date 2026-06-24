@@ -114,15 +114,24 @@ export function drawObstacle(ctx, obstacle, size, ox, oy) {
       ctx.textBaseline = 'middle'
       ctx.fillText(obstacle.label.slice(0, 6), cx, cy)
     }
-  } else if (obstacle.label) {
-    // Subtle label centred on the obstacle's centre hex for non-gravity types
-    const { x: cx, y: cy } = hexToPixel(obstacle.position.q, obstacle.position.r, size, ox, oy)
-    const fs = Math.max(8, Math.round(size * 0.24))
-    ctx.font = `${fs}px monospace`
-    ctx.fillStyle = stroke
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(obstacle.label.slice(0, 8), cx, cy)
+  } else {
+    // Type abbreviation always visible at centre hex; label appended if set
+    const TYPE_ABBR = {
+      asteroid_field: obstacle.density === 'dense' ? 'AST-D' : 'AST',
+      debris_field:   'DEB',
+      nebula:         'NEB',
+    }
+    const abbr = TYPE_ABBR[obstacle.type] ?? ''
+    const text = obstacle.label ? `${abbr} · ${obstacle.label.slice(0, 8)}` : abbr
+    if (text) {
+      const { x: cx, y: cy } = hexToPixel(obstacle.position.q, obstacle.position.r, size, ox, oy)
+      const fs = Math.max(8, Math.round(size * 0.24))
+      ctx.font = `${fs}px monospace`
+      ctx.fillStyle = stroke
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(text, cx, cy)
+    }
   }
 
   ctx.restore()
