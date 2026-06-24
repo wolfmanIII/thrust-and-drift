@@ -34,6 +34,8 @@ import { BasicManoeuvreModal }  from './components/modals/BasicManoeuvreModal.js
 import { HelpScreen }       from './components/help/HelpScreen.jsx'
 import { ChangelogScreen }  from './components/help/ChangelogScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
+import { useState }        from 'react'
+import { Modal }           from './components/modals/Modal.jsx'
 import { useUiStore }      from './store/uiStore.js'
 import { useBattleStore }  from './store/battleStore.js'
 import { useAutosave }     from './hooks/useAutosave.js'
@@ -59,15 +61,34 @@ const MODAL_MAP = {
   placeObstacle:    PlaceObstacleModal,
 }
 
-function LegendButton() {
-  const openModal = useUiStore((s) => s.openModal)
+function TopRightControls() {
+  const openModal        = useUiStore((s) => s.openModal)
+  const [helpOpen, setHelpOpen] = useState(false)
   return (
-    <button
-      onClick={() => openModal('legend')}
-      className="absolute top-3 right-3 z-10 bg-slate-900/80 border border-slate-700 rounded backdrop-blur-sm px-2.5 py-1 font-mono text-xs text-slate-400 hover:text-(--neon-cyan) hover:border-slate-500 transition-colors"
-    >
-      📖 Legend
-    </button>
+    <>
+      <div className="absolute top-3 right-3 z-10 flex gap-1">
+        <button
+          onClick={() => setHelpOpen(true)}
+          aria-label="Open field manual"
+          className="bg-slate-900/80 border border-slate-700 rounded backdrop-blur-sm px-2.5 py-1 font-mono text-xs font-bold text-cyan-400 hover:text-cyan-300 hover:border-cyan-600 transition-colors"
+        >
+          ?
+        </button>
+        <button
+          onClick={() => openModal('legend')}
+          className="bg-slate-900/80 border border-slate-700 rounded backdrop-blur-sm px-2.5 py-1 font-mono text-xs text-slate-400 hover:text-(--neon-cyan) hover:border-slate-500 transition-colors"
+        >
+          📖 Legend
+        </button>
+      </div>
+      {helpOpen && (
+        <Modal onClose={() => setHelpOpen(false)} variant="dialog" width="max-w-5xl" title="FIELD MANUAL">
+          <div className="h-[75vh]">
+            <HelpScreen onBack={() => setHelpOpen(false)} />
+          </div>
+        </Modal>
+      )}
+    </>
   )
 }
 
@@ -125,7 +146,7 @@ export function App() {
 
       {/* ── HUD overlays ─────────────────────────────────────────────── */}
       <HUD />
-      <LegendButton />
+      <TopRightControls />
       <PhaseTracker />
       <BattleLog />
 
