@@ -66,9 +66,16 @@ function Note({ children }) {
   )
 }
 
-export function HelpScreen() {
+/**
+ * @param {{ onBack?: () => void }} props
+ *   onBack — if provided, replaces the default "back to dashboard" navigation (used when HelpScreen
+ *   is rendered as a modal overlay during battle rather than as a standalone screen).
+ */
+export function HelpScreen({ onBack } = {}) {
   const gotoScreen = useUiStore((s) => s.gotoScreen)
   const [active, setActive] = useState('overview')
+
+  const handleBack = onBack ?? (() => gotoScreen('dashboard'))
 
   const scrollTo = (id) => {
     setActive(id)
@@ -113,7 +120,7 @@ export function HelpScreen() {
             📋 CHANGELOG
           </button>
           <button
-            onClick={() => gotoScreen('dashboard')}
+            onClick={handleBack}
             className="w-full py-2 border border-slate-700 text-slate-400 font-display text-xs tracking-widest rounded hover:border-slate-500 hover:text-slate-200 transition-colors"
           >
             ⬅️ BACK

@@ -8,6 +8,7 @@ import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore } from '../../store/uiStore.js'
 import { Tooltip } from './Tooltip.jsx'
 import { Modal } from '../modals/Modal.jsx'
+import { HelpScreen } from '../help/HelpScreen.jsx'
 import tdLogo from '../../assets/TD-logo-transparent.png'
 
 /** Phases during which an actor turn control is shown. */
@@ -52,6 +53,7 @@ export function HUD() {
 
   const [showExitWarning, setShowExitWarning] = useState(false)
   const [phaseBlockMsg,   setPhaseBlockMsg]   = useState(null)
+  const [helpOpen,        setHelpOpen]        = useState(false)
 
   // true when advancing to the next phase is allowed
   const canAdvancePhase = useMemo(() => {
@@ -253,6 +255,15 @@ export function HUD() {
             {audioEnabled ? '🔊' : '🔇'}
           </button>
         </Tooltip>
+        <Tooltip label="Field Manual — rules reference" position="bottom">
+          <button
+            onClick={() => setHelpOpen(true)}
+            aria-label="Open field manual"
+            className="bg-slate-800/80 border border-slate-700 text-cyan-400 hover:text-cyan-300 hover:border-cyan-600 font-mono text-sm font-bold rounded px-2 py-1 backdrop-blur-sm transition-colors"
+          >
+            ?
+          </button>
+        </Tooltip>
         <Tooltip label="Return to main menu" position="bottom">
           <button
             onClick={() => setShowExitWarning(true)}
@@ -359,6 +370,14 @@ export function HUD() {
                 CANCEL
               </button>
             </div>
+          </div>
+        </Modal>
+      )}
+
+      {helpOpen && (
+        <Modal onClose={() => setHelpOpen(false)} variant="dialog" width="max-w-5xl" title="FIELD MANUAL">
+          <div className="h-[75vh]">
+            <HelpScreen onBack={() => setHelpOpen(false)} />
           </div>
         </Modal>
       )}
