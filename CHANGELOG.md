@@ -10,11 +10,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
-- **i18n — DogfightNotificationModal**: 3 stringhe italiane residue tradotte in inglese ("Thrust libero" → "Thrust free"; "FUGGITIVO EVADE" → "EVADER ESCAPES").
+- **i18n — DogfightNotificationModal**: 3 remaining Italian strings translated to English ("Thrust libero" → "Thrust free"; "FUGGITIVO EVADE" → "EVADER ESCAPES").
 
 ### Added
 
-- **Playwright e2e scripts** — `playwright/test-dogfight.mjs`, `playwright/test-boarding.mjs`, `playwright/test-obstacles.mjs`: script headless per testare manualmente dogfight, boarding (setup → contact → conflict → outcome) e obstacles (piazzamento, canvas thrust targeting, collision budget, nebula sensor lock, rimozione).
+- **Playwright e2e scripts** — `playwright/test-dogfight.mjs`, `playwright/test-boarding.mjs`, `playwright/test-obstacles.mjs`: headless scripts for manual end-to-end testing of dogfight, boarding (setup → contact → conflict → outcome), and obstacles (placement, canvas thrust targeting, collision budget, nebula sensor lock, removal).
 
 ---
 
@@ -22,7 +22,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- **Legend — Obstacles section** — 5 token SVG (Asteroid Light, Asteroid Dense, Debris Field, Gravity Well, Nebula) sempre visibili in fondo alla leggenda; icone fedeli al canvas renderer (fill/stroke/dash identici); descrizione meccanica sintetica per ogni tipo.
+- **Legend — Obstacles section** — 5 token SVG (Asteroid Light, Asteroid Dense, Debris Field, Gravity Well, Nebula) always visible at the bottom of the legend; icons match the canvas renderer exactly (identical fill/stroke/dash); concise mechanical description for each type.
 
 ---
 
@@ -30,12 +30,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- **Field Manual overlay** — pulsante `?` in alto a destra (accanto a Legend) apre HelpScreen come dialog modale sopra la mappa; accessibile durante la sessione senza uscire dalla battaglia.
-- **Obstacle type abbreviation** — ogni zona ostacolo mostra sempre un'abbreviazione al centro hex (`AST` / `AST-D` / `DEB` / `NEB`); se il GM ha impostato un label, viene affiancato (`AST · Belt-1`). Gravity well invariato.
+- **Field Manual overlay** — the `?` button in the top-right corner (next to Legend) opens HelpScreen as a modal overlay above the map; accessible mid-session without leaving the battle.
+- **Obstacle type abbreviation** — every obstacle zone always shows a fixed abbreviation at the center hex (`AST` / `AST-D` / `DEB` / `NEB`); if the GM set a label, it is shown alongside (`AST · Belt-1`). Gravity well unchanged.
 
 ### Fixed
 
-- Rimossi import inutilizzati (`rollDogfightPilot` in `DogfightRoundModal`, `vi` in `ObstacleCollisionModal.test`).
+- Removed unused imports (`rollDogfightPilot` in `DogfightRoundModal`, `vi` in `ObstacleCollisionModal.test`).
 
 ---
 
