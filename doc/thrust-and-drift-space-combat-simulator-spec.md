@@ -1552,7 +1552,7 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - `BattleMap.jsx` — crea `mouseHexRef`; ESC keydown → `cancelThrustTargeting`.
 - `useCanvasRenderer.js` — Layer 3b `drawThrustTargeting` (linea, dot, ghost, linea inerziale, badge).
 - `ContextMenu.jsx` — *Apply Thrust* → `startThrustTargeting` invece di `openModal('thrust')`.
-- `ThrustModal.jsx` — non più importata (`⚠ UNUSED` nel README).
+- `ThrustModal.jsx` — non più importata né registrata in `MODAL_MAP`. Il file è mantenuto intenzionalmente: contiene la logica obstacle path warnings (banner giallo/arancio/rosso per asteroid field e gravity well) che era prevista per la fase vectorial. Il codice è dead ma non va rimosso — potrebbe essere riattivato o portato nel layer canvas in futuro. **Non eliminare.**
 - 692 test (+6 da 686).
 
 ### 13.8h Versione 1.15.0 — Missile Impact Resolution ✅ COMPLETATA
