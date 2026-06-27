@@ -61,11 +61,12 @@ src/
 │   │   ├── Modal.jsx           ← Generic modal wrapper
 │   │   ├── ShipProfileModal.jsx
 │   │   ├── AddShipModal.jsx
-│   │   ├── ThrustModal.jsx     ← Thrust application + map preview
+│   │   ├── ThrustModal.jsx     ← ⚠ UNUSED — dead code (rubber-band targeting replaced it)
 │   │   ├── AttackModal.jsx     ← Attack resolution + DM calc
 │   │   ├── ShipDetailModal.jsx
 │   │   ├── ActionModal.jsx
-│   │   └── InitiativeModal.jsx
+│   │   ├── InitiativeModal.jsx
+│   │   └── BattleReportModal.jsx ← PDF battle report (window.print() + @media print)
 │   ├── ui/
 │   │   ├── ContextMenu.jsx     ← Right-click context menu
 │   │   ├── HUD.jsx             ← Round/phase/initiative overlay

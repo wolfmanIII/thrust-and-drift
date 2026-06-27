@@ -23,6 +23,8 @@ const SECTIONS = [
   { id: 'dogfight',      label: 'Dogfight' },
   { id: 'boarding',      label: 'Boarding' },
   { id: 'obstacles',     label: 'Obstacles ✦' },
+  { id: 'zoom-levels',   label: 'Zoom Levels' },
+  { id: 'battle-report', label: 'Battle Report' },
 ]
 
 function Section({ id, title, children }) {
@@ -650,6 +652,41 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="Sensor lock" v="Cannot be acquired or maintained while either ship is inside. Existing lock cleared on entry." />
             <KV k="Cover" v="DM −2 to attacks from outside against ships inside the nebula." />
             <KV k="Sensors" v="DM −2 to all Electronics(sensors) rolls for ships inside." />
+          </Sub>
+        </Section>
+
+        <Section id="zoom-levels" title="Zoom Levels">
+          <p>Three named zoom levels are available in the toolbar at the bottom-right of the battle map.</p>
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="text-slate-400 border-b border-slate-700">
+                <th className="text-left pb-1 pr-3">Level</th>
+                <th className="text-left pb-1 pr-3">Key</th>
+                <th className="text-left pb-1 pr-3">Zoom</th>
+                <th className="text-left pb-1">Best for</th>
+              </tr>
+            </thead>
+            <tbody className="space-y-1">
+              <tr><td className="pr-3 py-0.5 text-slate-200">C — Close</td><td className="pr-3"><kbd className="bg-slate-700 px-1 rounded">1</kbd></td><td className="pr-3">2.5×</td><td>Tight engagements, token detail</td></tr>
+              <tr><td className="pr-3 py-0.5 text-slate-200">T — Tactical</td><td className="pr-3"><kbd className="bg-slate-700 px-1 rounded">2</kbd></td><td className="pr-3">1.0×</td><td>Default balanced view</td></tr>
+              <tr><td className="pr-3 py-0.5 text-slate-200">S — Strategic</td><td className="pr-3"><kbd className="bg-slate-700 px-1 rounded">3</kbd></td><td className="pr-3">0.45×</td><td>Wide-area overview</td></tr>
+            </tbody>
+          </table>
+          <p>Transitions animate over 250 ms. The canvas centre is anchored during animation so you don&apos;t lose your place.</p>
+          <KV k="Scroll wheel" v="Still available for free-zoom at any time; doing so deselects the active named level." />
+          <KV k="Keyboard guard" v="Shortcuts 1 / 2 / 3 are blocked while any modal is open." />
+        </Section>
+
+        <Section id="battle-report" title="Battle Report">
+          <p>Click <span className="text-slate-200">⎙ Report</span> (top-right, next to <span className="text-slate-200">?</span> and <span className="text-slate-200">📖 Legend</span>) to open the Battle Report modal.</p>
+          <Sub title="Contents">
+            <KV k="Header" v="Session title, current round number, combat mode (Vectorial Combat / Basic Combat)." />
+            <KV k="Ship Roster" v="Vessel name · Faction · Hull (current / max) · Critical hits (system + severity) · Status (Active / WRECK)." />
+            <KV k="Battle Log" v="All log entries grouped by round; each entry shows the phase and message." />
+          </Sub>
+          <Sub title="Print / Save PDF">
+            <p>Click <span className="text-slate-200">⎙ Print / Save PDF</span> to open the browser print dialog. Select a printer or choose <em>Save as PDF</em> to export the report.</p>
+            <p>The printout uses a white background with monospace text — no additional software or extensions required.</p>
           </Sub>
         </Section>
 

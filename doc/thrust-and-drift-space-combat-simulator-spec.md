@@ -1598,7 +1598,7 @@ Vedi [obstacles-system-design.md](obstacles-system-design.md) per la specifica c
 
 Dettagli design: `doc/discrete-zoom-design.md`.
 
-#### 13.10.2 Resoconto Battaglia in PDF (v2.0.1) ⬜ IN PROGRESS
+#### 13.10.2 Resoconto Battaglia in PDF (v2.0.0) ✅ COMPLETATA
 
 **Componente**: `BattleReportModal.jsx` — chiave MODAL_MAP `battleReport`, `variant="dialog"`, `width="max-w-4xl"`
 

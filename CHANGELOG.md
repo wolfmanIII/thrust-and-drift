@@ -6,6 +6,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.0.0] — 2026-06-27
+
+### Added
+
+- **Discrete zoom levels** — Three named zoom levels replace the scroll-only continuous zoom:
+  - **C — Close** (`1` / button `C`): 2.5× — ideal for tight engagements.
+  - **T — Tactical** (`2` / button `T`): 1.0× — default balanced view.
+  - **S — Strategic** (`3` / button `S`): 0.45× — wide-area overview.
+  Transitions animate over 250 ms ease-in-out via `requestAnimationFrame`; canvas centre anchored during animation. Scroll-wheel free-zoom continues to work and deselects the active named level. Keyboard shortcuts 1/2/3 blocked while any modal is open. (`BattleMap.jsx`, `useMapInteraction.js`)
+- **PDF Battle Report** — `⎙ Report` button in the top-right controls opens `BattleReportModal`: a formatted session summary with header (title, round, combat mode), ship roster (vessel · faction · hull · criticals · status), and battle log grouped by round. Designed for `window.print()` / Save as PDF. Print-optimised via `@media print` in `App.css`: white background, monospace font, semantic colour overrides via `[data-print-accent/red/green]` attribute selectors. Zero new runtime dependencies. (`BattleReportModal.jsx`, `App.css`, `App.jsx`)
+- **Playwright e2e suite** — `e2e/zoom-levels.spec.js` (12 tests) and `e2e/battle-report.spec.js` (10 tests) cover both v2.0 features end-to-end in headless Chromium. Shared helper `startNewBattle()` in `e2e/helpers.js`. Scripts: `npm run e2e` / `npm run e2e:headed`. (`playwright.config.js`, `package.json`, `.gitignore`)
+- **Unit tests — v2.0 features** — `BattleMap.test.jsx`: zoom button rendering, default active state, click dispatch (`animateZoom` calls with correct zoom values), active style transfer, keyboard shortcuts 1/2/3, modal-open guard. `BattleReportModal.test.jsx`: header content, ship roster (Active / WRECK for hull ≤ 0, criticals, faction labels, multiple criticals, empty placeholder), battle log (empty placeholder, message rendering, round headers, grouping — 1 header per round, all 7 phase label mappings), print button → `window.print()`. 1114 Vitest tests total.
+
+---
+
 ## [1.24.3] — 2026-06-27
 
 ### Fixed

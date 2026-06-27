@@ -9,16 +9,32 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 1.24.3 |
+| **Versione** | 2.0.0 |
 | **Branch** | main |
-| **Test** | 1050 passing |
-| **Ultimo commit** | fix(battle-log): disable height transition while dragging to prevent blocky resize (`c10802d`) |
+| **Test** | 1114 Vitest + 22 Playwright e2e |
+| **Ultimo commit** | docs(release): version bump 2.0.0 — update all doc, README, CHANGELOG, HANDOFF, CLAUDE.md, field manual, HelpScreen |
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — i18n + Playwright e2e (v1.24.3)
+### Sessione corrente — v2.0.0: Discrete Zoom + PDF Report + Test Suite
+
+1. **Spec §13.10** (`7149514`, prev session) — §13.10.1 Scale Mappa Discrete documentata come ✅ COMPLETATA; §13.10.2 Resoconto PDF espansa con dati completi (componente, trigger, sorgenti dati, struttura contenuto, meccanismo print). Ora entrambe ✅ COMPLETATE.
+
+2. **BattleReportModal.jsx** (prev session) — Legge `ships`, `log`, `round`, `combatMode` da battleStore; `closeModal` da uiStore. Raggruppa log per round. Pulsante `⎙ Print / Save PDF` → `window.print()`. Sezione `id="battle-report-print"` con attributi semantici `data-print-accent/red/green`. `THRUST &amp; DRIFT` via HTML entity. `variant="dialog"`, `width="max-w-4xl"`.
+
+3. **App.css** (prev session) — Blocco `@media print` aggiunto in cima: body `visibility:hidden`, `#battle-report-print` `position:fixed` white background, override colori semantici via selettori `[data-print-*]`.
+
+4. **App.jsx** (prev session) — Import + entry `battleReport: BattleReportModal` in `MODAL_MAP`; pulsante `⎙ Report` in `TopRightControls`.
+
+5. **Test unitari v2.0** (prev session) — `BattleMap.test.jsx`: zoom buttons C/T/S, stato attivo TACTICAL default, click dispatch verso `animateZoom(2.5/1.0/0.45)`, trasferimento stile attivo, shortcut 1/2/3, guard modale aperto. `BattleReportModal.test.jsx`: header, roster navi (Active/WRECK/critici/faction), log (placeholder, messaggi, header round, raggruppamento, 7 label fase), print button → `window.print()`. Pattern `vi.hoisted()` per mock `animateZoom` ref.
+
+6. **Playwright e2e suite** (prev session) — `playwright.config.js`: Chromium, `reuseExistingServer`, `testDir: './e2e'`. `e2e/helpers.js`: `startNewBattle()` naviga a `/` → clic `NEW SESSION` → attende `Tactical (2)`. `e2e/zoom-levels.spec.js`: 12 test (C/T/S visibili, TACTICAL attivo default, click, ciclaggio, shortcut 1/2/3, guard modale Legend). `e2e/battle-report.spec.js`: 10 test (pulsante visibile, apertura modale, titolo, round, combat mode, empty roster/log, Print visibile, Print chiama `window.print()`, chiusura con ×/ESC/backdrop). Fix: `getByText('Round 1', { exact: true })`, `getByRole('button', { name: 'Close' })`, `getByRole('heading', { name: /Legend/ })`.
+
+7. **Bump versione + doc sync** (questa sessione) — `package.json` 1.24.3 → 2.0.0; CHANGELOG entry v2.0.0; README Features + Running Tests + Tech Stack; CLAUDE.md PROJECT STRUCTURE; HANDOFF; spec §13.10.2 ✅; field-manual §17 Zoom + §17.2 Battle Report; HelpScreen nuove sezioni.
+
+### Sessione precedente — i18n + Playwright e2e (v1.24.3)
 
 1. **i18n — DogfightNotificationModal** (`ba217d2`) — 3 stringhe italiane residue tradotte: "Thrust libero" → "Thrust free", "FUGGITIVO EVADE" → "EVADER ESCAPES".
 2. **Playwright dogfight** (`4228196`) — `playwright/test-dogfight.mjs`: headless Chrome, flusso completo DogfightNotificationModal → HUD tracker → DogfightRoundModal → pilot check → probe attack-phase exclusion.
@@ -325,8 +341,10 @@ Code review completa su dogfight e boarding → 13 fix implementati in 5 fasi:
 ## Prossimo task
 
 - **Deploy Netlify** — manuale da CLI: `source ~/.nvm/nvm.sh && nvm use --lts && npm run build && netlify deploy --prod`
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg dopo le modifiche a §9.10 (naming note + tabella comparativa Fleet Combat)
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§17 Zoom + §17.2 Battle Report aggiunti)
 - **Test manuali in app** — dogfight e boarding (non testati da v1.17.1), flusso missile impact two-step, EW Counter Missile
+- **Reddit response** — risposta dettagliata al thread Reddit (7 fix + spiegazione FIX-08 non-bug)
+- **itch.io listing** — deferred da sessione precedente
 
 Deploy da fare da casa: `source ~/.nvm/nvm.sh && nvm use --lts && npm run build && netlify deploy --prod`
 

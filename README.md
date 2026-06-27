@@ -57,6 +57,8 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Range band rings** | Selecting a ship on the vector map draws four concentric dashed cyan hexagons marking the outer boundaries of SHORT (2 hex), MEDIUM (15 hex), LONG (38 hex), and VERY LONG (77 hex) range bands, each labelled on a dark pill. Hidden during thrust targeting to avoid cluttering the delta-v overlay. |
 | **Legend modal** | Always-visible `📖 Legend` button fixed top-right; also in right-click empty hex menu; 2-column visual reference for all tokens (incl. torpedo), 7 turret beam colours, 6 barbette beam colours, hit/movement effects, persistent indicators (incl. ion aura); Obstacles section with per-type SVG tokens when active |
 | **Field Manual overlay** | `?` button (top-right, next to Legend) opens the full in-app Field Manual as a dialog over the battle map — rules reference accessible mid-session without leaving the battle |
+| **Discrete zoom levels** | Three named zoom levels — **C Close** (2.5×) / **T Tactical** (1.0×) / **S Strategic** (0.45×) — with 250 ms animated transitions; buttons bottom-right of canvas; keyboard shortcuts `1`/`2`/`3`; scroll-wheel free-zoom still available |
+| **PDF battle report** | `⎙ Report` button opens a formatted session summary (ship roster + battle log by round); `⎙ Print / Save PDF` sends it to the browser print dialog; zero dependencies — native `window.print()` + `@media print` CSS |
 
 ---
 
@@ -151,19 +153,28 @@ that unsaved data will be lost.
 | Map rendering | Browser Canvas API |
 | Persistence | IndexedDB (autosave) + Browser File API (JSON export/import) |
 | Testing | Vitest 4 + Testing Library + jsdom + fake-indexeddb |
+| E2E Testing | Playwright 1.61 (Chromium) |
 
 ---
 
 ## Running Tests
 
 ```bash
-npm test                  # run all tests (utils, stores, components)
+npm test                  # run all unit/component tests (utils, stores, components)
 npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1050 tests across utils, Zustand stores, hooks, and UI components (v1.24.0).
-Playwright end-to-end scripts in `playwright/` cover dogfight, boarding, and obstacles flows (headless Chrome, `node playwright/test-*.mjs` with dev server running).
+1114 unit/component tests across utils, Zustand stores, hooks, and UI components.
+
+End-to-end tests run in Chromium via Playwright (dev server auto-started):
+
+```bash
+npm run e2e               # headless
+npm run e2e:headed        # visible browser
+```
+
+22 e2e tests in `e2e/` covering discrete zoom levels and the PDF battle report flow.
 
 ---
 

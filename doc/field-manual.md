@@ -1213,7 +1213,39 @@ A large zone of gas and interstellar dust. No movement cost, no collision risk.
 
 ---
 
-## 17. Further Reading
+## 17. Map Tools
+
+### 17.1 Zoom Levels
+
+Three named zoom levels are available in the toolbar at the bottom-right of the battle map:
+
+| Level | Key | Zoom | Best for |
+| ----- | --- | ---- | -------- |
+| **C — Close** | `1` | 2.5× | Token detail in tight engagements |
+| **T — Tactical** | `2` | 1.0× | Default balanced view |
+| **S — Strategic** | `3` | 0.45× | Wide-area overview |
+
+Click a button or press the corresponding key to animate a 250 ms ease-in-out transition to that zoom level. The canvas centre is anchored during the animation so you don't lose your place.
+
+The scroll-wheel still provides free-zoom at any point; doing so deselects the active named level. Keyboard shortcuts `1`/`2`/`3` are blocked while any modal is open.
+
+### 17.2 Battle Report
+
+Click **⎙ Report** (top-right controls, next to `?` and `📖 Legend`) to open the Battle Report modal.
+
+The report summarises the current battle state in three sections:
+
+| Section | Contents |
+| ------- | -------- |
+| **Header** | Session title, current round number, combat mode (Vectorial Combat / Basic Combat) |
+| **Ship Roster** | Vessel name · Faction · Hull (current/max) · Critical hits (system + severity) · Status (Active / WRECK) |
+| **Battle Log** | All log entries grouped by round; each entry shows Phase and message |
+
+Click **⎙ Print / Save PDF** to open the browser print dialog. Choose a printer or select *Save as PDF* to export the report. The printout uses a white background with monospace text — no additional software required.
+
+---
+
+## 18. Further Reading
 
 | Document | Contents |
 | -------- | -------- |
