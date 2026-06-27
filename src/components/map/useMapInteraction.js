@@ -6,7 +6,7 @@
  * Does NOT call ctx.draw* — rendering is handled by useCanvasRenderer.
  */
 
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 import { pixelToHex, hexDistance, computeClampedDelta } from '../../utils/hex.js'
 import { computeIonThrustEffect } from '../../utils/combat.js'
 import { emitEffect } from '../../utils/effectQueue.js'
@@ -16,6 +16,7 @@ import { useBattleStore } from '../../store/battleStore.js'
 const MIN_ZOOM = 0.3
 const MAX_ZOOM = 3
 const ZOOM_FACTOR = 0.001
+const ANIMATE_DURATION = 250 // ms
 
 /**
  * @param {{
@@ -26,6 +27,7 @@ const ZOOM_FACTOR = 0.001
  * @returns {{
  *   offset: React.MutableRefObject<{x: number, y: number}>,
  *   zoom: React.MutableRefObject<number>,
+ *   animateZoom: (targetZoom: number) => void,
  *   onMouseDown: Function,
  *   onMouseMove: Function,
  *   onMouseUp: Function,
@@ -41,6 +43,9 @@ export function useMapInteraction({ hexSize, canvasRef, mouseHexRef }) {
   const isPanning = useRef(false)
   const panStart = useRef({ x: 0, y: 0 })
   const hasDragged = useRef(false)
+  const animRaf = useRef(null)
+
+  useEffect(() => () => { if (animRaf.current) cancelAnimationFrame(animRaf.current) }, [])
 
   // Granular selectors — no full-store subscriptions
   const showContextMenu       = useUiStore((s) => s.showContextMenu)
@@ -181,6 +186,43 @@ export function useMapInteraction({ hexSize, canvasRef, mouseHexRef }) {
     })
   }, [pixelToWorld, findShipAt, findMissileAt, showContextMenu, canvasRef])
 
+  /**
+   * Animate zoom to a discrete target level, anchoring the canvas center on the same world point.
+   * Cancels any in-progress animation before starting a new one.
+   */
+  const animateZoom = useCallback((targetZoom) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    if (animRaf.current) cancelAnimationFrame(animRaf.current)
+
+    const endZoom    = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, targetZoom))
+    const startZoom  = zoom.current
+    const startOffX  = offset.current.x
+    const startOffY  = offset.current.y
+    const cx         = canvas.offsetWidth  / 2
+    const cy         = canvas.offsetHeight / 2
+    // World point that must stay at canvas center throughout the animation
+    const worldX     = (cx - startOffX) / startZoom
+    const worldY     = (cy - startOffY) / startZoom
+    const startTime  = performance.now()
+
+    const tick = (now) => {
+      const raw = Math.min((now - startTime) / ANIMATE_DURATION, 1)
+      const t   = raw * raw * (3 - 2 * raw) // ease-in-out
+      const z   = startZoom + (endZoom - startZoom) * t
+
+      zoom.current   = z
+      offset.current = { x: cx - worldX * z, y: cy - worldY * z }
+      canvasRef.current?.dispatchEvent(new CustomEvent('map:redraw'))
+
+      if (raw < 1) animRaf.current = requestAnimationFrame(tick)
+      else animRaf.current = null
+    }
+
+    animRaf.current = requestAnimationFrame(tick)
+  }, [canvasRef])
+
   const onDoubleClick = useCallback((e) => {
     if (hasDragged.current) return
     const hex = pixelToWorld(e.clientX, e.clientY)
@@ -195,6 +237,7 @@ export function useMapInteraction({ hexSize, canvasRef, mouseHexRef }) {
   return {
     offset,
     zoom,
+    animateZoom,
     onMouseDown,
     onMouseMove,
     onMouseUp,
