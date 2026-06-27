@@ -1,5 +1,42 @@
 /* App-level overrides and canvas layer utilities */
 
+/* ── Print: Battle Report ──────────────────────────────────────────────────── */
+@media print {
+  /* Hide the entire app UI */
+  body * { visibility: hidden; }
+
+  /* Reveal only the battle report area */
+  #battle-report-print,
+  #battle-report-print * { visibility: visible; }
+
+  /* Reset to a clean white page */
+  #battle-report-print {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: white !important;
+    color: #111 !important;
+    padding: 1.5cm;
+    font-size: 9pt;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* Force all descendants to inherit the container's black text
+     (overrides Tailwind's explicit color utilities) */
+  #battle-report-print * {
+    color: inherit !important;
+    background: transparent !important;
+    border-color: #d0d0d0 !important;
+  }
+
+  /* Semantic color overrides — applied via data attributes in the component */
+  #battle-report-print [data-print-accent] { color: #005555 !important; }
+  #battle-report-print [data-print-red]    { color: #cc0000 !important; }
+  #battle-report-print [data-print-green]  { color: #006600 !important; }
+}
+
+
 /* Canvas fills its parent completely */
 .battle-map-canvas {
   display: block;

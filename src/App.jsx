@@ -31,6 +31,7 @@ import { BoardingOutcomeModal }  from './components/modals/BoardingOutcomeModal.
 import { LegendModal }            from './components/modals/LegendModal.jsx'
 import { CrewAssignmentModal }   from './components/modals/CrewAssignmentModal.jsx'
 import { BasicManoeuvreModal }  from './components/modals/BasicManoeuvreModal.jsx'
+import { BattleReportModal }   from './components/modals/BattleReportModal.jsx'
 import { HelpScreen }       from './components/help/HelpScreen.jsx'
 import { ChangelogScreen }  from './components/help/ChangelogScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
@@ -59,6 +60,7 @@ const MODAL_MAP = {
   crewAssignment:   CrewAssignmentModal,
   basicManoeuvre:   BasicManoeuvreModal,
   placeObstacle:    PlaceObstacleModal,
+  battleReport:     BattleReportModal,
 }
 
 function TopRightControls() {
@@ -79,6 +81,12 @@ function TopRightControls() {
           className="bg-slate-900/80 border border-slate-700 rounded backdrop-blur-sm px-2.5 py-1 font-mono text-xs text-slate-400 hover:text-(--neon-cyan) hover:border-slate-500 transition-colors"
         >
           📖 Legend
+        </button>
+        <button
+          onClick={() => openModal('battleReport')}
+          className="bg-slate-900/80 border border-slate-700 rounded backdrop-blur-sm px-2.5 py-1 font-mono text-xs text-slate-400 hover:text-(--neon-cyan) hover:border-slate-500 transition-colors"
+        >
+          ⎙ Report
         </button>
       </div>
       {helpOpen && (
