@@ -6,11 +6,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [1.24.3] — 2026-06-24
+## [1.24.3] — 2026-06-27
 
 ### Fixed
 
 - **i18n — DogfightNotificationModal**: 3 remaining Italian strings translated to English ("Thrust libero" → "Thrust free"; "FUGGITIVO EVADE" → "EVADER ESCAPES").
+- **BattleLog drag resize** — height transition is now disabled while dragging the top edge; prevents blocky/stuttering resize caused by `transition-[height]` re-triggering on each `setHeight` call during drag.
 
 ### Added
 

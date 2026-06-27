@@ -12,7 +12,7 @@
 | **Versione** | 1.24.3 |
 | **Branch** | main |
 | **Test** | 1050 passing |
-| **Ultimo commit** | test(playwright): add obstacles system end-to-end script (`247c909`) |
+| **Ultimo commit** | fix(battle-log): disable height transition while dragging to prevent blocky resize (`c10802d`) |
 
 ---
 
@@ -25,6 +25,7 @@
 3. **Playwright boarding** (`4228196`, `19ddc9b`) — `playwright/test-boarding.mjs`: ships a (5,3)/(6,3) per evitare canvas center (offset={0,0}); flusso BOARD → BoardingSetupModal → ContactModal → ConflictModal → OutcomeModal; probe re-board assente per navi già in boarding (fix false positive: usa `.absolute.z-50` + regex `^Board ` invece di `body.textContent()`).
 4. **Playwright obstacles** (`247c909`) — `playwright/test-obstacles.mjs`: piazzamento via context menu, canvas thrust targeting (start/ESC), movement collision (wait 2500ms per setTimeout), nebula sensor lock in ActionModal, rimozione ostacolo.
    - Finding: `ThrustModal.jsx` è dead code — non nel MODAL_MAP, obstacle path warnings mai mostrate; canvas targeting è il sistema reale.
+5. **BattleLog drag fix** (`c10802d`) — aggiunto `isDragging` state; `transition-[height]` disabilitato durante il drag per evitare resize a scatti. Portato da tac-and-lock.
 
 ### Sessione precedente — UX polish + Legend carousel (v1.24.1–1.24.2)
 
