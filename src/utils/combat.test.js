@@ -21,6 +21,7 @@ import {
   isOutOfRange,
   getApValue,
   countMissileAmmoCapacity,
+  countMissileRacks,
   countSandcasters,
   computeMissileAttackDM,
   computeMissileImpactDamage,
@@ -320,6 +321,19 @@ describe('rollAttack', () => {
     const winner = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0, dogfightDM: 2 })
     expect(winner.total).toBe(base.total + 2)
     expect(winner.breakdown.dogfightDM).toBe(2)
+  })
+
+  it('obstacleCoverDM reduces total and appears in breakdown', () => {
+    // roll=8 (mocked), base all zeros → total=8; target in dense asteroid field → DM-2 → total=6
+    const base  = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0 })
+    const cover = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0, obstacleCoverDM: -2 })
+    expect(cover.total).toBe(base.total - 2)
+    expect(cover.breakdown.obstacleCoverDM).toBe(-2)
+  })
+
+  it('obstacleCoverDM defaults to 0 when omitted', () => {
+    const r = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0 })
+    expect(r.breakdown.obstacleCoverDM).toBe(0)
   })
 })
 
@@ -645,5 +659,23 @@ describe('computeIonThrustEffect', () => {
     // but effectively: floor(6 × 120/100) = 7; spec says return baseThrust when overpowered?
     // RAW: no amplification beyond rated thrust — result capped at baseThrust
     expect(computeIonThrustEffect(6, 120, 100)).toBeLessThanOrEqual(6)
+  })
+})
+
+// === countMissileRacks (deprecated alias) ===
+
+describe('countMissileRacks', () => {
+  it('returns same value as countMissileAmmoCapacity', () => {
+    const profile = { turrets: [
+      { slot: 1, weapons: ['Missile Rack'] },
+      { slot: 2, weapons: ['Missile Barbette'] },
+    ]}
+    expect(countMissileRacks(profile)).toBe(countMissileAmmoCapacity(profile))
+    expect(countMissileRacks(profile)).toBe(37) // 12 + 25
+  })
+
+  it('returns 0 for a profile with no missile weapons', () => {
+    const profile = { turrets: [{ slot: 1, weapons: ['Pulse Laser', 'Sandcaster'] }] }
+    expect(countMissileRacks(profile)).toBe(0)
   })
 })
