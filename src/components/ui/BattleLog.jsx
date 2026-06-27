@@ -31,8 +31,9 @@ const TYPE_PREFIX = {
 }
 
 export function BattleLog() {
-  const [collapsed, setCollapsed] = useState(true)
-  const [height, setHeight]       = useState(DEFAULT_HEIGHT)
+  const [collapsed,  setCollapsed]  = useState(true)
+  const [height,     setHeight]     = useState(DEFAULT_HEIGHT)
+  const [isDragging, setIsDragging] = useState(false)
   const log                   = useBattleStore((s) => s.log)
   const clearLog              = useBattleStore((s) => s.clearLog)
   const reopenMissileImpact   = useBattleStore((s) => s.reopenMissileImpact)
@@ -53,6 +54,7 @@ export function BattleLog() {
 
   const onDragStart = useCallback((e) => {
     dragState.current = { startY: e.clientY, startH: height }
+    setIsDragging(true)
     e.preventDefault()
   }, [height])
 
@@ -62,7 +64,11 @@ export function BattleLog() {
       const delta = dragState.current.startY - e.clientY
       setHeight(Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, dragState.current.startH + delta)))
     }
-    const onUp = () => { dragState.current = null }
+    const onUp = () => {
+      if (!dragState.current) return
+      dragState.current = null
+      setIsDragging(false)
+    }
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
     return () => {
@@ -73,7 +79,7 @@ export function BattleLog() {
 
   return (
     <div
-      className="absolute bottom-7 left-0 z-10 w-1/3 transition-[height] duration-200"
+      className={`absolute bottom-7 left-0 z-10 w-1/3 ${isDragging ? '' : 'transition-[height] duration-200'}`}
       style={{ height: collapsed ? 32 : height }}
     >
       <div className="h-full bg-slate-950/85 border-t border-slate-700 backdrop-blur-sm flex flex-col">
