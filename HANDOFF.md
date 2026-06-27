@@ -341,7 +341,6 @@ Code review completa su dogfight e boarding → 13 fix implementati in 5 fasi:
 ## Prossimo task
 
 - **Deploy Netlify** — manuale da CLI: `source ~/.nvm/nvm.sh && nvm use --lts && npm run build && netlify deploy --prod`
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§17 Zoom + §17.2 Battle Report aggiunti)
 - **Test manuali in app** — dogfight e boarding (non testati da v1.17.1), flusso missile impact two-step, EW Counter Missile
 - **Reddit response** — risposta dettagliata al thread Reddit (7 fix + spiegazione FIX-08 non-bug)
 - **itch.io listing** — deferred da sessione precedente
