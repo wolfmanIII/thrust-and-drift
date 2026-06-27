@@ -1592,8 +1592,40 @@ Vedi [obstacles-system-design.md](obstacles-system-design.md) per la specifica c
 
 ### 13.10 Versione 2.0 — Roadmap
 
-- **Scale mappa discrete con transizione** — 3 livelli nominati (CLOSE / TACTICAL / STRATEGIC) con salto animato via `requestAnimationFrame`; pulsanti HUD o shortcut tastiera; rendering adattivo per livello (coordinate hex, label token). Puramente presentazionale — nessun impatto su store o matematica hex.
-- **Resoconto battaglia in PDF** — componente `BattleReportView` con intestazione sessione, roster navi (stato finale: hull, criticals, fazione), battle log raggruppato per round; esportazione via `window.print()` con `@media print` CSS. Zero dipendenze aggiuntive. Dati già disponibili in store (`log`, `ships`).
+#### 13.10.1 Scale Mappa Discrete (v2.0.0) ✅ COMPLETATA
+
+3 livelli nominati (CLOSE 2.5× / TACTICAL 1.0× / STRATEGIC 0.45×) con transizione animata 250ms ease-in-out via `requestAnimationFrame`. Pulsanti C/T/S in basso a destra del canvas; shortcut tastiera 1/2/3 (disabilitati quando un modal è aperto). Centro canvas ancorato durante l'animazione. Scroll-wheel continua a funzionare in free-zoom (deseleziona il livello attivo). Puramente presentazionale — nessun impatto su store o matematica hex.
+
+Dettagli design: `doc/discrete-zoom-design.md`.
+
+#### 13.10.2 Resoconto Battaglia in PDF (v2.0.1) ⬜ IN PROGRESS
+
+**Componente**: `BattleReportModal.jsx` — chiave MODAL_MAP `battleReport`, `variant="dialog"`, `width="max-w-4xl"`
+
+**Trigger**: pulsante `⎙ Report` in `TopRightControls` (`App.jsx`) → `openModal('battleReport')`
+
+**Dati da store**:
+
+| Campo | Store | Descrizione |
+| --- | --- | --- |
+| `ships[]` | battleStore | Roster navi — stato finale al momento della stampa |
+| `log[]` | battleStore | Cronologia eventi del combattimento |
+| `round` | battleStore | Round corrente |
+| `combatMode` | battleStore | `'vectorial'` \| `'basic'` |
+
+**Struttura contenuto** (id `battle-report-print` per CSS `@media print`):
+
+| Sezione | Contenuto |
+| --- | --- |
+| Header | "THRUST & DRIFT / BATTLE REPORT", data corrente, round, modo combattimento |
+| Ship Roster | Tabella: Vessel · Faction · Hull (cur/max) · Criticals (system + severity) · Status (Active/WRECK) |
+| Battle Log | Entries raggruppate per round; per round: Phase · Messaggio |
+
+**Print mechanism**:
+
+- Pulsante `⎙ Print / Save PDF` → `window.print()`
+- `@media print` in `App.css`: `body * { visibility: hidden }` + `#battle-report-print { position: fixed; top:0; left:0; background:white; color:#111 }` + override selettivo dei colori semantici via attributi `data-print-accent / data-print-red / data-print-green`
+- Zero dipendenze aggiuntive
 
 ---
 
