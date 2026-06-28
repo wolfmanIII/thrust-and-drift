@@ -18,9 +18,13 @@
 import { useState, useEffect }                           from 'react'
 import { Modal }                                         from './Modal.jsx'
 import { useBattleStore }                                from '../../store/battleStore.js'
-import { rollDice }                                      from '../../utils/dice.js'
+import { rollDice, roll2D6 }                             from '../../utils/dice.js'
 import { getEffectiveSkill }                             from '../../utils/crew.js'
 import { computeMissileAttackDM, computeMissileImpactDamage, computeIonThrustEffect } from '../../utils/combat.js'
+import { DiceInput }                                     from '../forms/DiceInput.jsx'
+
+/** Laser types usable as Point Defence. // MgT2e CRB p.161 */
+const LASER_PD = ['Pulse Laser', 'Beam Laser']
 
 // MgT2e HG p.28 (Missile Rack 4D), HG p.30 (Torpedo 6D)
 function dicePerUnit(type) {
@@ -33,12 +37,21 @@ export function MissileImpactModal() {
   const dismissMissileImpact  = useBattleStore((s) => s.dismissMissileImpact)
   const applyDamage           = useBattleStore((s) => s.applyDamage)
   const spendReactionThrust   = useBattleStore((s) => s.spendReactionThrust)
+  const markTurretFired       = useBattleStore((s) => s.markTurretFired)
+  const addLogEntry           = useBattleStore((s) => s.addLogEntry)
 
   const [step, setStep]         = useState('attack')   // 'attack' | 'damage'
   const [die1, setDie1]         = useState('')
   const [die2, setDie2]         = useState('')
   const [evasiveActive, setEvasive] = useState(false)
   const [damageRolled, setDamage]   = useState('')
+
+  // PD state — resolved at impact per CRB p.173 (REQ-08)
+  const [pdUsedSlots, setPdUsedSlots]       = useState([])
+  const [pdDestroyedCount, setPdDestroyedCount] = useState(0)
+  const [pdTurretSlot, setPdTurretSlot]     = useState(null)
+  const [pdResult, setPdResult]             = useState(null)
+  const [pdManualDice, setPdManualDice]     = useState(null)
 
   const impact = pendingMissileImpacts[0]
 
@@ -50,6 +63,11 @@ export function MissileImpactModal() {
     setDie2('')
     setEvasive(false)
     setDamage('')
+    setPdUsedSlots([])
+    setPdDestroyedCount(0)
+    setPdTurretSlot(null)
+    setPdResult(null)
+    setPdManualDice(null)
   }, [impact?.id])
 
   if (!impact) return null
@@ -86,10 +104,22 @@ export function MissileImpactModal() {
     ? (launcherTL < 9 ? `TL${launcherTL} < 9` : 'Adjacent/Close range')
     : null
 
-  // Attack DMs — CRB p.173
-  const totalDM     = computeMissileAttackDM(impact.count, hasSmart, evasiveActive ? pilotSkill : 0)
+  // Point Defence — available laser turrets not yet used in this impact resolution. // CRB p.173
+  const pdTurrets = (target.profile.turrets ?? [])
+    .filter((t) => !(target.firedTurrets ?? []).includes(t.slot))
+    .filter((t) => !pdUsedSlots.includes(t.slot))
+    .filter((t) => t.weapons?.some((w) => LASER_PD.includes(w)))
+    .map((t) => ({
+      slot: t.slot,
+      laserBonus: Math.max(0, (t.weapons?.filter((w) => LASER_PD.includes(w)).length ?? 0) - 1),
+    }))
+  const remainingCount = Math.max(0, impact.count - pdDestroyedCount)
+  const isPlayerTarget = target.faction === 'players'
+
+  // Attack DMs — CRB p.173 (use remainingCount after PD)
+  const totalDM     = computeMissileAttackDM(remainingCount, hasSmart, evasiveActive ? pilotSkill : 0)
   const smartDM     = hasSmart ? 2 : 0
-  const salvoSizeDM = impact.count
+  const salvoSizeDM = remainingCount
   const evasiveDM  = evasiveActive ? -pilotSkill : 0
 
   const d1 = parseInt(die1, 10)
@@ -102,10 +132,34 @@ export function MissileImpactModal() {
   // Damage (step 2)
   const rawRolled  = parseInt(damageRolled, 10)
   const netPerMiss = isNaN(rawRolled) ? null : Math.max(0, rawRolled - armor)
-  const multiplier = effect !== null ? Math.min(effect, impact.count) : null
+  const multiplier = effect !== null ? Math.min(effect, remainingCount) : null
   const netDamage  = (!isNaN(rawRolled) && effect !== null)
-    ? computeMissileImpactDamage(rawRolled, armor, effect, impact.count)
+    ? computeMissileImpactDamage(rawRolled, armor, effect, remainingCount)
     : null
+
+  function handlePdRoll(diceOverride = null) {
+    const slot = pdTurretSlot ?? pdTurrets[0]?.slot
+    if (!slot) return
+    const turret     = target.profile.turrets?.find((t) => t.slot === slot)
+    const laserBonus = Math.max(0, (turret?.weapons?.filter((w) => LASER_PD.includes(w)).length ?? 0) - 1)
+    const gunner     = getEffectiveSkill(target.profile.crew, target.crewAssignments, 'gunner', slot)
+    const rollResult = diceOverride ?? roll2D6()
+    const total      = rollResult.total + gunner + laserBonus
+    const effect     = total - 8
+    const removed    = Math.max(0, effect)
+    const newDestroyed = pdDestroyedCount + removed
+    markTurretFired(target.id, slot)
+    setPdUsedSlots((prev) => [...prev, slot])
+    setPdTurretSlot(null)
+    setPdDestroyedCount(newDestroyed)
+    setPdResult({ turretSlot: slot, total, effect, missilesRemoved: removed })
+    setPdManualDice(null)
+    addLogEntry(`${target.profile.name} Point Defence (T${slot}): total ${total}, Effect ${effect >= 0 ? `+${effect}` : effect} — ${removed} missile${removed !== 1 ? 's' : ''} destroyed.`)
+    if (Math.max(0, impact.count - newDestroyed) === 0) {
+      addLogEntry(`${target.profile.name} Point Defence destroyed entire salvo.`)
+      dismissMissileImpact(impact.id)
+    }
+  }
 
   function handleAutoRollAttack() {
     const r = rollDice(2, 6)
@@ -211,6 +265,59 @@ export function MissileImpactModal() {
                 </div>
               </div>
             </div>
+
+            {/* ── Point Defence ───────────────────────────────────── */}
+            {/* CRB p.173: "When a missile salvo reaches its target, the target may attempt
+                Point Defence or Evasive Action." — resolved at impact, not at launch. */}
+            {(pdTurrets.length > 0 || pdResult) && (
+              <div className="border border-amber-700/30 rounded p-3 space-y-2 bg-amber-950/10">
+                <p className="font-mono text-xs text-amber-500/70 tracking-widest uppercase">
+                  🛡 Point Defence (CRB p.173)
+                </p>
+                {pdResult && (
+                  <div className={`rounded p-2 font-mono text-xs ${pdResult.missilesRemoved > 0 ? 'bg-green-950/30 text-green-400' : 'bg-slate-800 text-slate-400'}`}>
+                    T{pdResult.turretSlot} · Total {pdResult.total} · Effect {pdResult.effect >= 0 ? `+${pdResult.effect}` : pdResult.effect}
+                    {pdResult.missilesRemoved > 0
+                      ? ` → ${pdResult.missilesRemoved} missile${pdResult.missilesRemoved !== 1 ? 's' : ''} destroyed (${remainingCount} remaining)`
+                      : ' → no missiles destroyed'}
+                  </div>
+                )}
+                {pdTurrets.length > 0 && (
+                  <div className="space-y-1.5">
+                    {pdTurrets.length > 1 && (
+                      <div className="flex gap-1 flex-wrap">
+                        {pdTurrets.map((t) => (
+                          <button
+                            key={t.slot}
+                            onClick={() => setPdTurretSlot(t.slot)}
+                            className={`px-2 py-1 rounded font-mono text-xs border transition-colors ${
+                              pdTurretSlot === t.slot
+                                ? 'border-amber-500/60 bg-amber-900/30 text-amber-400'
+                                : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                            }`}
+                          >
+                            W{t.slot}{t.laserBonus > 0 && <span className="text-amber-500 ml-1">+{t.laserBonus}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {isPlayerTarget && (
+                      <div className="flex items-center gap-2 bg-slate-800/60 rounded px-3 py-1.5">
+                        <span className="text-slate-400 font-mono text-xs">2D6:</span>
+                        <DiceInput value={null} key={`pd-${pdResult?.turretSlot ?? 'init'}`} onChange={setPdManualDice} />
+                      </div>
+                    )}
+                    <button
+                      onClick={() => handlePdRoll(isPlayerTarget ? pdManualDice : null)}
+                      disabled={(pdTurrets.length > 1 && !pdTurretSlot) || (isPlayerTarget && !pdManualDice)}
+                      className="w-full py-1.5 bg-amber-900/20 border border-amber-700/50 text-amber-400 font-mono text-xs rounded hover:bg-amber-900/30 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
+                    >
+                      {isPlayerTarget ? 'CONFIRM POINT DEFENCE' : '🎲 ROLL POINT DEFENCE'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* ── Evasive Action toggle ───────────────────────────── */}
             {evasiveActive ? (

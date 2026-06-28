@@ -52,12 +52,10 @@ function DmRow({ label, value, highlight = false }) {
  * // MgT2e CRB p.171 — Reactions
  */
 function ReactionsPanel({
-  target, weaponKey, isMissile, isPlayerTarget,
+  target, weaponKey, isPlayerTarget,
   reactionEvasion, setReactionEvasion, availableThrust, targetPilotSkill,
-  pdTurrets, pdTurretSlot, setPdTurretSlot, pdResult, onPdRoll,
   sandTurrets, sandAmmoLeft, sandTurretSlot, setSandTurretSlot, sandResult, onSandRoll,
 }) {
-  const [pdManualDice, setPdManualDice]     = useState(null)
   const [sandManualDice, setSandManualDice] = useState(null)
   const laserAttack = LASER_TYPES.includes(weaponKey)
   // CRB p.171: 1 thrust → dodge 1 attack; DM fixed = −pilotSkill
@@ -93,60 +91,6 @@ function ReactionsPanel({
                 : `EVADE (1 thrust → DM −${targetPilotSkill})`}
         </button>
       </div>
-
-      {/* Point Defence — missile attacks + target has laser turret */}
-      {isMissile && (pdTurrets.length > 0 || pdResult) && (
-        <div className="border-t border-amber-700/20 pt-3 space-y-2">
-          <div className="flex items-center justify-between font-mono text-xs text-slate-400">
-            <span>Point Defence</span>
-            <span>Gunner turret · removes Effect missiles</span>
-          </div>
-          {/* Show last PD result (if any) */}
-          {pdResult && (
-            <div className={`rounded p-2 font-mono text-xs ${pdResult.missilesRemoved > 0 ? 'bg-green-950/30 text-green-400' : 'bg-slate-800 text-slate-400'}`}>
-              T{pdResult.turretSlot} · Total {pdResult.total} · Effect {pdResult.effect >= 0 ? `+${pdResult.effect}` : pdResult.effect}
-              {pdResult.missilesRemoved > 0
-                ? ` → ${pdResult.missilesRemoved} missile${pdResult.missilesRemoved !== 1 ? 's' : ''} destroyed`
-                : ' → no missiles destroyed'}
-            </div>
-          )}
-          {/* Additional turrets still available — allow another roll */}
-          {pdTurrets.length > 0 && (
-            <div className="space-y-1.5">
-              {pdTurrets.length > 1 && (
-                <div className="flex gap-1 flex-wrap">
-                  {pdTurrets.map((t) => (
-                    <button
-                      key={t.slot}
-                      onClick={() => setPdTurretSlot(t.slot)}
-                      className={`px-2 py-1 rounded font-mono text-xs border transition-colors ${
-                        pdTurretSlot === t.slot
-                          ? 'border-amber-500/60 bg-amber-900/30 text-amber-400'
-                          : 'border-slate-700 text-slate-400 hover:border-slate-500'
-                      }`}
-                    >
-                      W{t.slot}{t.laserBonus > 0 && <span className="text-amber-500 ml-1">+{t.laserBonus}</span>}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {isPlayerTarget && (
-                <div className="flex items-center gap-2 bg-slate-800/60 rounded px-3 py-1.5">
-                  <span className="text-slate-400 font-mono text-xs">2D6:</span>
-                  <DiceInput value={null} key={pdResult?.turretSlot ?? 'pd-init'} onChange={setPdManualDice} />
-                </div>
-              )}
-              <button
-                onClick={() => onPdRoll(isPlayerTarget ? pdManualDice : null)}
-                disabled={(pdTurrets.length > 1 && !pdTurretSlot) || (isPlayerTarget && !pdManualDice)}
-                className="w-full py-1.5 bg-amber-900/20 border border-amber-700/50 text-amber-400 font-mono text-xs rounded hover:bg-amber-900/30 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
-              >
-                {isPlayerTarget ? 'CONFIRM POINT DEFENCE' : '🎲 ROLL POINT DEFENCE'}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Disperse Sand — laser attacks + target has sandcaster */}
       {laserAttack && sandTurrets.length > 0 && (
@@ -451,22 +395,16 @@ function AttackConfigStep({
           </p>
         )}
 
-        {/* Defender reactions — shown when weapon + target selected */}
-        {weapon && target && reactions && (
+        {/* Defender reactions — direct attacks only; missiles react at impact (CRB p.173, REQ-08) */}
+        {weapon && target && reactions && !isMissile && (
           <ReactionsPanel
             target={target}
             weaponKey={weaponKey}
-            isMissile={isMissile}
             isPlayerTarget={target?.faction === 'players'}
             reactionEvasion={reactions.evasion}
             setReactionEvasion={reactions.setEvasion}
             availableThrust={reactions.availableThrust}
             targetPilotSkill={reactions.targetPilotSkill}
-            pdTurrets={reactions.pdTurrets}
-            pdTurretSlot={reactions.pdTurretSlot}
-            setPdTurretSlot={reactions.setPdTurretSlot}
-            pdResult={reactions.pdResult}
-            onPdRoll={reactions.onPdRoll}
             sandTurrets={reactions.sandTurrets}
             sandAmmoLeft={reactions.sandAmmoLeft}
             sandTurretSlot={reactions.sandTurretSlot}
@@ -474,13 +412,6 @@ function AttackConfigStep({
             sandResult={reactions.sandResult}
             onSandRoll={reactions.onSandRoll}
           />
-        )}
-
-        {/* All missiles intercepted banner */}
-        {isMissile && missileCount === 0 && (
-          <p className="text-green-400 font-mono text-xs text-center tracking-widest">
-            ✅ ALL MISSILES INTERCEPTED — salvo destroyed
-          </p>
         )}
 
         {isMissilePdMode ? (
@@ -492,22 +423,13 @@ function AttackConfigStep({
             🛡 INTERCEPT →
           </button>
         ) : isMissile ? (
-          missileCount === 0 ? (
-            <button
-              onClick={onNext}
-              className="w-full py-2 bg-slate-800 border border-slate-600 text-slate-400 font-mono text-sm tracking-widest rounded hover:border-slate-500 transition-colors"
-            >
-              MARK FIRED & CLOSE
-            </button>
-          ) : (
-            <button
-              onClick={onNext}
-              disabled={!weapon || !target || ammoLeft === 0}
-              className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
-            >
-              {ammoLeft === 0 ? '🚨 NO AMMO' : '🚀 LAUNCH SALVO →'}
-            </button>
-          )
+          <button
+            onClick={onNext}
+            disabled={!weapon || !target || ammoLeft === 0}
+            className="w-full py-2 bg-red-900/30 border border-red-700/50 text-red-400 font-mono text-sm tracking-widest rounded hover:bg-red-900/40 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
+          >
+            {ammoLeft === 0 ? '🚨 NO AMMO' : '🚀 LAUNCH SALVO →'}
+          </button>
         ) : (
           <button
             onClick={onNext}
@@ -1291,20 +1213,17 @@ export function AttackModal() {
   const [critRoll, setCritRoll]               = useState(null)
   const [extraDamageResult, setExtraDamageResult] = useState(null)
   const [missileCount, setMissileCount]       = useState(1)
-  const [pdDestroyedTotal, setPdDestroyedTotal] = useState(0)
 
-  // Reaction state (CRB p.171)
+  // Reaction state — direct attacks only; missiles react at impact (CRB p.173, REQ-08)
   const [reactionEvasion, setReactionEvasion] = useState(false)
-  const [pdTurretSlot, setPdTurretSlot]       = useState(null)
-  const [pdResult, setPdResult]               = useState(null)
   const [sandTurretSlot, setSandTurretSlot]   = useState(null)
   const [sandResult, setSandResult]           = useState(null)
 
   const isMissile  = weaponKey === 'Missile Rack' || weaponKey === 'Missile Barbette' || weaponKey === 'Torpedo'
 
   const resetReactions = () => {
-    setReactionEvasion(false); setPdTurretSlot(null); setPdResult(null)
-    setSandTurretSlot(null); setSandResult(null); setPdDestroyedTotal(0)
+    setReactionEvasion(false)
+    setSandTurretSlot(null); setSandResult(null)
   }
 
   const setWeaponSelection = (name, turretSlot) => {
@@ -1365,15 +1284,6 @@ export function AttackModal() {
     - (target.evasiveThrust ?? 0)
   ) : 0
 
-  const targetPdTurrets = target ? (target.profile.turrets ?? [])
-    .filter((t) => !(target.firedTurrets ?? []).includes(t.slot))
-    .filter((t) => t.weapons?.some((w) => LASER_PD.includes(w)))
-    .map((t) => ({
-      slot: t.slot,
-      laserBonus: Math.max(0, (t.weapons?.filter((w) => LASER_PD.includes(w)).length ?? 0) - 1),
-    }))
-  : []
-
   const sandAmmoLeft = target?.sandAmmoTotal ?? 0
   const targetSandTurrets = (target && sandAmmoLeft > 0) ? (target.profile.turrets ?? [])
     .filter((t) => !(target.firedTurrets ?? []).includes(t.slot))
@@ -1391,24 +1301,6 @@ export function AttackModal() {
   const sandBonusArmor = sandResult?.success ? (sandResult.bonusArmor ?? 0) : 0
 
   // ── Reaction handlers ─────────────────────────────────────────────────
-  const handlePdRoll = (diceOverride = null) => {
-    const slot = pdTurretSlot ?? targetPdTurrets[0]?.slot
-    if (!slot || !target) return
-    const turret    = target.profile.turrets?.find((t) => t.slot === slot)
-    const laserBonus = Math.max(0, (turret?.weapons?.filter((w) => LASER_PD.includes(w)).length ?? 0) - 1)
-    const gunner    = getEffectiveSkill(target.profile.crew, target.crewAssignments, 'gunner', slot)
-    const rollResult = diceOverride ?? roll2D6()
-    const total     = rollResult.total + gunner + laserBonus
-    const effect    = total - 8
-    const removed   = Math.max(0, effect)
-    setMissileCount((prev) => Math.max(0, prev - removed))
-    setPdDestroyedTotal((prev) => prev + removed)
-    markTurretFired(target.id, slot)
-    setPdTurretSlot(null)  // reset — next turret must be explicitly selected
-    setPdResult({ turretSlot: slot, roll: rollResult, gunner, laserBonus, total, effect, missilesRemoved: removed })
-    addLogEntry(`${target.profile.name} Point Defence (T${slot}): total ${total}, Effect ${effect >= 0 ? `+${effect}` : effect} — ${removed} missile${removed !== 1 ? 's' : ''} destroyed.`)
-  }
-
   const handleSandRoll = (diceOverride = null) => {
     const slot = sandTurretSlot ?? targetSandTurrets[0]?.slot
     if (!slot || !target) return
@@ -1429,13 +1321,6 @@ export function AttackModal() {
   const handleAdvanceToRoll = () => {
     if (reactionEvasion && target) spendReactionThrust(target.id, 1)
     setStep('roll')
-  }
-
-  const handleAllIntercepted = () => {
-    if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
-    if (pdDestroyedTotal > 0) spendMissileAmmo(attacker.id, pdDestroyedTotal)
-    addLogEntry(`${attacker.profile.name}: missile salvo fully intercepted by ${target?.profile.name ?? '?'} Point Defence.`)
-    closeModal()
   }
 
   const handleApplyDamage = () => {
@@ -1575,11 +1460,6 @@ export function AttackModal() {
           setEvasion:      setReactionEvasion,
           availableThrust: availableReactionThrust,
           targetPilotSkill,
-          pdTurrets:       targetPdTurrets,
-          pdTurretSlot,
-          setPdTurretSlot,
-          pdResult,
-          onPdRoll:        handlePdRoll,
           sandTurrets:     targetSandTurrets,
           sandAmmoLeft,
           sandTurretSlot,
@@ -1589,7 +1469,7 @@ export function AttackModal() {
         }}
         onNext={
           targetMissileId ? handleAdvanceToMissilePd :
-          isMissile ? (missileCount === 0 ? handleAllIntercepted : handleLaunchMissile) :
+          isMissile ? handleLaunchMissile :
           handleAdvanceToRoll
         }
         onClose={closeModal}
