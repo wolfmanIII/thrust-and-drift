@@ -192,15 +192,15 @@ function buildNextRoundState(s) {
     : s.initiativeOrder
 
   // CRB p.160: initiative is rolled once at start of combat, not every round.
-  // Skip initiative from round 2+ unless a ship was added mid-battle this round.
-  const skipInitiative = s.round >= 1 && !s.shipAddedThisRound && newInitiativeOrder.length > 0
+  // TC p.174 vectorial combat adds no new initiative rules — same as CRB.
+  // GM uses the ↺ button (forceInitiativePhase) to manually slot new ships mid-battle.
+  const skipInitiative = s.round >= 1 && newInitiativeOrder.length > 0
   const nextPhase = skipInitiative ? 'acceleration' : 'initiative'
 
   return {
     round: s.round + 1,
     phase: nextPhase,
     currentActorIndex: 0,
-    shipAddedThisRound: false,
     missiles: updatedMissiles,
     initiativeOrder: newInitiativeOrder,
     pendingMissileImpacts: [
@@ -278,9 +278,6 @@ const useBattleStore = create((set, get) => {
   /** @type {string[]} Ordered ship IDs by initiative */
   initiativeOrder: [],
   currentActorIndex: 0,
-  /** True when a ship was added mid-battle this round — forces initiative re-roll next round. */
-  shipAddedThisRound: false,
-
   /** @type {object[]} ShipInstance array */
   ships: [],
   /** @type {object[]} MissileToken array */
@@ -529,8 +526,6 @@ const useBattleStore = create((set, get) => {
       initiativeOrder: s.initiativeOrder.length > 0
         ? [...s.initiativeOrder, instance.id]
         : s.initiativeOrder,
-      // Flag so buildNextRoundState knows to re-roll initiative next round.
-      shipAddedThisRound: s.initiativeOrder.length > 0 ? true : s.shipAddedThisRound,
       log: [...s.log, makeLogEntry({
         round: s.round,
         phase: s.phase,
@@ -2067,7 +2062,6 @@ const useBattleStore = create((set, get) => {
     phase: 'setup',
     initiativeOrder: [],
     currentActorIndex: 0,
-    shipAddedThisRound: false,
     ships: [],
     missiles: [],
     dogfights: [],

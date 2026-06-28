@@ -237,7 +237,7 @@ Actions phases.
 **Formula:** `2D6 + Pilot skill + current Thrust rating + Tactics effect`
 *(MgT2e CRB p. 160)*
 
-**Initiative is rolled once** at the start of combat *(CRB p.160)*. From round 2 onward the initiative order is carried over and the phase advances directly to Acceleration — no re-roll. If a ship joins mid-battle, initiative is re-rolled the following round to include it.
+**Initiative is rolled once** at the start of combat *(CRB p.160)*. From round 2 onward the initiative order is carried over and the phase advances directly to Acceleration — no re-roll. If a new ship joins mid-battle, use **↺** to open the Initiative phase and roll that ship into the existing order *(CRB p.160: only the new ship rolls; the existing order is retained)*.
 
 > **GM override:** a **↺** button appears next to the phase label in the HUD during the Acceleration phase of round 2+. Click it to force an initiative re-roll for the current round.
 

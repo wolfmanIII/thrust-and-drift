@@ -288,8 +288,8 @@ export function HelpScreen({ onBack } = {}) {
             <p><span className="text-slate-200">Click a ship name</span> in the Phase Tracker to pan the map and center on that token. Useful when tracking multiple ships across a large hex grid.</p>
           </Sub>
           <Sub title="INITIATIVE CARRY-OVER (CRB p.160)">
-            <p>Initiative is rolled <span className="text-slate-200">once</span> at the start of combat. From round 2 onward the order is carried over automatically — the phase advances directly to Acceleration with no re-roll. If a ship joins mid-battle, initiative is re-rolled the following round.</p>
-            <p>A <span className="text-slate-200">↺</span> button appears in the HUD during the Acceleration phase of round 2+. Click it to force an initiative re-roll for the current round.</p>
+            <p>Initiative is rolled <span className="text-slate-200">once</span> at the start of combat. From round 2 onward the order is carried over automatically — the phase advances directly to Acceleration with no re-roll.</p>
+            <p>A <span className="text-slate-200">↺</span> button appears in the HUD during the Acceleration phase of round 2+. Click it to open the Initiative phase — useful when a new ship joins mid-battle (only the new ship rolls; the existing order is retained per CRB p.160).</p>
           </Sub>
         </Section>
 
