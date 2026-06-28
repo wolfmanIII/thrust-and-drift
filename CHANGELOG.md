@@ -6,6 +6,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.0.1] — 2026-06-28
+
+### Fixed
+
+- **REQ-09 — Negative crew skill values** — Crew skill inputs now accept values down to −3 (attribute penalty / untrained). Previously clamped to 0. (`ShipProfileForm.jsx`)
+- **REQ-10 — Monoposto crew actions** — A crew member assigned to a role but with skill 0 for that role can now perform the corresponding actions (no DM bonus). Fixes solo pilots unable to use Sensor Lock, Electronic Warfare, etc. when skills were implicitly 0. (`ActionModal.jsx`)
+- **REQ-12 — Wrecks excluded from attack targets** — Destroyed ships (`isDestroyed: true`) no longer appear in the attack target list. (`useAttackSetup.js`)
+
+### Docs
+
+- **REQ-05 — Hex scale documented** — Field Manual §3.2 and HelpScreen now state that 1 hex = 648 km *(Traveller Companion 2024, p.171)* with the full range-band distance table (SHORT ≤ 1,296 km · MEDIUM ≤ 9,720 km · LONG ≤ 24,624 km · VERY LONG ≤ 49,896 km).
+
+---
+
 ## [2.0.0] — 2026-06-27
 
 ### Added
