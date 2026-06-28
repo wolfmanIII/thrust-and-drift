@@ -49,7 +49,7 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const obstaclesEnabled = useBattleStore((s) => s.obstaclesEnabled)
 
   const attacker = ships.find((s) => s.id === attackerShipId)
-  const enemies  = ships.filter((s) => s.id !== attackerShipId)
+  const enemies  = ships.filter((s) => s.id !== attackerShipId && !s.isDestroyed)
   const target   = ships.find((s) => s.id === targetId)
   const weapon  = weaponKey ? (WEAPONS[weaponKey] ?? null) : null
 
