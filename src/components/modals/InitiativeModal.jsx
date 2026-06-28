@@ -1,8 +1,9 @@
 /**
- * InitiativeModal — roll initiative for all ships.
- * Player ships: manual dice entry. NPC ships: auto-rolled on confirm.
- * Tactics(naval) check is optional — Effect added to initiative if entered.
- * // MgT2e CRB p.160 — Initiative
+ * InitiativeModal — roll initiative for all ships (start of battle) or insert a new
+ * ship mid-battle without disturbing the existing order. MgT2e CRB p.160.
+ *
+ * Insert mode: activated automatically when any ship has needsInitiativeRoll=true.
+ * Only those ships are shown; existing ships keep their scores. (CRB p.160)
  */
 
 import { useState } from 'react'
@@ -13,30 +14,32 @@ import { getEffectiveSkill } from '../../utils/crew.js'
 import { DiceInput } from '../forms/DiceInput.jsx'
 
 export function InitiativeModal() {
-  const closeModal        = useUiStore((s) => s.closeModal)
-  const rollAllInitiative = useBattleStore((s) => s.rollAllInitiative)
-  const ships             = useBattleStore((s) => s.ships)
-  const initiativeOrder   = useBattleStore((s) => s.initiativeOrder)
+  const closeModal            = useUiStore((s) => s.closeModal)
+  const rollAllInitiative     = useBattleStore((s) => s.rollAllInitiative)
+  const insertShipsInitiative = useBattleStore((s) => s.insertShipsInitiative)
+  const ships                 = useBattleStore((s) => s.ships)
+  const initiativeOrder       = useBattleStore((s) => s.initiativeOrder)
 
-  // Manual initiative dice per player ship: null = not yet rolled.
+  const insertMode  = ships.some((s) => s.needsInitiativeRoll)
+  const targetShips = insertMode ? ships.filter((s) => s.needsInitiativeRoll) : ships
+  const playerShips = targetShips.filter((s) => s.faction === 'players')
+  const npcShips    = targetShips.filter((s) => s.faction !== 'players')
+
   const [playerDice, setPlayerDice]   = useState(() => {
     const map = {}
-    ships.filter((s) => s.faction === 'players').forEach((s) => { map[s.id] = null })
+    playerShips.forEach((s) => { map[s.id] = null })
     return map
   })
-  // Optional Tactics(naval) check dice per player ship (only ships with tactics > 0).
   const [tacticsDice, setTacticsDice] = useState(() => {
     const map = {}
-    ships
-      .filter((s) => s.faction === 'players' && getEffectiveSkill(s.profile.crew, s.crewAssignments, 'tactics') > 0)
+    playerShips
+      .filter((s) => getEffectiveSkill(s.profile.crew, s.crewAssignments, 'tactics') > 0)
       .forEach((s) => { map[s.id] = null })
     return map
   })
-  const [rerollCount, setRerollCount] = useState(0)
-  const [confirmed, setConfirmed]     = useState(false)
-
-  const playerShips = ships.filter((s) => s.faction === 'players')
-  const npcShips    = ships.filter((s) => s.faction !== 'players')
+  const [rerollCount, setRerollCount]       = useState(0)
+  const [confirmed, setConfirmed]           = useState(false)
+  const [insertedIds, setInsertedIds]       = useState(() => new Set())
 
   const setShipDice    = (shipId, dice) => setPlayerDice((prev) => ({ ...prev, [shipId]: dice }))
   const setShipTactics = (shipId, dice) => setTacticsDice((prev) => ({ ...prev, [shipId]: dice }))
@@ -57,13 +60,17 @@ export function InitiativeModal() {
   }
 
   const handleConfirm = () => {
-    // Build tactics effects map for all ships (player entries + NPC auto via store).
     const playerTacticsEffects = {}
     playerShips.forEach((ship) => {
       const effect = tacticsEffect(ship)
       if (effect !== 0) playerTacticsEffects[ship.id] = effect
     })
-    rollAllInitiative(playerTacticsEffects, playerDice)
+    if (insertMode) {
+      setInsertedIds(new Set(targetShips.map((s) => s.id)))
+      insertShipsInitiative(playerTacticsEffects, playerDice)
+    } else {
+      rollAllInitiative(playerTacticsEffects, playerDice)
+    }
     setConfirmed(true)
   }
 
@@ -81,8 +88,13 @@ export function InitiativeModal() {
   }
 
   return (
-    <Modal title="Initiative Roll" onClose={closeModal}>
+    <Modal title={insertMode ? 'Initiative — Insert New Ship' : 'Initiative Roll'} onClose={closeModal}>
       <div className="space-y-4">
+        {insertMode && (
+          <p className="text-amber-400/70 font-mono text-xs border border-amber-700/30 rounded px-2 py-1.5">
+            New ship joining mid-battle. Roll initiative for this ship only — existing order is retained. (CRB p.160)
+          </p>
+        )}
         <p className="text-slate-400 font-mono text-xs">
           Formula: 2D6 + Pilot + Thrust [+ Tactics Effect] // MgT2e CRB p.160
         </p>
@@ -101,7 +113,6 @@ export function InitiativeModal() {
                     const effect       = tacticsEffect(ship)
                     return (
                       <div key={ship.id} className="bg-slate-800 rounded px-3 py-2 space-y-1.5">
-                        {/* Initiative row */}
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
                           <span className="text-slate-300 font-mono text-xs flex-1 min-w-0 truncate">
@@ -117,7 +128,6 @@ export function InitiativeModal() {
                             {previewTotal(ship)}
                           </span>
                         </div>
-                        {/* Tactics check row — appears after main dice are entered */}
                         {tacticsSkill > 0 && playerDice[ship.id] !== null && (
                           <div className="flex items-center gap-2 pl-4 border-l border-slate-700">
                             <span className="text-slate-400 font-mono text-xs shrink-0">
@@ -181,20 +191,24 @@ export function InitiativeModal() {
             </button>
           </>
         ) : (
-          /* Post-confirm: sorted initiative order */
+          /* Post-confirm: full order including newly inserted ship */
           <div className="space-y-1">
-            <p className="text-slate-400 font-mono text-xs mb-2">Initiative order:</p>
+            <p className="text-slate-400 font-mono text-xs mb-2">
+              {insertMode ? 'Updated initiative order:' : 'Initiative order:'}
+            </p>
             <ol className="space-y-1">
               {initiativeOrder.map((id, idx) => {
                 const ship = ships.find((s) => s.id === id)
                 if (!ship) return null
-                const bd = ship.initiativeBreakdown
+                const bd    = ship.initiativeBreakdown
+                const isNew = insertedIds.has(id)
                 return (
-                  <li key={id} className="bg-slate-800 rounded px-3 py-1.5">
+                  <li key={id} className={`rounded px-3 py-1.5 ${isNew ? 'bg-amber-950/30 border border-amber-700/30' : 'bg-slate-800'}`}>
                     <div className="flex items-center gap-3">
                       <span className="text-slate-400 font-mono text-xs w-4">{idx + 1}.</span>
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
                       <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.profile.name}</span>
+                      {isNew && <span className="text-amber-400 font-mono text-[10px]">NEW</span>}
                       <span className="text-(--neon-cyan) font-mono text-sm font-bold">{ship.initiative}</span>
                     </div>
                     {bd && (
