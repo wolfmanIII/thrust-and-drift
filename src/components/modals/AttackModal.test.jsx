@@ -85,3 +85,50 @@ describe('AttackModal — missile rack', () => {
     expect(ship.missileAmmoTotal).toBe(24)
   })
 })
+
+// ── REQ-12: destroyed ships excluded from target list ─────────────────────────
+
+describe('AttackModal — wreck exclusion from targets (REQ-12)', () => {
+  function setupWithWreck() {
+    const laserProfile = {
+      id: 'profile-att', name: 'Attacker',
+      hull: 20, armor: 0, thrust: 4, tonnage: 100,
+      turrets: [{ slot: 1, weapons: ['Beam Laser'] }],
+      crew: [],
+    }
+    useBattleStore.getState().addShip(laserProfile,   { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-live', name: 'Live Target',    hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    useBattleStore.getState().addShip(
+      { id: 'profile-wreck', name: 'Wrecked Target', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 3, r: 0 }, 'npc', '#888',
+    )
+    // Mark the third ship as destroyed
+    const [att, , wreck] = useBattleStore.getState().ships
+    useBattleStore.setState({
+      ships: useBattleStore.getState().ships.map((s) =>
+        s.id === wreck.id ? { ...s, isDestroyed: true, hullCurrent: 0 } : s
+      ),
+    })
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+  }
+
+  beforeEach(() => {
+    useBattleStore.getState().resetBattle('vectorial')
+    useUiStore.setState({ activeModal: null, modalPayload: null })
+  })
+
+  it('destroyed ship does not appear in the target list', () => {
+    setupWithWreck()
+    render(<AttackModal />)
+    expect(screen.queryByText('Wrecked Target')).not.toBeInTheDocument()
+  })
+
+  it('live ship still appears in the target list alongside a wreck', () => {
+    setupWithWreck()
+    render(<AttackModal />)
+    expect(screen.getByText('Live Target')).toBeInTheDocument()
+  })
+})
