@@ -191,16 +191,17 @@ function buildNextRoundState(s) {
       })
     : s.initiativeOrder
 
-  // CRB p.160: initiative is rolled once at start of combat, not every round.
-  // TC p.174 vectorial combat adds no new initiative rules — same as CRB.
-  // GM uses the ↺ button (forceInitiativePhase) to manually slot new ships mid-battle.
-  const skipInitiative = s.round >= 1 && newInitiativeOrder.length > 0
+  // CRB p.160: initiative rolled once at combat start. CRB has no rule for mid-battle additions
+  // (RAW gap). House rule per REQ-13: if a ship was added mid-battle, trigger a full re-roll
+  // so all ships roll together; GM may also force it at any time via ↺ (forceInitiativePhase).
+  const skipInitiative = s.round >= 1 && !s.shipAddedThisRound && newInitiativeOrder.length > 0
   const nextPhase = skipInitiative ? 'acceleration' : 'initiative'
 
   return {
     round: s.round + 1,
     phase: nextPhase,
     currentActorIndex: 0,
+    shipAddedThisRound: false,
     missiles: updatedMissiles,
     initiativeOrder: newInitiativeOrder,
     pendingMissileImpacts: [
@@ -278,6 +279,8 @@ const useBattleStore = create((set, get) => {
   /** @type {string[]} Ordered ship IDs by initiative */
   initiativeOrder: [],
   currentActorIndex: 0,
+  /** True when a ship was added mid-battle this round — triggers initiative re-roll next round (house rule, RAW gap). */
+  shipAddedThisRound: false,
   /** @type {object[]} ShipInstance array */
   ships: [],
   /** @type {object[]} MissileToken array */
@@ -508,12 +511,8 @@ const useBattleStore = create((set, get) => {
       currentBandwidth:   profile.computerBandwidth ?? 0,
       bandwidthReduction: 0,
       hardened:           profile.hardened ?? false,
-      /** True when this ship was added mid-battle and hasn't rolled initiative yet. */
-      needsInitiativeRoll: false,
     }
-    const { ships: existing, combatMode, initiativeOrder: currentOrder } = get()
-    // CRB p.160: a ship joining mid-battle rolls its own initiative and is inserted.
-    if (currentOrder.length > 0) instance.needsInitiativeRoll = true
+    const { ships: existing, combatMode } = get()
     const newRangeBands = {}
     if (combatMode === 'basic') {
       for (const ex of existing) {
@@ -530,6 +529,8 @@ const useBattleStore = create((set, get) => {
       initiativeOrder: s.initiativeOrder.length > 0
         ? [...s.initiativeOrder, instance.id]
         : s.initiativeOrder,
+      // House rule (RAW gap): full re-roll next round when a ship is added mid-battle.
+      shipAddedThisRound: s.initiativeOrder.length > 0 ? true : s.shipAddedThisRound,
       log: [...s.log, makeLogEntry({
         round: s.round,
         phase: s.phase,
@@ -643,72 +644,6 @@ const useBattleStore = create((set, get) => {
       currentActorIndex: 0,
       log: [...s.log, ...entries],
     }))
-  }),
-
-  /**
-   * Roll initiative only for ships with needsInitiativeRoll and insert them into the
-   * existing order at the correct sorted position. All other ships keep their scores.
-   * CRB p.160 — a ship joining mid-battle rolls its own initiative and is inserted.
-   * @param {Record<string, number>} [tacticsEffects]
-   * @param {Record<string, object>} [diceOverrides]
-   */
-  insertShipsInitiative: wh((tacticsEffects = {}, diceOverrides = {}) => {
-    const { ships, round } = get()
-    const targets = ships.filter((sh) => sh.needsInitiativeRoll)
-    if (!targets.length) return
-
-    const rolled = targets.map((ship) => {
-      let tacticsBonus = tacticsEffects[ship.id] ?? 0
-      if (!(ship.id in tacticsEffects) && ship.faction !== 'players') {
-        const tacticsSkill = getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'tactics')
-        if (tacticsSkill > 0) {
-          tacticsBonus = roll2D6().total + tacticsSkill - 8
-        }
-      }
-      const result = rollInitiative(
-        getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot'),
-        ship.profile.thrust,
-        tacticsBonus + (ship.initiativeBonusNextRound ?? 0),
-        diceOverrides[ship.id] ?? null,
-      )
-      return { id: ship.id, initiative: result.total, roll: result }
-    })
-
-    const entries = rolled.map((r) => makeLogEntry({
-      round,
-      phase: 'initiative',
-      type: 'system',
-      message: `Initiative ${get().ships.find((s) => s.id === r.id)?.profile.name}: ${r.initiative} (inserted mid-battle, CRB p.160)`,
-      shipId: r.id,
-      details: r.roll,
-    }))
-
-    set((s) => {
-      const newShipIds = new Set(rolled.map((r) => r.id))
-      const updatedShips = s.ships.map((sh) => {
-        const r = rolled.find((r) => r.id === sh.id)
-        return r
-          ? { ...sh, initiative: r.initiative, initiativeBonusNextRound: 0, initiativeBreakdown: r.roll.breakdown, needsInitiativeRoll: false }
-          : sh
-      })
-      // Build initiative map for all ships to find correct insertion points.
-      const initMap = {}
-      updatedShips.forEach((sh) => { initMap[sh.id] = sh.initiative ?? 0 })
-      // Start from existing order minus the new ships (they were appended at end).
-      const baseOrder = s.initiativeOrder.filter((id) => !newShipIds.has(id))
-      // Insert each new ship at the correct position (highest-first).
-      const newOrder = [...baseOrder]
-      for (const r of rolled) {
-        const idx = newOrder.findIndex((id) => (initMap[id] ?? 0) <= r.initiative)
-        newOrder.splice(idx === -1 ? newOrder.length : idx, 0, r.id)
-      }
-      return {
-        ships: updatedShips,
-        initiativeOrder: newOrder,
-        currentActorIndex: 0,
-        log: [...s.log, ...entries],
-      }
-    })
   }),
 
   // === THRUST ===
@@ -2132,6 +2067,7 @@ const useBattleStore = create((set, get) => {
     phase: 'setup',
     initiativeOrder: [],
     currentActorIndex: 0,
+    shipAddedThisRound: false,
     ships: [],
     missiles: [],
     dogfights: [],

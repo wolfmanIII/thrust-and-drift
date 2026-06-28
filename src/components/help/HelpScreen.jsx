@@ -289,7 +289,8 @@ export function HelpScreen({ onBack } = {}) {
           </Sub>
           <Sub title="INITIATIVE CARRY-OVER (CRB p.160)">
             <p>Initiative is rolled <span className="text-slate-200">once</span> at the start of combat. From round 2 onward the order is carried over automatically — the phase advances directly to Acceleration with no re-roll.</p>
-            <p>A <span className="text-slate-200">↺</span> button appears in the HUD during the Acceleration phase of round 2+. Click it to open the Initiative phase — useful when a new ship joins mid-battle (only the new ship rolls; the existing order is retained per CRB p.160).</p>
+            <p><span className="text-amber-400/80">RAW gap:</span> The CRB has no rule for ships joining mid-battle. House rule: adding a ship mid-battle triggers a full re-roll the next round so the new ship rolls with everyone else.</p>
+            <p>A <span className="text-slate-200">↺</span> button appears in the HUD during Acceleration (round 2+). Click it to force an initiative re-roll immediately — useful to include a new ship or when the GM decides a re-roll is appropriate.</p>
           </Sub>
         </Section>
 

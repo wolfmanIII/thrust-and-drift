@@ -11,7 +11,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ### Added
 
 - **REQ-11 — Crew AUTO-ASSIGN** — New **AUTO-ASSIGN** button in the Assign Crew modal. Assigns the crew member with the highest relevant skill to each role and turret slot in one click. A single crew member can cover multiple roles (supported for solo-pilot ships). (`CrewAssignmentModal.jsx`)
-- **REQ-13 — Initiative carry-over (CRB p.160)** — Initiative is now rolled only once at the start of combat. From round 2 onward the phase transitions directly from End to Acceleration, carrying the existing order. If a ship was added mid-battle, initiative is re-rolled the following round. A **↺** GM override button appears in the HUD during Acceleration phase (round 2+) to force a re-roll when needed. (`battleStore.js`, `HUD.jsx`)
+- **REQ-13 — Initiative carry-over (CRB p.160)** — Initiative is now rolled only once at the start of combat. From round 2 onward the phase transitions directly from End to Acceleration, carrying the existing order. A **↺** GM override button appears in the HUD during Acceleration phase (round 2+) to force a re-roll when needed. (`battleStore.js`, `HUD.jsx`)
+  > **Note — RAW gap:** The CRB provides no rule for a ship joining mid-battle. Thrust & Drift applies a house rule: adding a ship mid-battle triggers a full initiative re-roll the following round so the new ship is included with all others. The ↺ button can also be used to achieve this immediately in the current round.
 
 ### Fixed
 
