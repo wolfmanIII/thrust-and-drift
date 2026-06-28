@@ -67,6 +67,20 @@ export function CrewAssignmentModal() {
     setAssignments(cleared)
   }
 
+  // Assign the crew member with the highest relevant skill to each role.
+  // One person can cover multiple roles (supports solo-pilot ships).
+  const handleAutoAssign = () => {
+    if (!crewArray.length) return
+    const bestFor = (role) => {
+      const sorted = [...crewArray].sort((a, b) => (b.skills?.[role] ?? -3) - (a.skills?.[role] ?? -3))
+      return sorted[0].id
+    }
+    const a = { gunners: {} }
+    for (const role of NON_GUNNER_ROLES) a[role] = bestFor(role)
+    for (const t of turrets) a.gunners[t.slot] = bestFor('gunner')
+    setAssignments(a)
+  }
+
   const renderSelect = (value, onChange, role) => (
     <select
       value={value ?? ''}
@@ -140,6 +154,12 @@ export function CrewAssignmentModal() {
 
             {/* Actions */}
             <div className="flex gap-2 pt-1">
+              <button
+                onClick={handleAutoAssign}
+                className="px-3 py-1.5 border border-(--neon-cyan)/30 text-(--neon-cyan)/70 font-mono text-xs rounded hover:border-(--neon-cyan)/60 hover:text-(--neon-cyan) transition-colors"
+              >
+                AUTO-ASSIGN
+              </button>
               <button
                 onClick={handleClearAll}
                 className="px-3 py-1.5 border border-slate-700 text-slate-400 font-mono text-xs rounded hover:border-slate-500 hover:text-slate-400 transition-colors"
