@@ -114,7 +114,7 @@ function TextField({ label, value, onChange, placeholder = '' }) {
 
 /**
  * Crew member row: name field + compact skill inputs for each role.
- * Skill value 0 means the member doesn't have that skill.
+ * Skill value 0 = trained, no bonus. Negative = attribute penalty or untrained (min −3). Max 5.
  */
 function CrewMemberRow({ member, onChange, onRemove }) {
   return (
@@ -146,12 +146,12 @@ function CrewMemberRow({ member, onChange, onRemove }) {
             </span>
             <input
               type="number"
-              min={0}
+              min={-3}
               max={5}
               value={member.skills[skill] ?? 0}
               onChange={(e) => onChange({
                 ...member,
-                skills: { ...member.skills, [skill]: Math.max(0, Math.min(5, Number(e.target.value) || 0)) },
+                skills: { ...member.skills, [skill]: Math.max(-3, Math.min(5, Number(e.target.value) || 0)) },
               })}
               className="w-full bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-1.5 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
             />
