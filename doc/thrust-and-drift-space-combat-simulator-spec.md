@@ -1679,7 +1679,7 @@ Feature batch da feedback post-lancio v2.0 (Reddit/CotI), più un bug RAW e un f
 | --- | ------- | --------------- |
 | REQ-08 | Point Defence spostato all'impatto (CRB p.173) | `MissileImpactModal.jsx` — sezione PD prima del tiro d'attacco; `AttackModal.jsx` — rimossa sezione PD da ReactionsPanel per missili |
 | REQ-11 | AUTO-ASSIGN in CrewAssignmentModal | `CrewAssignmentModal.jsx` — bottone che assegna il membro con skill più alta per ogni ruolo e slot gunner; supporto mono-crew |
-| REQ-13 | Initiative carry-over round 2+ (CRB p.160) | `battleStore.js` — `buildNextRoundState` controlla `shipAddedThisRound`; `HUD.jsx` — bottone ↺ GM override in fase Acceleration |
+| REQ-13 | Initiative carry-over round 2+ (CRB p.160) | `battleStore.js` — `buildNextRoundState` controlla `shipAddedThisRound`; `HUD.jsx` — bottone ↺ GM override in fase Acceleration. **Nota RAW gap:** il CRB non specifica il comportamento per navi aggiunte mid-battle; house rule applicata: full re-roll il round successivo. |
 
 **Fix contestuale:**
 
@@ -1875,7 +1875,7 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 
 ### 14.18 Versione 1.20.9 — Mid-Battle Ship Initiative Fix + Range Band Rings ✅ COMPLETATA
 
-- **Navi piazzate mid-battle non entravano nell'initiative order**: `addShip` aggiungeva la nave a `ships` ma non a `initiativeOrder`. Le navi piazzate dopo il roll initiative venivano skippate in Acceleration/Attack/Actions. Fix: `addShip` appende l'ID alla fine di `initiativeOrder` se non è vuoto (initiative 0, ultimo in ordine — CRB p.160).
+- **Navi piazzate mid-battle non entravano nell'initiative order**: `addShip` aggiungeva la nave a `ships` ma non a `initiativeOrder`. Le navi piazzate dopo il roll initiative venivano skippate in Acceleration/Attack/Actions. Fix: `addShip` appende l'ID alla fine di `initiativeOrder` se non è vuoto (initiative 0, ultimo in ordine). Nota: il CRB non prevede questa casistica (RAW gap); il comportamento è una house rule.
 - **Range band rings sul canvas vettoriale**: selezionare una nave disegna 4 esagoni tratteggiati cyan centrati sulla nave, marcando i confini esterni di SHORT (2 hex), MEDIUM (15 hex), LONG (38 hex), VERY LONG (77 hex). Vertici calcolati dagli assi assiali `(±N, 0)`, `(±N, ∓N)`, `(0, ±N)` scalati al confine di banda `maxDistance + 0.5`. Label su pill scuro alla cima di ogni esagono. Hidden durante thrust targeting. Implementato in `drawRangeBandRings()` in `useCanvasRenderer.js`; Layer 2 nel render loop.
 - 857 test (invariato).
 
