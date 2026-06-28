@@ -47,6 +47,17 @@ export function useMapInteraction({ hexSize, canvasRef, mouseHexRef }) {
 
   useEffect(() => () => { if (animRaf.current) cancelAnimationFrame(animRaf.current) }, [])
 
+  // Granular selectors — no full-store subscriptions
+  const showContextMenu       = useUiStore((s) => s.showContextMenu)
+  const hideContextMenu       = useUiStore((s) => s.hideContextMenu)
+  const selectShip            = useUiStore((s) => s.selectShip)
+  const pendingPlacement      = useUiStore((s) => s.pendingPlacement)
+  const cancelPlacement       = useUiStore((s) => s.cancelPlacement)
+  const thrustTargeting       = useUiStore((s) => s.thrustTargeting)
+  const cancelThrustTargeting = useUiStore((s) => s.cancelThrustTargeting)
+  const centerRequest         = useUiStore((s) => s.centerRequest)
+  const clearCenterRequest    = useUiStore((s) => s.clearCenterRequest)
+
   // Center map on a hex when PhaseTracker requests it
   useEffect(() => {
     if (!centerRequest) return
@@ -61,17 +72,6 @@ export function useMapInteraction({ hexSize, canvasRef, mouseHexRef }) {
     canvas.dispatchEvent(new CustomEvent('map:redraw'))
     clearCenterRequest()
   }, [centerRequest, canvasRef, hexSize, offset, zoom, clearCenterRequest])
-
-  // Granular selectors — no full-store subscriptions
-  const showContextMenu       = useUiStore((s) => s.showContextMenu)
-  const hideContextMenu       = useUiStore((s) => s.hideContextMenu)
-  const selectShip            = useUiStore((s) => s.selectShip)
-  const pendingPlacement      = useUiStore((s) => s.pendingPlacement)
-  const cancelPlacement       = useUiStore((s) => s.cancelPlacement)
-  const thrustTargeting       = useUiStore((s) => s.thrustTargeting)
-  const cancelThrustTargeting = useUiStore((s) => s.cancelThrustTargeting)
-  const centerRequest         = useUiStore((s) => s.centerRequest)
-  const clearCenterRequest    = useUiStore((s) => s.clearCenterRequest)
 
   const ships           = useBattleStore((s) => s.ships)
   const missiles        = useBattleStore((s) => s.missiles)
