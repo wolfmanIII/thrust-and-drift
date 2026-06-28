@@ -259,3 +259,42 @@ describe('HUD — redo button', () => {
     expect(useBattleStore.getState().ships).toHaveLength(1)
   })
 })
+
+// === REQ-13: ↺ initiative override button ====================================
+
+describe('HUD — ↺ initiative override (REQ-13)', () => {
+  it('↺ not visible in round 1 acceleration', () => {
+    useBattleStore.setState({ phase: 'acceleration', round: 1 })
+    render(<HUD />)
+    expect(screen.queryByTitle('Re-roll initiative this round')).not.toBeInTheDocument()
+  })
+
+  it('↺ visible in round 2 acceleration', () => {
+    useBattleStore.setState({ phase: 'acceleration', round: 2 })
+    render(<HUD />)
+    expect(screen.getByTitle('Re-roll initiative this round')).toBeInTheDocument()
+  })
+
+  it('↺ visible in round 3 acceleration', () => {
+    useBattleStore.setState({ phase: 'acceleration', round: 3 })
+    render(<HUD />)
+    expect(screen.getByTitle('Re-roll initiative this round')).toBeInTheDocument()
+  })
+
+  it('↺ not visible outside acceleration even in round 2+', () => {
+    const nonAccel = ['setup', 'initiative', 'movement', 'attack', 'actions', 'end']
+    for (const phase of nonAccel) {
+      useBattleStore.setState({ phase, round: 3 })
+      const { unmount } = render(<HUD />)
+      expect(screen.queryByTitle('Re-roll initiative this round')).not.toBeInTheDocument()
+      unmount()
+    }
+  })
+
+  it('clicking ↺ calls forceInitiativePhase and switches to initiative', () => {
+    useBattleStore.setState({ phase: 'acceleration', round: 2 })
+    render(<HUD />)
+    fireEvent.click(screen.getByTitle('Re-roll initiative this round'))
+    expect(useBattleStore.getState().phase).toBe('initiative')
+  })
+})

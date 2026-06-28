@@ -2755,3 +2755,85 @@ describe('exportBattleState / importBattleState — obstacle fields', () => {
     expect(useBattleStore.getState().pendingObstacleCollisions).toEqual([])
   })
 })
+
+// === REQ-13: Initiative skip (CRB p.160) =====================================
+
+describe('REQ-13 — initiative skip on round transition', () => {
+  it('skips initiative when round >= 1, order is set, and no ship added', () => {
+    useBattleStore.setState({
+      phase: 'end',
+      round: 1,
+      initiativeOrder: ['ship-1'],
+      shipAddedThisRound: false,
+    })
+    useBattleStore.getState().advancePhase()
+    expect(useBattleStore.getState().round).toBe(2)
+    expect(useBattleStore.getState().phase).toBe('acceleration')
+  })
+
+  it('does not skip when initiativeOrder is empty', () => {
+    useBattleStore.setState({
+      phase: 'end',
+      round: 1,
+      initiativeOrder: [],
+      shipAddedThisRound: false,
+    })
+    useBattleStore.getState().advancePhase()
+    expect(useBattleStore.getState().phase).toBe('initiative')
+  })
+
+  it('does not skip when shipAddedThisRound is true', () => {
+    useBattleStore.setState({
+      phase: 'end',
+      round: 1,
+      initiativeOrder: ['ship-1'],
+      shipAddedThisRound: true,
+    })
+    useBattleStore.getState().advancePhase()
+    expect(useBattleStore.getState().phase).toBe('initiative')
+  })
+
+  it('resets shipAddedThisRound to false on round transition', () => {
+    useBattleStore.setState({
+      phase: 'end',
+      round: 1,
+      initiativeOrder: ['ship-1'],
+      shipAddedThisRound: true,
+    })
+    useBattleStore.getState().advancePhase()
+    expect(useBattleStore.getState().shipAddedThisRound).toBe(false)
+  })
+
+  it('log message includes "Initiative order carried over." when skipped', () => {
+    useBattleStore.setState({
+      phase: 'end',
+      round: 1,
+      initiativeOrder: ['ship-1'],
+      shipAddedThisRound: false,
+    })
+    useBattleStore.getState().advancePhase()
+    const roundStart = useBattleStore.getState().log.find(
+      (e) => e.message.includes('Initiative order carried over.'),
+    )
+    expect(roundStart).toBeTruthy()
+  })
+
+  it('addShip sets shipAddedThisRound when battle is in progress', () => {
+    useBattleStore.setState({ initiativeOrder: ['existing-ship'] })
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    expect(useBattleStore.getState().shipAddedThisRound).toBe(true)
+  })
+
+  it('addShip does not set shipAddedThisRound during setup (empty order)', () => {
+    useBattleStore.setState({ initiativeOrder: [] })
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#0f0')
+    expect(useBattleStore.getState().shipAddedThisRound).toBe(false)
+  })
+
+  it('forceInitiativePhase sets phase to initiative and resets actor index', () => {
+    useBattleStore.setState({ phase: 'acceleration', currentActorIndex: 2 })
+    useBattleStore.getState().forceInitiativePhase()
+    expect(useBattleStore.getState().phase).toBe('initiative')
+    expect(useBattleStore.getState().currentActorIndex).toBe(0)
+  })
+})
