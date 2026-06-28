@@ -29,7 +29,8 @@ export function HUD() {
   const initiativeOrder     = useBattleStore((s) => s.initiativeOrder)
   const currentActorIndex   = useBattleStore((s) => s.currentActorIndex)
   const ships               = useBattleStore((s) => s.ships)
-  const advancePhase        = useBattleStore((s) => s.advancePhase)
+  const advancePhase           = useBattleStore((s) => s.advancePhase)
+  const forceInitiativePhase   = useBattleStore((s) => s.forceInitiativePhase)
   const advanceActor        = useBattleStore((s) => s.advanceActor)
   const exportBattleState   = useBattleStore((s) => s.exportBattleState)
   const combatMode          = useBattleStore((s) => s.combatMode)
@@ -134,6 +135,16 @@ export function HUD() {
         <span className="text-(--neon-cyan) font-mono font-bold text-lg leading-none">{round}</span>
         <span className="text-slate-400 text-xs">│</span>
         <span className="text-slate-200 font-display text-xs tracking-widest">{phaseLabel}</span>
+        {/* GM override: re-roll initiative when it was auto-skipped (CRB p.160, REQ-13) */}
+        {phase === 'acceleration' && round > 1 && (
+          <button
+            onClick={forceInitiativePhase}
+            className="pointer-events-auto ml-1 text-slate-500 font-mono text-xs hover:text-amber-400 transition-colors"
+            title="Re-roll initiative this round"
+          >
+            ↺
+          </button>
+        )}
       </div>
 
       {/* Current actor */}
