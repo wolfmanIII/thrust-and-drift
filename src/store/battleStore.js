@@ -2067,6 +2067,7 @@ const useBattleStore = create((set, get) => {
     phase: 'setup',
     initiativeOrder: [],
     currentActorIndex: 0,
+    shipAddedThisRound: false,
     ships: [],
     missiles: [],
     dogfights: [],
