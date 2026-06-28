@@ -1627,6 +1627,29 @@ Dettagli design: `doc/discrete-zoom-design.md`.
 - `@media print` in `App.css`: `body * { visibility: hidden }` + `#battle-report-print { position: fixed; top:0; left:0; background:white; color:#111 }` + override selettivo dei colori semantici via attributi `data-print-accent / data-print-red / data-print-green`
 - Zero dipendenze aggiuntive
 
+#### 13.10.3 Community Fixes Batch 1 (v2.0.1) ✅ COMPLETATA
+
+Fix prioritari emersi dal feedback Reddit post-lancio v2.0.
+
+**REQ-09 — Valori skill negativi** (`ShipProfileForm.jsx`)
+
+Input skill equipaggio: `min` abbassato da `0` a `-3`; clamp aggiornato da `Math.max(0, …)` a `Math.max(-3, …)`. Consente la rappresentazione di penalità attributo o mancanza di training (MgT2e CRB p.9: skill −3 = non addestrato con penalità DEX).
+
+**REQ-10 — Equipaggio monoposto** (`ActionModal.jsx`)
+
+`getActionsForMember` ora accetta `assignments` come secondo parametro. Un membro assegnato esplicitamente a un ruolo (es. `sensors: 'crew-solo'`) può eseguire le relative azioni anche con skill = 0 (nessun DM bonus ma azione disponibile). Prima un solo pilota senza skill `sensors > 0` non poteva eseguire Sensor Lock né EW. La logica è: `if (skillLevel === 0 && !isAssigned) return []`.
+
+**REQ-12 — Relitti esclusi dalla lista target** (`useAttackSetup.js`)
+
+`enemies` filtrato con `!s.isDestroyed`: le navi distrutte non compaiono più nella target list dell'Attack Modal.
+
+**REQ-05 — Scala esagoni documentata** (Field Manual §3.2 + HelpScreen)
+
+Aggiunta sezione §3.2 Hex Scale: 1 hex = 648 km *(TC 2024, p.171)*; tabella distanze per range band (SHORT ≤ 1.296 km · MEDIUM ≤ 9.720 km · LONG ≤ 24.624 km · VERY LONG ≤ 49.896 km).
+
+- 1121 test Vitest (+7 rispetto a v2.0.0: 5 `ActionModal.test.jsx` per REQ-09/REQ-10, 2 `AttackModal.test.jsx` per REQ-12).
+- 26 e2e Playwright (+4: `e2e/batch1-fixes.spec.js` — 4 test REQ-09 sul form skill input).
+
 ---
 
 ## 14. Note per lo Sviluppo

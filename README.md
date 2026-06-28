@@ -32,9 +32,9 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Sandcaster ammo** | 20 canisters per sandcaster slot; depleted by Disperse Sand reaction; shown as 🪨 N/max on bento cards, ship detail modal, and tooltip |
 | **Sound effects** | Procedural synthesis via Web Audio API — laser, impact, critical, missile launch, thrust plume; 🔊/🔇 mute toggle in HUD; no audio files required |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in on all roll steps (attack, damage, critical location, extra damage, reactions, crew actions, initiative); NPC ships auto-roll |
-| **Destroyed ships** | Hull = 0 → `isDestroyed` flag; token rendered at 35% opacity with ☠ badge; all combat actions blocked ("WRECK — no actions available"); ship skipped in initiative cycling; GM removes wreck manually |
-| **Crew assignments** | Right-click any ship → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner W1…Wn); unassigned roles contribute 0; weapon slots without a gunner cannot fire |
-| **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action. Sensor operators have three actions: Sensor Lock (8+, DM+2 flat), Electronic Warfare (8+, breaks sensor lock), **EW — Counter Missile** (10+, Effect removes missiles from a salvo — CRB p.173) |
+| **Destroyed ships** | Hull = 0 → `isDestroyed` flag; token rendered at 35% opacity with ☠ badge; all combat actions blocked ("WRECK — no actions available"); ship skipped in initiative cycling; excluded from the attack target list; GM removes wreck manually |
+| **Crew assignments** | Right-click any ship → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner W1…Wn); unassigned roles contribute 0; weapon slots without a gunner cannot fire. A single crew member can cover all roles (monoposto / solo pilot). |
+| **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action. A crew member assigned to a role can perform its actions even at skill 0 (no DM bonus). Sensor operators have three actions: Sensor Lock (8+, DM+2 flat), Electronic Warfare (8+, breaks sensor lock), **EW — Counter Missile** (10+, Effect removes missiles from a salvo — CRB p.173) |
 | **Initiative** | 2D6 + Pilot + Thrust [+ Tactics Effect]; optional Tactics(naval) check (CRB p.160); player ships manual entry, NPC auto-rolled |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase AND when it is that ship's turn (initiative order enforced in Acceleration, Attack, Actions phases) |
@@ -165,7 +165,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1114 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1121 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 
@@ -174,7 +174,7 @@ npm run e2e               # headless
 npm run e2e:headed        # visible browser
 ```
 
-22 e2e tests in `e2e/` covering discrete zoom levels and the PDF battle report flow.
+26 e2e tests in `e2e/` covering discrete zoom levels, the PDF battle report flow, and crew skill input constraints.
 
 ---
 

@@ -179,7 +179,7 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="Hull / Thrust" v="Max hull points and base manoeuvre drive rating." />
             <KV k="Tech Level (TL)" v="Ship's technology level (default 12). Gates Smart guidance on missiles and torpedoes — DM+2 applies only when TL ≥ 9 (CRB p.79). Most Traveller-era vessels are TL 12–15; set lower for pre-stellar or primitive opponents." />
             <KV k="Weapons" v="Add weapon slots — type, damage dice, range band, special traits. Maximum 3 weapons per slot (triple turret, CRB p.163)." />
-            <KV k="Crew" v="Add named crew members, each with individual skill levels (Pilot, Leadership, Tactics, Engineer, Gunner, Sensors 0–5). One crew member can hold multiple skills — useful for single-seat fighters." />
+            <KV k="Crew" v="Add named crew members, each with individual skill levels (Pilot, Leadership, Tactics, Engineer, Gunner, Sensors −3 to 5). Negative values represent untrained crew or attribute penalties. One crew member can hold multiple skills and be assigned to all roles — useful for single-seat fighters." />
           </Sub>
         </Section>
 
@@ -359,7 +359,7 @@ export function HelpScreen({ onBack } = {}) {
 
           <Sub title="ATTACK MODAL — STEP 1: CONFIG">
             <KV k="Weapon" v="Select which turret/weapon to fire." />
-            <KV k="Target" v="Select the target ship." />
+            <KV k="Target" v="Select the target ship. Destroyed ships (☠ WRECK) are excluded from the target list." />
             <KV k="DM Breakdown" v="The modal shows all applicable DMs: gunner skill, weapon trait, range band, target size, evasion DM (when active), sensor lock DM (when active)." />
           </Sub>
 
@@ -449,7 +449,7 @@ export function HelpScreen({ onBack } = {}) {
           <p>Right-click ship → <span className="text-slate-200">Crew Action</span>. The modal shows three steps: pick a crew member → pick an action → roll (if required).</p>
 
           <Sub title="CREW SELECTION">
-            <p>Only crew members with skills relevant to available actions are shown. Actions are filtered per member based on their skill set.</p>
+            <p>Actions are filtered per member based on their skill set and role assignment. A crew member assigned to a role can perform its actions even at skill 0 (no DM bonus) — this covers single-crew ships where one pilot covers all roles.</p>
           </Sub>
 
           <Sub title="SKILL DM OVERRIDE">
