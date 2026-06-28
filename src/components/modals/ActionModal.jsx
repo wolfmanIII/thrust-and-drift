@@ -55,18 +55,29 @@ function useActionEffects() {
   }
 }
 
-/** Derive available actions for a crew member based on their skills. */
-function getActionsForMember(member) {
+/**
+ * Derive available actions for a crew member.
+ * Includes actions for roles where the member has a non-zero skill OR is explicitly assigned,
+ * so a solo pilot assigned to all roles can attempt any action (skill 0 = no bonus, not blocked).
+ * @param {object} member
+ * @param {object|null} assignments  ship.crewAssignments
+ */
+function getActionsForMember(member, assignments) {
   return Object.entries(CREW_ACTIONS).flatMap(([role, actions]) => {
     const skillLevel = member.skills[role] ?? 0
-    if (skillLevel === 0) return []
+    const isAssigned = assignments
+      ? (role === 'gunner'
+          ? Object.values(assignments.gunners ?? {}).includes(member.id)
+          : assignments[role] === member.id)
+      : false
+    if (skillLevel === 0 && !isAssigned) return []
     return actions.map((a) => ({ ...a, skillLevel }))
   })
 }
 
 /** Compact skill badge list for a crew member row. */
 function SkillBadges({ skills }) {
-  const present = CREW_SKILLS.filter((s) => (skills[s] ?? 0) > 0)
+  const present = CREW_SKILLS.filter((s) => (skills[s] ?? 0) !== 0)
   if (present.length === 0) return <span className="text-slate-400 font-mono text-xs">no skills</span>
   return (
     <span className="flex flex-wrap gap-1">
@@ -119,7 +130,7 @@ export function ActionModal() {
   const availableCrew   = crewArray.filter((m) => !usedCrewMembers.includes(m.id))
 
   const selectedMember = crewArray.find((m) => m.id === selectedMemberId) ?? null
-  const memberActions  = selectedMember ? getActionsForMember(selectedMember) : []
+  const memberActions  = selectedMember ? getActionsForMember(selectedMember, ship.crewAssignments) : []
   const otherShips     = ships.filter((s) => s.id !== ship.id)
 
   const handleSelectMember = (member) => {
