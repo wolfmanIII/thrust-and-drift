@@ -287,6 +287,10 @@ export function HelpScreen({ onBack } = {}) {
             <p>If the Captain uses <span className="text-slate-200">Improve Initiative</span> in the Actions phase of round N, the bonus takes effect at the <span className="text-slate-200">start of round N+1</span> — the acting order is re-sorted before anyone acts. The bonus lasts exactly 1 round and is removed automatically at the start of round N+2. The Phase Tracker shows an <span className="text-amber-400">↑ini</span> badge on ships whose bonus is active.</p>
             <p><span className="text-slate-200">Click a ship name</span> in the Phase Tracker to pan the map and center on that token. Useful when tracking multiple ships across a large hex grid.</p>
           </Sub>
+          <Sub title="INITIATIVE CARRY-OVER (CRB p.160)">
+            <p>Initiative is rolled <span className="text-slate-200">once</span> at the start of combat. From round 2 onward the order is carried over automatically — the phase advances directly to Acceleration with no re-roll. If a ship joins mid-battle, initiative is re-rolled the following round.</p>
+            <p>A <span className="text-slate-200">↺</span> button appears in the HUD during the Acceleration phase of round 2+. Click it to force an initiative re-roll for the current round.</p>
+          </Sub>
         </Section>
 
         {/* ACCELERATION */}
@@ -330,8 +334,14 @@ export function HelpScreen({ onBack } = {}) {
           <Sub title="MISSILE IMPACT">
             <p>When a missile salvo reaches its target, the token is consumed and a <span className="text-slate-200">⚡ MISSILE IMPACT</span> modal opens. Resolution follows CRB p.173 in two steps.</p>
             <p className="text-slate-400 text-xs italic">In vectorial mode this happens during the Movement phase when the salvo reaches the target hex. In basic mode, each missile advances up to 10 thrust/round against the Ship Movement cost table (CRB p.166) — the modal opens at the start of the round when the salvo reaches Adjacent range. Bento cards show <span className="text-slate-300">~Xr</span> (estimated rounds to impact).</p>
+            <p className="font-mono text-xs text-slate-300 mt-1">POINT DEFENCE (optional, before attack roll)</p>
+            <p>If the target has at least one unfired laser turret (Pulse Laser or Beam Laser), the GM may roll Point Defence before the attack roll <span className="text-slate-400">(CRB p.173)</span>.</p>
+            <KV k="🛡 ROLL POINT DEFENCE" v="Gunner check 2D6 + Gunner + laser bonus (DM+1 for 2 lasers on one slot; DM+2 for 3). Effect removes that many missiles. Turret slot marked fired immediately." />
+            <KV k="Multiple turrets" v="A slot selector appears when more than one eligible turret is available. Select a slot, roll; repeat with remaining slots." />
+            <KV k="Player targets" v="Enter dice manually; NPC targets auto-roll." />
+            <KV k="All missiles destroyed" v="Impact dismissed immediately — no attack roll needed. Salvo size DM in Step 1 reflects remaining count after PD." />
             <p className="font-mono text-xs text-slate-300 mt-1">STEP 1 — ATTACK ROLL</p>
-            <KV k="Salvo DM" v="+1 per missile in the salvo (e.g. 3 missiles → DM+3)." />
+            <KV k="Salvo DM" v="+1 per missile remaining after Point Defence (e.g. 3 survivors → DM+3)." />
             <KV k="Smart DM" v="+2 — all missile and torpedo weapons carry the Smart trait (CRB p.79). Active only when the launcher ship's Tech Level is 9 or higher. Sub-TL9 launchers do not receive this bonus." />
             <KV k="🛡 EVASIVE ACTION" v="If the target has unspent thrust, click to spend 1 thrust and apply DM −Pilot to this attack roll. Button disabled when no thrust available." />
             <p>Roll 2D6 + total DM vs 8+. Effect = total − 8. Effect &lt; 0 → MISS, modal closes. Effect ≥ 0 → proceed to damage.</p>
@@ -367,8 +377,8 @@ export function HelpScreen({ onBack } = {}) {
           <Sub title="REACTIONS (CRB p.171)">
             <p>The defender can declare Reactions in Step 1 before the attack roll.</p>
             <KV k="Evasive Action" v="Toggle: spend 1 thrust to dodge this attack. The attack suffers DM −Pilot skill (fixed). Button disabled if no thrust remains or Pilot skill is 0." />
-            <KV k="Point Defence" v="Missile attacks only. Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Weapon slot marked fired." />
             <KV k="Disperse Sand" v="Laser attacks only. Gunner (turret) check — on success adds 1D+Effect to armour for this attack only. Slot marked fired." />
+            <p className="text-slate-400 text-xs italic">Point Defence for missile salvos is resolved in the Missile Impact modal, not here. The Reactions panel is not shown for missile attacks.</p>
             <p className="text-slate-400 italic text-xs">Player-controlled defending ships enter physical dice manually for PD and Sand rolls.</p>
           </Sub>
 
@@ -488,6 +498,7 @@ export function HelpScreen({ onBack } = {}) {
             <p><span className="text-slate-200">Roles</span> — one dropdown per non-gunner slot: Pilot, Leadership (LDR), Tactics (TAC), Engineer, Sensors.</p>
             <p><span className="text-slate-200">Gunners</span> — one dropdown per weapon slot (W1, W2…), with weapon names shown next to the slot label.</p>
             <p>Each dropdown lists all named crew members. The relevant skill level is shown in brackets — e.g. <span className="text-(--neon-cyan)">Mira Vasquez [pilot 1]</span> or <span className="text-slate-400">Joko Hendrik [no skill]</span>. Select <span className="text-slate-400">— unassigned —</span> to leave the slot empty.</p>
+            <KV k="AUTO-ASSIGN" v="Assigns the crew member with the highest relevant skill to each role and turret slot in one click. One person can cover multiple roles (e.g. solo-pilot light fighter). Use as a starting point, then adjust manually." />
             <KV k="CLEAR ALL" v="Reset every slot to unassigned." />
             <KV k="SAVE ASSIGNMENTS" v="Commit selections to the ship and close." />
             <p className="text-slate-400 italic">If the profile has no named crew the modal prompts you to add crew in the profile editor first.</p>

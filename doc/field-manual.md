@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.1.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.2.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -237,6 +237,10 @@ Actions phases.
 **Formula:** `2D6 + Pilot skill + current Thrust rating + Tactics effect`
 *(MgT2e CRB p. 160)*
 
+**Initiative is rolled once** at the start of combat *(CRB p.160)*. From round 2 onward the initiative order is carried over and the phase advances directly to Acceleration — no re-roll. If a ship joins mid-battle, initiative is re-rolled the following round to include it.
+
+> **GM override:** a **↺** button appears next to the phase label in the HUD during the Acceleration phase of round 2+. Click it to force an initiative re-roll for the current round.
+
 ### 6.1 Rolling Initiative
 
 Right-click any hex → **Roll Initiative**. The modal shows all ships.
@@ -366,6 +370,22 @@ When a missile salvo reaches its target, the token is consumed and a **⚡ MISSI
 **Vectorial mode:** impact is detected during the Movement phase when the salvo reaches the target hex.
 
 **Basic mode:** the Movement phase is skipped, but missiles still advance. Each round transition, every in-flight salvo spends up to **Thrust 10** guidance budget against the Ship Movement cost table *(CRB p.166)*. Excess carries to the next band. When the salvo reaches **Adjacent** range the modal opens at the start of the following round. Bento cards show **~Xr** (estimated rounds to impact) next to each salvo row.
+
+#### Point Defence (optional, resolved before Step 1)
+
+If the target has at least one **unfired laser turret** (Pulse Laser or Beam Laser), the GM may roll Point Defence *(CRB p.173)* before the attack roll.
+
+| DM | Source |
+| -- | ------ |
+| +Gunner skill | Assigned gunner for that turret slot |
+| +1 per laser beyond the first | DM+1 for 2 lasers on one slot; DM+2 for 3 lasers |
+
+Roll 2D6 + total DM against **8+**. Effect = total − 8. `max(0, Effect)` missiles are destroyed. The turret slot is marked fired immediately.
+
+- **Multiple turrets:** if more than one eligible slot is available, a selector appears. Select a slot, roll; repeat with remaining slots.
+- **Player targets:** enter dice manually. NPC targets auto-roll.
+- If all missiles are destroyed (count reaches 0), the impact is dismissed immediately — no attack roll.
+- The salvo size DM in Step 1 reflects the **remaining count** after PD.
 
 #### Step 1 — Attack Roll
 
@@ -593,11 +613,9 @@ on the token shows when a ship has used reactions this round.
 | Reaction | Availability | Mechanic |
 | -------- | ------------ | -------- |
 | **Evasive Action** | All attacks | Toggle button: spend **1 thrust** to dodge this attack. The attack suffers **DM −Pilot skill** (fixed — not multiplied). *(CRB p.171)* |
-| **Point Defence** | Missile attacks only; target must have at least one unfired laser weapon slot | Gunner (turret) check 2D6 + Gunner + laser bonus (DM+1 for 2-laser turret, DM+2 for 3-laser). Effect removes that many missiles from the salvo. Weapon slot marked fired immediately. **Multiple slots can each roll PD** — the roll section stays visible after each attempt as long as unfired laser slots remain; select the next weapon slot before rolling. |
 | **Disperse Sand** | Laser (Pulse/Beam) attacks only; target must have an unfired sandcaster slot | Gunner (turret) check 2D6 + Gunner. On success: +1D+Effect added to armour for this attack only. Slot marked fired immediately. |
 
-> If Point Defence destroys all missiles (count reaches 0), the attack does not
-> proceed — click **MARK FIRED & CLOSE** to mark the attacker's weapon slot and close.
+> **Point Defence** for missile salvos is resolved in the **Missile Impact modal** (§8.1), not here. The Reactions panel is not shown for missile attacks.
 
 ### 9.10 Special Weapon Mechanics
 
@@ -817,6 +835,7 @@ Select `— unassigned —` to leave the slot empty.
 
 Buttons:
 
+- **AUTO-ASSIGN** — assigns the crew member with the highest relevant skill to each role and turret slot automatically. A single crew member can cover multiple roles (e.g., solo-pilot light fighter). Use as a starting point, then adjust manually if needed.
 - **CLEAR ALL** — resets every slot to unassigned.
 - **SAVE ASSIGNMENTS** — commits the selection to the ship and closes the modal.
 

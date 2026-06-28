@@ -1671,6 +1671,28 @@ I nomi nave nel PhaseTracker sono ora `<button>` invece di span statici. Click �
 
 ---
 
+#### 13.10.5 Community Feature Batch 3 (v2.2.0) ✅ COMPLETATA
+
+Feature batch da feedback post-lancio v2.0 (Reddit/CotI), più un bug RAW e un fix store.
+
+| REQ | Feature | File principali |
+| --- | ------- | --------------- |
+| REQ-08 | Point Defence spostato all'impatto (CRB p.173) | `MissileImpactModal.jsx` — sezione PD prima del tiro d'attacco; `AttackModal.jsx` — rimossa sezione PD da ReactionsPanel per missili |
+| REQ-11 | AUTO-ASSIGN in CrewAssignmentModal | `CrewAssignmentModal.jsx` — bottone che assegna il membro con skill più alta per ogni ruolo e slot gunner; supporto mono-crew |
+| REQ-13 | Initiative carry-over round 2+ (CRB p.160) | `battleStore.js` — `buildNextRoundState` controlla `shipAddedThisRound`; `HUD.jsx` — bottone ↺ GM override in fase Acceleration |
+
+**Fix contestuale:**
+
+- `battleStore.js` `resetBattle` non resettava `shipAddedThisRound` — causava leak di stato tra sessioni.
+
+**Test coverage — Batch 3:**
+
+- 57 nuovi test unitari (`battleStore.test.js`, `HUD.test.jsx`, `CrewAssignmentModal.test.jsx`, `MissileImpactModal.test.jsx`)
+- 8 test Playwright e2e (`e2e/batch3-features.spec.js`)
+- Totale suite: **1178 test Vitest** · **32 test Playwright e2e**
+
+---
+
 ## 14. Note per lo Sviluppo
 
 ### 14.1 Regola Critica: Thrust su Griglia Hex

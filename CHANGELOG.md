@@ -6,6 +6,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.2.0] — 2026-06-28
+
+### Added
+
+- **REQ-11 — Crew AUTO-ASSIGN** — New **AUTO-ASSIGN** button in the Assign Crew modal. Assigns the crew member with the highest relevant skill to each role and turret slot in one click. A single crew member can cover multiple roles (supported for solo-pilot ships). (`CrewAssignmentModal.jsx`)
+- **REQ-13 — Initiative carry-over (CRB p.160)** — Initiative is now rolled only once at the start of combat. From round 2 onward the phase transitions directly from End to Acceleration, carrying the existing order. If a ship was added mid-battle, initiative is re-rolled the following round. A **↺** GM override button appears in the HUD during Acceleration phase (round 2+) to force a re-roll when needed. (`battleStore.js`, `HUD.jsx`)
+
+### Fixed
+
+- **REQ-08 — Point Defence at impact (CRB p.173)** — Point Defence for missile salvos was incorrectly resolved at launch (AttackModal) instead of at impact. PD is now handled entirely in MissileImpactModal: unfired laser turrets can intercept missiles before the attack roll; the salvo size DM and damage multiplier reflect the reduced count. (`MissileImpactModal.jsx`, `AttackModal.jsx`)
+- **`resetBattle` state leak** — `shipAddedThisRound` was not reset by `resetBattle`, allowing it to bleed across battle sessions. (`battleStore.js`)
+
+### Tests
+
+- **Unit — Batch 3** — 57 new test cases: battleStore REQ-13 round-transition logic, HUD ↺ button visibility/interaction, `CrewAssignmentModal` AUTO-ASSIGN behavior, `MissileImpactModal` PD visibility/resolution/DM update, `AttackModal` PD regression (no PD section for missiles).
+- **Playwright e2e — batch3** — `e2e/batch3-features.spec.js`: 8 tests — REQ-11 button presence/save/clear, REQ-13 full round-1 flow → round-2 acceleration skip + ↺ override, REQ-08 attack modal smoke test.
+
+---
+
 ## [2.1.0] — 2026-06-28
 
 ### Added
