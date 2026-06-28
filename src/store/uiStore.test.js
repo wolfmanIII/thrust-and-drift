@@ -17,6 +17,7 @@ beforeEach(() => {
     hoveredShip:       null,
     hoveredMissile:    null,
     thrustTargeting:   null,
+    centerRequest:     null,
     audioEnabled:      true,
   })
 })
@@ -219,5 +220,20 @@ describe('toggleAudio', () => {
     useUiStore.setState({ audioEnabled: false })
     useUiStore.getState().toggleAudio()
     expect(useUiStore.getState().audioEnabled).toBe(true)
+  })
+})
+
+// === CENTER REQUEST (REQ-04) ===
+
+describe('centerRequest', () => {
+  it('requestCenterOn sets centerRequest to the given position', () => {
+    useUiStore.getState().requestCenterOn({ q: 3, r: -2 })
+    expect(useUiStore.getState().centerRequest).toEqual({ q: 3, r: -2 })
+  })
+
+  it('clearCenterRequest resets to null', () => {
+    useUiStore.setState({ centerRequest: { q: 1, r: 1 } })
+    useUiStore.getState().clearCenterRequest()
+    expect(useUiStore.getState().centerRequest).toBeNull()
   })
 })
