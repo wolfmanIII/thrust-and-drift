@@ -248,3 +248,55 @@ Nota minore, ma la fase iniziativa potrebbe/dovrebbe probabilmente essere rimoss
 | REQ-07 | Label mount tipo torretta | Basso | Basso | UX cosmético |
 | REQ-05 | Documentare scala hex | Basso | Medio | Chiarimento |
 | REQ-06 | Discord | — | — | Organizzativo |
+
+---
+
+## Piano deploy — ripartizione in batch
+
+Ogni batch = un deploy Netlify. Minimizzare i deploy per risparmiare crediti.
+
+### Batch 1 — v2.0.1 ✅ DEPLOYATO (2026-06-28)
+
+Bug ad alto impatto + chiarimento doc. Tutti a basso effort, zero rischio regressione.
+
+| REQ | Fix |
+| --- | --- |
+| REQ-09 | Skill values negativi (min −3) |
+| REQ-10 | Monoposto: crew actions con skill 0 se assegnato |
+| REQ-12 | Relitti esclusi dalla lista target |
+| REQ-05 | Scala hex documentata nel Field Manual e HelpScreen |
+
+---
+
+### Batch 2 — v2.1.0 (prossimo)
+
+Feature canvas + UX leggera. Nessun impatto su store o meccaniche RAW.
+
+| REQ | Feature |
+| --- | ------- |
+| REQ-02 | Highlight current actor sul canvas (anello pulsante) |
+| REQ-04 | Click su PhaseTracker → centra mappa sul token |
+| REQ-07 | Label tipo mount torretta (Single/Double/Triple) in ShipDetailModal |
+
+---
+
+### Batch 3 — v2.2.0
+
+Feature con impatto su store/flusso di fase. Richiede test approfonditi.
+
+| REQ | Feature |
+| --- | ------- |
+| REQ-08 | Timing PD/Evasion missili all'impatto (bug RAW — rimuove PD da AttackModal per missili, aggiunge a MissileImpactModal) |
+| REQ-13 | Saltare fase Initiative dal round 2 se nessuna nuova nave |
+| REQ-11 | Auto-fill crew roles all'aggiunta della nave |
+
+---
+
+### Batch 4 — v2.3.0
+
+Feature complesse o a basso impatto immediato.
+
+| REQ | Feature |
+| --- | ------- |
+| REQ-01 | Override vettore iniziale (campo Δq/Δr in AddShipModal o context menu) |
+| REQ-03 | Rinomina istanza nave in battaglia (inline edit o mini-modal) |
