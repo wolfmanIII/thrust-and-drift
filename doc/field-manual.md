@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.0.1** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.1.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -120,7 +120,7 @@ Click **📖 Legend** (fixed button, top-right of the battle screen) to open the
 | **Barbette beams** | Pulse Laser Barbette (sky blue, thicker), Beam Laser Barbette (blue, thicker), Particle Barbette (purple, thicker), Fusion Barbette (amber-white, thicker), Plasma Barbette (magenta, thicker), Railgun Barbette (orange, thicker) — all barbettes deal ×3 damage after armour |
 | **Hit effects** | Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion weapon hit) |
 | **Movement effects** | Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line) |
-| **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + red ring), Missile exhausted (×), Ion aura (pulsing blue ring, while ionRoundsLeft > 0), **Range band rings** (dashed cyan hexagons — SHORT / MEDIUM / LONG / VERY LONG boundaries — shown when a ship is selected; hidden during thrust targeting) |
+| **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + red ring), Missile exhausted (×), Ion aura (pulsing blue ring, while ionRoundsLeft > 0), **Range band rings** (dashed cyan hexagons — SHORT / MEDIUM / LONG / VERY LONG boundaries — shown when a ship is selected; hidden during thrust targeting), **Current actor ring** (pulsing cyan ring — shown on the token of the ship whose turn it is during Acceleration, Attack, and Actions phases) |
 | **Obstacle zones** | Asteroid Field (dashed amber border; `AST` light / `AST-D` dense at centre hex); Debris Field (dashed gray-blue border; `DEB`); Gravity Well (solid purple zone, filled purple circle at centre — dashed orange warning ring at radius + 1); Nebula (dashed cyan border; `NEB`). Type label coloured like the zone border; custom label appended if set. *(vectorial mode — obstacles enabled only)* |
 
 ### 3.2 Hex Scale
@@ -263,6 +263,8 @@ the start of round N+2. No manual input required. *(CRB p.166)*
 
 > The Phase Tracker shows an **↑ini** amber badge on ships whose bonus is
 > active in the current round.
+
+> **Click a ship name** in the Phase Tracker to pan the map and center on that token. Useful when tracking multiple ships across a large hex grid.
 
 ---
 
@@ -492,6 +494,8 @@ The Attack modal weapon list shows only slots that have not yet fired this
 round, identified by their slot number (`W1`, `W2`…). Once all offensive slots
 have fired, the **Attack…** option disappears from the context menu until the
 next Attack phase or the start of a new round.
+
+The Ship Detail modal labels each slot's mount type based on how many weapons it contains: **Single Turret** (1 weapon), **Double Turret** (2 weapons), **Triple Turret** (3 weapons). This is cosmetic — it does not affect attack mechanics.
 
 ### 9.6 Launching Missiles
 

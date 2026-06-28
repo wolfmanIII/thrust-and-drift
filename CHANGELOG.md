@@ -6,6 +6,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.1.0] — 2026-06-28
+
+### Added
+
+- **REQ-02 — Actor highlight ring** — The current initiative actor's token now shows a pulsing cyan ring on the canvas, making it immediately visible which ship should act next — especially useful with multiple identical tokens. (`tokenRenderers.js`, `useCanvasRenderer.js`)
+- **REQ-04 — PhaseTracker → center map** — Ship names in the Phase Tracker (HUD) are now interactive buttons. Clicking a name pans the canvas to center on that token. (`PhaseTracker.jsx`, `uiStore.js`, `useMapInteraction.js`)
+- **REQ-07 — Mount type label** — Weapon slots in ShipDetailModal now show their turret mount type: **Single Turret** (1 weapon), **Double Turret** (2 weapons), **Triple Turret** (3 weapons). Purely cosmetic — no mechanical change. (`ShipDetailModal.jsx`)
+
+### Fixed
+
+- **TDZ crash in `useMapInteraction`** — `useEffect` referencing `centerRequest` and `clearCenterRequest` appeared before their `const` declarations, causing a JavaScript Temporal Dead Zone crash on map initialization. (`useMapInteraction.js`)
+
+### Tests
+
+- **Playwright e2e — batch2** — `e2e/batch2-features.spec.js`: 5 tests covering REQ-07 mount labels (Single/Double/Triple Turret) and REQ-04 PhaseTracker button rendering + no-crash on click.
+
+---
+
 ## [2.0.1] — 2026-06-28
 
 ### Fixed

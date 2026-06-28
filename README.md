@@ -36,8 +36,10 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Crew assignments** | Right-click any ship → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner W1…Wn); unassigned roles contribute 0; weapon slots without a gunner cannot fire. A single crew member can cover all roles (monoposto / solo pilot). |
 | **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action. A crew member assigned to a role can perform its actions even at skill 0 (no DM bonus). Sensor operators have three actions: Sensor Lock (8+, DM+2 flat), Electronic Warfare (8+, breaks sensor lock), **EW — Counter Missile** (10+, Effect removes missiles from a salvo — CRB p.173) |
 | **Initiative** | 2D6 + Pilot + Thrust [+ Tactics Effect]; optional Tactics(naval) check (CRB p.160); player ships manual entry, NPC auto-rolled |
-| **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End |
+| **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End. Ship names are clickable — click to pan the map to that token |
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase AND when it is that ship's turn (initiative order enforced in Acceleration, Attack, Actions phases) |
+| **Actor highlight ring** | The current initiative actor's token shows a pulsing cyan ring on the canvas — instantly visible which ship should act next, even with multiple identical tokens |
+| **Mount type labels** | Weapon slots in the Ship Detail modal show their turret mount type: Single Turret (1 weapon), Double Turret (2 weapons), Triple Turret (3 weapons) |
 | **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals, sensor lock → target, locked-by attacker, inbound missiles (200ms delay) |
 | **Battle log** | Timestamped event log with colour-coded entry types |
 | **Undo/Redo (Ctrl+Z / Ctrl+Y)** | Snapshot-based undo/redo — 20-step stacks; `↩️` `↪️` buttons in HUD; new action clears redo |

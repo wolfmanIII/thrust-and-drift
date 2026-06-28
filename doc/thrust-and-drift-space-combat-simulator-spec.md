@@ -1650,6 +1650,25 @@ Aggiunta sezione §3.2 Hex Scale: 1 hex = 648 km *(TC 2024, p.171)*; tabella dis
 - 1121 test Vitest (+7 rispetto a v2.0.0: 5 `ActionModal.test.jsx` per REQ-09/REQ-10, 2 `AttackModal.test.jsx` per REQ-12).
 - 26 e2e Playwright (+4: `e2e/batch1-fixes.spec.js` — 4 test REQ-09 sul form skill input).
 
+#### 13.10.4 Community Feature Batch 2 (v2.1.0) ✅ COMPLETATA
+
+Feature UX emerse dal feedback Reddit post-lancio v2.0, più un bug interno.
+
+**REQ-02 — Anello highlight current actor** (`tokenRenderers.js`, `useCanvasRenderer.js`)
+
+Il token dell'attore corrente nell'ordine d'iniziativa mostra un anello cyan pulsante durante le fasi Acceleration, Attack e Actions. Implementato in `drawShipToken` come cerchio aggiuntivo con animazione via `sin(Date.now() / 400)` mappata su opacità 0.4–1.0 e raggio 0–4px. `useCanvasRenderer` passa `isCurrentActor` a `drawShipToken`. Aggiornamento del canvas via `requestAnimationFrame` continuo quando ci sono attori da evidenziare.
+
+**REQ-04 — PhaseTracker click → centra mappa** (`PhaseTracker.jsx`, `uiStore.js`, `useMapInteraction.js`)
+
+I nomi nave nel PhaseTracker sono ora `<button>` invece di span statici. Click → `setCenterRequest(ship.pos)` su `uiStore`. `useMapInteraction` legge `centerRequest` in un `useEffect` e aggiorna `offset.current` per centrare il canvas su quella posizione hex. Corretto contestualmente un bug TDZ: l'`useEffect` che legge `centerRequest` era posizionato prima della dichiarazione `const` delle stesse variabili, causando un crash JavaScript alla prima inizializzazione della mappa.
+
+**REQ-07 — Label tipo mount** (`ShipDetailModal.jsx`)
+
+`ShipDetailModal` calcola il numero di armi per slot e mostra "Single Turret" / "Double Turret" / "Triple Turret" accanto al badge dello slot. Nessun impatto sui calcoli meccanici. Usato anche come base per la futura meccanica di attacco combinato (REQ-14, v2.3.0).
+
+- 1126 test Vitest (+5 rispetto a v2.0.1: `batch2-features.spec.js` — 3 per REQ-07 mount labels, 2 per REQ-04 PhaseTracker buttons).
+- 31 e2e Playwright (+5: `e2e/batch2-features.spec.js`).
+
 ---
 
 ## 14. Note per lo Sviluppo

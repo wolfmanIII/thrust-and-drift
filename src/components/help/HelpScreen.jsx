@@ -213,7 +213,7 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="Barbette beams" v="Pulse Laser Barbette (sky blue, thicker), Beam Laser Barbette (blue, thicker), Particle Barbette (purple, thicker), Fusion Barbette (amber-white, thicker), Plasma Barbette (magenta, thicker), Railgun Barbette (orange, thicker) — all barbettes deal ×3 damage after armour." />
             <KV k="Hit effects" v="Impact burst (expanding sparks on target), Critical flash (red ring + label), Ion burst (blue ring — Ion weapon hit)." />
             <KV k="Movement effects" v="Thrust plume (amber triangle opposite delta-v), Missile launch (ring + sparks), Missile trail (dashed orange line)." />
-            <KV k="Persistent indicators" v="Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + amber ring), Missile exhausted (×), Ion aura (pulsing blue ring — while ionRoundsLeft {'>'} 0), Range band rings (dashed cyan hexagons — SHORT / MEDIUM / LONG / VERY LONG — shown on selected ship; hidden during thrust targeting)." />
+            <KV k="Persistent indicators" v="Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + amber ring), Missile exhausted (×), Ion aura (pulsing blue ring — while ionRoundsLeft {'>'} 0), Range band rings (dashed cyan hexagons — SHORT / MEDIUM / LONG / VERY LONG — shown on selected ship; hidden during thrust targeting), Current actor ring (pulsing cyan ring — shown on the token of the ship whose turn it is during Acceleration, Attack, and Actions phases)." />
             <KV k="Obstacle zones" v="Asteroid Field (dashed amber border; AST light / AST-D dense at centre); Debris Field (dashed gray-blue; DEB); Gravity Well (solid purple zone, filled purple circle at centre — dashed orange warning ring at radius + 1); Nebula (dashed cyan; NEB). Type label coloured like the zone border; custom label appended if set. Vectorial mode — obstacles enabled only." />
           </Sub>
         </Section>
@@ -285,6 +285,7 @@ export function HelpScreen({ onBack } = {}) {
           </Sub>
           <Sub title="INITIATIVE BONUS">
             <p>If the Captain uses <span className="text-slate-200">Improve Initiative</span> in the Actions phase of round N, the bonus takes effect at the <span className="text-slate-200">start of round N+1</span> — the acting order is re-sorted before anyone acts. The bonus lasts exactly 1 round and is removed automatically at the start of round N+2. The Phase Tracker shows an <span className="text-amber-400">↑ini</span> badge on ships whose bonus is active.</p>
+            <p><span className="text-slate-200">Click a ship name</span> in the Phase Tracker to pan the map and center on that token. Useful when tracking multiple ships across a large hex grid.</p>
           </Sub>
         </Section>
 
@@ -399,6 +400,7 @@ export function HelpScreen({ onBack } = {}) {
 
           <Sub title="PER-SLOT FIRING LIMIT">
             <p>Each weapon slot may fire <span className="text-slate-200">once per round</span> (CRB p.164). The weapon list shows only unfired slots, identified by slot badge (W1, W2…). Once all offensive slots have fired, the Attack… option disappears from the context menu.</p>
+            <p>The Ship Detail modal labels each slot&apos;s mount type: <span className="text-slate-200">Single Turret</span> (1 weapon), <span className="text-slate-200">Double Turret</span> (2 weapons), <span className="text-slate-200">Triple Turret</span> (3 weapons). Cosmetic only — no effect on attack mechanics.</p>
           </Sub>
 
           <Sub title="WEAPON RANGE LIMITS">
