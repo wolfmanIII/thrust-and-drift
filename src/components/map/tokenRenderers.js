@@ -75,13 +75,14 @@ function vectorToPixelDirection(vector, hexSize) {
 /**
  * Draw a ship token at its pixel center.
  * @param {CanvasRenderingContext2D} ctx
- * @param {object} ship       ShipInstance
- * @param {number} cx         Pixel center X
- * @param {number} cy         Pixel center Y
- * @param {boolean} selected  Whether this ship is currently selected
- * @param {number} [timestamp=0]  rAF timestamp in ms — drives dogfight pulse animation
+ * @param {object} ship            ShipInstance
+ * @param {number} cx              Pixel center X
+ * @param {number} cy              Pixel center Y
+ * @param {boolean} selected       Whether this ship is currently selected
+ * @param {boolean} isCurrentActor Whether this ship is the current initiative actor
+ * @param {number} [timestamp=0]   rAF timestamp in ms — drives pulse animations
  */
-export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
+export function drawShipToken(ctx, ship, cx, cy, selected, isCurrentActor, timestamp = 0) {
   const { color, profile, hullCurrent, isDestroyed } = ship
   const hullFraction = profile.hull > 0 ? hullCurrent / profile.hull : 0
   const inDogfight   = ship.inDogfight !== null && ship.inDogfight !== undefined
@@ -90,6 +91,16 @@ export function drawShipToken(ctx, ship, cx, cy, selected, timestamp = 0) {
   if (isDestroyed) {
     ctx.save()
     ctx.globalAlpha = 0.35
+  }
+
+  // Current actor pulsing ring — outermost ring, cyan, drawn first
+  if (isCurrentActor && !isDestroyed) {
+    const pulse = 0.5 + 0.5 * (0.5 + 0.5 * Math.sin(timestamp * 0.005))
+    ctx.beginPath()
+    ctx.arc(cx, cy, TOKEN_RADIUS + 12, 0, Math.PI * 2)
+    ctx.strokeStyle = `rgba(34, 211, 238, ${pulse})`   // cyan-400
+    ctx.lineWidth = 2
+    ctx.stroke()
   }
 
   // Dogfight pulsing ring — circular, drawn before selection ring

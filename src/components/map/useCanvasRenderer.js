@@ -247,16 +247,29 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
   const ships             = useBattleStore((s) => s.ships)
   const missiles          = useBattleStore((s) => s.missiles)
   const phase             = useBattleStore((s) => s.phase)
+  const initiativeOrder   = useBattleStore((s) => s.initiativeOrder)
+  const currentActorIndex = useBattleStore((s) => s.currentActorIndex)
+  const combatMode        = useBattleStore((s) => s.combatMode)
   const obstacles         = useBattleStore((s) => s.obstacles)
   const obstaclesEnabled  = useBattleStore((s) => s.obstaclesEnabled)
   const selectedShipId    = useUiStore((s) => s.selectedShipId)
   const thrustTargeting   = useUiStore((s) => s.thrustTargeting)
+
+  // Phases where turn order matters; acceleration reverses the list (TC p.174)
+  const ACTOR_PHASES = ['acceleration', 'attack', 'actions']
+  const displayOrder = (phase === 'acceleration' && combatMode === 'vectorial')
+    ? [...initiativeOrder].reverse()
+    : initiativeOrder
+  const currentActorId = ACTOR_PHASES.includes(phase)
+    ? (displayOrder[currentActorIndex] ?? null)
+    : null
 
 
   /** rAF timestamp in ms — used for dogfight pulse animation. */
   const timestampRef = useRef(0)
 
   const hasActiveDogfight = ships.some((s) => s.inDogfight !== null)
+  const hasCurrentActor   = currentActorId !== null
   const movementAnimation = useUiStore((s) => s.movementAnimation)
 
   const render = useCallback(() => {
@@ -343,7 +356,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
         renderPos = lerpHex(anim.startPositions[ship.id], ship.position, t)
       }
       const { x: cx, y: cy } = hexToPixel(renderPos.q, renderPos.r, size, ox, oy)
-      drawShipToken(ctx, ship, cx, cy, ship.id === selectedShipId, timestampRef.current)
+      drawShipToken(ctx, ship, cx, cy, ship.id === selectedShipId, ship.id === currentActorId, timestampRef.current)
       drawShipLabel(ctx, ship, cx, cy)
     }
 
@@ -354,7 +367,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
   // ships/missiles/obstacles are read fresh via getState() inside render, but kept in deps to
   // trigger useCallback recreation → useEffect([render]) fires → canvas redraws on store change.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canvasRef, ships, missiles, phase, obstacles, obstaclesEnabled, selectedShipId, offset, zoom, timestampRef, thrustTargeting, mouseHexRef])
+  }, [canvasRef, ships, missiles, phase, initiativeOrder, currentActorIndex, combatMode, obstacles, obstaclesEnabled, selectedShipId, offset, zoom, timestampRef, thrustTargeting, mouseHexRef])
 
   // Render on state changes
   useEffect(() => {
@@ -383,9 +396,9 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
     return () => observer.disconnect()
   }, [canvasRef, render])
 
-  // rAF animation loop — active during dogfight pulse or movement animation
+  // rAF animation loop — active during dogfight pulse, current actor pulse, or movement animation
   useEffect(() => {
-    if (!hasActiveDogfight && !movementAnimation) return
+    if (!hasActiveDogfight && !hasCurrentActor && !movementAnimation) return
     let frameId
     const loop = (ts) => {
       timestampRef.current = ts
@@ -394,7 +407,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
     }
     frameId = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(frameId)
-  }, [render, hasActiveDogfight, movementAnimation, timestampRef])
+  }, [render, hasActiveDogfight, hasCurrentActor, movementAnimation, timestampRef])
 }
 
 export { HEX_SIZE }
