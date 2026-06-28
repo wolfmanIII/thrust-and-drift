@@ -203,15 +203,15 @@ Nota minore, ma la fase iniziativa potrebbe/dovrebbe probabilmente essere rimoss
 
 ---
 
-### REQ-07 — Torrette doppie e triple *(chiarimento + UX)*
+### REQ-07 — Label tipo mount torretta *(UX cosmético — deployato v2.1.0)*
 
-**Cosa chiede:** un modo per raggruppare più armi in una singola torretta (doppia o tripla) invece di gestirle come slot separati.
+**Cosa chiedeva:** un modo per raggruppare più armi in una singola torretta (doppia o tripla) invece di gestirle come slot separati.
 
-**Stato attuale:** T&D implementa le torrette come slot indipendenti (W1, W2, W3) — fino a 3 per profilo, cap RAW (CRB p.163). Ogni slot spara separatamente nel proprio turno. Il concetto di "torretta doppia" o "tripla" in RAW significa semplicemente che la torretta fisicamente contiene 2 o 3 armi, che sparano ciascuna il proprio attacco indipendente nello stesso turno — non è un attacco combinato.
+**Stato attuale:** T&D implementa le torrette come slot indipendenti (W1, W2, W3) — fino a 3 per profilo, cap RAW (CRB p.163).
 
-**Risposta corretta:** il comportamento è già RAW-corretto. W1/W2/W3 rappresentano le armi nella torretta (o nelle torrette). Il termine "doppia/tripla" descrive la capacità fisica del mount, non una meccanica di attacco combinato. Da chiarire nella risposta.
+**⚠️ Analisi iniziale parzialmente errata:** la prima risposta a questa richiesta concludeva che sparare ogni slot in modo indipendente fosse RAW-corretto. Questo è sbagliato — v. **REQ-14** per la regola RAW su attacchi combinati nelle torrette doppie/triple (CRB 2022 p.168).
 
-**Eventuale miglioramento UX:** etichettare il mount nel profilo ("Single Turret / Double Turret / Triple Turret") e mostrarlo nel ShipDetailModal — puramente cosmético, nessun impatto meccanico.
+**Fix deployato v2.1.0:** etichettatura del mount nel profilo ("Single Turret / Double Turret / Triple Turret") in ShipDetailModal — UX cosmética, nessun impatto meccanico. La meccanica di attacco combinato è tracciata separatamente in REQ-14.
 
 ---
 
@@ -231,6 +231,44 @@ Nota minore, ma la fase iniziativa potrebbe/dovrebbe probabilmente essere rimoss
 
 ---
 
+### REQ-14 — Torrette doppie/triple: attacco combinato same-type weapons *(bug RAW)*
+
+**Origine:** segnalazione community aggiuntiva, 2026-06-28 — stessa sessione di REQ-01…REQ-13. Collegata a **REQ-07** (che aveva concluso erroneamente che gli slot indipendenti fossero RAW-corretti).
+
+**Cosa chiede:** le armi dello stesso tipo in una torretta doppia o tripla dovrebbero sparare con un unico attacco combinato, non come attacchi indipendenti.
+
+**Riferimento RAW:** CRB 2022 p.168 — *"If all weapons in the turret are of the same type, they fire together as one attack but add +1 per additional weapon to each damage die."* Esempi:
+
+| Configurazione | RAW | Errore attuale |
+| -------------- | --- | -------------- |
+| Doppia torretta Pulse Laser (2D) | 1 roll → 2D+2 | 2 roll → 2D + 2D |
+| Tripla torretta Pulse Laser (2D) | 1 roll → 2D+4 | 3 roll → 2D + 2D + 2D |
+| Doppia torretta armi miste | solo un tipo per round | 2 roll indipendenti |
+
+**Regole correlate (CRB 2022 p.168):**
+
+- Sandcaster in torretta multipla: ciascun Sandcaster aggiuntivo aggiunge +1 al numero di damage die negate dal cloud (non +1 per die).
+- Missili: **esclusi** dalla meccanica di attacco combinato (p.172 — ogni missile spara individualmente).
+- Armi miste in una torretta: solo un tipo può sparare per round (il Gunner sceglie).
+
+**Stato attuale:** ogni slot (W1, W2, W3) genera un attacco indipendente con roll separato. Il danno viene calcolato per ogni slot. Questo produce ~2–3× il danno RAW atteso per torrette same-type.
+
+**Fix necessario:**
+
+1. Rilevare se W1/W2/W3 nella torretta sono dello stesso tipo (confronto `weaponId` o `weaponType`).
+2. Se same-type: generare un unico attack roll; sommare `+1` al danno per ogni arma extra rispetto alla prima.
+3. Se mixed-type: permettere al Gunner di scegliere quale tipo usare per il round; le armi dell'altro tipo non sparano.
+4. Caso Sandcaster doppia/tripla: un unico roll → sand cloud con +1 die negato per Sandcaster aggiuntivo.
+5. Missili: nessuna modifica — sparano individualmente come prima.
+
+**Impatto:** `AttackModal.jsx`, `useAttackSetup.js`, `combat.js` (calcolo danno), potenzialmente `battleStore.js` (tracking which weapon slot fired).
+
+**Milestone:** v2.3.0 — Issue GitHub #14.
+
+**Priorità: media-alta** — bug RAW sistematico su tutte le navi con torrette doppie/triple same-type.
+
+---
+
 ## Priorità di implementazione suggerita
 
 | # | Feature | Effort | Impatto | Tipo |
@@ -245,7 +283,8 @@ Nota minore, ma la fase iniziativa potrebbe/dovrebbe probabilmente essere rimoss
 | REQ-01 | Override vettore iniziale | Medio | Alto | Feature |
 | REQ-11 | Auto-fill crew roles | Medio | Medio | Feature UX |
 | REQ-03 | Rinomina istanza nave in battaglia | Medio | Medio | Feature |
-| REQ-07 | Label mount tipo torretta | Basso | Basso | UX cosmético |
+| REQ-14 | Torrette doppie/triple — attacco combinato | Medio | Alto | Bug RAW |
+| REQ-07 | Label mount tipo torretta | Basso | Basso | UX cosmético ✅ v2.1.0 |
 | REQ-05 | Documentare scala hex | Basso | Medio | Chiarimento |
 | REQ-06 | Discord | — | — | Organizzativo |
 
@@ -300,3 +339,4 @@ Feature complesse o a basso impatto immediato.
 | --- | ------- |
 | REQ-01 | Override vettore iniziale (campo Δq/Δr in AddShipModal o context menu) |
 | REQ-03 | Rinomina istanza nave in battaglia (inline edit o mini-modal) |
+| REQ-14 | Torrette doppie/triple: attacco combinato same-type (CRB 2022 p.168) — impatto su AttackModal, useAttackSetup, combat.js |
