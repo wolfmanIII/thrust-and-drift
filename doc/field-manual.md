@@ -123,7 +123,21 @@ Click **📖 Legend** (fixed button, top-right of the battle screen) to open the
 | **Persistent indicators** | Sensor lock (dashed cyan line + ring on target), Evasive aura (pulsing blue ring), Dogfight (⚔️ + red ring), Missile exhausted (×), Ion aura (pulsing blue ring, while ionRoundsLeft > 0), **Range band rings** (dashed cyan hexagons — SHORT / MEDIUM / LONG / VERY LONG boundaries — shown when a ship is selected; hidden during thrust targeting) |
 | **Obstacle zones** | Asteroid Field (dashed amber border; `AST` light / `AST-D` dense at centre hex); Debris Field (dashed gray-blue border; `DEB`); Gravity Well (solid purple zone, filled purple circle at centre — dashed orange warning ring at radius + 1); Nebula (dashed cyan border; `NEB`). Type label coloured like the zone border; custom label appended if set. *(vectorial mode — obstacles enabled only)* |
 
-### 3.2 Basic Mode View
+### 3.2 Hex Scale
+
+One hex represents **648 km** *(Traveller Companion 2024, p.171)*.
+
+Range band thresholds on the vectorial map:
+
+| Band | Threshold | Approx. distance |
+| ---- | --------- | ---------------- |
+| Short | ≤ 2 hex | ≤ 1,296 km |
+| Medium | ≤ 15 hex | ≤ 9,720 km |
+| Long | ≤ 38 hex | ≤ 24,624 km |
+| Very Long | ≤ 77 hex | ≤ 49,896 km |
+| Distant | > 77 hex | > 49,896 km |
+
+### 3.3 Basic Mode View
 
 In **Basic** mode there is no hex map. The screen shows **ship bento cards** grouped
 by faction.

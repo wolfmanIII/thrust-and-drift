@@ -190,6 +190,7 @@ export function HelpScreen({ onBack } = {}) {
           <KV k="Scroll wheel" v="Zoom in / out." />
           <KV k="Double-click" v="Centre the map on that hex." />
           <KV k="Left-click token" v="Select the ship (highlights it). Four dashed cyan range band rings appear centred on the ship — SHORT (2 hex), MEDIUM (15 hex), LONG (38 hex), VERY LONG (77 hex) — each labelled on a dark pill. Hidden while thrust targeting is active." />
+          <KV k="Hex scale" v="1 hex = 648 km (Traveller Companion 2024, p.171). SHORT ≤ 1,296 km · MEDIUM ≤ 9,720 km · LONG ≤ 24,624 km · VERY LONG ≤ 49,896 km." />
           <KV k="Right-click hex" v="Open context menu — actions depend on what is in the hex and the current phase." />
           <KV k="🔊/🔇 button" v="Audio toggle (HUD, top-left) — enables or mutes procedural sound effects (laser, impact, thrust plume, missile launch)." />
           <KV k="Hover ship token" v="After 200 ms, a tooltip panel appears showing: name, hull bar, vector, available thrust, evasion DM, initiative, sensor lock → target (if active, with DM), Locked by [attacker] (if targeted), ⚡ N× missile inbound (if applicable), critical hits. Clears on pan or mouse-leave." />
