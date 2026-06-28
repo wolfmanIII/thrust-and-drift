@@ -345,7 +345,7 @@ Code review completa su dogfight e boarding → 13 fix implementati in 5 fasi:
 - **Reddit response** — risposta dettagliata al thread Reddit (7 fix + spiegazione FIX-08 non-bug)
 - **itch.io listing** — deferred da sessione precedente
 
-Deploy da fare da casa: `source ~/.nvm/nvm.sh && nvm use --lts && npm run build && netlify deploy --prod`
+Deploy da fare da casa: `source ~/.nvm/nvm.sh && nvm use --lts && npm run build && npx netlify-cli deploy --prod --dir=dist`
 
 Possibili aree di sviluppo future:
 
