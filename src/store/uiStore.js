@@ -125,6 +125,14 @@ const useUiStore = create((set) => ({
   startThrustTargeting: (shipId) => set({ thrustTargeting: { shipId } }),
   cancelThrustTargeting: () => set({ thrustTargeting: null }),
 
+  // === CENTER REQUEST ===
+  /** When not null, the map should pan to center this hex position. */
+  centerRequest: null,
+
+  /** @param {{ q: number, r: number }} pos */
+  requestCenterOn: (pos) => set({ centerRequest: pos }),
+  clearCenterRequest: () => set({ centerRequest: null }),
+
   // === AUDIO ===
   /** Whether in-app sound effects are enabled. */
   audioEnabled: true,

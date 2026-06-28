@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import { useBattleStore } from '../../store/battleStore.js'
+import { useUiStore } from '../../store/uiStore.js'
 
 export function PhaseTracker() {
   const [collapsed, setCollapsed] = useState(false)
@@ -14,6 +15,7 @@ export function PhaseTracker() {
   const phase             = useBattleStore((s) => s.phase)
   const combatMode        = useBattleStore((s) => s.combatMode)
   const ships             = useBattleStore((s) => s.ships)
+  const requestCenterOn   = useUiStore((s) => s.requestCenterOn)
 
   if (initiativeOrder.length === 0) return null
 
@@ -53,11 +55,13 @@ export function PhaseTracker() {
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: ship.color }}
                   />
-                  <span
-                    className={`font-mono text-xs truncate ${isActive ? 'text-(--neon-cyan)' : 'text-slate-400'}`}
+                  <button
+                    onClick={() => requestCenterOn(ship.position)}
+                    className={`font-mono text-xs truncate text-left hover:text-slate-200 transition-colors ${isActive ? 'text-(--neon-cyan)' : 'text-slate-400'}`}
+                    title="Centre map on this ship"
                   >
                     {ship.profile.name}
-                  </span>
+                  </button>
                   <span className="ml-auto font-mono text-xs text-slate-400 flex items-center gap-1">
                     {ship.initiative}
                     {(ship.initiativeTemporaryBonus ?? 0) > 0 && (

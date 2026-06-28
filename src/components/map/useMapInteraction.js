@@ -47,6 +47,21 @@ export function useMapInteraction({ hexSize, canvasRef, mouseHexRef }) {
 
   useEffect(() => () => { if (animRaf.current) cancelAnimationFrame(animRaf.current) }, [])
 
+  // Center map on a hex when PhaseTracker requests it
+  useEffect(() => {
+    if (!centerRequest) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const px = 1.5 * hexSize * centerRequest.q
+    const py = Math.sqrt(3) * hexSize * (Math.sqrt(3) / 2 * centerRequest.q + centerRequest.r)
+    offset.current = {
+      x: canvas.offsetWidth  / 2 - px * zoom.current,
+      y: canvas.offsetHeight / 2 - py * zoom.current,
+    }
+    canvas.dispatchEvent(new CustomEvent('map:redraw'))
+    clearCenterRequest()
+  }, [centerRequest, canvasRef, hexSize, offset, zoom, clearCenterRequest])
+
   // Granular selectors — no full-store subscriptions
   const showContextMenu       = useUiStore((s) => s.showContextMenu)
   const hideContextMenu       = useUiStore((s) => s.hideContextMenu)
@@ -55,6 +70,8 @@ export function useMapInteraction({ hexSize, canvasRef, mouseHexRef }) {
   const cancelPlacement       = useUiStore((s) => s.cancelPlacement)
   const thrustTargeting       = useUiStore((s) => s.thrustTargeting)
   const cancelThrustTargeting = useUiStore((s) => s.cancelThrustTargeting)
+  const centerRequest         = useUiStore((s) => s.centerRequest)
+  const clearCenterRequest    = useUiStore((s) => s.clearCenterRequest)
 
   const ships           = useBattleStore((s) => s.ships)
   const missiles        = useBattleStore((s) => s.missiles)
