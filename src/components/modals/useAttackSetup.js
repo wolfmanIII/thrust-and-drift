@@ -53,8 +53,12 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const target   = ships.find((s) => s.id === targetId)
   const weapon  = weaponKey ? (WEAPONS[weaponKey] ?? null) : null
 
-  // One entry per unfired turret×weapon — no deduplication (CRB p.164: each turret fires once)
-  // When crewAssignments are set, turrets without an assigned gunner cannot fire.
+  // Missiles are excluded from the same-type linking bonus (CRB p.168 / p.172).
+  const MISSILE_WEAPONS = new Set(['Missile Rack', 'Missile Barbette', 'Torpedo'])
+
+  // One entry per unique weapon TYPE per unfired turret slot.
+  // Same-type weapons (non-missile) in a double/triple turret fire together with one roll
+  // and add +1 per damage die per extra weapon. // MgT2e CRB p.168 — Double and Triple Turrets
   const firedTurrets     = attacker?.firedTurrets ?? []
   const assignments      = attacker?.crewAssignments ?? null
   const availableWeapons = (attacker?.profile.turrets ?? [])
@@ -63,10 +67,20 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
       if (assignments && (assignments.gunners?.[t.slot] ?? null) === null) return false
       return true
     })
-    .flatMap((t) => t.weapons
-      .filter((w) => !DEFENSIVE_WEAPONS.includes(w))
-      .map((w) => ({ weaponName: w, turretSlot: t.slot }))
-    )
+    .flatMap((t) => {
+      const offensiveWeapons = t.weapons.filter((w) => !DEFENSIVE_WEAPONS.includes(w))
+      // Count occurrences of each weapon type in the slot
+      const counts = {}
+      for (const w of offensiveWeapons) counts[w] = (counts[w] ?? 0) + 1
+      // One entry per unique type — linked weapons show combined damage bonus
+      return Object.entries(counts).map(([weaponName, linkedCount]) => {
+        const wDef = WEAPONS[weaponName]
+        const damageDiceBonus = MISSILE_WEAPONS.has(weaponName)
+          ? 0
+          : (linkedCount - 1) * (wDef?.damageDice ?? 0)
+        return { weaponName, turretSlot: t.slot, linkedCount, damageDiceBonus }
+      })
+    })
 
   const distance  = combatMode === 'vectorial' && target && attacker
     ? hexDistance(attacker.position, target.position)

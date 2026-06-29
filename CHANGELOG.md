@@ -19,6 +19,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 - **#15 — EW Counter Missile description text** — `crewActions.js` listed `Electronics(comms)` as the skill specialisation; corrected to `Electronics(sensors)` per CRB p.173. HelpScreen updated to match. No mechanical change.
+- **#14 — Combined attack roll for same-type weapons (CRB p.168)** — Double/triple turrets with multiple weapons of the same type now fire as a linked group: one attack roll, +1 per damage die per extra weapon (e.g. 3× Pulse Laser → 2D+4). The weapon selector shows a `×N` badge for linked weapons and the enhanced damage (e.g. `2D+4 dmg`). The damage step formula and result display include the `+N linked` bonus explicitly. Missiles are excluded from linking per CRB p.172. Mixed-type turret enforcement (only one type per round) was already correct via `firedTurrets` slot-locking. (`useAttackSetup.js`, `AttackModal.jsx`)
 - **#18 — New ship mid-battle initiative display** — Ships added mid-battle showed `0` as their initiative score in PhaseTracker, with no indication that a re-roll was pending. Initiative `0` now renders as `—` (tooltip: "Initiative not yet rolled — re-roll pending at round start"). When `shipAddedThisRound` is active, a `↺ re-roll next round` notice appears at the bottom of the PhaseTracker list. (`PhaseTracker.jsx`)
 
 ---
