@@ -36,6 +36,59 @@ beforeEach(() => {
   })
 })
 
+const SHIP_UNROLLED = {
+  id: 'ship-c',
+  profile: { name: 'Scout', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+  faction: 'npc', hullCurrent: 10, color: '#ff0',
+  position: { q: 0, r: 0 },
+  initiative: 0,
+  firedTurrets: [], evasiveThrust: 0, criticalHits: [], thrustUsedThisRound: 0,
+}
+
+describe('PhaseTracker — mid-battle ship initiative display (#18)', () => {
+  it('shows numeric initiative for ships that have rolled', () => {
+    useBattleStore.setState({
+      ships: [SHIP_A, SHIP_B],
+      initiativeOrder: ['ship-a', 'ship-b'],
+      shipAddedThisRound: false,
+    })
+    render(<PhaseTracker />)
+    expect(screen.getByText('8')).toBeInTheDocument()
+    expect(screen.getByText('5')).toBeInTheDocument()
+  })
+
+  it('shows — instead of 0 for a ship with initiative not yet rolled', () => {
+    useBattleStore.setState({
+      ships: [SHIP_A, SHIP_UNROLLED],
+      initiativeOrder: ['ship-a', 'ship-c'],
+      shipAddedThisRound: true,
+    })
+    render(<PhaseTracker />)
+    expect(screen.getByText('—')).toBeInTheDocument()
+    expect(screen.queryByText('0')).not.toBeInTheDocument()
+  })
+
+  it('shows ↺ re-roll notice when shipAddedThisRound is true', () => {
+    useBattleStore.setState({
+      ships: [SHIP_A, SHIP_UNROLLED],
+      initiativeOrder: ['ship-a', 'ship-c'],
+      shipAddedThisRound: true,
+    })
+    render(<PhaseTracker />)
+    expect(screen.getByText(/↺ re-roll next round/)).toBeInTheDocument()
+  })
+
+  it('does not show ↺ notice when shipAddedThisRound is false', () => {
+    useBattleStore.setState({
+      ships: [SHIP_A, SHIP_B],
+      initiativeOrder: ['ship-a', 'ship-b'],
+      shipAddedThisRound: false,
+    })
+    render(<PhaseTracker />)
+    expect(screen.queryByText(/↺ re-roll next round/)).not.toBeInTheDocument()
+  })
+})
+
 describe('PhaseTracker — centre map on click (REQ-04)', () => {
   it('renders ship names as clickable buttons', () => {
     render(<PhaseTracker />)

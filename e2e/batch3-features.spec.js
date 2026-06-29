@@ -171,6 +171,42 @@ test.describe('Initiative skip — round 2+ starts at Acceleration (REQ-13)', ()
   })
 })
 
+// ── #18: Mid-battle ship initiative display ───────────────────────────────────
+
+test.describe('PhaseTracker — mid-battle ship shows — and re-roll notice (#18)', () => {
+  test.beforeEach(async ({ page }) => {
+    await startNewBattle(page)
+  })
+
+  test('adding a ship after initiative is set shows — and ↺ notice in PhaseTracker', async ({ page }) => {
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    const cx     = box.x + box.width  / 2
+    const cy     = box.y + box.height / 2
+
+    // Place first ship and roll initiative
+    await placeNpcShip(page, 'Light Fighter')
+    await page.getByRole('button', { name: /NEXT PHASE/i }).click()
+    await rollInitiative(page)
+
+    // Advance past initiative — now in Acceleration (initiative is committed)
+    await page.getByRole('button', { name: /NEXT PHASE/i }).click()
+
+    // Add a second ship mid-battle via context menu on an empty hex
+    await page.mouse.click(cx + 160, cy + 80, { button: 'right' })
+    await page.getByText('Add ship here').click()
+    await page.getByText('Light Fighter').first().click()
+    await page.getByRole('button', { name: 'NPC' }).click()
+    await page.getByRole('button', { name: /place|add to battle|confirm/i }).first().click()
+
+    // PhaseTracker must show — for the new ship (initiative not yet rolled)
+    await expect(page.getByText('—')).toBeVisible()
+
+    // ↺ re-roll notice must appear at the bottom of the list
+    await expect(page.getByText(/↺ re-roll next round/)).toBeVisible()
+  })
+})
+
 // ── REQ-08: PD at impact, not at launch ───────────────────────────────────────
 
 test.describe('AttackModal — no Point Defence section for missiles (REQ-08)', () => {
