@@ -470,6 +470,7 @@ export function HelpScreen({ onBack } = {}) {
           </Sub>
 
           <Sub title="AVAILABLE ACTIONS">
+            <KV k="Pilot" v="AID GUNNERS — 2D6 + Pilot (8+). Starts a task chain with gunners (CRB p.63, p.166): Effect 0 → DM+1, Effect 1–5 → DM+2, Effect 6+ → DM+3 to all gunner attack rolls this round. Failure: Effect −1 → DM−1, −2/−5 → DM−2, −6 or less → DM−3. Resets each round." />
             <KV k="Captain (Leadership)" v="IMPROVE INITIATIVE — 2D6 + Leadership (8+). +Effect added to this ship's initiative at the start of next round (lasts 1 round) (CRB p.166)." />
             <KV k="Engineer" v="OVERLOAD M-DRIVE — 2D6 + Engineer (8+). +Effect Thrust available this round (CRB p.167). REPAIR SYSTEM — difficulty scales with severity: Avg 8+ (Sev 1–2) / Diff 10+ (Sev 3–4) / Very Diff 12+ (Sev 5–6). GM selects which critical to repair. Removes 1 critical hit (CRB p.167)." />
             <KV k="Gunner" v="RELOAD TURRET — Automatic, no roll. Reloads 1 missile weapon slot (CRB p.167)." />

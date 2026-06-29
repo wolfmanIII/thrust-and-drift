@@ -764,6 +764,7 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 
 | Role | Action | Difficulty | Effect on success |
 | ---- | ------ | ---------- | ----------------- |
+| **Pilot** | **Aid Gunners** | 8+ (Pilot) | Starts a task chain with gunners *(CRB p.63, p.166)*. The Pilot check Effect maps to a DM applied to **all** gunner attack rolls this round: Effect 0 → DM+1, Effect 1–5 → DM+2, Effect 6+ → DM+3. Failure applies a negative DM: Effect −1 → DM−1, Effect −2/−5 → DM−2, Effect −6 or less → DM−3. Resets each round. |
 | **Captain** | **Improve Initiative** | 8+ (Leadership) | +Effect added to this ship's initiative at the start of next round (lasts 1 round) *(CRB p.166)* |
 | **Engineer** | **Overload M-Drive** | 8+ (Engineer) | +Effect Thrust available this round *(CRB p.167)* |
 | **Engineer** | **Repair System** | Average 8+ (Sev 1–2) / Difficult 10+ (Sev 3–4) / Very Difficult 12+ (Sev 5–6) (Engineer) | Removes 1 critical hit from this ship. The GM selects which critical to repair when multiple are present *(CRB p.167)* |
@@ -793,7 +794,7 @@ Ships have a list of **named crew members**, each with individual skill ratings.
 
 | Abbrev | Skill | Used for |
 | ------ | ----- | -------- |
-| **PLT** | Pilot | Initiative roll, evasion DM, dogfight/pursuit checks |
+| **PLT** | Pilot | Initiative roll, evasion DM, dogfight/pursuit checks, Aid Gunners action |
 | **LDR** | Leadership | Improve Initiative action (Actions phase) |
 | **TAC** | Tactics | Initiative DM at start of battle (Initiative phase) |
 | **ENG** | Engineer | Overload M-Drive action, Repair System action |
