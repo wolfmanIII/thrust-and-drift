@@ -61,7 +61,7 @@ export function ShipTooltip() {
   const vectorMag    = hexMagnitude(ship.vector)
   const factionColor = FACTION_COLOR[ship.faction] ?? FACTION_COLOR.neutral
   const inbound      = missiles.filter((m) => m.target === ship.id)
-  const lockerName   = ship.sensorLockedBy ? (ships.find((s) => s.id === ship.sensorLockedBy)?.profile.name ?? '?') : null
+  const lockerName   = ship.sensorLockedBy ? (ships.find((s) => s.id === ship.sensorLockedBy)?.name ?? '?') : null
 
   // Flip toward viewport center when cursor is in the right/bottom 35%
   const flipX = hoveredShip.x > window.innerWidth  * 0.65
@@ -84,7 +84,7 @@ export function ShipTooltip() {
       <div className="px-3 pt-2.5 pb-2 border-b border-slate-800">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
-          <span className="font-mono font-bold text-xs text-slate-100 truncate">{ship.profile.name}</span>
+          <span className="font-mono font-bold text-xs text-slate-100 truncate">{ship.name}</span>
         </div>
         <span className="font-mono text-xs mt-0.5 block" style={{ color: factionColor }}>
           {FACTION_LABEL[ship.faction] ?? ship.faction.toUpperCase()}
@@ -113,7 +113,7 @@ export function ShipTooltip() {
           <StatRow label="Initiative" value={ship.initiative} />
         )}
         {ship.sensorLockOn && (
-          <StatRow label="Sensor Lock" value={ships.find((s) => s.id === ship.sensorLockOn)?.profile.name ?? '?'} accent />
+          <StatRow label="Sensor Lock" value={ships.find((s) => s.id === ship.sensorLockOn)?.name ?? '?'} accent />
         )}
         {lockerName && (
           <StatRow label="Locked by" value={lockerName} />

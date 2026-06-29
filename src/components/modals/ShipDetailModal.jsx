@@ -42,7 +42,7 @@ export function ShipDetailModal() {
   const sandAmmoMax = countSandcasters(profile)
 
   return (
-    <Modal title={profile.name} onClose={closeModal} width="max-w-xl">
+    <Modal title={ship.name} onClose={closeModal} width="max-w-xl">
       <div className="grid grid-cols-2 gap-4 text-sm">
         {/* Left column */}
         <div className="space-y-3">

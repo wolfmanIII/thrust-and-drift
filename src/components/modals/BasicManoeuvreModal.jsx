@@ -98,7 +98,7 @@ export function BasicManoeuvreModal() {
   if (!movingShip) return null
 
   return (
-    <Modal title={`Manoeuvre — ${movingShip.profile.name}`} onClose={closeModal} width="max-w-md">
+    <Modal title={`Manoeuvre — ${movingShip.name}`} onClose={closeModal} width="max-w-md">
       <div className="space-y-4">
 
         {/* Target selector */}
@@ -123,7 +123,7 @@ export function BasicManoeuvreModal() {
                   }`}
                 >
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: e.color }} />
-                  <span className="font-bold">{e.profile.name}</span>
+                  <span className="font-bold">{e.name}</span>
                   <span className="ml-auto text-slate-400">{band}</span>
                   {pool !== 0 && (
                     <span className={`text-[10px] ${pool > 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -192,7 +192,7 @@ export function BasicManoeuvreModal() {
 
             {/* Thrust input */}
             <ThrustInput
-              label={`${movingShip.profile.name} (this ship)`}
+              label={`${movingShip.name} (this ship)`}
               color={movingShip.color}
               value={movingThrust}
               max={movingAvail}

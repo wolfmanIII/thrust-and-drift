@@ -105,7 +105,7 @@ export function InitiativeModal() {
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
                           <span className="text-slate-300 font-mono text-xs flex-1 min-w-0 truncate">
-                            {ship.profile.name}
+                            {ship.name}
                           </span>
                           <DiceInput
                             key={`init-${ship.id}-${rerollCount}`}
@@ -160,7 +160,7 @@ export function InitiativeModal() {
                       >
                         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
                         <span className="text-slate-400 font-mono text-xs flex-1 min-w-0 truncate">
-                          {ship.profile.name}
+                          {ship.name}
                         </span>
                         <span className="text-slate-400 font-mono text-xs">
                           🎲 auto{tacticsSkill > 0 ? ` + tactics ${tacticsSkill}` : ''}
@@ -194,7 +194,7 @@ export function InitiativeModal() {
                     <div className="flex items-center gap-3">
                       <span className="text-slate-400 font-mono text-xs w-4">{idx + 1}.</span>
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
-                      <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.profile.name}</span>
+                      <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.name}</span>
                       <span className="text-(--neon-cyan) font-mono text-sm font-bold">{ship.initiative}</span>
                     </div>
                     {bd && (

@@ -61,7 +61,7 @@ export function PhaseTracker() {
                     className={`font-mono text-xs truncate text-left hover:text-slate-200 transition-colors ${isActive ? 'text-(--neon-cyan)' : 'text-slate-400'}`}
                     title="Centre map on this ship"
                   >
-                    {ship.profile.name}
+                    {ship.name}
                   </button>
                   <span className="ml-auto font-mono text-xs text-slate-400 flex items-center gap-1">
                     {ship.initiative === 0

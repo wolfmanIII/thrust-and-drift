@@ -48,7 +48,7 @@ export function MissileLaunchModal() {
   }
 
   return (
-    <Modal title={`Missile Launch — ${attacker.profile.name}`} onClose={closeModal}>
+    <Modal title={`Missile Launch — ${attacker.name}`} onClose={closeModal}>
       <div className="space-y-4">
         <p className="text-slate-400 font-mono text-xs">
           Missile Rack turrets: <span className="text-(--neon-cyan)">{rackCount}</span>
@@ -74,7 +74,7 @@ export function MissileLaunchModal() {
                 }`}
               >
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: e.color }} />
-                {e.profile.name}
+                {e.name}
               </button>
             ))}
           </div>

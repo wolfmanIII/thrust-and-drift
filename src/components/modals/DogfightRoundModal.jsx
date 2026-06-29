@@ -44,7 +44,7 @@ function ShipCheckRow({ ship, dms, dice, onDice }) {
       <div className="flex items-center gap-2">
         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
         <span className="text-slate-200 font-mono text-xs font-bold flex-1 min-w-0 truncate">
-          {ship.profile.name}
+          {ship.name}
         </span>
         <span className="text-slate-400 font-mono text-xs shrink-0">[{ship.faction}]</span>
       </div>
@@ -85,7 +85,7 @@ function EscapeCheckRow({ ship, pursuer, totals, onFleeRoll, onPursuerRoll }) {
     <div className="bg-slate-800/80 rounded px-3 py-2.5 space-y-2.5">
       <div className="flex items-center gap-2">
         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
-        <span className="text-slate-200 font-mono text-xs font-bold">{ship.profile.name}</span>
+        <span className="text-slate-200 font-mono text-xs font-bold">{ship.name}</span>
         <span className="text-slate-400 font-mono text-xs">attempts escape</span>
       </div>
 
@@ -312,7 +312,7 @@ export function DogfightRoundModal() {
             <span key={s.id} className="flex items-center gap-1.5">
               {i > 0 && <span className="text-slate-400 font-mono text-xs">↔</span>}
               <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-              <span className="text-slate-300 font-mono text-xs">{s.profile.name}</span>
+              <span className="text-slate-300 font-mono text-xs">{s.name}</span>
             </span>
           ))}
         </div>
@@ -321,7 +321,7 @@ export function DogfightRoundModal() {
         {group.roundWinnerId && (
           <div className="bg-amber-500/10 border border-amber-500/20 rounded px-3 py-1.5 font-mono text-xs text-amber-400">
             ↑ Round {group.microRound - 1}:{' '}
-            {ships.find((s) => s.id === group.roundWinnerId)?.profile.name ?? '—'}
+            {ships.find((s) => s.id === group.roundWinnerId)?.name ?? '—'}
             {' '}+{group.roundWinnerMargin} — bonus to current check.
           </div>
         )}
@@ -342,7 +342,7 @@ export function DogfightRoundModal() {
                   <div key={ship.id} className="bg-slate-800 rounded px-3 py-2 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
-                      <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.profile.name}</span>
+                      <span className="text-slate-200 font-mono text-xs flex-1 truncate">{ship.name}</span>
                       <span className="text-slate-400 font-mono text-xs shrink-0">
                         Thrust {ship.profile.thrust} vs max {enemyThrusts.length > 0 ? Math.max(...enemyThrusts) : '—'}
                       </span>
@@ -453,8 +453,8 @@ export function DogfightRoundModal() {
                         : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
                     }`}>
                       {outcome.escaped
-                        ? `▸ ${ship?.profile.name ?? shipId} escaped (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
-                        : `⚔️ ${ship?.profile.name ?? shipId} remained in dogfight (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
+                        ? `▸ ${ship?.name ?? shipId} escaped (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
+                        : `⚔️ ${ship?.name ?? shipId} remained in dogfight (${outcome.fleeTotal} vs ${outcome.pursuerTotal}).`
                       }
                     </div>
                   )
@@ -510,7 +510,7 @@ export function DogfightRoundModal() {
                     <span className={`font-mono text-xs flex-1 min-w-0 truncate ${
                       isWinner && !resolved.tied ? 'text-amber-200' : 'text-slate-300'
                     }`}>
-                      {ship.profile.name}
+                      {ship.name}
                     </span>
                     <span className="text-(--neon-cyan) font-mono text-sm font-bold w-8 text-right">
                       {total}
@@ -534,7 +534,7 @@ export function DogfightRoundModal() {
             }`}>
               {resolved.tied
                 ? '▸ TIE — fixed weapons cannot fire; turrets OK. No positional DM.'
-                : `⚔️ ${ships.find((s) => s.id === resolved.winnerId)?.profile.name ?? '—'} leads (+${resolved.margin}). Advantage carries to the next round.`
+                : `⚔️ ${ships.find((s) => s.id === resolved.winnerId)?.name ?? '—'} leads (+${resolved.margin}). Advantage carries to the next round.`
               }
             </div>
 

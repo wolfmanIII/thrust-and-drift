@@ -64,7 +64,7 @@ function ReactionsPanel({
   return (
     <div className="border border-amber-700/40 rounded p-3 space-y-3 bg-amber-950/10">
       <p className="font-mono text-xs text-amber-500/70 tracking-widest uppercase">
-        🛡 {target.profile.name} — Reactions
+        🛡 {target.name} — Reactions
       </p>
 
       {/* Evasive Action — 1 thrust, DM fixed = −pilotSkill (CRB p.171) */}
@@ -271,7 +271,7 @@ function AttackConfigStep({
                 }`}
               >
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: e.color }} />
-                <span>{e.profile.name}</span>
+                <span>{e.name}</span>
                 {target?.id === e.id && combatMode === 'vectorial' && (
                   <span className="ml-auto text-slate-400">{rangeBand} ({distance} hex)</span>
                 )}
@@ -1273,8 +1273,8 @@ export function AttackModal() {
     })
     .map((m) => ({
       ...m,
-      launcherName: allShips.find((s) => s.id === m.launchedBy)?.profile.name ?? '?',
-      targetName:   allShips.find((s) => s.id === m.target)?.profile.name ?? '?',
+      launcherName: allShips.find((s) => s.id === m.launchedBy)?.name ?? '?',
+      targetName:   allShips.find((s) => s.id === m.target)?.name ?? '?',
     }))
   const targetMissile = targetMissileId
     ? inFlightHostileMissiles.find((m) => m.id === targetMissileId) ?? null
@@ -1323,7 +1323,7 @@ export function AttackModal() {
     spendSandAmmo(target.id)
     setSandTurretSlot(slot)
     setSandResult({ turretSlot: slot, roll: rollResult, gunner, total, effect, success, armorRoll, bonusArmor })
-    addLogEntry(`${target.profile.name} Disperse Sand (T${slot}): total ${total}${success ? ` — +${bonusArmor} armour vs this laser attack` : ' — no effect'}.`)
+    addLogEntry(`${target.name} Disperse Sand (T${slot}): total ${total}${success ? ` — +${bonusArmor} armour vs this laser attack` : ' — no effect'}.`)
   }
 
   const handleAdvanceToRoll = () => {
@@ -1334,7 +1334,7 @@ export function AttackModal() {
   const handleApplyDamage = () => {
     if (!damageResult || !target) return
     if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
-    applyDamage(target.id, damageResult.total, `${weaponKey} from ${attacker.profile.name}`)
+    applyDamage(target.id, damageResult.total, `${weaponKey} from ${attacker.name}`)
 
     if (damageResult.total > 0 && isCriticalHit(attackResult?.effect ?? 0)) {
       setStep('critical')
@@ -1488,8 +1488,8 @@ export function AttackModal() {
   if (step === 'roll') {
     return (
       <AttackRollStep
-        attackerName={attacker.profile.name}
-        targetName={target?.profile.name ?? '?'}
+        attackerName={attacker.name}
+        targetName={target?.name ?? '?'}
         weaponKey={weaponKey}
         isPlayer={attacker.faction === 'players'}
         dmBreakdown={augmentedDmBreakdown}
@@ -1515,9 +1515,9 @@ export function AttackModal() {
             applyIonDamage(target.id, ionDamage, ionRounds)
             emitEffect('ion_burst', { duration: 1500, hex: target.position })
             const remaining = Math.max(0, (target.currentPower ?? target.profile.maxPower ?? 100) - ionDamage)
-            addLogEntry(`${attacker.profile.name} → ${target.profile.name}: ${weapon?.label ?? 'Ion Cannon'} hit — −${ionDamage} Power (${remaining} remaining, ${ionRounds}R).`)
+            addLogEntry(`${attacker.name} → ${target.name}: ${weapon?.label ?? 'Ion Cannon'} hit — −${ionDamage} Power (${remaining} remaining, ${ionRounds}R).`)
           } else {
-            addLogEntry(`${attacker.profile.name} → ${target.profile.name}: ${weapon?.label ?? 'Ion Cannon'} — no effect (hardened systems).`)
+            addLogEntry(`${attacker.name} → ${target.name}: ${weapon?.label ?? 'Ion Cannon'} — no effect (hardened systems).`)
           }
           if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
           closeModal()
@@ -1542,7 +1542,7 @@ export function AttackModal() {
           interceptMissileSalvo(targetMissile.id, removed)
           if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
           addLogEntry(
-            `${attacker.profile.name} PD (T${selectedTurretSlot}) vs ${targetMissile.launcherName} salvo: ${removed} missile${removed !== 1 ? 's' : ''} destroyed.`
+            `${attacker.name} PD (T${selectedTurretSlot}) vs ${targetMissile.launcherName} salvo: ${removed} missile${removed !== 1 ? 's' : ''} destroyed.`
           )
           closeModal()
         }}
@@ -1554,7 +1554,7 @@ export function AttackModal() {
   if (step === 'critical') {
     return (
       <AttackCriticalStep
-        targetName={target?.profile.name ?? '?'}
+        targetName={target?.name ?? '?'}
         attackEffect={attackResult?.effect ?? 6}
         targetCrits={target?.criticalHits ?? []}
         isPlayer={attacker.faction === 'players'}

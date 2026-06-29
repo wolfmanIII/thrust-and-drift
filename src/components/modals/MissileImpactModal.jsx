@@ -154,9 +154,9 @@ export function MissileImpactModal() {
     setPdDestroyedCount(newDestroyed)
     setPdResult({ turretSlot: slot, total, effect, missilesRemoved: removed })
     setPdManualDice(null)
-    addLogEntry(`${target.profile.name} Point Defence (T${slot}): total ${total}, Effect ${effect >= 0 ? `+${effect}` : effect} — ${removed} missile${removed !== 1 ? 's' : ''} destroyed.`)
+    addLogEntry(`${target.name} Point Defence (T${slot}): total ${total}, Effect ${effect >= 0 ? `+${effect}` : effect} — ${removed} missile${removed !== 1 ? 's' : ''} destroyed.`)
     if (Math.max(0, impact.count - newDestroyed) === 0) {
-      addLogEntry(`${target.profile.name} Point Defence destroyed entire salvo.`)
+      addLogEntry(`${target.name} Point Defence destroyed entire salvo.`)
       dismissMissileImpact(impact.id)
     }
   }
@@ -187,7 +187,7 @@ export function MissileImpactModal() {
     applyDamage(
       impact.target,
       netDamage,
-      `${impact.count}× ${impact.type ?? 'Missile'} salvo (${launcher?.profile.name ?? '?'})`,
+      `${impact.count}× ${impact.type ?? 'Missile'} salvo (${launcher?.name ?? '?'})`,
     )
     dismissMissileImpact(impact.id)
   }
@@ -217,12 +217,12 @@ export function MissileImpactModal() {
         <div className="bg-slate-800/60 border border-slate-700 rounded px-4 py-3 flex flex-col gap-2">
           <div className="flex justify-between text-xs font-mono">
             <span className="text-slate-400">LAUNCHER</span>
-            <span className="text-slate-200">{launcher?.profile.name ?? '?'}</span>
+            <span className="text-slate-200">{launcher?.name ?? '?'}</span>
           </div>
           <div className="flex justify-between text-xs font-mono">
             <span className="text-slate-400">TARGET</span>
             <span style={{ color: target.color }} className="font-semibold">
-              {target.profile.name}
+              {target.name}
             </span>
           </div>
           <div className="flex justify-between text-xs font-mono">

@@ -54,7 +54,7 @@ export function MissileTooltip() {
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: launcher.color }} />
           )}
           <span className="font-mono text-xs text-slate-200 truncate">
-            {launcher?.profile.name ?? '—'}
+            {launcher?.name ?? '—'}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -63,7 +63,7 @@ export function MissileTooltip() {
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: target.color }} />
           )}
           <span className="font-mono text-xs text-slate-200 truncate">
-            {target?.profile.name ?? '—'}
+            {target?.name ?? '—'}
           </span>
         </div>
 

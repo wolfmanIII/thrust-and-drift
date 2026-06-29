@@ -33,7 +33,7 @@ function PursuitRow({ label, ship, pilotSkill, tonnageDM, thrustFree, dice, onDi
       <div className="flex items-center gap-2">
         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
         <span className="text-slate-300 font-mono text-xs font-bold">
-          {label}: {ship.profile.name}
+          {label}: {ship.name}
         </span>
       </div>
       <p className="text-slate-400 font-mono text-xs">
@@ -196,7 +196,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
 
         {/* Ships involved */}
         <p className="text-slate-400 font-mono text-xs">
-          {groupShips.map((s) => s.profile.name).join(' and ')} are in the same hex.
+          {groupShips.map((s) => s.name).join(' and ')} are in the same hex.
         </p>
 
         {/* ── PHASE: INTENT ── */}
@@ -213,7 +213,7 @@ export function DogfightNotificationModal({ groups, onDone }) {
                     style={{ backgroundColor: ship.color }}
                   />
                   <span className="text-slate-200 font-mono text-xs flex-1 min-w-0 truncate">
-                    {ship.profile.name}
+                    {ship.name}
                   </span>
                   <span className="text-slate-400 font-mono text-xs shrink-0">
                     [{ship.faction}]

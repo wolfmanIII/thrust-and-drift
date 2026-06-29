@@ -69,17 +69,17 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
   const sandAmmoMax = countSandcasters(ship.profile)
 
   const lockerName = ship.sensorLockedBy
-    ? (ships.find((s) => s.id === ship.sensorLockedBy)?.profile.name ?? '?')
+    ? (ships.find((s) => s.id === ship.sensorLockedBy)?.name ?? '?')
     : null
   const lockTargetName = ship.sensorLockOn
-    ? (ships.find((s) => s.id === ship.sensorLockOn)?.profile.name ?? '?')
+    ? (ships.find((s) => s.id === ship.sensorLockOn)?.name ?? '?')
     : null
 
   // Group inbound missiles by launcher; track ETA per group
   const inboundByLauncher = useMemo(() => {
     const map = {}
     inbound.forEach((m) => {
-      const name = ships.find((s) => s.id === m.launchedBy)?.profile.name ?? '?'
+      const name = ships.find((s) => s.id === m.launchedBy)?.name ?? '?'
       const eta  = estimateRoundsToImpact(m)
       if (!map[name]) map[name] = { count: 0, type: m.type ?? 'Missile', eta }
       map[name].count += m.count
@@ -92,7 +92,7 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
   const launchedByTarget = useMemo(() => {
     const map = {}
     launched.forEach((m) => {
-      const name = ships.find((s) => s.id === m.target)?.profile.name ?? '?'
+      const name = ships.find((s) => s.id === m.target)?.name ?? '?'
       const eta  = estimateRoundsToImpact(m)
       if (!map[name]) map[name] = { count: 0, type: m.type ?? 'Missile', eta }
       map[name].count += m.count
@@ -125,7 +125,7 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
       {/* ── Zona A — Header ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 px-3 pt-3 pb-2">
         <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
-        <span className="font-mono text-sm text-slate-200 font-bold truncate">{ship.profile.name}</span>
+        <span className="font-mono text-sm text-slate-200 font-bold truncate">{ship.name}</span>
         <div className="ml-auto flex items-center gap-1 shrink-0 flex-wrap justify-end">
           {ship.isDestroyed && (
             <Badge label="☠ WRECK" className="text-red-400 border-red-800" />
@@ -281,10 +281,10 @@ function RangeBandRow({ ship1, ship2, band, onSet }) {
   return (
     <div className="flex items-center gap-2 py-1">
       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ship1.color }} />
-      <span className="font-mono text-xs text-slate-300 truncate">{ship1.profile.name}</span>
+      <span className="font-mono text-xs text-slate-300 truncate">{ship1.name}</span>
       <span className="text-slate-400 mx-1">↔</span>
       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ship2.color }} />
-      <span className="font-mono text-xs text-slate-300 truncate">{ship2.profile.name}</span>
+      <span className="font-mono text-xs text-slate-300 truncate">{ship2.name}</span>
       <span className="ml-auto font-mono text-xs text-yellow-400 shrink-0">{band}</span>
       <div className="flex gap-1 shrink-0">
         <button

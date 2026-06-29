@@ -80,11 +80,11 @@ export function BoardingOutcomeModal() {
         <div className="flex items-center gap-3 bg-slate-800/60 rounded px-3 py-2">
           <div className="flex items-center gap-1.5 flex-1 min-w-0">
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: attacker.color }} />
-            <span className="text-slate-200 font-mono text-xs font-bold truncate">{attacker.profile.name}</span>
+            <span className="text-slate-200 font-mono text-xs font-bold truncate">{attacker.name}</span>
           </div>
           <span className="text-amber-400 font-mono text-xs shrink-0">⚔ OUTCOME</span>
           <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-            <span className="text-slate-200 font-mono text-xs font-bold truncate">{defender.profile.name}</span>
+            <span className="text-slate-200 font-mono text-xs font-bold truncate">{defender.name}</span>
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: defender.color }} />
           </div>
         </div>
@@ -140,7 +140,7 @@ export function BoardingOutcomeModal() {
                 onChange={(e) => setTransferFaction(e.target.checked)}
                 className="accent-(--neon-cyan)"
               />
-              Transfer {defender.profile.name} to faction{' '}
+              Transfer {defender.name} to faction{' '}
               <span className={FACTION_COLORS[attacker.faction] ?? 'text-slate-400'}>
                 {attacker.faction.toUpperCase()}
               </span>

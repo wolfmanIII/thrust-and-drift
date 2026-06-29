@@ -80,7 +80,7 @@ export function BattleReportModal() {
                 const crits   = ship.criticalHits ?? []
                 return (
                   <tr key={ship.id} className="border-b border-slate-800">
-                    <td className="py-1.5 pr-4">{ship.profile.name}</td>
+                    <td className="py-1.5 pr-4">{ship.name}</td>
                     <td className="py-1.5 pr-4 text-slate-400">
                       {FACTION_LABEL[ship.faction] ?? ship.faction}
                     </td>

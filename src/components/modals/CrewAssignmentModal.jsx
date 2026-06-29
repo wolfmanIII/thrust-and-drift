@@ -101,7 +101,7 @@ export function CrewAssignmentModal() {
   )
 
   return (
-    <Modal title={`Crew Assignments — ${ship.profile.name}`} onClose={closeModal}>
+    <Modal title={`Crew Assignments — ${ship.name}`} onClose={closeModal}>
       <div className="space-y-4">
 
         {crewArray.length === 0 && (

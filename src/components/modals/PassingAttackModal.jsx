@@ -71,14 +71,14 @@ export function PassingAttackModal() {
             className="font-display text-base tracking-wide"
             style={{ color: shipA.color }}
           >
-            {shipA.profile.name}
+            {shipA.name}
           </span>
           <span className="text-slate-400 font-mono text-xs">⟶|⟵</span>
           <span
             className="font-display text-base tracking-wide"
             style={{ color: shipB.color }}
           >
-            {shipB.profile.name}
+            {shipB.name}
           </span>
         </div>
 
@@ -115,7 +115,7 @@ export function PassingAttackModal() {
                   : 'bg-amber-900/40 border border-amber-600/60 text-amber-300 hover:bg-amber-800/50'
                 }`}
             >
-              {encounter.firedA ? `✅ ${shipA.profile.name.toUpperCase()} FIRED` : `${shipA.profile.name.toUpperCase()} FIRES`}
+              {encounter.firedA ? `✅ ${shipA.name.toUpperCase()} FIRED` : `${shipA.name.toUpperCase()} FIRES`}
             </button>
             <button
               disabled={encounter.firedB || actionsLocked}
@@ -126,7 +126,7 @@ export function PassingAttackModal() {
                   : 'bg-amber-900/40 border border-amber-600/60 text-amber-300 hover:bg-amber-800/50'
                 }`}
             >
-              {encounter.firedB ? `✅ ${shipB.profile.name.toUpperCase()} FIRED` : `${shipB.profile.name.toUpperCase()} FIRES`}
+              {encounter.firedB ? `✅ ${shipB.name.toUpperCase()} FIRED` : `${shipB.name.toUpperCase()} FIRES`}
             </button>
           </div>
           <button

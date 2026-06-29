@@ -96,7 +96,7 @@ export function ThrustModal() {
   const gravityCollisionBlocks = obstacleWarning === 'gravity_collision'
 
   return (
-    <Modal title={`Thrust — ${ship.profile.name}`} onClose={closeModal}>
+    <Modal title={`Thrust — ${ship.name}`} onClose={closeModal}>
       <div className="space-y-4">
         {/* Thrust availability bar */}
         <div>

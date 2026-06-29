@@ -179,7 +179,7 @@ export function drawShipToken(ctx, ship, cx, cy, selected, isCurrentActor, times
  * @param {number} cy
  */
 export function drawShipLabel(ctx, ship, cx, cy) {
-  const label = `${ship.profile.name}  ${ship.hullCurrent}/${ship.profile.hull}`
+  const label = `${ship.name}  ${ship.hullCurrent}/${ship.profile.hull}`
   ctx.font = LABEL_FONT
   ctx.fillStyle = 'rgba(255,255,255,0.85)'
   ctx.textAlign = 'center'

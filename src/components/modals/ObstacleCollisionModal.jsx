@@ -103,7 +103,7 @@ export function ObstacleCollisionModal() {
         <div className="bg-slate-800/60 border border-slate-700 rounded px-4 py-3 flex flex-col gap-2">
           <div className="flex justify-between text-xs font-mono">
             <span className="text-slate-400">SHIP</span>
-            <span style={{ color: ship.color }} className="font-semibold">{ship.profile.name}</span>
+            <span style={{ color: ship.color }} className="font-semibold">{ship.name}</span>
           </div>
           <div className="flex justify-between text-xs font-mono">
             <span className="text-slate-400">OBSTACLE</span>

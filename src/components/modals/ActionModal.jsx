@@ -202,7 +202,7 @@ export function ActionModal() {
     if (selectedMember) markCrewMemberUsed(ship.id, selectedMember.id)
     setRollResult(result)
     addLogEntry(
-      `${ship.profile.name} / ${selectedMember?.name ?? '?'}: ${selectedAction.label} — ${result.display} (${result.success ? 'SUCCESS' : 'FAILED'})`
+      `${ship.name} / ${selectedMember?.name ?? '?'}: ${selectedAction.label} — ${result.display} (${result.success ? 'SUCCESS' : 'FAILED'})`
     )
 
     // aid_gunners applies a task chain DM on both success AND failure (CRB p.63)
@@ -218,7 +218,7 @@ export function ActionModal() {
     !(isPlayer && effectiveDifficulty !== 'auto' && !manualDice)
 
   return (
-    <Modal title={`Actions — ${ship.profile.name}`} onClose={closeModal}>
+    <Modal title={`Actions — ${ship.name}`} onClose={closeModal}>
       <div className="space-y-4">
 
         {/* Roll result view */}
@@ -241,7 +241,7 @@ export function ActionModal() {
 
             {(rollResult.success || selectedAction?.id === 'aid_gunners') && selectedAction && (
               <p className="text-slate-400 font-mono text-xs text-center">
-                {selectedAction.id === 'sensor_lock'        && `Sensor lock acquired on ${ships.find(s => s.id === targetShipId)?.profile.name ?? '?'}.`}
+                {selectedAction.id === 'sensor_lock'        && `Sensor lock acquired on ${ships.find(s => s.id === targetShipId)?.name ?? '?'}.`}
                 {selectedAction.id === 'electronic_warfare' && 'Enemy sensor lock removed.'}
                 {selectedAction.id === 'missile_ew'         && (() => {
                   const removed = Math.max(1, rollResult.effect)
@@ -378,7 +378,7 @@ export function ActionModal() {
                       }`}
                     >
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-                      {s.profile.name}
+                      {s.name}
                       {s.sensorLockedBy === ship.id && (
                         <span className="ml-auto text-(--neon-cyan) text-xs">🔒 locked</span>
                       )}
@@ -418,7 +418,7 @@ export function ActionModal() {
                       >
                         <span className="font-bold">{salvo.count}× {salvo.type}</span>
                         <span className="text-slate-500 ml-2">
-                          {launcher?.profile.name ?? '?'} → {target?.profile.name ?? '?'}
+                          {launcher?.name ?? '?'} → {target?.name ?? '?'}
                         </span>
                         {salvo.isPending && !alreadyEW && (
                           <span className="ml-2 text-orange-400 text-[10px] uppercase tracking-wider">⚡ impact</span>

@@ -60,7 +60,7 @@ export function BoardingSetupModal() {
           <p className="text-slate-400 font-mono text-xs uppercase mb-1">Attacker</p>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: attacker.color }} />
-            <span className="text-slate-200 font-mono text-sm font-bold">{attacker.profile.name}</span>
+            <span className="text-slate-200 font-mono text-sm font-bold">{attacker.name}</span>
           </div>
           <p className="text-slate-400 font-mono text-xs mt-1">
             Thrust {attacker.profile.thrust} · {attacker.profile.tonnage} ton
@@ -83,7 +83,7 @@ export function BoardingSetupModal() {
               >
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: t.color }} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-slate-200 font-mono text-sm font-bold truncate">{t.profile.name}</p>
+                  <p className="text-slate-200 font-mono text-sm font-bold truncate">{t.name}</p>
                   <p className="text-slate-400 font-mono text-xs">
                     Thrust {t.profile.thrust} · {t.profile.tonnage} ton
                     {' · '}

@@ -155,7 +155,7 @@ export function HUD() {
             style={{ backgroundColor: currentActor.color }}
           />
           <span className="text-slate-200 font-mono text-xs truncate max-w-32">
-            {currentActor.profile.name}
+            {currentActor.name}
           </span>
           <span className="text-slate-400 text-xs">{currentActorIndex + 1}/{initiativeOrder.length}</span>
           <button
@@ -292,7 +292,7 @@ export function HUD() {
                 ⚔ DOGFIGHT {idx + 1}
               </span>
               <span className="text-slate-400 font-mono text-xs truncate">
-                {groupShips.map((s) => s.profile.name).join(' ↔ ')}
+                {groupShips.map((s) => s.name).join(' ↔ ')}
               </span>
             </div>
             <div className="flex items-center gap-2 text-slate-400 font-mono text-xs">
@@ -301,7 +301,7 @@ export function HUD() {
                 <>
                   <span className="text-slate-400">│</span>
                   <span className="text-amber-300 truncate">
-                    ↑ {winnerShip.profile.name} +{group.roundWinnerMargin}
+                    ↑ {winnerShip.name} +{group.roundWinnerMargin}
                   </span>
                 </>
               )}
@@ -334,7 +334,7 @@ export function HUD() {
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-red-400 font-mono text-xs font-bold shrink-0">⚔ BOARDING</span>
               <span className="text-slate-400 font-mono text-xs truncate">
-                {attacker?.profile.name ?? '?'} → {defender?.profile.name ?? '?'}
+                {attacker?.name ?? '?'} → {defender?.name ?? '?'}
               </span>
             </div>
             <button
