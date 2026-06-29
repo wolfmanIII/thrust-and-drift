@@ -263,6 +263,9 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="Initial vector (Δq / Δr)" v="Vectorial mode only. Pre-set the ship's starting velocity vector (default 0 / 0). Use for ships arriving at cruise speed, fleeing, or intercepting at scenario start." />
             <p>After placing, right-click the ship token → <span className="text-slate-200">Assign Crew…</span> to review or adjust which crew member covers each role and turret (see Crew System below).</p>
           </Sub>
+          <Sub title="RENAMING A SHIP INSTANCE">
+            <p>Right-click a ship token → <span className="text-slate-200">Rename…</span> to give an individual ship a battle-specific name (e.g. "Fighter 1", "Cobra — Bounty") without touching its profile. The instance name propagates to the map token, PhaseTracker, HUD, all modals, and the battle log. The original profile name is shown inside the rename modal for reference.</p>
+          </Sub>
           <Sub title="REMOVING A SHIP">
             <p>Right-click a ship token → <span className="text-slate-200">Remove from battle</span>. This is available in all phases.</p>
           </Sub>

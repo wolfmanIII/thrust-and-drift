@@ -213,7 +213,11 @@ Right-click any empty hex → **Add ship here**. A modal opens where you select:
 After placing, right-click the ship token → **Assign Crew…** to review or
 adjust which crew member covers each role and turret (see [§ 11.3](#113-crew-role-assignments)).
 
-### 5.2 Removing a Ship
+### 5.2 Renaming a Ship Instance
+
+Right-click a ship token → **Rename…** to give an individual ship a battle-specific name (e.g. "Fighter 1", "Cobra — Bounty") without touching the profile. The instance name appears on the map token, in PhaseTracker, in the HUD, in all modals, and in the battle log. The original profile name is shown inside the rename modal for reference.
+
+### 5.3 Removing a Ship
 
 Right-click a ship token → **Remove from battle**. Available in all phases.
 
