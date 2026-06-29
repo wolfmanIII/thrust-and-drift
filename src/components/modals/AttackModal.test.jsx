@@ -86,6 +86,65 @@ describe('AttackModal — missile rack', () => {
   })
 })
 
+// ── #14: same-type weapon linking UI ──────────────────────────────────────────
+
+describe('AttackModal — linked weapon display (#14)', () => {
+  function setupLinkedTurret(turrets) {
+    const profile = { id: 'profile-linked', name: 'Gunship', hull: 20, armor: 0, thrust: 4, tonnage: 100, turrets, crew: [] }
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Target', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att] = useBattleStore.getState().ships
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+    return att
+  }
+
+  beforeEach(() => {
+    useBattleStore.getState().resetBattle('vectorial')
+    useUiStore.setState({ activeModal: null, modalPayload: null })
+  })
+
+  it('shows ×3 badge for triple Pulse Laser turret', () => {
+    setupLinkedTurret([{ slot: 1, weapons: ['Pulse Laser', 'Pulse Laser', 'Pulse Laser'] }])
+    render(<AttackModal />)
+    expect(screen.getByText('×3')).toBeInTheDocument()
+  })
+
+  it('shows 2D+4 dmg for triple Pulse Laser turret', () => {
+    setupLinkedTurret([{ slot: 1, weapons: ['Pulse Laser', 'Pulse Laser', 'Pulse Laser'] }])
+    render(<AttackModal />)
+    expect(screen.getByText(/2D\+4 dmg/)).toBeInTheDocument()
+  })
+
+  it('shows ×2 badge for double Beam Laser turret', () => {
+    setupLinkedTurret([{ slot: 1, weapons: ['Beam Laser', 'Beam Laser'] }])
+    render(<AttackModal />)
+    expect(screen.getByText('×2')).toBeInTheDocument()
+  })
+
+  it('shows 1D+1 dmg for double Beam Laser turret', () => {
+    setupLinkedTurret([{ slot: 1, weapons: ['Beam Laser', 'Beam Laser'] }])
+    render(<AttackModal />)
+    expect(screen.getByText(/1D\+1 dmg/)).toBeInTheDocument()
+  })
+
+  it('single weapon shows no ×N badge', () => {
+    setupLinkedTurret([{ slot: 1, weapons: ['Pulse Laser'] }])
+    render(<AttackModal />)
+    expect(screen.queryByText(/×\d/)).not.toBeInTheDocument()
+  })
+
+  it('mixed-type turret shows two separate weapon entries, no ×N badge', () => {
+    setupLinkedTurret([{ slot: 1, weapons: ['Pulse Laser', 'Beam Laser'] }])
+    render(<AttackModal />)
+    expect(screen.getByText('Pulse Laser')).toBeInTheDocument()
+    expect(screen.getByText('Beam Laser')).toBeInTheDocument()
+    expect(screen.queryByText(/×\d/)).not.toBeInTheDocument()
+  })
+})
+
 // ── REQ-12: destroyed ships excluded from target list ─────────────────────────
 
 describe('AttackModal — wreck exclusion from targets (REQ-12)', () => {

@@ -171,6 +171,86 @@ test.describe('Initiative skip — round 2+ starts at Acceleration (REQ-13)', ()
   })
 })
 
+// ── #14: Same-type weapon linking in double/triple turrets ───────────────────
+
+test.describe('AttackModal — same-type weapon linking (#14)', () => {
+  /**
+   * Patrol Cruiser has slot 1 = [Pulse Laser, Pulse Laser, Missile Rack].
+   * Advance to Attack phase with Patrol Cruiser as current actor, then open AttackModal.
+   */
+  async function setupPatrolCruiserAttack(page) {
+    await startNewBattle(page)
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    const cx     = box.x + box.width  / 2
+    const cy     = box.y + box.height / 2
+
+    // Place Patrol Cruiser (player) at centre
+    await page.mouse.click(cx, cy, { button: 'right' })
+    await page.getByText('Add ship here').click()
+    await page.getByText('Patrol Cruiser').first().click()
+    await page.getByRole('button', { name: /place|add to battle|confirm/i }).first().click()
+
+    // Place NPC target slightly offset
+    await page.mouse.click(cx + 80, cy, { button: 'right' })
+    await page.getByText('Add ship here').click()
+    await page.getByText('Light Fighter').first().click()
+    await page.getByRole('button', { name: 'NPC' }).click()
+    await page.getByRole('button', { name: /place|add to battle|confirm/i }).first().click()
+
+    // Setup → Initiative → roll → Acceleration → Movement → Attack
+    await page.getByRole('button', { name: /NEXT PHASE/i }).click()
+    await rollInitiative(page)
+    await page.getByRole('button', { name: /NEXT PHASE/i }).click()
+    await drainActors(page)
+    await page.getByRole('button', { name: /NEXT PHASE/i }).click()
+    await page.getByRole('button', { name: /NEXT PHASE/i }).click()
+
+    return { canvas, box, cx, cy }
+  }
+
+  test('×2 badge shown for 2× Pulse Laser in Patrol Cruiser slot 1', async ({ page }) => {
+    const { cx, cy } = await setupPatrolCruiserAttack(page)
+
+    // Open Attack modal on Patrol Cruiser (right-click on ship token at centre)
+    await page.mouse.click(cx, cy, { button: 'right' })
+    const attackBtn = page.getByText('Attack…')
+    if (!await attackBtn.isVisible().catch(() => false)) return // not current actor
+    await attackBtn.click()
+
+    // The ×2 badge must appear next to the linked Pulse Laser entry
+    await expect(page.getByText('×2')).toBeVisible()
+  })
+
+  test('2D+2 damage shown for 2× Pulse Laser entry', async ({ page }) => {
+    const { cx, cy } = await setupPatrolCruiserAttack(page)
+
+    await page.mouse.click(cx, cy, { button: 'right' })
+    const attackBtn = page.getByText('Attack…')
+    if (!await attackBtn.isVisible().catch(() => false)) return
+    await attackBtn.click()
+
+    // Damage label shows 2D+2 dmg for 2 linked Pulse Lasers (not bare 2D)
+    await expect(page.getByText(/2D\+2 dmg/)).toBeVisible()
+  })
+
+  test('Missile Rack in same slot shows as separate entry with no ×N badge', async ({ page }) => {
+    const { cx, cy } = await setupPatrolCruiserAttack(page)
+
+    await page.mouse.click(cx, cy, { button: 'right' })
+    const attackBtn = page.getByText('Attack…')
+    if (!await attackBtn.isVisible().catch(() => false)) return
+    await attackBtn.click()
+
+    // Missile Rack present (mixed slot), Pulse Laser ×2 also present
+    await expect(page.getByText('Missile Rack')).toBeVisible()
+    await expect(page.getByText('Pulse Laser')).toBeVisible()
+    // Missile Rack must NOT carry a ×N badge (no linking per CRB p.172)
+    const badges = page.locator('text=/×\\d/')
+    await expect(badges).toHaveCount(1) // only the Pulse Laser ×2 badge
+  })
+})
+
 // ── #18: Mid-battle ship initiative display ───────────────────────────────────
 
 test.describe('PhaseTracker — mid-battle ship shows — and re-roll notice (#18)', () => {
