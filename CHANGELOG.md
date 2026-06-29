@@ -6,6 +6,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [Unreleased]
+
+### Investigated (no code change)
+
+- **#15 — EW Counter Missile difficulty (CRB p.173)** — Reported as bug: "10+ should be 8+". Investigation confirmed the implementation is **RAW-correct**. The CRB defines two distinct sensor actions with different difficulties:
+  - **Electronic Warfare** (removes sensor locks) → Average **(8+)** — CRB p.167
+  - **EW — Counter Missile** (reduces in-flight salvo) → Difficult **(10+)** — CRB p.173
+
+  The reporter cited CRB p.166 (general EW overview) and conflated the two. No change to game logic. CRB FAQ (Aug 2024) contains no errata for this rule.
+
+### Fixed
+
+- **#15 — EW Counter Missile description text** — `crewActions.js` listed `Electronics(comms)` as the skill specialisation; corrected to `Electronics(sensors)` per CRB p.173. HelpScreen updated to match. No mechanical change.
+
+---
+
 ## [2.2.0] — 2026-06-28
 
 ### Added

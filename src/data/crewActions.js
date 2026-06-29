@@ -52,7 +52,7 @@ export const CREW_ACTIONS = {
       difficulty: 10,
       skill: 'sensors',
       requiresSalvoTarget: true,
-      description: 'Difficult Electronics(comms) check. Success: removes Effect missiles (min 1) from one in-flight salvo. Cumulative across rounds; once per salvo per round. // MgT2e CRB p.173',
+      description: 'Difficult Electronics(sensors) check (INT). Success: removes Effect missiles (min 1) from one in-flight salvo. Cumulative across rounds; once per salvo per round. // MgT2e CRB p.173',
     },
   ],
   gunner: [
