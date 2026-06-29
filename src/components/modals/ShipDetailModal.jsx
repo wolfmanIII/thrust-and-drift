@@ -119,7 +119,7 @@ export function ShipDetailModal() {
             {(profile.turrets ?? []).map((t) => (
               <div key={t.slot} className="py-0.5">
                 <span className="text-slate-400 font-mono text-xs">
-                  W{t.slot} [{['—', 'Single', 'Double', 'Triple'][t.weapons.length] ?? 'Triple'} Turret]:{' '}
+                  W{t.slot} [{['—', 'Single', 'Double', 'Triple', 'Quad'][t.weapons.length] ?? 'Quad'} Turret]:{' '}
                 </span>
                 <span className="text-slate-300 font-mono text-xs">
                   {t.weapons.join(', ')}

@@ -178,7 +178,7 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="Name / Tonnage" v="Display name and hull size (affects target size DM)." />
             <KV k="Hull / Thrust" v="Max hull points and base manoeuvre drive rating." />
             <KV k="Tech Level (TL)" v="Ship's technology level (default 12). Gates Smart guidance on missiles and torpedoes — DM+2 applies only when TL ≥ 9 (CRB p.79). Most Traveller-era vessels are TL 12–15; set lower for pre-stellar or primitive opponents." />
-            <KV k="Weapons" v="Add weapon slots — type, damage dice, range band, special traits. Maximum 3 weapons per slot (triple turret, CRB p.163)." />
+            <KV k="Weapons" v="Add weapon slots — type, damage dice, range band, special traits. Maximum 4 weapons per slot (quad turret, HG p.81). The slot header shows SINGLE / DOUBLE / TRIPLE / QUAD as you add weapons." />
             <KV k="Crew" v="Add named crew members, each with individual skill levels (Pilot, Leadership, Tactics, Engineer, Gunner, Sensors −3 to 5). Negative values represent untrained crew or attribute penalties. One crew member can hold multiple skills and be assigned to all roles — useful for single-seat fighters." />
           </Sub>
         </Section>
@@ -415,7 +415,7 @@ export function HelpScreen({ onBack } = {}) {
 
           <Sub title="PER-SLOT FIRING LIMIT">
             <p>Each weapon slot may fire <span className="text-slate-200">once per round</span> (CRB p.164). The weapon list shows only unfired slots, identified by slot badge (W1, W2…). Once all offensive slots have fired, the Attack… option disappears from the context menu.</p>
-            <p>The Ship Detail modal labels each slot&apos;s mount type: <span className="text-slate-200">Single Turret</span> (1 weapon), <span className="text-slate-200">Double Turret</span> (2 weapons), <span className="text-slate-200">Triple Turret</span> (3 weapons). Cosmetic only — no effect on attack mechanics.</p>
+            <p>The Ship Detail modal labels each slot&apos;s mount type: <span className="text-slate-200">Single Turret</span> (1), <span className="text-slate-200">Double Turret</span> (2), <span className="text-slate-200">Triple Turret</span> (3), <span className="text-slate-200">Quad Turret</span> (4, HG p.81). A Quad Turret with 4 laser weapons grants <span className="text-slate-200">DM+3</span> on Point Defence — this is computed automatically from weapon count.</p>
           </Sub>
 
           <Sub title="WEAPON RANGE LIMITS">

@@ -164,13 +164,20 @@ function CrewMemberRow({ member, onChange, onRemove }) {
 
 const TURRET_WEAPON_IDS = WEAPON_IDS
 
+// Single / Double / Triple / Quad — HG p.81 (quad turret, 4 weapons, DM+3 PD)
+const TURRET_TYPE_LABELS = ['—', 'SINGLE', 'DOUBLE', 'TRIPLE', 'QUAD']
+
 /** Turret row: slot number, weapon chips, add weapon dropdown, remove turret. */
 function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurret }) {
+  const n         = turret.weapons.length
+  const typeLabel = TURRET_TYPE_LABELS[n] ?? 'QUAD'
+
   return (
     <div className="flex flex-wrap items-center gap-1.5 bg-slate-800 rounded px-2 py-1.5">
       <span className="text-slate-400 font-mono text-xs shrink-0 w-16">
         Weapon {turret.slot}
       </span>
+      <span className="text-slate-600 font-mono text-[10px] shrink-0">{typeLabel}</span>
 
       {/* Weapon chips */}
       {turret.weapons.map((w, wIdx) => (
@@ -190,8 +197,8 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
         </span>
       ))}
 
-      {/* Add weapon — max 3 per turret (triple turret, CRB p.163) */}
-      {turret.weapons.length < 3 && (
+      {/* Add weapon — max 4 per turret (quad turret, HG p.81) */}
+      {n < 4 && (
         <select
           value=""
           onChange={(e) => { onAddWeapon(slotIdx, e.target.value); e.target.value = '' }}
@@ -203,8 +210,8 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
           ))}
         </select>
       )}
-      {turret.weapons.length >= 3 && (
-        <span className="text-slate-400 font-mono text-xs italic">max 3 weapons</span>
+      {n >= 4 && (
+        <span className="text-slate-400 font-mono text-xs italic">QUAD — max 4</span>
       )}
 
       {/* Remove turret */}
