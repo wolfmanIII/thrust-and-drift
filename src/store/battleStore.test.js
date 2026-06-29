@@ -80,6 +80,29 @@ describe('addShip', () => {
     store.addShip(makeProfile({ id: 'p2', name: 'Beta'  }), { q: 1, r: 0 }, 'npc',     '#f00')
     expect(useBattleStore.getState().ships).toHaveLength(2)
   })
+
+  // REQ-01: initial vector override
+  it('initialVector param sets ship vector instead of {q:0,r:0}', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff', { q: 3, r: -2 })
+    expect(useBattleStore.getState().ships[0].vector).toEqual({ q: 3, r: -2 })
+  })
+
+  it('initialVector is deep-copied — mutation of source does not affect ship', () => {
+    const iv = { q: 1, r: 1 }
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff', iv)
+    iv.q = 99
+    expect(useBattleStore.getState().ships[0].vector.q).toBe(1)
+  })
+
+  it('omitting initialVector defaults to {q:0,r:0}', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].vector).toEqual({ q: 0, r: 0 })
+  })
+
+  it('null initialVector also defaults to {q:0,r:0}', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff', null)
+    expect(useBattleStore.getState().ships[0].vector).toEqual({ q: 0, r: 0 })
+  })
 })
 
 describe('removeShip', () => {

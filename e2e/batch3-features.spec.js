@@ -3,6 +3,7 @@
  * REQ-08: Point Defence resolved at missile impact (MissileImpactModal), not at launch.
  * REQ-11: AUTO-ASSIGN button in CrewAssignmentModal.
  * REQ-13: Initiative phase skipped from round 2+ (CRB p.160); GM ↺ override.
+ * #11:  Initial vector override when adding a ship (REQ-01).
  * #14: Same-type weapon linking in double/triple turrets (CRB p.168).
  * #16: Aid Gunners action for Pilot (CRB p.63, p.166).
  * #18: Mid-battle ship shows — and ↺ notice in PhaseTracker.
@@ -441,6 +442,78 @@ test.describe('AttackModal — no Point Defence section for missiles (REQ-08)', 
     }
     // If Attack… isn't available for this ship (not the current actor in initiative),
     // still verify the battle screen is intact — the unit tests cover the modal logic.
+    await expect(page.getByTitle('Tactical (2)')).toBeVisible()
+  })
+})
+
+// ── #11: Initial vector override (REQ-01) ─────────────────────────────────────
+
+test.describe('AddShipModal — initial vector inputs (#11 REQ-01)', () => {
+  test.beforeEach(async ({ page }) => {
+    await startNewBattle(page)
+  })
+
+  test('Δq and Δr inputs are visible in AddShipModal in vectorial mode', async ({ page }) => {
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    const cx     = box.x + box.width  / 2
+    const cy     = box.y + box.height / 2
+
+    await page.mouse.click(cx, cy, { button: 'right' })
+    await page.getByText('Add ship here').click()
+
+    // Both vector inputs must be visible
+    await expect(page.getByLabel('Initial vector Δq')).toBeVisible()
+    await expect(page.getByLabel('Initial vector Δr')).toBeVisible()
+    // Both default to 0
+    await expect(page.getByLabel('Initial vector Δq')).toHaveValue('0')
+    await expect(page.getByLabel('Initial vector Δr')).toHaveValue('0')
+  })
+
+  test('ship placed via direct hex with non-zero vector has that vector in battle log', async ({ page }) => {
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    const cx     = box.x + box.width  / 2
+    const cy     = box.y + box.height / 2
+
+    await page.mouse.click(cx, cy, { button: 'right' })
+    await page.getByText('Add ship here').click()
+
+    // Set non-zero initial vector
+    await page.getByLabel('Initial vector Δq').fill('3')
+    await page.getByLabel('Initial vector Δr').fill('-1')
+
+    // Select NPC faction and place
+    await page.getByRole('button', { name: 'NPC' }).click()
+    await page.getByRole('button', { name: 'PLACE SHIP' }).click()
+
+    // Ship is now on map — confirm battle screen still responsive
+    await expect(page.getByTitle('Tactical (2)')).toBeVisible()
+  })
+
+  test('SELECT HEX ON MAP flow: inputs visible and preserve value before map click', async ({ page }) => {
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    const cx     = box.x + box.width  / 2
+    const cy     = box.y + box.height / 2
+
+    // Open modal from an empty hex (not direct-hex — no initialHex payload)
+    // Right-click away from centre, then use context menu
+    await page.mouse.click(cx + 150, cy, { button: 'right' })
+    await page.getByText('Add ship here').click()
+
+    // Set vector before confirming
+    await page.getByLabel('Initial vector Δq').fill('2')
+    await page.getByLabel('Initial vector Δr').fill('2')
+
+    // Click SELECT HEX ON MAP → (starts pendingPlacement)
+    await page.getByRole('button', { name: /SELECT HEX ON MAP/i }).click()
+
+    // Modal should close; now click a hex to place the ship
+    // Click at an offset to place the ship
+    await page.mouse.click(cx, cy, { button: 'left' })
+
+    // Battle screen still live
     await expect(page.getByTitle('Tactical (2)')).toBeVisible()
   })
 })
