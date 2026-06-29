@@ -2837,3 +2837,56 @@ describe('REQ-13 — initiative skip on round transition', () => {
     expect(useBattleStore.getState().currentActorIndex).toBe(0)
   })
 })
+
+// === AID GUNNERS (#16) ===
+// // MgT2e CRB p.63, p.166
+
+describe('applyAidGunners', () => {
+  it('sets aidGunnersDM on target ship', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyAidGunners(id, 2)
+    expect(useBattleStore.getState().ships[0].aidGunnersDM).toBe(2)
+  })
+
+  it('sets negative DM on failure', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyAidGunners(id, -2)
+    expect(useBattleStore.getState().ships[0].aidGunnersDM).toBe(-2)
+  })
+
+  it('does not affect other ships', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'Alpha' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'Beta'  }), { q: 1, r: 0 }, 'npc',     '#f00')
+    const [a] = useBattleStore.getState().ships
+    useBattleStore.getState().applyAidGunners(a.id, 3)
+    expect(useBattleStore.getState().ships[1].aidGunnersDM).toBe(0)
+  })
+
+  it('adds log entry', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    const logBefore = useBattleStore.getState().log.length
+    useBattleStore.getState().applyAidGunners(id, 1)
+    expect(useBattleStore.getState().log.length).toBeGreaterThan(logBefore)
+  })
+
+  it('unknown shipId is no-op', () => {
+    expect(() => useBattleStore.getState().applyAidGunners('ghost', 2)).not.toThrow()
+  })
+
+  it('aidGunnersDM resets to 0 at start of next round', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().applyAidGunners(id, 2)
+    expect(useBattleStore.getState().ships[0].aidGunnersDM).toBe(2)
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].aidGunnersDM).toBe(0)
+  })
+
+  it('addShip initialises aidGunnersDM to 0', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].aidGunnersDM).toBe(0)
+  })
+})

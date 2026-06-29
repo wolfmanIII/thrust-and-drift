@@ -1,6 +1,6 @@
 /**
- * Tests for useAttackSetup — same-type weapon grouping (#14).
- * Verifies linkedCount and damageDiceBonus computation per CRB p.168.
+ * Tests for useAttackSetup — same-type weapon grouping (#14) + Aid Gunners DM (#16).
+ * Verifies linkedCount, damageDiceBonus (CRB p.168) and aidGunnersDM pass-through.
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
@@ -151,5 +151,42 @@ describe('useAttackSetup — same-type weapon grouping (#14)', () => {
     const bl = w.find((e) => e.weaponName === 'Beam Laser')
     expect(pl).toMatchObject({ turretSlot: 1, linkedCount: 2, damageDiceBonus: 2 })
     expect(bl).toMatchObject({ turretSlot: 2, linkedCount: 1, damageDiceBonus: 0 })
+  })
+})
+
+// === AID GUNNERS DM (#16) ===
+// // MgT2e CRB p.63, p.166
+
+describe('useAttackSetup — aidGunnersDM in dmBreakdown', () => {
+  it('aidGunnersDM=0 when ship has no aid (default)', () => {
+    const att = addAttacker([{ slot: 1, weapons: ['Pulse Laser'] }])
+    addTarget()
+    const tgt = useBattleStore.getState().ships.at(-1)
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, 'Pulse Laser', '1', tgt.id, null)
+    )
+    expect(result.current.dmBreakdown.aidGunnersDM).toBe(0)
+  })
+
+  it('aidGunnersDM propagates from store to dmBreakdown', () => {
+    const att = addAttacker([{ slot: 1, weapons: ['Pulse Laser'] }])
+    addTarget()
+    const tgt = useBattleStore.getState().ships.at(-1)
+    useBattleStore.getState().applyAidGunners(att.id, 2)
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, 'Pulse Laser', '1', tgt.id, null)
+    )
+    expect(result.current.dmBreakdown.aidGunnersDM).toBe(2)
+  })
+
+  it('negative aidGunnersDM (failed Aid Gunners roll) propagates to dmBreakdown', () => {
+    const att = addAttacker([{ slot: 1, weapons: ['Pulse Laser'] }])
+    addTarget()
+    const tgt = useBattleStore.getState().ships.at(-1)
+    useBattleStore.getState().applyAidGunners(att.id, -1)
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, 'Pulse Laser', '1', tgt.id, null)
+    )
+    expect(result.current.dmBreakdown.aidGunnersDM).toBe(-1)
   })
 })

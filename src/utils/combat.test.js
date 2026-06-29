@@ -26,6 +26,7 @@ import {
   computeMissileAttackDM,
   computeMissileImpactDamage,
   computeIonThrustEffect,
+  taskChainDM,
 } from './combat.js'
 
 // === RANGE DMs ===
@@ -659,6 +660,28 @@ describe('computeIonThrustEffect', () => {
     // but effectively: floor(6 × 120/100) = 7; spec says return baseThrust when overpowered?
     // RAW: no amplification beyond rated thrust — result capped at baseThrust
     expect(computeIonThrustEffect(6, 120, 100)).toBeLessThanOrEqual(6)
+  })
+})
+
+// === TASK CHAIN DM ===
+// // MgT2e CRB p.63 — Task Chains table
+
+describe('taskChainDM', () => {
+  const CASES = [
+    [-8,  -3], // ≤ −6 → −3
+    [-6,  -3],
+    [-5,  -2], // −2 to −5 → −2
+    [-2,  -2],
+    [-1,  -1], // −1 → −1
+    [ 0,  +1], // 0 → +1 (success with no effect)
+    [ 1,  +2], // 1–5 → +2
+    [ 5,  +2],
+    [ 6,  +3], // ≥ 6 → +3
+    [10,  +3],
+  ]
+
+  it.each(CASES)('effect %i → DM %i', (effect, dm) => {
+    expect(taskChainDM(effect)).toBe(dm)
   })
 })
 

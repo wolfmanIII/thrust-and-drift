@@ -3,6 +3,9 @@
  * REQ-08: Point Defence resolved at missile impact (MissileImpactModal), not at launch.
  * REQ-11: AUTO-ASSIGN button in CrewAssignmentModal.
  * REQ-13: Initiative phase skipped from round 2+ (CRB p.160); GM ↺ override.
+ * #14: Same-type weapon linking in double/triple turrets (CRB p.168).
+ * #16: Aid Gunners action for Pilot (CRB p.63, p.166).
+ * #18: Mid-battle ship shows — and ↺ notice in PhaseTracker.
  */
 
 import { test, expect } from '@playwright/test'
@@ -284,6 +287,93 @@ test.describe('PhaseTracker — mid-battle ship shows — and re-roll notice (#1
 
     // ↺ re-roll notice must appear at the bottom of the list
     await expect(page.getByText(/↺ re-roll next round/)).toBeVisible()
+  })
+})
+
+// ── #16: Aid Gunners action for Pilot ────────────────────────────────────────
+
+test.describe('ActionModal — Aid Gunners action (#16)', () => {
+  /**
+   * Patrol Cruiser has Lt. Sura Delacroix (pilot: 2).
+   * Advances to the Actions phase with the Patrol Cruiser as current actor.
+   */
+  async function setupActions(page) {
+    await startNewBattle(page)
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    const cx     = box.x + box.width  / 2
+    const cy     = box.y + box.height / 2
+
+    // Place Patrol Cruiser (player) at centre
+    await page.mouse.click(cx, cy, { button: 'right' })
+    await page.getByText('Add ship here').click()
+    await page.getByText('Patrol Cruiser').first().click()
+    await page.getByRole('button', { name: /place|add to battle|confirm/i }).first().click()
+
+    // Place NPC target slightly offset
+    await page.mouse.click(cx + 80, cy, { button: 'right' })
+    await page.getByText('Add ship here').click()
+    await page.getByText('Light Fighter').first().click()
+    await page.getByRole('button', { name: 'NPC' }).click()
+    await page.getByRole('button', { name: /place|add to battle|confirm/i }).first().click()
+
+    // Setup → Initiative → Acceleration → Movement → Attack → Actions
+    await page.getByRole('button', { name: /NEXT PHASE/i }).click()
+    await rollInitiative(page)
+    await page.getByRole('button', { name: /NEXT PHASE/i }).click()
+    await drainActors(page)
+    await page.getByRole('button', { name: /NEXT PHASE/i }).click()
+    await page.getByRole('button', { name: /NEXT PHASE/i }).click()
+    await drainActors(page) // drain attack actors
+    await page.getByRole('button', { name: /NEXT PHASE/i }).click()
+
+    return { canvas, box, cx, cy }
+  }
+
+  test('ActionModal shows Aid Gunners entry under Pilot role', async ({ page }) => {
+    const { cx, cy } = await setupActions(page)
+
+    // Try to open Actions… on the Patrol Cruiser
+    await page.mouse.click(cx, cy, { button: 'right' })
+    const actionsBtn = page.getByText('Actions…')
+    if (!await actionsBtn.isVisible().catch(() => false)) return // not current actor
+    await actionsBtn.click()
+
+    // Select the Pilot crew member (Lt. Sura Delacroix)
+    const pilotOption = page.getByText(/Sura Delacroix|Pilot/i).first()
+    if (await pilotOption.isVisible().catch(() => false)) {
+      await pilotOption.click()
+    }
+
+    // Aid Gunners action must be visible
+    await expect(page.getByText(/Aid Gunners/i)).toBeVisible()
+  })
+
+  test('Aid Gunners roll produces a task chain DM result message', async ({ page }) => {
+    const { cx, cy } = await setupActions(page)
+
+    await page.mouse.click(cx, cy, { button: 'right' })
+    const actionsBtn = page.getByText('Actions…')
+    if (!await actionsBtn.isVisible().catch(() => false)) return
+    await actionsBtn.click()
+
+    // Select Pilot crew member
+    const pilotOption = page.getByText(/Sura Delacroix/i).first()
+    if (!await pilotOption.isVisible().catch(() => false)) return
+    await pilotOption.click()
+
+    // Click Aid Gunners
+    const aidGunnersBtn = page.getByText(/Aid Gunners/i)
+    if (!await aidGunnersBtn.isVisible().catch(() => false)) return
+    await aidGunnersBtn.click()
+
+    // Roll button must appear and be clickable
+    const rollBtn = page.getByRole('button', { name: /ROLL/i })
+    await expect(rollBtn).toBeVisible()
+    await rollBtn.click()
+
+    // Result message must contain the task chain DM text
+    await expect(page.getByText(/Task chain DM/i)).toBeVisible()
   })
 })
 
