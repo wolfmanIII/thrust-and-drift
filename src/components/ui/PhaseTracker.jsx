@@ -15,6 +15,7 @@ export function PhaseTracker() {
   const phase             = useBattleStore((s) => s.phase)
   const combatMode        = useBattleStore((s) => s.combatMode)
   const ships             = useBattleStore((s) => s.ships)
+  const shipAddedThisRound = useBattleStore((s) => s.shipAddedThisRound)
   const requestCenterOn   = useUiStore((s) => s.requestCenterOn)
 
   if (initiativeOrder.length === 0) return null
@@ -63,7 +64,10 @@ export function PhaseTracker() {
                     {ship.profile.name}
                   </button>
                   <span className="ml-auto font-mono text-xs text-slate-400 flex items-center gap-1">
-                    {ship.initiative}
+                    {ship.initiative === 0
+                      ? <span title="Initiative not yet rolled — re-roll pending at round start" className="text-slate-600">—</span>
+                      : ship.initiative
+                    }
                     {(ship.initiativeTemporaryBonus ?? 0) > 0 && (
                       <span className="text-amber-400 text-[10px]">↑ini</span>
                     )}
@@ -71,6 +75,13 @@ export function PhaseTracker() {
                 </li>
               )
             })}
+            {shipAddedThisRound && (
+              <li className="px-3 py-1 border-t border-slate-700/30">
+                <span className="font-mono text-[10px] text-amber-400/70" title="A ship was added mid-battle — all ships re-roll initiative at the start of the next round">
+                  ↺ re-roll next round
+                </span>
+              </li>
+            )}
           </ul>
         )}
       </div>

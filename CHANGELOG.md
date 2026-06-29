@@ -19,6 +19,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 - **#15 — EW Counter Missile description text** — `crewActions.js` listed `Electronics(comms)` as the skill specialisation; corrected to `Electronics(sensors)` per CRB p.173. HelpScreen updated to match. No mechanical change.
+- **#18 — New ship mid-battle initiative display** — Ships added mid-battle showed `0` as their initiative score in PhaseTracker, with no indication that a re-roll was pending. Initiative `0` now renders as `—` (tooltip: "Initiative not yet rolled — re-roll pending at round start"). When `shipAddedThisRound` is active, a `↺ re-roll next round` notice appears at the bottom of the PhaseTracker list. (`PhaseTracker.jsx`)
 
 ---
 
