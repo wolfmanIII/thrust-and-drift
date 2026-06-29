@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { ActionModal } from './ActionModal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
@@ -144,5 +144,97 @@ describe('ActionModal — negative skill values (REQ-09)', () => {
     render(<ActionModal />)
     fireEvent.click(screen.getByText('Solo Pilot'))
     expect(screen.getByText('Sensor Lock')).toBeInTheDocument()
+  })
+})
+
+// ── #16: Aid Gunners action for Pilot ────────────────────────────────────────
+// // MgT2e CRB p.63, p.166
+
+describe('ActionModal — Aid Gunners (#16)', () => {
+  /** NPC ship with a dedicated pilot crew member (no manual dice needed). */
+  const PILOT_SHIP = {
+    id: 'ship-pilot',
+    profile: {
+      name: 'Scout', hull: 20, armor: 0, thrust: 6, tonnage: 100,
+      turrets: [],
+      crew: [{ id: 'crew-pilot', name: 'Lt. Delacroix', skills: { pilot: 2 } }],
+    },
+    faction: 'npc',
+    hullCurrent: 20,
+    color: '#0f0',
+    firedTurrets:         [],
+    evasiveThrust:        0,
+    criticalHits:         [],
+    thrustUsedThisRound:  0,
+    aidGunnersDM:         0,
+    usedCrewMembers:      [],
+    crewAssignments:      null,
+  }
+
+  beforeEach(() => {
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ ships: [PILOT_SHIP] })
+    useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-pilot' } })
+  })
+
+  afterEach(() => vi.restoreAllMocks())
+
+  it('pilot crew member shows Aid Gunners action', () => {
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Lt. Delacroix'))
+    expect(screen.getByText('Aid Gunners')).toBeInTheDocument()
+  })
+
+  it('selecting Aid Gunners enables EXECUTE ACTION button', () => {
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Lt. Delacroix'))
+    fireEvent.click(screen.getByText('Aid Gunners'))
+    expect(screen.getByText(/EXECUTE ACTION/i)).not.toBeDisabled()
+  })
+
+  it('success roll shows task chain DM +2 and updates store', () => {
+    // Math.random=0.5 → d6=4, 2d6=8; pilot:2 → total=10, effect=2 → taskChainDM(2)=+2
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Lt. Delacroix'))
+    fireEvent.click(screen.getByText('Aid Gunners'))
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/Task chain DM \+2 to all gunner attack rolls this round/)).toBeInTheDocument()
+    expect(useBattleStore.getState().ships[0].aidGunnersDM).toBe(2)
+  })
+
+  it('failure roll shows negative DM and updates store (CRB p.63 — failure also applies DM)', () => {
+    // Math.random=0.1 → d6=1, 2d6=2; pilot:2 → total=4, effect=-4 → taskChainDM(-4)=-2
+    vi.spyOn(Math, 'random').mockReturnValue(0.1)
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Lt. Delacroix'))
+    fireEvent.click(screen.getByText('Aid Gunners'))
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/Task chain DM -2 to all gunner attack rolls this round/)).toBeInTheDocument()
+    expect(useBattleStore.getState().ships[0].aidGunnersDM).toBe(-2)
+  })
+
+  it('effect 0 (exactly meets difficulty) maps to DM +1', () => {
+    // Math.random=0.17 → d6=floor(0.17*6)+1=2, 2d6=4; but we need total=8 exactly
+    // 2d6=6 needed: Math.random such that d6=3 → floor(x*6)+1=3 → x≈0.34
+    // 6 + pilot:2 = 8 → effect=0 → taskChainDM(0)=+1
+    vi.spyOn(Math, 'random').mockReturnValue(0.34)
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Lt. Delacroix'))
+    fireEvent.click(screen.getByText('Aid Gunners'))
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/Task chain DM \+1 to all gunner attack rolls this round/)).toBeInTheDocument()
+    expect(useBattleStore.getState().ships[0].aidGunnersDM).toBe(1)
+  })
+
+  it('great success (effect ≥ 6) maps to DM +3', () => {
+    // Math.random=1-ε → d6=6, 2d6=12; pilot:2 → total=14, effect=6 → taskChainDM(6)=+3
+    vi.spyOn(Math, 'random').mockReturnValue(0.99)
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Lt. Delacroix'))
+    fireEvent.click(screen.getByText('Aid Gunners'))
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/Task chain DM \+3 to all gunner attack rolls this round/)).toBeInTheDocument()
+    expect(useBattleStore.getState().ships[0].aidGunnersDM).toBe(3)
   })
 })
