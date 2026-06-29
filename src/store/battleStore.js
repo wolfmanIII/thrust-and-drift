@@ -143,7 +143,7 @@ function buildNextRoundState(s) {
     const tgt      = s.ships.find((sh) => sh.id === impact.target)
     return makeLogEntry({
       round: s.round + 1, phase: 'initiative', type: 'attack',
-      message: `${launcher?.profile.name ?? '?'} — ${impact.count}× ${impact.type} reaches ${tgt?.profile.name ?? '?'}. Resolve damage.`,
+      message: `${launcher?.name ?? '?'} — ${impact.count}× ${impact.type} reaches ${tgt?.name ?? '?'}. Resolve damage.`,
       shipId: impact.launchedBy, details: impact,
     })
   })
@@ -514,6 +514,8 @@ const useBattleStore = create((set, get) => {
       currentBandwidth:   profile.computerBandwidth ?? 0,
       bandwidthReduction: 0,
       hardened:           profile.hardened ?? false,
+      // REQ-03: instance-level display name; defaults to profile.name, overridable via renameShip.
+      name: profile.name,
     }
     const { ships: existing, combatMode } = get()
     const newRangeBands = {}
@@ -538,9 +540,22 @@ const useBattleStore = create((set, get) => {
         round: s.round,
         phase: s.phase,
         type: 'system',
-        message: `${profile.name} added to battle as ${faction}.`,
+        message: `${instance.name} added to battle as ${faction}.`,
         shipId: instance.id,
       })],
+    }))
+  }),
+
+  /**
+   * Rename a ship instance without modifying its profile. REQ-03.
+   * @param {string} shipId
+   * @param {string} newName
+   */
+  renameShip: wh((shipId, newName) => {
+    const trimmed = newName.trim()
+    if (!trimmed) return
+    set((s) => ({
+      ships: s.ships.map((sh) => sh.id === shipId ? { ...sh, name: trimmed } : sh),
     }))
   }),
 
@@ -572,7 +587,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'system',
-          message: `${ship.profile.name} removed from battle.`,
+          message: `${ship.name} removed from battle.`,
         })],
       }))
     },
@@ -633,7 +648,7 @@ const useBattleStore = create((set, get) => {
       round,
       phase: 'initiative',
       type: 'system',
-      message: `Initiative ${get().ships.find(s => s.id === r.id)?.profile.name}: ${r.initiative}`,
+      message: `Initiative ${get().ships.find(s => s.id === r.id)?.name}: ${r.initiative}`,
       shipId: r.id,
       details: r.roll,
     }))
@@ -673,7 +688,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'move',
-          message: `${ship.profile.name} applies Thrust Δ(${delta.q},${delta.r}). Vector: (${newVector.q},${newVector.r}).`,
+          message: `${ship.name} applies Thrust Δ(${delta.q},${delta.r}). Vector: (${newVector.q},${newVector.r}).`,
           shipId,
           details: { delta, newVector, cost },
         })],
@@ -762,7 +777,7 @@ const useBattleStore = create((set, get) => {
       if (gravityImpact) {
         gravityImpacts.push({
           shipId:          sh.id,
-          shipName:        sh.profile.name,
+          shipName:        sh.name,
           dogfightGroupId: sh.inDogfight ?? null,
           obstacle:        gravityImpact.obstacle,
           armor:           sh.profile.armor ?? 0,
@@ -772,7 +787,7 @@ const useBattleStore = create((set, get) => {
         fieldCollisions.push({
           id:       uuidv7(),
           shipId:   sh.id,
-          shipName: sh.profile.name,
+          shipName: sh.name,
           obstacle: collision.obstacle,
           position: collision.position,
         })
@@ -847,7 +862,7 @@ const useBattleStore = create((set, get) => {
       round,
       phase: 'movement',
       type: 'move',
-      message: `${sh.profile.name} moves to (${sh.position.q},${sh.position.r}).`,
+      message: `${sh.name} moves to (${sh.position.q},${sh.position.r}).`,
       shipId: sh.id,
       details: { position: sh.position, vector: sh.vector },
     }))
@@ -859,7 +874,7 @@ const useBattleStore = create((set, get) => {
         round,
         phase: 'movement',
         type: 'system',
-        message: `⚡ ${m.count}× ${m.type ?? 'Missile'} salvo from ${launcherShip?.profile.name ?? '?'} impacts ${targetShip?.profile.name ?? '?'}. Resolve damage.`,
+        message: `⚡ ${m.count}× ${m.type ?? 'Missile'} salvo from ${launcherShip?.name ?? '?'} impacts ${targetShip?.name ?? '?'}. Resolve damage.`,
         shipId: m.target,
         details: { recoverable: true, impact: { launchedBy: m.launchedBy, target: m.target, count: m.count, type: m.type ?? 'Missile' } },
       })
@@ -957,8 +972,8 @@ const useBattleStore = create((set, get) => {
       if (impact) {
         const newCount = impact.count - removed
         const logMsg = newCount <= 0
-          ? `${actor?.profile.name ?? '?'} EW destroys entire salvo (${impact.count} missiles removed).`
-          : `${actor?.profile.name ?? '?'} EW removes ${removed} missile(s) — salvo reduced to ${newCount}.`
+          ? `${actor?.name ?? '?'} EW destroys entire salvo (${impact.count} missiles removed).`
+          : `${actor?.name ?? '?'} EW removes ${removed} missile(s) — salvo reduced to ${newCount}.`
         set((s) => ({
           pendingMissileImpacts: newCount <= 0
             ? s.pendingMissileImpacts.filter((i) => i.id !== missileId)
@@ -974,8 +989,8 @@ const useBattleStore = create((set, get) => {
       if (!missile) return
       const newCount = missile.count - removed
       const logMsg = newCount <= 0
-        ? `${actor?.profile.name ?? '?'} EW destroys entire in-flight salvo (${missile.count} missiles removed).`
-        : `${actor?.profile.name ?? '?'} EW removes ${removed} missile(s) — in-flight salvo reduced to ${newCount}.`
+        ? `${actor?.name ?? '?'} EW destroys entire in-flight salvo (${missile.count} missiles removed).`
+        : `${actor?.name ?? '?'} EW removes ${removed} missile(s) — in-flight salvo reduced to ${newCount}.`
       set((s) => ({
         missiles: newCount <= 0
           ? s.missiles.filter((m) => m.id !== missileId)
@@ -1054,7 +1069,7 @@ const useBattleStore = create((set, get) => {
       round: get().round,
       phase: get().phase,
       type: 'damage',
-      message: `${ship.profile.name} takes ${damage} damage from ${sourceLabel}. Hull: ${hullCurrent}/${ship.profile.hull}.`,
+      message: `${ship.name} takes ${damage} damage from ${sourceLabel}. Hull: ${hullCurrent}/${ship.profile.hull}.`,
       shipId,
       details: { damage, hullCurrent, hullMax: ship.profile.hull },
     })]
@@ -1063,7 +1078,7 @@ const useBattleStore = create((set, get) => {
         round: get().round,
         phase: get().phase,
         type: 'system',
-        message: `⚠ ${ship.profile.name} DESTROYED — hull reduced to 0. Wreck remains on map until removed by GM.`,
+        message: `⚠ ${ship.name} DESTROYED — hull reduced to 0. Wreck remains on map until removed by GM.`,
         shipId,
       }))
       if (ship.position) emitEffect('ship_destroyed', { duration: 2200, hex: ship.position })
@@ -1187,7 +1202,7 @@ const useBattleStore = create((set, get) => {
         round: s.round,
         phase: s.phase,
         type: 'damage',
-        message: `${ship.profile.name}: Critical hit on ${system} (Severity ${severity}).`,
+        message: `${ship.name}: Critical hit on ${system} (Severity ${severity}).`,
         shipId,
         details: { system, severity },
       })],
@@ -1217,7 +1232,7 @@ const useBattleStore = create((set, get) => {
         round: s.round,
         phase: s.phase,
         type: 'system',
-        message: `${ship.profile.name}: Armour reduced by −${amount} → ${reduced} (Critical).`,
+        message: `${ship.name}: Armour reduced by −${amount} → ${reduced} (Critical).`,
         shipId,
       })],
     }))
@@ -1267,7 +1282,7 @@ const useBattleStore = create((set, get) => {
         round: s.round,
         phase: s.phase,
         type: 'attack',
-        message: `${attacker?.profile.name ?? '?'} launches ${count} missile(s) (${type}).`,
+        message: `${attacker?.name ?? '?'} launches ${count} missile(s) (${type}).`,
         shipId: launchedBy,
         details: missile,
       })],
@@ -1310,8 +1325,8 @@ const useBattleStore = create((set, get) => {
       const launcher = ships.find((s) => s.id === missile.launchedBy)
       const newCount = Math.max(0, missile.count - removed)
       const msg = newCount === 0
-        ? `${launcher?.profile.name ?? '?'} missile salvo (${missile.type}) fully destroyed by Point Defence.`
-        : `${launcher?.profile.name ?? '?'} missile salvo reduced: ${missile.count} → ${newCount} (${removed} destroyed by PD).`
+        ? `${launcher?.name ?? '?'} missile salvo (${missile.type}) fully destroyed by Point Defence.`
+        : `${launcher?.name ?? '?'} missile salvo reduced: ${missile.count} → ${newCount} (${removed} destroyed by PD).`
       set((s) => ({
         missiles: newCount === 0
           ? s.missiles.filter((m) => m.id !== missileId)
@@ -1430,7 +1445,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${ship.profile.name} Evasive Action: ${clamped} thrust — DM −${pilotSkill * clamped} to this attack (CRB p.171).`,
+          message: `${ship.name} Evasive Action: ${clamped} thrust — DM −${pilotSkill * clamped} to this attack (CRB p.171).`,
           shipId,
         })],
       }))
@@ -1453,7 +1468,7 @@ const useBattleStore = create((set, get) => {
       basicBandPool: { ...s.basicBandPool, [key]: 0 },  // GM override resets accumulated thrust
       log: [...s.log, makeLogEntry({
         round: s.round, phase: s.phase, type: 'system',
-        message: `Range set: ${s.ships.find(sh=>sh.id===id1)?.profile.name} vs ${s.ships.find(sh=>sh.id===id2)?.profile.name} → ${band}.`,
+        message: `Range set: ${s.ships.find(sh=>sh.id===id1)?.name} vs ${s.ships.find(sh=>sh.id===id2)?.name} → ${band}.`,
       })],
     }))
   }),
@@ -1498,8 +1513,8 @@ const useBattleStore = create((set, get) => {
     }
 
     const logMsg = bandChanged
-      ? `${moving.profile.name} ${direction === 'approach' ? 'approaches' : 'flees from'} ${target.profile.name}: ${currentBand} → ${newBand}.`
-      : `${moving.profile.name} allocates ${movingThrust} thrust ${direction === 'approach' ? 'toward' : 'away from'} ${target.profile.name} (${Math.abs(finalPool)}/${cost} accumulated).`
+      ? `${moving.name} ${direction === 'approach' ? 'approaches' : 'flees from'} ${target.name}: ${currentBand} → ${newBand}.`
+      : `${moving.name} allocates ${movingThrust} thrust ${direction === 'approach' ? 'toward' : 'away from'} ${target.name} (${Math.abs(finalPool)}/${cost} accumulated).`
 
     set((s) => ({
       rangeBands: { ...s.rangeBands, [key]: newBand },
@@ -1535,7 +1550,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${attacker.profile.name}: Sensor Lock on ${target.profile.name} (DM +2 to attacks).`,
+          message: `${attacker.name}: Sensor Lock on ${target.name} (DM +2 to attacks).`,
           shipId: attackerId,
         })],
     }))
@@ -1563,7 +1578,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${ship.profile.name}: Electronic Warfare — sensor lock removed.`,
+          message: `${ship.name}: Electronic Warfare — sensor lock removed.`,
           shipId,
         })],
       }))
@@ -1600,7 +1615,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${ship.profile.name}: ${removed.system} repaired (Sev. ${removed.severity} removed).`,
+          message: `${ship.name}: ${removed.system} repaired (Sev. ${removed.severity} removed).`,
           shipId,
         })],
       }))
@@ -1632,7 +1647,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${ship.profile.name}: Initiative improved by +${applied} (takes effect next round, lasts 1 round).`,
+          message: `${ship.name}: Initiative improved by +${applied} (takes effect next round, lasts 1 round).`,
           shipId,
         })],
       }))
@@ -1657,7 +1672,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${ship.profile.name}: Aid Gunners — task chain DM ${dm >= 0 ? '+' : ''}${dm} to all gunner attacks this round. // CRB p.63`,
+          message: `${ship.name}: Aid Gunners — task chain DM ${dm >= 0 ? '+' : ''}${dm} to all gunner attacks this round. // CRB p.63`,
           shipId,
         })],
       }))
@@ -1684,7 +1699,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${ship.profile.name}: M-Drive overloaded — +${applied} Thrust next round.`,
+          message: `${ship.name}: M-Drive overloaded — +${applied} Thrust next round.`,
           shipId,
         })],
       }))
@@ -1709,7 +1724,7 @@ const useBattleStore = create((set, get) => {
           round: s.round,
           phase: s.phase,
           type: 'action',
-          message: `${ship.profile.name}: missile turret reloaded.`,
+          message: `${ship.name}: missile turret reloaded.`,
           shipId,
         })],
       }))
@@ -1738,7 +1753,7 @@ const useBattleStore = create((set, get) => {
       roundWinnerMargin: 0,
       active: true,
     }
-    const names = shipIds.map((id) => ships.find((s) => s.id === id)?.profile.name ?? id).join(' ↔ ')
+    const names = shipIds.map((id) => ships.find((s) => s.id === id)?.name ?? id).join(' ↔ ')
     set((s) => ({
       dogfights: [...s.dogfights, group],
       ships: s.ships.map((sh) =>
@@ -1764,7 +1779,7 @@ const useBattleStore = create((set, get) => {
       const group = get().dogfights.find((g) => g.id === groupId)
       const { winnerId, margin, tied } = resolveDogfightChecks(checkResults)
       const nextMicroRound = group.microRound + 1
-      const winnerName = tied ? null : (ships.find((s) => s.id === winnerId)?.profile.name ?? winnerId)
+      const winnerName = tied ? null : (ships.find((s) => s.id === winnerId)?.name ?? winnerId)
 
       set((s) => ({
         dogfights: s.dogfights.map((g) =>
@@ -1812,7 +1827,7 @@ const useBattleStore = create((set, get) => {
         ),
         log: [...s.log, makeLogEntry({
           round, phase, type: 'action',
-          message: `⚔ ${ship?.profile.name ?? shipId} escapes dogfight.`,
+          message: `⚔ ${ship?.name ?? shipId} escapes dogfight.`,
           shipId,
         })],
       }))
@@ -1891,7 +1906,7 @@ const useBattleStore = create((set, get) => {
         ),
         log: [...s.log, makeLogEntry({
           round, phase, type: 'system',
-          message: `⚔ Boarding initiated — ${s.ships.find((sh) => sh.id === attackerId)?.profile.name ?? attackerId} → ${s.ships.find((sh) => sh.id === defenderId)?.profile.name ?? defenderId}.`,
+          message: `⚔ Boarding initiated — ${s.ships.find((sh) => sh.id === attackerId)?.name ?? attackerId} → ${s.ships.find((sh) => sh.id === defenderId)?.name ?? defenderId}.`,
         })],
       }))
     },
@@ -2032,7 +2047,7 @@ const useBattleStore = create((set, get) => {
           }),
           log: [...s.log, makeLogEntry({
             round, phase, type: 'system',
-            message: `⚔ Boarding resolved — ${label}. ${boarding ? `(${s.ships.find((sh) => sh.id === boarding.attackerId)?.profile.name ?? ''} → ${s.ships.find((sh) => sh.id === boarding.defenderId)?.profile.name ?? ''})` : ''}`,
+            message: `⚔ Boarding resolved — ${label}. ${boarding ? `(${s.ships.find((sh) => sh.id === boarding.attackerId)?.name ?? ''} → ${s.ships.find((sh) => sh.id === boarding.defenderId)?.name ?? ''})` : ''}`,
           })],
         }
       })
@@ -2071,7 +2086,7 @@ const useBattleStore = create((set, get) => {
         ),
         log: [...s.log, makeLogEntry({
           round, phase, type: 'system',
-          message: `⚔ ${s.ships.find((sh) => sh.id === shipId)?.profile.name ?? shipId} faction changed to ${newFaction}.`,
+          message: `⚔ ${s.ships.find((sh) => sh.id === shipId)?.name ?? shipId} faction changed to ${newFaction}.`,
         })],
       }))
     },
