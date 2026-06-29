@@ -223,6 +223,22 @@ describe('MissileImpactModal — double laser bonus display', () => {
     expect(screen.getByText('W1')).toBeInTheDocument()
     expect(screen.getByText('+1')).toBeInTheDocument()
   })
+
+  it('shows +3 bonus label in turret selector for quad Pulse Laser slot (HG p.81)', () => {
+    // laserBonus = 4 - 1 = 3 — CRB p.173: "add DM equal to the number of lasers above 1"
+    setupImpact({
+      targetTurrets: [
+        { slot: 1, weapons: ['Pulse Laser', 'Pulse Laser', 'Pulse Laser', 'Pulse Laser'] }, // laserBonus: 3
+        { slot: 2, weapons: ['Beam Laser'] },                                                // laserBonus: 0
+      ],
+      faction: 'npc',
+      count: 10,
+    })
+    render(<MissileImpactModal />)
+    // Multi-slot selector shows W1 with "+3"
+    expect(screen.getByText('W1')).toBeInTheDocument()
+    expect(screen.getByText('+3')).toBeInTheDocument()
+  })
 })
 
 // ── Salvo size DM reflects PD reduction ───────────────────────────────────────

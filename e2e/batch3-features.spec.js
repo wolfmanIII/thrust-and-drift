@@ -7,6 +7,7 @@
  * #12:  Rename ship instances (REQ-03).
  * #14: Same-type weapon linking in double/triple turrets (CRB p.168).
  * #16: Aid Gunners action for Pilot (CRB p.63, p.166).
+ * #17: Quad turret cap 4 + SINGLE/DOUBLE/TRIPLE/QUAD labels (HG p.81).
  * #18: Mid-battle ship shows — and ↺ notice in PhaseTracker.
  */
 
@@ -376,6 +377,59 @@ test.describe('ActionModal — Aid Gunners action (#16)', () => {
 
     // Result message must contain the task chain DM text
     await expect(page.getByText(/Task chain DM/i)).toBeVisible()
+  })
+})
+
+// ── #17: Quad turret cap + labels in profile builder (HG p.81) ───────────────
+
+test.describe('ShipProfileForm — quad turret UI (#17 HG p.81)', () => {
+  async function openNewProfile(page) {
+    await page.goto('/')
+    await page.getByRole('button', { name: '+ NEW PROFILE' }).click()
+    // ShipProfileForm renders Save/Cancel buttons — wait for either
+    await page.getByRole('button', { name: /SAVE|CANCEL/i }).first().waitFor({ state: 'visible' })
+  }
+
+  async function addTurretSlot(page) {
+    // Crew Manifest "+ Add" is first; Weapons "+ Add" is last
+    await page.getByRole('button', { name: '+ Add' }).last().click()
+  }
+
+  async function addWeapon(page, weapon = 'Pulse Laser') {
+    await page.getByRole('combobox').selectOption(weapon)
+  }
+
+  test('SINGLE label appears after adding 1 weapon to an empty slot', async ({ page }) => {
+    await openNewProfile(page)
+    await addTurretSlot(page)
+    await addWeapon(page)
+    await expect(page.getByText('SINGLE')).toBeVisible()
+  })
+
+  test('TRIPLE label visible and dropdown still present after 3 weapons', async ({ page }) => {
+    await openNewProfile(page)
+    await addTurretSlot(page)
+    await addWeapon(page)
+    await addWeapon(page)
+    await addWeapon(page)
+
+    await expect(page.getByText('TRIPLE')).toBeVisible()
+    // Combobox still present (cap not yet reached)
+    await expect(page.getByRole('combobox')).toBeVisible()
+  })
+
+  test('QUAD label + "QUAD — max 4" message after 4 weapons, dropdown hidden', async ({ page }) => {
+    await openNewProfile(page)
+    await addTurretSlot(page)
+    await addWeapon(page)
+    await addWeapon(page)
+    await addWeapon(page)
+    await addWeapon(page)
+
+    await expect(page.getByText('QUAD')).toBeVisible()
+    await expect(page.getByText('QUAD — max 4')).toBeVisible()
+    // Add-weapon combobox must be gone (slot is full)
+    await expect(page.getByRole('combobox')).not.toBeVisible()
   })
 })
 

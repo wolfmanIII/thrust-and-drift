@@ -11,6 +11,7 @@ import { useBattleStore } from '../../store/battleStore.js'
 function makeShip(turrets) {
   return {
     id: 'ship-detail-1',
+    name: 'Testship',
     profile: {
       name: 'Testship', hull: 20, armor: 2, thrust: 4, tonnage: 200,
       turrets,
@@ -64,6 +65,12 @@ describe('ShipDetailModal — mount type labels (REQ-07)', () => {
     render(<ShipDetailModal />)
     expect(screen.getByText(/Single Turret/)).toBeInTheDocument()
     expect(screen.getByText(/Double Turret/)).toBeInTheDocument()
+  })
+
+  it('shows "Quad Turret" for a slot with 4 weapons', () => {
+    useBattleStore.setState({ ships: [makeShip([{ slot: 1, weapons: ['Pulse Laser', 'Pulse Laser', 'Pulse Laser', 'Pulse Laser'] }])] })
+    render(<ShipDetailModal />)
+    expect(screen.getByText(/Quad Turret/)).toBeInTheDocument()
   })
 
   it('lists weapon names alongside the mount label', () => {

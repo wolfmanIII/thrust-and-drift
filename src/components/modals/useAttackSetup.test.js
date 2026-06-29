@@ -66,6 +66,17 @@ describe('useAttackSetup — same-type weapon grouping (#14)', () => {
     expect(w[0]).toMatchObject({ weaponName: 'Pulse Laser', turretSlot: 1, linkedCount: 3, damageDiceBonus: 4 })
   })
 
+  it('quad turret with 4× Pulse Laser (2D): linkedCount 4, damageDiceBonus 6 (HG p.81)', () => {
+    // (4-1)*2 = 6 — quad turret linking (HG p.81)
+    const att = addAttacker([{ slot: 1, weapons: ['Pulse Laser', 'Pulse Laser', 'Pulse Laser', 'Pulse Laser'] }])
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, '', '', null, null)
+    )
+    const w = result.current.availableWeapons
+    expect(w).toHaveLength(1)
+    expect(w[0]).toMatchObject({ weaponName: 'Pulse Laser', turretSlot: 1, linkedCount: 4, damageDiceBonus: 6 })
+  })
+
   it('2× Beam Laser (1D): damageDiceBonus 1', () => {
     // (2-1)*1 = 1 → 1D+1
     const att = addAttacker([{ slot: 1, weapons: ['Beam Laser', 'Beam Laser'] }])
