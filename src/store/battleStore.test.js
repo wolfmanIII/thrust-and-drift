@@ -103,6 +103,62 @@ describe('addShip', () => {
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff', null)
     expect(useBattleStore.getState().ships[0].vector).toEqual({ q: 0, r: 0 })
   })
+
+  // REQ-03: instance name defaults to profile.name
+  it('name defaults to profile.name', () => {
+    useBattleStore.getState().addShip(makeProfile({ name: 'Intrepid' }), { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].name).toBe('Intrepid')
+  })
+
+  it('name is independent of profile.name mutation', () => {
+    const profile = makeProfile({ name: 'Original' })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    profile.name = 'MUTATED'
+    expect(useBattleStore.getState().ships[0].name).toBe('Original')
+  })
+})
+
+describe('renameShip (REQ-03)', () => {
+  beforeEach(() => {
+    useBattleStore.getState().addShip(makeProfile({ name: 'Cobra' }), { q: 0, r: 0 }, 'players', '#fff')
+  })
+
+  it('updates ship.name', () => {
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().renameShip(id, 'Cobra Prime')
+    expect(useBattleStore.getState().ships[0].name).toBe('Cobra Prime')
+  })
+
+  it('trims whitespace', () => {
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().renameShip(id, '  Cobra II  ')
+    expect(useBattleStore.getState().ships[0].name).toBe('Cobra II')
+  })
+
+  it('empty string is a no-op', () => {
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().renameShip(id, '')
+    expect(useBattleStore.getState().ships[0].name).toBe('Cobra')
+  })
+
+  it('whitespace-only is a no-op', () => {
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().renameShip(id, '   ')
+    expect(useBattleStore.getState().ships[0].name).toBe('Cobra')
+  })
+
+  it('does not affect other ships', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'Viper' }), { q: 1, r: 0 }, 'npc', '#f00')
+    const cobraId = useBattleStore.getState().ships[0].id
+    useBattleStore.getState().renameShip(cobraId, 'Cobra Mk.II')
+    expect(useBattleStore.getState().ships[1].name).toBe('Viper')
+  })
+
+  it('does not change profile.name', () => {
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().renameShip(id, 'New Name')
+    expect(useBattleStore.getState().ships[0].profile.name).toBe('Cobra')
+  })
 })
 
 describe('removeShip', () => {

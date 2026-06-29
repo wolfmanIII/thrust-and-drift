@@ -24,6 +24,7 @@ function makeShip(overrides = {}) {
     thrustUsedThisRound: 0,
     thrustBonusThisRound: 0,
     thrustPenalty:       0,
+    name: overrides.profile?.name ?? 'Beowulf',
     profile: {
       name:    'Beowulf',
       hull:    16,

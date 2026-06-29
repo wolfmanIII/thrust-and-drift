@@ -8,6 +8,7 @@ function makeShip(overrides = {}) {
   return {
     id:             'ship-1',
     profile:        { name: 'Viper', hull: 10, turrets: [{ slot: 1, weapons: ['Pulse Laser'] }], crew: { pilot: 2 } },
+    name:           overrides.profile?.name ?? 'Viper',
     firedTurrets:   [],
     hullCurrent:    10,
     color:          '#0f0',

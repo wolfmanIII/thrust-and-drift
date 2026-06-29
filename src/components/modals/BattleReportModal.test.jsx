@@ -17,6 +17,7 @@ function makeShip(overrides = {}) {
     hullCurrent:  10,
     criticalHits: [],
     profile:      { name: 'Beowulf', hull: 16 },
+    name:         overrides.profile?.name ?? 'Beowulf',
     ...overrides,
   }
 }

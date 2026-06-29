@@ -10,6 +10,7 @@ import { useUiStore } from '../../store/uiStore.js'
 
 const SHIP_A = {
   id: 'ship-a',
+  name: 'Cobra',
   profile: { name: 'Cobra', hull: 20, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
   faction: 'players', hullCurrent: 20, color: '#0f0',
   position: { q: 2, r: -1 },
@@ -19,6 +20,7 @@ const SHIP_A = {
 
 const SHIP_B = {
   id: 'ship-b',
+  name: 'Viper',
   profile: { name: 'Viper', hull: 10, armor: 0, thrust: 6, tonnage: 50, turrets: [], crew: [] },
   faction: 'npc', hullCurrent: 10, color: '#f00',
   position: { q: -3, r: 4 },
@@ -38,6 +40,7 @@ beforeEach(() => {
 
 const SHIP_UNROLLED = {
   id: 'ship-c',
+  name: 'Scout',
   profile: { name: 'Scout', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
   faction: 'npc', hullCurrent: 10, color: '#ff0',
   position: { q: 0, r: 0 },
