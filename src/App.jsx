@@ -32,6 +32,7 @@ import { LegendModal }            from './components/modals/LegendModal.jsx'
 import { CrewAssignmentModal }   from './components/modals/CrewAssignmentModal.jsx'
 import { BasicManoeuvreModal }  from './components/modals/BasicManoeuvreModal.jsx'
 import { BattleReportModal }   from './components/modals/BattleReportModal.jsx'
+import { RenameShipModal }    from './components/modals/RenameShipModal.jsx'
 import { HelpScreen }       from './components/help/HelpScreen.jsx'
 import { ChangelogScreen }  from './components/help/ChangelogScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
@@ -61,6 +62,7 @@ const MODAL_MAP = {
   basicManoeuvre:   BasicManoeuvreModal,
   placeObstacle:    PlaceObstacleModal,
   battleReport:     BattleReportModal,
+  renameShip:       RenameShipModal,
 }
 
 function TopRightControls() {

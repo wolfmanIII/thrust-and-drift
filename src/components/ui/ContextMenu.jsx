@@ -112,7 +112,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
 
       {/* ── Header ────────────────────────────────────────────────── */}
       <div className="px-3 py-1.5 bg-slate-800 border-b border-slate-700">
-        <p className="font-mono text-xs text-(--neon-cyan) font-bold truncate">{ship.profile.name}</p>
+        <p className="font-mono text-xs text-(--neon-cyan) font-bold truncate">{ship.name}</p>
         <p className="font-mono text-xs text-slate-400">
           Hull {ship.hullCurrent}/{ship.profile.hull}
           {ship.evasiveThrust > 0 && (
@@ -169,7 +169,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
             <MenuItem
               key={t.id}
               icon="⚔️"
-              label={`Board ${t.profile.name}…`}
+              label={`Board ${t.name}…`}
               onClick={() => open('boarding-setup', { attackerId: targetId })}
             />
           ))}
@@ -181,6 +181,7 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
       {!ship.isDestroyed && (
         <MenuItem icon="👥" label="Assign Crew…" onClick={() => open('crewAssignment', { shipId: targetId })} />
       )}
+      <MenuItem icon="✏️" label="Rename…" onClick={() => open('renameShip', { shipId: targetId })} />
       <MenuItem icon="📊" label="Ship Sheet" onClick={() => open('shipDetail', { shipId: targetId })} />
       <MenuDivider />
       {ship.isDestroyed
@@ -208,7 +209,7 @@ function MissileContextMenu({ x, y, menuRef, missile, targetId, close }) {
           Salvo — {missile?.count ?? '?'} missiles ({missile?.type ?? 'Standard'})
         </p>
         <p className="font-mono text-xs text-slate-400">
-          {launchedBy?.profile.name ?? '?'} → {target?.profile.name ?? '?'}
+          {launchedBy?.name ?? '?'} → {target?.name ?? '?'}
         </p>
         <p className="font-mono text-xs text-slate-400">
           Thrust remaining: {missile?.thrustRemaining ?? '?'}/10
