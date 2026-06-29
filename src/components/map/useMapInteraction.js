@@ -176,7 +176,7 @@ export function useMapInteraction({ hexSize, canvasRef, mouseHexRef }) {
 
     // Placement mode: place the pending ship on the clicked hex
     if (pendingPlacement) {
-      addShip(pendingPlacement.profile, hex, pendingPlacement.faction, pendingPlacement.color)
+      addShip(pendingPlacement.profile, hex, pendingPlacement.faction, pendingPlacement.color, pendingPlacement.vector ?? null)
       cancelPlacement()
       return
     }

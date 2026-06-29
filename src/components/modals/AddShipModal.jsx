@@ -87,6 +87,8 @@ export function AddShipModal() {
   const [color, setColor]         = useState('#f87171')
   const [filter, setFilter]       = useState('')
   const [tokenShape, setTokenShape] = useState('delta')
+  const [vectorQ, setVectorQ]     = useState(0)
+  const [vectorR, setVectorR]     = useState(0)
 
   const filtered = profiles.filter((p) =>
     p.name.toLowerCase().includes(filter.toLowerCase())
@@ -97,14 +99,15 @@ export function AddShipModal() {
   const handleConfirm = () => {
     if (!selectedProfile) return
     const profile = { ...selectedProfile, tokenShape }
+    const vector  = isBasicMode ? null : { q: vectorQ, r: vectorR }
     if (initialHex) {
-      addShip(profile, initialHex, faction, color)
+      addShip(profile, initialHex, faction, color, vector)
       closeModal()
     } else if (isBasicMode) {
       addShip(profile, { q: 0, r: 0 }, faction, color)
       closeModal()
     } else {
-      startPlacement({ profile, faction, color })
+      startPlacement({ profile, faction, color, vector })
       closeModal()
     }
   }
@@ -197,6 +200,38 @@ export function AddShipModal() {
             ))}
           </div>
         </div>
+
+        {/* Initial vector — vectorial mode only */}
+        {!isBasicMode && (
+          <div>
+            <p className="text-slate-400 font-mono text-xs mb-1.5">
+              Initial vector (Δq / Δr)
+              <span className="text-slate-600 ml-2">— leave 0 if stationary</span>
+            </p>
+            <div className="flex gap-2">
+              <div className="flex-1 flex items-center gap-1.5">
+                <span className="font-mono text-xs text-slate-500 w-5 shrink-0">Δq</span>
+                <input
+                  type="number"
+                  value={vectorQ}
+                  onChange={(e) => setVectorQ(Number(e.target.value) || 0)}
+                  className="w-full bg-slate-800 border border-slate-600 text-(--neon-cyan) font-mono text-xs rounded px-2 py-1 text-center focus:outline-none focus:border-(--neon-cyan)/60"
+                  aria-label="Initial vector Δq"
+                />
+              </div>
+              <div className="flex-1 flex items-center gap-1.5">
+                <span className="font-mono text-xs text-slate-500 w-5 shrink-0">Δr</span>
+                <input
+                  type="number"
+                  value={vectorR}
+                  onChange={(e) => setVectorR(Number(e.target.value) || 0)}
+                  className="w-full bg-slate-800 border border-slate-600 text-(--neon-cyan) font-mono text-xs rounded px-2 py-1 text-center focus:outline-none focus:border-(--neon-cyan)/60"
+                  aria-label="Initial vector Δr"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Confirm */}
         <button

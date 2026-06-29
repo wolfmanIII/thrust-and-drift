@@ -470,8 +470,9 @@ const useBattleStore = create((set, get) => {
    * @param {{ q: number, r: number }} position
    * @param {'players'|'npc'|'neutral'} faction
    * @param {string} color  CSS hex color
+   * @param {{ q: number, r: number }} [initialVector]  Pre-set velocity vector (default {q:0,r:0}). REQ-01.
    */
-  addShip: wh((profile, position, faction, color) => {
+  addShip: wh((profile, position, faction, color, initialVector) => {
     const instance = {
       id: uuidv7(),
       profileId: profile.id,
@@ -479,7 +480,7 @@ const useBattleStore = create((set, get) => {
       faction,
       color,
       position: { ...position },
-      vector: { q: 0, r: 0 },
+      vector: initialVector ? { ...initialVector } : { q: 0, r: 0 },
       lastThrustDelta: { q: 0, r: 0 },
       hullCurrent: profile.hull,
       baseArmor: profile.armor ?? 0,
