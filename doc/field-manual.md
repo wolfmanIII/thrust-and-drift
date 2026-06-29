@@ -208,6 +208,7 @@ Right-click any empty hex → **Add ship here**. A modal opens where you select:
   auto-roll behaviour.
 - **Color** — token display colour.
 - **Shape** — token silhouette: Delta, Needle, Freighter, Gunship, Cruiser, or Capital. Each shape has a distinct hull outline and bridge/cockpit detail overlay. The choice is per-placement and does not affect game mechanics.
+- **Initial vector (Δq / Δr)** *(vectorial mode only)* — Pre-set the ship's starting velocity vector. Default is 0 / 0 (stationary). Use this for ships arriving at cruise speed, fleeing, or intercepting at the start of an engagement.
 
 After placing, right-click the ship token → **Assign Crew…** to review or
 adjust which crew member covers each role and turret (see [§ 11.3](#113-crew-role-assignments)).

@@ -260,6 +260,7 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="Faction" v="Players, Allies, Enemies, Neutral — affects token colour and auto-roll behaviour." />
             <KV k="Color" v="Token display colour." />
             <KV k="Shape" v="Token silhouette — Delta, Needle, Freighter, Gunship, Cruiser, or Capital. Each has a distinct hull outline and bridge/cockpit overlay (increased contrast for colour-vision accessibility). Per-placement only; does not affect game mechanics." />
+            <KV k="Initial vector (Δq / Δr)" v="Vectorial mode only. Pre-set the ship's starting velocity vector (default 0 / 0). Use for ships arriving at cruise speed, fleeing, or intercepting at scenario start." />
             <p>After placing, right-click the ship token → <span className="text-slate-200">Assign Crew…</span> to review or adjust which crew member covers each role and turret (see Crew System below).</p>
           </Sub>
           <Sub title="REMOVING A SHIP">

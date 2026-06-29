@@ -16,6 +16,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
   The reporter cited CRB p.166 (general EW overview) and conflated the two. No change to game logic. CRB FAQ (Aug 2024) contains no errata for this rule.
 
+### Added
+
+- **#11 — Initial vector override when adding a ship (REQ-01)** — The Add Ship modal now shows Δq/Δr number inputs (vectorial mode only, hidden in basic mode). The GM can set a non-zero starting velocity before placing the ship — useful for ships arriving at cruise speed, fleeing, or intercepting. Works for both direct-hex placement (right-click a hex) and the map-click flow. Default remains {q:0, r:0}. (`AddShipModal.jsx`, `battleStore.addShip`, `useMapInteraction.js`)
+
 ### Fixed
 
 - **#15 — EW Counter Missile description text** — `crewActions.js` listed `Electronics(comms)` as the skill specialisation; corrected to `Electronics(sensors)` per CRB p.173. HelpScreen updated to match. No mechanical change.
