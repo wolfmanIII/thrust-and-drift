@@ -8,6 +8,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [2.3.0] — 2026-06-29
+
 ### Investigated (no code change)
 
 - **#15 — EW Counter Missile difficulty (CRB p.173)** — Reported as bug: "10+ should be 8+". Investigation confirmed the implementation is **RAW-correct**. The CRB defines two distinct sensor actions with different difficulties:
@@ -28,6 +32,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **#16 — Aid Gunners action for Pilot (CRB p.63, p.166)** — New crew action under the Pilot role. The pilot makes an Average (8+) Pilot check to start a task chain with the gunners. Effect maps per CRB p.63: success grants DM+1/+2/+3 to all gunner attack rolls this round; failure applies DM−1/−2/−3. The DM appears in the Attack Modal DM summary as "Aid Gunners". Resets to 0 at round start. (`crewActions.js`, `battleStore.js`, `ActionModal.jsx`, `AttackModal.jsx`, `useAttackSetup.js`, `combat.js`)
 - **#14 — Combined attack roll for same-type weapons (CRB p.168)** — Double/triple turrets with multiple weapons of the same type now fire as a linked group: one attack roll, +1 per damage die per extra weapon (e.g. 3× Pulse Laser → 2D+4). The weapon selector shows a `×N` badge for linked weapons and the enhanced damage (e.g. `2D+4 dmg`). The damage step formula and result display include the `+N linked` bonus explicitly. Missiles are excluded from linking per CRB p.172. Mixed-type turret enforcement (only one type per round) was already correct via `firedTurrets` slot-locking. (`useAttackSetup.js`, `AttackModal.jsx`)
 - **#18 — New ship mid-battle initiative display** — Ships added mid-battle showed `0` as their initiative score in PhaseTracker, with no indication that a re-roll was pending. Initiative `0` now renders as `—` (tooltip: "Initiative not yet rolled — re-roll pending at round start"). When `shipAddedThisRound` is active, a `↺ re-roll next round` notice appears at the bottom of the PhaseTracker list. (`PhaseTracker.jsx`)
+
+### Tests
+
+- **Unit** — 182 new test cases across all features: `battleStore.renameShip` (6), `RenameShipModal` (13), fixture updates (4 files), quad turret `ShipProfileForm` (9), `ShipDetailModal` Quad label (1), `useAttackSetup` quad linking (1), `MissileImpactModal` PD +3 bonus (1), `battleStore.addShip` name field (2), plus prior batch covering #11/#14/#15/#16/#18.
+- **Playwright e2e** — 9 new tests in `batch3-features.spec.js`: ship rename context menu + modal flow (6), quad turret profile builder SINGLE/TRIPLE/QUAD label progression (3).
 
 ---
 
