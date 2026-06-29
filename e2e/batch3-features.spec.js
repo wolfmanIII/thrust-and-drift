@@ -4,6 +4,7 @@
  * REQ-11: AUTO-ASSIGN button in CrewAssignmentModal.
  * REQ-13: Initiative phase skipped from round 2+ (CRB p.160); GM ↺ override.
  * #11:  Initial vector override when adding a ship (REQ-01).
+ * #12:  Rename ship instances (REQ-03).
  * #14: Same-type weapon linking in double/triple turrets (CRB p.168).
  * #16: Aid Gunners action for Pilot (CRB p.63, p.166).
  * #18: Mid-battle ship shows — and ↺ notice in PhaseTracker.
@@ -515,5 +516,107 @@ test.describe('AddShipModal — initial vector inputs (#11 REQ-01)', () => {
 
     // Battle screen still live
     await expect(page.getByTitle('Tactical (2)')).toBeVisible()
+  })
+})
+
+// ── #12: Rename ship instances (REQ-03) ───────────────────────────────────────
+
+test.describe('ContextMenu + RenameShipModal — ship rename (#12 REQ-03)', () => {
+  test.beforeEach(async ({ page }) => {
+    await startNewBattle(page)
+    await placeNpcShip(page, 'Light Fighter')
+  })
+
+  test('"Rename…" option appears in ship context menu', async ({ page }) => {
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, { button: 'right' })
+    await expect(page.getByText('Rename…')).toBeVisible()
+  })
+
+  test('clicking "Rename…" opens the rename modal with the ship name pre-filled', async ({ page }) => {
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, { button: 'right' })
+    await page.getByText('Rename…').click()
+
+    // Modal header
+    await expect(page.getByRole('heading', { name: 'Rename Ship' })).toBeVisible()
+    // Input pre-filled with the profile name
+    const input = page.getByRole('textbox')
+    await expect(input).toBeVisible()
+    await expect(input).toHaveValue('Light Fighter')
+  })
+
+  test('renaming a ship updates its name in the context menu header', async ({ page }) => {
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    const cx     = box.x + box.width  / 2
+    const cy     = box.y + box.height / 2
+
+    // Rename
+    await page.mouse.click(cx, cy, { button: 'right' })
+    await page.getByText('Rename…').click()
+    await page.getByRole('textbox').fill('Ace One')
+    await page.getByRole('button', { name: 'RENAME' }).click()
+
+    // Modal must close
+    await expect(page.getByRole('heading', { name: 'Rename Ship' })).not.toBeVisible()
+
+    // Right-click the ship again — header in context menu must show the new name
+    await page.mouse.click(cx, cy, { button: 'right' })
+    // The context menu header uses ship.name (cyan text at the top)
+    await expect(page.locator('.text-\\(--neon-cyan\\).font-bold').filter({ hasText: 'Ace One' })).toBeVisible()
+  })
+
+  test('CANCEL closes modal without renaming — context menu header unchanged', async ({ page }) => {
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    const cx     = box.x + box.width  / 2
+    const cy     = box.y + box.height / 2
+
+    await page.mouse.click(cx, cy, { button: 'right' })
+    await page.getByText('Rename…').click()
+    await page.getByRole('textbox').fill('Should Not Stick')
+    await page.getByRole('button', { name: 'CANCEL' }).click()
+
+    // Modal closed
+    await expect(page.getByRole('heading', { name: 'Rename Ship' })).not.toBeVisible()
+
+    // Right-click the ship — header still shows original name
+    await page.mouse.click(cx, cy, { button: 'right' })
+    await expect(page.locator('.text-\\(--neon-cyan\\).font-bold').filter({ hasText: 'Light Fighter' })).toBeVisible()
+    await expect(page.getByText('Should Not Stick')).not.toBeVisible()
+  })
+
+  test('RENAME button is disabled when input is empty', async ({ page }) => {
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, { button: 'right' })
+    await page.getByText('Rename…').click()
+
+    await page.getByRole('textbox').fill('')
+    await expect(page.getByRole('button', { name: 'RENAME' })).toBeDisabled()
+  })
+
+  test('Enter key confirms rename and name appears in context menu header', async ({ page }) => {
+    const canvas = page.locator('canvas').first()
+    const box    = await canvas.boundingBox()
+    const cx     = box.x + box.width  / 2
+    const cy     = box.y + box.height / 2
+
+    await page.mouse.click(cx, cy, { button: 'right' })
+    await page.getByText('Rename…').click()
+
+    const input = page.getByRole('textbox')
+    await input.fill('Bandit Alpha')
+    await input.press('Enter')
+
+    // Modal closes
+    await expect(page.getByRole('heading', { name: 'Rename Ship' })).not.toBeVisible()
+
+    // Verify via context menu header
+    await page.mouse.click(cx, cy, { button: 'right' })
+    await expect(page.locator('.text-\\(--neon-cyan\\).font-bold').filter({ hasText: 'Bandit Alpha' })).toBeVisible()
   })
 })
