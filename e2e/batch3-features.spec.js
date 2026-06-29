@@ -426,7 +426,7 @@ test.describe('ShipProfileForm — quad turret UI (#17 HG p.81)', () => {
     await addWeapon(page)
     await addWeapon(page)
 
-    await expect(page.getByText('QUAD')).toBeVisible()
+    await expect(page.getByText('QUAD', { exact: true })).toBeVisible()
     await expect(page.getByText('QUAD — max 4')).toBeVisible()
     // Add-weapon combobox must be gone (slot is full)
     await expect(page.getByRole('combobox')).not.toBeVisible()
