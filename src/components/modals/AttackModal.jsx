@@ -180,7 +180,7 @@ function AttackConfigStep({
   reactions,
   onNext, onClose,
 }) {
-  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, dogfightDM = 0, obstacleCoverDM = 0, totalDM } = dmBreakdown
+  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, totalDM } = dmBreakdown
   const isMissilePdMode = !!targetMissileId
   // When targeting a missile, only PD weapons are valid
   const visibleWeapons  = isMissilePdMode
@@ -384,6 +384,7 @@ function AttackConfigStep({
             <DmRow label="Target size" value={sizeDM} />
             {evasiveDM !== 0 && <DmRow label="Evasion" value={evasiveDM} />}
             {sensorLockDM !== 0 && <DmRow label="Sensor Lock" value={sensorLockDM} />}
+            {aidGunnersDM !== 0 && <DmRow label="Aid Gunners" value={aidGunnersDM} />}
             {dogfightDM !== 0 && <DmRow label="Dogfight" value={dogfightDM} />}
             {obstacleCoverDM !== 0 && <DmRow label="Field cover" value={obstacleCoverDM} />}
             <div className="border-t border-slate-700 mt-1 pt-1">
@@ -468,14 +469,14 @@ function AttackRollStep({
   dmBreakdown,
   attackResult, setAttackResult, onNext, onClose, onMissClose,
 }) {
-  const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, dogfightDM = 0, obstacleCoverDM = 0, totalDM } = dmBreakdown
+  const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, totalDM } = dmBreakdown
   const [manualDice, setManualDice] = useState(null)
 
   const handleRoll = (diceOverride = null) => {
     const result = rollAttack({
       gunnerSkill,
       dexDM: 0,
-      aidGunnersDM: 0,
+      aidGunnersDM,
       rangeDM,
       weaponDM,
       targetSizeDM: sizeDM,

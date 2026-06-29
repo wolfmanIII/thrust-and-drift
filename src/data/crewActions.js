@@ -5,6 +5,15 @@
  */
 
 export const CREW_ACTIONS = {
+  pilot: [
+    {
+      id: 'aid_gunners',
+      label: 'Aid Gunners',
+      difficulty: 8,
+      skill: 'pilot',
+      description: 'Average Pilot check (DEX). Starts a task chain with gunners: success grants DM+1/+2/+3 to all gunner attack rolls this round; failure applies DM−1/−2/−3. // MgT2e CRB p.63, p.166',
+    },
+  ],
   leadership: [
     {
       id: 'improve_initiative',

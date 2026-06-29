@@ -95,9 +95,10 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const rangeDM   = getRangeDM(rangeBand)
   const sizeDM      = target ? getTargetSizeDM(target.profile.tonnage ?? 0) : 0
   // evasiveDM is 0 here — computed dynamically in AttackModal from Reactions (CRB p.171)
-  const sensorLockDM = attacker?.sensorLockOn === targetId ? (attacker.sensorLockDM ?? 0) : 0
-  const gunnerSkill = getEffectiveSkill(attacker?.profile.crew, assignments, 'gunner', turretSlot)
-  const weaponDM    = weapon?.attackDM ?? 0
+  const sensorLockDM  = attacker?.sensorLockOn === targetId ? (attacker.sensorLockDM ?? 0) : 0
+  const aidGunnersDM  = attacker?.aidGunnersDM ?? 0
+  const gunnerSkill   = getEffectiveSkill(attacker?.profile.crew, assignments, 'gunner', turretSlot)
+  const weaponDM      = weapon?.attackDM ?? 0
 
   // Dogfight attack DM: +2 winner, −2 loser, 0 tie (CRB p.138)
   const attackerGroup  = attacker?.inDogfight
@@ -125,7 +126,7 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     ? computeObstacleCoverDM(getObstacleAt(obstacles, target.position))
     : 0
 
-  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM + obstacleCoverDM
+  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM + obstacleCoverDM + aidGunnersDM
   const outOfRange  = weapon ? isOutOfRange(weapon.maxRange, rangeBand) : false
 
   return {
@@ -141,6 +142,6 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     outOfRange,
     dogfightTie,
     noPower,
-    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, dogfightDM, obstacleCoverDM, totalDM },
+    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, aidGunnersDM, dogfightDM, obstacleCoverDM, totalDM },
   }
 }

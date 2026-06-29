@@ -166,6 +166,7 @@ function buildNextRoundState(s) {
       evasiveThrust:        0,
       firedTurrets:         [],
       usedCrewMembers:      [],
+      aidGunnersDM:         0,
       ionRoundsLeft:        ionNext,
       // Penalty persists while ionCurrent > 0 (survives one boundary for N+1 acceleration).
       // Clears only when ionCurrent reaches 0. // HG p.30, FAQ HG 2022 p.1 — BUG-001
@@ -493,6 +494,7 @@ const useBattleStore = create((set, get) => {
       hasActedThisPhase: false,
       evasiveThrust: 0,
       firedTurrets: [],
+      aidGunnersDM: 0,
       usedCrewMembers: [],
       sensorLockOn: null,
       sensorLockedBy: null,
@@ -1630,6 +1632,31 @@ const useBattleStore = create((set, get) => {
           phase: s.phase,
           type: 'action',
           message: `${ship.profile.name}: Initiative improved by +${applied} (takes effect next round, lasts 1 round).`,
+          shipId,
+        })],
+      }))
+    },
+  ),
+
+  /**
+   * Apply Aid Gunners task chain DM to all gunner attack rolls this round.
+   * DM is derived from the Pilot check Effect via the Task Chain table (CRB p.63).
+   * Resets to 0 at the start of the next round via buildNextRoundState.
+   * // MgT2e CRB p.63, p.166
+   * @param {string} shipId
+   * @param {number} dm  Task chain DM (positive on success, negative on failure)
+   */
+  applyAidGunners: wh(
+    (shipId) => !!get().ships.find((s) => s.id === shipId),
+    (shipId, dm) => {
+      const ship = get().ships.find((s) => s.id === shipId)
+      set((s) => ({
+        ships: s.ships.map((sh) => sh.id === shipId ? { ...sh, aidGunnersDM: dm } : sh),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'action',
+          message: `${ship.profile.name}: Aid Gunners — task chain DM ${dm >= 0 ? '+' : ''}${dm} to all gunner attacks this round. // CRB p.63`,
           shipId,
         })],
       }))

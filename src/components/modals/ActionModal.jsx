@@ -13,6 +13,7 @@ import { CREW_ACTIONS } from '../../data/crewActions.js'
 import { migrateCrew, CREW_SKILLS } from '../../utils/crew.js'
 import { DiceInput } from '../forms/DiceInput.jsx'
 import { getObstacleAt } from '../../utils/obstacles.js'
+import { taskChainDM } from '../../utils/combat.js'
 
 /**
  * Apply the mechanical effect of a successful action to the battle state.
@@ -22,6 +23,7 @@ function useActionEffects() {
   const clearSensorLock      = useBattleStore((s) => s.clearSensorLock)
   const repairCritical       = useBattleStore((s) => s.repairCritical)
   const applyInitiativeBonus = useBattleStore((s) => s.applyInitiativeBonus)
+  const applyAidGunners      = useBattleStore((s) => s.applyAidGunners)
   const overloadDrive        = useBattleStore((s) => s.overloadDrive)
   const reloadTurret         = useBattleStore((s) => s.reloadTurret)
   const applyMissileEW       = useBattleStore((s) => s.applyMissileEW)
@@ -42,6 +44,9 @@ function useActionEffects() {
         break
       case 'improve_initiative':
         applyInitiativeBonus(shipId, effect)
+        break
+      case 'aid_gunners':
+        applyAidGunners(shipId, taskChainDM(effect))
         break
       case 'overload_drive':
         overloadDrive(shipId, 1)  // fixed +1 per CRB p.171 — not +Effect
@@ -243,6 +248,10 @@ export function ActionModal() {
                 })()}
                 {selectedAction.id === 'repair_system'      && 'Critical hit removed.'}
                 {selectedAction.id === 'improve_initiative' && `+${rollResult.effect} to initiative next round.`}
+                {selectedAction.id === 'aid_gunners' && (() => {
+                  const dm = taskChainDM(rollResult.effect)
+                  return `Task chain DM ${dm >= 0 ? '+' : ''}${dm} to all gunner attack rolls this round.`
+                })()}
                 {selectedAction.id === 'overload_drive'     && `+1 Thrust next round.${rollResult.effect <= -6 ? ' ⚠ Effect ≤ −6: apply M-Drive critical Severity 1.' : ''}`}
                 {selectedAction.id === 'reload_turret'      && 'Turret reloaded.'}
               </p>

@@ -10,8 +10,8 @@ const ALL_ROLES   = Object.keys(CREW_ACTIONS)
 const ALL_ACTIONS = Object.values(CREW_ACTIONS).flat()
 
 describe('CREW_ACTIONS — roles', () => {
-  it('defines exactly the 4 expected roles', () => {
-    expect(ALL_ROLES.sort()).toEqual(['engineer', 'gunner', 'leadership', 'sensors'])
+  it('defines exactly the 5 expected roles', () => {
+    expect(ALL_ROLES.sort()).toEqual(['engineer', 'gunner', 'leadership', 'pilot', 'sensors'])
   })
 
   it('every role has at least one action', () => {

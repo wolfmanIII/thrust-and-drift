@@ -354,3 +354,18 @@ export function computeMissileAttackDM(count, hasSmart = true, evasivePilot = 0)
 export function computeMissileImpactDamage(roll, armour, effect, count) {
   return Math.max(0, roll - armour) * Math.max(1, Math.min(effect, count))
 }
+
+/**
+ * Map the Effect of the first check in a task chain to the DM granted to the next check.
+ * // MgT2e CRB p.63 — Task Chains table
+ * @param {number} effect  Effect of the preceding check (total − difficulty)
+ * @returns {number}  DM applied to the linked check (negative on failure)
+ */
+export function taskChainDM(effect) {
+  if (effect <= -6) return -3
+  if (effect <= -2) return -2   // Effect -2 to -5
+  if (effect < 0)   return -1   // Effect -1
+  if (effect === 0) return 1
+  if (effect <= 5)  return 2
+  return 3
+}
