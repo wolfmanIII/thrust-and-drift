@@ -205,7 +205,8 @@ export function ActionModal() {
       `${ship.profile.name} / ${selectedMember?.name ?? '?'}: ${selectedAction.label} — ${result.display} (${result.success ? 'SUCCESS' : 'FAILED'})`
     )
 
-    if (result.success) {
+    // aid_gunners applies a task chain DM on both success AND failure (CRB p.63)
+    if (result.success || selectedAction.id === 'aid_gunners') {
       applyEffect(selectedAction.id, ship.id, result.effect, targetShipId, targetImpactId, selectedCritIndex)
     }
   }
@@ -238,7 +239,7 @@ export function ActionModal() {
                 : `FAILED — Effect ${rollResult.effect}`}
             </div>
 
-            {rollResult.success && selectedAction && (
+            {(rollResult.success || selectedAction?.id === 'aid_gunners') && selectedAction && (
               <p className="text-slate-400 font-mono text-xs text-center">
                 {selectedAction.id === 'sensor_lock'        && `Sensor lock acquired on ${ships.find(s => s.id === targetShipId)?.profile.name ?? '?'}.`}
                 {selectedAction.id === 'electronic_warfare' && 'Enemy sensor lock removed.'}
