@@ -136,7 +136,10 @@ export function ActionModal() {
   const isPlayer = ship.faction === 'players'
 
   const usedCrewMembers = ship.usedCrewMembers ?? []
-  const availableCrew   = crewArray.filter((m) => !usedCrewMembers.includes(m.id))
+  const availableCrew   = crewArray.filter((m) =>
+    !usedCrewMembers.includes(m.id) &&
+    getActionsForMember(m, ship.crewAssignments, phase).length > 0
+  )
 
   const selectedMember = crewArray.find((m) => m.id === selectedMemberId) ?? null
   const memberActions  = selectedMember ? getActionsForMember(selectedMember, ship.crewAssignments, phase) : []

@@ -91,8 +91,10 @@ describe('ActionModal — solo crew / crew assignments (REQ-10)', () => {
   })
 
   it('crew member with sensors:0 NOT assigned to sensors does not see Sensor Lock', () => {
+    // engineer:1 gives an actions-phase action so the member appears in the crew list;
+    // sensors:0 + unassigned still blocks Sensor Lock regardless
     const ship = makeSoloShip({
-      skills: { pilot: 2 },
+      skills: { pilot: 2, engineer: 1 },
       assignments: { sensors: null },
     })
     useBattleStore.setState({ ships: [ship] })
