@@ -10,6 +10,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.3.1] — 2026-06-30
+
+### Fixed
+
+- **#20 Bug 1 — Torpedo ammo pool separated from missile ammo** — `countTorpedoAmmoCapacity` is now a distinct function (3 per Torpedo barbette). `battleStore.addShip` initialises `torpedoAmmoTotal` independently; `launchMissile` routes deductions by weapon type. `countMissileAmmoCapacity` no longer includes Torpedo barbettes. Display surfaces (`BasicBattleView`, `ShipDetailModal`) show a dedicated torpedo ammo row when `torpedoAmmoMax > 0`. (`combat.js`, `battleStore.js`, `BasicBattleView.jsx`, `ShipDetailModal.jsx`)
+- **#20 Bug 2 — PD Effect halved vs torpedo salvoes (HG p.39)** — `MissileImpactModal` now applies `⌊Effect/2⌋` when `impact.type === 'Torpedo'`, instead of full Effect. Battle log entries and UI labels use "torpedo/es" vs "missile/s" contextually. (`MissileImpactModal.jsx`)
+- **#20 Bug 3 — DM-2 vs ships < 2,000 tons for torpedoes (HG p.39)** — `useAttackSetup` computes `torpedoSmallShipDM = -2` when the weapon is Torpedo and the target tonnage is below 2,000. Flows through `dmBreakdown` → `AttackModal` → `rollAttack`. A dedicated DM row appears in the Attack modal breakdown when non-zero. (`useAttackSetup.js`, `AttackModal.jsx`, `combat.js`)
+
+### Tests
+
+- **Unit** — 173 new test cases: `countTorpedoAmmoCapacity` (5), `battleStore` torpedo magazine (6), `useAttackSetup` torpedoSmallShipDM (5), `MissileImpactModal` torpedo PD halving (3), `BasicBattleView` torpedo ammo row (1), updated `countMissileAmmoCapacity` and `battleStore` ammo-init tests for separated pools.
+
+---
+
 ## [2.3.0] — 2026-06-29
 
 ### Investigated (no code change)

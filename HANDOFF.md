@@ -9,10 +9,10 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.0.0 |
+| **Versione** | 2.3.1 |
 | **Branch** | main |
-| **Test** | 1114 Vitest + 22 Playwright e2e |
-| **Ultimo commit** | docs(release): version bump 2.0.0 — update all doc, README, CHANGELOG, HANDOFF, CLAUDE.md, field manual, HelpScreen |
+| **Test** | 1294 Vitest + 22 Playwright e2e |
+| **Ultimo commit** | fix(#20 Bug 3): DM-2 for torpedo attacks vs ships < 2,000 tons |
 
 ---
 

@@ -117,9 +117,9 @@ Il pilota si posiziona lungo un vettore di attacco ottimale per assistere i gunn
 | Fallito con Effetto −6 o peggio | −3 |
 | Fallito con Effetto −2 a −5 | −2 |
 | Fallito con Effetto −1 | −1 |
-| Riuscito con Effetto 0 | +0 |
-| Riuscito con Effetto 1–5 | +1 |
-| Riuscito con Effetto 6 o più | +2 |
+| Riuscito con Effetto 0 | +1 |
+| Riuscito con Effetto 1–5 | +2 |
+| Riuscito con Effetto 6 o più | +3 |
 
 #### 5.2.2 Docking
 
@@ -282,6 +282,8 @@ Formula: **2D6 + Gunner(turret) + DM DEX [+ DM torretta]**
 - Torretta con 3 laser dello stesso tipo: **DM +2**
 
 **L'Effetto del check** indica il numero di missili eliminati dalla salva.
+
+> **Salve di siluri (HG p.39):** Il Point Defence è meno efficace contro i siluri. L'Effetto viene **dimezzato (arrotondato per difetto)** prima di contare i siluri distrutti — un Effetto 3 elimina solo 1 siluro, non 3.
 
 ### 7.4 Disperse Sand (Gunner)
 

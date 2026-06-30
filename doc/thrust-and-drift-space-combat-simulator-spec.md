@@ -163,7 +163,7 @@ Suite Vitest collocata accanto ai file sorgente (`*.test.js` / `*.test.jsx`):
 | File | Coverage |
 | ---- | -------- |
 | `utils/hex.test.js` | `hex.js` — coordinate, distanza, pixel↔hex, range band |
-| `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco, getApValue, countMissileAmmoCapacity, countSandcasters, computeMissileAttackDM, computeMissileImpactDamage, computeIonThrustEffect |
+| `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco, getApValue, countMissileAmmoCapacity, countTorpedoAmmoCapacity, countSandcasters, computeMissileAttackDM, computeMissileImpactDamage, computeIonThrustEffect |
 | `utils/dice.test.js` | `dice.js` — rollDice, formatDiceResults, formatCheckResult |
 | `utils/crew.test.js` | `crew.js` — getCrewSkill, getEffectiveSkill, getAssignedSkill, buildDefaultAssignments, migrateCrew, blankCrewMember |
 | `data/weapons.test.js` | `weapons.js` — completezza catalogo WEAPON_IDS, campi obbligatori per ogni arma, barbette damageMultiple=3, turret damageMultiple=1, Ion Cannon (barbette, bayOnly, damageMultiple, ignoresArmour), bay variants S/M/L, Torpedo, Missile Barbette, AP cross-check, missile maxRange=Special, DEFENSIVE_WEAPONS |
@@ -329,8 +329,10 @@ interface ShipInstance {
   hardened: boolean             // true = immune a Ion weapons (/fib computers)
 
   // MUNIZIONI
-  missileAmmoTotal: number      // Missili rimanenti (tutti i launcher missile/torpedo combinati)
-                                // max = countMissileAmmoCapacity(profile): racks×12 + barbettes×25 + torpedoes×3
+  missileAmmoTotal: number      // Missili rimanenti (Missile Rack + Missile Barbette — non include siluri)
+                                // max = countMissileAmmoCapacity(profile): racks×12 + barbettes×25
+  torpedoAmmoTotal: number      // Siluri rimanenti (Torpedo Barbette — pool separato dai missili)
+                                // max = countTorpedoAmmoCapacity(profile): torpedo_barbettes×3
   sandAmmoTotal: number         // Canister sandcaster rimanenti; max = countSandcasters(profile): sandcasters×20
 
   // STATO DISTRUZIONE / MANOVRE SPECIALI
@@ -716,8 +718,8 @@ export function getApValue(traits) {
 }
 
 // === MISSILE AMMO CAPACITY ===
-// Capacità totale munizioni per tutti i launcher su una nave.
-// racks×12 + barbettes×25 + torpedoes×3 — HG p.29–31
+// Capacità missili (Rack + Barbette) — non include siluri.
+// racks×12 + barbettes×25 — HG p.28–29
 export function countMissileAmmoCapacity(profile) {
   const turrets = profile.turrets ?? []
   let total = 0
@@ -725,7 +727,20 @@ export function countMissileAmmoCapacity(profile) {
     for (const w of t.weapons ?? []) {
       if (w === 'Missile Rack')     total += 12
       if (w === 'Missile Barbette') total += 25
-      if (w === 'Torpedo')          total += 3
+    }
+  }
+  return total
+}
+
+// === TORPEDO AMMO CAPACITY ===
+// Capacità siluri (Torpedo Barbette) — pool separato dai missili.
+// torpedo_barbettes×3 — HG p.30–31
+export function countTorpedoAmmoCapacity(profile) {
+  const turrets = profile.turrets ?? []
+  let total = 0
+  for (const t of turrets) {
+    for (const w of t.weapons ?? []) {
+      if (w === 'Torpedo') total += 3
     }
   }
   return total

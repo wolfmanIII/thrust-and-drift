@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.3.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.3.1** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -148,7 +148,7 @@ Each card has three zones:
 | ---- | ------- |
 | **Header** | Ship name · faction colour dot · status badges: `☠ WRECK`, `DOGFIGHT`, `BOARDING`, `EVA N` (evasive thrust), `LOCKED` (sensor locked), `ION NR` (ion disruption active — blue) |
 | **Hull** | Hull bar (green → yellow → red) · "Hull N/M" · "Ini N" |
-| **Status** *(conditional)* | Sensor lock → target name (with DM if set); Locked by [attacker]; inbound missiles per launcher (⚡ N× type, ~Xr ETA in basic mode); inbound torpedoes; launched missiles per target (🚀 N× type, ~Xr ETA in basic mode); reloading turrets; critical hits list; missile ammo (🚀 N/max, yellow < 25%, red at 0); sand canisters (🪨 N/max, yellow < 25%, red at 0); ion disruption (`−N PWR · Xr remaining`; `OFFLINE` label when `currentPower` reaches 0) |
+| **Status** *(conditional)* | Sensor lock → target name (with DM if set); Locked by [attacker]; inbound missiles per launcher (⚡ N× type, ~Xr ETA in basic mode); inbound torpedoes; launched missiles per target (🚀 N× type, ~Xr ETA in basic mode); reloading turrets; critical hits list; missile ammo (🚀 N/max, yellow < 25%, red at 0); torpedo ammo (🎯 N/max, yellow < 25%, red at 0 — separate pool from missiles); sand canisters (🪨 N/max, yellow < 25%, red at 0); ion disruption (`−N PWR · Xr remaining`; `OFFLINE` label when `currentPower` reaches 0) |
 
 The Status zone is hidden when none of these conditions are active.
 
@@ -408,7 +408,12 @@ If the target has at least one **unfired laser turret** (Pulse Laser or Beam Las
 | +Gunner skill | Assigned gunner for that turret slot |
 | +1 per laser beyond the first | DM+1 for 2 lasers on one slot; DM+2 for 3 lasers |
 
-Roll 2D6 + total DM against **8+**. Effect = total − 8. `max(0, Effect)` missiles are destroyed. The turret slot is marked fired immediately.
+Roll 2D6 + total DM against **8+**. Effect = total − 8.
+
+- **Missiles:** `max(0, Effect)` missiles destroyed.
+- **Torpedo salvoes:** Effect is **halved (rounded down)** before applying — `max(0, ⌊Effect/2⌋)` torpedoes destroyed *(HG p.39)*.
+
+The turret slot is marked fired immediately.
 
 - **Multiple turrets:** if more than one eligible slot is available, a selector appears. Select a slot, roll; repeat with remaining slots.
 - **Player targets:** enter dice manually. NPC targets auto-roll.
@@ -580,6 +585,19 @@ Torpedoes use the same guided-flight system as missiles. A torpedo token is
 rendered in red/amber on the map, separate from missile salvos.
 
 Damage: **6D6 per torpedo** (vs 4D6 per missile) *(HG p.31)*.
+
+**Torpedo ammo is tracked separately from missile ammo.** A ship with both
+Torpedo barbettes and Missile Racks/Barbettes shows two independent ammo
+pools — consuming torpedo ammo does not reduce the missile magazine, and vice
+versa.
+
+**Attack modifiers *(HG p.39)*:**
+
+- **DM-2 vs ships < 2,000 tons** — torpedoes are less accurate against small,
+  agile targets. Applied automatically when the target's tonnage is below 2,000.
+- **Point Defence is less effective** — the Effect of any successful PD roll is
+  halved (rounded down) before counting torpedoes destroyed: a PD Effect of 3
+  destroys only 1 torpedo instead of 3. See §8.1 for full PD rules.
 
 > The launching weapon slot is marked as fired after any launch. Launcher entries
 > disappear from the Attack weapon list once ammo is empty, consistent with the
