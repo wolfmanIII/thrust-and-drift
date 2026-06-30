@@ -312,6 +312,14 @@ export function HelpScreen({ onBack } = {}) {
           </Sub>
           <Note>Full thrust is available for movement. Evasive Action is a Reaction declared during the Attack phase — not pre-allocated here (CRB p.171). See the Attack Phase section below.</Note>
 
+          <Sub title="AID GUNNERS (PILOT — MANOEUVRE STEP)">
+            <p>The pilot may stabilise the ship along the optimal attack vector during the Acceleration phase <span className="text-slate-400">(CRB p.166)</span>. This is a <span className="text-slate-200">Manoeuvre Step</span> action — it must be resolved before the Attack phase so the DM applies to attacks in the same round.</p>
+            <p>Right-click ship → <span className="text-slate-200">Crew Action…</span> during Acceleration (pilot crew member required).</p>
+            <KV k="Success" v="Effect 0 → DM+1 · Effect 1–5 → DM+2 · Effect 6+ → DM+3 to all gunner attack rolls this round." />
+            <KV k="Failure" v="Effect −1 → DM−1 · Effect −2/−5 → DM−2 · Effect −6 or less → DM−3 to all gunner attack rolls this round." />
+            <p className="text-slate-400 text-xs italic">Task chain (CRB p.63) — both success and failure apply a DM. Resets to 0 at the start of the next round.</p>
+          </Sub>
+
           <Sub title="MANOEUVRE (BASIC MODE)">
             <p>In Basic mode, <span className="text-slate-200">Apply Thrust</span> is replaced by <span className="text-slate-200">Manoeuvre…</span> in the context menu.</p>
             <p>Each ship acts on its own initiative turn. Thrust <span className="text-slate-200">accumulates across rounds</span> — a ship that cannot afford the full band cost in one round contributes a partial amount; the band advances when the pool meets the threshold <span className="text-slate-400">(CRB p.166)</span>.</p>
@@ -474,7 +482,7 @@ export function HelpScreen({ onBack } = {}) {
           </Sub>
 
           <Sub title="AVAILABLE ACTIONS">
-            <KV k="Pilot" v="AID GUNNERS — 2D6 + Pilot (8+). Starts a task chain with gunners (CRB p.63, p.166): Effect 0 → DM+1, Effect 1–5 → DM+2, Effect 6+ → DM+3 to all gunner attack rolls this round. Failure: Effect −1 → DM−1, −2/−5 → DM−2, −6 or less → DM−3. Resets each round." />
+            <p className="text-slate-400 text-xs italic">Aid Gunners (Pilot) is a Manoeuvre Step action — see the Acceleration Phase section above.</p>
             <KV k="Captain (Leadership)" v="IMPROVE INITIATIVE — 2D6 + Leadership (8+). +Effect added to this ship's initiative at the start of next round (lasts 1 round) (CRB p.166)." />
             <KV k="Engineer" v="OVERLOAD M-DRIVE — 2D6 + Engineer (8+). +Effect Thrust available this round (CRB p.167). REPAIR SYSTEM — difficulty scales with severity: Avg 8+ (Sev 1–2) / Diff 10+ (Sev 3–4) / Very Diff 12+ (Sev 5–6). GM selects which critical to repair. Removes 1 critical hit (CRB p.167)." />
             <KV k="Gunner" v="RELOAD TURRET — Automatic, no roll. Reloads 1 missile weapon slot (CRB p.167)." />
@@ -489,7 +497,7 @@ export function HelpScreen({ onBack } = {}) {
           <p>Ships have a list of named crew members, each with individual skill ratings.</p>
 
           <Sub title="SKILLS">
-            <KV k="PLT — Pilot" v="Initiative roll, evasion DM, dogfight/pursuit checks." />
+            <KV k="PLT — Pilot" v="Initiative roll, evasion DM, dogfight/pursuit checks, Aid Gunners (Manoeuvre Step)." />
             <KV k="LDR — Leadership" v="Improve Initiative action (Actions phase)." />
             <KV k="TAC — Tactics" v="Initiative DM at start of battle (Initiative phase)." />
             <KV k="ENG — Engineer" v="Overload M-Drive action, Repair System action." />

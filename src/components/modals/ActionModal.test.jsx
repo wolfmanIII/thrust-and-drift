@@ -51,7 +51,7 @@ function makeSoloShip({ skills = { pilot: 2 }, assignments = {} } = {}) {
 describe('ActionModal', () => {
   beforeEach(() => {
     useBattleStore.getState().resetBattle('vectorial')
-    useBattleStore.setState({ ships: [SHIP] })
+    useBattleStore.setState({ ships: [SHIP], phase: 'actions' })
     useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-1' } })
   })
 
@@ -75,6 +75,7 @@ describe('ActionModal', () => {
 describe('ActionModal — solo crew / crew assignments (REQ-10)', () => {
   beforeEach(() => {
     useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ phase: 'actions' })
     useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-solo' } })
   })
 
@@ -100,7 +101,7 @@ describe('ActionModal — solo crew / crew assignments (REQ-10)', () => {
     expect(screen.queryByText('Sensor Lock')).not.toBeInTheDocument()
   })
 
-  it('crew member assigned to all roles sees both pilot and sensor actions', () => {
+  it('crew member assigned to all roles sees sensor actions in actions phase (Aid Gunners is acceleration-phase only)', () => {
     const ship = makeSoloShip({
       skills: { pilot: 2 },
       assignments: {
@@ -113,6 +114,8 @@ describe('ActionModal — solo crew / crew assignments (REQ-10)', () => {
     fireEvent.click(screen.getByText('Solo Pilot'))
     expect(screen.getByText('Sensor Lock')).toBeInTheDocument()
     expect(screen.getByText('Electronic Warfare')).toBeInTheDocument()
+    // Aid Gunners is Manoeuvre Step (acceleration phase) — must NOT appear in actions phase
+    expect(screen.queryByText('Aid Gunners')).not.toBeInTheDocument()
   })
 })
 
@@ -121,6 +124,7 @@ describe('ActionModal — solo crew / crew assignments (REQ-10)', () => {
 describe('ActionModal — negative skill values (REQ-09)', () => {
   beforeEach(() => {
     useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ phase: 'actions' })
     useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-solo' } })
   })
 
@@ -173,7 +177,7 @@ describe('ActionModal — Aid Gunners (#16)', () => {
 
   beforeEach(() => {
     useBattleStore.getState().resetBattle('vectorial')
-    useBattleStore.setState({ ships: [PILOT_SHIP] })
+    useBattleStore.setState({ ships: [PILOT_SHIP], phase: 'acceleration' })
     useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-pilot' } })
   })
 

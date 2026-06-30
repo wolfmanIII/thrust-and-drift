@@ -10,6 +10,7 @@ import { useBattleStore } from '../../store/battleStore.js'
 import { hexDistance }   from '../../utils/hex.js'
 import { getObstacleAt } from '../../utils/obstacles.js'
 import { DEFENSIVE_WEAPONS } from '../../data/weapons.js'
+import { CREW_ACTIONS } from '../../data/crewActions.js'
 
 // === SHARED PRIMITIVES ===
 
@@ -60,11 +61,26 @@ function MenuShell({ x, y, menuRef, children }) {
 
 // === SHIP CONTEXT ===
 
-/** Returns true if at least one crew member hasn't acted this round. */
-function hasAvailableCrewMember(ship) {
-  const used = ship.usedCrewMembers ?? []
-  const crew = Array.isArray(ship.profile.crew) ? ship.profile.crew : []
-  return crew.some((m) => !used.includes(m.id))
+/**
+ * Returns true if at least one crew member has an available action for the given phase.
+ * Phase-aware: Aid Gunners is acceleration-phase, all other actions are actions-phase.
+ * // MgT2e CRB p.164 (phase order), p.166–167 (crew actions)
+ */
+function hasAvailablePhaseCrewAction(ship, currentPhase) {
+  const used  = ship.usedCrewMembers ?? []
+  const crew  = Array.isArray(ship.profile.crew) ? ship.profile.crew : []
+  const asn   = ship.crewAssignments ?? {}
+  return crew.some((m) => {
+    if (used.includes(m.id)) return false
+    return Object.entries(CREW_ACTIONS).some(([role, actions]) => {
+      const skill      = m.skills?.[role] ?? 0
+      const isAssigned = role === 'gunner'
+        ? Object.values(asn.gunners ?? {}).includes(m.id)
+        : asn[role] === m.id
+      if (skill === 0 && !isAssigned) return false
+      return actions.some((a) => (a.phase ?? 'actions') === currentPhase)
+    })
+  })
 }
 
 /** Returns true if the ship has at least one offensive turret that hasn't fired this round. */
@@ -154,8 +170,16 @@ function ShipContextMenu({ x, y, menuRef, ship, targetId, close }) {
         </>
       )}
 
-      {/* ── Actions: crew actions ─────────────────────────────────── */}
-      {!ship.isDestroyed && phase === 'actions' && isCurrentActor && hasAvailableCrewMember(ship) && (
+      {/* ── Acceleration: Manoeuvre Step crew actions (Aid Gunners) ── */}
+      {!ship.isDestroyed && phase === 'acceleration' && isCurrentActor && hasAvailablePhaseCrewAction(ship, 'acceleration') && (
+        <>
+          <MenuItem icon="⚡" label="Crew Action…" onClick={() => open('action', { shipId: targetId })} />
+          <MenuDivider />
+        </>
+      )}
+
+      {/* ── Actions: Actions Step crew actions ────────────────────── */}
+      {!ship.isDestroyed && phase === 'actions' && isCurrentActor && hasAvailablePhaseCrewAction(ship, 'actions') && (
         <>
           <MenuItem icon="⚡" label="Crew Action…" onClick={() => open('action', { shipId: targetId })} />
           <MenuDivider />

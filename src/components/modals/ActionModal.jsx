@@ -61,13 +61,14 @@ function useActionEffects() {
 }
 
 /**
- * Derive available actions for a crew member.
- * Includes actions for roles where the member has a non-zero skill OR is explicitly assigned,
- * so a solo pilot assigned to all roles can attempt any action (skill 0 = no bonus, not blocked).
+ * Derive available actions for a crew member filtered by the current phase.
+ * Aid Gunners is a Manoeuvre Step (acceleration) action — CRB p.166.
+ * All other crew actions are Actions Step (actions) actions — CRB p.167.
  * @param {object} member
  * @param {object|null} assignments  ship.crewAssignments
+ * @param {string} currentPhase  battleStore.phase
  */
-function getActionsForMember(member, assignments) {
+function getActionsForMember(member, assignments, currentPhase) {
   return Object.entries(CREW_ACTIONS).flatMap(([role, actions]) => {
     const skillLevel = member.skills[role] ?? 0
     const isAssigned = assignments
@@ -76,7 +77,9 @@ function getActionsForMember(member, assignments) {
           : assignments[role] === member.id)
       : false
     if (skillLevel === 0 && !isAssigned) return []
-    return actions.map((a) => ({ ...a, skillLevel }))
+    return actions
+      .filter((a) => (a.phase ?? 'actions') === currentPhase)
+      .map((a) => ({ ...a, skillLevel }))
   })
 }
 
@@ -105,6 +108,7 @@ export function ActionModal() {
   const markCrewMemberUsed     = useBattleStore((s) => s.markCrewMemberUsed)
   const obstacles              = useBattleStore((s) => s.obstacles)
   const obstaclesEnabled       = useBattleStore((s) => s.obstaclesEnabled)
+  const phase                  = useBattleStore((s) => s.phase)
 
   const applyEffect  = useActionEffects()
 
@@ -135,7 +139,7 @@ export function ActionModal() {
   const availableCrew   = crewArray.filter((m) => !usedCrewMembers.includes(m.id))
 
   const selectedMember = crewArray.find((m) => m.id === selectedMemberId) ?? null
-  const memberActions  = selectedMember ? getActionsForMember(selectedMember, ship.crewAssignments) : []
+  const memberActions  = selectedMember ? getActionsForMember(selectedMember, ship.crewAssignments, phase) : []
   const otherShips     = ships.filter((s) => s.id !== ship.id)
 
   const handleSelectMember = (member) => {
@@ -218,7 +222,7 @@ export function ActionModal() {
     !(isPlayer && effectiveDifficulty !== 'auto' && !manualDice)
 
   return (
-    <Modal title={`Actions — ${ship.name}`} onClose={closeModal}>
+    <Modal title={`${phase === 'acceleration' ? 'Manoeuvre' : 'Actions'} — ${ship.name}`} onClose={closeModal}>
       <div className="space-y-4">
 
         {/* Roll result view */}

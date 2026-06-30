@@ -1,7 +1,10 @@
 /**
- * Crew action definitions for the Actions phase.
- * Keyed by crew role. Consumed by ActionModal.
- * // MgT2e CRB p.166–167 — Crew Actions
+ * Crew action definitions keyed by role.
+ * Each action may carry an optional `phase` field ('acceleration' | 'actions') indicating
+ * when it is available. Actions without `phase` default to 'actions'.
+ * Aid Gunners is a Manoeuvre Step (acceleration) action — CRB p.166.
+ * Consumed by ActionModal.
+ * // MgT2e CRB p.164 (phase order), p.166–167 (crew actions)
  */
 
 export const CREW_ACTIONS = {
@@ -9,6 +12,7 @@ export const CREW_ACTIONS = {
     {
       id: 'aid_gunners',
       label: 'Aid Gunners',
+      phase: 'acceleration', // Manoeuvre Step — CRB p.166 (not Actions Step)
       difficulty: 8,
       skill: 'pilot',
       description: 'Average Pilot check (DEX). Starts a task chain with gunners: success grants DM+1/+2/+3 to all gunner attack rolls this round; failure applies DM−1/−2/−3. // MgT2e CRB p.63, p.166',
