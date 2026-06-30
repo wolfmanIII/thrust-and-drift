@@ -518,7 +518,8 @@ function ShipPreviewRow({ ship }) {
   return (
     <div className="flex items-center gap-2.5">
       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ship.color ?? '#64748b' }} />
-      <span className="font-mono text-xs text-slate-300 truncate flex-1">{ship.profile?.name ?? '?'}</span>
+      <span className="font-mono text-xs text-slate-300 truncate w-28 shrink-0">{ship.name ?? '?'}</span>
+      <span className="font-mono text-xs text-slate-500 truncate flex-1">{ship.profile?.name ?? '?'}</span>
       <div className="w-14 h-1 bg-slate-800 rounded-full overflow-hidden shrink-0">
         <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, backgroundColor: barColor }} />
       </div>
@@ -771,7 +772,7 @@ export function Dashboard() {
               SPACE COMBAT SIMULATOR
             </span>
           </div>
-          <span className="ml-auto text-slate-400 font-mono text-xs">v2.3.1</span>
+          <span className="ml-auto text-slate-400 font-mono text-xs">v2.3.2</span>
         </header>
 
         <main className="flex-1 overflow-hidden">

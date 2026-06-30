@@ -3,7 +3,7 @@
   "description": "Browser-based virtual tabletop for Mongoose Traveller 2e space combat",
   "homepage": "https://tad.nav-fi-3.space",
   "private": true,
-  "version": "2.3.1",
+  "version": "2.3.2",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -10,6 +10,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.3.2] — 2026-06-30
+
+### Fixed
+
+- **Dashboard ship list — instance name not shown** — The ship list in the session preview panel now shows both the instance name (white) and the profile name (grey) as two distinct columns. Previously only `profile.name` was displayed, so renamed ships appeared under their profile name. (`Dashboard.jsx`)
+- **Ion Disruption modal — instance name not shown** — The "HARDENED SYSTEMS" message inside the Ion Disruption step of AttackModal used `target.profile.name` instead of `target.name`. (`AttackModal.jsx`)
+
+---
+
 ## [2.3.1] — 2026-06-30
 
 ### Fixed

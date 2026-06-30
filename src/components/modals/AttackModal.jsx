@@ -644,7 +644,7 @@ function IonDamageStep({ weapon, target, attackEffect, isPlayer, onApply, onClos
     }
   }
 
-  const targetName = target?.profile?.name ?? '?'
+  const targetName = target?.name ?? '?'
   const weaponLabel = weapon?.label ?? 'Ion Cannon'
 
   return (

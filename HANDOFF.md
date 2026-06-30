@@ -9,10 +9,10 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.3.1 |
+| **Versione** | 2.3.2 |
 | **Branch** | main |
 | **Test** | 1294 Vitest + 22 Playwright e2e |
-| **Ultimo commit** | fix(#20 Bug 3): DM-2 for torpedo attacks vs ships < 2,000 tons |
+| **Ultimo commit** | fix(dashboard): show instance name + profile name as separate columns |
 
 ---
 
