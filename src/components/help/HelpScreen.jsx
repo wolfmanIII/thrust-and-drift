@@ -474,7 +474,8 @@ export function HelpScreen({ onBack } = {}) {
           <p>Right-click ship → <span className="text-slate-200">Crew Action</span>. The modal shows three steps: pick a crew member → pick an action → roll (if required).</p>
 
           <Sub title="CREW SELECTION">
-            <p>Actions are filtered per member based on their skill set and role assignment. A crew member assigned to a role can perform its actions even at skill 0 (no DM bonus) — this covers single-crew ships where one pilot covers all roles.</p>
+            <p>The crew list shows only members who have at least one action available <span className="text-slate-200">in the current phase</span> and have not yet acted this round. Members with no phase-appropriate actions are hidden entirely — e.g. a pure pilot has no Actions Step actions and will not appear here.</p>
+            <p>Actions are further filtered per member based on skill set and role assignment. A crew member assigned to a role can perform its actions even at skill 0 (no DM bonus) — this covers single-crew ships where one pilot covers all roles.</p>
           </Sub>
 
           <Sub title="SKILL DM OVERRIDE">

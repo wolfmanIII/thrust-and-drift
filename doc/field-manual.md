@@ -767,8 +767,9 @@ open after each roll so the GM can chain actions until all crew have acted.
 
 Right-click ship → **Crew Action**. Steps:
 
-1. **Crew member** — only members who have not yet acted this round are listed.
-   Already-used members are hidden until the next round.
+1. **Crew member** — only members who have at least one action available in the
+   current phase **and** have not yet acted this round are listed. Already-used
+   members and members with no phase-appropriate actions are hidden.
 2. **Action** — the list shows only actions that match the member's skills.
 3. **Target** *(Sensor Lock only)* — select the ship to lock.
    **Target Salvo** *(EW — Counter Missile only)* — select the in-flight salvo to jam.
