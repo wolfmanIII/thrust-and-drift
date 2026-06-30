@@ -261,6 +261,64 @@ describe('MissileImpactModal — DM breakdown uses remainingCount after PD', () 
   })
 })
 
+// ── #20 Bug 2: torpedo salvo halves PD Effect (HG p.39) ──────────────────────
+
+function setupTorpedoImpact({ count = 3, faction = 'npc', targetTurrets = [{ slot: 1, weapons: ['Pulse Laser'] }] } = {}) {
+  useBattleStore.getState().addShip(
+    { id: 'tp-launcher', name: 'Launcher', hull: 20, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+    { q: 0, r: 0 }, 'players', '#0f0',
+  )
+  useBattleStore.getState().addShip(
+    { id: 'tp-target', name: 'Target', hull: 20, armor: 0, thrust: 4, tonnage: 100, turrets: targetTurrets, crew: [] },
+    { q: 5, r: 0 }, faction, '#f00',
+  )
+  const { ships } = useBattleStore.getState()
+  const [launcher, target] = ships
+  useBattleStore.setState({
+    pendingMissileImpacts: [{
+      id: 'imp-torp',
+      launchedBy:         launcher.id,
+      target:             target.id,
+      count,
+      type:               'Torpedo',
+      hasSmartGuidance:   true,
+      ewAppliedThisRound: false,
+    }],
+  })
+  return { launcher, target }
+}
+
+describe('MissileImpactModal — torpedo PD halving (#20 Bug 2)', () => {
+  // Mocked roll2D6 → total 10, effect +2
+  // Missile: removes 2 (Effect 2)
+  // Torpedo: removes floor(2/2) = 1 (Effect halved — HG p.39)
+
+  it('torpedo PD: effect 2 → only 1 torpedo destroyed (halved), not 2', () => {
+    setupTorpedoImpact({ count: 3, faction: 'npc' })
+    render(<MissileImpactModal />)
+    fireEvent.click(screen.getByRole('button', { name: /ROLL POINT DEFENCE/ }))
+    // "1 torpedo destroyed" shown in PD result banner (not "2 missiles destroyed")
+    expect(screen.getByText(/1 torpedo destroyed/)).toBeInTheDocument()
+  })
+
+  it('torpedo PD: salvo of 3, 1 destroyed → 2 remaining shown in UI (impact not dismissed)', () => {
+    // The store count is NOT updated by PD — PD tracks destroyed count in local state
+    // only dismissal (full salvo gone) updates the store
+    setupTorpedoImpact({ count: 3, faction: 'npc' })
+    render(<MissileImpactModal />)
+    fireEvent.click(screen.getByRole('button', { name: /ROLL POINT DEFENCE/ }))
+    expect(useBattleStore.getState().pendingMissileImpacts).toHaveLength(1)
+    expect(screen.getByText(/2 remaining/)).toBeInTheDocument()
+  })
+
+  it('torpedo PD: salvo of 1, effect 2 → floor(2/2)=1 destroyed → entire salvo dismissed', () => {
+    setupTorpedoImpact({ count: 1, faction: 'npc' })
+    render(<MissileImpactModal />)
+    fireEvent.click(screen.getByRole('button', { name: /ROLL POINT DEFENCE/ }))
+    expect(useBattleStore.getState().pendingMissileImpacts).toHaveLength(0)
+  })
+})
+
 // ── AttackModal — no PD section for missiles ──────────────────────────────────
 
 describe('AttackModal — PD absent for missile weapons (REQ-08)', () => {

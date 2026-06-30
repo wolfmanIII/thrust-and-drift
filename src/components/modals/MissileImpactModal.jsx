@@ -146,7 +146,10 @@ export function MissileImpactModal() {
     const rollResult = diceOverride ?? roll2D6()
     const total      = rollResult.total + gunner + laserBonus
     const effect     = total - 8
-    const removed    = Math.max(0, effect)
+    // HG p.39: torpedo salvoes halve the Effect of any successful PD, rounded down
+    const removed    = impact.type === 'Torpedo'
+      ? Math.max(0, Math.floor(effect / 2))
+      : Math.max(0, effect)
     const newDestroyed = pdDestroyedCount + removed
     markTurretFired(target.id, slot)
     setPdUsedSlots((prev) => [...prev, slot])
@@ -154,7 +157,9 @@ export function MissileImpactModal() {
     setPdDestroyedCount(newDestroyed)
     setPdResult({ turretSlot: slot, total, effect, missilesRemoved: removed })
     setPdManualDice(null)
-    addLogEntry(`${target.name} Point Defence (T${slot}): total ${total}, Effect ${effect >= 0 ? `+${effect}` : effect} — ${removed} missile${removed !== 1 ? 's' : ''} destroyed.`)
+    const pdEffectNote = impact.type === 'Torpedo' ? ` (Effect halved — torpedo salvo)` : ''
+    const unitLabel    = impact.type === 'Torpedo' ? 'torpedo' : 'missile'
+    addLogEntry(`${target.name} Point Defence (T${slot}): total ${total}, Effect ${effect >= 0 ? `+${effect}` : effect}${pdEffectNote} — ${removed} ${unitLabel}${removed !== 1 ? 's' : ''} destroyed.`)
     if (Math.max(0, impact.count - newDestroyed) === 0) {
       addLogEntry(`${target.name} Point Defence destroyed entire salvo.`)
       dismissMissileImpact(impact.id)
@@ -278,8 +283,8 @@ export function MissileImpactModal() {
                   <div className={`rounded p-2 font-mono text-xs ${pdResult.missilesRemoved > 0 ? 'bg-green-950/30 text-green-400' : 'bg-slate-800 text-slate-400'}`}>
                     T{pdResult.turretSlot} · Total {pdResult.total} · Effect {pdResult.effect >= 0 ? `+${pdResult.effect}` : pdResult.effect}
                     {pdResult.missilesRemoved > 0
-                      ? ` → ${pdResult.missilesRemoved} missile${pdResult.missilesRemoved !== 1 ? 's' : ''} destroyed (${remainingCount} remaining)`
-                      : ' → no missiles destroyed'}
+                      ? ` → ${pdResult.missilesRemoved} ${impact.type === 'Torpedo' ? 'torpedo' : 'missile'}${pdResult.missilesRemoved !== 1 ? 's' : ''} destroyed (${remainingCount} remaining)`
+                      : ` → no ${impact.type === 'Torpedo' ? 'torpedoes' : 'missiles'} destroyed`}
                   </div>
                 )}
                 {pdTurrets.length > 0 && (
