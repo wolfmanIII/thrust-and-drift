@@ -21,6 +21,7 @@ import {
   isOutOfRange,
   getApValue,
   countMissileAmmoCapacity,
+  countTorpedoAmmoCapacity,
   countMissileRacks,
   countSandcasters,
   computeMissileAttackDM,
@@ -483,22 +484,61 @@ describe('countMissileAmmoCapacity', () => {
     expect(countMissileAmmoCapacity({ turrets: [{ slot: 1, weapons: ['Missile Barbette'] }] })).toBe(25)
   })
 
-  it('3 per Torpedo', () => {
-    expect(countMissileAmmoCapacity({ turrets: [{ slot: 1, weapons: ['Torpedo'] }] })).toBe(3)
+  it('Torpedo weapon counts 0 — torpedo ammo is tracked separately', () => {
+    expect(countMissileAmmoCapacity({ turrets: [{ slot: 1, weapons: ['Torpedo'] }] })).toBe(0)
   })
 
-  it('mixed: 1 Rack + 1 Barbette + 1 Torpedo → 12+25+3 = 40', () => {
+  it('mixed: 1 Rack + 1 Barbette + 1 Torpedo → 12+25 = 37 (torpedo excluded)', () => {
     expect(countMissileAmmoCapacity({
       turrets: [
         { slot: 1, weapons: ['Missile Rack'] },
         { slot: 2, weapons: ['Missile Barbette'] },
         { slot: 3, weapons: ['Torpedo'] },
       ],
-    })).toBe(40)
+    })).toBe(37)
   })
 
   it('handles missing turrets field', () => {
     expect(countMissileAmmoCapacity({})).toBe(0)
+  })
+})
+
+// === TORPEDO AMMO CAPACITY ===
+// HG p.31 — 3 rounds per Torpedo barbette; tracked separately from missile ammo
+
+describe('countTorpedoAmmoCapacity', () => {
+  it('returns 0 for profile with no turrets', () => {
+    expect(countTorpedoAmmoCapacity({ turrets: [] })).toBe(0)
+  })
+
+  it('returns 0 when turrets have no torpedo weapons', () => {
+    expect(countTorpedoAmmoCapacity({ turrets: [{ slot: 1, weapons: ['Missile Rack', 'Pulse Laser'] }] })).toBe(0)
+  })
+
+  it('3 per Torpedo barbette', () => {
+    expect(countTorpedoAmmoCapacity({ turrets: [{ slot: 1, weapons: ['Torpedo'] }] })).toBe(3)
+  })
+
+  it('2 Torpedo barbettes → 6', () => {
+    expect(countTorpedoAmmoCapacity({
+      turrets: [
+        { slot: 1, weapons: ['Torpedo'] },
+        { slot: 2, weapons: ['Torpedo'] },
+      ],
+    })).toBe(6)
+  })
+
+  it('mixed turrets — only counts Torpedo weapons', () => {
+    expect(countTorpedoAmmoCapacity({
+      turrets: [
+        { slot: 1, weapons: ['Missile Rack'] },
+        { slot: 2, weapons: ['Torpedo'] },
+      ],
+    })).toBe(3)
+  })
+
+  it('handles missing turrets field', () => {
+    expect(countTorpedoAmmoCapacity({})).toBe(0)
   })
 })
 

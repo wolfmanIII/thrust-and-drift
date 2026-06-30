@@ -180,7 +180,9 @@ function AttackConfigStep({
   reactions,
   onNext, onClose,
 }) {
-  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, totalDM } = dmBreakdown
+  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, torpedoSmallShipDM = 0, totalDM } = dmBreakdown
+  // Torpedo salvo capped at 3 per barbette (HG p.31) — missiles cap is full ammoLeft
+  const maxSalvo        = weaponKey === 'Torpedo' ? Math.min(3, ammoLeft) : ammoLeft
   const isMissilePdMode = !!targetMissileId
   // When targeting a missile, only PD weapons are valid
   const visibleWeapons  = isMissilePdMode
@@ -315,7 +317,7 @@ function AttackConfigStep({
             ) : (
               <>
                 <p className="text-slate-400 font-mono text-xs mb-1.5">
-                  {weaponKey === 'Torpedo' ? 'Torpedoes in salvo' : 'Missiles in salvo'} (1–{ammoLeft})
+                  {weaponKey === 'Torpedo' ? 'Torpedoes in salvo' : 'Missiles in salvo'} (1–{maxSalvo})
                   {' · '}Ammo: <span className={ammoLeft === 0 ? 'text-red-400' : 'text-(--neon-cyan)'}>{ammoLeft}</span>
                 </p>
                 <div className="flex items-center gap-3">
@@ -330,7 +332,7 @@ function AttackConfigStep({
                     {missileCount}
                   </span>
                   <button
-                    onClick={() => setMissileCount((c) => Math.min(ammoLeft, c + 1))}
+                    onClick={() => setMissileCount((c) => Math.min(maxSalvo, c + 1))}
                     disabled={ammoLeft === 0}
                     className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
                   >
@@ -387,6 +389,7 @@ function AttackConfigStep({
             {aidGunnersDM !== 0 && <DmRow label="Aid Gunners" value={aidGunnersDM} />}
             {dogfightDM !== 0 && <DmRow label="Dogfight" value={dogfightDM} />}
             {obstacleCoverDM !== 0 && <DmRow label="Field cover" value={obstacleCoverDM} />}
+            {torpedoSmallShipDM !== 0 && <DmRow label="Torpedo vs <2kt" value={torpedoSmallShipDM} />}
             <div className="border-t border-slate-700 mt-1 pt-1">
               <DmRow label="Total DM" value={totalDM} highlight />
             </div>
@@ -469,7 +472,7 @@ function AttackRollStep({
   dmBreakdown,
   attackResult, setAttackResult, onNext, onClose, onMissClose,
 }) {
-  const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, totalDM } = dmBreakdown
+  const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, torpedoSmallShipDM = 0, totalDM } = dmBreakdown
   const [manualDice, setManualDice] = useState(null)
 
   const handleRoll = (diceOverride = null) => {
@@ -484,6 +487,7 @@ function AttackRollStep({
       sensorLockDM,
       dogfightDM,
       obstacleCoverDM,
+      torpedoSmallShipDM,
       diceOverride,
     })
     setAttackResult(result)
@@ -1261,7 +1265,9 @@ export function AttackModal() {
 
   if (!attacker) return null
 
-  const ammoLeft          = isMissile ? (attacker.missileAmmoTotal ?? 0) : 0
+  const ammoLeft   = weaponKey === 'Torpedo'
+    ? (attacker.torpedoAmmoTotal ?? 0)
+    : isMissile ? (attacker.missileAmmoTotal ?? 0) : 0
   const isMissileBarbette = weaponKey === 'Missile Barbette'
 
   // ── In-flight missile targeting (FEAT-001) ────────────────────────────

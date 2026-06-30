@@ -1002,6 +1002,58 @@ describe('missile magazine (missileAmmoTotal)', () => {
   })
 })
 
+// #20 Bug 1: torpedo ammo tracked separately from missile ammo — HG p.31, p.39
+describe('torpedo magazine (torpedoAmmoTotal)', () => {
+  it('initialises to 0 for ships with no torpedo barbette', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].torpedoAmmoTotal).toBe(0)
+  })
+
+  it('initialises to 3 per Torpedo barbette', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Torpedo'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].torpedoAmmoTotal).toBe(3)
+  })
+
+  it('2 torpedo barbettes → torpedoAmmoTotal 6', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Torpedo'] }, { slot: 2, weapons: ['Torpedo'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].torpedoAmmoTotal).toBe(6)
+  })
+
+  it('Torpedo launch deducts from torpedoAmmoTotal, not missileAmmoTotal', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Torpedo'] }, { slot: 2, weapons: ['Missile Rack'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile(), { q: 5, r: 0 }, 'npc', '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 2, { q: 0, r: 0 }, { q: 0, r: 0 }, 'Torpedo')
+    const updated = useBattleStore.getState().ships[0]
+    expect(updated.torpedoAmmoTotal).toBe(1)   // 3 − 2
+    expect(updated.missileAmmoTotal).toBe(12)  // unchanged
+  })
+
+  it('Missile launch deducts from missileAmmoTotal, not torpedoAmmoTotal', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Torpedo'] }, { slot: 2, weapons: ['Missile Rack'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile(), { q: 5, r: 0 }, 'npc', '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 5, { q: 0, r: 0 }, { q: 0, r: 0 }, 'Standard')
+    const updated = useBattleStore.getState().ships[0]
+    expect(updated.missileAmmoTotal).toBe(7)  // 12 − 5
+    expect(updated.torpedoAmmoTotal).toBe(3)  // unchanged
+  })
+
+  it('clamps torpedoAmmoTotal at 0, never negative', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Torpedo'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile(), { q: 5, r: 0 }, 'npc', '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 3, { q: 0, r: 0 }, { q: 0, r: 0 }, 'Torpedo')
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 3, { q: 0, r: 0 }, { q: 0, r: 0 }, 'Torpedo')
+    expect(useBattleStore.getState().ships[0].torpedoAmmoTotal).toBe(0)
+  })
+})
+
 describe('launchMissile', () => {
   it('adds missile to missiles array', () => {
     useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#fff')
@@ -2326,21 +2378,22 @@ describe('missile ammo initialisation — barbette and torpedo', () => {
     expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(25)
   })
 
-  it('Torpedo initialises to 3 ammo', () => {
+  it('Torpedo initialises torpedoAmmoTotal to 3, missileAmmoTotal stays 0', () => {
     const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Torpedo'] }] })
     useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
-    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(3)
+    expect(useBattleStore.getState().ships[0].torpedoAmmoTotal).toBe(3)
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(0)
   })
 
-  it('Rack + Barbette + Torpedo mixed capacity sums correctly', () => {
+  it('Rack + Barbette + Torpedo mixed: missileAmmoTotal=37, torpedoAmmoTotal=3', () => {
     const profile = makeProfile({ turrets: [
       { slot: 1, weapons: ['Missile Rack'] },
       { slot: 2, weapons: ['Missile Barbette'] },
       { slot: 3, weapons: ['Torpedo'] },
     ] })
     useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
-    // 12 + 25 + 3 = 40
-    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(40)
+    expect(useBattleStore.getState().ships[0].missileAmmoTotal).toBe(37)
+    expect(useBattleStore.getState().ships[0].torpedoAmmoTotal).toBe(3)
   })
 })
 

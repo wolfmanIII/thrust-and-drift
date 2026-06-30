@@ -8,7 +8,7 @@
 import { useRef, useCallback, useMemo } from 'react'
 import { useBattleStore }    from '../../store/battleStore.js'
 import { useUiStore }        from '../../store/uiStore.js'
-import { countMissileAmmoCapacity, countSandcasters } from '../../utils/combat.js'
+import { countMissileAmmoCapacity, countTorpedoAmmoCapacity, countSandcasters } from '../../utils/combat.js'
 import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST }  from '../../data/rangeBands.js'
 
 const MISSILE_BASIC_THRUST = 10  // MgT2e CRB p.162
@@ -65,8 +65,9 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
   const inbound  = useMemo(() => missiles.filter((m) => m.target    === ship.id), [missiles, ship.id])
   const launched = useMemo(() => missiles.filter((m) => m.launchedBy === ship.id), [missiles, ship.id])
 
-  const ammoMax     = countMissileAmmoCapacity(ship.profile)
-  const sandAmmoMax = countSandcasters(ship.profile)
+  const ammoMax        = countMissileAmmoCapacity(ship.profile)
+  const torpedoAmmoMax = countTorpedoAmmoCapacity(ship.profile)
+  const sandAmmoMax    = countSandcasters(ship.profile)
 
   const lockerName = ship.sensorLockedBy
     ? (ships.find((s) => s.id === ship.sensorLockedBy)?.name ?? '?')
@@ -109,6 +110,7 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
     (ship.turretsNeedingReload ?? 0) > 0 ||
     (ship.criticalHits?.length > 0 && !ship.isDestroyed) ||
     ammoMax > 0 ||
+    torpedoAmmoMax > 0 ||
     sandAmmoMax > 0 ||
     (ship.ionRoundsLeft ?? 0) > 0
 
@@ -224,6 +226,15 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
               : 'text-slate-300'
             }>
               Ammo {ship.missileAmmoTotal ?? ammoMax}/{ammoMax}
+            </StatusRow>
+          )}
+          {torpedoAmmoMax > 0 && (
+            <StatusRow icon="🎯" className={
+              (ship.torpedoAmmoTotal ?? torpedoAmmoMax) === 0 ? 'text-red-400'
+              : (ship.torpedoAmmoTotal ?? torpedoAmmoMax) <= torpedoAmmoMax * 0.25 ? 'text-yellow-400'
+              : 'text-slate-300'
+            }>
+              Torp {ship.torpedoAmmoTotal ?? torpedoAmmoMax}/{torpedoAmmoMax}
             </StatusRow>
           )}
 

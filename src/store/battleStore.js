@@ -7,7 +7,7 @@
 import { create } from 'zustand'
 import { v7 as uuidv7 } from 'uuid'
 import { exportBattle, importBattle } from '../utils/io.js'
-import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount, countMissileAmmoCapacity, countSandcasters, computeIonThrustEffect } from '../utils/combat.js'
+import { applyThrust, applyMovement, rollInitiative, getThresholdCriticalCount, countMissileAmmoCapacity, countTorpedoAmmoCapacity, countSandcasters, computeIonThrustEffect } from '../utils/combat.js'
 import { hexAdd, hexDistance, segmentMinDistance } from '../utils/hex.js'
 import { getObstacleAt, applyMovementWithObstacles } from '../utils/obstacles.js'
 import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
@@ -502,6 +502,7 @@ const useBattleStore = create((set, get) => {
       sensorLockDM: 0,
       turretsNeedingReload: 0,
       missileAmmoTotal: countMissileAmmoCapacity(profile),
+      torpedoAmmoTotal: countTorpedoAmmoCapacity(profile),
       sandAmmoTotal: countSandcasters(profile),
       inDogfight: null,
       inBoarding: null,
@@ -1275,7 +1276,11 @@ const useBattleStore = create((set, get) => {
         sh.id === launchedBy ? {
           ...sh,
           turretsNeedingReload: (sh.turretsNeedingReload ?? 0) + 1,
-          missileAmmoTotal: Math.max(0, (sh.missileAmmoTotal ?? countMissileAmmoCapacity(sh.profile)) - count),
+          // Torpedo ammo tracked separately from missile ammo — HG p.31, p.39
+          ...(type === 'Torpedo'
+            ? { torpedoAmmoTotal: Math.max(0, (sh.torpedoAmmoTotal ?? countTorpedoAmmoCapacity(sh.profile)) - count) }
+            : { missileAmmoTotal: Math.max(0, (sh.missileAmmoTotal ?? countMissileAmmoCapacity(sh.profile)) - count) }
+          ),
         } : sh
       ),
       log: [...s.log, makeLogEntry({

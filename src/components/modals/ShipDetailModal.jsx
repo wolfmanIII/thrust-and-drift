@@ -6,7 +6,7 @@ import { Modal } from './Modal.jsx'
 import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { migrateCrew, CREW_SKILLS } from '../../utils/crew.js'
-import { countMissileAmmoCapacity, countSandcasters } from '../../utils/combat.js'
+import { countMissileAmmoCapacity, countTorpedoAmmoCapacity, countSandcasters } from '../../utils/combat.js'
 
 function StatRow({ label, value }) {
   return (
@@ -38,8 +38,9 @@ export function ShipDetailModal() {
 
   const { profile, hullCurrent, vector, criticalHits, evasiveThrust, initiative } = ship
   const hullPct     = profile.hull > 0 ? Math.round((hullCurrent / profile.hull) * 100) : 0
-  const ammoMax     = countMissileAmmoCapacity(profile)
-  const sandAmmoMax = countSandcasters(profile)
+  const ammoMax        = countMissileAmmoCapacity(profile)
+  const torpedoAmmoMax = countTorpedoAmmoCapacity(profile)
+  const sandAmmoMax    = countSandcasters(profile)
 
   return (
     <Modal title={ship.name} onClose={closeModal} width="max-w-xl">
@@ -78,10 +79,13 @@ export function ShipDetailModal() {
             )}
           </Section>
 
-          {(ammoMax > 0 || sandAmmoMax > 0) && (
+          {(ammoMax > 0 || torpedoAmmoMax > 0 || sandAmmoMax > 0) && (
             <Section title="Ammunition">
               {ammoMax > 0 && (
                 <StatRow label="Missile ammo" value={`${ship.missileAmmoTotal ?? ammoMax}/${ammoMax}`} />
+              )}
+              {torpedoAmmoMax > 0 && (
+                <StatRow label="Torpedo ammo" value={`${ship.torpedoAmmoTotal ?? torpedoAmmoMax}/${torpedoAmmoMax}`} />
               )}
               {sandAmmoMax > 0 && (
                 <StatRow label="Sand canisters" value={`${ship.sandAmmoTotal ?? sandAmmoMax}/${sandAmmoMax}`} />

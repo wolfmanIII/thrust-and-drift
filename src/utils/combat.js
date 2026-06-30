@@ -64,6 +64,7 @@ export function rollAttack({
   sensorLockDM = 0,
   dogfightDM = 0,
   obstacleCoverDM = 0,
+  torpedoSmallShipDM = 0,
   diceOverride = null,
 }) {
   const roll = diceOverride ?? roll2D6()
@@ -78,7 +79,8 @@ export function rollAttack({
     evasiveDM +
     sensorLockDM +
     dogfightDM +
-    obstacleCoverDM
+    obstacleCoverDM +
+    torpedoSmallShipDM
   return {
     roll,
     total,
@@ -96,6 +98,7 @@ export function rollAttack({
       sensorLockDM,
       dogfightDM,
       obstacleCoverDM,
+      torpedoSmallShipDM,
     },
   }
 }
@@ -219,8 +222,9 @@ export function applyMovement(currentPosition, currentVector) {
 // === MISSILES ===
 
 /**
- * Count total missile ammo capacity across all turrets.
- * Missile Rack: 12 rounds each. Missile Barbette: 25 rounds. Torpedo: 3 rounds.
+ * Count missile (non-torpedo) ammo capacity across all turrets.
+ * Missile Rack: 12 rounds each. Missile Barbette: 25 rounds.
+ * Torpedo ammo is tracked separately — see countTorpedoAmmoCapacity.
  * // MgT2e CRB p.162, HG p.30–31
  * @param {{ turrets?: Array<{ weapons: string[] }> }} profile
  * @returns {number}
@@ -229,9 +233,19 @@ export function countMissileAmmoCapacity(profile) {
   const all = (profile.turrets ?? []).flatMap((t) => t.weapons)
   return (
     all.filter((w) => w === 'Missile Rack').length * 12 +
-    all.filter((w) => w === 'Missile Barbette').length * 25 +
-    all.filter((w) => w === 'Torpedo').length * 3
+    all.filter((w) => w === 'Missile Barbette').length * 25
   )
+}
+
+/**
+ * Count torpedo ammo capacity across all turrets.
+ * Each Torpedo weapon holds 3 rounds — HG p.31 (3 per barbette).
+ * @param {{ turrets?: Array<{ weapons: string[] }> }} profile
+ * @returns {number}
+ */
+export function countTorpedoAmmoCapacity(profile) {
+  const all = (profile.turrets ?? []).flatMap((t) => t.weapons)
+  return all.filter((w) => w === 'Torpedo').length * 3
 }
 
 /** @deprecated Use countMissileAmmoCapacity */

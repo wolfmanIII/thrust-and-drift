@@ -133,9 +133,9 @@ describe('ShipBentoCard', () => {
     expect(screen.getByText('Ammo 20/25')).toBeTruthy()
   })
 
-  it('shows ammo row with correct max for Torpedo (3)', () => {
+  it('shows torpedo ammo row with correct max for Torpedo (3)', () => {
     const ship = makeShip({
-      missileAmmoTotal: 2,
+      torpedoAmmoTotal: 2,
       profile: {
         name: 'Fighter', hull: 8, thrust: 6,
         turrets: [{ weapons: ['Torpedo'] }],
@@ -143,7 +143,7 @@ describe('ShipBentoCard', () => {
     })
     useBattleStore.setState({ ships: [ship], missiles: [] })
     render(<BasicBattleView />)
-    expect(screen.getByText('Ammo 2/3')).toBeTruthy()
+    expect(screen.getByText('Torp 2/3')).toBeTruthy()
   })
 
   it('shows sandcaster ammo row for ship with Sandcaster', () => {
