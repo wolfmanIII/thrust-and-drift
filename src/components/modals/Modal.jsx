@@ -9,13 +9,14 @@ import { useEffect, useRef } from 'react'
 /**
  * @param {{
  *   title?: string,
+ *   subtitle?: string,
  *   onClose?: Function,
  *   children: React.ReactNode,
  *   width?: string,
  *   variant?: 'panel' | 'dialog',
  * }} props
  */
-export function Modal({ title, onClose, children, width = 'max-w-lg', variant = 'panel' }) {
+export function Modal({ title, subtitle, onClose, children, width = 'max-w-lg', variant = 'panel' }) {
   const panelRef = useRef(null)
 
   useEffect(() => {
@@ -38,7 +39,10 @@ export function Modal({ title, onClose, children, width = 'max-w-lg', variant = 
         >
           {title && (
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0">
-              <h2 className="font-mono text-sm text-(--neon-cyan) tracking-widest uppercase">{title}</h2>
+              <div>
+                <h2 className="font-mono text-sm text-(--neon-cyan) tracking-widest uppercase">{title}</h2>
+                {subtitle && <p className="font-mono text-xs text-(--neon-cyan) tracking-widest uppercase mt-0.5">{subtitle}</p>}
+              </div>
               {onClose && (
                 <button
                   onClick={onClose}
@@ -70,7 +74,10 @@ export function Modal({ title, onClose, children, width = 'max-w-lg', variant = 
         className={`relative w-full ${width} mx-4 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl outline-none max-h-[90vh] flex flex-col`}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 shrink-0">
-          <h2 className="font-mono text-sm text-(--neon-cyan) tracking-widest uppercase">{title}</h2>
+          <div>
+            <h2 className="font-mono text-sm text-(--neon-cyan) tracking-widest uppercase">{title}</h2>
+            {subtitle && <p className="font-mono text-xs text-(--neon-cyan) tracking-widest uppercase mt-0.5">{subtitle}</p>}
+          </div>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-200 font-mono text-lg leading-none transition-colors"

@@ -14,8 +14,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
-- **Dashboard ship list — instance name not shown** — The ship list in the session preview panel now shows both the instance name (white) and the profile name (grey) as two distinct columns. Previously only `profile.name` was displayed, so renamed ships appeared under their profile name. (`Dashboard.jsx`)
-- **Ion Disruption modal — instance name not shown** — The "HARDENED SYSTEMS" message inside the Ion Disruption step of AttackModal used `target.profile.name` instead of `target.name`. (`AttackModal.jsx`)
+- **Instance name / profile name — shown separately across all surfaces** — All display surfaces now show both the instance name (e.g. "Fighter 1") and the profile name (e.g. "Type S Scout") in cyan when the two differ. Previously `profile.name` was used in place of or instead of `ship.name` in several components. Fixed surfaces: Dashboard ship list (two columns), bento cards in Basic mode, ship tooltip on canvas, context menu header, Ship Detail modal title, Ion Disruption modal. (`Dashboard.jsx`, `BasicBattleView.jsx`, `ShipTooltip.jsx`, `ContextMenu.jsx`, `ShipDetailModal.jsx`, `Modal.jsx`, `AttackModal.jsx`)
 
 ---
 

@@ -86,6 +86,9 @@ export function ShipTooltip() {
           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
           <span className="font-mono font-bold text-xs text-slate-100 truncate">{ship.name}</span>
         </div>
+        {ship.profile.name !== ship.name && (
+          <span className="font-mono text-xs text-(--neon-cyan) truncate block">{ship.profile.name}</span>
+        )}
         <span className="font-mono text-xs mt-0.5 block" style={{ color: factionColor }}>
           {FACTION_LABEL[ship.faction] ?? ship.faction.toUpperCase()}
         </span>
