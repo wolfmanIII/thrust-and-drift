@@ -201,3 +201,67 @@ describe('useAttackSetup — aidGunnersDM in dmBreakdown', () => {
     expect(result.current.dmBreakdown.aidGunnersDM).toBe(-1)
   })
 })
+
+// === TORPEDO DM-2 vs SMALL SHIPS (#20 Bug 3) ===
+// HG p.39 — torpedo attacks vs ships < 2,000 tons suffer DM-2
+
+describe('useAttackSetup — torpedoSmallShipDM (#20 Bug 3)', () => {
+  it('DM-2 when weapon is Torpedo and target < 2,000 tons', () => {
+    const att = addAttacker([{ slot: 1, weapons: ['Torpedo'] }])
+    const profile = { id: 'profile-tgt', name: 'Corvette', hull: 50, armor: 0, thrust: 4, tonnage: 800, turrets: [], crew: [] }
+    useBattleStore.getState().addShip(profile, { q: 5, r: 0 }, 'npc', '#f00')
+    const tgt = useBattleStore.getState().ships.at(-1)
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, tgt.id, 'Torpedo', null, 1)
+    )
+    expect(result.current.dmBreakdown.torpedoSmallShipDM).toBe(-2)
+  })
+
+  it('DM 0 when weapon is Torpedo and target is exactly 2,000 tons (threshold excluded)', () => {
+    const att = addAttacker([{ slot: 1, weapons: ['Torpedo'] }])
+    const profile = { id: 'profile-tgt', name: 'Cruiser', hull: 200, armor: 0, thrust: 4, tonnage: 2000, turrets: [], crew: [] }
+    useBattleStore.getState().addShip(profile, { q: 5, r: 0 }, 'npc', '#f00')
+    const tgt = useBattleStore.getState().ships.at(-1)
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, tgt.id, 'Torpedo', null, 1)
+    )
+    expect(result.current.dmBreakdown.torpedoSmallShipDM).toBe(0)
+  })
+
+  it('DM 0 when weapon is Torpedo and target > 2,000 tons', () => {
+    const att = addAttacker([{ slot: 1, weapons: ['Torpedo'] }])
+    const profile = { id: 'profile-tgt', name: 'Battleship', hull: 500, armor: 0, thrust: 4, tonnage: 10000, turrets: [], crew: [] }
+    useBattleStore.getState().addShip(profile, { q: 5, r: 0 }, 'npc', '#f00')
+    const tgt = useBattleStore.getState().ships.at(-1)
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, tgt.id, 'Torpedo', null, 1)
+    )
+    expect(result.current.dmBreakdown.torpedoSmallShipDM).toBe(0)
+  })
+
+  it('DM 0 for non-torpedo weapon regardless of target tonnage', () => {
+    const att = addAttacker([{ slot: 1, weapons: ['Pulse Laser'] }])
+    const profile = { id: 'profile-tgt', name: 'Fighter', hull: 10, armor: 0, thrust: 4, tonnage: 50, turrets: [], crew: [] }
+    useBattleStore.getState().addShip(profile, { q: 5, r: 0 }, 'npc', '#f00')
+    const tgt = useBattleStore.getState().ships.at(-1)
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, tgt.id, 'Pulse Laser', null, 1)
+    )
+    expect(result.current.dmBreakdown.torpedoSmallShipDM).toBe(0)
+  })
+
+  it('torpedoSmallShipDM is included in totalDM', () => {
+    // 100t target at distance 5 (Medium, rangeDM=0) — no other active DMs
+    // totalDM = gunner(0) + weapon(0) + range(0) + size(0) + torpedoSmall(-2) = -2
+    const att = addAttacker([{ slot: 1, weapons: ['Torpedo'] }])
+    const profile = { id: 'profile-tgt', name: 'Scout', hull: 20, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] }
+    useBattleStore.getState().addShip(profile, { q: 5, r: 0 }, 'npc', '#f00')
+    const tgt = useBattleStore.getState().ships.at(-1)
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, tgt.id, 'Torpedo', null, 1)
+    )
+    const { torpedoSmallShipDM, totalDM } = result.current.dmBreakdown
+    expect(torpedoSmallShipDM).toBe(-2)
+    expect(totalDM).toBe(-2)
+  })
+})

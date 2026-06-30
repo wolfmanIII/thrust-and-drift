@@ -30,13 +30,14 @@ import { getObstacleAt, computeObstacleCoverDM } from '../../utils/obstacles.js'
  *   combatMode:       'vectorial'|'basic',
  *   outOfRange:   boolean,
  *   dmBreakdown: {
- *     gunnerSkill:  number,
- *     weaponDM:     number,
- *     rangeDM:      number,
- *     sizeDM:       number,
- *     evasiveDM:    number,   // always 0 here; set dynamically by Reactions in AttackModal
- *     sensorLockDM: number,
- *     totalDM:      number,
+ *     gunnerSkill:        number,
+ *     weaponDM:           number,
+ *     rangeDM:            number,
+ *     sizeDM:             number,
+ *     evasiveDM:          number,   // always 0 here; set dynamically by Reactions in AttackModal
+ *     sensorLockDM:       number,
+ *     torpedoSmallShipDM: number,   // DM-2 vs ships < 2,000 tons (HG p.39); 0 otherwise
+ *     totalDM:            number,
  *   },
  * }}
  */
@@ -126,7 +127,10 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     ? computeObstacleCoverDM(getObstacleAt(obstacles, target.position))
     : 0
 
-  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM + obstacleCoverDM + aidGunnersDM
+  // DM-2 for torpedo attacks against ships smaller than 2,000 tons — HG p.39
+  const torpedoSmallShipDM = (weaponKey === 'Torpedo' && (target?.profile.tonnage ?? 0) < 2000) ? -2 : 0
+
+  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM + obstacleCoverDM + aidGunnersDM + torpedoSmallShipDM
   const outOfRange  = weapon ? isOutOfRange(weapon.maxRange, rangeBand) : false
 
   return {
@@ -142,6 +146,6 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     outOfRange,
     dogfightTie,
     noPower,
-    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, aidGunnersDM, dogfightDM, obstacleCoverDM, totalDM },
+    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, aidGunnersDM, dogfightDM, obstacleCoverDM, torpedoSmallShipDM, totalDM },
   }
 }
