@@ -55,7 +55,7 @@ function HullBar({ current, max }) {
  */
 function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
   const cardRef  = useRef(null)
-  const tokenRef = useShipTokenIcon(ship, 28)
+  const tokenRef = useShipTokenIcon(ship, 36)
 
   const handleContextMenu = useCallback((e) => {
     e.preventDefault()
@@ -128,12 +128,10 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
     >
       {/* ── Zona A — Header ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 px-3 pt-3 pb-2">
-        <canvas ref={tokenRef} width={28} height={28} className="shrink-0" />
+        <canvas ref={tokenRef} width={36} height={36} className="shrink-0" />
         <div className="truncate min-w-0">
           <span className="font-mono text-sm text-slate-200 font-bold block truncate">{ship.name}</span>
-          {ship.profile?.name !== ship.name && (
-            <span className="font-mono text-xs text-(--neon-cyan) block truncate">{ship.profile?.name}</span>
-          )}
+          <span className="font-mono text-xs text-(--neon-cyan) block truncate">{ship.profile?.name}</span>
         </div>
         <div className="ml-auto flex items-center gap-1 shrink-0 flex-wrap justify-end">
           {ship.isDestroyed && (

@@ -9,10 +9,10 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.3.2 |
+| **Versione** | 2.3.3 |
 | **Branch** | main |
 | **Test** | 1294 Vitest + 22 Playwright e2e |
-| **Ultimo commit** | fix(dashboard): show instance name + profile name as separate columns |
+| **Ultimo commit** | feat(ui): ship token icon in bento card header (Basic mode), always show profile name |
 
 ---
 

@@ -44,7 +44,7 @@ describe('ShipBentoCard', () => {
   it('renders ship name and hull', () => {
     useBattleStore.setState({ ships: [makeShip()], missiles: [] })
     render(<BasicBattleView />)
-    expect(screen.getByText('Beowulf')).toBeTruthy()
+    expect(screen.getAllByText('Beowulf').length).toBeGreaterThan(0)
     expect(screen.getByText('Hull 10/16')).toBeTruthy()
   })
 

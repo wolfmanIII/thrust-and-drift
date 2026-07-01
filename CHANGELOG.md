@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.3.3] — 2026-07-01
+
+### Changed
+
+- **Basic mode bento cards — ship token icon in header** — The header of each `ShipBentoCard` now shows the ship's actual token silhouette (same shape/colour as the tactical map token, 36px) instead of a plain colour dot, via a new shared `useShipTokenIcon` hook that reuses the existing `shipTokenShapes.js` tracers. The HP arc is omitted (redundant with the card's own hull bar below). The profile name is now always shown below the instance name (previously hidden when the two matched), so the two-line text block consistently fills the header row next to the taller token. (`useShipTokenIcon.js`, `BasicBattleView.jsx`)
+
+---
+
 ## [2.3.2] — 2026-06-30
 
 ### Fixed
