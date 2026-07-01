@@ -8,6 +8,7 @@
 import { useRef, useCallback, useMemo } from 'react'
 import { useBattleStore }    from '../../store/battleStore.js'
 import { useUiStore }        from '../../store/uiStore.js'
+import { useShipTokenIcon }  from './useShipTokenIcon.js'
 import { countMissileAmmoCapacity, countTorpedoAmmoCapacity, countSandcasters } from '../../utils/combat.js'
 import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST }  from '../../data/rangeBands.js'
 
@@ -53,7 +54,8 @@ function HullBar({ current, max }) {
  * @param {{ ship: object, ships: object[], missiles: object[], onContextMenu: Function }} props
  */
 function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
-  const cardRef = useRef(null)
+  const cardRef  = useRef(null)
+  const tokenRef = useShipTokenIcon(ship, 28)
 
   const handleContextMenu = useCallback((e) => {
     e.preventDefault()
@@ -126,7 +128,7 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
     >
       {/* ── Zona A — Header ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 px-3 pt-3 pb-2">
-        <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: ship.color }} />
+        <canvas ref={tokenRef} width={28} height={28} className="shrink-0" />
         <div className="truncate min-w-0">
           <span className="font-mono text-sm text-slate-200 font-bold block truncate">{ship.name}</span>
           {ship.profile?.name !== ship.name && (
