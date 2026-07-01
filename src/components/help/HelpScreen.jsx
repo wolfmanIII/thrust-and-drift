@@ -198,7 +198,7 @@ export function HelpScreen({ onBack } = {}) {
 
           <Sub title="BASIC MODE VIEW">
             <p>In Basic mode there is no hex map. Ships appear as bento cards grouped by faction. Each card has three zones:</p>
-            <KV k="Header" v="Ship token icon (same shape/colour as the tactical map token) · instance name · profile name (cyan, below) · status badges: ☠ WRECK, DOGFIGHT, BOARDING, EVA N (evasive thrust), LOCKED (sensor locked by enemy), ION NR (ion disruption active — blue)." />
+            <KV k="Header" v="Ship token icon (same shape/colour as the tactical map token, rotated 90° clockwise — nose right) · instance name · profile name (cyan, below) · status badges: ☠ WRECK, DOGFIGHT, BOARDING, EVA N (evasive thrust), LOCKED (sensor locked by enemy), ION NR (ion disruption active — blue)." />
             <KV k="Hull" v="Hull bar (green → yellow → red) · Hull N/M · Initiative." />
             <KV k="Status" v="Conditional zone — shown only when active: sensor lock target (with DM), locked-by attacker, inbound missiles per launcher, inbound torpedoes (separate row), launched missiles per target, reloading turrets, critical hits, missile ammo (🚀 N/max, yellow < 25%, red at 0), torpedo ammo (🎯 N/max, yellow < 25%, red at 0 — separate pool from missiles), sand canisters (🪨 N/max, yellow < 25%, red at 0), ion disruption (−N PWR · Xr remaining; OFFLINE when currentPower = 0). Hidden when none apply." />
             <KV k="DISTANCES panel" v="Lists every cross-faction pair with its current range band. ⬇ / ⬆ buttons adjust the band directly (GM override — no thrust spent)." />

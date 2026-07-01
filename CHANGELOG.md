@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.3.4] — 2026-07-01
+
+### Changed
+
+- **Basic mode bento cards — token icon rotated 90° clockwise** — The ship token silhouette in the `ShipBentoCard` header (`useShipTokenIcon`) is now drawn nose-right instead of nose-up, a better fit for the horizontal header layout. (`useShipTokenIcon.js`)
+
+---
+
 ## [2.3.3] — 2026-07-01
 
 ### Changed

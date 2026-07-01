@@ -3,8 +3,9 @@
  * Reuses the same shape tracers as the tactical map renderer
  * (shipTokenShapes.js) so non-map surfaces — e.g. Basic mode bento cards —
  * stay visually consistent with the map token without duplicating draw logic.
- * No rotation/animation, no HP arc (hull state is shown by the card's own
- * HP bar): static, nose-up shape only.
+ * No animation, no HP arc (hull state is shown by the card's own HP bar):
+ * static shape only, fixed 90° clockwise rotation (nose points right) for
+ * a better fit in the horizontal bento card header.
  */
 
 import { useRef, useEffect } from 'react'
@@ -38,6 +39,7 @@ export function useShipTokenIcon(ship, size = 28) {
 
     ctx.save()
     ctx.translate(cx, cy)
+    ctx.rotate(Math.PI / 2)   // nose-up shapes → nose-right, 90° clockwise
     const shape = tokenShape ?? 'delta'
     getShapeTracer(shape)(ctx, radius)
     ctx.fillStyle = color ?? '#64748b'

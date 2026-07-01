@@ -9,10 +9,10 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.3.3 |
+| **Versione** | 2.3.4 |
 | **Branch** | main |
 | **Test** | 1294 Vitest + 22 Playwright e2e |
-| **Ultimo commit** | feat(ui): ship token icon in bento card header (Basic mode), always show profile name |
+| **Ultimo commit** | feat(ui): rotate bento card token icon 90° clockwise |
 
 ---
 

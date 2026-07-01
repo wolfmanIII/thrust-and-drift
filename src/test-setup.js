@@ -5,7 +5,7 @@ import '@testing-library/jest-dom'
 HTMLCanvasElement.prototype.getContext = function () {
   return {
     scale: () => {}, clearRect: () => {}, save: () => {}, restore: () => {},
-    translate: () => {}, fill: () => {}, stroke: () => {},
+    translate: () => {}, rotate: () => {}, fill: () => {}, stroke: () => {},
     beginPath: () => {}, closePath: () => {}, moveTo: () => {}, lineTo: () => {}, arc: () => {}, ellipse: () => {},
     quadraticCurveTo: () => {}, bezierCurveTo: () => {}, rect: () => {},
     set fillStyle(_) {}, set strokeStyle(_) {}, set lineWidth(_) {}, set globalAlpha(_) {},
