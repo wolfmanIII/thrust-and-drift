@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.3.5] — 2026-07-03
+
+### Fixed
+
+- **Battle Report — multi-page print was cut off at page 1** — `#battle-report-print` used `position: fixed` in the print stylesheet to escape the modal's `max-h-[90vh] overflow-y-auto` scroll clipping. Chrome/Firefox's print engine renders `position: fixed` elements only on the first page, so any report longer than one page (multi-round battle log) got truncated. Fixed by neutralizing the modal's ancestor chain instead (`*:has(#battle-report-print) { position: static; overflow: visible; max-height: none; display: block }`), letting the report flow in normal document flow and paginate correctly across as many pages as needed. Reported via Reddit. (`App.css`)
+
+---
+
 ## [2.3.4] — 2026-07-01
 
 ### Changed

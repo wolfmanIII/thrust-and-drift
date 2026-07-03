@@ -9,10 +9,10 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.3.4 |
+| **Versione** | 2.3.5 |
 | **Branch** | main |
 | **Test** | 1294 Vitest + 22 Playwright e2e |
-| **Ultimo commit** | feat(ui): rotate bento card token icon 90° clockwise |
+| **Ultimo commit** | fix(print): battle report multi-page print cut off at page 1 |
 
 ---
 

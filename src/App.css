@@ -9,11 +9,22 @@
   #battle-report-print,
   #battle-report-print * { visibility: visible; }
 
+  /* The report's ancestors (modal overlay + scrollable panel) stay
+     invisible but still affect layout — their fixed positioning, flex
+     centering, and max-h + overflow-y-auto scroll clipping would confine
+     the printed report to a single viewport-height page. Neutralize them
+     instead of putting position:fixed on the report itself — fixed-position
+     elements are only rendered on page 1 by Chrome/Firefox's print engine,
+     which is what caused multi-page reports to get cut off. */
+  *:has(#battle-report-print) {
+    position: static !important;
+    overflow: visible !important;
+    max-height: none !important;
+    display: block !important;
+  }
+
   /* Reset to a clean white page */
   #battle-report-print {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
     background: white !important;
     color: #111 !important;
