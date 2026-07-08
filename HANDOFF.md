@@ -9,14 +9,32 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.3.5 |
+| **Versione** | 2.3.6 |
 | **Branch** | main |
-| **Test** | 1294 Vitest + 22 Playwright e2e |
-| **Ultimo commit** | fix(print): battle report multi-page print cut off at page 1 |
+| **Test** | 1302 Vitest + 22 Playwright e2e |
+| **Ultimo commit** | fix(attack): torpedo/barbette single-mount + PD auto-roll opt-in |
+
+---
+
+## Prossimo task
+
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§9.5 Weapons, §9.6 Point Defence, §per-slot firing limit aggiornati per il fix quad turret/barbette)
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
+
+### Sessione corrente — CotI bug fixes: Torpedo quad turret + PD auto-roll (v2.3.6)
+
+Segnalazione CotI, due bug distinti in `AttackModal.jsx` / `ShipProfileForm.jsx`:
+
+1. **Torpedo (barbette) combinabile in quad turret** — RAW-check su HG p.31 (Torpedo Barbette: "holds three torpedoes" = capacità munizioni di UN barbette, non salvo per-round) e HG p.81 (Quad Turret: esplicitamente un meccanismo solo-turret). Root cause: `ShipProfileForm.jsx` non distingueva `mount: 'turret'` da `mount: 'barbette'/'bay'`, lasciando fino a 4 armi di qualsiasi tipo per slot. Fix: barbette/bay cappate a 1 per slot (dropdown filtrato + guard a livello di stato in `addWeapon`, indipendente dalla UI). `ShipDetailModal.jsx` corretta di conseguenza — uno slot barbette/bay mostra **Barbette**/**Bay**, mai "Turret".
+2. **PD contro missili/torpedo senza auto-roll opt-in** — `MissilePdStep` in `AttackModal.jsx` forzava input manuale 2D6 per le navi player, senza il pulsante 🎲 presente invece in `AttackDamageStep` e altri step. Aggiunto lo stesso pattern.
+3. **Doc aggiornati**: field-manual.md (§9.5 Ship Detail Weapons, §9.6 Point Defence, §per-slot firing limit), HelpScreen.jsx (stesse sezioni), CHANGELOG v2.3.6.
+4. **Test**: +6 in `ShipProfileForm.test.jsx` (barbette/bay single-mount, dropdown filtering), +2 in `ShipDetailModal.test.jsx` (label Barbette/Bay). 1302 test totali (+8 da 1294).
+5. **Issue GitHub**: [#24](https://github.com/wolfmanIII/thrust-and-drift/issues/24) — entrambi i bug documentati con root cause analysis.
+
+**Nota metodologica**: l'utente ha esplicitamente richiesto di seguire sempre il RAW su ambiguità di regole, mai proporre house rule come alternativa. Salvato in memoria (`feedback_raw_fidelity`).
 
 ### Sessione corrente — v2.0.0: Discrete Zoom + PDF Report + Test Suite
 
@@ -338,32 +356,11 @@ Code review completa su dogfight e boarding → 13 fix implementati in 5 fasi:
 
 ---
 
-## Prossimo task
-
-- **Deploy Netlify** — manuale da CLI: `source ~/.nvm/nvm.sh && nvm use --lts && npm run build && netlify deploy --prod`
-- **Test manuali in app** — dogfight e boarding (non testati da v1.17.1), flusso missile impact two-step, EW Counter Missile
-- **Reddit response** — risposta dettagliata al thread Reddit (7 fix + spiegazione FIX-08 non-bug)
-- **itch.io listing** — deferred da sessione precedente
-
-Deploy da fare da casa: `source ~/.nvm/nvm.sh && nvm use --lts && npm run build && npx netlify-cli deploy --prod --dir=dist`
-
-Possibili aree di sviluppo future:
-
-- **Eliminare `ThrustModal.jsx`** — file ancora su disco ma non più importato; rimuovere quando confermato stabile il nuovo targeting
-- **Obstacles system** — vedi `doc/obstacles-system-design.md` per spec completa; §14 documenta già l'interazione dogfight × ostacoli
-- **BoardingPanel side panel** — vedi `doc/conflict-resolution-implementation.md` §5 (UX D); sostituisce i 3 boarding modal con pannello laterale persistente accanto alla mappa
-- **Animazione lancio missili** — token appare istantaneamente, manca slide-in analoga al movimento navi
-- **Configurabilità `MISSILE_GUIDANCE_THRUST`** — esporre nelle impostazioni GM (attualmente hardcoded a 10 per RAW; Smart missiles TC p.176 hanno Thrust 15)
-- **Verifica sourcePage rimanenti** — altri entry del catalogo non verificati contro PDF HG 2022
-- **tokenShape in profili** — attualmente `tokenShape` è per-instance (scelta al placement); valutare se aggiungere un default al profilo per navi con una forma canonica (es. capital ship sempre `capital`)
-
----
-
 ## Riferimenti utili
 
 - `CLAUDE.md` — regole di progetto, stack, struttura
 - `doc/field-manual.md` — manuale di gioco (italiano)
-- `doc/obstacles-system-design.md` — spec completa sistema ostacoli (prossima feature major); §14 interazione dogfight
+- `doc/obstacles-system-design.md` — spec completa sistema ostacoli (implementato, v1.24.0+); §14 interazione dogfight
 - `doc/conflict-resolution-implementation.md` — piano implementativo fix A/B/C/D; D (BoardingPanel) ancora da fare
 - `src/store/battleStore.js` — `isDestroyed`, `applyDamage()`, `advanceActor()`, `computeMissileGuidance()`, `startDogfight` (guard inBoarding)
 - `src/components/map/useDogfightDetection.js` — `detectDogfightGroups` (esclude `inBoarding` e `inDogfight`)

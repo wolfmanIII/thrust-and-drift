@@ -84,7 +84,7 @@ Each profile stores the ship's stats and named crew members.
 | **Name / Tonnage** | Display name and hull size (affects target size DM). |
 | **Hull / Thrust** | Max hull points and base manoeuvre drive rating. |
 | **Tech Level (TL)** | Ship's technology level (default **12**). Gates Smart guidance on all missile and torpedo weapons — the DM+2 Smart bonus applies only when the *launching* ship's TL ≥ 9 *(CRB p.79)*. Set to 8 or below for pre-stellar opponents or salvaged/primitive vessels. Most standard Traveller-era ships are TL 12–15. |
-| **Weapons** | Add weapon slots: type, damage dice, range band, and special traits. Maximum 4 weapons per slot (quad turret, HG p.81). The slot header shows SINGLE / DOUBLE / TRIPLE / QUAD as you add weapons. |
+| **Weapons** | Add weapon slots: type, damage dice, range band, and special traits. Turret-mount weapons (Pulse Laser, Beam Laser, Missile Rack, Sandcaster, Particle Beam, Railgun, Fusion Gun, Plasma Gun) may be combined up to 4 per slot (quad turret, HG p.81); the slot header shows SINGLE / DOUBLE / TRIPLE / QUAD as you add weapons. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, all `*_Barbette`, Ion Cannon Bay) are each a standalone hardpoint — only 1 per slot, cannot combine with anything else *(HG p.30–31)*. |
 | **Crew** | Named crew members, each with individual skill levels (see [§ 11](#11-crew-system)). |
 
 > **Design note — why TL on the ship, not the weapon:** CRB p.79 states that Smart munitions require a *fire control system* at TL9+ to guide them. All missile and torpedo weapons already carry the `Smart` trait in the weapon table — this correctly represents the *munition*'s capability. The TL field on the ship represents whether the vessel's targeting computer can actually exploit that capability. Separating the two avoids silent incorrect DMs when early-TL or pirate vessels appear alongside standard Imperial fleet ships.
@@ -416,7 +416,7 @@ Roll 2D6 + total DM against **8+**. Effect = total − 8.
 The turret slot is marked fired immediately.
 
 - **Multiple turrets:** if more than one eligible slot is available, a selector appears. Select a slot, roll; repeat with remaining slots.
-- **Player targets:** enter dice manually. NPC targets auto-roll.
+- **Player targets:** enter dice manually, with a 🎲 opt-in auto-roll button available. NPC targets auto-roll.
 - If all missiles are destroyed (count reaches 0), the impact is dismissed immediately — no attack roll.
 - The salvo size DM in Step 1 reflects the **remaining count** after PD.
 
@@ -548,7 +548,7 @@ round, identified by their slot number (`W1`, `W2`…). Once all offensive slots
 have fired, the **Attack…** option disappears from the context menu until the
 next Attack phase or the start of a new round.
 
-The Ship Detail modal labels each slot's mount type based on how many weapons it contains: **Single Turret** (1), **Double Turret** (2), **Triple Turret** (3), **Quad Turret** (4, HG p.81). A Quad Turret with 4 laser weapons grants **DM+3** on Point Defence — this is computed automatically from weapon count. Same-type weapons in a quad turret fire as a linked group: one attack roll with +3 bonus damage dice.
+The Ship Detail modal labels each slot's mount type. For turret-mount weapons, the label is based on weapon count: **Single Turret** (1), **Double Turret** (2), **Triple Turret** (3), **Quad Turret** (4, HG p.81). A Quad Turret with 4 laser weapons grants **DM+3** on Point Defence — this is computed automatically from weapon count. Same-type weapons in a quad turret fire as a linked group: one attack roll with +3 bonus damage dice. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, all `*_Barbette`, Ion Cannon Bay) are always shown as **Barbette** or **Bay** — each is a standalone hardpoint, capped at 1 per slot, and never labelled "Turret" *(HG p.30–31)*.
 
 ### 9.6 Launching Missiles
 

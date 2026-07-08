@@ -10,6 +10,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.3.6] — 2026-07-08
+
+### Fixed
+
+- **Torpedo (and all barbette/bay weapons) could be combined into a quad turret** — Quad Turret (HG p.81) is a turret-only mechanic; barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, all `*_Barbette`, Ion Cannon Bay) are each a standalone hardpoint per HG p.30–31 and cannot combine with anything else. `ShipProfileForm` previously allowed up to 4 of any weapon type per slot, so a GM could build a 4-tube Torpedo mount that displayed "4 available" but could still only fire 3 per round (the old barbette-derived cap). Fixed by capping barbette/bay weapons at 1 per slot and restricting the add-weapon dropdown accordingly; the state-level guard in `addWeapon` enforces this independently of the UI. `ShipDetailModal` slot labels also corrected — a barbette/bay slot now shows **Barbette** or **Bay** instead of "Single Turret". Reported via CotI.
+- **Point Defence vs. in-flight missiles/torpedoes had no auto-roll opt-in for player ships** — `MissilePdStep` forced manual 2D6 entry with no 🎲 button, unlike every other roll step in the app (e.g. `AttackDamageStep`). Added the same opt-in auto-roll affordance. Reported via CotI.
+
+---
+
 ## [2.3.5] — 2026-07-03
 
 ### Fixed

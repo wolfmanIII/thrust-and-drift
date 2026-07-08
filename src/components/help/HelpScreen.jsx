@@ -178,7 +178,7 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="Name / Tonnage" v="Display name and hull size (affects target size DM)." />
             <KV k="Hull / Thrust" v="Max hull points and base manoeuvre drive rating." />
             <KV k="Tech Level (TL)" v="Ship's technology level (default 12). Gates Smart guidance on missiles and torpedoes — DM+2 applies only when TL ≥ 9 (CRB p.79). Most Traveller-era vessels are TL 12–15; set lower for pre-stellar or primitive opponents." />
-            <KV k="Weapons" v="Add weapon slots — type, damage dice, range band, special traits. Maximum 4 weapons per slot (quad turret, HG p.81). The slot header shows SINGLE / DOUBLE / TRIPLE / QUAD as you add weapons." />
+            <KV k="Weapons" v="Add weapon slots — type, damage dice, range band, special traits. Turret-mount weapons combine up to 4 per slot (quad turret, HG p.81) — the slot header shows SINGLE / DOUBLE / TRIPLE / QUAD as you add weapons. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, Ion Cannon Bay, all *_Barbette) are standalone — only 1 per slot (HG p.30–31)." />
             <KV k="Crew" v="Add named crew members, each with individual skill levels (Pilot, Leadership, Tactics, Engineer, Gunner, Sensors −3 to 5). Negative values represent untrained crew or attribute penalties. One crew member can hold multiple skills and be assigned to all roles — useful for single-seat fighters." />
           </Sub>
         </Section>
@@ -351,7 +351,7 @@ export function HelpScreen({ onBack } = {}) {
             <p>If the target has at least one unfired laser turret (Pulse Laser or Beam Laser), the GM may roll Point Defence before the attack roll <span className="text-slate-400">(CRB p.173)</span>.</p>
             <KV k="🛡 ROLL POINT DEFENCE" v="Gunner check 2D6 + Gunner + laser bonus (DM+1 for 2 lasers on one slot; DM+2 for 3). Effect removes that many missiles. Against torpedo salvoes, Effect is halved (rounded down) before applying — e.g. Effect 3 destroys only 1 torpedo (HG p.39). Turret slot marked fired immediately." />
             <KV k="Multiple turrets" v="A slot selector appears when more than one eligible turret is available. Select a slot, roll; repeat with remaining slots." />
-            <KV k="Player targets" v="Enter dice manually; NPC targets auto-roll." />
+            <KV k="Player targets" v="Enter dice manually, with a 🎲 opt-in auto-roll button; NPC targets auto-roll." />
             <KV k="All missiles destroyed" v="Impact dismissed immediately — no attack roll needed. Salvo size DM in Step 1 reflects remaining count after PD." />
             <p className="font-mono text-xs text-slate-300 mt-1">STEP 1 — ATTACK ROLL</p>
             <KV k="Salvo DM" v="+1 per missile remaining after Point Defence (e.g. 3 survivors → DM+3)." />
@@ -424,7 +424,7 @@ export function HelpScreen({ onBack } = {}) {
 
           <Sub title="PER-SLOT FIRING LIMIT">
             <p>Each weapon slot may fire <span className="text-slate-200">once per round</span> (CRB p.164). The weapon list shows only unfired slots, identified by slot badge (W1, W2…). Once all offensive slots have fired, the Attack… option disappears from the context menu.</p>
-            <p>The Ship Detail modal labels each slot&apos;s mount type: <span className="text-slate-200">Single Turret</span> (1), <span className="text-slate-200">Double Turret</span> (2), <span className="text-slate-200">Triple Turret</span> (3), <span className="text-slate-200">Quad Turret</span> (4, HG p.81). A Quad Turret with 4 laser weapons grants <span className="text-slate-200">DM+3</span> on Point Defence — this is computed automatically from weapon count.</p>
+            <p>The Ship Detail modal labels each slot&apos;s mount type. Turret-mount weapons: <span className="text-slate-200">Single Turret</span> (1), <span className="text-slate-200">Double Turret</span> (2), <span className="text-slate-200">Triple Turret</span> (3), <span className="text-slate-200">Quad Turret</span> (4, HG p.81). A Quad Turret with 4 laser weapons grants <span className="text-slate-200">DM+3</span> on Point Defence — this is computed automatically from weapon count. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, all *_Barbette, Ion Cannon Bay) are always standalone — labelled <span className="text-slate-200">Barbette</span> or <span className="text-slate-200">Bay</span>, capped at 1 per slot, never combinable into a Quad mount (HG p.30–31).</p>
           </Sub>
 
           <Sub title="WEAPON RANGE LIMITS">
