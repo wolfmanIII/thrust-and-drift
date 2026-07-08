@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { useProfilesStore } from '../../store/profilesStore.js'
 import { WEAPON_IDS, WEAPONS } from '../../data/weapons.js'
 import { CREW_SKILLS, blankCrewMember, migrateCrew } from '../../utils/crew.js'
+import { hardpointBudget, slotHardpointCost, totalHardpointsUsed } from '../../utils/hardpoints.js'
 import { Tooltip } from '../ui/Tooltip.jsx'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -267,6 +268,9 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
 
   const isNew = !profileId
 
+  const hardpointsBudget = hardpointBudget(form.tonnage)
+  const hardpointsUsed   = totalHardpointsUsed(form.turrets)
+
   // ── Field helpers ──────────────────────────────────────────────────────
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }))
@@ -289,6 +293,21 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
 
   const addWeapon = (slotIdx, weapon) => {
     if (!weapon) return
+    const targetSlot = form.turrets[slotIdx]
+    // Only an empty slot's first weapon changes the slot's Hardpoint cost —
+    // a 2nd/3rd/4th turret weapon in the same slot is still 1 Hardpoint total.
+    // Existing profiles that already exceed budget are never retroactively
+    // blocked (CRB p.183 budget applies only to new slot additions going forward).
+    if (targetSlot?.weapons.length === 0) {
+      const budget = hardpointBudget(form.tonnage)
+      const used = totalHardpointsUsed(form.turrets)
+      const newCost = slotHardpointCost({ weapons: [weapon] })
+      if (used + newCost > budget) {
+        setError(`Hardpoint budget exceeded — ${used}/${budget} used, this mount needs ${newCost} more.`)
+        return
+      }
+    }
+    setError(null)
     setForm((f) => ({
       ...f,
       turrets: f.turrets.map((t, i) => {
@@ -446,13 +465,20 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
             <h3 className="font-mono text-xs text-slate-400 tracking-widest uppercase">
               Weapons ({form.turrets.length})
             </h3>
-            <button
-              type="button"
-              onClick={addTurret}
-              className="text-(--neon-cyan) font-mono text-xs border border-(--neon-cyan)/30 rounded px-2 py-0.5 hover:bg-(--neon-cyan)/10 transition-colors"
-            >
-              + Add
-            </button>
+            <div className="flex items-center gap-3">
+              <Tooltip label="CRB p.183 — 1 Hardpoint per full 100 tons (Firmpoints under 100t). HG p.31 — Large Bay costs 5." position="top">
+                <span className={`font-mono text-xs tracking-widest ${hardpointsUsed > hardpointsBudget ? 'text-red-400' : 'text-slate-400'}`}>
+                  HARDPOINTS {hardpointsUsed}/{hardpointsBudget}
+                </span>
+              </Tooltip>
+              <button
+                type="button"
+                onClick={addTurret}
+                className="text-(--neon-cyan) font-mono text-xs border border-(--neon-cyan)/30 rounded px-2 py-0.5 hover:bg-(--neon-cyan)/10 transition-colors"
+              >
+                + Add
+              </button>
+            </div>
           </div>
           {form.turrets.length === 0 && (
             <p className="text-slate-400 font-mono text-xs italic">No weapon slots.</p>

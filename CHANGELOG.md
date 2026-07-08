@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.4.0] — 2026-07-08
+
+### Added
+
+- **Hardpoint budget enforced in the Ship Profile form** — CRB p.183: a ship has one Hardpoint for every full 100 tons of its hull (ships under 100 tons get Firmpoints instead — 1 below 35t, 2 from 35–70t, 3 from 71–99t). HG p.31: a Large Bay weapon consumes 5 Hardpoints instead of 1. Previously nothing tied weapon slot count to hull tonnage — a GM could add unlimited weapon slots to any ship regardless of size. `ShipProfileForm` now shows a live `HARDPOINTS n/n` readout and blocks adding a new weapon to an empty slot if it would exceed the budget. Existing profiles (including the full ship catalog — verified, zero violations) are never retroactively invalidated; the check only applies to new slot additions going forward. (`src/utils/hardpoints.js`, `ShipProfileForm.jsx`) — GitHub #25
+
+---
+
 ## [2.3.6] — 2026-07-08
 
 ### Fixed

@@ -9,22 +9,32 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.3.6 |
+| **Versione** | 2.4.0 |
 | **Branch** | main |
-| **Test** | 1302 Vitest + 22 Playwright e2e |
-| **Ultimo commit** | fix(attack): torpedo/barbette single-mount + PD auto-roll opt-in |
+| **Test** | 1318 Vitest + 28 Playwright e2e |
+| **Ultimo commit** | feat(weapons): enforce Hardpoint budget (CRB p.183, HG p.31) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§9.5 Weapons, §9.6 Point Defence, §per-slot firing limit aggiornati per il fix quad turret/barbette)
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§2.3.1 Hardpoint budget nuova, oltre a §9.5 Weapons/§9.6 Point Defence/§per-slot firing limit del fix precedente v2.3.6)
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — CotI bug fixes: Torpedo quad turret + PD auto-roll (v2.3.6)
+### Sessione corrente — Hardpoint budget (v2.4.0)
+
+Follow-up dell'issue [#24](https://github.com/wolfmanIII/thrust-and-drift/issues/24): mentre si fixava il bug torpedo/quad-turret, è emerso che l'app non applicava affatto il budget Hardpoint (CRB p.183: 1 Hardpoint ogni 100 tonnellate scafo intere; navi sotto 100t hanno Firmpoint — 1/2/3 a seconda della fascia; HG p.31: Large Bay costa 5 Hardpoint invece di 1). Aperta issue dedicata [#25](https://github.com/wolfmanIII/thrust-and-drift/issues/25).
+
+1. **`src/utils/hardpoints.js`** (nuovo) — `hardpointBudget(tonnage)`, `slotHardpointCost(turret)`, `totalHardpointsUsed(turrets)`. Verificato contro tutte le 34 navi del catalogo: 0 violazioni (il primo tentativo con `Math.floor(tonnage/100)` dava falsi positivi su tutti i piccoli scafi sotto 100t, perché la regola Firmpoint non era ancora implementata).
+2. **`ShipProfileForm.jsx`** — readout live `HARDPOINTS n/n` nell'header sezione Weapons; `addWeapon` blocca l'aggiunta di una nuova arma a uno slot vuoto se sforerebbe il budget. Le navi/profili esistenti non vengono mai invalidati retroattivamente — il check si applica solo alle nuove aggiunte.
+3. **Test**: +10 in `hardpoints.test.js`, +6 in `ShipProfileForm.test.jsx`, +6 e2e Playwright (`e2e/hardpoint-budget.spec.js`, autorizzato esplicitamente per questa sessione). Totale 1318 Vitest (+16 da 1302) + 28 e2e (+6 da 22).
+4. **Doc aggiornati**: field-manual.md (nuovo §2.3.1), HelpScreen.jsx (stessa sezione), CHANGELOG v2.4.0, package.json + Dashboard badge.
+5. Issue [#24](https://github.com/wolfmanIII/thrust-and-drift/issues/24) chiusa (fix già deployati in v2.3.6); [#25](https://github.com/wolfmanIII/thrust-and-drift/issues/25) tracciava questo lavoro.
+
+### Sessione precedente — CotI bug fixes: Torpedo quad turret + PD auto-roll (v2.3.6)
 
 Segnalazione CotI, due bug distinti in `AttackModal.jsx` / `ShipProfileForm.jsx`:
 

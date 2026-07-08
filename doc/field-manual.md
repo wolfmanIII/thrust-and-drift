@@ -1,13 +1,13 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.3.5** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.4.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
 ## Table of Contents
 
 1. [Overview](#1-overview)
-2. [Dashboard](#2-dashboard)
+2. [Dashboard](#2-dashboard) — includes §2.3.1 Hardpoint budget
 3. [Map Controls](#3-map-controls)
 4. [Phase Flow](#4-phase-flow)
 5. [Setup Phase](#5-setup-phase)
@@ -84,10 +84,18 @@ Each profile stores the ship's stats and named crew members.
 | **Name / Tonnage** | Display name and hull size (affects target size DM). |
 | **Hull / Thrust** | Max hull points and base manoeuvre drive rating. |
 | **Tech Level (TL)** | Ship's technology level (default **12**). Gates Smart guidance on all missile and torpedo weapons — the DM+2 Smart bonus applies only when the *launching* ship's TL ≥ 9 *(CRB p.79)*. Set to 8 or below for pre-stellar opponents or salvaged/primitive vessels. Most standard Traveller-era ships are TL 12–15. |
-| **Weapons** | Add weapon slots: type, damage dice, range band, and special traits. Turret-mount weapons (Pulse Laser, Beam Laser, Missile Rack, Sandcaster, Particle Beam, Railgun, Fusion Gun, Plasma Gun) may be combined up to 4 per slot (quad turret, HG p.81); the slot header shows SINGLE / DOUBLE / TRIPLE / QUAD as you add weapons. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, all `*_Barbette`, Ion Cannon Bay) are each a standalone hardpoint — only 1 per slot, cannot combine with anything else *(HG p.29: "a barbette uses a single Hardpoint")*. |
+| **Weapons** | Add weapon slots: type, damage dice, range band, and special traits. Turret-mount weapons (Pulse Laser, Beam Laser, Missile Rack, Sandcaster, Particle Beam, Railgun, Fusion Gun, Plasma Gun) may be combined up to 4 per slot (quad turret, HG p.81); the slot header shows SINGLE / DOUBLE / TRIPLE / QUAD as you add weapons. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, all `*_Barbette`, Ion Cannon Bay) are each a standalone hardpoint — only 1 per slot, cannot combine with anything else *(HG p.29: "a barbette uses a single Hardpoint")*. A live **HARDPOINTS n/n** readout shows how many of the hull's available Hardpoints are used; adding a new weapon to an empty slot is blocked if it would exceed the budget (see below). |
 | **Crew** | Named crew members, each with individual skill levels (see [§ 11](#11-crew-system)). |
 
 > **Design note — why TL on the ship, not the weapon:** CRB p.79 states that Smart munitions require a *fire control system* at TL9+ to guide them. All missile and torpedo weapons already carry the `Smart` trait in the weapon table — this correctly represents the *munition*'s capability. The TL field on the ship represents whether the vessel's targeting computer can actually exploit that capability. Separating the two avoids silent incorrect DMs when early-TL or pirate vessels appear alongside standard Imperial fleet ships.
+
+#### 2.3.1 Hardpoint Budget
+
+*CRB p.183*: a ship has one Hardpoint for every full 100 tons of its hull. Each weapon system (a turret slot, a barbette, a Small/Medium Bay) uses one Hardpoint — a Double/Triple/Quad Turret still counts as just 1, since it's a single mount holding multiple weapons of the same type. Ships **under 100 tons** use **Firmpoints** instead: 1 Firmpoint below 35 tons, 2 from 35–70 tons, 3 from 71–99 tons.
+
+*HG p.31*: a **Large Bay** is the one exception — it consumes **5 Hardpoints** instead of 1.
+
+The Ship Profile Form shows a live `HARDPOINTS n/n` readout next to the Weapons section header and blocks adding a new weapon to an empty slot if doing so would exceed the hull's budget. This check applies only to **new** slot additions going forward — existing ship profiles (including every ship in the built-in catalog) are never retroactively invalidated, even if one happened to predate this rule and exceed the budget.
 
 ---
 

@@ -22,10 +22,10 @@ function clickAddSlot() {
   fireEvent.click(adds[adds.length - 1])
 }
 
-/** Fire the add-weapon select for a single weapon. */
+/** Fire the add-weapon select for a single weapon (targets the last/newest slot). */
 function addWeapon(name = 'Pulse Laser') {
-  const select = screen.getByRole('combobox')
-  fireEvent.change(select, { target: { value: name } })
+  const selects = screen.getAllByRole('combobox')
+  fireEvent.change(selects[selects.length - 1], { target: { value: name } })
 }
 
 describe('ShipProfileForm — quad turret (#17 HG p.81)', () => {
@@ -142,5 +142,62 @@ describe('ShipProfileForm — fixed-mount weapons are single-slot (HG p.30–31,
     expect(optionValues).not.toContain('Torpedo')
     expect(optionValues).not.toContain('Ion Cannon Bay (Small)')
     expect(optionValues).toContain('Beam Laser')
+  })
+})
+
+// CRB p.183 — 1 Hardpoint per full 100 tons (Firmpoints under 100t).
+// HG p.31 — Large Bay costs 5 Hardpoints. Only new slot additions are
+// blocked; existing profiles that predate this rule are never retroactively
+// invalidated.
+describe('ShipProfileForm — Hardpoint budget (CRB p.183, HG p.31)', () => {
+  it('shows 0/1 at default 100-ton tonnage with no weapons', () => {
+    renderForm()
+    expect(screen.getByText('HARDPOINTS 0/1')).toBeInTheDocument()
+  })
+
+  it('shows 1/1 after filling the only Hardpoint on a 100-ton hull', () => {
+    renderForm()
+    clickAddSlot()
+    addWeapon('Pulse Laser')
+    expect(screen.getByText('HARDPOINTS 1/1')).toBeInTheDocument()
+  })
+
+  it('blocks a 2nd weapon slot once the 100-ton hull budget (1) is used', () => {
+    renderForm()
+    clickAddSlot()
+    addWeapon('Pulse Laser')
+    clickAddSlot()
+    addWeapon('Beam Laser')
+    expect(screen.getByText(/Hardpoint budget exceeded/i)).toBeInTheDocument()
+    // Rejected — budget stays at 1/1, second slot never received a weapon.
+    expect(screen.getByText('HARDPOINTS 1/1')).toBeInTheDocument()
+  })
+
+  it('allows a 2nd weapon slot once tonnage is raised to cover the budget', () => {
+    renderForm()
+    fireEvent.change(screen.getByLabelText('TONNAGE'), { target: { value: '200' } })
+    clickAddSlot()
+    addWeapon('Pulse Laser')
+    clickAddSlot()
+    addWeapon('Beam Laser')
+    expect(screen.queryByText(/Hardpoint budget exceeded/i)).not.toBeInTheDocument()
+    expect(screen.getByText('HARDPOINTS 2/2')).toBeInTheDocument()
+  })
+
+  it('a Large Bay consumes 5 Hardpoints, blocked on a 100-ton hull', () => {
+    renderForm()
+    clickAddSlot()
+    addWeapon('Ion Cannon Bay (Large)')
+    expect(screen.getByText(/Hardpoint budget exceeded/i)).toBeInTheDocument()
+    expect(screen.getByText('HARDPOINTS 0/1')).toBeInTheDocument()
+  })
+
+  it('a small craft under 35 tons still gets 1 Firmpoint (not 0)', () => {
+    renderForm()
+    fireEvent.change(screen.getByLabelText('TONNAGE'), { target: { value: '10' } })
+    expect(screen.getByText('HARDPOINTS 0/1')).toBeInTheDocument()
+    clickAddSlot()
+    addWeapon('Pulse Laser')
+    expect(screen.getByText('HARDPOINTS 1/1')).toBeInTheDocument()
   })
 })

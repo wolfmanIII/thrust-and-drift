@@ -178,8 +178,11 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="Name / Tonnage" v="Display name and hull size (affects target size DM)." />
             <KV k="Hull / Thrust" v="Max hull points and base manoeuvre drive rating." />
             <KV k="Tech Level (TL)" v="Ship's technology level (default 12). Gates Smart guidance on missiles and torpedoes — DM+2 applies only when TL ≥ 9 (CRB p.79). Most Traveller-era vessels are TL 12–15; set lower for pre-stellar or primitive opponents." />
-            <KV k="Weapons" v="Add weapon slots — type, damage dice, range band, special traits. Turret-mount weapons combine up to 4 per slot (quad turret, HG p.81) — the slot header shows SINGLE / DOUBLE / TRIPLE / QUAD as you add weapons. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, Ion Cannon Bay, all *_Barbette) are standalone — only 1 per slot (HG p.29: 'a barbette uses a single Hardpoint')." />
+            <KV k="Weapons" v="Add weapon slots — type, damage dice, range band, special traits. Turret-mount weapons combine up to 4 per slot (quad turret, HG p.81) — the slot header shows SINGLE / DOUBLE / TRIPLE / QUAD as you add weapons. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, Ion Cannon Bay, all *_Barbette) are standalone — only 1 per slot (HG p.29: 'a barbette uses a single Hardpoint'). A live HARDPOINTS n/n readout shows Hardpoint usage against the hull's budget; adding a new weapon is blocked if it would exceed the budget." />
             <KV k="Crew" v="Add named crew members, each with individual skill levels (Pilot, Leadership, Tactics, Engineer, Gunner, Sensors −3 to 5). Negative values represent untrained crew or attribute penalties. One crew member can hold multiple skills and be assigned to all roles — useful for single-seat fighters." />
+            <p className="pt-1">
+              <span className="text-slate-200">Hardpoint budget (CRB p.183):</span> one Hardpoint per full 100 tons of hull; ships under 100 tons use Firmpoints instead (1 below 35t, 2 from 35–70t, 3 from 71–99t). A Large Bay (HG p.31) costs 5 Hardpoints instead of 1. The check only blocks <em>new</em> weapon-slot additions — existing profiles, including the built-in catalog, are never retroactively invalidated.
+            </p>
           </Sub>
         </Section>
 
