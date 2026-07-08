@@ -819,6 +819,15 @@ function MissilePdStep({ missile, launcherName, targetName, attacker, turretSlot
                   className="w-20 bg-slate-700 border border-slate-600 text-(--neon-cyan) font-mono text-lg rounded text-center px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60"
                   placeholder="—"
                 />
+                <button
+                  type="button"
+                  onClick={() => setManualRaw(roll2D6().total.toString())}
+                  className="text-slate-400 hover:text-(--neon-cyan) font-mono text-sm transition-colors"
+                  title="Auto-roll"
+                  aria-label="Auto-roll 2D6"
+                >
+                  🎲
+                </button>
               </div>
               <button
                 onClick={handleManualConfirm}

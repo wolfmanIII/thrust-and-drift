@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useProfilesStore } from '../../store/profilesStore.js'
-import { WEAPON_IDS } from '../../data/weapons.js'
+import { WEAPON_IDS, WEAPONS } from '../../data/weapons.js'
 import { CREW_SKILLS, blankCrewMember, migrateCrew } from '../../utils/crew.js'
 import { Tooltip } from '../ui/Tooltip.jsx'
 
@@ -164,13 +164,29 @@ function CrewMemberRow({ member, onChange, onRemove }) {
 
 const TURRET_WEAPON_IDS = WEAPON_IDS
 
-// Single / Double / Triple / Quad — HG p.81 (quad turret, 4 weapons, DM+3 PD)
+// Single / Double / Triple / Quad — HG p.81 (quad turret, 4 weapons, DM+3 PD).
+// Quad Turret is a turret-only mechanic — barbette and bay weapons are each
+// their own standalone hardpoint (HG p.30–31) and cannot combine with anything.
 const TURRET_TYPE_LABELS = ['—', 'SINGLE', 'DOUBLE', 'TRIPLE', 'QUAD']
+
+function weaponMount(weaponId) {
+  return WEAPONS[weaponId]?.mount ?? 'turret'
+}
 
 /** Turret row: slot number, weapon chips, add weapon dropdown, remove turret. */
 function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurret }) {
-  const n         = turret.weapons.length
-  const typeLabel = TURRET_TYPE_LABELS[n] ?? 'QUAD'
+  const n          = turret.weapons.length
+  const firstMount = n > 0 ? weaponMount(turret.weapons[0]) : null
+  const isFixedMount = firstMount === 'barbette' || firstMount === 'bay'
+  const maxWeapons   = isFixedMount ? 1 : 4
+  const canAddMore   = n < maxWeapons
+  const typeLabel    = isFixedMount ? firstMount.toUpperCase() : (TURRET_TYPE_LABELS[n] ?? 'QUAD')
+
+  // Barbette/bay weapons are standalone — only offer them in an empty slot.
+  // A slot already holding a turret weapon may only receive more turret weapons.
+  const addableWeaponIds = n === 0
+    ? TURRET_WEAPON_IDS
+    : TURRET_WEAPON_IDS.filter((w) => weaponMount(w) === 'turret')
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 bg-slate-800 rounded px-2 py-1.5">
@@ -197,21 +213,23 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
         </span>
       ))}
 
-      {/* Add weapon — max 4 per turret (quad turret, HG p.81) */}
-      {n < 4 && (
+      {/* Add weapon — turret slots hold up to 4 (quad turret, HG p.81); barbette/bay are single-mount (HG p.30–31) */}
+      {canAddMore && (
         <select
           value=""
           onChange={(e) => { onAddWeapon(slotIdx, e.target.value); e.target.value = '' }}
           className="bg-slate-700 border border-slate-600 text-slate-400 font-mono text-xs rounded px-1.5 py-0.5 focus:outline-none focus:border-(--neon-cyan)/60 cursor-pointer"
         >
           <option value="">+ weapon</option>
-          {TURRET_WEAPON_IDS.map((w) => (
+          {addableWeaponIds.map((w) => (
             <option key={w} value={w}>{w}</option>
           ))}
         </select>
       )}
-      {n >= 4 && (
-        <span className="text-slate-400 font-mono text-xs italic">QUAD — max 4</span>
+      {!canAddMore && (
+        <span className="text-slate-400 font-mono text-xs italic">
+          {isFixedMount ? `${typeLabel} — single mount` : 'QUAD — max 4'}
+        </span>
       )}
 
       {/* Remove turret */}
@@ -273,9 +291,17 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
     if (!weapon) return
     setForm((f) => ({
       ...f,
-      turrets: f.turrets.map((t, i) =>
-        i === slotIdx ? { ...t, weapons: [...t.weapons, weapon] } : t
-      ),
+      turrets: f.turrets.map((t, i) => {
+        if (i !== slotIdx) return t
+        if (t.weapons.length === 0) return { ...t, weapons: [weapon] }
+        // Barbette/bay weapons are standalone hardpoints (HG p.30–31) — cannot
+        // combine with anything. Quad turret (HG p.81) applies to turret weapons only.
+        const firstMount = weaponMount(t.weapons[0])
+        if (firstMount !== 'turret') return t
+        if (weaponMount(weapon) !== 'turret') return t
+        if (t.weapons.length >= 4) return t
+        return { ...t, weapons: [...t.weapons, weapon] }
+      }),
     }))
   }
 

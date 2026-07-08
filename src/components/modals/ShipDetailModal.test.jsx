@@ -79,3 +79,20 @@ describe('ShipDetailModal — mount type labels (REQ-07)', () => {
     expect(screen.getByText('Beam Laser')).toBeInTheDocument()
   })
 })
+
+// HG p.30–31: barbette/bay weapons are standalone hardpoints — never "Turret".
+describe('ShipDetailModal — barbette/bay mount labels (HG p.30–31)', () => {
+  it('shows "Barbette" (not "Single Turret") for a slot with 1 Torpedo', () => {
+    useBattleStore.setState({ ships: [makeShip([{ slot: 1, weapons: ['Torpedo'] }])] })
+    render(<ShipDetailModal />)
+    expect(screen.getByText(/\[Barbette\]/)).toBeInTheDocument()
+    expect(screen.queryByText(/Turret/)).not.toBeInTheDocument()
+  })
+
+  it('shows "Bay" (not "Single Turret") for a slot with 1 Ion Cannon Bay (Small)', () => {
+    useBattleStore.setState({ ships: [makeShip([{ slot: 1, weapons: ['Ion Cannon Bay (Small)'] }])] })
+    render(<ShipDetailModal />)
+    expect(screen.getByText(/\[Bay\]/)).toBeInTheDocument()
+    expect(screen.queryByText(/Turret/)).not.toBeInTheDocument()
+  })
+})

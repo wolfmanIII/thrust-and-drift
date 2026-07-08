@@ -7,6 +7,7 @@ import { useUiStore } from '../../store/uiStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { migrateCrew, CREW_SKILLS } from '../../utils/crew.js'
 import { countMissileAmmoCapacity, countTorpedoAmmoCapacity, countSandcasters } from '../../utils/combat.js'
+import { WEAPONS } from '../../data/weapons.js'
 
 function StatRow({ label, value }) {
   return (
@@ -120,16 +121,24 @@ export function ShipDetailModal() {
             {(profile.turrets ?? []).length === 0 && (
               <p className="text-slate-400 font-mono text-xs italic">None</p>
             )}
-            {(profile.turrets ?? []).map((t) => (
-              <div key={t.slot} className="py-0.5">
-                <span className="text-slate-400 font-mono text-xs">
-                  W{t.slot} [{['—', 'Single', 'Double', 'Triple', 'Quad'][t.weapons.length] ?? 'Quad'} Turret]:{' '}
-                </span>
-                <span className="text-slate-300 font-mono text-xs">
-                  {t.weapons.join(', ')}
-                </span>
-              </div>
-            ))}
+            {(profile.turrets ?? []).map((t) => {
+              // Barbette/bay weapons are standalone hardpoints (HG p.30–31) —
+              // never "Turret", regardless of count. Quad Turret (HG p.81) is turret-only.
+              const firstMount = t.weapons.length > 0 ? (WEAPONS[t.weapons[0]]?.mount ?? 'turret') : 'turret'
+              const mountLabel = firstMount === 'turret'
+                ? `${['—', 'Single', 'Double', 'Triple', 'Quad'][t.weapons.length] ?? 'Quad'} Turret`
+                : firstMount === 'barbette' ? 'Barbette' : 'Bay'
+              return (
+                <div key={t.slot} className="py-0.5">
+                  <span className="text-slate-400 font-mono text-xs">
+                    W{t.slot} [{mountLabel}]:{' '}
+                  </span>
+                  <span className="text-slate-300 font-mono text-xs">
+                    {t.weapons.join(', ')}
+                  </span>
+                </div>
+              )
+            })}
           </Section>
 
           {criticalHits.length > 0 && (
