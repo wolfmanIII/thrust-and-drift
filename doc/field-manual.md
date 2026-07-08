@@ -1,13 +1,13 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.4.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.5.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
 ## Table of Contents
 
 1. [Overview](#1-overview)
-2. [Dashboard](#2-dashboard) — includes §2.3.1 Hardpoint budget
+2. [Dashboard](#2-dashboard) — includes §2.2.1 Ship Roster columns, §2.3.1 Hardpoint budget
 3. [Map Controls](#3-map-controls)
 4. [Phase Flow](#4-phase-flow)
 5. [Setup Phase](#5-setup-phase)
@@ -68,12 +68,24 @@ The right panel lists all saved ship profiles.
 | Control | Action |
 | ------- | ------ |
 | **COMBAT MODE** | Toggle between Vectorial and Basic before starting. |
-| **🔄 RESUME** | Appears when an autosaved session is found. Click to restore instantly. The right panel shows the full saved roster (round, phase, ships by faction with hull bars). |
+| **🔄 RESUME** | Appears when an autosaved session is found. Click to restore instantly. The right panel shows the full saved roster (round, phase, ships by faction — see §2.2.1 for what each roster row shows). |
 | **✕** | Clears the autosave from IndexedDB. Appears next to 🔄 RESUME. |
 | **▶ NEW SESSION** | Clears any existing battle state and enters the combat map. |
-| **↓ RESUME FROM FILE** | Load a previously saved `.json` session. A preview screen shows the full roster before you confirm. |
+| **↓ RESUME FROM FILE** | Load a previously saved `.json` session. A preview screen shows the same roster (§2.2.1) before you confirm. |
 | **📖 FIELD MANUAL** | Opens this manual inside the app. |
 | **📋 CHANGELOG** | Opens the in-app version history (all releases with change categories). |
+
+#### 2.2.1 Ship Roster columns
+
+Both the autosave roster and the pre-import session preview show one row per ship, grouped by faction. Each row has:
+
+| Column | Shows |
+| ------ | ----- |
+| **Token + Name / Class** | Ship silhouette icon (same shape/colour as the map token), instance name (bold) and ship class (muted, below). |
+| **Thrust / Armour** | Rated Thrust from the profile; current Armour (reflects Ion Cannon reduction, if any). |
+| **Telemetry** | **Vectorial** mode: hex position and velocity vector (`POSITION q,r` / `VECTOR q,r`). **Basic** mode: ships have no real hex position (they sit on a `{0,0}` placeholder), so this instead shows the nearest-enemy range band. |
+| **Status** | `💥 DESTROYED` (red) → `⚔ DOGFIGHT` (amber) → `⚔ BOARDING` (red), in that priority order; otherwise `○ NEUTRAL` (grey, neutral-faction ships) or `● COMBAT` (cyan) by default. |
+| **Hull** | Progress bar (green → yellow → red) and current/max hull points. |
 
 ### 2.3 Ship Profile Form
 
@@ -978,8 +990,8 @@ Click **💾 SAVE** in the HUD at any time to download the full session as a
 ### 13.3 Resume from File
 
 On the Dashboard, click **↓ RESUME FROM FILE** and select your saved `.json`
-file. A preview screen shows the full roster (name, faction, hull, position)
-before you confirm loading.
+file. A preview screen shows the full roster (see §2.2.1 for what each row
+shows) before you confirm loading.
 
 ### 13.4 Profile Export / Import
 

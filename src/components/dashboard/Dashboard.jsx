@@ -16,6 +16,8 @@ import { Tooltip }          from '../ui/Tooltip.jsx'
 import { Modal }            from '../modals/Modal.jsx'
 import { dbGet, dbDelete, STORE_BATTLE } from '../../utils/db.js'
 import { parseBattleFile } from '../../utils/io.js'
+import { useShipTokenIcon } from '../map/useShipTokenIcon.js'
+import { RANGE_BAND_ORDER } from '../../data/rangeBands.js'
 
 // ── Left panel: profiles list ─────────────────────────────────────────────
 
@@ -415,7 +417,7 @@ function TacticalDisplayIdle() {
 
 /** Right column shown when an autosave exists but no file is pending. */
 function TacticalDisplayAutosave({ autosave }) {
-  const { round, phase, combatMode, ships = [], missiles = [], name, savedAt } = autosave
+  const { round, phase, combatMode, ships = [], missiles = [], name, savedAt, rangeBands } = autosave
 
   const FACTION_LABELS = { players: 'PLAYERS', npc: 'NPC', neutral: 'NEUTRAL' }
   const FACTION_COLORS = { players: 'text-(--neon-cyan)', npc: 'text-red-400', neutral: 'text-slate-400' }
@@ -480,7 +482,9 @@ function TacticalDisplayAutosave({ autosave }) {
                 {FACTION_LABELS[faction] ?? faction.toUpperCase()} · {factionShips.length}
               </p>
               <div className="space-y-1.5">
-                {factionShips.map((ship) => <ShipPreviewRow key={ship.id} ship={ship} />)}
+                {factionShips.map((ship) => (
+                  <ShipPreviewRow key={ship.id} ship={ship} combatMode={combatMode} ships={ships} rangeBands={rangeBands} />
+                ))}
               </div>
             </div>
           ))}
@@ -510,16 +514,102 @@ function DataField({ label, value, accent = false, small = false }) {
   )
 }
 
+/** Ship token silhouette for a roster row — same icon as the battle bento card. */
+function RosterShipToken({ ship, size = 40 }) {
+  const tokenRef = useShipTokenIcon(ship, size)
+  return <canvas ref={tokenRef} width={size} height={size} className="shrink-0" />
+}
+
+/** Thrust rating (profile) / current Armor mini-column. */
+function RosterCombatStats({ ship }) {
+  const thrust = ship.profile?.thrust
+  const armor  = ship.profile?.armor ?? ship.baseArmor
+  return (
+    <div className="w-24 shrink-0 leading-tight">
+      <p className="font-mono text-xs text-slate-300">THRUST {thrust ?? '—'}</p>
+      <p className="font-mono text-xs text-slate-300">ARMOUR {armor ?? '—'}</p>
+    </div>
+  )
+}
+
+const ROSTER_STATUS_BADGES = [
+  { key: 'isDestroyed', test: (s) => s.isDestroyed,    label: '💥 DESTROYED', className: 'text-red-400' },
+  { key: 'inDogfight',  test: (s) => !!s.inDogfight,    label: '⚔ DOGFIGHT',   className: 'text-amber-400' },
+  { key: 'inBoarding',  test: (s) => !!s.inBoarding,    label: '⚔ BOARDING',   className: 'text-red-400' },
+]
+
+/** Dogfight/boarding/destroyed status mini-column — max 2 badges, defaults to COMBAT/NEUTRAL. */
+function RosterStatus({ ship }) {
+  const active = ROSTER_STATUS_BADGES.filter((b) => b.test(ship)).slice(0, 2)
+  const badges = active.length > 0
+    ? active
+    : ship.faction === 'neutral'
+      ? [{ key: 'neutral', label: '○ NEUTRAL', className: 'text-slate-400' }]
+      : [{ key: 'combat', label: '● COMBAT', className: 'text-(--neon-cyan)' }]
+  return (
+    <div className="w-24 shrink-0 leading-tight">
+      {badges.map((b) => (
+        <p key={b.key} className={`font-mono text-xs font-bold truncate ${b.className}`}>{b.label}</p>
+      ))}
+    </div>
+  )
+}
+
+function rangeBandPairKey(id1, id2) { return [id1, id2].sort().join('_') }
+
+/** Closest range band from `ship` to any opposing-faction ship (basic mode only has range bands, no hex position). */
+function nearestEnemyRangeBand(ship, ships, rangeBands) {
+  const enemies = ships.filter((s) => s.id !== ship.id && s.faction !== ship.faction)
+  if (enemies.length === 0) return null
+  let nearestIdx = RANGE_BAND_ORDER.length - 1
+  for (const enemy of enemies) {
+    const band = rangeBands?.[rangeBandPairKey(ship.id, enemy.id)] ?? 'Very Long'
+    const idx = RANGE_BAND_ORDER.indexOf(band)
+    if (idx !== -1 && idx < nearestIdx) nearestIdx = idx
+  }
+  return RANGE_BAND_ORDER[nearestIdx]
+}
+
+/**
+ * Spatial telemetry mini-column — hex position/vector in vectorial mode
+ * (basic mode has neither: ships sit on a placeholder {0,0} with no vector),
+ * nearest-enemy range band in basic mode.
+ */
+function RosterTelemetry({ ship, combatMode, ships, rangeBands }) {
+  if (combatMode === 'basic') {
+    const band = nearestEnemyRangeBand(ship, ships, rangeBands)
+    return (
+      <div className="w-32 shrink-0 leading-tight">
+        <p className="font-mono text-xs text-slate-300">RANGE</p>
+        <p className="font-mono text-xs text-slate-300">{band ?? '—'}</p>
+      </div>
+    )
+  }
+  const pos = ship.position
+  const vec = ship.vector
+  return (
+    <div className="w-32 shrink-0 leading-tight">
+      <p className="font-mono text-xs text-slate-300">POSITION {pos ? `${pos.q},${pos.r}` : '—'}</p>
+      <p className="font-mono text-xs text-slate-300">VECTOR {vec ? `${vec.q},${vec.r}` : '—'}</p>
+    </div>
+  )
+}
+
 /** Single ship row inside session preview. */
-function ShipPreviewRow({ ship }) {
+function ShipPreviewRow({ ship, combatMode, ships, rangeBands }) {
   const hull = ship.profile?.hull ?? 0
   const pct  = hull > 0 ? Math.max(0, ship.hullCurrent / hull) : 1
   const barColor = pct > 0.6 ? '#22c55e' : pct > 0.3 ? '#eab308' : '#ef4444'
   return (
     <div className="flex items-center gap-2.5">
-      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ship.color ?? '#64748b' }} />
-      <span className="font-mono text-xs text-slate-300 truncate w-28 shrink-0">{ship.name ?? '?'}</span>
-      <span className="font-mono text-xs text-(--neon-cyan) truncate flex-1">{ship.profile?.name ?? '?'}</span>
+      <RosterShipToken ship={ship} />
+      <div className="min-w-0 flex-1">
+        <p className="font-mono text-xs text-slate-200 font-bold truncate">{ship.name ?? '?'}</p>
+        <p className="font-mono text-xs text-slate-400 truncate">{ship.profile?.shipClass ?? '—'}</p>
+      </div>
+      <RosterCombatStats ship={ship} />
+      <RosterTelemetry ship={ship} combatMode={combatMode} ships={ships} rangeBands={rangeBands} />
+      <RosterStatus ship={ship} />
       <div className="w-14 h-1 bg-slate-800 rounded-full overflow-hidden shrink-0">
         <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, backgroundColor: barColor }} />
       </div>
@@ -532,7 +622,7 @@ function ShipPreviewRow({ ship }) {
 
 /** Right column shown after a session file is parsed (before import). */
 function SessionPreview({ data, onConfirm, onCancel, loading }) {
-  const { name, round, phase, combatMode, ships = [], missiles = [], _exportedAt, _filename } = data
+  const { name, round, phase, combatMode, ships = [], missiles = [], rangeBands, _exportedAt, _filename } = data
 
   const FACTION_LABELS = { players: 'PLAYERS', npc: 'NPC', neutral: 'NEUTRAL' }
   const FACTION_COLORS = { players: 'text-(--neon-cyan)', npc: 'text-red-400', neutral: 'text-slate-400' }
@@ -581,7 +671,9 @@ function SessionPreview({ data, onConfirm, onCancel, loading }) {
                 {FACTION_LABELS[faction] ?? faction.toUpperCase()} · {factionShips.length}
               </p>
               <div className="space-y-1.5">
-                {factionShips.map((ship) => <ShipPreviewRow key={ship.id} ship={ship} />)}
+                {factionShips.map((ship) => (
+                  <ShipPreviewRow key={ship.id} ship={ship} combatMode={combatMode} ships={ships} rangeBands={rangeBands} />
+                ))}
               </div>
             </div>
           ))}
@@ -772,7 +864,7 @@ export function Dashboard() {
               SPACE COMBAT SIMULATOR
             </span>
           </div>
-          <span className="ml-auto text-slate-400 font-mono text-xs">v2.4.0</span>
+          <span className="ml-auto text-slate-400 font-mono text-xs">v2.5.0</span>
         </header>
 
         <main className="flex-1 overflow-hidden">

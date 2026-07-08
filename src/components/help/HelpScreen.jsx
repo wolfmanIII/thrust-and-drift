@@ -169,8 +169,17 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="COMBAT MODE" v="Toggle between Vectorial and Basic before starting." />
             <KV k="🔄 RESUME AUTOSAVE" v="Appears when an autosaved session is found. Shows round, phase, ship count, and timestamp. Click to restore instantly." />
             <KV k="▶ NEW SESSION" v="Clears any existing battle state and enters the combat map." />
-            <KV k="↓ RESUME FROM FILE" v="Load a previously saved .json session file. A preview screen shows the full roster before you confirm." />
+            <KV k="↓ RESUME FROM FILE" v="Load a previously saved .json session file. A preview screen shows the same ship roster (see below) before you confirm." />
             <KV k="📖 FIELD MANUAL" v="This screen." />
+          </Sub>
+
+          <Sub title="SHIP ROSTER COLUMNS">
+            <p>Shown on both the autosave roster and the pre-import preview, grouped by faction. Each row:</p>
+            <KV k="Token + Name / Class" v="Ship silhouette icon (same shape/colour as the map token), instance name (bold) and ship class (muted, below)." />
+            <KV k="Thrust / Armour" v="Rated Thrust from the profile; current Armour (reflects Ion Cannon reduction, if any)." />
+            <KV k="Telemetry" v="Vectorial mode: hex position and velocity vector (POSITION q,r / VECTOR q,r). Basic mode: ships have no real hex position (placeholder {0,0}), so this shows the nearest-enemy range band instead." />
+            <KV k="Status" v="💥 DESTROYED (red) → ⚔ DOGFIGHT (amber) → ⚔ BOARDING (red), in that priority order; otherwise ○ NEUTRAL (grey, neutral-faction ships) or ● COMBAT (cyan) by default." />
+            <KV k="Hull" v="Progress bar (green → yellow → red) and current/max hull points." />
           </Sub>
 
           <Sub title="SHIP PROFILE FORM">

@@ -10,6 +10,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.5.0] — 2026-07-08
+
+### Added
+
+- **Ship Roster redesign on the Dashboard's Tactical Display** — the roster shown on Resume Autosave and the pre-import session preview previously listed just a colour dot, name, class, and hull bar per ship. Redesigned with:
+  - **Ship token silhouette** (40px) instead of a flat colour dot — same shape/colour tracer used on the battle map and bento cards (`useShipTokenIcon`).
+  - **Name / Class** stacked in one column (name bold, class muted below), freeing the horizontal room for the larger token.
+  - **THRUST / ARMOUR** column — rated Thrust from the profile and current Armour (reflects Ion Cannon reduction, if any).
+  - **STATUS** column — `💥 DESTROYED` (red) / `⚔ DOGFIGHT` (amber) / `⚔ BOARDING` (red) take priority; otherwise `○ NEUTRAL` (grey) for neutral-faction ships or `● COMBAT` (cyan) as the default.
+  - **Telemetry column** — in **Vectorial** mode, hex position and velocity vector (`POS q,r` / `VEC q,r`); in **Basic** mode ships have no real hex position (they sit on a `{0,0}` placeholder), so this instead shows the **nearest-enemy range band** computed from the battle's `rangeBands` map.
+  (`src/components/dashboard/Dashboard.jsx`)
+
+---
+
 ## [2.4.0] — 2026-07-08
 
 ### Added

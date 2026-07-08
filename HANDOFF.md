@@ -9,22 +9,34 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.4.0 |
+| **Versione** | 2.5.0 |
 | **Branch** | main |
-| **Test** | 1318 Vitest + 28 Playwright e2e |
-| **Ultimo commit** | feat(weapons): enforce Hardpoint budget (CRB p.183, HG p.31) |
+| **Test** | 1318 Vitest + 63 Playwright e2e |
+| **Ultimo commit** | feat(dashboard): redesign Ship Roster — token icon, Thrust/Armour, Status, telemetry |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§2.3.1 Hardpoint budget nuova, oltre a §9.5 Weapons/§9.6 Point Defence/§per-slot firing limit del fix precedente v2.3.6)
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§2.2.1 Ship Roster columns nuova, oltre a §2.3.1 Hardpoint budget e §9.5 Weapons/§9.6 Point Defence/§per-slot firing limit dei fix precedenti)
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Hardpoint budget (v2.4.0)
+### Sessione corrente — Ship Roster redesign (v2.5.0)
+
+Redesign incrementale del roster navi nel Tactical Display della Dashboard (autosave + preview pre-import), costruito un pezzo alla volta su richiesta diretta durante la sessione:
+
+1. **Token silhouette** — sostituito il pallino colore piatto con l'icona nave (`useShipTokenIcon`, stessa forma/colore del token sulla mappa e delle bento card), portato da tac-and-lock e poi ingrandito a 40px. Nome/classe impilati in una colonna per liberare lo spazio orizzontale necessario.
+2. **THRUST / ARMOUR** — colonna con thrust nominale da profilo e armour corrente (riflette eventuali riduzioni da Ion Cannon).
+3. **STATUS** — badge con priorità 💥 DESTROYED (rosso) → ⚔ DOGFIGHT (ambra) → ⚔ BOARDING (rosso); default ○ NEUTRAL (grigio, fazione neutrale) o ● COMBAT (ciano) quando nessuno stato speciale è attivo.
+4. **Telemetria** — POS/VEC (posizione esagonale + vettore) in modalità Vectorial; in modalità Basic le navi non hanno posizione/vettore reali (placeholder `{0,0}`), quindi la colonna mostra invece **RANGE**, la banda di distanza dal nemico più vicino calcolata da `rangeBands`.
+5. **Doc sync + bump v2.5.0**: CHANGELOG, README (corretto anche un conteggio test stale: 1294→1318 unit, 26→63 e2e — la cifra e2e non rifletteva più `batch1-3-features.spec.js`/`battle-report.spec.js` da sessioni precedenti), field-manual §2.2.1 nuova, HelpScreen, package.json + Dashboard badge.
+
+Nessun nuovo test dedicato: modifica puramente di visualizzazione su dati già presenti nello stato di battaglia (`ship.profile.thrust/armour`, `isDestroyed`, `inDogfight`, `inBoarding`, `faction`, `position`, `vector`, `rangeBands`). La suite esistente (1318 Vitest) resta verde senza modifiche.
+
+### Sessione precedente — Hardpoint budget (v2.4.0)
 
 Follow-up dell'issue [#24](https://github.com/wolfmanIII/thrust-and-drift/issues/24): mentre si fixava il bug torpedo/quad-turret, è emerso che l'app non applicava affatto il budget Hardpoint (CRB p.183: 1 Hardpoint ogni 100 tonnellate scafo intere; navi sotto 100t hanno Firmpoint — 1/2/3 a seconda della fascia; HG p.31: Large Bay costa 5 Hardpoint invece di 1). Aperta issue dedicata [#25](https://github.com/wolfmanIII/thrust-and-drift/issues/25).
 

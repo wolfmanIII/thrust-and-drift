@@ -100,9 +100,9 @@ A set of default profiles (Far Trader, Type S Scout, etc.) is pre-loaded.
 
 ### 2 — Start or resume a session
 
-- **🔄 RESUME / ✕** — if an autosaved session exists, a compact row appears. `🔄 RESUME` restores instantly; `✕` clears the IndexedDB record. The right panel shows the full saved roster (round, phase, ships by faction with hull bars).
+- **🔄 RESUME / ✕** — if an autosaved session exists, a compact row appears. `🔄 RESUME` restores instantly; `✕` clears the IndexedDB record. The right panel shows the full saved roster (round, phase, ships by faction, each with token icon, Thrust/Armour, status badge, position/vector or range band, and hull bar).
 - **▶ NEW SESSION** — resets battle state and enters the combat map
-- **↓ RESUME FROM FILE** — load a `.json` file; a preview screen shows round, phase, and ship roster before confirming
+- **↓ RESUME FROM FILE** — load a `.json` file; a preview screen shows round, phase, and the same ship roster before confirming
 
 ### 3 — In battle
 
@@ -168,7 +168,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1294 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1318 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 
@@ -177,7 +177,7 @@ npm run e2e               # headless
 npm run e2e:headed        # visible browser
 ```
 
-26 e2e tests in `e2e/` covering discrete zoom levels, the PDF battle report flow, and crew skill input constraints.
+63 e2e tests in `e2e/` covering discrete zoom levels, the PDF battle report flow, crew skill input constraints, the Hardpoint budget check, and assorted fix/feature regressions.
 
 ---
 
