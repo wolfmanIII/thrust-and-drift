@@ -166,7 +166,7 @@ const TURRET_WEAPON_IDS = WEAPON_IDS
 
 // Single / Double / Triple / Quad — HG p.81 (quad turret, 4 weapons, DM+3 PD).
 // Quad Turret is a turret-only mechanic — barbette and bay weapons are each
-// their own standalone hardpoint (HG p.30–31) and cannot combine with anything.
+// their own standalone hardpoint (HG p.29 — "a barbette uses a single Hardpoint") and cannot combine with anything.
 const TURRET_TYPE_LABELS = ['—', 'SINGLE', 'DOUBLE', 'TRIPLE', 'QUAD']
 
 function weaponMount(weaponId) {
@@ -213,7 +213,7 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
         </span>
       ))}
 
-      {/* Add weapon — turret slots hold up to 4 (quad turret, HG p.81); barbette/bay are single-mount (HG p.30–31) */}
+      {/* Add weapon — turret slots hold up to 4 (quad turret, HG p.81); barbette/bay are single-mount (HG p.29) */}
       {canAddMore && (
         <select
           value=""
@@ -294,7 +294,7 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
       turrets: f.turrets.map((t, i) => {
         if (i !== slotIdx) return t
         if (t.weapons.length === 0) return { ...t, weapons: [weapon] }
-        // Barbette/bay weapons are standalone hardpoints (HG p.30–31) — cannot
+        // Barbette/bay weapons are standalone hardpoints (HG p.29) — cannot
         // combine with anything. Quad turret (HG p.81) applies to turret weapons only.
         const firstMount = weaponMount(t.weapons[0])
         if (firstMount !== 'turret') return t

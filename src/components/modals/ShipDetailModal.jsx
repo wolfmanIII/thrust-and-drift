@@ -122,7 +122,7 @@ export function ShipDetailModal() {
               <p className="text-slate-400 font-mono text-xs italic">None</p>
             )}
             {(profile.turrets ?? []).map((t) => {
-              // Barbette/bay weapons are standalone hardpoints (HG p.30–31) —
+              // Barbette/bay weapons are standalone hardpoints (HG p.29) —
               // never "Turret", regardless of count. Quad Turret (HG p.81) is turret-only.
               const firstMount = t.weapons.length > 0 ? (WEAPONS[t.weapons[0]]?.mount ?? 'turret') : 'turret'
               const mountLabel = firstMount === 'turret'
