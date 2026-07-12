@@ -9,22 +9,30 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.5.0 |
+| **Versione** | 2.5.1 |
 | **Branch** | main |
-| **Test** | 1318 Vitest + 63 Playwright e2e |
-| **Ultimo commit** | feat(dashboard): redesign Ship Roster — token icon, Thrust/Armour, Status, telemetry |
+| **Test** | 1320 Vitest + 63 Playwright e2e |
+| **Ultimo commit** | fix(weapons): cap Missile Rack salvo to racks mounted in turret (#26) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§2.2.1 Ship Roster columns nuova, oltre a §2.3.1 Hardpoint budget e §9.5 Weapons/§9.6 Point Defence/§per-slot firing limit dei fix precedenti)
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§9.6 Missile Rack aggiornato per il cap salvo per-torretta, oltre a §2.2.1 Ship Roster columns e §2.3.1 Hardpoint budget dei fix precedenti)
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Ship Roster redesign (v2.5.0)
+### Sessione corrente — Missile Rack salvo cap fix (v2.5.1)
+
+Triage di due segnalazioni CotI: aperte le issue [#26](https://github.com/wolfmanIII/thrust-and-drift/issues/26) (bug) e [#27](https://github.com/wolfmanIII/thrust-and-drift/issues/27) (feature request, rimandata — richiede prima un concetto di "bridge design option" che l'app non ha).
+
+Fixata la #26: `maxSalvo` in `AttackModal.jsx` per `Missile Rack` usava `ammoLeft` (l'intero magazzino missili della nave) invece di essere limitato al numero di componenti Missile Rack effettivamente montati nella torretta selezionata (`linkedCount`, già calcolato in `useAttackSetup.js` per il bonus danno ma mai usato per il cap). Una torretta tripla mista (Beam Laser / Missile Rack / Sandcaster) permetteva di lanciare l'intero magazzino invece di 1 missile/round; una torretta tripla omogenea di rack non era limitata a 3. Analogo al cap esistente per Torpedo (`min(3, ammoLeft)`).
+
++2 test in `AttackModal.test.jsx` (torretta mista → cap 1, torretta tripla omogenea → cap 3). Doc sync: CHANGELOG v2.5.1, field-manual §9.6, HelpScreen, package.json + Dashboard badge.
+
+### Sessione precedente — Ship Roster redesign (v2.5.0)
 
 Redesign incrementale del roster navi nel Tactical Display della Dashboard (autosave + preview pre-import), costruito un pezzo alla volta su richiesta diretta durante la sessione:
 

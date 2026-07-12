@@ -10,6 +10,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.5.1] — 2026-07-12
+
+### Fixed
+
+- **Missile Rack salvo not capped per turret instance (#26)** — the Attack modal's missile-count stepper let a player launch up to the ship's *entire remaining ammo pool* from a single Missile Rack, ignoring how many rack components are actually mounted in the selected turret. A lone rack sharing a mixed triple turret (e.g. Beam Laser / Missile Rack / Sandcaster) could fire many missiles at once instead of the RAW-correct 1 per round; a homogeneous triple-rack turret was likewise unbounded instead of capped at 3. `maxSalvo` in `AttackModal.jsx` now uses the turret entry's `linkedCount` (already computed in `useAttackSetup.js` for damage linking, but never wired to the salvo cap) — analogous to the existing Torpedo cap of `min(3, ammoLeft)` per barbette. *(Traveller Companion p.172 / HG p.31 — a turret fires all its mounted weapons together, but each Missile Rack is a single mount that launches one missile per round.)* Reported via CotI feedback.
+  (`src/components/modals/AttackModal.jsx`)
+
+---
+
 ## [2.5.0] — 2026-07-08
 
 ### Added
@@ -19,7 +28,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   - **Name / Class** stacked in one column (name bold, class muted below), freeing the horizontal room for the larger token.
   - **THRUST / ARMOUR** column — rated Thrust from the profile and current Armour (reflects Ion Cannon reduction, if any).
   - **STATUS** column — `💥 DESTROYED` (red) / `⚔ DOGFIGHT` (amber) / `⚔ BOARDING` (red) take priority; otherwise `○ NEUTRAL` (grey) for neutral-faction ships or `● COMBAT` (cyan) as the default.
-  - **Telemetry column** — in **Vectorial** mode, hex position and velocity vector (`POS q,r` / `VEC q,r`); in **Basic** mode ships have no real hex position (they sit on a `{0,0}` placeholder), so this instead shows the **nearest-enemy range band** computed from the battle's `rangeBands` map.
+  - **Telemetry column** — in **Vectorial** mode, hex position and velocity vector (`POSITION q,r` / `VECTOR q,r`); in **Basic** mode ships have no real hex position (they sit on a `{0,0}` placeholder), so this instead shows the **nearest-enemy range band** computed from the battle's `rangeBands` map.
   (`src/components/dashboard/Dashboard.jsx`)
 
 ---

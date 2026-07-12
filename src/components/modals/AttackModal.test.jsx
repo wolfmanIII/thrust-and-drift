@@ -86,6 +86,58 @@ describe('AttackModal — missile rack', () => {
   })
 })
 
+// ── #26: Missile Rack salvo capped per turret instance, not full ammo pool ────
+
+describe('AttackModal — Missile Rack salvo cap (#26)', () => {
+  it('caps salvo at 1 for a single rack in a mixed triple turret, even with ample ammo', () => {
+    const profile = makeRackProfile('Mixed', {
+      turrets: [{ slot: 1, weapons: ['Beam Laser', 'Missile Rack', 'Sandcaster'] }],
+    })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Target', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att] = useBattleStore.getState().ships
+    useBattleStore.setState({
+      ships: useBattleStore.getState().ships.map((s) => (s.id === att.id ? { ...s, missileAmmoTotal: 12 } : s)),
+    })
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Missile Rack'))
+    expect(screen.getByText(/missiles in salvo.*\(1–1\)/i)).toBeInTheDocument()
+    // "+" stepper must not move the count past 1
+    fireEvent.click(screen.getByRole('button', { name: '+' }))
+    const counts = screen.getAllByText('1')
+    expect(counts.length).toBeGreaterThan(0)
+    expect(screen.queryByText('2')).not.toBeInTheDocument()
+  })
+
+  it('caps salvo at rack count (3) for a homogeneous triple Missile Rack turret', () => {
+    const profile = makeRackProfile('TripleRack', {
+      turrets: [{ slot: 1, weapons: ['Missile Rack', 'Missile Rack', 'Missile Rack'] }],
+    })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Target', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att] = useBattleStore.getState().ships
+    useBattleStore.setState({
+      ships: useBattleStore.getState().ships.map((s) => (s.id === att.id ? { ...s, missileAmmoTotal: 36 } : s)),
+    })
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Missile Rack'))
+    expect(screen.getByText(/missiles in salvo.*\(1–3\)/i)).toBeInTheDocument()
+    const plus = screen.getByRole('button', { name: '+' })
+    fireEvent.click(plus)
+    fireEvent.click(plus)
+    fireEvent.click(plus) // 4th click must be a no-op — cap is 3
+    expect(screen.queryByText('4')).not.toBeInTheDocument()
+  })
+})
+
 // ── #14: same-type weapon linking UI ──────────────────────────────────────────
 
 describe('AttackModal — linked weapon display (#14)', () => {

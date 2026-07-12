@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.5.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.5.1** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -578,9 +578,17 @@ No dice roll is required at launch — the weapon slot is immediately marked as 
 #### Missile Rack *(CRB p.162)*
 
 Select `Missile Rack`, choose a target, adjust the salvo count using the `−` / `+`
-stepper (maximum capped at remaining magazine — **12 missiles per Rack**), then
-click **🚀 LAUNCH SALVO →**. The button shows **🚨 NO AMMO** and is disabled when the
-magazine is empty.
+stepper, then click **🚀 LAUNCH SALVO →**. The button shows **🚨 NO AMMO** and is
+disabled when the magazine is empty.
+
+**Salvo size is capped at the number of Missile Rack components mounted in the
+selected turret** — each rack is a single mount that launches one missile per
+round, even inside a mixed-weapon turret. A lone rack sharing a triple turret
+with, say, a Beam Laser and a Sandcaster can only launch **1** missile per
+round; a homogeneous triple-rack turret can launch up to **3**
+*(Traveller Companion p.172 / HG p.31 — turret components fire together, each
+according to its own nature)*. Total magazine: **12 missiles per Rack**
+component.
 
 Missiles have **Thrust 10** and **10 rounds of guided flight**. Each round in the
 Movement phase they apply up to Thrust 10 toward the target's predicted position.

@@ -181,8 +181,14 @@ function AttackConfigStep({
   onNext, onClose,
 }) {
   const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, torpedoSmallShipDM = 0, totalDM } = dmBreakdown
-  // Torpedo salvo capped at 3 per barbette (HG p.31) — missiles cap is full ammoLeft
-  const maxSalvo        = weaponKey === 'Torpedo' ? Math.min(3, ammoLeft) : ammoLeft
+  // Torpedo salvo capped at 3 per barbette (HG p.31).
+  // Missile Rack salvo capped at the number of racks mounted in this turret — a rack is a
+  // single mount that launches one missile per round, even inside a mixed-weapon turret
+  // (Traveller Companion p.172 / HG p.31 — turret components fire together, not as one weapon).
+  const selectedWeaponEntry = availableWeapons.find((w) => w.weaponName === weaponKey && w.turretSlot === selectedTurretSlot)
+  const maxSalvo        = weaponKey === 'Torpedo'      ? Math.min(3, ammoLeft)
+                         : weaponKey === 'Missile Rack' ? Math.min(selectedWeaponEntry?.linkedCount ?? 1, ammoLeft)
+                         : ammoLeft
   const isMissilePdMode = !!targetMissileId
   // When targeting a missile, only PD weapons are valid
   const visibleWeapons  = isMissilePdMode
