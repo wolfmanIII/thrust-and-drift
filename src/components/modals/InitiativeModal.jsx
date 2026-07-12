@@ -53,7 +53,7 @@ export function InitiativeModal() {
   const previewTotal = (ship) => {
     const dice = playerDice[ship.id]
     if (!dice) return '?'
-    return dice.total + getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot') + ship.profile.thrust + tacticsEffect(ship) + (ship.initiativeBonusNextRound ?? 0)
+    return dice.total + getEffectiveSkill(ship.profile.crew, ship.crewAssignments, 'pilot') + ship.profile.thrust + tacticsEffect(ship) + (ship.initiativeBonusNextRound ?? 0) + (ship.profile.holographicControls ? 2 : 0)
   }
 
   const handleConfirm = () => {
@@ -84,7 +84,7 @@ export function InitiativeModal() {
     <Modal title="Initiative Roll" onClose={closeModal}>
       <div className="space-y-4">
         <p className="text-slate-400 font-mono text-xs">
-          Formula: 2D6 + Pilot + Thrust [+ Tactics Effect] // MgT2e CRB p.160
+          Formula: 2D6 + Pilot + Thrust [+ Tactics Effect] [+2 Holo Controls] // MgT2e CRB p.160, p.186
         </p>
 
         {!confirmed ? (
@@ -204,6 +204,9 @@ export function InitiativeModal() {
                         <span>+ T{bd.thrust}</span>
                         {bd.tacticsEffect !== 0 && (
                           <span className="text-green-400">+ Tac:{bd.tacticsEffect}</span>
+                        )}
+                        {bd.holographicControlsDM > 0 && (
+                          <span className="text-(--neon-cyan)">+ Holo:{bd.holographicControlsDM}</span>
                         )}
                       </div>
                     )}

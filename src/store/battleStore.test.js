@@ -720,6 +720,20 @@ describe('rollAllInitiative', () => {
     expect(useBattleStore.getState().ships[0].initiative).toBeGreaterThan(0)
   })
 
+  // Holographic Controls bridge option — DM+2 to Initiative (CRB p.186 / HG Update 2022 p.31)
+  it('adds DM+2 when the ship profile has holographicControls', () => {
+    const store = useBattleStore.getState()
+    store.addShip(makeProfile({ id: 'p1', name: 'Plain', thrust: 0, crew: { pilot: 0 } }), { q: 0, r: 0 }, 'players', '#0f0')
+    store.addShip(makeProfile({ id: 'p2', name: 'Holo',  thrust: 0, crew: { pilot: 0 }, holographicControls: true }), { q: 1, r: 0 }, 'npc', '#f00')
+    useBattleStore.getState().rollAllInitiative()
+    const ships = useBattleStore.getState().ships
+    const plain = ships.find((s) => s.name === 'Plain')
+    const holo  = ships.find((s) => s.name === 'Holo')
+    // Both rolled with mocked Math.random → identical dice; holo ship gets +2
+    expect(holo.initiative).toBe(plain.initiative + 2)
+    expect(holo.initiativeBreakdown.holographicControlsDM).toBe(2)
+  })
+
   it('diceOverrides map — specified ships use manual dice, others auto-roll', () => {
     // Math.random mocked to 0.5 → auto-roll gives 4+4=8 per ship
     const store = useBattleStore.getState()

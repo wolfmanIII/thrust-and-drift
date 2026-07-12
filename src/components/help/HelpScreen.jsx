@@ -287,7 +287,7 @@ export function HelpScreen({ onBack } = {}) {
         {/* INITIATIVE */}
         <Section id="initiative" title="Initiative Phase">
           <p>Initiative determines the acting order for Acceleration, Attack, and Actions phases.</p>
-          <p>Formula: <span className="text-slate-200">2D6 + Pilot skill + current Thrust rating + Tactics effect</span> (MgT2e CRB p.160).</p>
+          <p>Formula: <span className="text-slate-200">2D6 + Pilot skill + current Thrust rating + Tactics effect [+2 Holographic Controls]</span> (MgT2e CRB p.160, p.186).</p>
 
           <Sub title="ROLLING INITIATIVE">
             <p>Right-click any hex → <span className="text-slate-200">Roll Initiative</span>. The modal shows all ships.</p>
@@ -298,6 +298,9 @@ export function HelpScreen({ onBack } = {}) {
           <Sub title="TACTICS(NAVAL) CHECK (optional)">
             <p>If the assigned Tactics crew member has <span className="text-slate-200">Tactics ≥ 1</span>, an optional secondary dice row appears. Roll 2D6 + Tactics — the Effect (total − 8, can be negative) is added to the initiative total. Leaving it blank applies no bonus.</p>
             <p>NPC ships with Tactics &gt; 0 auto-roll their Tactics check on confirm.</p>
+          </Sub>
+          <Sub title="HOLOGRAPHIC CONTROLS BRIDGE (TL9)">
+            <p>A ship whose profile has <span className="text-slate-200">Holographic Controls</span> enabled (Ship Profile Form → Combat Stats) always applies <span className="text-slate-200">DM+2</span> to its Initiative roll — the bridge automatically reconfigures itself to the situation (CRB p.186 / High Guard Update 2022 p.31). Applied automatically; no manual entry needed. Shown as <span className="text-(--neon-cyan)">+ Holo:2</span> in the resolved breakdown.</p>
           </Sub>
           <Sub title="INITIATIVE BONUS">
             <p>If the Captain uses <span className="text-slate-200">Improve Initiative</span> in the Actions phase of round N, the bonus takes effect at the <span className="text-slate-200">start of round N+1</span> — the acting order is re-sorted before anyone acts. The bonus lasts exactly 1 round and is removed automatically at the start of round N+2. The Phase Tracker shows an <span className="text-amber-400">↑ini</span> badge on ships whose bonus is active.</p>

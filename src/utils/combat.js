@@ -11,26 +11,22 @@ import { hexDistance, hexAdd } from './hex.js'
 
 /**
  * Roll initiative for a ship.
- * Formula: 2D6 + Pilot skill + Ship Thrust [+ Tactics(naval) effect]
- * // MgT2e CRB p.160
+ * Formula: 2D6 + Pilot skill + Ship Thrust [+ Tactics(naval) effect] [+ Holographic Controls DM+2]
+ * // MgT2e CRB p.160, p.186 (Holographic Controls bridge option)
  * @param {number} pilotSkill
  * @param {number} thrust
  * @param {number} [tacticsEffect=0]  Effect of prior Tactics(naval) check
+ * @param {{ results: number[], total: number }|null} [diceOverride]  Pre-rolled dice (player manual entry)
+ * @param {number} [holographicControlsDM=0]  DM+2 if the ship's bridge has Holographic Controls (CRB p.186)
  * @returns {{ roll: object, total: number, breakdown: object }}
  */
-/**
- * @param {number} pilotSkill
- * @param {number} thrust
- * @param {number} [tacticsEffect=0]
- * @param {{ results: number[], total: number }|null} [diceOverride]  Pre-rolled dice (player manual entry)
- */
-export function rollInitiative(pilotSkill, thrust, tacticsEffect = 0, diceOverride = null) {
+export function rollInitiative(pilotSkill, thrust, tacticsEffect = 0, diceOverride = null, holographicControlsDM = 0) {
   const roll = diceOverride ?? roll2D6()
-  const total = roll.total + pilotSkill + thrust + tacticsEffect
+  const total = roll.total + pilotSkill + thrust + tacticsEffect + holographicControlsDM
   return {
     roll,
     total,
-    breakdown: { roll: roll.total, pilotSkill, thrust, tacticsEffect },
+    breakdown: { roll: roll.total, pilotSkill, thrust, tacticsEffect, holographicControlsDM },
   }
 }
 

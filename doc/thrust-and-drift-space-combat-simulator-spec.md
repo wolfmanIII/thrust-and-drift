@@ -562,16 +562,17 @@ export function getRangeBand(distance) {
 ### 6.1 Iniziativa
 
 ```javascript
-// 2D6 + Pilot skill + Ship Thrust [+ effetto Tactics(naval)]
+// 2D6 + Pilot skill + Ship Thrust [+ effetto Tactics(naval)] [+2 Holographic Controls]
 // diceOverride: { results, total } per navi player con dadi fisici (v1.3.6)
+// holographicControlsDM: DM+2 se profile.holographicControls (v2.6.0) — MgT2e CRB p.186
 // MgT2e CRB p.160
-export function rollInitiative(pilotSkill, thrust, tacticsEffect = 0, diceOverride = null) {
+export function rollInitiative(pilotSkill, thrust, tacticsEffect = 0, diceOverride = null, holographicControlsDM = 0) {
   const roll = diceOverride ?? roll2D6()
-  const total = roll.total + pilotSkill + thrust + tacticsEffect
+  const total = roll.total + pilotSkill + thrust + tacticsEffect + holographicControlsDM
   return {
     roll,
     total,
-    breakdown: { roll: roll.total, pilotSkill, thrust, tacticsEffect },
+    breakdown: { roll: roll.total, pilotSkill, thrust, tacticsEffect, holographicControlsDM },
   }
 }
 ```

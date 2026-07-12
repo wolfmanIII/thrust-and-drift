@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.5.1** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.6.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -11,7 +11,7 @@
 3. [Map Controls](#3-map-controls)
 4. [Phase Flow](#4-phase-flow)
 5. [Setup Phase](#5-setup-phase)
-6. [Initiative Phase](#6-initiative-phase)
+6. [Initiative Phase](#6-initiative-phase) — includes §6.1.2 Holographic Controls bridge
 7. [Acceleration Phase](#7-acceleration-phase)
 8. [Movement Phase](#8-movement-phase) — includes §8.1 missile impact, §8.2 ships that pass in the night
 9. [Attack Phase](#9-attack-phase) — includes §9.5 per-slot firing limit, §9.6 missile launch, §9.9 reactions, §9.10 special weapon mechanics, §9.11 point defence active intercept
@@ -259,8 +259,8 @@ See [§ 16](#16-obstacles-optional) for full obstacle mechanics.
 Initiative determines the acting order for the Acceleration, Attack, and
 Actions phases.
 
-**Formula:** `2D6 + Pilot skill + current Thrust rating + Tactics effect`
-*(MgT2e CRB p. 160)*
+**Formula:** `2D6 + Pilot skill + current Thrust rating + Tactics effect [+2 Holographic Controls]`
+*(MgT2e CRB p. 160, p.186)*
 
 **Initiative is rolled once** at the start of combat *(CRB p.160)*. From round 2 onward the initiative order is carried over and the phase advances directly to Acceleration — no re-roll.
 
@@ -283,6 +283,15 @@ Right-click any hex → **Roll Initiative**. The modal shows all ships.
 If the captain has **Tactics ≥ 1**, an optional secondary dice row appears under the initiative row. The captain may roll 2D6 + Tactics — the Effect (total − 8, can be negative) is added to the initiative total. This check is optional; leaving it blank applies no bonus.
 
 NPC ships with Tactics > 0 auto-roll their Tactics check on confirm.
+
+### 6.1.2 Holographic Controls Bridge (TL9)
+
+A ship whose profile has **Holographic Controls** enabled (Ship Profile Form
+→ Combat Stats section) always applies **DM+2** to its Initiative roll — the
+bridge is optimised for the task at hand and automatically reconfigures
+itself to the situation *(CRB p.186 / High Guard Update 2022 p.31)*. The
+bonus is baked into the roll automatically; no manual entry is required. The
+breakdown line under a resolved initiative shows **+ Holo:2** when active.
 
 ### 6.2 Initiative Bonus
 

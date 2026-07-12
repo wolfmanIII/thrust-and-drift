@@ -640,6 +640,7 @@ const useBattleStore = create((set, get) => {
         ship.profile.thrust,
         tacticsBonus + (ship.initiativeBonusNextRound ?? 0),
         diceOverrides[ship.id] ?? null,
+        ship.profile.holographicControls ? 2 : 0,
       )
       return { id: ship.id, initiative: result.total, roll: result }
     })

@@ -10,7 +10,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [2.5.1] — 2026-07-12
+## [2.6.0] — 2026-07-12
+
+### Added
+
+- **Holographic Controls bridge option (#27)** — new toggle on the Ship Profile Form (Combat Stats section): a bridge with holographic controls "is always optimised for the task at hand" and grants **DM+2** to the ship's Initiative roll *(CRB p.186 / High Guard Update 2022 p.31)*. Applied automatically in `rollAllInitiative` — no manual entry required. Shown in the Initiative modal's live preview (before confirm) and in the resolved breakdown as `+ Holo:2`. Reported via CotI feedback.
+  (`src/data/defaultProfiles.js`, `src/components/forms/ShipProfileForm.jsx`, `src/utils/combat.js`, `src/store/battleStore.js`, `src/components/modals/InitiativeModal.jsx`)
 
 ### Fixed
 

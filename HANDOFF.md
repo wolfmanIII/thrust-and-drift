@@ -9,28 +9,30 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.5.1 |
+| **Versione** | 2.6.0 |
 | **Branch** | main |
-| **Test** | 1320 Vitest + 63 Playwright e2e |
-| **Ultimo commit** | fix(weapons): cap Missile Rack salvo to racks mounted in turret (#26) |
+| **Test** | 1323 Vitest + 63 Playwright e2e |
+| **Ultimo commit** | feat(ship): Holographic Controls bridge option — DM+2 Initiative (#27) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§9.6 Missile Rack aggiornato per il cap salvo per-torretta, oltre a §2.2.1 Ship Roster columns e §2.3.1 Hardpoint budget dei fix precedenti)
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§6.1.2 Holographic Controls nuova, oltre a §9.6 Missile Rack cap per-torretta e §2.2.1 Ship Roster columns/§2.3.1 Hardpoint budget dei fix precedenti)
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Missile Rack salvo cap fix (v2.5.1)
+### Sessione corrente — Missile Rack salvo cap + Holographic Controls (v2.6.0)
 
-Triage di due segnalazioni CotI: aperte le issue [#26](https://github.com/wolfmanIII/thrust-and-drift/issues/26) (bug) e [#27](https://github.com/wolfmanIII/thrust-and-drift/issues/27) (feature request, rimandata — richiede prima un concetto di "bridge design option" che l'app non ha).
+Triage di due segnalazioni CotI, entrambe risolte nella stessa sessione e rilasciate insieme come v2.6.0 (nessun deploy intermedio a v2.5.1, quindi versione unica anziché due bump separati):
 
-Fixata la #26: `maxSalvo` in `AttackModal.jsx` per `Missile Rack` usava `ammoLeft` (l'intero magazzino missili della nave) invece di essere limitato al numero di componenti Missile Rack effettivamente montati nella torretta selezionata (`linkedCount`, già calcolato in `useAttackSetup.js` per il bonus danno ma mai usato per il cap). Una torretta tripla mista (Beam Laser / Missile Rack / Sandcaster) permetteva di lanciare l'intero magazzino invece di 1 missile/round; una torretta tripla omogenea di rack non era limitata a 3. Analogo al cap esistente per Torpedo (`min(3, ammoLeft)`).
+1. **Fix #26 — Missile Rack salvo non limitato per torretta**: `maxSalvo` in `AttackModal.jsx` per `Missile Rack` usava `ammoLeft` (l'intero magazzino missili della nave) invece di essere limitato al numero di componenti Missile Rack effettivamente montati nella torretta selezionata (`linkedCount`, già calcolato in `useAttackSetup.js` per il bonus danno ma mai usato per il cap). Una torretta tripla mista (Beam Laser / Missile Rack / Sandcaster) permetteva di lanciare l'intero magazzino invece di 1 missile/round; una torretta tripla omogenea di rack non era limitata a 3. Analogo al cap esistente per Torpedo (`min(3, ammoLeft)`). +2 test in `AttackModal.test.jsx` (torretta mista → cap 1, torretta tripla omogenea → cap 3).
 
-+2 test in `AttackModal.test.jsx` (torretta mista → cap 1, torretta tripla omogenea → cap 3). Doc sync: CHANGELOG v2.5.1, field-manual §9.6, HelpScreen, package.json + Dashboard badge.
+2. **Feature #27 — Holographic Controls bridge option**: nuovo campo boolean `holographicControls` sul profilo nave (default `false`), toggle in `ShipProfileForm.jsx` sezione Combat Stats. Quando attivo, `rollAllInitiative` applica **DM+2** al tiro di iniziativa della nave (CRB p.186 / HG Update 2022 p.31) — passato come nuovo parametro `holographicControlsDM` a `rollInitiative` in `combat.js`. Mostrato nel preview live (pre-conferma) e nel breakdown risolto (`+ Holo:2`) di `InitiativeModal.jsx`. Non serviva il concetto di "bridge design option" completo ipotizzato nell'issue: bastava un campo diretto sul profilo, senza introdurre un sotto-sistema bridge (fuori scope, l'app non fa costruzione navi). +3 test (2 `combat.test.js`, 1 `battleStore.test.js`).
+
+Totale +5 test. Doc sync: CHANGELOG v2.6.0 (sezioni Added + Fixed), field-manual §6.1.2 nuova + formula iniziativa + §9.6 Missile Rack, Combattimento-Spaziale.md §4.2.1 nuova, spec.md formula `rollInitiative`, HelpScreen, README, package.json + Dashboard badge.
 
 ### Sessione precedente — Ship Roster redesign (v2.5.0)
 

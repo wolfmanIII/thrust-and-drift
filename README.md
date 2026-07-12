@@ -35,7 +35,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Destroyed ships** | Hull = 0 → `isDestroyed` flag; token rendered at 35% opacity with ☠ badge; all combat actions blocked ("WRECK — no actions available"); ship skipped in initiative cycling; excluded from the attack target list; GM removes wreck manually |
 | **Crew assignments** | Right-click any ship → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner W1…Wn); unassigned roles contribute 0; weapon slots without a gunner cannot fire. A single crew member can cover all roles (monoposto / solo pilot). |
 | **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action. A crew member assigned to a role can perform its actions even at skill 0 (no DM bonus). Sensor operators have three actions: Sensor Lock (8+, DM+2 flat), Electronic Warfare (8+, breaks sensor lock), **EW — Counter Missile** (10+, Effect removes missiles from a salvo — CRB p.173) |
-| **Initiative** | 2D6 + Pilot + Thrust [+ Tactics Effect]; optional Tactics(naval) check (CRB p.160); rolled once at the start of combat — from round 2+ the order is carried over and the phase skips directly to Acceleration; GM **↺** override button forces a re-roll when needed; if a ship is added mid-battle, initiative is re-rolled next round |
+| **Initiative** | 2D6 + Pilot + Thrust [+ Tactics Effect] [+2 Holographic Controls]; optional Tactics(naval) check (CRB p.160); Holographic Controls is a per-ship bridge option toggled on the profile, always applies DM+2 (CRB p.186 / HG Update 2022 p.31); rolled once at the start of combat — from round 2+ the order is carried over and the phase skips directly to Acceleration; GM **↺** override button forces a re-roll when needed; if a ship is added mid-battle, initiative is re-rolled next round |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End. Ship names are clickable — click to pan the map to that token |
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase AND when it is that ship's turn (initiative order enforced in Acceleration, Attack, Actions phases) |
 | **Actor highlight ring** | The current initiative actor's token shows a pulsing cyan ring on the canvas — instantly visible which ship should act next, even with multiple identical tokens |
@@ -168,7 +168,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1320 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1323 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 

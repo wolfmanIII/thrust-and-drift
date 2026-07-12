@@ -28,6 +28,7 @@ function blankForm() {
     maxPower: 100,
     computerBandwidth: 0,
     hardened: false,
+    holographicControls: false,
     crew: [],
     turrets: [],
   }
@@ -53,6 +54,7 @@ function initForm(profile) {
     maxPower:          profile.maxPower          ?? 100,
     computerBandwidth: profile.computerBandwidth ?? 0,
     hardened:          profile.hardened          ?? false,
+    holographicControls: profile.holographicControls ?? false,
     crew,
     turrets: (profile.turrets ?? []).map((t) => ({ ...t, weapons: [...t.weapons] })),
   }
@@ -399,6 +401,12 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
             <NumField label="TECH LVL" value={form.tl}    onChange={(v) => set('tl', v)}     min={7} max={16} />
             <NumField label="PILOT DEX DM" value={form.dexDM} onChange={(v) => set('dexDM', v)} min={-3} max={3} />
           </div>
+          <CheckboxField
+            label="HOLOGRAPHIC CONTROLS BRIDGE (TL9)"
+            checked={form.holographicControls}
+            onChange={(v) => set('holographicControls', v)}
+            tooltip="Bridge optimised for the task at hand — DM+2 to Initiative rolls (CRB p.186 / HG Update 2022 p.31)"
+          />
         </section>
 
         {/* Power Plant — Ion Cannon target stat */}

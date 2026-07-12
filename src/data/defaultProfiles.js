@@ -35,6 +35,7 @@ function makeProfile(overrides) {
     maxPower: 100,          // Ion Cannon Power target — HG p.30
     computerBandwidth: 0,   // 0 = not tracked (no DM-2 on bandwidth depletion)
     hardened: false,        // /fib immunity to Ion — FAQ HG 2022 p.1
+    holographicControls: false, // DM+2 to Initiative — CRB p.186 / HG Update 2022 p.31
     ...overrides,
   }
 }

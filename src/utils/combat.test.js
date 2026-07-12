@@ -367,6 +367,19 @@ describe('rollInitiative', () => {
     expect(r.total).toBe(8)
     expect(r.roll).toBe(override)
   })
+
+  // Holographic Controls bridge option — CRB p.186 / HG Update 2022 p.31
+  it('holographicControlsDM defaults to 0', () => {
+    const r = rollInitiative(1, 2)
+    expect(r.breakdown.holographicControlsDM).toBe(0)
+  })
+
+  it('adds DM+2 when holographicControlsDM is passed', () => {
+    // roll=8, pilot=1, thrust=2, tactics=0, holo=2 → total=13
+    const r = rollInitiative(1, 2, 0, null, 2)
+    expect(r.total).toBe(13)
+    expect(r.breakdown.holographicControlsDM).toBe(2)
+  })
 })
 
 // === RANGE_ORDER / isOutOfRange ===

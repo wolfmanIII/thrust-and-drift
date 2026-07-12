@@ -67,9 +67,13 @@ Il capitano può eseguire un check **Tactics(Naval)** all'inizio del combattimen
 
 ### 4.2 Initiative check
 
-Formula: **2D6 + Pilot skill + Ship Thrust [+ effetto Tactics(Naval)]**
+Formula: **2D6 + Pilot skill + Ship Thrust [+ effetto Tactics(Naval)] [+2 Holographic Controls]**
 
 Chi ha il punteggio più alto agisce per primo. In caso di parità, va prima la nave con il **Thrust più alto**.
+
+### 4.2.1 Holographic Controls (TL9)
+
+Una plancia con controlli olografici (opzione attivabile sul profilo nave) è sempre ottimizzata per il compito richiesto e garantisce **DM+2** al tiro di Iniziativa *(CRB p.186 / High Guard Update 2022 p.31)*.
 
 ### 4.3 Sorpresa
 
