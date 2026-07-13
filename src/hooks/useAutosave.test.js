@@ -271,4 +271,58 @@ describe('autosave on significant changes', () => {
     const call = dbPut.mock.calls.find(([store]) => store === 'battle')
     expect(call[2]).toMatchObject({ basicBandPool })
   })
+
+  it('includes pendingMissileImpacts, pendingObstacleCollisions and shipAddedThisRound in persisted snapshot', async () => {
+    const { unmount } = renderHook(() => useAutosave())
+    await act(async () => {})
+
+    const pendingMissileImpacts = [{ id: 'impact1', shipId: 's1', targetId: 's2', count: 2, type: 'Standard' }]
+    const pendingObstacleCollisions = [{ id: 'coll1', shipId: 's1', obstacle: { type: 'debris_field' }, position: { q: 0, r: 0 } }]
+    act(() => { useBattleStore.setState({ round: 2, pendingMissileImpacts, pendingObstacleCollisions, shipAddedThisRound: true }) })
+    await act(async () => {})
+    unmount()
+
+    const call = dbPut.mock.calls.find(([store]) => store === 'battle')
+    expect(call[2]).toMatchObject({ pendingMissileImpacts, pendingObstacleCollisions, shipAddedThisRound: true })
+  })
+})
+
+describe('restore on mount — pendingMissileImpacts, pendingObstacleCollisions, shipAddedThisRound', () => {
+  it('restores all three from IndexedDB', async () => {
+    const pendingMissileImpacts = [{ id: 'impact-restore', shipId: 's1', targetId: 's2', count: 1, type: 'Smart' }]
+    const pendingObstacleCollisions = [{ id: 'coll-restore', shipId: 's1', obstacle: { type: 'nebula' }, position: { q: 1, r: 1 } }]
+    mockStore['battle:current'] = {
+      id: 'battle-5', name: 'Test', round: 3, combatMode: 'vectorial',
+      phase: 'attack', initiativeOrder: [], currentActorIndex: 0,
+      ships: [makeShip()], missiles: [], log: [], mapSettings: { scale: 1 },
+      pendingMissileImpacts, pendingObstacleCollisions, shipAddedThisRound: true,
+    }
+
+    const { unmount } = renderHook(() => useAutosave())
+    await act(async () => {})
+    unmount()
+
+    const state = useBattleStore.getState()
+    expect(state.pendingMissileImpacts).toEqual(pendingMissileImpacts)
+    expect(state.pendingObstacleCollisions).toEqual(pendingObstacleCollisions)
+    expect(state.shipAddedThisRound).toBe(true)
+  })
+
+  it('defaults all three when absent from saved data', async () => {
+    mockStore['battle:current'] = {
+      id: 'battle-6', name: 'Test', round: 1, combatMode: 'vectorial',
+      phase: 'setup', initiativeOrder: [], currentActorIndex: 0,
+      ships: [makeShip()], missiles: [], log: [], mapSettings: { scale: 1 },
+      // pendingMissileImpacts / pendingObstacleCollisions / shipAddedThisRound intentionally absent
+    }
+
+    const { unmount } = renderHook(() => useAutosave())
+    await act(async () => {})
+    unmount()
+
+    const state = useBattleStore.getState()
+    expect(state.pendingMissileImpacts).toEqual([])
+    expect(state.pendingObstacleCollisions).toEqual([])
+    expect(state.shipAddedThisRound).toBe(false)
+  })
 })

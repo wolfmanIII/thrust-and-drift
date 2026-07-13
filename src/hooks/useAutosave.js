@@ -27,6 +27,7 @@ function extractBattleSnapshot(state) {
     phase: state.phase,
     initiativeOrder: state.initiativeOrder,
     currentActorIndex: state.currentActorIndex,
+    shipAddedThisRound: state.shipAddedThisRound,
     ships: state.ships,
     missiles: state.missiles,
     dogfights: state.dogfights,
@@ -37,6 +38,8 @@ function extractBattleSnapshot(state) {
     mapSettings: state.mapSettings,
     obstaclesEnabled: state.obstaclesEnabled,
     obstacles: state.obstacles,
+    pendingObstacleCollisions: state.pendingObstacleCollisions,
+    pendingMissileImpacts: state.pendingMissileImpacts,
     savedAt: new Date().toISOString(),
   }
 }
@@ -47,6 +50,7 @@ function hasSignificantChange(prev, next) {
     prev.round !== next.round ||
     prev.phase !== next.phase ||
     prev.currentActorIndex !== next.currentActorIndex ||
+    prev.shipAddedThisRound !== next.shipAddedThisRound ||
     prev.ships !== next.ships ||
     prev.missiles !== next.missiles ||
     prev.log !== next.log ||
@@ -56,7 +60,9 @@ function hasSignificantChange(prev, next) {
     prev.rangeBands !== next.rangeBands ||
     prev.basicBandPool !== next.basicBandPool ||
     prev.obstaclesEnabled !== next.obstaclesEnabled ||
-    prev.obstacles !== next.obstacles
+    prev.obstacles !== next.obstacles ||
+    prev.pendingObstacleCollisions !== next.pendingObstacleCollisions ||
+    prev.pendingMissileImpacts !== next.pendingMissileImpacts
   )
 }
 
@@ -78,6 +84,7 @@ export function useAutosave() {
           phase: saved.phase,
           initiativeOrder: saved.initiativeOrder ?? [],
           currentActorIndex: saved.currentActorIndex ?? 0,
+          shipAddedThisRound: saved.shipAddedThisRound ?? false,
           ships: saved.ships ?? [],
           missiles: saved.missiles ?? [],
           dogfights: saved.dogfights ?? [],
@@ -88,6 +95,8 @@ export function useAutosave() {
           mapSettings: saved.mapSettings ?? { scale: 1 },
           obstaclesEnabled: saved.obstaclesEnabled ?? false,
           obstacles: saved.obstacles ?? [],
+          pendingObstacleCollisions: saved.pendingObstacleCollisions ?? [],
+          pendingMissileImpacts: saved.pendingMissileImpacts ?? [],
         })
       }
     }).catch(() => {/* IndexedDB unavailable — no recovery */})

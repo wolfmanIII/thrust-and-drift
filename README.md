@@ -22,7 +22,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
 | **Attack resolution** | 4-step flow: weapon/target config → 2D6 roll → damage → critical; per-slot firing limit (CRB p.164) — each slot fires once per round, slot badge (W1, W2…) shown in weapon list |
 | **Reactions (CRB p.171)** | Defender reacts before each attack roll: Evasive Action (1 thrust → DM −Pilot skill), Disperse Sand (sandcaster turret → Gunner check, +1D+Effect armour vs laser); player ships enter physical dice manually. **Point Defence for missiles** is resolved at impact, not at launch — see Missile impact row |
-| **Missile launch** | Three launcher types in the Attack modal: **Missile Rack** (count stepper, 12/rack, 4D per missile), **Missile Barbette** (fixed 5-missile salvo, 25 total, 4D per missile), **Torpedo** (1–3 per launch, 3 total, 6D per torpedo, red token) — no DM roll at launch; salvo token inherits launcher vector |
+| **Missile launch** | Three launcher types in the Attack modal: **Missile Rack** (count stepper, 12/rack, 4D per missile), **Missile Barbette** (1–5 stepper, 25 total, 4D per missile — RAW is a fixed 5-salvo, HG p.30; the stepper is an optional house-rule deviation for referee flexibility), **Torpedo** (1–3 per launch, 3 total, 6D per torpedo, red token) — no DM roll at launch; salvo token inherits launcher vector |
 | **Missile guidance** | Each round in the movement phase, all guided salvos home toward their target's predicted next position; up to 10 hex/round delta-v correction (MgT2e CRB p.162 — Thrust 10); drifts when 10-round fuel exhausted |
 | **Missile impact** | When a salvo reaches its target's hex, token consumed and **⚡ MISSILE IMPACT** modal opens per CRB p.173: (0) **Point Defence** — if the target has unfired laser turrets, Gunner check 2D6 + Gunner + laser bonus; Effect removes that many missiles; if all destroyed, impact dismissed; (1) **Attack roll** — 2D6 + DM+1/missile (remaining after PD) + DM+2 Smart (launcher TL ≥ 9) ± Evasive Action; Effect < 0 → miss; (2) **Damage** — roll 4D6/6D6 for one missile; formula `max(0, roll − armour) × min(Effect, count)`; APPLY DAMAGE or MISS/INTERCEPTED; multiple impacts queue sequentially |
 | **Weapons expansion** | 11 new weapons (HG pp.28–31): Fusion Gun, Plasma Gun, Ion Cannon, Torpedo, Missile Barbette + 6 barbettes (Pulse/Beam/Particle/Fusion/Plasma/Railgun Barbette) |
@@ -168,7 +168,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1323 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1331 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 

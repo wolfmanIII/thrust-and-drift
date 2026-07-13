@@ -185,9 +185,12 @@ function AttackConfigStep({
   // Missile Rack salvo capped at the number of racks mounted in this turret — a rack is a
   // single mount that launches one missile per round, even inside a mixed-weapon turret
   // (Traveller Companion p.172 / HG p.31 — turret components fire together, not as one weapon).
+  // Missile Barbette RAW fires a fixed salvo of 5 (HG p.30); the 1–5 stepper below is a
+  // deliberate house-rule deviation (GH #28 — CotI feedback) for referee flexibility.
   const selectedWeaponEntry = availableWeapons.find((w) => w.weaponName === weaponKey && w.turretSlot === selectedTurretSlot)
-  const maxSalvo        = weaponKey === 'Torpedo'      ? Math.min(3, ammoLeft)
-                         : weaponKey === 'Missile Rack' ? Math.min(selectedWeaponEntry?.linkedCount ?? 1, ammoLeft)
+  const maxSalvo        = weaponKey === 'Torpedo'          ? Math.min(3, ammoLeft)
+                         : weaponKey === 'Missile Rack'    ? Math.min(selectedWeaponEntry?.linkedCount ?? 1, ammoLeft)
+                         : weaponKey === 'Missile Barbette' ? Math.min(5, ammoLeft)
                          : ammoLeft
   const isMissilePdMode = !!targetMissileId
   // When targeting a missile, only PD weapons are valid
@@ -247,7 +250,7 @@ function AttackConfigStep({
                   {wDef && (
                     <span className="text-slate-400">
                       {['Missile Rack', 'Missile Barbette', 'Torpedo'].includes(w.weaponName) ? (
-                        w.weaponName === 'Missile Barbette' ? 'Guided · 4D dmg/missile · Salvo 5 · 25 ammo' :
+                        w.weaponName === 'Missile Barbette' ? 'Guided · 4D dmg/missile · Salvo 1–5 · 25 ammo' :
                         w.weaponName === 'Torpedo'          ? 'Guided · 6D dmg/torpedo · Salvo 1–3 · 3 ammo' :
                                                               'Guided · 4D dmg/missile · Special'
                       ) : (
@@ -315,41 +318,33 @@ function AttackConfigStep({
         {/* Missile count */}
         {isMissile && (
           <div>
-            {isMissileBarbette ? (
-              <p className="text-slate-400 font-mono text-xs">
-                Fixed salvo: <span className="text-(--neon-cyan) font-bold">{missileCount}</span> missiles
-                {' · '}Ammo: <span className={ammoLeft === 0 ? 'text-red-400' : 'text-(--neon-cyan)'}>{ammoLeft}</span>/25
-              </p>
-            ) : (
-              <>
-                <p className="text-slate-400 font-mono text-xs mb-1.5">
-                  {weaponKey === 'Torpedo' ? 'Torpedoes in salvo' : 'Missiles in salvo'} (1–{maxSalvo})
-                  {' · '}Ammo: <span className={ammoLeft === 0 ? 'text-red-400' : 'text-(--neon-cyan)'}>{ammoLeft}</span>
-                </p>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setMissileCount((c) => Math.max(1, c - 1))}
-                    disabled={ammoLeft === 0}
-                    className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
-                  >
-                    −
-                  </button>
-                  <span className="text-(--neon-cyan) font-mono font-bold text-xl w-8 text-center">
-                    {missileCount}
-                  </span>
-                  <button
-                    onClick={() => setMissileCount((c) => Math.min(maxSalvo, c + 1))}
-                    disabled={ammoLeft === 0}
-                    className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
-                  >
-                    +
-                  </button>
-                  <span className="text-slate-400 font-mono text-xs ml-2">
-                    {weaponKey === 'Torpedo' ? 'torpedoes · guided munitions' : 'missiles · guided munitions'}
-                  </span>
-                </div>
-              </>
-            )}
+            <p className="text-slate-400 font-mono text-xs mb-1.5">
+              {weaponKey === 'Torpedo' ? 'Torpedoes in salvo' : 'Missiles in salvo'} (1–{maxSalvo})
+              {' · '}Ammo: <span className={ammoLeft === 0 ? 'text-red-400' : 'text-(--neon-cyan)'}>{ammoLeft}</span>
+              {isMissileBarbette && '/25'}
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setMissileCount((c) => Math.max(1, c - 1))}
+                disabled={ammoLeft === 0}
+                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
+              >
+                −
+              </button>
+              <span className="text-(--neon-cyan) font-mono font-bold text-xl w-8 text-center">
+                {missileCount}
+              </span>
+              <button
+                onClick={() => setMissileCount((c) => Math.min(maxSalvo, c + 1))}
+                disabled={ammoLeft === 0}
+                className="w-8 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono rounded hover:border-slate-400 transition-colors disabled:text-slate-400 disabled:border-slate-600/50 disabled:bg-transparent disabled:cursor-not-allowed"
+              >
+                +
+              </button>
+              <span className="text-slate-400 font-mono text-xs ml-2">
+                {weaponKey === 'Torpedo' ? 'torpedoes · guided munitions' : 'missiles · guided munitions'}
+              </span>
+            </div>
           </div>
         )}
 
@@ -1256,7 +1251,7 @@ export function AttackModal() {
     setWeaponKey(name)
     setSelectedTurretSlot(turretSlot)
     setDamageDiceBonus(linkedBonus)
-    setMissileCount(name === 'Missile Barbette' ? 5 : 1)
+    setMissileCount(name === 'Missile Barbette' ? Math.max(1, Math.min(5, attacker?.missileAmmoTotal ?? 5)) : 1)
     resetReactions()
   }
   const handleTargetChange = (id) => {

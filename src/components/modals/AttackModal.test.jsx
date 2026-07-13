@@ -138,6 +138,53 @@ describe('AttackModal — Missile Rack salvo cap (#26)', () => {
   })
 })
 
+// ── #28: Missile Barbette variable salvo (1–5), house-rule deviation from RAW fixed-5 ──
+
+describe('AttackModal — Missile Barbette variable salvo (#28)', () => {
+  it('defaults to a full 5-missile salvo and allows stepping down to 1', () => {
+    const profile = makeRackProfile('Barbette', {
+      turrets: [{ slot: 1, weapons: ['Missile Barbette'] }],
+    })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Target', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: useBattleStore.getState().ships[0].id } })
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Missile Barbette'))
+    expect(screen.getByText(/missiles in salvo.*\(1–5\)/i)).toBeInTheDocument()
+    expect(screen.getByText('5')).toBeInTheDocument()
+    const minus = screen.getByRole('button', { name: '−' })
+    fireEvent.click(minus)
+    fireEvent.click(minus)
+    expect(screen.getByText('3')).toBeInTheDocument()
+  })
+
+  it('caps the salvo at remaining ammo when fewer than 5 missiles are left', () => {
+    const profile = makeRackProfile('BarbetteLowAmmo', {
+      turrets: [{ slot: 1, weapons: ['Missile Barbette'] }],
+    })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Target', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att] = useBattleStore.getState().ships
+    useBattleStore.setState({
+      ships: useBattleStore.getState().ships.map((s) => (s.id === att.id ? { ...s, missileAmmoTotal: 3 } : s)),
+    })
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Missile Barbette'))
+    expect(screen.getByText(/missiles in salvo.*\(1–3\)/i)).toBeInTheDocument()
+    expect(screen.getAllByText('3').length).toBeGreaterThan(0)
+    const plus = screen.getByRole('button', { name: '+' })
+    fireEvent.click(plus) // no-op — capped at remaining ammo (3)
+    expect(screen.queryByText('4')).not.toBeInTheDocument()
+  })
+})
+
 // ── #14: same-type weapon linking UI ──────────────────────────────────────────
 
 describe('AttackModal — linked weapon display (#14)', () => {

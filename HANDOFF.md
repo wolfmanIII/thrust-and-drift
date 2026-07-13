@@ -9,22 +9,40 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.6.0 |
+| **Versione** | 2.7.0 |
 | **Branch** | main |
-| **Test** | 1323 Vitest + 63 Playwright e2e |
-| **Ultimo commit** | feat(ship): Holographic Controls bridge option — DM+2 Initiative (#27) |
+| **Test** | 1331 Vitest + 63 Playwright e2e |
+| **Ultimo commit** | fix(save): persist pendingMissileImpacts, pendingObstacleCollisions, shipAddedThisRound (v2.7.0) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§6.1.2 Holographic Controls nuova, oltre a §9.6 Missile Rack cap per-torretta e §2.2.1 Ship Roster columns/§2.3.1 Hardpoint budget dei fix precedenti)
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§9.6 Missile Barbette aggiornata: house-rule 1–5 stepper invece di salvo fisso RAW)
+- Valutare se chiudere formalmente le issue GitHub #26/#27 su `main` (rimaste OPEN: i commit di fix non usavano la sintassi `Fixes #N`, quindi GitHub non le ha chiuse in automatico al merge)
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Missile Rack salvo cap + Holographic Controls (v2.6.0)
+### Sessione corrente — Missile Barbette variable salvo (v2.7.0)
+
+Terza segnalazione CotI dallo stesso thread (dopo #26/#27 già rilasciate in v2.6.0): *"lasciare che le missile barbette sparino un numero variabile di missili, da 1 a 5, invece di sparare sempre tutti e 5"*. Il segnalante stesso riconosceva che RAW è un salvo fisso di 5.
+
+Verifica RAW: *High Guard Update 2022, p.30* — *"A missile barbette fires five missiles at a time and holds enough missiles for five full salvos (a total of 25 missiles)"*. Nessuna FAQ/errata la modifica: RAW è salvo fisso 5, quindi la richiesta è esplicitamente una house rule opzionale, non un bug. Aperta issue [#28](https://github.com/wolfmanIII/thrust-and-drift/issues/28). Chiesto all'utente come esporla (nessun toggle rules-system esisteva già in app): scelto uno stepper libero 1–5 sempre attivo, stessa UX di Torpedo/Missile Rack, senza gate opzionale — deviazione RAW dichiarata a design, non nascosta dietro un flag.
+
+1. **`AttackModal.jsx`** — rimosso il ramo JSX "Fixed salvo" per `Missile Barbette`; ora usa lo stesso stepper 1–maxSalvo di Rack/Torpedo. `maxSalvo` per Barbette = `Math.min(5, ammoLeft)`. Default alla selezione dell'arma resta 5 (punch massimo invariato) ma clampato a `ammoLeft` se restano meno di 5 missili in magazzino. Nessuna modifica a `spendMissileAmmo`/`launchMissile`/calcolo danno — già parametrizzati sul count.
+2. **Test**: +2 in `AttackModal.test.jsx` (default 5 + stepper giù a 3; cap a ammo residuo quando <5 missili rimasti). Totale 1325 Vitest (+2 da 1323).
+3. **Doc sync**: CHANGELOG v2.7.0, field-manual §9.6 Missile Barbette riscritta, HelpScreen sezione "LAUNCHING MISSILES", README riga Missile launch, spec.md (commenti tipo `MissileSalvo`/`WeaponId`). Combattimento-Spaziale.md/Vettoriale.md verificati — nessun riferimento diretto al salvo Barbette, nulla da aggiornare.
+
+Richiesta di follow-up nella stessa sessione: *"controlla se save e autosave sono ok anche con le modifiche precedenti non solo per questa"*. Audit dell'intera catena di persistenza (`useAutosave.js` + `exportBattleState`/`importBattleState` in `battleStore.js`), non solo del diff Missile Barbette:
+
+4. **Campi per-nave/profilo** (`holographicControls`, `hardpoints`, `linkedCount`, il nuovo salvo Barbette) — nessun problema: `ships[]`/`profiles[]` vengono serializzati per intero da autosave e da export/import, senza allowlist interna, quindi ogni nuovo campo dentro quegli oggetti è già al sicuro.
+5. **Campi top-level dello `BattleState`** — trovati 3 gap reali (il `git log` di `useAutosave.js` mostra 5+ fix storici dello stesso tipo, è un pattern ricorrente in questa area): `pendingMissileImpacts` (impatti missile in coda per risoluzione danno — mancava sia da autosave **che** da export/import, il gap più grave: un refresh/crash a metà risoluzione cancellava silenziosamente l'impatto in coda), `pendingObstacleCollisions` (mancava solo da autosave — l'export/import manuale ce l'aveva già), `shipAddedThisRound` (flag house-rule per il reroll iniziativa a metà round — mancava da entrambi). `passingEncounters` controllato ma lasciato fuori: è transiente per design, svuotato prima che finisca l'animazione della fase movimento.
+6. **Fix**: aggiunti i 3 campi a `extractBattleSnapshot`/`hasSignificantChange`/restore-on-mount in `useAutosave.js` e a `exportBattleState`/`importBattleState` in `battleStore.js`. +6 test (+3 `useAutosave.test.js`, +3 `battleStore.test.js`). Totale 1331 Vitest (+6 da 1325). Tutto tenuto su v2.7.0 (nessun bump aggiuntivo, su richiesta esplicita).
+7. Salvata nuova memoria persistente (`feedback-save-autosave-audit.md`): controllare sempre le 3 allowlist di persistenza quando si tocca lo stato di battaglia, non solo il diff della feature del momento.
+
+### Sessione precedente — Missile Rack salvo cap + Holographic Controls (v2.6.0)
 
 Triage di due segnalazioni CotI, entrambe risolte nella stessa sessione e rilasciate insieme come v2.6.0 (nessun deploy intermedio a v2.5.1, quindi versione unica anziché due bump separati):
 

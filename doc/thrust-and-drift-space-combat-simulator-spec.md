@@ -280,7 +280,7 @@ type WeaponType =
   | "Ion Cannon Bay (Medium)"   // HG p.33 — 8D×20 Power, Medium
   | "Ion Cannon Bay (Large)"    // HG p.33 — 10D×100 Power, Long
   // Launcher weapons
-  | "Missile Barbette"          // HG p.29 — fixed 5-missile salvo, 25 total
+  | "Missile Barbette"          // HG p.29–30 — RAW fixed 5-missile salvo, 25 total; UI offers 1–5 stepper (house rule, v2.7.0)
   | "Torpedo"                   // HG p.30–31 — 6D, 3 total, Smart trait
 ```
 
@@ -381,7 +381,7 @@ interface MissileToken {
   thrustRemaining: number       // Thrust rimanente (parte da 10)
   type: "Standard" | "Smart" | "Torpedo"
   // "Standard" = Missile Rack salvo
-  // "Smart"    = Missile Barbette salvo (fixed 5-missile)
+  // "Smart"    = Missile Barbette salvo (1–5 stepper; RAW fixed 5)
   // "Torpedo"  = Torpedo salvo (red token; 6D per torpedo)
 }
 ```

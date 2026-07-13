@@ -2902,6 +2902,62 @@ describe('exportBattleState / importBattleState — obstacle fields', () => {
   })
 })
 
+describe('exportBattleState / importBattleState — pendingMissileImpacts, shipAddedThisRound', () => {
+  it('export includes pendingMissileImpacts and shipAddedThisRound', () => {
+    useBattleStore.setState({
+      shipAddedThisRound: true,
+      pendingMissileImpacts: [
+        { id: 'impact1', shipId: 'x', targetId: 'y', count: 3, type: 'Standard' },
+      ],
+    })
+    useBattleStore.getState().exportBattleState()
+    const callArg = exportBattle.mock.calls.at(-1)[0]
+    expect(callArg.shipAddedThisRound).toBe(true)
+    expect(callArg.pendingMissileImpacts).toHaveLength(1)
+    expect(callArg.pendingMissileImpacts[0].id).toBe('impact1')
+  })
+
+  it('import restores pendingMissileImpacts and shipAddedThisRound', async () => {
+    const fakeImpact = { id: 'impact-import', shipId: 'a', targetId: 'b', count: 2, type: 'Smart' }
+    importBattle.mockResolvedValueOnce({
+      id: 'battle-import-test-2',
+      name: 'Import Test 2',
+      round: 3,
+      combatMode: 'vectorial',
+      phase: 'attack',
+      ships: [],
+      missiles: [],
+      dogfights: [],
+      boardings: [],
+      log: [],
+      mapSettings: null,
+      rangeBands: null,
+      basicBandPool: null,
+      initiativeOrder: [],
+      currentActorIndex: 0,
+      shipAddedThisRound: true,
+      pendingMissileImpacts: [fakeImpact],
+    })
+    await useBattleStore.getState().importBattleState(null)
+    expect(useBattleStore.getState().shipAddedThisRound).toBe(true)
+    expect(useBattleStore.getState().pendingMissileImpacts).toHaveLength(1)
+    expect(useBattleStore.getState().pendingMissileImpacts[0].id).toBe('impact-import')
+  })
+
+  it('import with missing fields defaults gracefully', () => {
+    importBattle.mockReturnValueOnce({
+      id: 'x', name: 'X', round: 1, combatMode: 'vectorial', phase: 'setup',
+      ships: [], missiles: [], dogfights: [], boardings: [], log: [],
+      mapSettings: null, rangeBands: null, basicBandPool: null,
+      initiativeOrder: [], currentActorIndex: 0,
+      // shipAddedThisRound / pendingMissileImpacts intentionally absent
+    })
+    useBattleStore.getState().importBattleState(null)
+    expect(useBattleStore.getState().shipAddedThisRound).toBe(false)
+    expect(useBattleStore.getState().pendingMissileImpacts).toEqual([])
+  })
+})
+
 // === REQ-13: Initiative skip (CRB p.160) =====================================
 
 describe('REQ-13 — initiative skip on round transition', () => {

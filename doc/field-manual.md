@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.6.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.7.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -605,13 +605,17 @@ After fuel is exhausted the salvo drifts on its last vector.
 
 Damage: **4D6 per missile** *(HG p.28)*.
 
-#### Missile Barbette *(HG p.29)*
+#### Missile Barbette *(HG p.29–30)*
 
-Launches a **fixed 5-missile salvo** — the count is not adjustable. Total magazine:
-**25 missiles** (5 salvos). Uses the same guided-flight system as the Missile Rack.
+RAW fires a **fixed 5-missile salvo** *(HG p.30: "A missile barbette fires five
+missiles at a time")*. The simulator offers a **1–5 salvo stepper** instead — a
+deliberate house-rule deviation, for referees who want to finish off a damaged
+target, fire a warning shot, probe point defence, or conserve ammunition without
+always committing all 5. Total magazine: **25 missiles** (5 full-salvo equivalents).
+Uses the same guided-flight system as the Missile Rack.
 
 Damage: **4D6 per missile** (same as Rack — barbette ×3 multiplier does **not** apply
-to missile weapons; the Smart trait drives the fixed salvo size instead).
+to missile weapons).
 
 #### Torpedo *(HG p.30–31)*
 

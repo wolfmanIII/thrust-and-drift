@@ -10,6 +10,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.7.0] — 2026-07-13
+
+### Added
+
+- **Missile Barbette variable salvo, 1–5 (#28)** — the Attack modal's Missile Barbette weapon now uses the same 1–5 stepper UI as Missile Rack/Torpedo instead of always firing a fixed 5-missile salvo. RAW (*High Guard Update 2022, p.30*) is a fixed 5-missile salvo; this is a deliberate, always-on deviation for referee flexibility — finishing off a damaged target, warning shots, probing point defence, or conserving ammunition without committing the full salvo every time. Default remains a full 5 (unchanged max punch); the stepper is capped at remaining ammo when fewer than 5 missiles are left. Reported via CotI feedback.
+  (`src/components/modals/AttackModal.jsx`)
+
+### Fixed
+
+- **Save/autosave missing top-level battle-state fields** — audit of the whole persistence chain (prompted by the Missile Barbette work above) found three `BattleState` fields that some or all of autosave (IndexedDB)/manual JSON export/import silently dropped: `pendingMissileImpacts` (missile impacts queued for GM damage resolution — missing from **both** autosave and export/import, the most severe gap: a refresh or crash mid-resolution silently deleted the queued impact), `pendingObstacleCollisions` (missing from autosave only — export/import already had it), and `shipAddedThisRound` (the mid-round-join initiative-reroll house-rule flag — missing from both). All three are now included in `useAutosave.js` (snapshot, significant-change check, and restore-on-mount) and in `exportBattleState`/`importBattleState` (`battleStore.js`). `passingEncounters` was checked too but left out of persistence by design — it's explicitly transient, cleared before the movement-phase animation ends.
+  (`src/hooks/useAutosave.js`, `src/store/battleStore.js`)
+
+---
+
 ## [2.6.0] — 2026-07-12
 
 ### Added
