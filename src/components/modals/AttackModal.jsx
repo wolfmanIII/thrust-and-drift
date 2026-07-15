@@ -1511,7 +1511,7 @@ export function AttackModal() {
         dmBreakdown={augmentedDmBreakdown}
         attackResult={attackResult}
         setAttackResult={setAttackResult}
-        onNext={() => setStep(weaponKey === 'Ion Cannon' ? 'ion' : 'damage')}
+        onNext={() => setStep(weapon?.traits?.includes('Ion') ? 'ion' : 'damage')}
         onClose={closeModal}
         onMissClose={handleMissClose}
       />

@@ -185,6 +185,39 @@ describe('AttackModal — Missile Barbette variable salvo (#28)', () => {
   })
 })
 
+// ── #29: Ion Cannon Bay must route to Power-reduction step, not Hull damage ────
+
+describe('AttackModal — Ion Cannon Bay routes to Ion Disruption step (#29)', () => {
+  it('routes a hit with Ion Cannon Bay (Small) to the Ion Disruption step, not normal Damage', () => {
+    const profile = makeRackProfile('IonBayShip', {
+      turrets: [{ slot: 1, weapons: ['Ion Cannon Bay (Small)'] }],
+    })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Bogey', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att, tgt] = useBattleStore.getState().ships
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+    render(<AttackModal />)
+
+    fireEvent.click(screen.getByText('Ion Cannon Bay (Small)'))
+    fireEvent.click(screen.getByText(tgt.name))
+    fireEvent.click(screen.getByText('ROLL ATTACK →'))
+
+    // Guaranteed hit — 6+6 well above the 8+ target number.
+    fireEvent.change(screen.getByLabelText('Die 1'), { target: { value: '6' } })
+    fireEvent.change(screen.getByLabelText('Die 2'), { target: { value: '6' } })
+    fireEvent.click(screen.getByText('CONFIRM ROLL'))
+    fireEvent.click(screen.getByText('CALCULATE DAMAGE →'))
+
+    // Must land on the Ion Disruption step (Power reduction), never normal Hull damage.
+    expect(screen.getByText('Ion Disruption')).toBeInTheDocument()
+    expect(screen.getByText(/no hull damage/i)).toBeInTheDocument()
+    expect(screen.queryByText('Damage')).not.toBeInTheDocument()
+  })
+})
+
 // ── #14: same-type weapon linking UI ──────────────────────────────────────────
 
 describe('AttackModal — linked weapon display (#14)', () => {

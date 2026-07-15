@@ -35,7 +35,7 @@ Verifica RAW: *High Guard Update 2022, p.30* — *"A missile barbette fires five
 2. **Test**: +2 in `AttackModal.test.jsx` (default 5 + stepper giù a 3; cap a ammo residuo quando <5 missili rimasti). Totale 1325 Vitest (+2 da 1323).
 3. **Doc sync**: CHANGELOG v2.7.0, field-manual §9.6 Missile Barbette riscritta, HelpScreen sezione "LAUNCHING MISSILES", README riga Missile launch, spec.md (commenti tipo `MissileSalvo`/`WeaponId`). Combattimento-Spaziale.md/Vettoriale.md verificati — nessun riferimento diretto al salvo Barbette, nulla da aggiornare.
 
-Richiesta di follow-up nella stessa sessione: *"controlla se save e autosave sono ok anche con le modifiche precedenti non solo per questa"*. Audit dell'intera catena di persistenza (`useAutosave.js` + `exportBattleState`/`importBattleState` in `battleStore.js`), non solo del diff Missile Barbette:
+   Richiesta di follow-up nella stessa sessione: *"controlla se save e autosave sono ok anche con le modifiche precedenti non solo per questa"*. Audit dell'intera catena di persistenza (`useAutosave.js` + `exportBattleState`/`importBattleState` in `battleStore.js`), non solo del diff Missile Barbette:
 
 4. **Campi per-nave/profilo** (`holographicControls`, `hardpoints`, `linkedCount`, il nuovo salvo Barbette) — nessun problema: `ships[]`/`profiles[]` vengono serializzati per intero da autosave e da export/import, senza allowlist interna, quindi ogni nuovo campo dentro quegli oggetti è già al sicuro.
 5. **Campi top-level dello `BattleState`** — trovati 3 gap reali (il `git log` di `useAutosave.js` mostra 5+ fix storici dello stesso tipo, è un pattern ricorrente in questa area): `pendingMissileImpacts` (impatti missile in coda per risoluzione danno — mancava sia da autosave **che** da export/import, il gap più grave: un refresh/crash a metà risoluzione cancellava silenziosamente l'impatto in coda), `pendingObstacleCollisions` (mancava solo da autosave — l'export/import manuale ce l'aveva già), `shipAddedThisRound` (flag house-rule per il reroll iniziativa a metà round — mancava da entrambi). `passingEncounters` controllato ma lasciato fuori: è transiente per design, svuotato prima che finisca l'animazione della fase movimento.
@@ -106,7 +106,7 @@ Segnalazione CotI, due bug distinti in `AttackModal.jsx` / `ShipProfileForm.jsx`
 
 1. **i18n — DogfightNotificationModal** (`ba217d2`) — 3 stringhe italiane residue tradotte: "Thrust libero" → "Thrust free", "FUGGITIVO EVADE" → "EVADER ESCAPES".
 2. **Playwright dogfight** (`4228196`) — `playwright/test-dogfight.mjs`: headless Chrome, flusso completo DogfightNotificationModal → HUD tracker → DogfightRoundModal → pilot check → probe attack-phase exclusion.
-3. **Playwright boarding** (`4228196`, `19ddc9b`) — `playwright/test-boarding.mjs`: ships a (5,3)/(6,3) per evitare canvas center (offset={0,0}); flusso BOARD → BoardingSetupModal → ContactModal → ConflictModal → OutcomeModal; probe re-board assente per navi già in boarding (fix false positive: usa `.absolute.z-50` + regex `^Board ` invece di `body.textContent()`).
+3. **Playwright boarding** (`4228196`, `19ddc9b`) — `playwright/test-boarding.mjs`: ships a (5,3)/(6,3) per evitare canvas center (offset={0,0}); flusso BOARD → BoardingSetupModal → ContactModal → ConflictModal → OutcomeModal; probe re-board assente per navi già in boarding (fix false positive: usa `.absolute.z-50` + regex `^Board` invece di `body.textContent()`).
 4. **Playwright obstacles** (`247c909`) — `playwright/test-obstacles.mjs`: piazzamento via context menu, canvas thrust targeting (start/ESC), movement collision (wait 2500ms per setTimeout), nebula sensor lock in ActionModal, rimozione ostacolo.
    - Finding: `ThrustModal.jsx` è dead code — non nel MODAL_MAP, obstacle path warnings mai mostrate; canvas targeting è il sistema reale.
 5. **BattleLog drag fix** (`c10802d`) — aggiunto `isDragging` state; `transition-[height]` disabilitato durante il drag per evitare resize a scatti. Portato da tac-and-lock.
@@ -164,11 +164,13 @@ FIX-08 (hardened per-sistema) differito a v1.24.0.
 Code review completa su dogfight e boarding → 13 fix implementati in 5 fasi:
 
 **Phase 1 — Production + data integrity (FIX-01…03):**
+
 - FIX-01: `BoardingOutcomeModal` — sostituiti class interpolation dinamici con `OUTCOME_STYLES` lookup map (Tailwind v4 scan).
 - FIX-02: Boarding double-initiation bloccata — guard in `startBoarding`, `ContextMenu`, `BoardingSetupModal`.
 - FIX-03: `resolveBoarding` ora resetta `inBoarding` su tutti i partecipanti (non solo attacker/defender).
 
 **Phase 2 — Game flow (FIX-04…08):**
+
 - FIX-04: `canAdvancePhase` in HUD blocca NEXT PHASE se ci sono dogfight attivi.
 - FIX-05: `advanceActor` salta navi con `inDogfight`.
 - FIX-06: Danno hull-cut instradato tramite `applyBoardingCutDamage` (undo stack).
@@ -176,13 +178,16 @@ Code review completa su dogfight e boarding → 13 fix implementati in 5 fasi:
 - FIX-08: Dogfight detection in basic mode tramite `detectDogfightGroupsBasic`.
 
 **Phase 3 — RAW compliance (FIX-09):**
+
 - FIX-09: DEX DM (−3/+3) aggiunto a `rollDogfightPilot`, `computeShipDMs`, `ShipCheckRow`, `checkResults`. Campo "PILOT DEX DM" in `ShipProfileForm` e `defaultProfiles`.
 
 **Phase 4 — AttackModal integration (FIX-10/11):**
+
 - FIX-10: Dogfight attack DM (+2/−2/0) pre-fill automatico in `useAttackSetup` + mostrato in DM Summary.
 - FIX-11: Fixed weapons (barbette/bay) bloccate su tie; banner `⚠ Dogfight tie` in AttackModal.
 
 **Phase 5 — Refactor (REF-01…03):**
+
 - REF-01: `computeShipDMs`, `bestPilot`, `freeThrust`, `escapeCheckTotals` estratti da `DogfightRoundModal` a `utils/dogfight.js`.
 - REF-02: `endDogfight` wrappato in `wh`.
 - REF-03: Payload boarding modali usa `boardingId` invece di `boardingAttackerId + phase`.
@@ -255,7 +260,7 @@ Code review completa su dogfight e boarding → 13 fix implementati in 5 fasi:
 
 ### Sessione precedente — Doc Audit + Rules Corrections (v1.20.5–v1.20.6)
 
-0. **`fix(rules): missile Effect 0 floors multiplier at ×1`** (`2980185`) — CotI community ha correttamente identificato che Effect 0 è un colpo andato a segno, non un miss. `computeMissileImpactDamage` usa ora `max(1, min(effect, count))`. Nota "Effect×0 = 0 RAW" ritrattata. Test aggiornato.
+1. **`fix(rules): missile Effect 0 floors multiplier at ×1`** (`2980185`) — CotI community ha correttamente identificato che Effect 0 è un colpo andato a segno, non un miss. `computeMissileImpactDamage` usa ora `max(1, min(effect, count))`. Nota "Effect×0 = 0 RAW" ritrattata. Test aggiornato.
 
 ### Sessione corrente — Doc Audit + Rules Corrections (v1.20.5)
 
