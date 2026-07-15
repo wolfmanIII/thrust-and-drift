@@ -595,8 +595,8 @@ selected turret** — each rack is a single mount that launches one missile per
 round, even inside a mixed-weapon turret. A lone rack sharing a triple turret
 with, say, a Beam Laser and a Sandcaster can only launch **1** missile per
 round; a homogeneous triple-rack turret can launch up to **3**
-*(Traveller Companion p.172 / HG p.31 — turret components fire together, each
-according to its own nature)*. Total magazine: **12 missiles per Rack**
+*(Traveller Companion p.167 — "a double missile rack turret can still only
+fire two missiles at once")*. Total magazine: **12 missiles per Rack**
 component.
 
 Missiles have **Thrust 10** and **10 rounds of guided flight**. Each round in the

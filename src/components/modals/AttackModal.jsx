@@ -184,7 +184,7 @@ function AttackConfigStep({
   // Torpedo salvo capped at 3 per barbette (HG p.31).
   // Missile Rack salvo capped at the number of racks mounted in this turret — a rack is a
   // single mount that launches one missile per round, even inside a mixed-weapon turret
-  // (Traveller Companion p.172 / HG p.31 — turret components fire together, not as one weapon).
+  // (Traveller Companion p.167 — "a double missile rack turret can still only fire two missiles at once").
   // Missile Barbette RAW fires a fixed salvo of 5 (HG p.30); the 1–5 stepper below is a
   // deliberate house-rule deviation (GH #28 — CotI feedback) for referee flexibility.
   const selectedWeaponEntry = availableWeapons.find((w) => w.weaponName === weaponKey && w.turretSlot === selectedTurretSlot)
