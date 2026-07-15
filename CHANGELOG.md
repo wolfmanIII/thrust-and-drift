@@ -10,6 +10,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.7.1] — 2026-07-15
+
+### Fixed
+
+- **Ion Cannon Bay dealt normal Hull damage and triggered normal critical hits instead of Power reduction (#29)** — the Attack modal's roll→damage routing (`AttackModal.jsx:1514`) checked `weaponKey === 'Ion Cannon'`, a literal-name match that only caught the barbette variant. All three Bay variants (`Ion Cannon Bay (Small/Medium/Large)`) failed the check and fell through to the normal Hull-damage/critical-hit path, even though `weapons.js` already correctly flags all four Ion weapons with `traits: ['Ion']` and `ignoresArmour: true`. Fixed by checking the weapon's `Ion` trait instead of its literal name, so all four variants route to the Ion Disruption step (Power reduction, no hull damage, no criticals — *High Guard Update 2022, p.30/p.32*). Reported via CotI feedback with battle-log evidence: a Small Ion Cannon Bay destroyed a target outright (170/200 Hull damage + crit cascade), a Large Ion Cannon Bay dealt 3200 Hull damage to a 500-Hull test ship. The plain (barbette) Ion Cannon was unaffected and already worked correctly.
+  (`src/components/modals/AttackModal.jsx`)
+
+---
+
 ## [2.7.0] — 2026-07-13
 
 ### Added

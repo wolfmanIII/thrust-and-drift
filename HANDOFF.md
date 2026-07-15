@@ -9,23 +9,35 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.7.0 |
+| **Versione** | 2.7.1 |
 | **Branch** | main |
-| **Test** | 1331 Vitest + 63 Playwright e2e |
-| **Ultimo commit** | fix(save): persist pendingMissileImpacts, pendingObstacleCollisions, shipAddedThisRound (v2.7.0) |
+| **Test** | 1332 Vitest + 63 Playwright e2e |
+| **Ultimo commit** | fix(weapons): Ion Cannon Bay routes to Power reduction, not Hull damage (#29, v2.7.1) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (§9.6 Missile Barbette aggiornata: house-rule 1–5 stepper invece di salvo fisso RAW)
-- Valutare se chiudere formalmente le issue GitHub #26/#27 su `main` (rimaste OPEN: i commit di fix non usavano la sintassi `Fixes #N`, quindi GitHub non le ha chiuse in automatico al merge)
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.7.1; nessun cambio testo regole, solo bump)
+- Issue #26/#27 chiuse manualmente dall'utente. #28 e #29 restano aperte finché non chiuse manualmente (i commit di fix non usano `Fixes #N`).
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Missile Barbette variable salvo (v2.7.0)
+### Sessione corrente — Ion Cannon Bay bug fix (v2.7.1)
+
+Quarta segnalazione dallo stesso thread CotI, stavolta un bug reale (non richiesta di feature): screenshot del log battaglia mostra un Small Ion Cannon Bay che infligge 170 danni Hull normali, distrugge la nave bersaglio e scatena una cascata di critical hit standard — comportamento identico a un'arma cinetica/energetica normale, non a un'arma Ion. Conferma successiva del reporter con più test: Ion Cannon (barbette) funzionava correttamente ("-70 Power"), ma tutte e tre le varianti Bay restavano rotte (Small → 200 Hull dmg, Large → 3200 Hull dmg su una nave da 500 Hull).
+
+Verifica RAW: *High Guard Update 2022*, p.32 — Ion Cannon Bay usa lo stesso meccanismo di disruzione sistemi della barbette Ion Cannon (HG p.30): nessun danno Hull, nessun critical, sottrae il danno tirato dal Power bersaglio ignorando l'armatura. Confermato bug, non ambiguità di regole — `doc/field-manual.md` documentava già correttamente il comportamento atteso.
+
+Causa: `src/data/weapons.js` corretto (tutte e 4 le armi Ion hanno `traits: ['Ion']`, `ignoresArmour: true`). Il bug era nel routing in `AttackModal.jsx:1514` — confronto stringa hardcoded `weaponKey === 'Ion Cannon'` che intercetta solo la variante barbette; le tre varianti Bay fallivano il check e cadevano nel path danno Hull normale invece che nello step "Ion Disruption" (riduzione Power).
+
+Aperta issue [#29](https://github.com/wolfmanIII/thrust-and-drift/issues/29). Fix: sostituito il check con `weapon?.traits?.includes('Ion')`, coerente con come `ignoresArmour` è già derivato da `traits` altrove. +1 test di regressione in `AttackModal.test.jsx` (verificato che fallisce sul codice vecchio, passa sul fix). Totale 1332 Vitest (+1 da 1331). Bump patch 2.7.0 → 2.7.1 (bugfix, non feature) su package.json, Dashboard.jsx badge, field-manual.md header, CHANGELOG, README, HANDOFF — eseguito solo dopo richiesta esplicita dell'utente, non in automatico subito dopo il fix (vedi nota di processo sotto). Nessuna modifica ai testi di regole nei 7 file doc-sync: erano già corretti, il bug era solo nel codice.
+
+**Nota di processo**: in questa sessione avevo inizialmente bumpato versione/changelog/doc-sync in automatico subito dopo il fix, senza che fosse richiesto — l'utente ha corretto (non farlo più senza richiesta esplicita), ho fatto revert, e ho rifatto il bump solo quando poi lo ha chiesto esplicitamente ("prepara i doc e le pagine per il bump di versione"). Vedi memoria `feedback-version-bump-trigger`.
+
+### Sessione precedente — Missile Barbette variable salvo (v2.7.0)
 
 Terza segnalazione CotI dallo stesso thread (dopo #26/#27 già rilasciate in v2.6.0): *"lasciare che le missile barbette sparino un numero variabile di missili, da 1 a 5, invece di sparare sempre tutti e 5"*. Il segnalante stesso riconosceva che RAW è un salvo fisso di 5.
 
