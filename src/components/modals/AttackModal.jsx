@@ -1216,7 +1216,6 @@ export function AttackModal() {
   const markTurretFired         = useBattleStore((s) => s.markTurretFired)
   const launchMissile           = useBattleStore((s) => s.launchMissile)
   const spendReactionThrust     = useBattleStore((s) => s.spendReactionThrust)
-  const spendMissileAmmo        = useBattleStore((s) => s.spendMissileAmmo)
   const addLogEntry             = useBattleStore((s) => s.addLogEntry)
   const interceptMissileSalvo   = useBattleStore((s) => s.interceptMissileSalvo)
   const missiles                = useBattleStore((s) => s.missiles)
