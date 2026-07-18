@@ -161,7 +161,11 @@ function buildNextRoundState(s) {
     return {
       ...sh,
       thrustUsedThisRound:  0,
-      thrustBonusThisRound: 0,
+      // Overload M-Drive: pending bonus (granted in Actions phase) activates this boundary
+      // for the upcoming round's Acceleration phase; it is spent by the time the next
+      // boundary is reached, so it does not persist further. // CRB p.171
+      thrustBonusThisRound: sh.thrustBonusNextRound ?? 0,
+      thrustBonusNextRound: 0,
       hasActedThisPhase:    false,
       evasiveThrust:        0,
       firedTurrets:         [],
@@ -487,6 +491,7 @@ const useBattleStore = create((set, get) => {
       isDestroyed: false,
       thrustUsedThisRound: 0,
       thrustBonusThisRound: 0,
+      thrustBonusNextRound: 0,
       thrustPenalty: 0,
       criticalHits: [],
       initiative: 0,
@@ -1686,9 +1691,9 @@ const useBattleStore = create((set, get) => {
   ),
 
   /**
-   * Overload M-Drive: grant temporary thrust bonus for this round only.
-   * Bonus resets at start of next round.
-   * // MgT2e CRB p.167
+   * Overload M-Drive: grant a thrust bonus for the *next* round's Acceleration phase.
+   * Activates at the upcoming round boundary; expires at the boundary after that.
+   * // MgT2e CRB p.171
    * @param {string} shipId
    * @param {number} bonus  Effect of the roll (>= 0)
    */
@@ -1699,7 +1704,7 @@ const useBattleStore = create((set, get) => {
       const applied = Math.max(0, bonus)
       set((s) => ({
         ships: s.ships.map((sh) =>
-          sh.id === shipId ? { ...sh, thrustBonusThisRound: (sh.thrustBonusThisRound ?? 0) + applied } : sh
+          sh.id === shipId ? { ...sh, thrustBonusNextRound: (sh.thrustBonusNextRound ?? 0) + applied } : sh
         ),
         log: [...s.log, makeLogEntry({
           round: s.round,

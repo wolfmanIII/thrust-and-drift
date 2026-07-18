@@ -1476,33 +1476,45 @@ describe('applyInitiativeBonus', () => {
   })
 })
 
+// // MgT2e CRB p.171 — Overload M-Drive grants +Thrust for the round AFTER the one it's
+// used in (it's an Actions-phase check, taken after that round's own Acceleration phase
+// has already happened). The bonus must therefore be pending through the round boundary
+// and only become spendable once the next Acceleration phase arrives (#30).
 describe('overloadDrive', () => {
-  it('adds thrustBonusThisRound', () => {
+  it('does not grant thrustBonusThisRound immediately — bonus is pending for next round', () => {
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().overloadDrive(id, 2)
-    expect(useBattleStore.getState().ships[0].thrustBonusThisRound).toBe(2)
+    expect(useBattleStore.getState().ships[0].thrustBonusThisRound).toBe(0)
+    expect(useBattleStore.getState().ships[0].thrustBonusNextRound).toBe(2)
   })
 
-  it('accumulates on repeated calls', () => {
+  it('accumulates pending bonus on repeated calls', () => {
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().overloadDrive(id, 2)
     useBattleStore.getState().overloadDrive(id, 1)
-    expect(useBattleStore.getState().ships[0].thrustBonusThisRound).toBe(3)
+    expect(useBattleStore.getState().ships[0].thrustBonusNextRound).toBe(3)
   })
 
   it('clamps negative bonus to 0', () => {
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().overloadDrive(id, -5)
-    expect(useBattleStore.getState().ships[0].thrustBonusThisRound).toBe(0)
+    expect(useBattleStore.getState().ships[0].thrustBonusNextRound).toBe(0)
   })
 
-  it('bonus resets at next round', () => {
+  it('activates as thrustBonusThisRound on the following round, then expires the round after', () => {
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
     const { id } = useBattleStore.getState().ships[0]
     useBattleStore.getState().overloadDrive(id, 3)
+
+    // Round boundary 1: pending bonus becomes active for the upcoming round's Acceleration.
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].thrustBonusThisRound).toBe(3)
+    expect(useBattleStore.getState().ships[0].thrustBonusNextRound).toBe(0)
+
+    // Round boundary 2: bonus has been spent — it does not carry over again.
     useBattleStore.getState().startNextRound()
     expect(useBattleStore.getState().ships[0].thrustBonusThisRound).toBe(0)
   })
