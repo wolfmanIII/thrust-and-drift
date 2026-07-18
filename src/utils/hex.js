@@ -194,11 +194,28 @@ export function computeClampedDelta(targetHex, shipPos, thrustAvailable) {
   if (rawMag === 0 || thrustAvailable === 0) return { q: 0, r: 0 }
   if (rawMag <= thrustAvailable) return rawDelta
 
-  let scale = (thrustAvailable - 0.5) / rawMag
+  let scale = thrustAvailable / rawMag
   let delta = hexRound({ q: rawDelta.q * scale, r: rawDelta.r * scale })
-  while (hexDistance({ q: 0, r: 0 }, delta) > thrustAvailable && scale > 0) {
+  let mag   = hexDistance({ q: 0, r: 0 }, delta)
+
+  // Shrink: the rounded point may land past thrustAvailable (hex rounding can round
+  // away from the origin on some bearings) — walk back toward the origin.
+  while (mag > thrustAvailable && scale > 0) {
     scale -= 1 / rawMag
     delta = hexRound({ q: rawDelta.q * scale, r: rawDelta.r * scale })
+    mag   = hexDistance({ q: 0, r: 0 }, delta)
+  }
+  // Grow: on axial bearings, hex-round ties (e.g. r = -6.5) resolve toward the
+  // origin, undershooting thrustAvailable by exactly 1 even though the lattice
+  // point AT thrustAvailable exists on the same ray. Walk back out to claim it. (#30)
+  while (mag < thrustAvailable) {
+    const nextScale = scale + 1 / rawMag
+    const nextDelta = hexRound({ q: rawDelta.q * nextScale, r: rawDelta.r * nextScale })
+    const nextMag   = hexDistance({ q: 0, r: 0 }, nextDelta)
+    if (nextMag > thrustAvailable) break
+    scale = nextScale
+    delta = nextDelta
+    mag   = nextMag
   }
   return delta
 }

@@ -255,4 +255,23 @@ describe('computeClampedDelta', () => {
   it('returns {0,0} when target equals ship position', () => {
     expect(computeClampedDelta({ q: 2, r: 2 }, { q: 2, r: 2 }, 4)).toEqual({ q: 0, r: 0 })
   })
+
+  // #30 — CotI report: a Thrust-7 ship "seemed capped at 6" when dragging straight
+  // in one direction. Root cause: hexRound ties on axial bearings (e.g. r = -6.5)
+  // resolved toward the origin, undershooting thrustAvailable by exactly 1 hex even
+  // though the lattice point AT thrustAvailable exists on the same ray. Assert EXACT
+  // magnitude (not just "<= budget") for every principal direction — the previous
+  // <=-only assertions above did not catch this.
+  it.each(HEX_DIRECTIONS)('reaches exactly thrustAvailable along principal direction %o, for every integer Thrust 1-9', (dir) => {
+    for (let thrust = 1; thrust <= 9; thrust++) {
+      const target = { q: dir.q * 20, r: dir.r * 20 } // well past any tested thrust value
+      const delta  = computeClampedDelta(target, { q: 0, r: 0 }, thrust)
+      expect(hexDistance({ q: 0, r: 0 }, delta)).toBe(thrust)
+    }
+  })
+
+  it('reaches exactly thrustAvailable=7 dragging due "north" (q:0,r:-1) — the CotI reproduction case', () => {
+    const delta = computeClampedDelta({ q: 0, r: -20 }, { q: 0, r: 0 }, 7)
+    expect(delta).toEqual({ q: 0, r: -7 })
+  })
 })

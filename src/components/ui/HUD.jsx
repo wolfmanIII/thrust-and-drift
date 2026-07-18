@@ -184,6 +184,17 @@ export function HUD() {
         </p>
       )}
 
+      {/* Add ship without pre-picking a hex — deferred placement, click the map after confirming.
+          Vectorial mode only: basic mode's empty-area right-click already reaches this flow (#30). */}
+      {combatMode === 'vectorial' && (
+        <button
+          onClick={() => openModal('addShip', {})}
+          className="pointer-events-auto bg-slate-800/80 border border-slate-700 rounded px-3 py-1.5 backdrop-blur-sm hover:border-(--neon-cyan)/60 text-slate-300 hover:text-(--neon-cyan) transition-colors font-mono text-xs tracking-widest"
+        >
+          ➕ ADD SHIP
+        </button>
+      )}
+
       {/* Obstacles toggle — setup phase + vectorial mode only */}
       {phase === 'setup' && combatMode === 'vectorial' && (
         <button

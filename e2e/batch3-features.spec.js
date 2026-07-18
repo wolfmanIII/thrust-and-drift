@@ -552,10 +552,10 @@ test.describe('AddShipModal — initial vector inputs (#11 REQ-01)', () => {
     const cx     = box.x + box.width  / 2
     const cy     = box.y + box.height / 2
 
-    // Open modal from an empty hex (not direct-hex — no initialHex payload)
-    // Right-click away from centre, then use context menu
-    await page.mouse.click(cx + 150, cy, { button: 'right' })
-    await page.getByText('Add ship here').click()
+    // Open modal with no pre-picked hex via the HUD "+ ADD SHIP" button (#30) —
+    // the right-click "Add ship here" context menu item always supplies a hex,
+    // so it can never reach the deferred-placement flow tested here.
+    await page.getByRole('button', { name: /ADD SHIP/i }).click()
 
     // Set vector before confirming
     await page.getByLabel('Initial vector Δq').fill('2')
