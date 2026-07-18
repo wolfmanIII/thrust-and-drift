@@ -8,6 +8,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [2.7.2] — 2026-07-18
+
 ### Fixed
 
 - **Overload M-Drive bonus never reached the next round's Acceleration phase (#30)** — `overloadDrive` wrote the granted bonus directly onto `thrustBonusThisRound`, the same field read for the *current* round's available Thrust. Since Overload M-Drive is an Actions-phase check (taken after that round's own Acceleration has already happened), the round-boundary reset in `buildNextRoundState` wiped the bonus before the following round's Acceleration phase could ever read it — the "M-Drive overloaded" log line fired and the roll succeeded, but the extra Thrust was never actually usable *(CRB p.171: "+1 Thrust next round")*. Fixed by mirroring the existing pending/active pattern already used for the Leadership initiative bonus: `overloadDrive` now sets a new pending field `thrustBonusNextRound`; `buildNextRoundState` activates it into `thrustBonusThisRound` at the boundary, then clears the pending field, so the following boundary's existing reset correctly expires it after one round of use. Reported via CotI feedback.
@@ -15,6 +19,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 - **Thrust drag undershot the rated Thrust by exactly 1 hex on 3 of the 6 principal directions (#30)** — `computeClampedDelta`'s scale-and-round heuristic (`scale = (thrustAvailable - 0.5) / rawMag`) produces an exact `.5` cube-coordinate rounding tie whenever the drag direction is a pure axial bearing (q:0,r:-1 / q:-1,r:0 / q:-1,r:1 — CotI's report dragged along one of these). `hexRound`'s tie-break resolved toward the origin, so the clamp landed 1 hex short of `thrustAvailable` — deterministically, for *every* integer Thrust value, not just 7. The other 3 principal directions were unaffected, which is why it read as an intermittent "feels capped at 6" rather than an obvious break. The existing unit tests only asserted `magnitude ≤ thrustAvailable`, never exact equality, so this shipped unnoticed. Fixed by starting the scale search unbiased (`thrustAvailable / rawMag`) and adding a symmetric grow-loop alongside the existing shrink-loop, so the clamp reliably reaches the largest reachable magnitude ≤ `thrustAvailable` on every bearing. Verified via a new e2e test that drives the real canvas drag-to-thrust interaction (`e2e/overload-mdrive.spec.js`), confirmed to fail against the pre-fix code.
   (`src/utils/hex.js`)
+
+- **Field manual described Overload M-Drive incorrectly** — the Actions-table row said "8+ (Engineer) — +Effect Thrust available this round *(CRB p.167)*". RAW (*CRB p.171*) is a Difficult **10+** check granting a **fixed +1** Thrust on the **next** round, not an Effect-scaled bonus this round — p.167 is an unrelated section (Repair System / Reload Turret). The app code already matched RAW correctly (`crewActions.js` difficulty 10, `ActionModal.jsx` fixed `+1`); only the documentation was wrong. Found while doc-syncing the two fixes above.
+  (`doc/field-manual.md`)
 
 ### Added
 

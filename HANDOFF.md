@@ -9,23 +9,37 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.7.1 |
+| **Versione** | 2.7.2 |
 | **Branch** | main |
-| **Test** | 1332 Vitest + 63 Playwright e2e |
-| **Ultimo commit** | fix(weapons): Ion Cannon Bay routes to Power reduction, not Hull damage (#29, v2.7.1) |
+| **Test** | 1339 Vitest + 65 Playwright e2e |
+| **Ultimo commit** | fix(thrust): computeClampedDelta undershoots Thrust by 1 hex on 3 of 6 axial directions (#31, v2.7.2) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.7.1; nessun cambio testo regole, solo bump)
-- Issue #26/#27 chiuse manualmente dall'utente. #28 e #29 restano aperte finché non chiuse manualmente (i commit di fix non usano `Fixes #N`).
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.7.2; §10.2 Overload M-Drive corretta, vedi sotto)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31 chiuse automaticamente via `Fixes #N`.
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Ion Cannon Bay bug fix (v2.7.1)
+### Sessione corrente — Overload M-Drive persistence + computeClampedDelta axial undershoot (v2.7.2)
+
+Segnalazione CotI su Overload M-Drive: una nave Thrust 7 in modalità vettoriale applicava sempre solo 6 esagoni di thrust, sia prima che dopo un check di Overload M-Drive riuscito ("+1 Thrust next round" mai osservato). Il reporter stesso segnalava due ipotesi distinte, entrambe risultate bug reali e indipendenti — più una terza segnalazione di follow-up sulla modalità Basic che si è rivelata essere lo stesso bug #1 osservato in un contesto diverso.
+
+**Bug #1 — Overload M-Drive bonus mai attivo (#30)**: `overloadDrive` scriveva il bonus direttamente su `thrustBonusThisRound`, lo stesso campo letto per il thrust disponibile del round *corrente*. Ma Overload M-Drive si usa in fase Actions (dopo che l'Acceleration di quel round è già avvenuta) — il reset al boundary round in `buildNextRoundState` azzerava il bonus prima che l'Acceleration del round successivo potesse mai leggerlo. Fix: stesso pattern pending/attivo già usato per il bonus iniziativa Leadership — nuovo campo `thrustBonusNextRound` (pending), attivato in `thrustBonusThisRound` al boundary successivo. Il bug era mode-agnostic (`buildNextRoundState` opera sull'array `ships` indipendentemente da `combatMode`), quindi la stessa causa spiegava anche la segnalazione di follow-up in modalità Basic (`BasicManoeuvreModal.jsx` legge lo stesso campo) — nessun fix aggiuntivo necessario lì.
+
+**Bug #2 — computeClampedDelta sottostima 1 hex su 3/6 direzioni assiali (#31)**: verificando la seconda ipotesi del reporter ("il cap a 6 sembra strano, verifica anche il profilo nave") con un test e2e reale (drag sul canvas, non chiamata diretta allo store), riprodotto esattamente il sintomo: nave Thrust 7 in profilo pulito, drag lungo un asse puro → solo 6 hex applicati. Causa: `computeClampedDelta` (`src/utils/hex.js`) usa `scale = (thrustAvailable - 0.5) / rawMag` — per le 3 direzioni assiali pure (q:0,r:-1 / q:-1,r:0 / q:-1,r:1) questo produce sempre un tie esatto `.5` nell'arrotondamento cubico, che `hexRound` risolve verso l'origine, perdendo 1 hex — deterministico per QUALSIASI Thrust intero, non solo 7. I test unitari esistenti asserivano solo `<= thrustAvailable`, mai l'uguaglianza esatta, quindi il bug è passato inosservato. Fix: scale di partenza non biasata (`thrustAvailable / rawMag`) + loop di crescita simmetrico a quello di riduzione esistente. Verificato su tutte le 6 direzioni × Thrust 1-9, 5000 casi random, e via e2e reale (fallisce sul codice vecchio, passa col fix).
+
+**Trovato durante il lavoro (non richiesto, side-effect della verifica e2e)**: un test e2e preesistente (`batch3-features.spec.js` "SELECT HEX ON MAP flow") falliva non per flakiness ma perché testava un flusso UI irraggiungibile — `AddShipModal`'s deferred-placement branch non era mai raggiungibile in modalità vectorial (l'unico entry point, right-click "Add ship here", passa sempre un hex). Aggiunto un pulsante "➕ ADD SHIP" nell'HUD che apre il modale senza hex, rendendo il flusso (e il test) realmente raggiungibile. Stesso pattern del dead code già noto in `ThrustModal.jsx`.
+
+**Trovato durante il doc-sync (non richiesto)**: `doc/field-manual.md` §10.2 descriveva Overload M-Drive in modo sbagliato su tre punti — difficoltà (8+ invece di Difficult 10+), effetto (+Effect questo round invece di +1 fisso il round successivo), citazione (CRB p.167 invece di p.171). Verificato contro il PDF ufficiale (CRB p.171): il codice era già RAW-corretto (`crewActions.js` difficulty 10, `ActionModal.jsx` fixed +1), solo la documentazione era sbagliata. Corretta.
+
+Aperte issue [#30](https://github.com/wolfmanIII/thrust-and-drift/issues/30) e [#31](https://github.com/wolfmanIII/thrust-and-drift/issues/31), entrambe chiuse via `Fixes #N` nei commit di fix (nuova convenzione adottata questa sessione). +2 test in `battleStore.test.js` (overloadDrive, riscritti — i vecchi certificavano il bug come comportamento corretto), +7 in `hex.test.js` (6 direzioni × Thrust 1-9 + caso di riproduzione), +1 file e2e nuovo (`e2e/overload-mdrive.spec.js`, 2 test). Totale 1339 Vitest (+7 da 1332), 65 Playwright e2e (+2 da 63). Bump patch 2.7.1 → 2.7.2 (bugfix, non feature — il pulsante ADD SHIP è un side-effect di rendere raggiungibile codice morto preesistente, non una feature richiesta) eseguito solo dopo richiesta esplicita ("prepara i doc e le pagine per il bump di versione").
+
+### Sessione precedente — Ion Cannon Bay bug fix (v2.7.1)
 
 Quarta segnalazione dallo stesso thread CotI, stavolta un bug reale (non richiesta di feature): screenshot del log battaglia mostra un Small Ion Cannon Bay che infligge 170 danni Hull normali, distrugge la nave bersaglio e scatena una cascata di critical hit standard — comportamento identico a un'arma cinetica/energetica normale, non a un'arma Ion. Conferma successiva del reporter con più test: Ion Cannon (barbette) funzionava correttamente ("-70 Power"), ma tutte e tre le varianti Bay restavano rotte (Small → 200 Hull dmg, Large → 3200 Hull dmg su una nave da 500 Hull).
 

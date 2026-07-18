@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.7.1** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.7.2** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -221,7 +221,7 @@ Place ships on the hex grid before the battle begins.
 
 ### 5.1 Adding a Ship
 
-Right-click any empty hex → **Add ship here**. A modal opens where you select:
+Right-click any empty hex → **Add ship here** (places the ship at that hex directly), or click the **➕ ADD SHIP** button in the HUD (vectorial mode) to confirm the profile/faction/vector first and pick the hex afterward by clicking the map. A modal opens where you select:
 
 - **Profile** — which saved ship profile to use.
 - **Faction** — Players, Allies, Enemies, Neutral. Affects token colour and
@@ -851,7 +851,7 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 | Role | Action | Difficulty | Effect on success |
 | ---- | ------ | ---------- | ----------------- |
 | **Captain** | **Improve Initiative** | 8+ (Leadership) | +Effect added to this ship's initiative at the start of next round (lasts 1 round) *(CRB p.166)* |
-| **Engineer** | **Overload M-Drive** | 8+ (Engineer) | +Effect Thrust available this round *(CRB p.167)* |
+| **Engineer** | **Overload M-Drive** | Difficult 10+ (Engineer) | +1 Thrust (fixed) next round *(CRB p.171)* |
 | **Engineer** | **Repair System** | Average 8+ (Sev 1–2) / Difficult 10+ (Sev 3–4) / Very Difficult 12+ (Sev 5–6) (Engineer) | Removes 1 critical hit from this ship. The GM selects which critical to repair when multiple are present *(CRB p.167)* |
 | **Gunner** | **Reload Turret** | Automatic | Reloads 1 missile turret; no roll required *(CRB p.167)* |
 | **Sensors** | **Sensor Lock** | 8+ (Electronics) | DM+2 flat to all attacks against the selected target *(CRB p.172)* |

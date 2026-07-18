@@ -267,7 +267,7 @@ export function HelpScreen({ onBack } = {}) {
         <Section id="setup" title="Setup Phase">
           <p>Place ships on the hex grid before the battle begins.</p>
           <Sub title="ADDING A SHIP">
-            <p>Right-click any empty hex → <span className="text-slate-200">Add ship here</span>. A modal opens where you select:</p>
+            <p>Right-click any empty hex → <span className="text-slate-200">Add ship here</span> (places at that hex directly), or click <span className="text-slate-200">➕ ADD SHIP</span> in the HUD (vectorial mode) to confirm the profile/faction/vector first and pick the hex afterward by clicking the map. A modal opens where you select:</p>
             <KV k="Profile" v="Which saved ship profile to use." />
             <KV k="Faction" v="Players, Allies, Enemies, Neutral — affects token colour and auto-roll behaviour." />
             <KV k="Color" v="Token display colour." />
