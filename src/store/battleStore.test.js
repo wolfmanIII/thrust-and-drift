@@ -1406,7 +1406,7 @@ describe('applyInitiativeBonus', () => {
   })
 
   // BUG-003: rollAllInitiative must include initiativeBonusNextRound in the final total.
-  // With known dice (total=7), pilot=2, thrust=4, bonus=3 → expected 7+2+4+3=16. // CRB p.160, p.166
+  // With known dice (total=7), pilot=2, thrust=4, bonus=3 → expected 7+2+4+3=16. // CRB p.165, p.166
   it('rollAllInitiative includes initiativeBonusNextRound in ship initiative total', () => {
     useBattleStore.getState().addShip(
       makeProfile({ thrust: 4, crew: { pilot: 2 } }),
@@ -2970,7 +2970,7 @@ describe('exportBattleState / importBattleState — pendingMissileImpacts, shipA
   })
 })
 
-// === REQ-13: Initiative skip (CRB p.160) =====================================
+// === REQ-13: Initiative skip (CRB p.165) =====================================
 
 describe('REQ-13 — initiative skip on round transition', () => {
   it('skips initiative when round >= 1, order is set, and no ship added', () => {

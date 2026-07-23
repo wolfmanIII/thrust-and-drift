@@ -565,7 +565,7 @@ export function getRangeBand(distance) {
 // 2D6 + Pilot skill + Ship Thrust [+ effetto Tactics(naval)] [+2 Holographic Controls]
 // diceOverride: { results, total } per navi player con dadi fisici (v1.3.6)
 // holographicControlsDM: DM+2 se profile.holographicControls (v2.6.0) — MgT2e CRB p.186
-// MgT2e CRB p.160
+// MgT2e CRB p.165
 export function rollInitiative(pilotSkill, thrust, tacticsEffect = 0, diceOverride = null, holographicControlsDM = 0) {
   const roll = diceOverride ?? roll2D6()
   const total = roll.total + pilotSkill + thrust + tacticsEffect + holographicControlsDM
@@ -1695,7 +1695,7 @@ Feature batch da feedback post-lancio v2.0 (Reddit/CotI), più un bug RAW e un f
 | --- | ------- | --------------- |
 | REQ-08 | Point Defence spostato all'impatto (CRB p.173) | `MissileImpactModal.jsx` — sezione PD prima del tiro d'attacco; `AttackModal.jsx` — rimossa sezione PD da ReactionsPanel per missili |
 | REQ-11 | AUTO-ASSIGN in CrewAssignmentModal | `CrewAssignmentModal.jsx` — bottone che assegna il membro con skill più alta per ogni ruolo e slot gunner; supporto mono-crew |
-| REQ-13 | Initiative carry-over round 2+ (CRB p.160) | `battleStore.js` — `buildNextRoundState` controlla `shipAddedThisRound`; `HUD.jsx` — bottone ↺ GM override in fase Acceleration. **Nota RAW gap:** il CRB non specifica il comportamento per navi aggiunte mid-battle; house rule applicata: full re-roll il round successivo. |
+| REQ-13 | Initiative carry-over round 2+ (CRB p.165) | `battleStore.js` — `buildNextRoundState` controlla `shipAddedThisRound`; `HUD.jsx` — bottone ↺ GM override in fase Acceleration. **Nota RAW gap:** il CRB non specifica il comportamento per navi aggiunte mid-battle; house rule applicata: full re-roll il round successivo. |
 
 **Fix contestuale:**
 
@@ -1900,7 +1900,7 @@ Se `thrustRemaining` raggiunge 0 prima dell'impatto, il salvo manca. Se raggiung
 - **Armour Critical automatizzato** (CRB p.170): aggiunto `armour_reduce_fixed/d3/xd` mechanic codes in `criticalHits.js`. Nuova action `reduceArmour` in `battleStore.js`. `AttackCriticalStep` gestisce roll extra (D3: `ceil(D6/2)`, XD: sum dice) e applica riduzione all'armatura del target via store.
 - **Point Defense multi-torretta** (CRB p.173): `ReactionsPanel` in `AttackModal` ora mostra risultato + roll section in parallelo finché `pdTurrets.length > 0`. `handlePdRoll` resetta `pdTurretSlot` a `null` dopo ogni roll (non al turret corrente). `key` su `DiceInput` forza reset tra roll consecutivi.
 - **EW Counter Missile su missili in volo** (CRB p.173): `ewAppliedThisRound` aggiunto ai missili al lancio via `launchMissile`, resettato in `buildNextRoundState` (entrambi gli array). `applyMissileEW` cerca prima `pendingMissileImpacts` poi `missiles`. ActionModal salvo selector: lista unificata `[...missiles, ...pendingMissileImpacts]` con badge `⚡ impact` per i pending.
-- **Initiative breakdown visibile** (CRB p.160): `rollAllInitiative` salva `initiativeBreakdown: { roll, pilotSkill, thrust, tacticsEffect }` per nave. `InitiativeModal` post-confirm mostra riga dettaglio con badge verde Tactics se ≠ 0.
+- **Initiative breakdown visibile** (CRB p.165): `rollAllInitiative` salva `initiativeBreakdown: { roll, pilotSkill, thrust, tacticsEffect }` per nave. `InitiativeModal` post-confirm mostra riga dettaglio con badge verde Tactics se ≠ 0.
 - **Thrust delta persistente** (TC p.172): `addShip` aggiunge `lastThrustDelta: {q:0,r:0}`. `applyShipThrust` salva il delta applicato. `ThrustModal` lazy-inizializza da `ship.lastThrustDelta`.
 - **`basicBandPool` in autosave**: era incluso in undo/redo e JSON export/import ma mancava in `useAutosave.js`. Aggiunto a `extractBattleSnapshot`, `hasSignificantChange` e restore `setState`.
 - 834 test (invariato).

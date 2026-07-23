@@ -287,7 +287,7 @@ export function HelpScreen({ onBack } = {}) {
         {/* INITIATIVE */}
         <Section id="initiative" title="Initiative Phase">
           <p>Initiative determines the acting order for Acceleration, Attack, and Actions phases.</p>
-          <p>Formula: <span className="text-slate-200">2D6 + Pilot skill + current Thrust rating + Tactics effect [+2 Holographic Controls]</span> (MgT2e CRB p.160, p.186).</p>
+          <p>Formula: <span className="text-slate-200">2D6 + Pilot skill + current Thrust rating + Tactics effect [+2 Holographic Controls]</span> (MgT2e CRB p.165, p.186).</p>
 
           <Sub title="ROLLING INITIATIVE">
             <p>Right-click any hex → <span className="text-slate-200">Roll Initiative</span>. The modal shows all ships.</p>
@@ -306,7 +306,7 @@ export function HelpScreen({ onBack } = {}) {
             <p>If the Captain uses <span className="text-slate-200">Improve Initiative</span> in the Actions phase of round N, the bonus takes effect at the <span className="text-slate-200">start of round N+1</span> — the acting order is re-sorted before anyone acts. The bonus lasts exactly 1 round and is removed automatically at the start of round N+2. The Phase Tracker shows an <span className="text-amber-400">↑ini</span> badge on ships whose bonus is active.</p>
             <p><span className="text-slate-200">Click a ship name</span> in the Phase Tracker to pan the map and center on that token. Useful when tracking multiple ships across a large hex grid.</p>
           </Sub>
-          <Sub title="INITIATIVE CARRY-OVER (CRB p.160)">
+          <Sub title="INITIATIVE CARRY-OVER (CRB p.165)">
             <p>Initiative is rolled <span className="text-slate-200">once</span> at the start of combat. From round 2 onward the order is carried over automatically — the phase advances directly to Acceleration with no re-roll.</p>
             <p><span className="text-amber-400/80">RAW gap:</span> The CRB has no rule for ships joining mid-battle. House rule: adding a ship mid-battle triggers a full re-roll the next round so the new ship rolls with everyone else.</p>
             <p>A <span className="text-slate-200">↺</span> button appears in the HUD during Acceleration (round 2+). Click it to force an initiative re-roll immediately — useful to include a new ship or when the GM decides a re-roll is appropriate.</p>

@@ -135,7 +135,7 @@ export function HUD() {
         <span className="text-(--neon-cyan) font-mono font-bold text-lg leading-none">{round}</span>
         <span className="text-slate-400 text-xs">│</span>
         <span className="text-slate-200 font-display text-xs tracking-widest">{phaseLabel}</span>
-        {/* GM override: re-roll initiative when it was auto-skipped (CRB p.160, REQ-13) */}
+        {/* GM override: re-roll initiative when it was auto-skipped (CRB p.165, REQ-13) */}
         {phase === 'acceleration' && round > 1 && (
           <button
             onClick={forceInitiativePhase}

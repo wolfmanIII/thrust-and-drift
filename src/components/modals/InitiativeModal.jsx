@@ -2,7 +2,7 @@
  * InitiativeModal — roll initiative for all ships.
  * Player ships: manual dice entry. NPC ships: auto-rolled on confirm.
  * Tactics(naval) check is optional — Effect added to initiative if entered.
- * // MgT2e CRB p.160 — Initiative
+ * // MgT2e CRB p.165 — Initiative
  */
 
 import { useState } from 'react'
@@ -41,7 +41,7 @@ export function InitiativeModal() {
   const setShipDice    = (shipId, dice) => setPlayerDice((prev) => ({ ...prev, [shipId]: dice }))
   const setShipTactics = (shipId, dice) => setTacticsDice((prev) => ({ ...prev, [shipId]: dice }))
 
-  /** Tactics Effect = 2D6 + tactics skill − 8 (CRB p.160). */
+  /** Tactics Effect = 2D6 + tactics skill − 8 (CRB p.165). */
   const tacticsEffect = (ship) => {
     const dice = tacticsDice[ship.id]
     if (!dice) return 0
@@ -84,7 +84,7 @@ export function InitiativeModal() {
     <Modal title="Initiative Roll" onClose={closeModal}>
       <div className="space-y-4">
         <p className="text-slate-400 font-mono text-xs">
-          Formula: 2D6 + Pilot + Thrust [+ Tactics Effect] [+2 Holo Controls] // MgT2e CRB p.160, p.186
+          Formula: 2D6 + Pilot + Thrust [+ Tactics Effect] [+2 Holo Controls] // MgT2e CRB p.165, p.186
         </p>
 
         {!confirmed ? (

@@ -12,7 +12,7 @@ import { hexDistance, hexAdd } from './hex.js'
 /**
  * Roll initiative for a ship.
  * Formula: 2D6 + Pilot skill + Ship Thrust [+ Tactics(naval) effect] [+ Holographic Controls DM+2]
- * // MgT2e CRB p.160, p.186 (Holographic Controls bridge option)
+ * // MgT2e CRB p.165, p.186 (Holographic Controls bridge option)
  * @param {number} pilotSkill
  * @param {number} thrust
  * @param {number} [tacticsEffect=0]  Effect of prior Tactics(naval) check

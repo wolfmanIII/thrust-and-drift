@@ -340,7 +340,7 @@ describe('rollAttack', () => {
 })
 
 // === ROLL INITIATIVE ===
-// // MgT2e CRB p.160
+// // MgT2e CRB p.165
 
 describe('rollInitiative', () => {
   beforeEach(() => vi.spyOn(Math, 'random').mockReturnValue(0.5))

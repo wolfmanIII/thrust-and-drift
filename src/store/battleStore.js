@@ -196,7 +196,7 @@ function buildNextRoundState(s) {
       })
     : s.initiativeOrder
 
-  // CRB p.160: initiative rolled once at combat start. CRB has no rule for mid-battle additions
+  // CRB p.165: initiative rolled once at combat start. CRB has no rule for mid-battle additions
   // (RAW gap). House rule per REQ-13: if a ship was added mid-battle, trigger a full re-roll
   // so all ships roll together; GM may also force it at any time via ↺ (forceInitiativePhase).
   const skipInitiative = s.round >= 1 && !s.shipAddedThisRound && newInitiativeOrder.length > 0
@@ -536,7 +536,7 @@ const useBattleStore = create((set, get) => {
       ships: [...s.ships, instance],
       rangeBands: { ...s.rangeBands, ...newRangeBands },
       // If initiative has already been rolled this battle, append the new ship at the end
-      // so it can act this round (with initiative 0 — last in order). MgT2e CRB p.160.
+      // so it can act this round (with initiative 0 — last in order). MgT2e CRB p.165.
       initiativeOrder: s.initiativeOrder.length > 0
         ? [...s.initiativeOrder, instance.id]
         : s.initiativeOrder,

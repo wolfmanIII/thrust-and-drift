@@ -260,9 +260,9 @@ Initiative determines the acting order for the Acceleration, Attack, and
 Actions phases.
 
 **Formula:** `2D6 + Pilot skill + current Thrust rating + Tactics effect [+2 Holographic Controls]`
-*(MgT2e CRB p. 160, p.186)*
+*(MgT2e CRB p.165, p.186)*
 
-**Initiative is rolled once** at the start of combat *(CRB p.160)*. From round 2 onward the initiative order is carried over and the phase advances directly to Acceleration — no re-roll.
+**Initiative is rolled once** at the start of combat *(CRB p.165)*. From round 2 onward the initiative order is carried over and the phase advances directly to Acceleration — no re-roll.
 
 > **RAW gap — new ship joining mid-battle:** the CRB has no explicit rule for this case. Thrust & Drift applies a house rule: adding a ship mid-battle flags the next round to open the Initiative phase, so all ships re-roll together and the new ship is included. GM may bypass this by using ↺ (see below) or by simply noting the new ship acts last until the next re-roll.
 
