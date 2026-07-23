@@ -131,8 +131,10 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   // DM-2 for torpedo attacks against ships smaller than 2,000 tons — HG p.39
   const torpedoSmallShipDM = (weaponKey === 'Torpedo' && (target?.profile.tonnage ?? 0) < 2000) ? -2 : 0
 
-  // DM-2/-4 for bay weapons vs small targets — HG p.31 (excludes Missile/Torpedo Bay, not yet implemented)
-  const bayWeaponSmallShipDMValue = bayWeaponSmallShipDM(weapon?.mount === 'bay', target?.profile.tonnage ?? 0)
+  // DM-2/-4 for bay weapons vs small targets — HG p.31. Missile/Torpedo Bay are RAW-excluded;
+  // not yet implemented, but the MISSILE_WEAPONS check makes that exclusion automatic once they are.
+  const isBayWeapon = weapon?.mount === 'bay' && !MISSILE_WEAPONS.has(weaponKey)
+  const bayWeaponSmallShipDMValue = bayWeaponSmallShipDM(isBayWeapon, target?.profile.tonnage ?? 0)
 
   const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM + obstacleCoverDM + aidGunnersDM + torpedoSmallShipDM + bayWeaponSmallShipDMValue
   const outOfRange  = weapon ? isOutOfRange(weapon.maxRange, rangeBand) : false

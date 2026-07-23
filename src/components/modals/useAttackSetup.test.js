@@ -23,8 +23,8 @@ function addAttacker(turrets, faction = 'players') {
   return useBattleStore.getState().ships[0]
 }
 
-function addTarget() {
-  const profile = { id: 'profile-tgt', name: 'Target', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] }
+function addTarget(tonnage = 100) {
+  const profile = { id: 'profile-tgt', name: 'Target', hull: 10, armor: 0, thrust: 4, tonnage, turrets: [], crew: [] }
   useBattleStore.getState().addShip(profile, { q: 5, r: 0 }, 'npc', '#f00')
   return useBattleStore.getState().ships.at(-1)
 }
@@ -270,44 +270,38 @@ describe('useAttackSetup — torpedoSmallShipDM (#20 Bug 3)', () => {
 // HG p.31 — all bay weapons suffer DM-2 vs targets ≤2,000t, DM-4 vs targets ≤100t.
 // Inclusive thresholds, unlike torpedoSmallShipDM's exclusive "< 2,000 tons".
 
-function addTargetWithTonnage(tonnage) {
-  const profile = { id: 'profile-tgt', name: 'Target', hull: 20, armor: 0, thrust: 4, tonnage, turrets: [], crew: [] }
-  useBattleStore.getState().addShip(profile, { q: 5, r: 0 }, 'npc', '#f00')
-  return useBattleStore.getState().ships.at(-1)
-}
-
 describe('useAttackSetup — bayWeaponSmallShipDM (#23)', () => {
   it('DM-4 when target is exactly 100 tons (inclusive threshold)', () => {
     const att = addAttacker([{ slot: 1, weapons: ['Fusion Gun Bay (Small)'] }])
-    const tgt = addTargetWithTonnage(100)
+    const tgt = addTarget(100)
     const { result } = renderHook(() => useAttackSetup(att.id, tgt.id, 'Fusion Gun Bay (Small)', null, 1))
     expect(result.current.dmBreakdown.bayWeaponSmallShipDM).toBe(-4)
   })
 
   it('DM-2 when target is exactly 2,000 tons (inclusive threshold)', () => {
     const att = addAttacker([{ slot: 1, weapons: ['Railgun Bay (Medium)'] }])
-    const tgt = addTargetWithTonnage(2000)
+    const tgt = addTarget(2000)
     const { result } = renderHook(() => useAttackSetup(att.id, tgt.id, 'Railgun Bay (Medium)', null, 1))
     expect(result.current.dmBreakdown.bayWeaponSmallShipDM).toBe(-2)
   })
 
   it('DM 0 when target is above 2,000 tons', () => {
     const att = addAttacker([{ slot: 1, weapons: ['Particle Beam Bay (Large)'] }])
-    const tgt = addTargetWithTonnage(10000)
+    const tgt = addTarget(10000)
     const { result } = renderHook(() => useAttackSetup(att.id, tgt.id, 'Particle Beam Bay (Large)', null, 1))
     expect(result.current.dmBreakdown.bayWeaponSmallShipDM).toBe(0)
   })
 
   it('DM 0 for a non-bay weapon regardless of target tonnage', () => {
     const att = addAttacker([{ slot: 1, weapons: ['Pulse Laser'] }])
-    const tgt = addTargetWithTonnage(50)
+    const tgt = addTarget(50)
     const { result } = renderHook(() => useAttackSetup(att.id, tgt.id, 'Pulse Laser', null, 1))
     expect(result.current.dmBreakdown.bayWeaponSmallShipDM).toBe(0)
   })
 
   it('applies retroactively to the pre-existing Ion Cannon Bay (also mount: bay)', () => {
     const att = addAttacker([{ slot: 1, weapons: ['Ion Cannon Bay (Small)'] }])
-    const tgt = addTargetWithTonnage(800)
+    const tgt = addTarget(800)
     const { result } = renderHook(() => useAttackSetup(att.id, tgt.id, 'Ion Cannon Bay (Small)', null, 1))
     expect(result.current.dmBreakdown.bayWeaponSmallShipDM).toBe(-2)
   })
@@ -316,7 +310,7 @@ describe('useAttackSetup — bayWeaponSmallShipDM (#23)', () => {
     // 100t target at distance 5 (Medium, rangeDM=0) — no other active DMs
     // totalDM = gunner(0) + weapon(0) + range(0) + size(0) + bayWeaponSmall(-4) = -4
     const att = addAttacker([{ slot: 1, weapons: ['Meson Gun Bay (Small)'] }])
-    const tgt = addTargetWithTonnage(100)
+    const tgt = addTarget(100)
     const { result } = renderHook(() => useAttackSetup(att.id, tgt.id, 'Meson Gun Bay (Small)', null, 1))
     const { bayWeaponSmallShipDM, totalDM } = result.current.dmBreakdown
     expect(bayWeaponSmallShipDM).toBe(-4)
