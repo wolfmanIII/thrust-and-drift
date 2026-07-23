@@ -17,6 +17,7 @@
 
 import { test, expect } from '@playwright/test'
 import { hexToPixel, pixelToHex } from '../src/utils/hex.js'
+import { startNewBattle, placeNpcShipByProfile, rollInitiativeAt, drainActors } from './helpers.js'
 
 const HEX_SIZE = 32 // useCanvasRenderer.js HEX_SIZE, zoom 1.0 at default "Tactical (2)" level
 const SHIP_NAME = 'QA Test Ship T7'
@@ -110,5 +111,83 @@ test.describe('Thrust-7 ship — no hard cap at 6 (CotI hypothesis, #30)', () =>
     // The log line must show a magnitude-7 delta (Δq=0, Δr=-7), never -6.
     await expect(page.getByText(/Thrust Δ\(0,-7\)/)).toBeVisible()
     await expect(page.getByText(/Thrust Δ\(0,-6\)/)).not.toBeVisible()
+  })
+})
+
+/**
+ * E2E tests — Overload M-Drive cumulative DM-2 penalty (CRB p.171, CotI report, #32).
+ * The check must apply DM−2 per prior attempt this battle — 2nd attempt DM−2,
+ * 3rd DM−4 — with no in-app reset. Uses "Patrol Cruiser" (seeded profile,
+ * Engineer Olya Fennek: 2) placed as NPC, so the check auto-rolls on EXECUTE ACTION.
+ */
+
+// Movement phase sets canvas pointer-events:none for MOVEMENT_ANIM_DURATION_MS (2000ms,
+// uiStore.js) while ship tokens animate. Racing through phase clicks faster than that
+// leaves the canvas unresponsive to the right-click that opens Actions… — wait it out.
+const MOVEMENT_ANIM_MS = 2100
+
+/** Setup → ... → this round's Actions phase, for a single freshly placed NPC ship. */
+async function advanceToActions(page, box) {
+  await page.getByRole('button', { name: /NEXT PHASE/i }).click() // setup → initiative
+  await rollInitiativeAt(page, box)
+  await page.getByRole('button', { name: /NEXT PHASE/i }).click() // → acceleration
+  await drainActors(page)
+  await page.getByRole('button', { name: /NEXT PHASE/i }).click() // → movement
+  await page.waitForTimeout(MOVEMENT_ANIM_MS)
+  await page.getByRole('button', { name: /NEXT PHASE/i }).click() // → attack
+  await drainActors(page)
+  await page.getByRole('button', { name: /NEXT PHASE/i }).click() // → actions
+}
+
+/** End the current round and advance to the next round's Actions phase (REQ-13 auto-skips Initiative). */
+async function advanceToNextRoundActions(page) {
+  await page.getByRole('button', { name: /NEXT PHASE/i }).click() // actions → end
+  await page.getByRole('button', { name: /NEXT PHASE/i }).click() // end → next round acceleration
+  await drainActors(page)
+  await page.getByRole('button', { name: /NEXT PHASE/i }).click() // → movement
+  await page.waitForTimeout(MOVEMENT_ANIM_MS)
+  await page.getByRole('button', { name: /NEXT PHASE/i }).click() // → attack
+  await drainActors(page)
+  await page.getByRole('button', { name: /NEXT PHASE/i }).click() // → actions
+}
+
+/** Open Crew Action… on the ship at (cx, cy), select the named crew member, then Overload M-Drive. */
+async function openOverloadDrive(page, cx, cy, crewName) {
+  await page.mouse.click(cx, cy, { button: 'right' })
+  await page.getByText(/Crew Action/).click()
+  await page.getByText(crewName, { exact: false }).first().click()
+  await page.getByText('Overload M-Drive').click()
+}
+
+test.describe('Overload M-Drive — cumulative DM-2 penalty (CRB p.171, #32)', () => {
+  test('first attempt this battle shows no cumulative penalty warning', async ({ page }) => {
+    await startNewBattle(page)
+    const { box, cx, cy } = await placeNpcShipByProfile(page, 'Patrol Cruiser')
+    await advanceToActions(page, box)
+
+    await openOverloadDrive(page, cx, cy, 'Olya Fennek')
+    await expect(page.getByText(/Cumulative penalty/)).not.toBeVisible()
+
+    await page.getByRole('button', { name: /EXECUTE ACTION/i }).click()
+    await expect(page.getByText(/SUCCESS|FAILED/)).toBeVisible()
+  })
+
+  test('second attempt in a later round shows the DM−2 warning and log reflects it', async ({ page }) => {
+    await startNewBattle(page)
+    const { box, cx, cy } = await placeNpcShipByProfile(page, 'Patrol Cruiser')
+    await advanceToActions(page, box)
+
+    // Round 1 — first attempt. Closing the modal doesn't mark the actor as done —
+    // drain it via NEXT → before the Actions phase (and the round) can advance.
+    await openOverloadDrive(page, cx, cy, 'Olya Fennek')
+    await page.getByRole('button', { name: /EXECUTE ACTION/i }).click()
+    await page.getByText('CLOSE', { exact: true }).click()
+    await drainActors(page)
+
+    await advanceToNextRoundActions(page)
+
+    // Round 2 — second attempt this battle: warning must show the cumulative penalty.
+    await openOverloadDrive(page, cx, cy, 'Olya Fennek')
+    await expect(page.getByText(/Cumulative penalty -2 — attempt #2/)).toBeVisible()
   })
 })

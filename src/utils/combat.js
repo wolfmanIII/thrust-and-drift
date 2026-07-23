@@ -379,3 +379,13 @@ export function taskChainDM(effect) {
   if (effect <= 5)  return 2
   return 3
 }
+
+/**
+ * Cumulative DM applied to an Overload M-Drive check for prior attempts this battle.
+ * // MgT2e CRB p.171 — "cumulative DM–2 each time it is attempted after the first"
+ * @param {number} priorAttempts  Number of prior attempts this battle (0 for the first)
+ * @returns {number}  DM applied to the check (0 or negative)
+ */
+export function overloadDrivePenaltyDM(priorAttempts) {
+  return priorAttempts > 0 ? -2 * priorAttempts : 0
+}

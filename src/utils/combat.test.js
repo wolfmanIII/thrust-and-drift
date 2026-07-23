@@ -28,6 +28,7 @@ import {
   computeMissileImpactDamage,
   computeIonThrustEffect,
   taskChainDM,
+  overloadDrivePenaltyDM,
 } from './combat.js'
 
 // === RANGE DMs ===
@@ -735,6 +736,20 @@ describe('taskChainDM', () => {
 
   it.each(CASES)('effect %i → DM %i', (effect, dm) => {
     expect(taskChainDM(effect)).toBe(dm)
+  })
+})
+
+// === overloadDrivePenaltyDM ===
+// // MgT2e CRB p.171 — cumulative DM−2 per prior Overload M-Drive attempt
+
+describe('overloadDrivePenaltyDM', () => {
+  it.each([
+    [0,   0],
+    [1,  -2],
+    [2,  -4],
+    [3,  -6],
+  ])('%i prior attempts → DM %i', (priorAttempts, dm) => {
+    expect(overloadDrivePenaltyDM(priorAttempts)).toBe(dm)
   })
 })
 

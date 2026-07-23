@@ -13,7 +13,7 @@ import { CREW_ACTIONS } from '../../data/crewActions.js'
 import { migrateCrew, CREW_SKILLS } from '../../utils/crew.js'
 import { DiceInput } from '../forms/DiceInput.jsx'
 import { getObstacleAt } from '../../utils/obstacles.js'
-import { taskChainDM } from '../../utils/combat.js'
+import { taskChainDM, overloadDrivePenaltyDM } from '../../utils/combat.js'
 
 /**
  * Apply the mechanical effect of a successful action to the battle state.
@@ -196,7 +196,7 @@ export function ActionModal() {
   // Cumulative DM−2 per prior attempt (CRB p.171) — no in-app reset; RAW requires
   // maintenance (Engineer m-drive, 1D hours) outside the combat round.
   const isOverloadDrive   = selectedAction?.id === 'overload_drive'
-  const overloadPenaltyDM = isOverloadDrive ? -2 * (ship.overloadDriveAttempts ?? 0) : 0
+  const overloadPenaltyDM = isOverloadDrive ? overloadDrivePenaltyDM(ship.overloadDriveAttempts ?? 0) : 0
 
   const handleRoll = () => {
     if (!selectedAction) return
