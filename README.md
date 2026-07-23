@@ -168,7 +168,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1339 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1353 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 
@@ -177,7 +177,7 @@ npm run e2e               # headless
 npm run e2e:headed        # visible browser
 ```
 
-65 e2e tests in `e2e/` covering discrete zoom levels, the PDF battle report flow, crew skill input constraints, the Hardpoint budget check, and assorted fix/feature regressions.
+67 e2e tests in `e2e/` covering discrete zoom levels, the PDF battle report flow, crew skill input constraints, the Hardpoint budget check, and assorted fix/feature regressions.
 
 ---
 

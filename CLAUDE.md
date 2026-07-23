@@ -102,3 +102,10 @@ src/
 - Code: JSDoc on hooks and complex functions (English, technical tone).
 - Project: keep `doc/` updated in Italian Markdown.
 - Game rules references: always cite source (e.g. `// MgT2e CRB p.164`, `// Traveller Companion p.172`).
+
+## AVAILABLE TOOLING — CodeGraph & claude-mem
+
+This project has both indexed. Use them before falling back to grep/find or unaided recall:
+
+- **CodeGraph** (`.codegraph/`): reach for it BEFORE grep/find or reading files to locate or understand code. `codegraph_explore` (MCP) or `codegraph explore "<symbols/question>"` (shell) returns verbatim, line-numbered source plus call paths between symbols in one call.
+- **claude-mem**: cross-session memory of past work on this repo. Use `mem-search`/`smart-search`/`timeline` style lookups when checking whether something was already solved, how a past bug/feature was handled, or for session history context — before re-deriving it from scratch.
