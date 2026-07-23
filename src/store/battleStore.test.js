@@ -1520,6 +1520,47 @@ describe('overloadDrive', () => {
   })
 })
 
+// Cumulative DM−2 per prior attempt (CRB p.171). No in-app reset — RAW requires
+// offline maintenance (Engineer m-drive, 1D hours).
+describe('recordOverloadDriveAttempt', () => {
+  it('starts at 0 attempts for a new ship', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    expect(useBattleStore.getState().ships[0].overloadDriveAttempts).toBe(0)
+  })
+
+  it('increments overloadDriveAttempts by 1 per call', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().recordOverloadDriveAttempt(id)
+    expect(useBattleStore.getState().ships[0].overloadDriveAttempts).toBe(1)
+    useBattleStore.getState().recordOverloadDriveAttempt(id)
+    expect(useBattleStore.getState().ships[0].overloadDriveAttempts).toBe(2)
+  })
+
+  it('is isolated per ship', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile(), { q: 1, r: 0 }, 'players', '#fff')
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().recordOverloadDriveAttempt(a.id)
+    useBattleStore.getState().recordOverloadDriveAttempt(a.id)
+    expect(useBattleStore.getState().ships.find((s) => s.id === a.id).overloadDriveAttempts).toBe(2)
+    expect(useBattleStore.getState().ships.find((s) => s.id === b.id).overloadDriveAttempts).toBe(0)
+  })
+
+  it('does not reset across round boundaries', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().recordOverloadDriveAttempt(id)
+    useBattleStore.getState().recordOverloadDriveAttempt(id)
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].overloadDriveAttempts).toBe(2)
+  })
+
+  it('no-op for a ghost ship id', () => {
+    expect(() => useBattleStore.getState().recordOverloadDriveAttempt('ghost')).not.toThrow()
+  })
+})
+
 describe('reloadTurret', () => {
   it('decrements turretsNeedingReload', () => {
     useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')

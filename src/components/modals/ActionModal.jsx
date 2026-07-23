@@ -106,6 +106,7 @@ export function ActionModal() {
   const missiles               = useBattleStore((s) => s.missiles)
   const addLogEntry            = useBattleStore((s) => s.addLogEntry)
   const markCrewMemberUsed     = useBattleStore((s) => s.markCrewMemberUsed)
+  const recordOverloadDriveAttempt = useBattleStore((s) => s.recordOverloadDriveAttempt)
   const obstacles              = useBattleStore((s) => s.obstacles)
   const obstaclesEnabled       = useBattleStore((s) => s.obstaclesEnabled)
   const phase                  = useBattleStore((s) => s.phase)
@@ -192,6 +193,11 @@ export function ActionModal() {
     ? repairDifficulty(selectedCrit.severity)
     : selectedAction?.difficulty
 
+  // Cumulative DM−2 per prior attempt (CRB p.171) — no in-app reset; RAW requires
+  // maintenance (Engineer m-drive, 1D hours) outside the combat round.
+  const isOverloadDrive   = selectedAction?.id === 'overload_drive'
+  const overloadPenaltyDM = isOverloadDrive ? -2 * (ship.overloadDriveAttempts ?? 0) : 0
+
   const handleRoll = () => {
     if (!selectedAction) return
     if (selectedAction.requiresTarget && !targetShipId) return
@@ -202,10 +208,11 @@ export function ActionModal() {
       result = { display: 'Automatic', success: true, effect: 0, finalTotal: 8 }
     } else {
       const roll = isPlayer ? manualDice : roll2D6()
-      const dm   = skillOverride ?? selectedAction.skillLevel
+      const dm   = (skillOverride ?? selectedAction.skillLevel) + overloadPenaltyDM
       result = formatCheckResult(roll, dm, effectiveDifficulty)
     }
 
+    if (isOverloadDrive) recordOverloadDriveAttempt(ship.id)
     if (selectedMember) markCrewMemberUsed(ship.id, selectedMember.id)
     setRollResult(result)
     addLogEntry(
@@ -497,6 +504,13 @@ export function ActionModal() {
                   </button>
                 )}
               </div>
+            )}
+
+            {/* Overload M-Drive cumulative penalty — CRB p.171, no in-app reset (requires offline maintenance) */}
+            {isOverloadDrive && overloadPenaltyDM !== 0 && (
+              <p className="text-amber-400/80 font-mono text-xs">
+                ⚠ Cumulative penalty {overloadPenaltyDM} — attempt #{(ship.overloadDriveAttempts ?? 0) + 1} this battle (CRB p.171: cleared only by offline maintenance)
+              </p>
             )}
 
             {/* Player manual dice entry — shown when an action requiring a roll is selected */}

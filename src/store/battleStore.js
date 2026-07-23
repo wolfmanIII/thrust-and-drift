@@ -506,6 +506,7 @@ const useBattleStore = create((set, get) => {
       sensorLockedBy: null,
       sensorLockDM: 0,
       turretsNeedingReload: 0,
+      overloadDriveAttempts: 0,
       missileAmmoTotal: countMissileAmmoCapacity(profile),
       torpedoAmmoTotal: countTorpedoAmmoCapacity(profile),
       sandAmmoTotal: countSandcasters(profile),
@@ -1713,6 +1714,24 @@ const useBattleStore = create((set, get) => {
           message: `${ship.name}: M-Drive overloaded — +${applied} Thrust next round.`,
           shipId,
         })],
+      }))
+    },
+  ),
+
+  /**
+   * Record an Overload M-Drive attempt (success or failure) so the next attempt's
+   * check suffers a cumulative DM−2. No in-app way to clear it — RAW requires
+   * performing maintenance (Engineer (m-drive), 1D hours) outside the combat round.
+   * // MgT2e CRB p.171
+   * @param {string} shipId
+   */
+  recordOverloadDriveAttempt: wh(
+    (shipId) => !!get().ships.find((s) => s.id === shipId),
+    (shipId) => {
+      set((s) => ({
+        ships: s.ships.map((sh) =>
+          sh.id === shipId ? { ...sh, overloadDriveAttempts: (sh.overloadDriveAttempts ?? 0) + 1 } : sh
+        ),
       }))
     },
   ),

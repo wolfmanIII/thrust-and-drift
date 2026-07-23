@@ -244,3 +244,96 @@ describe('ActionModal — Aid Gunners (#16)', () => {
     expect(useBattleStore.getState().ships[0].aidGunnersDM).toBe(3)
   })
 })
+
+// ── Overload M-Drive cumulative penalty (CRB p.171, CotI report) ─────────────
+describe('ActionModal — Overload M-Drive cumulative penalty (CRB p.171)', () => {
+  /** NPC ship with a dedicated engineer crew member (no manual dice needed). */
+  function makeEngineerShip(overloadDriveAttempts = 0) {
+    return {
+      id: 'ship-engineer',
+      profile: {
+        name: 'Freighter', hull: 40, armor: 2, thrust: 2, tonnage: 200,
+        turrets: [],
+        crew: [{ id: 'crew-eng', name: 'Chief Voss', skills: { engineer: 2 } }],
+      },
+      faction: 'npc',
+      hullCurrent: 40,
+      color: '#0f0',
+      firedTurrets:          [],
+      evasiveThrust:         0,
+      criticalHits:          [],
+      thrustUsedThisRound:   0,
+      thrustBonusNextRound:  0,
+      usedCrewMembers:       [],
+      crewAssignments:       null,
+      overloadDriveAttempts,
+    }
+  }
+
+  afterEach(() => vi.restoreAllMocks())
+
+  // Math.random=0.5 → both dice = 4, 2D6 total = 8 (fixed across all attempts below).
+  // Difficulty 10, engineer skill +2.
+
+  it('first attempt (0 prior): no penalty — dm=+2, total=10, succeeds', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ ships: [makeEngineerShip(0)], phase: 'actions' })
+    useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-engineer' } })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Chief Voss'))
+    fireEvent.click(screen.getByText('Overload M-Drive'))
+    expect(screen.queryByText(/Cumulative penalty/)).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/SUCCESS — Effect \+0/)).toBeInTheDocument()
+    expect(useBattleStore.getState().ships[0].overloadDriveAttempts).toBe(1)
+  })
+
+  it('second attempt (1 prior): shows warning, dm=+2-2=0, total=8, fails', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ ships: [makeEngineerShip(1)], phase: 'actions' })
+    useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-engineer' } })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Chief Voss'))
+    fireEvent.click(screen.getByText('Overload M-Drive'))
+    expect(screen.getByText(/Cumulative penalty -2 — attempt #2/)).toBeInTheDocument()
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/FAILED — Effect -2/)).toBeInTheDocument()
+    expect(useBattleStore.getState().ships[0].overloadDriveAttempts).toBe(2)
+  })
+
+  it('third attempt (2 prior): dm=+2-4=-2, total=6, fails harder', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ ships: [makeEngineerShip(2)], phase: 'actions' })
+    useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-engineer' } })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Chief Voss'))
+    fireEvent.click(screen.getByText('Overload M-Drive'))
+    expect(screen.getByText(/Cumulative penalty -4 — attempt #3/)).toBeInTheDocument()
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/FAILED — Effect -4/)).toBeInTheDocument()
+    expect(useBattleStore.getState().ships[0].overloadDriveAttempts).toBe(3)
+  })
+
+  it('attempt counter increments on failure too, not only on success', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ ships: [makeEngineerShip(1)], phase: 'actions' })
+    useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-engineer' } })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Chief Voss'))
+    fireEvent.click(screen.getByText('Overload M-Drive'))
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/FAILED/)).toBeInTheDocument()
+    expect(useBattleStore.getState().ships[0].overloadDriveAttempts).toBe(2)
+  })
+
+  it('does not reset across a round boundary', () => {
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ ships: [makeEngineerShip(3)], phase: 'actions' })
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].overloadDriveAttempts).toBe(3)
+  })
+})
