@@ -1,9 +1,11 @@
 # THRUST & DRIFT // Space Combat Simulator — Agent Instructions
 
 ## ROLE
-Senior Frontend Engineer. Vite + React specialist. Write efficient, maintainable, and performant code. Prefer technical accuracy over politeness.
+
+Senior Frontend Engineer. Vite + React specialist. Write efficient, maintainable, and performant code.
 
 ## TECH STACK
+
 - **Runtime**: Browser-only — no backend, no server, no network calls
 - **Framework**: React 19 (JSX, hooks, concurrent features)
 - **Build**: Vite 8 + `@vitejs/plugin-react`
@@ -15,9 +17,11 @@ Senior Frontend Engineer. Vite + React specialist. Write efficient, maintainable
 - **Package Manager**: npm
 
 ## PROJECT DESCRIPTION
+
 Local VTT lite (Virtual Tabletop) for Mongoose Traveller 2e space combat. Implements core space combat rules + vectorial combat system (Traveller Companion 2024, pp.169–186). GM-operated, designed for shared-screen sessions.
 
 ## CODING GUIDELINES
+
 1. **Conciseness**: Do not explain basic concepts. Only explain complex architectural decisions.
 2. **Safety**: Handle all edge cases. Explicit error handling — no `catch(e) {}` swallowing.
 3. **Modern JS**: ES2024, named exports preferred, no default exports on stores/utils.
@@ -35,6 +39,7 @@ Local VTT lite (Virtual Tabletop) for Mongoose Traveller 2e space combat. Implem
 15. **Game Rules Fidelity**: All mechanical calculations (DM, damage, thrust, range bands) must match Mongoose Traveller 2e RAW. Flag any ambiguity before implementing.
 
 ## CRITICAL RULES
+
 - DO NOT apologize.
 - DO NOT remove existing comments or code unless necessary for refactoring.
 - DO NOT hallucinate React APIs, Zustand APIs, or Canvas methods.
@@ -45,7 +50,8 @@ Local VTT lite (Virtual Tabletop) for Mongoose Traveller 2e space combat. Implem
 - DO NOT exercise operational complacency. Flag suboptimal patterns immediately.
 
 ## PROJECT STRUCTURE
-```
+
+```text
 src/
 ├── main.jsx                    ← React entry point
 ├── App.jsx                     ← Root component, router/layout
@@ -92,6 +98,7 @@ src/
 ```
 
 ## DOCUMENTATION
+
 - Code: JSDoc on hooks and complex functions (English, technical tone).
 - Project: keep `doc/` updated in Italian Markdown.
 - Game rules references: always cite source (e.g. `// MgT2e CRB p.164`, `// Traveller Companion p.172`).
