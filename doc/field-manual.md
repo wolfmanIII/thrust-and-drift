@@ -851,7 +851,7 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 | Role | Action | Difficulty | Effect on success |
 | ---- | ------ | ---------- | ----------------- |
 | **Captain** | **Improve Initiative** | 8+ (Leadership) | +Effect added to this ship's initiative at the start of next round (lasts 1 round) *(CRB p.166)* |
-| **Engineer** | **Overload M-Drive** | Difficult 10+ (Engineer) | +1 Thrust (fixed) next round *(CRB p.171)* |
+| **Engineer** | **Overload M-Drive** | Difficult 10+ (Engineer), cumulative DM−2 per prior attempt this battle | +1 Thrust (fixed) next round *(CRB p.171)* |
 | **Engineer** | **Repair System** | Average 8+ (Sev 1–2) / Difficult 10+ (Sev 3–4) / Very Difficult 12+ (Sev 5–6) (Engineer) | Removes 1 critical hit from this ship. The GM selects which critical to repair when multiple are present *(CRB p.167)* |
 | **Gunner** | **Reload Turret** | Automatic | Reloads 1 missile turret; no roll required *(CRB p.167)* |
 | **Sensors** | **Sensor Lock** | 8+ (Electronics) | DM+2 flat to all attacks against the selected target *(CRB p.172)* |
@@ -868,6 +868,14 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 >
 > **NPC ships** resolve all non-automatic rolls automatically when the GM
 > clicks 🎲 EXECUTE ACTION.
+>
+> **Overload M-Drive cumulative penalty** *(CRB p.171)*: each attempt after the
+> first (per ship, for the whole battle) suffers an additional DM−2 — 2nd
+> attempt DM−2, 3rd DM−4, and so on. The Actions modal shows an amber warning
+> with the current penalty and attempt count before rolling. The counter
+> increments whether the check succeeds or fails, and there is **no in-app way
+> to clear it** — RAW requires performing offline maintenance (Engineer
+> (m-drive), 1D hours), which falls outside the scope of a combat round.
 
 ---
 

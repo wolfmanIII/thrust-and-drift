@@ -10,6 +10,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.7.3] — 2026-07-23
+
+### Fixed
+
+- **Overload M-Drive cumulative DM−2 penalty never applied to the roll (#32)** — CRB p.171: "This check suffers a cumulative DM–2 each time it is attempted after the first." `crewActions.js` already described this in the action's text, but the check itself never tracked attempts — `handleRoll` only ever used the engineer skill DM. Added a per-ship `overloadDriveAttempts` counter (`battleStore.js`), incremented on every attempt (success or failure) via a new `recordOverloadDriveAttempt` action; `ActionModal.jsx` applies `-2 × attempts` on top of the skill DM and shows an amber warning with the running penalty before rolling. No in-app way to clear the counter — RAW requires offline maintenance (Engineer m-drive, 1D hours), outside the scope of a combat round; the penalty accumulates for the whole battle by design. HelpScreen also had a separate, pre-existing wrong description of this action (said "8+" instead of "Difficult 10+", "+Effect Thrust" instead of the fixed "+1 Thrust next round", cited CRB p.167 instead of p.171) — corrected. Reported via CotI.
+
+### Docs
+
+- Corrected the Initiative rule citation from **CRB p.160** (Sensors — wrong) to **CRB p.165** (Initiative — verified against the PDF) everywhere it appeared: source comments, tests, README, field-manual, spec doc, and a follow-up correction on GitHub issue #18.
+
+---
+
 ## [2.7.2] — 2026-07-18
 
 ### Fixed

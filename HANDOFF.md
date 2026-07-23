@@ -9,21 +9,30 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.7.2 |
+| **Versione** | 2.7.3 |
 | **Branch** | main |
-| **Test** | 1339 Vitest + 65 Playwright e2e |
-| **Ultimo commit** | fix(thrust): computeClampedDelta undershoots Thrust by 1 hex on 3 of 6 axial directions (#31, v2.7.2) |
+| **Test** | 1349 Vitest + 65 Playwright e2e |
+| **Ultimo commit** | fix(actions): apply cumulative DM-2 penalty for repeated Overload M-Drive attempts (#32, v2.7.3) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.7.2; §10.2 Overload M-Drive corretta, vedi sotto)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31 chiuse automaticamente via `Fixes #N`.
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.7.3; §10.2 Overload M-Drive cumulative penalty + Initiative CRB p.160→p.165, vedi sotto)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32 chiuse automaticamente via `Fixes #N`.
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
+
+### Sessione corrente — Overload M-Drive cumulative penalty + Initiative citation fix (v2.7.3)
+
+Due segnalazioni CotI distinte, entrambe verificate contro i PDF ufficiali prima di intervenire:
+
+1. **Overload M-Drive DM−2 cumulativo mai applicato (#32)** — CRB p.171: *"This check suffers a cumulative DM–2 each time it is attempted after the first."* `crewActions.js` descriveva già la regola nel testo, ma `handleRoll` in `ActionModal.jsx` usava solo lo skill engineer, senza alcun tracking dei tentativi. Aggiunto contatore `overloadDriveAttempts` per nave (`battleStore.js`) e action `recordOverloadDriveAttempt`, incrementata ad ogni tentativo (successo o fallimento). `ActionModal.jsx` applica `-2 × tentativi` sopra la skill DM e mostra un warning ambra col conteggio prima del tiro. **Nessun reset in-app**: la manutenzione RAW richiede 1D ore fuori dal ciclo di combattimento — scelta esplicita dell'utente, penalità cumulativa per tutta la battaglia. Trovato anche un secondo bug doc in `HelpScreen.jsx`: descriveva l'azione con difficoltà "8+" invece di "Difficult 10+", bonus "+Effect" invece di "+1 fisso", citazione CRB p.167 invece di p.171 — corretto insieme. +10 test (`battleStore.test.js`, `ActionModal.test.jsx`).
+2. **Citazione Initiative errata in tutto il codebase (CRB p.160 → p.165)** — verificato che CRB p.160 è la sezione Sensors, non Initiative. La regola vera ("Initiative is rolled once for each ship... 2D + Pilot skill + Thrust score") è a p.165. Corretto in 10 file (codice, test, README, field-manual, spec) più un commento di follow-up sulla issue #18 già pubblicata. Verificato anche il Traveller Companion (pp.169–186): nessuna regola lì sul mid-battle join — il RAW gap resta confermato con la pagina giusta.
+
+### Sessione precedente — Overload M-Drive persistence + computeClampedDelta axial undershoot (v2.7.2)
 
 ### Sessione corrente — Overload M-Drive persistence + computeClampedDelta axial undershoot (v2.7.2)
 
