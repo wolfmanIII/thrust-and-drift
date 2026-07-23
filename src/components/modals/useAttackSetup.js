@@ -7,7 +7,7 @@
 import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS, DEFENSIVE_WEAPONS } from '../../data/weapons.js'
 import { hexDistance, getRangeBand } from '../../utils/hex.js'
-import { getRangeDM, getTargetSizeDM, isOutOfRange } from '../../utils/combat.js'
+import { getRangeDM, getTargetSizeDM, isOutOfRange, bayWeaponSmallShipDM } from '../../utils/combat.js'
 import { getEffectiveSkill } from '../../utils/crew.js'
 import { dogfightAttackDM } from '../../utils/dogfight.js'
 import { getObstacleAt, computeObstacleCoverDM } from '../../utils/obstacles.js'
@@ -37,6 +37,7 @@ import { getObstacleAt, computeObstacleCoverDM } from '../../utils/obstacles.js'
  *     evasiveDM:          number,   // always 0 here; set dynamically by Reactions in AttackModal
  *     sensorLockDM:       number,
  *     torpedoSmallShipDM: number,   // DM-2 vs ships < 2,000 tons (HG p.39); 0 otherwise
+ *     bayWeaponSmallShipDM: number, // DM-2 vs ships ≤2,000t / DM-4 vs ≤100t for bay weapons (HG p.31); 0 otherwise
  *     totalDM:            number,
  *   },
  * }}
@@ -130,7 +131,10 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   // DM-2 for torpedo attacks against ships smaller than 2,000 tons — HG p.39
   const torpedoSmallShipDM = (weaponKey === 'Torpedo' && (target?.profile.tonnage ?? 0) < 2000) ? -2 : 0
 
-  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM + obstacleCoverDM + aidGunnersDM + torpedoSmallShipDM
+  // DM-2/-4 for bay weapons vs small targets — HG p.31 (excludes Missile/Torpedo Bay, not yet implemented)
+  const bayWeaponSmallShipDMValue = bayWeaponSmallShipDM(weapon?.mount === 'bay', target?.profile.tonnage ?? 0)
+
+  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM + obstacleCoverDM + aidGunnersDM + torpedoSmallShipDM + bayWeaponSmallShipDMValue
   const outOfRange  = weapon ? isOutOfRange(weapon.maxRange, rangeBand) : false
 
   return {
@@ -146,6 +150,6 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     outOfRange,
     dogfightTie,
     noPower,
-    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, aidGunnersDM, dogfightDM, obstacleCoverDM, torpedoSmallShipDM, totalDM },
+    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, aidGunnersDM, dogfightDM, obstacleCoverDM, torpedoSmallShipDM, bayWeaponSmallShipDM: bayWeaponSmallShipDMValue, totalDM },
   }
 }

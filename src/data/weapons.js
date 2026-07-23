@@ -17,7 +17,7 @@
  *   - notes:      Short rule clarification
  */
 
-/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'|'Pulse Laser Barbette'|'Beam Laser Barbette'|'Particle Barbette'|'Fusion Barbette'|'Plasma Barbette'|'Railgun Barbette'|'Missile Barbette'|'Torpedo'|'Ion Cannon'|'Ion Cannon Bay (Small)'|'Ion Cannon Bay (Medium)'|'Ion Cannon Bay (Large)'} WeaponType */
+/** @typedef {'Pulse Laser'|'Beam Laser'|'Missile Rack'|'Sandcaster'|'Particle Beam'|'Railgun'|'Fusion Gun'|'Plasma Gun'|'Pulse Laser Barbette'|'Beam Laser Barbette'|'Particle Barbette'|'Fusion Barbette'|'Plasma Barbette'|'Railgun Barbette'|'Missile Barbette'|'Torpedo'|'Ion Cannon'|'Ion Cannon Bay (Small)'|'Ion Cannon Bay (Medium)'|'Ion Cannon Bay (Large)'|'Fusion Gun Bay (Small)'|'Fusion Gun Bay (Medium)'|'Fusion Gun Bay (Large)'|'Meson Gun Bay (Small)'|'Meson Gun Bay (Medium)'|'Meson Gun Bay (Large)'|'Particle Beam Bay (Small)'|'Particle Beam Bay (Medium)'|'Particle Beam Bay (Large)'|'Railgun Bay (Small)'|'Railgun Bay (Medium)'|'Railgun Bay (Large)'} WeaponType */
 
 /**
  * Weapon stat table.
@@ -201,6 +201,191 @@ export const WEAPONS = {
     ignoresArmour: true,
     notes: 'No hull damage. Roll 10D×100 ignoring armour; deduct from target Power + bandwidth. Duration: 1 round (D3 if Effect ≥ 6). // HG p.33, FAQ HG 2022 p.1',
   },
+
+  // ── Bays (HG p.31–33) ───────────────────────────────────────────────────────
+  // All bay weapons: DM-2 vs targets ≤2,000 tons, DM-4 vs targets ≤100 tons. // HG p.31
+
+  'Fusion Gun Bay (Small)': {
+    id: 'Fusion Gun Bay (Small)',
+    label: 'Fusion Gun Bay (S)',
+    attackDM: 0,
+    damageDice: 6,           // HG p.32
+    damageBonus: 0,
+    maxRange: 'Medium',      // HG p.32
+    damageMultiple: 10,      // Small Bay damage multiple. // HG p.31
+    traits: ['AP 6', 'Radiation'],
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (6D + Effect − Armour(AP 6)) × 10. Radiation. // HG p.32',
+  },
+  'Fusion Gun Bay (Medium)': {
+    id: 'Fusion Gun Bay (Medium)',
+    label: 'Fusion Gun Bay (M)',
+    attackDM: 0,
+    damageDice: 7,           // HG p.33
+    damageBonus: 0,
+    maxRange: 'Medium',      // HG p.33
+    damageMultiple: 20,      // Medium Bay damage multiple. // HG p.31
+    traits: ['AP 6', 'Radiation'],
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (7D + Effect − Armour(AP 6)) × 20. Radiation. // HG p.33',
+  },
+  'Fusion Gun Bay (Large)': {
+    id: 'Fusion Gun Bay (Large)',
+    label: 'Fusion Gun Bay (L)',
+    attackDM: 0,
+    damageDice: 10,          // HG p.33
+    damageBonus: 0,
+    maxRange: 'Long',        // HG p.33
+    damageMultiple: 100,     // Large Bay damage multiple. // HG p.31
+    traits: ['AP 8', 'Radiation'],  // AP increases to 8 at Large size — HG p.33
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (10D + Effect − Armour(AP 8)) × 100. Radiation. // HG p.33',
+  },
+  'Meson Gun Bay (Small)': {
+    id: 'Meson Gun Bay (Small)',
+    label: 'Meson Gun Bay (S)',
+    attackDM: 0,
+    damageDice: 5,           // HG p.32
+    damageBonus: 0,
+    maxRange: 'Long',        // HG p.32
+    damageMultiple: 10,      // Small Bay damage multiple. // HG p.31
+    traits: ['AP ∞', 'Radiation'],  // Ignores all Armour and radiation shielding. // HG p.31
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (5D + Effect) × 10, ignoring all Armour and radiation shielding. // HG p.31–32',
+  },
+  'Meson Gun Bay (Medium)': {
+    id: 'Meson Gun Bay (Medium)',
+    label: 'Meson Gun Bay (M)',
+    attackDM: 0,
+    damageDice: 6,           // HG p.33
+    damageBonus: 0,
+    maxRange: 'Long',        // HG p.33
+    damageMultiple: 20,      // Medium Bay damage multiple. // HG p.31
+    traits: ['AP ∞', 'Radiation'],
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (6D + Effect) × 20, ignoring all Armour and radiation shielding. // HG p.31, 33',
+  },
+  'Meson Gun Bay (Large)': {
+    id: 'Meson Gun Bay (Large)',
+    label: 'Meson Gun Bay (L)',
+    attackDM: 0,
+    damageDice: 6,           // HG p.33 — same dice as Medium, Power/Cost/TL scale instead
+    damageBonus: 0,
+    maxRange: 'Long',        // HG p.33
+    damageMultiple: 100,     // Large Bay damage multiple. // HG p.31
+    traits: ['AP ∞', 'Radiation'],
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (6D + Effect) × 100, ignoring all Armour and radiation shielding. // HG p.31, 33',
+  },
+  'Particle Beam Bay (Small)': {
+    id: 'Particle Beam Bay (Small)',
+    label: 'Particle Beam Bay (S)',
+    attackDM: 0,
+    damageDice: 6,           // HG p.32
+    damageBonus: 0,
+    maxRange: 'Very Long',   // HG p.32
+    damageMultiple: 10,      // Small Bay damage multiple. // HG p.31
+    traits: ['Radiation'],
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (6D + Effect − Armour) × 10. Radiation. // HG p.32',
+  },
+  'Particle Beam Bay (Medium)': {
+    id: 'Particle Beam Bay (Medium)',
+    label: 'Particle Beam Bay (M)',
+    attackDM: 0,
+    damageDice: 8,           // HG p.33
+    damageBonus: 0,
+    maxRange: 'Very Long',   // HG p.33
+    damageMultiple: 20,      // Medium Bay damage multiple. // HG p.31
+    traits: ['Radiation'],
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (8D + Effect − Armour) × 20. Radiation. // HG p.33',
+  },
+  'Particle Beam Bay (Large)': {
+    id: 'Particle Beam Bay (Large)',
+    label: 'Particle Beam Bay (L)',
+    attackDM: 0,
+    damageDice: 10,          // HG p.33
+    damageBonus: 0,
+    maxRange: 'Distant',     // HG p.33
+    damageMultiple: 100,     // Large Bay damage multiple. // HG p.31
+    traits: ['Radiation'],
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (10D + Effect − Armour) × 100. Radiation. // HG p.33',
+  },
+  'Railgun Bay (Small)': {
+    id: 'Railgun Bay (Small)',
+    label: 'Railgun Bay (S)',
+    attackDM: 0,
+    damageDice: 3,           // HG p.32
+    damageBonus: 0,
+    maxRange: 'Short',       // HG p.32
+    damageMultiple: 10,      // Small Bay damage multiple. // HG p.31
+    traits: ['AP 10'],
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (3D + Effect − Armour(AP 10)) × 10. // HG p.32',
+  },
+  'Railgun Bay (Medium)': {
+    id: 'Railgun Bay (Medium)',
+    label: 'Railgun Bay (M)',
+    attackDM: 0,
+    damageDice: 5,           // HG p.33
+    damageBonus: 0,
+    maxRange: 'Short',       // HG p.33
+    damageMultiple: 20,      // Medium Bay damage multiple. // HG p.31
+    traits: ['AP 10'],
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (5D + Effect − Armour(AP 10)) × 20. // HG p.33',
+  },
+  'Railgun Bay (Large)': {
+    id: 'Railgun Bay (Large)',
+    label: 'Railgun Bay (L)',
+    attackDM: 0,
+    damageDice: 6,           // HG p.33
+    damageBonus: 0,
+    maxRange: 'Medium',      // HG p.33
+    damageMultiple: 100,     // Large Bay damage multiple. // HG p.31
+    traits: ['AP 10'],
+    mount: 'bay',
+    barbetteOnly: false,
+    turretOnly: false,
+    bayOnly: true,
+    notes: 'Bay: (6D + Effect − Armour(AP 10)) × 100. // HG p.33',
+  },
+
   'Torpedo': {
     id: 'Torpedo',
     label: 'Torpedo',

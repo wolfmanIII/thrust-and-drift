@@ -96,7 +96,7 @@ Each profile stores the ship's stats and named crew members.
 | **Name / Tonnage** | Display name and hull size (affects target size DM). |
 | **Hull / Thrust** | Max hull points and base manoeuvre drive rating. |
 | **Tech Level (TL)** | Ship's technology level (default **12**). Gates Smart guidance on all missile and torpedo weapons — the DM+2 Smart bonus applies only when the *launching* ship's TL ≥ 9 *(CRB p.79)*. Set to 8 or below for pre-stellar opponents or salvaged/primitive vessels. Most standard Traveller-era ships are TL 12–15. |
-| **Weapons** | Add weapon slots: type, damage dice, range band, and special traits. Turret-mount weapons (Pulse Laser, Beam Laser, Missile Rack, Sandcaster, Particle Beam, Railgun, Fusion Gun, Plasma Gun) may be combined up to 4 per slot (quad turret, HG p.81); the slot header shows SINGLE / DOUBLE / TRIPLE / QUAD as you add weapons. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, all `*_Barbette`, Ion Cannon Bay) are each a standalone hardpoint — only 1 per slot, cannot combine with anything else *(HG p.29: "a barbette uses a single Hardpoint")*. A live **HARDPOINTS n/n** readout shows how many of the hull's available Hardpoints are used; adding a new weapon to an empty slot is blocked if it would exceed the budget (see below). |
+| **Weapons** | Add weapon slots: type, damage dice, range band, and special traits. Turret-mount weapons (Pulse Laser, Beam Laser, Missile Rack, Sandcaster, Particle Beam, Railgun, Fusion Gun, Plasma Gun) may be combined up to 4 per slot (quad turret, HG p.81); the slot header shows SINGLE / DOUBLE / TRIPLE / QUAD as you add weapons. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, all `*_Barbette`, Ion Cannon Bay, Fusion/Meson/Particle/Railgun Bay) are each a standalone hardpoint — only 1 per slot, cannot combine with anything else *(HG p.29: "a barbette uses a single Hardpoint")*. A live **HARDPOINTS n/n** readout shows how many of the hull's available Hardpoints are used; adding a new weapon to an empty slot is blocked if it would exceed the budget (see below). |
 | **Crew** | Named crew members, each with individual skill levels (see [§ 11](#11-crew-system)). |
 
 > **Design note — why TL on the ship, not the weapon:** CRB p.79 states that Smart munitions require a *fire control system* at TL9+ to guide them. All missile and torpedo weapons already carry the `Smart` trait in the weapon table — this correctly represents the *munition*'s capability. The TL field on the ship represents whether the vessel's targeting computer can actually exploit that capability. Separating the two avoids silent incorrect DMs when early-TL or pirate vessels appear alongside standard Imperial fleet ships.
@@ -577,7 +577,7 @@ round, identified by their slot number (`W1`, `W2`…). Once all offensive slots
 have fired, the **Attack…** option disappears from the context menu until the
 next Attack phase or the start of a new round.
 
-The Ship Detail modal labels each slot's mount type. For turret-mount weapons, the label is based on weapon count: **Single Turret** (1), **Double Turret** (2), **Triple Turret** (3), **Quad Turret** (4, HG p.81). A Quad Turret with 4 laser weapons grants **DM+3** on Point Defence — this is computed automatically from weapon count. Same-type weapons in a quad turret fire as a linked group: one attack roll with +3 bonus damage dice. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, all `*_Barbette`, Ion Cannon Bay) are always shown as **Barbette** or **Bay** — each is a standalone hardpoint, capped at 1 per slot, and never labelled "Turret" *(HG p.29: "a barbette uses a single Hardpoint")*.
+The Ship Detail modal labels each slot's mount type. For turret-mount weapons, the label is based on weapon count: **Single Turret** (1), **Double Turret** (2), **Triple Turret** (3), **Quad Turret** (4, HG p.81). A Quad Turret with 4 laser weapons grants **DM+3** on Point Defence — this is computed automatically from weapon count. Same-type weapons in a quad turret fire as a linked group: one attack roll with +3 bonus damage dice. Barbette and bay weapons (Torpedo, Missile Barbette, Ion Cannon, all `*_Barbette`, Ion Cannon Bay, Fusion/Meson/Particle/Railgun Bay) are always shown as **Barbette** or **Bay** — each is a standalone hardpoint, capped at 1 per slot, and never labelled "Turret" *(HG p.29: "a barbette uses a single Hardpoint")*.
 
 ### 9.6 Launching Missiles
 
@@ -668,10 +668,22 @@ Each weapon has a **maximum range band** beyond which it cannot fire
 | Ion Cannon Bay (Small) | Bay | Medium |
 | Ion Cannon Bay (Medium) | Bay | Medium |
 | Ion Cannon Bay (Large) | Bay | Long |
+| Fusion Gun Bay (Small) | Bay | Medium |
+| Fusion Gun Bay (Medium) | Bay | Medium |
+| Fusion Gun Bay (Large) | Bay | Long |
+| Railgun Bay (Small) | Bay | Short |
+| Railgun Bay (Medium) | Bay | Short |
+| Railgun Bay (Large) | Bay | Medium |
 | Pulse Laser | Turret | Long |
 | Pulse Laser Barbette | Barbette | Long |
+| Meson Gun Bay (Small) | Bay | Long |
+| Meson Gun Bay (Medium) | Bay | Long |
+| Meson Gun Bay (Large) | Bay | Long |
 | Particle Beam | Turret | Very Long |
 | Particle Barbette | Barbette | Very Long |
+| Particle Beam Bay (Small) | Bay | Very Long |
+| Particle Beam Bay (Medium) | Bay | Very Long |
+| Particle Beam Bay (Large) | Bay | Distant |
 | Missile Rack | Launcher | Special (no cap) |
 | Missile Barbette | Launcher | Special (no cap) |
 | Torpedo | Launcher | Special (no cap) |
@@ -718,6 +730,10 @@ Formula: `effectiveArmour = max(0, profile.armour − apReduction)`
 | Fusion Barbette | 3 |
 | Plasma Barbette | 2 |
 | Railgun Barbette | 5 |
+| Fusion Gun Bay (Small/Medium) | 6 |
+| Fusion Gun Bay (Large) | 8 |
+| Railgun Bay (all sizes) | 10 |
+| Meson Gun Bay (all sizes) | ∞ (ignores all armour) |
 
 #### Barbette Damage Multiplier *(HG p.29)*
 
@@ -788,6 +804,43 @@ that point.
 
 While active, the target's token shows a **pulsing blue aura**; the bento card shows
 an **ION NR** badge and a status row (`⚡ ION NR — −X PWR · COMMS DOWN` when depleted).
+
+#### Bay Weapons — Fusion Gun, Meson Gun, Particle Beam, Railgun *(HG p.31–33)*
+
+Unlike the Ion Cannon Bay, these four bay weapon families deal **ordinary hull
+damage** — roll the listed dice, add Effect, subtract effective armour (AP where
+applicable), then multiply by the bay's damage multiple.
+
+| Weapon | Size | Damage | Multiple | Traits | Max Range |
+| ------ | ---- | ------ | -------- | ------ | --------- |
+| Fusion Gun Bay | Small | 6D | ×10 | AP 6, Radiation | Medium |
+| Fusion Gun Bay | Medium | 7D | ×20 | AP 6, Radiation | Medium |
+| Fusion Gun Bay | Large | 10D | ×100 | AP 8, Radiation | Long |
+| Meson Gun Bay | Small | 5D | ×10 | AP ∞, Radiation | Long |
+| Meson Gun Bay | Medium | 6D | ×20 | AP ∞, Radiation | Long |
+| Meson Gun Bay | Large | 6D | ×100 | AP ∞, Radiation | Long |
+| Particle Beam Bay | Small | 6D | ×10 | Radiation | Very Long |
+| Particle Beam Bay | Medium | 8D | ×20 | Radiation | Very Long |
+| Particle Beam Bay | Large | 10D | ×100 | Radiation | Distant |
+| Railgun Bay | Small | 3D | ×10 | AP 10 | Short |
+| Railgun Bay | Medium | 5D | ×20 | AP 10 | Short |
+| Railgun Bay | Large | 6D | ×100 | AP 10 | Medium |
+
+**Meson Gun Bay** carries `AP ∞` — it **ignores all Armour** (and radiation
+shielding) outright, per HG p.31: "Meson gun bays ignore all Armour and radiation
+shielding." Effective armour against a Meson Gun Bay hit is always 0.
+
+**Bay weapons vs small targets** *(HG p.31)*: "All bay weapons suffer DM-2 when
+attacking targets of 2,000 tons or less and DM-4 when attacking targets of 100
+tons or less." This applies to **every** bay-mount weapon — the four families
+above and the Ion Cannon Bay alike — and is applied automatically as a **"Bay vs
+small target"** row in the DM Summary. Thresholds are inclusive (≤2,000t / ≤100t),
+unlike the Torpedo small-ship DM (§9.6, strict `< 2,000` tons). Missile Bay and
+Torpedo Bay would be excluded from this penalty per RAW, but neither is
+implemented in T&D.
+
+**Hardpoint cost**: Small and Medium bays cost **1 Hardpoint**; Large bays cost
+**5 Hardpoints** *(HG p.31)* — same rule already applied to the Ion Cannon Bay.
 
 ### 9.11 Point Defence — Active Intercept
 

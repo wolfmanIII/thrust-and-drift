@@ -29,6 +29,7 @@ import {
   computeIonThrustEffect,
   taskChainDM,
   overloadDrivePenaltyDM,
+  bayWeaponSmallShipDM,
 } from './combat.js'
 
 // === RANGE DMs ===
@@ -466,6 +467,42 @@ describe('getApValue', () => {
 
   it('does not match "AP4" without space', () => {
     expect(getApValue(['AP4'])).toBe(0)
+  })
+
+  it('AP ∞ (Meson Gun Bay) returns Infinity', () => {
+    expect(getApValue(['AP ∞', 'Radiation'])).toBe(Infinity)
+  })
+})
+
+// === BAY WEAPON SMALL-TARGET DM ===
+// // MgT2e HG p.31 — "All bay weapons suffer DM-2 ... 2,000 tons or less and
+// DM-4 ... 100 tons or less." Thresholds are inclusive, unlike torpedoSmallShipDM.
+
+describe('bayWeaponSmallShipDM', () => {
+  it('returns 0 when not a bay weapon, regardless of tonnage', () => {
+    expect(bayWeaponSmallShipDM(false, 50)).toBe(0)
+    expect(bayWeaponSmallShipDM(false, 100000)).toBe(0)
+  })
+
+  it('DM-4 at exactly 100 tons (inclusive threshold)', () => {
+    expect(bayWeaponSmallShipDM(true, 100)).toBe(-4)
+  })
+
+  it('DM-4 below 100 tons', () => {
+    expect(bayWeaponSmallShipDM(true, 50)).toBe(-4)
+  })
+
+  it('DM-2 at exactly 2,000 tons (inclusive threshold)', () => {
+    expect(bayWeaponSmallShipDM(true, 2000)).toBe(-2)
+  })
+
+  it('DM-2 between 101 and 2,000 tons', () => {
+    expect(bayWeaponSmallShipDM(true, 800)).toBe(-2)
+  })
+
+  it('DM 0 above 2,000 tons', () => {
+    expect(bayWeaponSmallShipDM(true, 2001)).toBe(0)
+    expect(bayWeaponSmallShipDM(true, 100000)).toBe(0)
   })
 })
 

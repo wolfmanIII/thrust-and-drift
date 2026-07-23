@@ -149,6 +149,62 @@ describe('Ion Cannon Bay variants', () => {
   })
 })
 
+// === GENERIC BAY WEAPONS (Fusion/Meson/Particle/Railgun) ===
+// // MgT2e HG p.31-33 — GitHub #23
+
+describe('Fusion/Meson/Particle/Railgun Bay variants', () => {
+  const BAY_VARIANTS = [
+    { id: 'Fusion Gun Bay (Small)',    damageDice: 6,  damageMultiple: 10,  maxRange: 'Medium',    traits: ['AP 6', 'Radiation'] },
+    { id: 'Fusion Gun Bay (Medium)',   damageDice: 7,  damageMultiple: 20,  maxRange: 'Medium',    traits: ['AP 6', 'Radiation'] },
+    { id: 'Fusion Gun Bay (Large)',    damageDice: 10, damageMultiple: 100, maxRange: 'Long',      traits: ['AP 8', 'Radiation'] },
+    { id: 'Meson Gun Bay (Small)',     damageDice: 5,  damageMultiple: 10,  maxRange: 'Long',      traits: ['AP ∞', 'Radiation'] },
+    { id: 'Meson Gun Bay (Medium)',    damageDice: 6,  damageMultiple: 20,  maxRange: 'Long',      traits: ['AP ∞', 'Radiation'] },
+    { id: 'Meson Gun Bay (Large)',     damageDice: 6,  damageMultiple: 100, maxRange: 'Long',      traits: ['AP ∞', 'Radiation'] },
+    { id: 'Particle Beam Bay (Small)', damageDice: 6,  damageMultiple: 10,  maxRange: 'Very Long', traits: ['Radiation'] },
+    { id: 'Particle Beam Bay (Medium)',damageDice: 8,  damageMultiple: 20,  maxRange: 'Very Long', traits: ['Radiation'] },
+    { id: 'Particle Beam Bay (Large)', damageDice: 10, damageMultiple: 100, maxRange: 'Distant',   traits: ['Radiation'] },
+    { id: 'Railgun Bay (Small)',       damageDice: 3,  damageMultiple: 10,  maxRange: 'Short',     traits: ['AP 10'] },
+    { id: 'Railgun Bay (Medium)',      damageDice: 5,  damageMultiple: 20,  maxRange: 'Short',     traits: ['AP 10'] },
+    { id: 'Railgun Bay (Large)',       damageDice: 6,  damageMultiple: 100, maxRange: 'Medium',    traits: ['AP 10'] },
+  ]
+
+  it('all twelve variants are in WEAPON_IDS', () => {
+    for (const { id } of BAY_VARIANTS) expect(WEAPON_IDS).toContain(id)
+  })
+
+  for (const { id, damageDice, damageMultiple, maxRange, traits } of BAY_VARIANTS) {
+    describe(id, () => {
+      it(`damageDice is ${damageDice}`, () => {
+        expect(WEAPONS[id].damageDice).toBe(damageDice)
+      })
+      it(`damageMultiple is ${damageMultiple}`, () => {
+        expect(WEAPONS[id].damageMultiple).toBe(damageMultiple)
+      })
+      it(`maxRange is ${maxRange}`, () => {
+        expect(WEAPONS[id].maxRange).toBe(maxRange)
+      })
+      it('bayOnly: true — excluded from turret and barbette pickers', () => {
+        expect(WEAPONS[id].bayOnly).toBe(true)
+      })
+      for (const trait of traits) {
+        it(`has ${trait} trait`, () => {
+          expect(WEAPONS[id].traits).toContain(trait)
+        })
+      }
+    })
+  }
+
+  it('bay weapons are NOT in DEFENSIVE_WEAPONS', () => {
+    for (const { id } of BAY_VARIANTS) expect(DEFENSIVE_WEAPONS).not.toContain(id)
+  })
+
+  it('Meson Gun Bay AP ∞ resolves to Infinity via getApValue', () => {
+    for (const id of ['Meson Gun Bay (Small)', 'Meson Gun Bay (Medium)', 'Meson Gun Bay (Large)']) {
+      expect(getApValue(WEAPONS[id].traits)).toBe(Infinity)
+    }
+  })
+})
+
 // === TORPEDO ===
 // // MgT2e HG p.30–31
 

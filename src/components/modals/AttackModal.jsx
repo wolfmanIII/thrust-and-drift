@@ -180,7 +180,7 @@ function AttackConfigStep({
   reactions,
   onNext, onClose,
 }) {
-  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, torpedoSmallShipDM = 0, totalDM } = dmBreakdown
+  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, torpedoSmallShipDM = 0, bayWeaponSmallShipDM = 0, totalDM } = dmBreakdown
   // Torpedo salvo capped at 3 per barbette (HG p.31).
   // Missile Rack salvo capped at the number of racks mounted in this turret — a rack is a
   // single mount that launches one missile per round, even inside a mixed-weapon turret
@@ -391,6 +391,7 @@ function AttackConfigStep({
             {dogfightDM !== 0 && <DmRow label="Dogfight" value={dogfightDM} />}
             {obstacleCoverDM !== 0 && <DmRow label="Field cover" value={obstacleCoverDM} />}
             {torpedoSmallShipDM !== 0 && <DmRow label="Torpedo vs <2kt" value={torpedoSmallShipDM} />}
+            {bayWeaponSmallShipDM !== 0 && <DmRow label="Bay vs small target" value={bayWeaponSmallShipDM} />}
             <div className="border-t border-slate-700 mt-1 pt-1">
               <DmRow label="Total DM" value={totalDM} highlight />
             </div>
@@ -473,7 +474,7 @@ function AttackRollStep({
   dmBreakdown,
   attackResult, setAttackResult, onNext, onClose, onMissClose,
 }) {
-  const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, torpedoSmallShipDM = 0, totalDM } = dmBreakdown
+  const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, torpedoSmallShipDM = 0, bayWeaponSmallShipDM = 0, totalDM } = dmBreakdown
   const [manualDice, setManualDice] = useState(null)
 
   const handleRoll = (diceOverride = null) => {
@@ -489,6 +490,7 @@ function AttackRollStep({
       dogfightDM,
       obstacleCoverDM,
       torpedoSmallShipDM,
+      bayWeaponSmallShipDM,
       diceOverride,
     })
     setAttackResult(result)
@@ -891,6 +893,8 @@ function AttackDamageStep({ damageDice, effectBonus, linkedBonus = 0, armor, apR
 
   // AP reduces effective armour before damage, multiplier applied after. // MgT2e HG p.28–29
   const effectiveArmor = Math.max(0, armor - apReduction)
+  // Meson Gun Bay: 'AP ∞' parses to Infinity (getApValue) — display as ∞, not "Infinity". // HG p.31
+  const apLabel = apReduction === Infinity ? '∞' : apReduction
 
   const handleAutoRoll = () => {
     const roll  = rollDice(damageDice, 6)
@@ -914,7 +918,7 @@ function AttackDamageStep({ damageDice, effectBonus, linkedBonus = 0, armor, apR
     <Modal title="Damage" onClose={onClose}>
       <div className="space-y-4">
         <div className="text-center font-mono text-xs text-slate-400">
-          {formulaLabel.replace('Armour', `Armour (${effectiveArmor}${apReduction > 0 ? ` −AP${apReduction}` : ''})`)}
+          {formulaLabel.replace('Armour', `Armour (${effectiveArmor}${apReduction > 0 ? ` −AP${apLabel}` : ''})`)}
         </div>
 
         {!damageResult ? (
@@ -962,7 +966,7 @@ function AttackDamageStep({ damageDice, effectBonus, linkedBonus = 0, armor, apR
             <div className="bg-slate-800 rounded p-4 text-center font-mono text-xs">
               <p className="text-slate-400">
                 {(() => {
-                  const ap       = apReduction > 0 ? ` (AP−${apReduction})` : ''
+                  const ap       = apReduction > 0 ? ` (AP−${apLabel})` : ''
                   const mult     = damageMultiple > 1 ? ` ×${damageMultiple}` : ''
                   const linked   = linkedBonus > 0 ? ` +${linkedBonus} linked` : ''
                   const base     = isPlayer

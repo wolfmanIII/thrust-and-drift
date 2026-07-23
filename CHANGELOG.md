@@ -8,6 +8,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Generic weapon bays: Fusion Gun, Meson Gun, Particle Beam, Railgun Bay (Small/Medium/Large)** — 12 new weapon entries with stats verified against HG p.31–33 (`weapons.js`). Meson Gun Bay carries `AP ∞` (`getApValue` extended to resolve it to `Infinity`, ignoring all armour per RAW). Added the generic **bay-vs-small-target DM** (HG p.31: DM-2 ≤2,000t / DM-4 ≤100t, inclusive thresholds) via a new `bayWeaponSmallShipDM` function (`combat.js`), wired through `useAttackSetup.js` and displayed as a DM Summary row in `AttackModal.jsx` — this also applies retroactively to the pre-existing Ion Cannon Bay, which was missing this modifier. Hardpoint costs (1 for Small/Medium, 5 for Large) were already handled generically by the existing `slotHardpointCost` logic. GitHub #23.
+
 ---
 
 ## [2.7.3] — 2026-07-23

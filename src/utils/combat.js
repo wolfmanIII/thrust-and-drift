@@ -61,6 +61,7 @@ export function rollAttack({
   dogfightDM = 0,
   obstacleCoverDM = 0,
   torpedoSmallShipDM = 0,
+  bayWeaponSmallShipDM = 0,
   diceOverride = null,
 }) {
   const roll = diceOverride ?? roll2D6()
@@ -76,7 +77,8 @@ export function rollAttack({
     sensorLockDM +
     dogfightDM +
     obstacleCoverDM +
-    torpedoSmallShipDM
+    torpedoSmallShipDM +
+    bayWeaponSmallShipDM
   return {
     roll,
     total,
@@ -95,6 +97,7 @@ export function rollAttack({
       dogfightDM,
       obstacleCoverDM,
       torpedoSmallShipDM,
+      bayWeaponSmallShipDM,
     },
   }
 }
@@ -319,14 +322,35 @@ export function getThresholdCriticalCount(prevHull, newHull, maxHull) {
 /**
  * Parse the AP (Armor Piercing) value from a weapon's traits array.
  * // MgT2e HG p.28 — "subtract AP value from effective armour before damage"
+ * 'AP ∞' (Meson Gun Bay, HG p.31 — "ignore all Armour") returns Infinity, which
+ * always reduces effective armour to 0 regardless of the target's actual value.
  * @param {string[]} traits  e.g. ['AP 4', 'Radiation']
  * @returns {number}  AP reduction (0 if trait absent)
  */
 export function getApValue(traits) {
   for (const t of traits) {
+    if (t === 'AP ∞') return Infinity
     const m = t.match(/^AP\s+(\d+)$/)
     if (m) return parseInt(m[1], 10)
   }
+  return 0
+}
+
+/**
+ * DM penalty for bay weapons (Fusion/Ion/Meson/Particle/Railgun Bay, any size)
+ * attacking small targets. Thresholds are inclusive ("or less"), unlike the
+ * exclusive torpedoSmallShipDM ("< 2,000 tons") computed in useAttackSetup.js.
+ * Missile Bay / Torpedo Bay salvoes are explicitly excluded by RAW but are not
+ * yet implemented, so no exclusion is needed here.
+ * // MgT2e HG p.31 — "DM-2 ... 2,000 tons or less and DM-4 ... 100 tons or less"
+ * @param {boolean} isBayWeapon
+ * @param {number}  targetTonnage
+ * @returns {number}
+ */
+export function bayWeaponSmallShipDM(isBayWeapon, targetTonnage) {
+  if (!isBayWeapon) return 0
+  if (targetTonnage <= 100)  return -4
+  if (targetTonnage <= 2000) return -2
   return 0
 }
 
