@@ -324,3 +324,109 @@ describe('ActionModal — Overload M-Drive cumulative penalty (CRB p.171)', () =
     expect(useBattleStore.getState().ships[0].overloadDriveAttempts).toBe(3)
   })
 })
+
+// ── #34: severe failure (Effect <= -6) applies an M-Drive critical hit ────────
+// CRB p.171: "If the check fails with an Effect of -6 or less, the manoeuvre
+// drive suffers a critical hit with Severity 1."
+
+describe('ActionModal — Overload M-Drive severe failure critical hit (CRB p.171, #34)', () => {
+  function makeEngineerShip(overloadDriveAttempts = 0, criticalHits = []) {
+    return {
+      id: 'ship-engineer',
+      profile: {
+        name: 'Freighter', hull: 40, armor: 2, thrust: 6, tonnage: 200,
+        turrets: [],
+        crew: [{ id: 'crew-eng', name: 'Chief Voss', skills: { engineer: 2 } }],
+      },
+      faction: 'npc',
+      hullCurrent: 40,
+      color: '#0f0',
+      firedTurrets:          [],
+      evasiveThrust:         0,
+      criticalHits,
+      thrustUsedThisRound:   0,
+      thrustBonusNextRound:  0,
+      usedCrewMembers:       [],
+      crewAssignments:       null,
+      overloadDriveAttempts,
+    }
+  }
+
+  afterEach(() => vi.restoreAllMocks())
+
+  // Math.random=0.5 → both dice = 4, 2D6 total = 8 (fixed). Difficulty 10, engineer +2,
+  // cumulative penalty -2 per prior attempt: finalTotal = 8 + 2 - 2*priorAttempts.
+
+  it('effect exactly -6 (3 prior attempts, finalTotal=4) applies M-Drive critical Severity 1', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ ships: [makeEngineerShip(3)], phase: 'actions' })
+    useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-engineer' } })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Chief Voss'))
+    fireEvent.click(screen.getByText('Overload M-Drive'))
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/FAILED — Effect -6/)).toBeInTheDocument()
+    expect(screen.getByText(/M-Drive critical hit — Severity 1 applied/)).toBeInTheDocument()
+    const crit = useBattleStore.getState().ships[0].criticalHits.find((c) => c.system === 'M-Drive')
+    expect(crit?.severity).toBe(1)
+  })
+
+  it('effect below -6 (4 prior attempts, finalTotal=2) also applies the critical hit', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ ships: [makeEngineerShip(4)], phase: 'actions' })
+    useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-engineer' } })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Chief Voss'))
+    fireEvent.click(screen.getByText('Overload M-Drive'))
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/FAILED — Effect -8/)).toBeInTheDocument()
+    const crit = useBattleStore.getState().ships[0].criticalHits.find((c) => c.system === 'M-Drive')
+    expect(crit?.severity).toBe(1)
+  })
+
+  it('ordinary failure (effect -4, 2 prior attempts) does NOT apply a critical hit', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ ships: [makeEngineerShip(2)], phase: 'actions' })
+    useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-engineer' } })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Chief Voss'))
+    fireEvent.click(screen.getByText('Overload M-Drive'))
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/FAILED — Effect -4/)).toBeInTheDocument()
+    expect(screen.queryByText(/M-Drive critical hit/)).not.toBeInTheDocument()
+    expect(useBattleStore.getState().ships[0].criticalHits).toHaveLength(0)
+  })
+
+  it('does not downgrade a pre-existing worse M-Drive critical', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({
+      ships: [makeEngineerShip(3, [{ system: 'M-Drive', severity: 4, repairRoundsApplied: 0 }])],
+      phase: 'actions',
+    })
+    useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-engineer' } })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Chief Voss'))
+    fireEvent.click(screen.getByText('Overload M-Drive'))
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    const crit = useBattleStore.getState().ships[0].criticalHits.find((c) => c.system === 'M-Drive')
+    expect(crit?.severity).toBe(4)
+  })
+
+  it('success (0 prior attempts) does not touch criticalHits', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ ships: [makeEngineerShip(0)], phase: 'actions' })
+    useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-engineer' } })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Chief Voss'))
+    fireEvent.click(screen.getByText('Overload M-Drive'))
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    expect(screen.getByText(/SUCCESS/)).toBeInTheDocument()
+    expect(screen.getByText(/\+1 Thrust next round\./)).toBeInTheDocument()
+    expect(useBattleStore.getState().ships[0].criticalHits).toHaveLength(0)
+  })
+})

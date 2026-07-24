@@ -27,6 +27,7 @@ function useActionEffects() {
   const overloadDrive        = useBattleStore((s) => s.overloadDrive)
   const reloadTurret         = useBattleStore((s) => s.reloadTurret)
   const applyMissileEW       = useBattleStore((s) => s.applyMissileEW)
+  const addCriticalHit       = useBattleStore((s) => s.addCriticalHit)
 
   return (actionId, shipId, effect, targetShipId, targetImpactId, critIndex) => {
     switch (actionId) {
@@ -49,7 +50,17 @@ function useActionEffects() {
         applyAidGunners(shipId, taskChainDM(effect))
         break
       case 'overload_drive':
-        overloadDrive(shipId, 1)  // fixed +1 per CRB p.171 — not +Effect
+        if (effect >= 0) {
+          overloadDrive(shipId, 1)  // fixed +1 per CRB p.171 — not +Effect
+        } else if (effect <= -6) {
+          // CRB p.171: "If the check fails with an Effect of -6 or less, the manoeuvre
+          // drive suffers a critical hit with Severity 1." Never downgrade a worse
+          // pre-existing M-Drive crit — same non-decreasing rule battleStore.js already
+          // applies to sustained-damage crits.
+          const existingSeverity = useBattleStore.getState().ships
+            .find((s) => s.id === shipId)?.criticalHits.find((c) => c.system === 'M-Drive')?.severity ?? 0
+          addCriticalHit(shipId, { system: 'M-Drive', severity: Math.max(existingSeverity, 1) })
+        }
         break
       case 'reload_turret':
         reloadTurret(shipId)
@@ -219,8 +230,14 @@ export function ActionModal() {
       `${ship.name} / ${selectedMember?.name ?? '?'}: ${selectedAction.label} — ${result.display} (${result.success ? 'SUCCESS' : 'FAILED'})`
     )
 
-    // aid_gunners applies a task chain DM on both success AND failure (CRB p.63)
-    if (result.success || selectedAction.id === 'aid_gunners') {
+    // aid_gunners applies a task chain DM on both success AND failure (CRB p.63).
+    // overload_drive also needs the failure path: Effect <= -6 triggers an M-Drive
+    // critical hit (CRB p.171), handled inside useActionEffects' switch case.
+    if (
+      result.success ||
+      selectedAction.id === 'aid_gunners' ||
+      (selectedAction.id === 'overload_drive' && result.effect <= -6)
+    ) {
       applyEffect(selectedAction.id, ship.id, result.effect, targetShipId, targetImpactId, selectedCritIndex)
     }
   }
@@ -253,7 +270,11 @@ export function ActionModal() {
                 : `FAILED — Effect ${rollResult.effect}`}
             </div>
 
-            {(rollResult.success || selectedAction?.id === 'aid_gunners') && selectedAction && (
+            {(
+              rollResult.success ||
+              selectedAction?.id === 'aid_gunners' ||
+              (selectedAction?.id === 'overload_drive' && rollResult.effect <= -6)
+            ) && selectedAction && (
               <p className="text-slate-400 font-mono text-xs text-center">
                 {selectedAction.id === 'sensor_lock'        && `Sensor lock acquired on ${ships.find(s => s.id === targetShipId)?.name ?? '?'}.`}
                 {selectedAction.id === 'electronic_warfare' && 'Enemy sensor lock removed.'}
@@ -267,7 +288,11 @@ export function ActionModal() {
                   const dm = taskChainDM(rollResult.effect)
                   return `Task chain DM ${dm >= 0 ? '+' : ''}${dm} to all gunner attack rolls this round.`
                 })()}
-                {selectedAction.id === 'overload_drive'     && `+1 Thrust next round.${rollResult.effect <= -6 ? ' ⚠ Effect ≤ −6: apply M-Drive critical Severity 1.' : ''}`}
+                {selectedAction.id === 'overload_drive' && (
+                  rollResult.success
+                    ? '+1 Thrust next round.'
+                    : '⚠ M-Drive critical hit — Severity 1 applied.'
+                )}
                 {selectedAction.id === 'reload_turret'      && 'Turret reloaded.'}
               </p>
             )}
