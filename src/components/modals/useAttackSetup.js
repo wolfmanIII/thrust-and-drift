@@ -13,6 +13,14 @@ import { dogfightAttackDM } from '../../utils/dogfight.js'
 import { getObstacleAt, computeObstacleCoverDM } from '../../utils/obstacles.js'
 
 /**
+ * dmEntries key for the Evasive Action reaction DM — always 0 from this hook (Reactions
+ * state lives in AttackModal, not here); AttackModal overrides this one entry's value by
+ * matching this constant instead of a bare string literal, so a rename can't silently drift.
+ * // MgT2e CRB p.171
+ */
+export const EVASIVE_DM_KEY = 'evasiveDM'
+
+/**
  * @param {string|null} attackerShipId   ID of the attacking ship
  * @param {string}      targetId         ID of the selected target ship
  * @param {string}      weaponKey        Weapon type key (e.g. 'Pulse Laser')
@@ -29,10 +37,12 @@ import { getObstacleAt, computeObstacleCoverDM } from '../../utils/obstacles.js'
  *   storedBand:       string|null,
  *   combatMode:       'vectorial'|'basic',
  *   outOfRange:   boolean,
- *   dmEntries: { key: string, label: string, value: number, alwaysShow: boolean }[],
+ *   dmEntries: { key: string, label: string, value: number }[],
  *     // Ordered list of every attack DM contribution — the single source AttackModal.jsx
  *     // renders generically (DM Summary rows) and reduces into rollAttack's params.
  *     // Adding a new DM modifier means adding one entry here; no other file needs to change.
+ *     // Which rows to always display vs. hide-when-zero is a display policy, not part of
+ *     // this data — AttackModal.jsx decides that itself.
  *   dmBreakdown: object,
  *     // Same values as dmEntries, keyed flat (`{ [key]: value, totalDM }`) — kept for
  *     // call sites/tests that want direct named access rather than the ordered list.
@@ -138,18 +148,18 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   // the DM Summary display and reduces it into rollAttack's params. Adding a new modifier
   // (weapon-specific or situational) means adding one entry here — nowhere else.
   const dmEntries = [
-    { key: 'gunnerSkill',   label: 'Gunner',                    value: gunnerSkill, alwaysShow: true },
-    { key: 'weaponDM',      label: `Weapon (${weaponKey})`,      value: weaponDM,    alwaysShow: true },
-    { key: 'rangeDM',       label: `Range (${rangeBand})`,       value: rangeDM,     alwaysShow: true },
-    { key: 'sizeDM',        label: 'Target size',                value: sizeDM,      alwaysShow: true },
+    { key: 'gunnerSkill',   label: 'Gunner',               value: gunnerSkill },
+    { key: 'weaponDM',      label: `Weapon (${weaponKey})`, value: weaponDM },
+    { key: 'rangeDM',       label: `Range (${rangeBand})`,  value: rangeDM },
+    { key: 'sizeDM',        label: 'Target size',           value: sizeDM },
     // evasiveDM is always 0 here — AttackModal.jsx overrides it dynamically from Reactions.
-    { key: 'evasiveDM',            label: 'Evasion',                value: 0,                        alwaysShow: false },
-    { key: 'sensorLockDM',         label: 'Sensor Lock',            value: sensorLockDM,              alwaysShow: false },
-    { key: 'aidGunnersDM',         label: 'Aid Gunners',             value: aidGunnersDM,              alwaysShow: false },
-    { key: 'dogfightDM',           label: 'Dogfight',                value: dogfightDM,                alwaysShow: false },
-    { key: 'obstacleCoverDM',      label: 'Field cover',             value: obstacleCoverDM,           alwaysShow: false },
-    { key: 'torpedoSmallShipDM',   label: 'Torpedo vs <2kt',         value: torpedoSmallShipDM,        alwaysShow: false }, // HG p.39
-    { key: 'bayWeaponSmallShipDM', label: 'Bay vs small target',     value: bayWeaponSmallShipDMValue, alwaysShow: false }, // HG p.31
+    { key: EVASIVE_DM_KEY,         label: 'Evasion',                value: 0 },
+    { key: 'sensorLockDM',         label: 'Sensor Lock',            value: sensorLockDM },
+    { key: 'aidGunnersDM',         label: 'Aid Gunners',             value: aidGunnersDM },
+    { key: 'dogfightDM',           label: 'Dogfight',                value: dogfightDM },
+    { key: 'obstacleCoverDM',      label: 'Field cover',             value: obstacleCoverDM },
+    { key: 'torpedoSmallShipDM',   label: 'Torpedo vs <2kt',         value: torpedoSmallShipDM },        // HG p.39
+    { key: 'bayWeaponSmallShipDM', label: 'Bay vs small target',     value: bayWeaponSmallShipDMValue }, // HG p.31
   ]
   const totalDM     = dmEntries.reduce((sum, e) => sum + e.value, 0)
   const dmBreakdown = { ...Object.fromEntries(dmEntries.map((e) => [e.key, e.value])), totalDM }

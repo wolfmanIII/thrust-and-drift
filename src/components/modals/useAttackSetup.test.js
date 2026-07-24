@@ -168,7 +168,7 @@ describe('useAttackSetup — same-type weapon grouping (#14)', () => {
 // === dmEntries — single source for DM Summary + rollAttack (#33) ===
 
 describe('useAttackSetup — dmEntries', () => {
-  it('is an ordered array of { key, label, value, alwaysShow } covering every dmBreakdown key', () => {
+  it('is an ordered array of { key, label, value } covering every dmBreakdown key', () => {
     const att = addAttacker([{ slot: 1, weapons: ['Pulse Laser'] }])
     const tgt = addTarget()
     const { result } = renderHook(() => useAttackSetup(att.id, tgt.id, 'Pulse Laser', null, 1))
@@ -180,7 +180,6 @@ describe('useAttackSetup — dmEntries', () => {
       expect(entry, `missing dmEntries entry for "${key}"`).toBeDefined()
       expect(entry.value).toBe(dmBreakdown[key])
       expect(typeof entry.label).toBe('string')
-      expect(typeof entry.alwaysShow).toBe('boolean')
     }
   })
 
@@ -191,14 +190,6 @@ describe('useAttackSetup — dmEntries', () => {
     const { dmEntries, dmBreakdown } = result.current
     const reduced = dmEntries.reduce((sum, e) => sum + e.value, 0)
     expect(reduced).toBe(dmBreakdown.totalDM)
-  })
-
-  it('Gunner, Weapon, Range, Target size are alwaysShow: true — the rest are conditional', () => {
-    const att = addAttacker([{ slot: 1, weapons: ['Pulse Laser'] }])
-    const tgt = addTarget()
-    const { result } = renderHook(() => useAttackSetup(att.id, tgt.id, 'Pulse Laser', null, 1))
-    const alwaysShown = result.current.dmEntries.filter((e) => e.alwaysShow).map((e) => e.key)
-    expect(alwaysShown.sort()).toEqual(['gunnerSkill', 'rangeDM', 'sizeDM', 'weaponDM'].sort())
   })
 })
 

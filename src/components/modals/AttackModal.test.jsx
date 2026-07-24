@@ -323,3 +323,41 @@ describe('AttackModal — wreck exclusion from targets (REQ-12)', () => {
     expect(screen.getByText('Live Target')).toBeInTheDocument()
   })
 })
+
+// ── #33: DM Summary always-shown vs. conditional rows (display policy, not part of dmEntries) ──
+
+describe('AttackModal — DM Summary row visibility (#33)', () => {
+  function setupSimpleAttack() {
+    const profile = { id: 'profile-simple', name: 'Gunship', hull: 20, armor: 0, thrust: 4, tonnage: 100, turrets: [{ slot: 1, weapons: ['Pulse Laser'] }], crew: [] }
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Bogey', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att] = useBattleStore.getState().ships
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+  }
+
+  beforeEach(() => {
+    useBattleStore.getState().resetBattle('vectorial')
+    useUiStore.setState({ activeModal: null, modalPayload: null })
+  })
+
+  it('Gunner and Target size rows show even at DM 0 (always-shown rows)', () => {
+    setupSimpleAttack()
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Pulse Laser'))
+    fireEvent.click(screen.getByText('Bogey'))
+    expect(screen.getByText('Gunner')).toBeInTheDocument()
+    expect(screen.getByText('Target size')).toBeInTheDocument()
+  })
+
+  it('Aid Gunners and Dogfight rows are hidden when their DM is 0 (conditional rows)', () => {
+    setupSimpleAttack()
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Pulse Laser'))
+    fireEvent.click(screen.getByText('Bogey'))
+    expect(screen.queryByText('Aid Gunners')).not.toBeInTheDocument()
+    expect(screen.queryByText('Dogfight')).not.toBeInTheDocument()
+  })
+})

@@ -13,7 +13,7 @@ import { RANGE_BANDS } from '../../data/rangeBands.js'
 import { rollAttack, isCriticalHit, getCriticalSeverity, isOutOfRange, getApValue, computeIonThrustEffect } from '../../utils/combat.js'
 import { rollDice, roll2D6 } from '../../utils/dice.js'
 import { getCriticalLocation, getCriticalEffect } from '../../data/criticalHits.js'
-import { useAttackSetup } from './useAttackSetup.js'
+import { useAttackSetup, EVASIVE_DM_KEY } from './useAttackSetup.js'
 import { emitEffect } from '../../utils/effectQueue.js'
 import { DiceInput } from '../forms/DiceInput.jsx'
 import { getEffectiveSkill } from '../../utils/crew.js'
@@ -28,6 +28,8 @@ const BEAM_WEAPONS = [
 const LASER_TYPES = ['Pulse Laser', 'Beam Laser', 'Pulse Laser Barbette', 'Beam Laser Barbette']
 /** Laser types usable as Point Defence against missiles. // CRB p.161 */
 const LASER_PD = ['Pulse Laser', 'Beam Laser']
+/** DM Summary rows always shown, even at 0 — a display choice, not part of dmEntries itself. */
+const ALWAYS_SHOWN_DM_KEYS = new Set(['gunnerSkill', 'weaponDM', 'rangeDM', 'sizeDM'])
 
 /** @typedef {'config'|'roll'|'damage'|'critical'|'missile_pd'} AttackStep */
 
@@ -161,7 +163,8 @@ function ReactionsPanel({
  *   weapon: object|null,
  *   rangeBand: string,
  *   distance: number,
- *   dmEntries: { key: string, label: string, value: number, alwaysShow: boolean }[],
+ *   dmEntries: { key: string, label: string, value: number }[],
+ *   totalDM: number,
  *   isMissile: boolean,
  *   missileCount: number,
  *   setMissileCount: Function,
@@ -172,7 +175,7 @@ function ReactionsPanel({
 function AttackConfigStep({
   enemies, availableWeapons,
   weaponKey, selectedTurretSlot, setWeaponSelection, targetId, setTargetId,
-  target, weapon, rangeBand, distance, dmEntries,
+  target, weapon, rangeBand, distance, dmEntries, totalDM,
   combatMode, storedBand, manualRangeBand, setManualRangeBand,
   outOfRange, dogfightTie, noPower,
   isMissile, isMissileBarbette, missileCount, setMissileCount, ammoLeft,
@@ -180,7 +183,6 @@ function AttackConfigStep({
   reactions,
   onNext, onClose,
 }) {
-  const totalDM = dmEntries.reduce((sum, e) => sum + e.value, 0)
   // Torpedo salvo capped at 3 per barbette (HG p.31).
   // Missile Rack salvo capped at the number of racks mounted in this turret — a rack is a
   // single mount that launches one missile per round, even inside a mixed-weapon turret
@@ -381,7 +383,7 @@ function AttackConfigStep({
         {!isMissile && weapon && target && (
           <div className="bg-slate-800 rounded p-3 font-mono text-xs space-y-0.5">
             <p className="text-slate-400 mb-2">DM Summary (target: 8+)</p>
-            {dmEntries.filter((e) => e.alwaysShow || e.value !== 0).map((e) => (
+            {dmEntries.filter((e) => ALWAYS_SHOWN_DM_KEYS.has(e.key) || e.value !== 0).map((e) => (
               <DmRow key={e.key} label={e.label} value={e.value} />
             ))}
             <div className="border-t border-slate-700 mt-1 pt-1">
@@ -453,7 +455,8 @@ function AttackConfigStep({
  *   targetName: string,
  *   weaponKey: string,
  *   isPlayer: boolean,
- *   dmEntries: { key: string, label: string, value: number, alwaysShow: boolean }[],
+ *   dmEntries: { key: string, label: string, value: number }[],
+ *   totalDM: number,
  *   attackResult: object|null,
  *   setAttackResult: Function,
  *   onNext: Function,
@@ -463,10 +466,9 @@ function AttackConfigStep({
 function AttackRollStep({
   attackerName, targetName, weaponKey,
   isPlayer,
-  dmEntries,
+  dmEntries, totalDM,
   attackResult, setAttackResult, onNext, onClose, onMissClose,
 }) {
-  const totalDM = dmEntries.reduce((sum, e) => sum + e.value, 0)
   const [manualDice, setManualDice] = useState(null)
 
   const handleRoll = (diceOverride = null) => {
@@ -1301,7 +1303,8 @@ export function AttackModal() {
 
   // CRB p.171: each evasion costs 1 thrust, DM = −pilotSkill (fixed, not multiplied by thrust)
   const dynamicEvasiveDM = reactionEvasion ? -targetPilotSkill : 0
-  const augmentedDmEntries = dmEntries.map((e) => e.key === 'evasiveDM' ? { ...e, value: dynamicEvasiveDM } : e)
+  const augmentedDmEntries = dmEntries.map((e) => e.key === EVASIVE_DM_KEY ? { ...e, value: dynamicEvasiveDM } : e)
+  const augmentedTotalDM = augmentedDmEntries.reduce((sum, e) => sum + e.value, 0)
   const sandBonusArmor = sandResult?.success ? (sandResult.bonusArmor ?? 0) : 0
 
   // ── Reaction handlers ─────────────────────────────────────────────────
@@ -1451,6 +1454,7 @@ export function AttackModal() {
         dogfightTie={dogfightTie}
         noPower={noPower}
         dmEntries={augmentedDmEntries}
+        totalDM={augmentedTotalDM}
         isMissile={isMissile}
         isMissileBarbette={isMissileBarbette}
         missileCount={missileCount}
@@ -1489,6 +1493,7 @@ export function AttackModal() {
         weaponKey={weaponKey}
         isPlayer={attacker.faction === 'players'}
         dmEntries={augmentedDmEntries}
+        totalDM={augmentedTotalDM}
         attackResult={attackResult}
         setAttackResult={setAttackResult}
         onNext={() => setStep(weapon?.traits?.includes('Ion') ? 'ion' : 'damage')}
