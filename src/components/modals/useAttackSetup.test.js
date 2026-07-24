@@ -165,6 +165,43 @@ describe('useAttackSetup — same-type weapon grouping (#14)', () => {
   })
 })
 
+// === dmEntries — single source for DM Summary + rollAttack (#33) ===
+
+describe('useAttackSetup — dmEntries', () => {
+  it('is an ordered array of { key, label, value, alwaysShow } covering every dmBreakdown key', () => {
+    const att = addAttacker([{ slot: 1, weapons: ['Pulse Laser'] }])
+    const tgt = addTarget()
+    const { result } = renderHook(() => useAttackSetup(att.id, tgt.id, 'Pulse Laser', null, 1))
+    const { dmEntries, dmBreakdown } = result.current
+    expect(Array.isArray(dmEntries)).toBe(true)
+    for (const key of Object.keys(dmBreakdown)) {
+      if (key === 'totalDM') continue
+      const entry = dmEntries.find((e) => e.key === key)
+      expect(entry, `missing dmEntries entry for "${key}"`).toBeDefined()
+      expect(entry.value).toBe(dmBreakdown[key])
+      expect(typeof entry.label).toBe('string')
+      expect(typeof entry.alwaysShow).toBe('boolean')
+    }
+  })
+
+  it('reducing dmEntries values matches dmBreakdown.totalDM', () => {
+    const att = addAttacker([{ slot: 1, weapons: ['Torpedo'] }])
+    const tgt = addTarget(100)
+    const { result } = renderHook(() => useAttackSetup(att.id, tgt.id, 'Torpedo', null, 1))
+    const { dmEntries, dmBreakdown } = result.current
+    const reduced = dmEntries.reduce((sum, e) => sum + e.value, 0)
+    expect(reduced).toBe(dmBreakdown.totalDM)
+  })
+
+  it('Gunner, Weapon, Range, Target size are alwaysShow: true — the rest are conditional', () => {
+    const att = addAttacker([{ slot: 1, weapons: ['Pulse Laser'] }])
+    const tgt = addTarget()
+    const { result } = renderHook(() => useAttackSetup(att.id, tgt.id, 'Pulse Laser', null, 1))
+    const alwaysShown = result.current.dmEntries.filter((e) => e.alwaysShow).map((e) => e.key)
+    expect(alwaysShown.sort()).toEqual(['gunnerSkill', 'rangeDM', 'sizeDM', 'weaponDM'].sort())
+  })
+})
+
 // === AID GUNNERS DM (#16) ===
 // // MgT2e CRB p.63, p.166
 

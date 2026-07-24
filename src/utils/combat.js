@@ -34,71 +34,26 @@ export function rollInitiative(pilotSkill, thrust, tacticsEffect = 0, diceOverri
 
 /**
  * Resolve an attack roll against a target ship.
- * Formula: 2D6 + Gunner + DM_dex + DM_aidGunners + DM_range + DM_weapon + DM_size + DM_evasive + DM_sensorLock
+ * Formula: 2D6 + sum of all named DM contributions passed in.
  * Target number: 8+
- * // MgT2e CRB p.163, p.167 (sensor lock bonus)
- * @param {{
- *   gunnerSkill: number,
- *   dexDM: number,
- *   aidGunnersDM: number,
- *   rangeDM: number,
- *   weaponDM: number,
- *   targetSizeDM: number,
- *   evasiveDM: number,
- *   sensorLockDM?: number,
- * }} params
+ *
+ * Generic over its DM arguments — any named number param other than
+ * `diceOverride` is treated as a DM contribution, summed into the total and
+ * echoed back in `breakdown`. Adding a new attack DM (e.g. a new weapon-specific
+ * penalty) never requires a change here — the caller just passes a new named
+ * value. // MgT2e CRB p.163, p.167 (sensor lock bonus)
+ * @param {{ diceOverride?: object|null, [dmName: string]: number }} params
  * @returns {{ roll: object, total: number, effect: number, hit: boolean, breakdown: object }}
  */
-export function rollAttack({
-  gunnerSkill,
-  dexDM,
-  aidGunnersDM,
-  rangeDM,
-  weaponDM,
-  targetSizeDM,
-  evasiveDM,
-  sensorLockDM = 0,
-  dogfightDM = 0,
-  obstacleCoverDM = 0,
-  torpedoSmallShipDM = 0,
-  bayWeaponSmallShipDM = 0,
-  diceOverride = null,
-}) {
+export function rollAttack({ diceOverride = null, ...dmValues }) {
   const roll = diceOverride ?? roll2D6()
-  const total =
-    roll.total +
-    gunnerSkill +
-    dexDM +
-    aidGunnersDM +
-    rangeDM +
-    weaponDM +
-    targetSizeDM +
-    evasiveDM +
-    sensorLockDM +
-    dogfightDM +
-    obstacleCoverDM +
-    torpedoSmallShipDM +
-    bayWeaponSmallShipDM
+  const total = roll.total + Object.values(dmValues).reduce((sum, v) => sum + v, 0)
   return {
     roll,
     total,
     effect: total - 8,
     hit: total >= 8,
-    breakdown: {
-      roll: roll.total,
-      gunnerSkill,
-      dexDM,
-      aidGunnersDM,
-      rangeDM,
-      weaponDM,
-      targetSizeDM,
-      evasiveDM,
-      sensorLockDM,
-      dogfightDM,
-      obstacleCoverDM,
-      torpedoSmallShipDM,
-      bayWeaponSmallShipDM,
-    },
+    breakdown: { roll: roll.total, ...dmValues },
   }
 }
 

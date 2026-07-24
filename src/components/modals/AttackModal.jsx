@@ -161,7 +161,7 @@ function ReactionsPanel({
  *   weapon: object|null,
  *   rangeBand: string,
  *   distance: number,
- *   dmBreakdown: object,
+ *   dmEntries: { key: string, label: string, value: number, alwaysShow: boolean }[],
  *   isMissile: boolean,
  *   missileCount: number,
  *   setMissileCount: Function,
@@ -172,7 +172,7 @@ function ReactionsPanel({
 function AttackConfigStep({
   enemies, availableWeapons,
   weaponKey, selectedTurretSlot, setWeaponSelection, targetId, setTargetId,
-  target, weapon, rangeBand, distance, dmBreakdown,
+  target, weapon, rangeBand, distance, dmEntries,
   combatMode, storedBand, manualRangeBand, setManualRangeBand,
   outOfRange, dogfightTie, noPower,
   isMissile, isMissileBarbette, missileCount, setMissileCount, ammoLeft,
@@ -180,7 +180,7 @@ function AttackConfigStep({
   reactions,
   onNext, onClose,
 }) {
-  const { gunnerSkill, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, torpedoSmallShipDM = 0, bayWeaponSmallShipDM = 0, totalDM } = dmBreakdown
+  const totalDM = dmEntries.reduce((sum, e) => sum + e.value, 0)
   // Torpedo salvo capped at 3 per barbette (HG p.31).
   // Missile Rack salvo capped at the number of racks mounted in this turret — a rack is a
   // single mount that launches one missile per round, even inside a mixed-weapon turret
@@ -381,17 +381,9 @@ function AttackConfigStep({
         {!isMissile && weapon && target && (
           <div className="bg-slate-800 rounded p-3 font-mono text-xs space-y-0.5">
             <p className="text-slate-400 mb-2">DM Summary (target: 8+)</p>
-            <DmRow label="Gunner" value={gunnerSkill} />
-            <DmRow label={`Weapon (${weaponKey})`} value={weapon.attackDM} />
-            <DmRow label={`Range (${rangeBand})`} value={rangeDM} />
-            <DmRow label="Target size" value={sizeDM} />
-            {evasiveDM !== 0 && <DmRow label="Evasion" value={evasiveDM} />}
-            {sensorLockDM !== 0 && <DmRow label="Sensor Lock" value={sensorLockDM} />}
-            {aidGunnersDM !== 0 && <DmRow label="Aid Gunners" value={aidGunnersDM} />}
-            {dogfightDM !== 0 && <DmRow label="Dogfight" value={dogfightDM} />}
-            {obstacleCoverDM !== 0 && <DmRow label="Field cover" value={obstacleCoverDM} />}
-            {torpedoSmallShipDM !== 0 && <DmRow label="Torpedo vs <2kt" value={torpedoSmallShipDM} />}
-            {bayWeaponSmallShipDM !== 0 && <DmRow label="Bay vs small target" value={bayWeaponSmallShipDM} />}
+            {dmEntries.filter((e) => e.alwaysShow || e.value !== 0).map((e) => (
+              <DmRow key={e.key} label={e.label} value={e.value} />
+            ))}
             <div className="border-t border-slate-700 mt-1 pt-1">
               <DmRow label="Total DM" value={totalDM} highlight />
             </div>
@@ -461,7 +453,7 @@ function AttackConfigStep({
  *   targetName: string,
  *   weaponKey: string,
  *   isPlayer: boolean,
- *   dmBreakdown: { gunnerSkill: number, weaponDM: number, rangeDM: number, sizeDM: number, evasiveDM: number, sensorLockDM: number, totalDM: number },
+ *   dmEntries: { key: string, label: string, value: number, alwaysShow: boolean }[],
  *   attackResult: object|null,
  *   setAttackResult: Function,
  *   onNext: Function,
@@ -471,28 +463,17 @@ function AttackConfigStep({
 function AttackRollStep({
   attackerName, targetName, weaponKey,
   isPlayer,
-  dmBreakdown,
+  dmEntries,
   attackResult, setAttackResult, onNext, onClose, onMissClose,
 }) {
-  const { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM, sensorLockDM, aidGunnersDM = 0, dogfightDM = 0, obstacleCoverDM = 0, torpedoSmallShipDM = 0, bayWeaponSmallShipDM = 0, totalDM } = dmBreakdown
+  const totalDM = dmEntries.reduce((sum, e) => sum + e.value, 0)
   const [manualDice, setManualDice] = useState(null)
 
   const handleRoll = (diceOverride = null) => {
-    const result = rollAttack({
-      gunnerSkill,
-      dexDM: 0,
-      aidGunnersDM,
-      rangeDM,
-      weaponDM,
-      targetSizeDM: sizeDM,
-      evasiveDM,
-      sensorLockDM,
-      dogfightDM,
-      obstacleCoverDM,
-      torpedoSmallShipDM,
-      bayWeaponSmallShipDM,
-      diceOverride,
-    })
+    // dexDM has no live source (no reaction currently sets it) — kept explicit for parity
+    // with the pre-refactor call shape; every other DM flows generically from dmEntries.
+    const dmValues = { dexDM: 0, ...Object.fromEntries(dmEntries.map((e) => [e.key, e.value])) }
+    const result = rollAttack({ ...dmValues, diceOverride })
     setAttackResult(result)
   }
 
@@ -1273,7 +1254,7 @@ export function AttackModal() {
     resetReactions()
   }
 
-  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, storedBand, combatMode, outOfRange, dogfightTie, noPower, dmBreakdown } =
+  const { attacker, enemies, target, weapon, availableWeapons, distance, rangeBand, storedBand, combatMode, outOfRange, dogfightTie, noPower, dmEntries } =
     useAttackSetup(modalPayload?.shipId ?? null, targetId, weaponKey, manualRangeBand, selectedTurretSlot)
 
   if (!attacker) return null
@@ -1320,11 +1301,7 @@ export function AttackModal() {
 
   // CRB p.171: each evasion costs 1 thrust, DM = −pilotSkill (fixed, not multiplied by thrust)
   const dynamicEvasiveDM = reactionEvasion ? -targetPilotSkill : 0
-  const augmentedDmBreakdown = {
-    ...dmBreakdown,
-    evasiveDM: dynamicEvasiveDM,
-    totalDM: dmBreakdown.totalDM + dynamicEvasiveDM,
-  }
+  const augmentedDmEntries = dmEntries.map((e) => e.key === 'evasiveDM' ? { ...e, value: dynamicEvasiveDM } : e)
   const sandBonusArmor = sandResult?.success ? (sandResult.bonusArmor ?? 0) : 0
 
   // ── Reaction handlers ─────────────────────────────────────────────────
@@ -1473,7 +1450,7 @@ export function AttackModal() {
         outOfRange={outOfRange}
         dogfightTie={dogfightTie}
         noPower={noPower}
-        dmBreakdown={augmentedDmBreakdown}
+        dmEntries={augmentedDmEntries}
         isMissile={isMissile}
         isMissileBarbette={isMissileBarbette}
         missileCount={missileCount}
@@ -1511,7 +1488,7 @@ export function AttackModal() {
         targetName={target?.name ?? '?'}
         weaponKey={weaponKey}
         isPlayer={attacker.faction === 'players'}
-        dmBreakdown={augmentedDmBreakdown}
+        dmEntries={augmentedDmEntries}
         attackResult={attackResult}
         setAttackResult={setAttackResult}
         onNext={() => setStep(weapon?.traits?.includes('Ion') ? 'ion' : 'damage')}

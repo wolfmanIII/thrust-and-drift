@@ -335,9 +335,23 @@ describe('rollAttack', () => {
     expect(cover.breakdown.obstacleCoverDM).toBe(-2)
   })
 
-  it('obstacleCoverDM defaults to 0 when omitted', () => {
-    const r = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0 })
-    expect(r.breakdown.obstacleCoverDM).toBe(0)
+  it('is generic over any named DM param — an arbitrary key not hardcoded anywhere sums correctly (#33)', () => {
+    // rollAttack takes { diceOverride, ...dmValues } — any number of arbitrarily-named DM
+    // contributions, summed and echoed in breakdown. Adding a new weapon/situational DM
+    // never requires a change to rollAttack itself.
+    const r = rollAttack({ gunnerSkill: 2, futureSpinalMountDM: -3, someOtherFutureDM: 1 })
+    expect(r.total).toBe(8 + 2 - 3 + 1) // roll=8 (mocked) + 2 - 3 + 1
+    expect(r.breakdown.futureSpinalMountDM).toBe(-3)
+    expect(r.breakdown.someOtherFutureDM).toBe(1)
+  })
+
+  it('omitting obstacleCoverDM contributes nothing to the total (same as passing 0)', () => {
+    // rollAttack is generic over its DM params (see JSDoc) — an omitted key simply isn't
+    // summed, equivalent to 0, though it won't appear in `breakdown` (only passed-in keys do).
+    const omitted = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0 })
+    const explicit = rollAttack({ gunnerSkill: 0, dexDM: 0, aidGunnersDM: 0, rangeDM: 0, weaponDM: 0, targetSizeDM: 0, evasiveDM: 0, obstacleCoverDM: 0 })
+    expect(omitted.total).toBe(explicit.total)
+    expect(omitted.breakdown.obstacleCoverDM).toBeUndefined()
   })
 })
 

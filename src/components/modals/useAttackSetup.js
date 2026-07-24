@@ -29,17 +29,13 @@ import { getObstacleAt, computeObstacleCoverDM } from '../../utils/obstacles.js'
  *   storedBand:       string|null,
  *   combatMode:       'vectorial'|'basic',
  *   outOfRange:   boolean,
- *   dmBreakdown: {
- *     gunnerSkill:        number,
- *     weaponDM:           number,
- *     rangeDM:            number,
- *     sizeDM:             number,
- *     evasiveDM:          number,   // always 0 here; set dynamically by Reactions in AttackModal
- *     sensorLockDM:       number,
- *     torpedoSmallShipDM: number,   // DM-2 vs ships < 2,000 tons (HG p.39); 0 otherwise
- *     bayWeaponSmallShipDM: number, // DM-2 vs ships ≤2,000t / DM-4 vs ≤100t for bay weapons (HG p.31); 0 otherwise
- *     totalDM:            number,
- *   },
+ *   dmEntries: { key: string, label: string, value: number, alwaysShow: boolean }[],
+ *     // Ordered list of every attack DM contribution — the single source AttackModal.jsx
+ *     // renders generically (DM Summary rows) and reduces into rollAttack's params.
+ *     // Adding a new DM modifier means adding one entry here; no other file needs to change.
+ *   dmBreakdown: object,
+ *     // Same values as dmEntries, keyed flat (`{ [key]: value, totalDM }`) — kept for
+ *     // call sites/tests that want direct named access rather than the ordered list.
  * }}
  */
 export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeBand = null, turretSlot = null) {
@@ -136,8 +132,27 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const isBayWeapon = weapon?.mount === 'bay' && !MISSILE_WEAPONS.has(weaponKey)
   const bayWeaponSmallShipDMValue = bayWeaponSmallShipDM(isBayWeapon, target?.profile.tonnage ?? 0)
 
-  const totalDM     = gunnerSkill + weaponDM + rangeDM + sizeDM + sensorLockDM + dogfightDM + obstacleCoverDM + aidGunnersDM + torpedoSmallShipDM + bayWeaponSmallShipDMValue
   const outOfRange  = weapon ? isOutOfRange(weapon.maxRange, rangeBand) : false
+
+  // Single source of truth for every attack DM: AttackModal.jsx maps this generically for
+  // the DM Summary display and reduces it into rollAttack's params. Adding a new modifier
+  // (weapon-specific or situational) means adding one entry here — nowhere else.
+  const dmEntries = [
+    { key: 'gunnerSkill',   label: 'Gunner',                    value: gunnerSkill, alwaysShow: true },
+    { key: 'weaponDM',      label: `Weapon (${weaponKey})`,      value: weaponDM,    alwaysShow: true },
+    { key: 'rangeDM',       label: `Range (${rangeBand})`,       value: rangeDM,     alwaysShow: true },
+    { key: 'sizeDM',        label: 'Target size',                value: sizeDM,      alwaysShow: true },
+    // evasiveDM is always 0 here — AttackModal.jsx overrides it dynamically from Reactions.
+    { key: 'evasiveDM',            label: 'Evasion',                value: 0,                        alwaysShow: false },
+    { key: 'sensorLockDM',         label: 'Sensor Lock',            value: sensorLockDM,              alwaysShow: false },
+    { key: 'aidGunnersDM',         label: 'Aid Gunners',             value: aidGunnersDM,              alwaysShow: false },
+    { key: 'dogfightDM',           label: 'Dogfight',                value: dogfightDM,                alwaysShow: false },
+    { key: 'obstacleCoverDM',      label: 'Field cover',             value: obstacleCoverDM,           alwaysShow: false },
+    { key: 'torpedoSmallShipDM',   label: 'Torpedo vs <2kt',         value: torpedoSmallShipDM,        alwaysShow: false }, // HG p.39
+    { key: 'bayWeaponSmallShipDM', label: 'Bay vs small target',     value: bayWeaponSmallShipDMValue, alwaysShow: false }, // HG p.31
+  ]
+  const totalDM     = dmEntries.reduce((sum, e) => sum + e.value, 0)
+  const dmBreakdown = { ...Object.fromEntries(dmEntries.map((e) => [e.key, e.value])), totalDM }
 
   return {
     attacker,
@@ -152,6 +167,7 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
     outOfRange,
     dogfightTie,
     noPower,
-    dmBreakdown: { gunnerSkill, weaponDM, rangeDM, sizeDM, evasiveDM: 0, sensorLockDM, aidGunnersDM, dogfightDM, obstacleCoverDM, torpedoSmallShipDM, bayWeaponSmallShipDM: bayWeaponSmallShipDMValue, totalDM },
+    dmEntries,
+    dmBreakdown,
   }
 }
