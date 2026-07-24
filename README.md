@@ -168,7 +168,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1353 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1452 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 

@@ -8,13 +8,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [2.8.0] — 2026-07-24
+
 ### Added
 
 - **Generic weapon bays: Fusion Gun, Meson Gun, Particle Beam, Railgun Bay (Small/Medium/Large)** — 12 new weapon entries with stats verified against HG p.31–33 (`weapons.js`). Meson Gun Bay carries `AP ∞` (`getApValue` extended to resolve it to `Infinity`, ignoring all armour per RAW). Added the generic **bay-vs-small-target DM** (HG p.31: DM-2 ≤2,000t / DM-4 ≤100t, inclusive thresholds) via a new `bayWeaponSmallShipDM` function (`combat.js`), wired through `useAttackSetup.js` and displayed as a DM Summary row in `AttackModal.jsx` — this also applies retroactively to the pre-existing Ion Cannon Bay, which was missing this modifier. Hardpoint costs (1 for Small/Medium, 5 for Large) were already handled generically by the existing `slotHardpointCost` logic. GitHub #23.
 
 ### Changed
 
-- **Refactored attack-DM plumbing to a single generic path** (GitHub #33) — adding a weapon-specific or situational attack DM previously required touching 5 places by hand across `combat.js`/`useAttackSetup.js`/`AttackModal.jsx`. `useAttackSetup.js` now builds one ordered `dmEntries` array (`{ key, label, value, alwaysShow }`) as the single source of truth; `AttackModal.jsx`'s DM Summary maps over it generically instead of a hand-listed `<DmRow>` per modifier, and `rollAttack` (`combat.js`) is now generic over any named DM param (`{ diceOverride, ...dmValues }`, summed automatically) instead of a fixed, hand-maintained parameter list. `dmBreakdown` (flat object) is still derived and returned alongside `dmEntries` for backward compatibility. Adding a future weapon-specific DM now means adding one entry in `useAttackSetup.js` — no other file changes.
+- **Refactored attack-DM plumbing to a single generic path** (GitHub #33) — adding a weapon-specific or situational attack DM previously required touching 5 places by hand across `combat.js`/`useAttackSetup.js`/`AttackModal.jsx`. `useAttackSetup.js` now builds one ordered `dmEntries` array (`{ key, label, value }`) as the single source of truth; `AttackModal.jsx`'s DM Summary maps over it generically instead of a hand-listed `<DmRow>` per modifier, and `rollAttack` (`combat.js`) is now generic over any named DM param (`{ diceOverride, ...dmValues }`, summed automatically) instead of a fixed, hand-maintained parameter list. `dmBreakdown` (flat object) is still derived and returned alongside `dmEntries` for backward compatibility. Adding a future weapon-specific DM now means adding one entry in `useAttackSetup.js` — no other file changes. A follow-up cleanup pass moved the DM Summary's "always show even at 0" row policy out of `dmEntries` (a display concern) into a plain `ALWAYS_SHOWN_DM_KEYS` set in `AttackModal.jsx`, and deduplicated `totalDM` (previously re-reduced three times per render) into a single computation passed down as a prop.
 
 ---
 

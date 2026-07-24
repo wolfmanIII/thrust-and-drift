@@ -9,23 +9,31 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.7.3 |
+| **Versione** | 2.8.0 |
 | **Branch** | main |
-| **Test** | 1349 Vitest + 65 Playwright e2e |
-| **Ultimo commit** | fix(actions): apply cumulative DM-2 penalty for repeated Overload M-Drive attempts (#32, v2.7.3) |
+| **Test** | 1452 Vitest + 67 Playwright e2e |
+| **Ultimo commit** | refactor(combat): simplify dmEntries — move display policy out of the hook, dedupe totalDM (v2.8.0) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.7.3; §10.2 Overload M-Drive cumulative penalty + Initiative CRB p.160→p.165, vedi sotto)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32 chiuse automaticamente via `Fixes #N`.
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.8.0; nuova §10.x Bay Weapons generici, vedi sotto)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33 chiuse automaticamente via `Fixes #N`/`Closes #N`.
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Overload M-Drive cumulative penalty + Initiative citation fix (v2.7.3)
+### Sessione corrente — Generic weapon bays + refactor DM plumbing (v2.8.0)
+
+1. **Generic weapon bays: Fusion Gun, Meson Gun, Particle Beam, Railgun Bay (#23)** — richiesta CotI su bay weapons oltre l'Ion Cannon Bay già implementato. Verificate le stat esatte sul PDF HG p.31–33 (12 nuove entry in `weapons.js`, Small/Medium/Large per famiglia). Meson Gun Bay ha `AP ∞` (ignora tutta l'armatura) — `getApValue` esteso per risolverlo a `Infinity`, con display corretto "∞" invece di "Infinity" in `AttackModal.jsx`. Aggiunto il DM generico bay-vs-bersagli-piccoli (HG p.31: DM-2 ≤2000t / DM-4 ≤100t, soglie inclusive) via `bayWeaponSmallShipDM` in `combat.js` — si applica **retroattivamente anche all'Ion Cannon Bay** preesistente, che non lo riceveva mai. Costo Hardpoint (1 Small/Medium, 5 Large) già gestito gratis dal codice esistente (`slotHardpointCost`). Verificato anche dal vivo in browser (screenshot DM Summary + roll reale).
+2. **Refactor architetturale: DM plumbing generico (#33)** — aperta durante il `/simplify` su #23: aggiungere un nuovo DM d'attacco richiedeva toccare 5 punti a mano tra `combat.js`/`useAttackSetup.js`/`AttackModal.jsx`. `useAttackSetup.js` ora costruisce un array ordinato `dmEntries` come unica fonte di verità; `AttackModal.jsx` renderizza il DM Summary con un `.map()` generico; `rollAttack` è ora generico su qualunque DM nominato (`{ diceOverride, ...dmValues }`), zero rotture sui test esistenti grazie ai rest-params. Un secondo `/simplify` pass su questo stesso refactor ha spostato la policy "quali righe mostrare sempre" fuori dall'hook (era una decisione di UI infilata nel layer di calcolo) e deduplicato `totalDM` (ricalcolato 3 volte, ora una sola).
+3. **Metodologia**: due `/simplify` pass completi (4 agenti paralleli ciascuno: reuse/simplification/efficiency/altitude) su #23 e #33. Findings applicati: test helper duplicato in `useAttackSetup.test.js`, guardia mancante per futuri Missile/Torpedo Bay, `totalDM` deduplicato, `alwaysShow` spostato in `AttackModal.jsx`, costante `EVASIVE_DM_KEY` per evitare drift su rename. Un finding (architettura `dmBreakdown` shotgun-surgery) è diventato l'issue #33 stessa; un altro (genericità di `rollAttack` come possibile over-generalization) scartato esplicitamente perché era l'obiettivo dichiarato del refactor, non un effetto collaterale.
+
+Totale 1452 Vitest (+99 da 1353), 67 Playwright e2e (invariato, refactor puramente interno già coperto da test di rendering RTL + verifica browser precedente).
+
+### Sessione precedente — Overload M-Drive cumulative penalty + Initiative citation fix (v2.7.3)
 
 Due segnalazioni CotI distinte, entrambe verificate contro i PDF ufficiali prima di intervenire:
 
