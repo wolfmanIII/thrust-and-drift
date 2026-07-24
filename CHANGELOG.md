@@ -8,6 +8,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [2.8.1] — 2026-07-24
+
 ### Fixed
 
 - **Overload M-Drive severe failure never applied the M-Drive critical hit (#34)** — CRB p.171: *"If the check fails with an Effect of –6 or less, the manoeuvre drive suffers a critical hit with Severity 1."* `crewActions.js` already documented this, but three compounding issues meant it never fired: `handleRoll`'s gate only called `applyEffect` on success (or for `aid_gunners`), so severe failures — which are failures by definition — never reached the effect-application code at all; `useActionEffects`'s `overload_drive` case never checked `effect` in the first place; and the UI warning text for it was nested inside that same success-only conditional, making it dead code for its own intended case. Fixed by widening both gates to also admit `overload_drive` with `effect <= -6`, and applying the critical via the existing `addCriticalHit` action — capped with `Math.max(existingSeverity, 1)` so a worse pre-existing M-Drive critical is never downgraded. Reported via CotI.

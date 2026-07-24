@@ -9,23 +9,29 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.8.0 |
+| **Versione** | 2.8.1 |
 | **Branch** | main |
-| **Test** | 1452 Vitest + 67 Playwright e2e |
-| **Ultimo commit** | refactor(combat): simplify dmEntries — move display policy out of the hook, dedupe totalDM (v2.8.0) |
+| **Test** | 1457 Vitest + 67 Playwright e2e |
+| **Ultimo commit** | fix(actions): apply M-Drive critical hit on severe Overload M-Drive failure (#34, v2.8.1) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.8.0; nuova §10.x Bay Weapons generici, vedi sotto)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33 chiuse automaticamente via `Fixes #N`/`Closes #N`.
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.8.1; nuovo blockquote §10.2 Overload M-Drive severe failure, vedi sotto)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34 chiuse automaticamente via `Fixes #N`/`Closes #N`.
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Generic weapon bays + refactor DM plumbing (v2.8.0)
+### Sessione corrente — Overload M-Drive severe failure critical hit fix (v2.8.1)
+
+Segnalazione CotI di follow-up: la penalità cumulativa DM-2 (#32) funzionava, ma il critical hit su fallimento severo (Effect ≤ -6) non veniva mai applicato. Confermato sul PDF CRB p.171: *"If the check fails with an Effect of –6 or less, the manoeuvre drive suffers a critical hit with Severity 1."* Tre problemi concorrenti in `ActionModal.jsx`: (1) `handleRoll` chiamava `applyEffect` solo su successo (o per `aid_gunners`) — ma Effect ≤ -6 è per definizione un fallimento, quindi quel path non veniva mai raggiunto; (2) `useActionEffects`'s case `overload_drive` non controllava mai `effect`, applicava solo il bonus +1 Thrust incondizionatamente; (3) il testo di warning in UI era annidato nello stesso condizionale success-only del punto (1), quindi codice morto per il suo stesso caso d'uso. Fix: gate allargati per ammettere anche `overload_drive` con `effect <= -6`, applicato il critical via `addCriticalHit` esistente, con `Math.max(existingSeverity, 1)` per non declassare un critical M-Drive preesistente peggiore. +5 test (effect esatto -6, sotto -6, fallimento ordinario senza critical, nessun downgrade, successo non tocca criticalHits). Aperta issue #34 su richiesta esplicita dell'utente ("apri sempre una issue" — nuova convenzione permanente, salvata in memoria).
+
+Totale 1457 Vitest (+5 da 1452), 67 Playwright e2e (invariato — fix di logica pura, coperto da test RTL con render+click reali; verifica e2e dal vivo tentata ma non completata per complessità del flusso PLAYER/dadi manuali su initiative, giudicata non necessaria data la copertura RTL).
+
+### Sessione precedente — Generic weapon bays + refactor DM plumbing (v2.8.0)
 
 1. **Generic weapon bays: Fusion Gun, Meson Gun, Particle Beam, Railgun Bay (#23)** — richiesta CotI su bay weapons oltre l'Ion Cannon Bay già implementato. Verificate le stat esatte sul PDF HG p.31–33 (12 nuove entry in `weapons.js`, Small/Medium/Large per famiglia). Meson Gun Bay ha `AP ∞` (ignora tutta l'armatura) — `getApValue` esteso per risolverlo a `Infinity`, con display corretto "∞" invece di "Infinity" in `AttackModal.jsx`. Aggiunto il DM generico bay-vs-bersagli-piccoli (HG p.31: DM-2 ≤2000t / DM-4 ≤100t, soglie inclusive) via `bayWeaponSmallShipDM` in `combat.js` — si applica **retroattivamente anche all'Ion Cannon Bay** preesistente, che non lo riceveva mai. Costo Hardpoint (1 Small/Medium, 5 Large) già gestito gratis dal codice esistente (`slotHardpointCost`). Verificato anche dal vivo in browser (screenshot DM Summary + roll reale).
 2. **Refactor architetturale: DM plumbing generico (#33)** — aperta durante il `/simplify` su #23: aggiungere un nuovo DM d'attacco richiedeva toccare 5 punti a mano tra `combat.js`/`useAttackSetup.js`/`AttackModal.jsx`. `useAttackSetup.js` ora costruisce un array ordinato `dmEntries` come unica fonte di verità; `AttackModal.jsx` renderizza il DM Summary con un `.map()` generico; `rollAttack` è ora generico su qualunque DM nominato (`{ diceOverride, ...dmValues }`), zero rotture sui test esistenti grazie ai rest-params. Un secondo `/simplify` pass su questo stesso refactor ha spostato la policy "quali righe mostrare sempre" fuori dall'hook (era una decisione di UI infilata nel layer di calcolo) e deduplicato `totalDM` (ricalcolato 3 volte, ora una sola).

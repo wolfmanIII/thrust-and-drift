@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.8.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.8.1** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -929,6 +929,11 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 > increments whether the check succeeds or fails, and there is **no in-app way
 > to clear it** — RAW requires performing offline maintenance (Engineer
 > (m-drive), 1D hours), which falls outside the scope of a combat round.
+>
+> **Overload M-Drive severe failure** *(CRB p.171)*: if the check fails with an
+> **Effect of −6 or less**, the manoeuvre drive suffers an **M-Drive critical
+> hit, Severity 1** — applied automatically. A pre-existing M-Drive critical of
+> higher severity is never downgraded by this.
 
 ---
 
