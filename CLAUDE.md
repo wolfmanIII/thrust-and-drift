@@ -103,6 +103,12 @@ src/
 - Project: keep `doc/` updated in Italian Markdown.
 - Game rules references: always cite source (e.g. `// MgT2e CRB p.164`, `// Traveller Companion p.172`).
 
+## SIMPLIFY & PLAYWRIGHT USAGE
+
+- Before running `/simplify` or Playwright e2e verification, evaluate first if actually needed for the change. Skip if not.
+- `/simplify`: run on non-trivial diffs (new feature, refactor touching 3+ files, architectural change). Skip for trivial fixes, doc-only changes, single-line tweaks.
+- Playwright: run only when the change affects live UI/interaction flow not already covered by existing e2e suite, or when unit/component tests can't verify the actual user-facing behavior. Skip for pure logic/util changes already covered by unit tests.
+
 ## AVAILABLE TOOLING — CodeGraph & claude-mem
 
 This project has both indexed. Use them before falling back to grep/find or unaided recall:
