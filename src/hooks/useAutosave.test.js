@@ -285,6 +285,52 @@ describe('autosave on significant changes', () => {
     const call = dbPut.mock.calls.find(([store]) => store === 'battle')
     expect(call[2]).toMatchObject({ pendingMissileImpacts, pendingObstacleCollisions, shipAddedThisRound: true })
   })
+
+  it('includes passingEncounters in persisted snapshot (#35)', async () => {
+    const { unmount } = renderHook(() => useAutosave())
+    await act(async () => {})
+
+    const passingEncounters = [{ id: 'e1', shipAId: 's1', shipBId: 's2', minDistance: 1 }]
+    act(() => { useBattleStore.setState({ round: 2, passingEncounters }) })
+    await act(async () => {})
+    unmount()
+
+    const call = dbPut.mock.calls.find(([store]) => store === 'battle')
+    expect(call[2]).toMatchObject({ passingEncounters })
+  })
+})
+
+describe('restore on mount — passingEncounters (#35)', () => {
+  it('restores passingEncounters from IndexedDB', async () => {
+    const passingEncounters = [{ id: 'e-restore', shipAId: 's1', shipBId: 's2', minDistance: 1 }]
+    mockStore['battle:current'] = {
+      id: 'battle-7', name: 'Test', round: 3, combatMode: 'vectorial',
+      phase: 'movement', initiativeOrder: [], currentActorIndex: 0,
+      ships: [makeShip()], missiles: [], log: [], mapSettings: { scale: 1 },
+      passingEncounters,
+    }
+
+    const { unmount } = renderHook(() => useAutosave())
+    await act(async () => {})
+    unmount()
+
+    expect(useBattleStore.getState().passingEncounters).toEqual(passingEncounters)
+  })
+
+  it('defaults passingEncounters to [] when absent from saved data', async () => {
+    mockStore['battle:current'] = {
+      id: 'battle-8', name: 'Test', round: 1, combatMode: 'vectorial',
+      phase: 'setup', initiativeOrder: [], currentActorIndex: 0,
+      ships: [makeShip()], missiles: [], log: [], mapSettings: { scale: 1 },
+      // passingEncounters intentionally absent
+    }
+
+    const { unmount } = renderHook(() => useAutosave())
+    await act(async () => {})
+    unmount()
+
+    expect(useBattleStore.getState().passingEncounters).toEqual([])
+  })
 })
 
 describe('restore on mount — pendingMissileImpacts, pendingObstacleCollisions, shipAddedThisRound', () => {

@@ -2161,8 +2161,8 @@ const useBattleStore = create((set, get) => {
   // === IMPORT / EXPORT ===
 
   exportBattleState: () => {
-    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, shipAddedThisRound, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, basicBandPool, obstaclesEnabled, obstacles, pendingObstacleCollisions, pendingMissileImpacts } = get()
-    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, shipAddedThisRound, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, basicBandPool, obstaclesEnabled, obstacles, pendingObstacleCollisions, pendingMissileImpacts, savedAt: new Date().toISOString() })
+    const { id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, shipAddedThisRound, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, basicBandPool, obstaclesEnabled, obstacles, pendingObstacleCollisions, pendingMissileImpacts, passingEncounters } = get()
+    exportBattle({ id, name, round, combatMode, phase, initiativeOrder, currentActorIndex, shipAddedThisRound, ships, missiles, dogfights, boardings, log, mapSettings, rangeBands, basicBandPool, obstaclesEnabled, obstacles, pendingObstacleCollisions, pendingMissileImpacts, passingEncounters, savedAt: new Date().toISOString() })
   },
 
   /**
@@ -2192,6 +2192,7 @@ const useBattleStore = create((set, get) => {
       obstacles: battle.obstacles ?? [],
       pendingObstacleCollisions: battle.pendingObstacleCollisions ?? [],
       pendingMissileImpacts: battle.pendingMissileImpacts ?? [],
+      passingEncounters: battle.passingEncounters ?? [],
       undoStack: [],
       redoStack: [],
     })

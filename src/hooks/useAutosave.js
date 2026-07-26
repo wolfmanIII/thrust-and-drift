@@ -40,6 +40,7 @@ function extractBattleSnapshot(state) {
     obstacles: state.obstacles,
     pendingObstacleCollisions: state.pendingObstacleCollisions,
     pendingMissileImpacts: state.pendingMissileImpacts,
+    passingEncounters: state.passingEncounters,
     savedAt: new Date().toISOString(),
   }
 }
@@ -62,7 +63,8 @@ function hasSignificantChange(prev, next) {
     prev.obstaclesEnabled !== next.obstaclesEnabled ||
     prev.obstacles !== next.obstacles ||
     prev.pendingObstacleCollisions !== next.pendingObstacleCollisions ||
-    prev.pendingMissileImpacts !== next.pendingMissileImpacts
+    prev.pendingMissileImpacts !== next.pendingMissileImpacts ||
+    prev.passingEncounters !== next.passingEncounters
   )
 }
 
@@ -97,6 +99,7 @@ export function useAutosave() {
           obstacles: saved.obstacles ?? [],
           pendingObstacleCollisions: saved.pendingObstacleCollisions ?? [],
           pendingMissileImpacts: saved.pendingMissileImpacts ?? [],
+          passingEncounters: saved.passingEncounters ?? [],
         })
       }
     }).catch(() => {/* IndexedDB unavailable — no recovery */})

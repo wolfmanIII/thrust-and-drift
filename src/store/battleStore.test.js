@@ -3011,6 +3011,55 @@ describe('exportBattleState / importBattleState — pendingMissileImpacts, shipA
   })
 })
 
+describe('exportBattleState / importBattleState — passingEncounters (#35)', () => {
+  it('export includes passingEncounters', () => {
+    useBattleStore.setState({
+      passingEncounters: [{ id: 'e1', shipAId: 'x', shipBId: 'y', minDistance: 1 }],
+    })
+    useBattleStore.getState().exportBattleState()
+    const callArg = exportBattle.mock.calls.at(-1)[0]
+    expect(callArg.passingEncounters).toHaveLength(1)
+    expect(callArg.passingEncounters[0].id).toBe('e1')
+  })
+
+  it('import restores passingEncounters', async () => {
+    const fakeEncounter = { id: 'e-import', shipAId: 'a', shipBId: 'b', minDistance: 1 }
+    importBattle.mockResolvedValueOnce({
+      id: 'battle-import-test-3',
+      name: 'Import Test 3',
+      round: 3,
+      combatMode: 'vectorial',
+      phase: 'movement',
+      ships: [],
+      missiles: [],
+      dogfights: [],
+      boardings: [],
+      log: [],
+      mapSettings: null,
+      rangeBands: null,
+      basicBandPool: null,
+      initiativeOrder: [],
+      currentActorIndex: 0,
+      passingEncounters: [fakeEncounter],
+    })
+    await useBattleStore.getState().importBattleState(null)
+    expect(useBattleStore.getState().passingEncounters).toHaveLength(1)
+    expect(useBattleStore.getState().passingEncounters[0].id).toBe('e-import')
+  })
+
+  it('import with passingEncounters absent defaults to []', () => {
+    importBattle.mockReturnValueOnce({
+      id: 'x', name: 'X', round: 1, combatMode: 'vectorial', phase: 'setup',
+      ships: [], missiles: [], dogfights: [], boardings: [], log: [],
+      mapSettings: null, rangeBands: null, basicBandPool: null,
+      initiativeOrder: [], currentActorIndex: 0,
+      // passingEncounters intentionally absent
+    })
+    useBattleStore.getState().importBattleState(null)
+    expect(useBattleStore.getState().passingEncounters).toEqual([])
+  })
+})
+
 // === REQ-13: Initiative skip (CRB p.165) =====================================
 
 describe('REQ-13 — initiative skip on round transition', () => {
