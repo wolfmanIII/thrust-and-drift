@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.8.2] — 2026-07-26
+
+### Fixed
+
+- **`passingEncounters` not persisted in autosave/export/import (#35)** — the pending "passing encounter" queue (`PassingAttackModal.jsx`) is populated asynchronously after movement animation and stays pending until the GM dismisses it, same as `pendingMissileImpacts`/`pendingObstacleCollisions`. Unlike those two, it was missing from all 3 save/restore allowlists (`useAutosave.js`'s snapshot + mount-restore, `battleStore.js`'s `exportBattleState`/`importBattleState`), so an autosave, export, or page reload during that window silently dropped the pending encounter with no error. Added to all 3 allowlists; 6 regression tests added covering snapshot persistence, mount-restore, and export/import round-trip.
+
+---
+
 ## [2.8.1] — 2026-07-24
 
 ### Fixed

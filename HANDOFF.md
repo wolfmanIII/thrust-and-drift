@@ -9,23 +9,31 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.8.1 |
+| **Versione** | 2.8.2 |
 | **Branch** | main |
-| **Test** | 1457 Vitest + 67 Playwright e2e |
-| **Ultimo commit** | fix(actions): apply M-Drive critical hit on severe Overload M-Drive failure (#34, v2.8.1) |
+| **Test** | 1463 Vitest + 67 Playwright e2e |
+| **Ultimo commit** | fix(store): persist passingEncounters in autosave/export/import (#35, v2.8.2) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.8.1; nuovo blockquote §10.2 Overload M-Drive severe failure, vedi sotto)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34 chiuse automaticamente via `Fixes #N`/`Closes #N`.
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.8.2)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35 chiuse automaticamente via `Fixes #N`/`Closes #N`.
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — Overload M-Drive severe failure critical hit fix (v2.8.1)
+### Sessione corrente — passingEncounters non persistito in autosave/export/import (v2.8.2)
+
+Richiesta esplicita di audit ("fai una verifica per vedere se save e autosave sono ok", cfr. convenzione `feedback-save-autosave-audit` — ogni nuovo campo top-level in `battleStore` va controllato in 3 allowlist separate: `useAutosave.js` (snapshot + restore mount) e `battleStore.js` (`exportBattleState`/`importBattleState`)). Confrontando i campi delle 3 allowlist con lo stato iniziale dello store, trovato `passingEncounters` (coda "passing encounter" pendenti, guida `PassingAttackModal.jsx`) mancante in tutte e 3 — stessa classe di `pendingMissileImpacts`/`pendingObstacleCollisions` (decisioni GM pendenti), entrambi già persistiti correttamente. `passingEncounters` viene popolato via `setTimeout` dopo l'animazione di movimento e resta pendente finché il GM non lo chiude (`dismissPassingEncounter`) — un autosave, export o reload della pagina in quella finestra perdeva silenziosamente l'incontro pendente, nessun errore. Aperta issue #35 subito (convenzione "apri sempre una issue"), poi fix: aggiunto il campo a tutte e 3 le allowlist, +6 test di regressione (snapshot autosave, restore mount, export/import round-trip). Nessun altro campo mancante trovato — tutti gli altri campi top-level combaciano tra le 3 allowlist.
+
+Aggiunta anche una sezione al `CLAUDE.md` del progetto: valutare prima se `/simplify` e Playwright servono davvero, prima di lanciarli (skip su fix banali/doc-only o logica pura già coperta da unit test).
+
+Totale 1463 Vitest (+6 da 1457), 67 Playwright e2e (invariato — fix di puro state plumbing, coperto da test unitari sulle 3 allowlist).
+
+### Sessione precedente — Overload M-Drive severe failure critical hit fix (v2.8.1)
 
 Segnalazione CotI di follow-up: la penalità cumulativa DM-2 (#32) funzionava, ma il critical hit su fallimento severo (Effect ≤ -6) non veniva mai applicato. Confermato sul PDF CRB p.171: *"If the check fails with an Effect of –6 or less, the manoeuvre drive suffers a critical hit with Severity 1."* Tre problemi concorrenti in `ActionModal.jsx`: (1) `handleRoll` chiamava `applyEffect` solo su successo (o per `aid_gunners`) — ma Effect ≤ -6 è per definizione un fallimento, quindi quel path non veniva mai raggiunto; (2) `useActionEffects`'s case `overload_drive` non controllava mai `effect`, applicava solo il bonus +1 Thrust incondizionatamente; (3) il testo di warning in UI era annidato nello stesso condizionale success-only del punto (1), quindi codice morto per il suo stesso caso d'uso. Fix: gate allargati per ammettere anche `overload_drive` con `effect <= -6`, applicato il critical via `addCriticalHit` esistente, con `Math.max(existingSeverity, 1)` per non declassare un critical M-Drive preesistente peggiore. +5 test (effect esatto -6, sotto -6, fallimento ordinario senza critical, nessun downgrade, successo non tocca criticalHits). Aperta issue #34 su richiesta esplicita dell'utente ("apri sempre una issue" — nuova convenzione permanente, salvata in memoria).
 
