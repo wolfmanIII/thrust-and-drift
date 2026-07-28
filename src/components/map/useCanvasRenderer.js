@@ -182,7 +182,7 @@ function drawThrustTargeting(ctx, ship, mouseHex, size, ox, oy) {
   const delta     = computeClampedDelta(mouseHex, ship.position, thrustAvailable)
   const cost      = hexDistance({ q: 0, r: 0 }, delta)
   const atCap     = thrustAvailable > 0 && cost >= thrustAvailable
-  const lineColor = atCap ? '#f97316' : '#22d3ee'  // orange-500 : neon-cyan
+  const lineColor = atCap ? '#fef3c7' : '#22d3ee'  // amber-100 (pale yellow) : neon-cyan
 
   const { x: sx, y: sy } = hexToPixel(ship.position.q, ship.position.r, size, ox, oy)
   const thrustEndHex = hexAdd(ship.position, delta)
@@ -228,7 +228,7 @@ function drawThrustTargeting(ctx, ship, mouseHex, size, ox, oy) {
   // Thrust budget badge below ghost
   ctx.globalAlpha = 1
   ctx.font = `bold ${Math.round(9 * (size / 32))}px monospace`
-  ctx.fillStyle = atCap ? '#f97316' : '#94a3b8'
+  ctx.fillStyle = atCap ? '#fef3c7' : '#94a3b8'
   ctx.textAlign = 'center'
   ctx.fillText(`${cost}/${thrustAvailable}`, gx, gy + size * 0.9)
 
