@@ -109,9 +109,6 @@ src/
 - `/simplify`: run on non-trivial diffs (new feature, refactor touching 3+ files, architectural change). Skip for trivial fixes, doc-only changes, single-line tweaks.
 - Playwright: run only when the change affects live UI/interaction flow not already covered by existing e2e suite, or when unit/component tests can't verify the actual user-facing behavior. Skip for pure logic/util changes already covered by unit tests.
 
-## AVAILABLE TOOLING — CodeGraph & claude-mem
+## AVAILABLE TOOLING — claude-mem
 
-This project has both indexed. Use them before falling back to grep/find or unaided recall:
-
-- **CodeGraph** (`.codegraph/`): reach for it BEFORE grep/find or reading files to locate or understand code. `codegraph_explore` (MCP) or `codegraph explore "<symbols/question>"` (shell) returns verbatim, line-numbered source plus call paths between symbols in one call.
 - **claude-mem**: cross-session memory of past work on this repo. Use `mem-search`/`smart-search`/`timeline` style lookups when checking whether something was already solved, how a past bug/feature was handled, or for session history context — before re-deriving it from scratch.
