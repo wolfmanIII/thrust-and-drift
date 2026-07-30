@@ -33,16 +33,18 @@ import { CrewAssignmentModal }   from './components/modals/CrewAssignmentModal.j
 import { BasicManoeuvreModal }  from './components/modals/BasicManoeuvreModal.jsx'
 import { BattleReportModal }   from './components/modals/BattleReportModal.jsx'
 import { RenameShipModal }    from './components/modals/RenameShipModal.jsx'
-import { HelpScreen }       from './components/help/HelpScreen.jsx'
-import { ChangelogScreen }  from './components/help/ChangelogScreen.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
-import { useState }        from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { Modal }           from './components/modals/Modal.jsx'
 import { useUiStore }      from './store/uiStore.js'
 import { useBattleStore }  from './store/battleStore.js'
 import { useAutosave }     from './hooks/useAutosave.js'
 import { useDogfightDetection } from './components/map/useDogfightDetection.js'
 import './App.css'
+
+// Lazy-loaded: optional views, not needed for first render (GitHub #22).
+const HelpScreen      = lazy(() => import('./components/help/HelpScreen.jsx').then((m) => ({ default: m.HelpScreen })))
+const ChangelogScreen = lazy(() => import('./components/help/ChangelogScreen.jsx').then((m) => ({ default: m.ChangelogScreen })))
 
 /**
  * Maps modal IDs (as stored in uiStore.activeModal) to their components.
@@ -94,7 +96,9 @@ function TopRightControls() {
       {helpOpen && (
         <Modal onClose={() => setHelpOpen(false)} variant="dialog" width="max-w-5xl" title="FIELD MANUAL">
           <div className="h-[75vh]">
-            <HelpScreen onBack={() => setHelpOpen(false)} />
+            <Suspense fallback={null}>
+              <HelpScreen onBack={() => setHelpOpen(false)} />
+            </Suspense>
           </div>
         </Modal>
       )}
@@ -130,7 +134,9 @@ export function App() {
     return (
       <>
         <div className="h-[calc(100%-1.75rem)]">
-          <HelpScreen />
+          <Suspense fallback={null}>
+            <HelpScreen />
+          </Suspense>
         </div>
         <LegalFooter />
       </>
@@ -141,7 +147,9 @@ export function App() {
     return (
       <>
         <div className="h-[calc(100%-1.75rem)]">
-          <ChangelogScreen />
+          <Suspense fallback={null}>
+            <ChangelogScreen />
+          </Suspense>
         </div>
         <LegalFooter />
       </>
