@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.8.3] — 2026-07-30
+
+### Changed
+
+- **Lazy-loaded `HelpScreen` and `ChangelogScreen` (#22)** — both were statically imported in `App.jsx` and bundled unconditionally into the initial payload despite being optional views opened only via button click (64.7 kB gzip, ~30% of the total bundle, investigated with `vite-bundle-visualizer`). Wrapped both in `React.lazy()` + `<Suspense fallback={null}>`; main bundle dropped from 224 kB to 152 kB gzip, clearing the Vite "chunk > 700 kB" build warning. No UX cost — first open now takes a 100–200 ms fetch, not noticeable outside active combat.
+
+---
+
 ## [2.8.2] — 2026-07-26
 
 ### Fixed

@@ -9,23 +9,29 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.8.2 |
+| **Versione** | 2.8.3 |
 | **Branch** | main |
 | **Test** | 1463 Vitest + 67 Playwright e2e |
-| **Ultimo commit** | fix(store): persist passingEncounters in autosave/export/import (#35, v2.8.2) |
+| **Ultimo commit** | perf(app): lazy-load HelpScreen and ChangelogScreen (#22, v2.8.3) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.8.2)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35 chiuse automaticamente via `Fixes #N`/`Closes #N`.
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.8.3)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22 chiuse automaticamente via `Fixes #N`/`Closes #N`.
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — passingEncounters non persistito in autosave/export/import (v2.8.2)
+### Sessione corrente — lazy-load HelpScreen + ChangelogScreen (v2.8.3, #22)
+
+Bundle splitting rimandato da tempo (memoria `project-bundle-splitting`): Vite segnalava chunk > 700 kB. Analisi con `vite-bundle-visualizer` invece di reagire alla sola soglia euristica — trovato `HelpScreen.jsx` (21.6 kB gzip) e `ChangelogScreen.jsx` (43.1 kB gzip, incorpora `CHANGELOG.md?raw`) importati staticamente in `App.jsx`, insieme 64.7 kB gzip (~30% del bundle totale) per due viste opzionali aperte solo via click, mai necessarie al primo render. Fix: `React.lazy()` + `<Suspense fallback={null}>` per entrambe in `App.jsx` (3 punti di rendering: pannello laterale Help, HelpScreen standalone, ChangelogScreen standalone). Nessun costo UX — apertura ora richiede un fetch di 100–200ms, non un problema fuori dal combattimento attivo. Bundle principale sceso da 224 kB a 152 kB gzip, warning Vite sparito. Nessun test nuovo necessario (comportamento coperto dai 1463 test esistenti, nessuna logica di dominio toccata) — verificato che la suite passa integralmente dopo il cambio.
+
+Nella stessa sessione: fix colore rubber-band/thrust-badge (pale yellow, v2.8.2 già rilasciato), aggiunto `.claude/.headroom_wrap_marker.json` al `.gitignore`, commesso config Serena MCP (`.serena/project.yml`, `.serena/.gitignore` — cache esclusa dal suo stesso gitignore).
+
+### Sessione precedente — passingEncounters non persistito in autosave/export/import (v2.8.2)
 
 Richiesta esplicita di audit ("fai una verifica per vedere se save e autosave sono ok", cfr. convenzione `feedback-save-autosave-audit` — ogni nuovo campo top-level in `battleStore` va controllato in 3 allowlist separate: `useAutosave.js` (snapshot + restore mount) e `battleStore.js` (`exportBattleState`/`importBattleState`)). Confrontando i campi delle 3 allowlist con lo stato iniziale dello store, trovato `passingEncounters` (coda "passing encounter" pendenti, guida `PassingAttackModal.jsx`) mancante in tutte e 3 — stessa classe di `pendingMissileImpacts`/`pendingObstacleCollisions` (decisioni GM pendenti), entrambi già persistiti correttamente. `passingEncounters` viene popolato via `setTimeout` dopo l'animazione di movimento e resta pendente finché il GM non lo chiude (`dismissPassingEncounter`) — un autosave, export o reload della pagina in quella finestra perdeva silenziosamente l'incontro pendente, nessun errore. Aperta issue #35 subito (convenzione "apri sempre una issue"), poi fix: aggiunto il campo a tutte e 3 le allowlist, +6 test di regressione (snapshot autosave, restore mount, export/import round-trip). Nessun altro campo mancante trovato — tutti gli altri campi top-level combaciano tra le 3 allowlist.
 
