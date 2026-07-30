@@ -38,3 +38,6 @@ playwright-report/
 
 # Codegraph
 .codegraph/
+
+# Headroom
+.claude/.headroom_wrap_marker.json
