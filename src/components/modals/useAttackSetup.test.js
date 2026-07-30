@@ -345,3 +345,43 @@ describe('useAttackSetup — bayWeaponSmallShipDM (#23)', () => {
     expect(totalDM).toBe(-4)
   })
 })
+
+describe('useAttackSetup — weapon override wiring (#21 iteration 1)', () => {
+  it('applies a singleton turret weapon override to the resolved weapon', () => {
+    const att = addAttacker([{
+      slot: 1,
+      weapons: ['Pulse Laser'],
+      weaponOverrides: { 0: { label: 'Old Federation Laser', damageDice: 3 } },
+    }])
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, '', 'Pulse Laser', null, 1)
+    )
+    expect(result.current.weapon.label).toBe('Old Federation Laser')
+    expect(result.current.weapon.damageDice).toBe(3)
+  })
+
+  it('ignores the override when the weapon name occurs more than once in the slot (CRB p.168 linking)', () => {
+    const att = addAttacker([{
+      slot: 1,
+      weapons: ['Pulse Laser', 'Pulse Laser'],
+      weaponOverrides: { 1: { label: 'Rusty Pulse Laser', damageDice: 1 } },
+    }])
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, '', 'Pulse Laser', null, 1)
+    )
+    expect(result.current.weapon.label).toBe('Pulse Laser')
+    expect(result.current.weapon.damageDice).toBe(2)
+  })
+
+  it('resolves the base weapon def when no turretSlot is given', () => {
+    const att = addAttacker([{
+      slot: 1,
+      weapons: ['Pulse Laser'],
+      weaponOverrides: { 0: { label: 'Old Federation Laser' } },
+    }])
+    const { result } = renderHook(() =>
+      useAttackSetup(att.id, '', 'Pulse Laser', null, null)
+    )
+    expect(result.current.weapon.label).toBe('Pulse Laser')
+  })
+})

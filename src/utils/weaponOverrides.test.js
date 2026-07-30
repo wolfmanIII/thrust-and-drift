@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resolveWeapon, resolveTurretWeapon } from './weaponOverrides.js'
+import { resolveWeapon, resolveTurretWeapon, resolveWeaponForSlot } from './weaponOverrides.js'
 import { WEAPONS } from '../data/weapons.js'
 
 describe('resolveWeapon', () => {
@@ -48,5 +48,37 @@ describe('resolveTurretWeapon', () => {
   it('is a no-op when weaponOverrides is absent (JSON back-compat)', () => {
     const turret = { slot: 1, weapons: ['Beam Laser'] }
     expect(resolveTurretWeapon(turret, 0)).toBe(WEAPONS['Beam Laser'])
+  })
+})
+
+describe('resolveWeaponForSlot', () => {
+  it('applies the override when the weapon name is a singleton in the slot', () => {
+    const turret = {
+      slot: 1,
+      weapons: ['Pulse Laser'],
+      weaponOverrides: { 0: { label: 'Old Federation Laser', damageDice: 3 } },
+    }
+    const resolved = resolveWeaponForSlot(turret, 'Pulse Laser')
+    expect(resolved.label).toBe('Old Federation Laser')
+    expect(resolved.damageDice).toBe(3)
+  })
+
+  it('falls back to the base def when the weapon name occurs more than once (CRB p.168 linking)', () => {
+    const turret = {
+      slot: 1,
+      weapons: ['Pulse Laser', 'Pulse Laser'],
+      weaponOverrides: { 1: { label: 'Rusty Pulse Laser', damageDice: 1 } },
+    }
+    expect(resolveWeaponForSlot(turret, 'Pulse Laser')).toBe(WEAPONS['Pulse Laser'])
+  })
+
+  it('returns the base def when no override is present', () => {
+    const turret = { slot: 1, weapons: ['Beam Laser'] }
+    expect(resolveWeaponForSlot(turret, 'Beam Laser')).toBe(WEAPONS['Beam Laser'])
+  })
+
+  it('returns null for an unknown weapon name', () => {
+    const turret = { slot: 1, weapons: ['Not A Real Weapon'] }
+    expect(resolveWeaponForSlot(turret, 'Not A Real Weapon')).toBeNull()
   })
 })

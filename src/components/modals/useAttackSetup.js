@@ -6,6 +6,7 @@
 
 import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS, DEFENSIVE_WEAPONS } from '../../data/weapons.js'
+import { resolveWeaponForSlot } from '../../utils/weaponOverrides.js'
 import { hexDistance, getRangeBand } from '../../utils/hex.js'
 import { getRangeDM, getTargetSizeDM, isOutOfRange, bayWeaponSmallShipDM } from '../../utils/combat.js'
 import { getEffectiveSkill } from '../../utils/crew.js'
@@ -59,7 +60,10 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const attacker = ships.find((s) => s.id === attackerShipId)
   const enemies  = ships.filter((s) => s.id !== attackerShipId && !s.isDestroyed)
   const target   = ships.find((s) => s.id === targetId)
-  const weapon  = weaponKey ? (WEAPONS[weaponKey] ?? null) : null
+  const selectedTurret = turretSlot != null ? (attacker?.profile.turrets ?? []).find((t) => t.slot === turretSlot) : null
+  const weapon = !weaponKey ? null
+    : selectedTurret ? resolveWeaponForSlot(selectedTurret, weaponKey)
+    : (WEAPONS[weaponKey] ?? null)
 
   // Missiles are excluded from the same-type linking bonus (CRB p.168 / p.172).
   const MISSILE_WEAPONS = new Set(['Missile Rack', 'Missile Barbette', 'Torpedo'])

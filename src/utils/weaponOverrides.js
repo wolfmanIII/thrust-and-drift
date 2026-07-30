@@ -32,3 +32,34 @@ export function resolveWeapon(weaponName, override) {
 export function resolveTurretWeapon(turret, index) {
   return resolveWeapon(turret.weapons[index], turret.weaponOverrides?.[index])
 }
+
+/**
+ * Resolve the effective weapon definition for a turret slot by weapon NAME
+ * rather than index — used wherever selection is (turretSlot, weaponName)
+ * pairs, not positional indices (the current selection model everywhere
+ * except `weaponOverrides` itself).
+ *
+ * The override is applied only if `weaponName` occurs exactly once in
+ * `turret.weapons`. CRB p.168 (Double and Triple Turrets): weapons of the
+ * "same type" fire linked with a combined damage bonus — an override makes
+ * an instance mechanically distinct from its unmodified siblings, so when
+ * the name is ambiguous (2+ occurrences) applying it would either break
+ * that linking or silently apply it to the wrong physical weapon. Falling
+ * back to the base def in that case guarantees linking is only ever
+ * computed over identical, unmodified weapons — matching the RAW.
+ * @param {{weapons: string[], weaponOverrides?: Record<number, object>}} turret
+ * @param {string} weaponName
+ * @returns {object|null}
+ */
+export function resolveWeaponForSlot(turret, weaponName) {
+  let matchIndex = -1
+  let matchCount = 0
+  for (let i = 0; i < turret.weapons.length; i++) {
+    if (turret.weapons[i] === weaponName) {
+      matchIndex = i
+      matchCount++
+    }
+  }
+  if (matchCount !== 1) return WEAPONS[weaponName] ?? null
+  return resolveTurretWeapon(turret, matchIndex)
+}
