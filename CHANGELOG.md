@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.9.1] — 2026-09-09
+
+### Fixed
+
+- **Point Defence turret remained available for a normal attack in the same round (#45)** — CRB p.171: *"a weapon used for point defence cannot be used to make attacks in the same combat round and vice versa."* `MissileImpactModal.jsx` already marked the turret via `markTurretFired` on a PD roll, and `useAttackSetup.js` already excluded fired turrets from the Attack-phase weapon list — but `advancePhase` (`battleStore.js`) reset `firedTurrets` the moment Attack phase began, wiping out any marks made earlier in the same round during Movement (where PD resolves). Removed that redundant per-phase reset; `firedTurrets` now resets only once per round (`buildNextRoundState`), as intended. Reported via CotI. 2 regression tests added covering the Movement→Attack transition and the once-per-round reset.
+
+---
+
 ## [2.9.0] — 2026-09-09
 
 ### Added

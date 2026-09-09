@@ -9,24 +9,33 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.9.0 |
+| **Versione** | 2.9.1 |
 | **Branch** | main |
-| **Test** | 1487 Vitest + 68 Playwright e2e |
-| **Ultimo commit** | test(e2e): weapon override end-to-end damage roll (#21, v2.9.0) |
+| **Test** | 1489 Vitest + 68 Playwright e2e |
+| **Ultimo commit** | fix(store): stop resetting firedTurrets on entering Attack phase (#45, v2.9.1) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.9.0)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #21 chiuse automaticamente via `Fixes #N`/`Closes #N`.
-- **#21 iterazione 2** (se richiesta) — range/salvo/ammo/traits custom, nuove armi non basate su una entry esistente. Struttura dati attuale (`weaponOverrides` indicizzato per posizione, attivo solo se l'arma è singola nello slot) regge l'iterazione 1 ma andrebbe rivista per selezione multi-istanza (id stabile per arma invece di indice) se si espande oltre il cosmetic+danno.
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.9.1)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45 chiuse automaticamente via `Fixes #N`/`Closes #N`.
+- **#21 iterazione 2** (se richiesta) — range/salvo/ammo/traits custom, nuove armi non basate su una entry esistente. Struttura dati attuale (`weaponOverrides` indicizzato per posizione, attivo solo se l'arma è singola nello slot) regge l'iterazione 1 ma andrebbe rivista per selezione multi-istanza (id stabile per arma invece di indice) se si espande oltre il cosmetic+danno. **#21 resta OPEN** (iterazione 1 rilasciata in v2.9.0, non auto-chiusa).
+- **Wishlist CotI aperta come issue** (#36–#44, non urgenti, nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #38 icone navi, #39 leggibilità testo UI, #40 posizione bottone Add Ship, #41 Enter = Next Phase, #42 chiarezza Point Defence, #43 raggruppamento report PDF, #44 gestione Power armi Ion (priorità bassa per l'utente).
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — GM weapon overrides, backend + form UI + e2e (v2.9.0, #21)
+### Sessione corrente — wishlist CotI + fix Point Defence/firedTurrets (v2.9.1, #45)
+
+Ricevuto un lungo feedback CotI post-v2.9.0: wishlist di 7 richieste "biggest usefulness" (custom weapon editing esteso, bay missili/torpedo, varianti missili, icone navi, leggibilità testo, posizione bottone Add Ship, scorciatoia Enter=Next Phase) + 2 "nice to have" (chiarezza Point Defence, raggruppamento report PDF) + 1 "lower priority" (gestione Power Ion). Verificato che "custom weapon editing" è coperto solo in parte da #21 iterazione 1 (nome/danno, non range/traits/DM/ammo/mount type) — commentato su #21 per chiarire lo scope invece di aprire un duplicato. Aperte 9 issue nuove (#36–#44) per il resto della lista, ciascuna con la citazione originale e il tag di priorità dell'utente. Preparata (non ancora postata) bozza di risposta CotI che spiega la scelta architetturale dietro la scope-riduzione di #21.
+
+Nello stesso messaggio, segnalato un secondo bug CotI (con screenshot del battle log): un turret laser usato per Point Defence restava disponibile per un attacco normale nello stesso round. Verificato RAW: *CRB p.171* — "a weapon used for point defence cannot be used to make attacks in the same combat round and vice versa." Root cause isolata leggendo il codice, non ipotizzata: `MissileImpactModal.jsx` già marcava il turret via `markTurretFired` al roll di PD, e `useAttackSetup.js` già escludeva i turret marcati dalle armi disponibili in fase Attack — ma `advancePhase` (`battleStore.js:1377`) azzerava `firedTurrets` ogni volta che si entrava in fase Attack, cancellando marcature fatte in fase Movement (dove il PD si risolve) nello stesso round, prima che la fase Attack iniziasse. Il reset corretto (una volta per round) esisteva già in `buildNextRoundState`. Fix: rimosso il reset ridondante in `advancePhase`. Aperta issue #45 subito (convenzione "apri sempre una issue"), poi fix + 2 test di regressione (marcatura sopravvive alla transizione Movement→Attack; il reset una-volta-per-round resta intatto). Nessun test e2e — fix di puro state logic, nessuna UI toccata, catena causale già coperta a unit test (marking + filtering + persistenza attraverso il cambio fase).
+
+Totale 1489 Vitest (+2 da 1487), 68 Playwright e2e (invariato).
+
+### Sessione precedente — GM weapon overrides, backend + form UI + e2e (v2.9.0, #21)
 
 Ripresa del branch `feature/21-weapon-editor` (creato in una sessione precedente con solo l'helper `resolveWeapon`/`resolveTurretWeapon` in `src/utils/weaponOverrides.js`, non ancora wired). Completato in 3 passi:
 
