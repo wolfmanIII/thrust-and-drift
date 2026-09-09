@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.9.0] — 2026-09-09
+
+### Added
+
+- **GM weapon overrides (#21, iteration 1)** — a turret weapon can now be individually customized from the Ship Profile Form via a ⚙ icon on its chip: display name, damage dice, damage bonus, and a free-text GM note. Range, salvo, ammo, and traits are untouched in this iteration. New `resolveWeaponForSlot`/`isSingletonInSlot` (`src/utils/weaponOverrides.js`) resolve the effective weapon definition and are wired into `useAttackSetup.js`, so an override affects the actual damage rolled in `AttackModal`, not just the profile editor's display. An override only applies when its weapon is the sole occurrence of that type in the turret slot — *CRB p.168* Double/Triple Turret linking (fire-together, combined damage bonus) requires identical, unmodified weapons, so a duplicated weapon's override is shown as inactive in the editor rather than silently breaking the linking or applying to the wrong physical weapon. `weaponOverrides` is a sparse, purely additive field on each turret — fully backward- and forward-compatible with every existing profile/battle JSON export (verified: old files load with no override applied; new files carry the field inertly through an app build that predates this feature). 24 new unit tests (helper + `useAttackSetup` wiring + form UI) plus a new end-to-end Playwright spec (`e2e/weapon-override.spec.js`) driving the full profile-form → live-battle → damage-roll path.
+
+---
+
 ## [2.8.3] — 2026-07-30
 
 ### Changed

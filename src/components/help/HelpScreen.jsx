@@ -192,6 +192,9 @@ export function HelpScreen({ onBack } = {}) {
             <p className="pt-1">
               <span className="text-slate-200">Hardpoint budget (CRB p.183):</span> one Hardpoint per full 100 tons of hull; ships under 100 tons use Firmpoints instead (1 below 35t, 2 from 35–70t, 3 from 71–99t). A Large Bay (HG p.31) costs 5 Hardpoints instead of 1. The check only blocks <em>new</em> weapon-slot additions — existing profiles, including the built-in catalog, are never retroactively invalidated.
             </p>
+            <p className="pt-1">
+              <span className="text-slate-200">Weapon overrides:</span> click the ⚙ icon next to a weapon chip to customize its display name, damage dice, damage bonus, and a free-text GM note (range, salvo, ammo, and traits are unaffected). A blank field inherits the base weapon's value. An override only applies when its weapon is the sole occurrence of that type in the slot — CRB p.168 turret linking requires identical weapons, so a duplicated weapon's override is shown as inactive rather than applied.
+            </p>
           </Sub>
         </Section>
 

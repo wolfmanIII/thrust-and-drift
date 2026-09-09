@@ -9,23 +9,40 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.8.3 |
+| **Versione** | 2.9.0 |
 | **Branch** | main |
-| **Test** | 1463 Vitest + 67 Playwright e2e |
-| **Ultimo commit** | perf(app): lazy-load HelpScreen and ChangelogScreen (#22, v2.8.3) |
+| **Test** | 1487 Vitest + 68 Playwright e2e |
+| **Ultimo commit** | test(e2e): weapon override end-to-end damage roll (#21, v2.9.0) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.8.3)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22 chiuse automaticamente via `Fixes #N`/`Closes #N`.
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.9.0)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #21 chiuse automaticamente via `Fixes #N`/`Closes #N`.
+- **#21 iterazione 2** (se richiesta) — range/salvo/ammo/traits custom, nuove armi non basate su una entry esistente. Struttura dati attuale (`weaponOverrides` indicizzato per posizione, attivo solo se l'arma è singola nello slot) regge l'iterazione 1 ma andrebbe rivista per selezione multi-istanza (id stabile per arma invece di indice) se si espande oltre il cosmetic+danno.
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — lazy-load HelpScreen + ChangelogScreen (v2.8.3, #22)
+### Sessione corrente — GM weapon overrides, backend + form UI + e2e (v2.9.0, #21)
+
+Ripresa del branch `feature/21-weapon-editor` (creato in una sessione precedente con solo l'helper `resolveWeapon`/`resolveTurretWeapon` in `src/utils/weaponOverrides.js`, non ancora wired). Completato in 3 passi:
+
+1. **Wiring nel combattimento** — `resolveWeaponForSlot(turret, weaponName)` aggiunto: applica l'override solo se l'arma è l'unica occorrenza di quel tipo nello slot, altrimenti fallback silenzioso alla definizione base — protegge il linking double/triple turret (*CRB p.168*: armi identiche richieste per sparare insieme con bonus danno combinato). Wired in `useAttackSetup.js` — il `weapon` risolto (usato per `damageDice`/`label` in `AttackModal.jsx`) ora riflette l'override. `/simplify` (4 agent paralleli: reuse/simplification/efficiency/altitude) → applicati fix minori (single-pass loop, ternary appiattita).
+2. **UI form** — editor inline in `ShipProfileForm.jsx` (icona ⚙ per chip arma, pannello con nome/damage dice/damage bonus/note, banner "inactive" quando l'arma non è singola nello slot). Reindexing di `weaponOverrides` (mappa indicizzata per posizione) quando un'arma viene rimossa dallo slot, altrimenti gli override "seguirebbero" l'arma sbagliata. `/simplify` su questo secondo diff → estratto `isSingletonInSlot` condiviso da `weaponOverrides.js` (eliminato check duplicato form/resolver), rimosso wrapper componente ridondante, altri cleanup minori. Skippato: fondere l'editor override in `TextField`/`NumField` esistenti (rompe coerenza visiva del pannello compatto), id stabile per arma al posto dell'indice (cambia il data model, fuori scope iterazione 1).
+3. **E2E** — richiesto esplicitamente dall'utente data la prima UI reale della feature ("è roba nuova e abbiamo riscritto un po di roba"), in deroga alla convenzione `feedback-no-browser` (di norma Playwright non si lancia per non consumare il rate limit Pro). `e2e/weapon-override.spec.js`: crea profilo con Pulse Laser overridato a 1D (base 2D) via form reale, piazza come player, avanza a fase Attack, tira danno con dadi manuali 6+6 (hit garantito), verifica che il passo Danno mostri "1D + Effect − Armour" (non "2D…") — prova che l'override arriva fino al tiro dadi live, non solo ai test unitari. Debug iterativo non banale: scoperto che il default faction in `AddShipModal` è `'npc'` (serviva click esplicito su "Players" per abilitare l'input dadi manuale), e che con una nave player in campo l'iniziativa richiede `InitiativeModal`'s flusso a dadi manuali invece dell'auto-roll NPC-only di `helpers.js`.
+
+**Retrocompatibilità verificata esplicitamente** (richiesta dall'utente): `weaponOverrides` è additivo puro, nessun allowlist su `profilesStore`/`battleStore`/`io.js` — profili vecchi aprono senza problemi (campo assente, fallback ovunque via `?.`), profili nuovi aprono anche in una build precedente a questa feature (il campo resta portato dallo spread `...t` esistente, mai letto, nessun crash).
+
+Discussione sul semver: proposta iniziale "major" dall'utente, corretta a **minor** (2.8.3 → 2.9.0) — feature nuova additiva, zero breaking change, coerente con la convenzione `feedback-versioning` (patch=bugfix, minor=feature nuova).
+
+Merge `feature/21-weapon-editor` → `main` (fast-forward, nessun conflitto).
+
+Totale 1487 Vitest (+24 da 1463), 68 Playwright e2e (+1).
+
+### Sessione precedente — lazy-load HelpScreen + ChangelogScreen (v2.8.3, #22)
 
 Bundle splitting rimandato da tempo (memoria `project-bundle-splitting`): Vite segnalava chunk > 700 kB. Analisi con `vite-bundle-visualizer` invece di reagire alla sola soglia euristica — trovato `HelpScreen.jsx` (21.6 kB gzip) e `ChangelogScreen.jsx` (43.1 kB gzip, incorpora `CHANGELOG.md?raw`) importati staticamente in `App.jsx`, insieme 64.7 kB gzip (~30% del bundle totale) per due viste opzionali aperte solo via click, mai necessarie al primo render. Fix: `React.lazy()` + `<Suspense fallback={null}>` per entrambe in `App.jsx` (3 punti di rendering: pannello laterale Help, HelpScreen standalone, ChangelogScreen standalone). Nessun costo UX — apertura ora richiede un fetch di 100–200ms, non un problema fuori dal combattimento attivo. Bundle principale sceso da 224 kB a 152 kB gzip, warning Vite sparito. Nessun test nuovo necessario (comportamento coperto dai 1463 test esistenti, nessuna logica di dominio toccata) — verificato che la suite passa integralmente dopo il cambio.
 

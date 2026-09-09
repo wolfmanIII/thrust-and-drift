@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.8.3** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.9.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -108,6 +108,12 @@ Each profile stores the ship's stats and named crew members.
 *HG p.31*: a **Large Bay** is the one exception — it consumes **5 Hardpoints** instead of 1.
 
 The Ship Profile Form shows a live `HARDPOINTS n/n` readout next to the Weapons section header and blocks adding a new weapon to an empty slot if doing so would exceed the hull's budget. This check applies only to **new** slot additions going forward — existing ship profiles (including every ship in the built-in catalog) are never retroactively invalidated, even if one happened to predate this rule and exceed the budget.
+
+#### 2.3.2 Weapon Overrides (GM customization)
+
+Click the ⚙ icon next to a weapon chip to open a per-weapon override editor. Overridable fields are the display name, damage dice, damage bonus, and a free-text GM note — range, salvo size, ammo, and traits are unaffected in this iteration. Any field left blank inherits the base weapon's value.
+
+An override only takes effect when its weapon is the **sole occurrence of that type** in the turret slot. *CRB p.168* — Double and Triple Turrets fire linked (one attack roll, combined damage bonus) only when the mounted weapons are identical; an override makes a weapon mechanically distinct from its unmodified siblings, so applying it to a duplicated weapon would either break that linking or apply silently to the wrong physical weapon. When the weapon isn't a singleton, the editor shows the override as **inactive** rather than applying it — remove the duplicate to reactivate it.
 
 ---
 
