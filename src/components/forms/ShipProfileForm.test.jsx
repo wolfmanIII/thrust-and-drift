@@ -201,3 +201,88 @@ describe('ShipProfileForm — Hardpoint budget (CRB p.183, HG p.31)', () => {
     expect(screen.getByText('HARDPOINTS 1/1')).toBeInTheDocument()
   })
 })
+
+describe('ShipProfileForm — weapon override editor (#21 iteration 1)', () => {
+  it('opens the editor with the base weapon name as placeholder', () => {
+    renderForm()
+    clickAddSlot()
+    addWeapon('Pulse Laser')
+    fireEvent.click(screen.getByRole('button', { name: 'Customize Pulse Laser' }))
+    expect(screen.getByText('Override — Pulse Laser')).toBeInTheDocument()
+    expect(screen.getByLabelText('Custom name')).toHaveAttribute('placeholder', 'Pulse Laser')
+  })
+
+  it('a custom name updates the weapon chip and shows the active marker', () => {
+    renderForm()
+    clickAddSlot()
+    addWeapon('Pulse Laser')
+    fireEvent.click(screen.getByRole('button', { name: 'Customize Pulse Laser' }))
+    fireEvent.change(screen.getByLabelText('Custom name'), { target: { value: 'Old Federation Laser' } })
+    expect(screen.getByText('Old Federation Laser')).toBeInTheDocument()
+    expect(screen.getByTitle('Custom override active')).toBeInTheDocument()
+  })
+
+  it('persists label/damageDice overrides to the saved profile, keyed by weapon index', () => {
+    renderForm()
+    fireEvent.change(screen.getByLabelText('NAME *'), { target: { value: 'Test Ship' } })
+    clickAddSlot()
+    addWeapon('Pulse Laser')
+    fireEvent.click(screen.getByRole('button', { name: 'Customize Pulse Laser' }))
+    fireEvent.change(screen.getByLabelText('Custom name'), { target: { value: 'Old Federation Laser' } })
+    fireEvent.change(screen.getByLabelText('Damage dice'), { target: { value: '3' } })
+    fireEvent.click(screen.getByRole('button', { name: '+ CREATE PROFILE' }))
+    const saved = useProfilesStore.getState().profiles[0]
+    expect(saved.turrets[0].weaponOverrides).toEqual({ 0: { label: 'Old Federation Laser', damageDice: 3 } })
+  })
+
+  it('clearing every override field drops the sparse entry entirely', () => {
+    renderForm()
+    fireEvent.change(screen.getByLabelText('NAME *'), { target: { value: 'Test Ship' } })
+    clickAddSlot()
+    addWeapon('Pulse Laser')
+    fireEvent.click(screen.getByRole('button', { name: 'Customize Pulse Laser' }))
+    fireEvent.change(screen.getByLabelText('Custom name'), { target: { value: 'Old Federation Laser' } })
+    fireEvent.change(screen.getByLabelText('Custom name'), { target: { value: '' } })
+    fireEvent.click(screen.getByRole('button', { name: '+ CREATE PROFILE' }))
+    const saved = useProfilesStore.getState().profiles[0]
+    expect(saved.turrets[0].weaponOverrides).toBeUndefined()
+  })
+
+  it('warns that the override is inactive when the same weapon appears twice in the slot (CRB p.168)', () => {
+    renderForm()
+    clickAddSlot()
+    addWeapon('Pulse Laser')
+    addWeapon('Pulse Laser')
+    const gearButtons = screen.getAllByRole('button', { name: 'Customize Pulse Laser' })
+    fireEvent.click(gearButtons[0])
+    expect(screen.getByText(/Inactive — another Pulse Laser shares this slot/)).toBeInTheDocument()
+  })
+
+  it('reindexes an override when an earlier weapon in the same slot is removed', () => {
+    renderForm()
+    clickAddSlot()
+    addWeapon('Pulse Laser')
+    addWeapon('Beam Laser')
+    fireEvent.click(screen.getByRole('button', { name: 'Customize Beam Laser' }))
+    fireEvent.change(screen.getByLabelText('Custom name'), { target: { value: 'Refit Beam Laser' } })
+    expect(screen.getByText('Refit Beam Laser')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Pulse Laser' }))
+    expect(screen.getByText('Refit Beam Laser')).toBeInTheDocument()
+  })
+
+  it('loads an existing override when editing a saved profile', () => {
+    useProfilesStore.setState({
+      profiles: [{
+        id: 'p1',
+        name: 'Old Ship',
+        tonnage: 100,
+        turrets: [{ slot: 1, weapons: ['Pulse Laser'], weaponOverrides: { 0: { label: 'Rusty Laser', notes: 'Salvaged' } } }],
+      }],
+    })
+    render(<ShipProfileForm profileId="p1" onSave={vi.fn()} onCancel={vi.fn()} />)
+    expect(screen.getByText('Rusty Laser')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Customize Pulse Laser' }))
+    expect(screen.getByLabelText('Custom name')).toHaveValue('Rusty Laser')
+    expect(screen.getByLabelText('GM notes')).toHaveValue('Salvaged')
+  })
+})

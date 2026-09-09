@@ -9,6 +9,7 @@ import { useProfilesStore } from '../../store/profilesStore.js'
 import { WEAPON_IDS, WEAPONS } from '../../data/weapons.js'
 import { CREW_SKILLS, blankCrewMember, migrateCrew } from '../../utils/crew.js'
 import { hardpointBudget, slotHardpointCost, totalHardpointsUsed } from '../../utils/hardpoints.js'
+import { isSingletonInSlot } from '../../utils/weaponOverrides.js'
 import { Tooltip } from '../ui/Tooltip.jsx'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -56,7 +57,11 @@ function initForm(profile) {
     hardened:          profile.hardened          ?? false,
     holographicControls: profile.holographicControls ?? false,
     crew,
-    turrets: (profile.turrets ?? []).map((t) => ({ ...t, weapons: [...t.weapons] })),
+    turrets: (profile.turrets ?? []).map((t) => ({
+      ...t,
+      weapons: [...t.weapons],
+      ...(t.weaponOverrides ? { weaponOverrides: { ...t.weaponOverrides } } : {}),
+    })),
   }
 }
 
@@ -176,8 +181,119 @@ function weaponMount(weaponId) {
   return WEAPONS[weaponId]?.mount ?? 'turret'
 }
 
-/** Turret row: slot number, weapon chips, add weapon dropdown, remove turret. */
-function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurret }) {
+/**
+ * Shift a turret's weaponOverrides keys after a weapon at `removedIdx` is
+ * removed — every override at a higher index moves down by one so it still
+ * points at the same physical weapon.
+ * @param {Record<number, object>|undefined} weaponOverrides
+ * @param {number} removedIdx
+ * @returns {Record<number, object>|undefined}  undefined if nothing remains
+ */
+function reindexOverridesAfterRemoval(weaponOverrides, removedIdx) {
+  if (!weaponOverrides) return undefined
+  const result = {}
+  for (const [key, val] of Object.entries(weaponOverrides)) {
+    const idx = Number(key)
+    if (idx === removedIdx) continue
+    result[idx > removedIdx ? idx - 1 : idx] = val
+  }
+  return pruneEmpty(result)
+}
+
+/** `{}`-like objects collapse to `undefined` so sparse maps never carry dead keys. */
+function pruneEmpty(obj) {
+  return Object.keys(obj).length > 0 ? obj : undefined
+}
+
+/** Labelled text input for the override editor (empty = inherit base weapon value). */
+function OverrideField({ label, value, placeholder, onChange, numeric = false, min, max, wide = false }) {
+  return (
+    <label className={`flex flex-col gap-0.5 ${wide ? 'col-span-2' : ''}`}>
+      <span className="font-mono text-[10px] text-slate-400 tracking-wide uppercase">{label}</span>
+      <input
+        type={numeric ? 'number' : 'text'}
+        min={min}
+        max={max}
+        value={value ?? ''}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-slate-800 border border-slate-600 text-slate-200 font-mono text-xs rounded px-2 py-1 focus:outline-none focus:border-(--neon-cyan)/60 placeholder:text-slate-500"
+      />
+    </label>
+  )
+}
+
+/**
+ * Inline editor for a single turret weapon's GM override (#21 iteration 1).
+ * Only label/damageDice/damageBonus/notes are overridable — range/salvo/ammo/traits
+ * are untouched. Empty field = no override for that field (inherits base WEAPONS value).
+ * The override is applied at attack time only if the weapon name is a singleton in
+ * this slot (`resolveWeaponForSlot`, `utils/weaponOverrides.js`) — CRB p.168 double/triple
+ * turret linking requires identical weapons, so a duplicated name always falls back to
+ * the base def and the override sits inert until the duplicate is removed.
+ */
+function WeaponOverrideEditor({ weaponName, base, override, isSingleton, onField }) {
+  return (
+    <div className="bg-slate-900 border border-(--neon-cyan)/30 rounded px-3 py-2 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[10px] text-slate-400 tracking-widest uppercase">
+          Override — {weaponName}
+        </span>
+      </div>
+      {!isSingleton && (
+        <p className="text-amber-400 font-mono text-[10px] leading-snug">
+          ⚠ Inactive — another {weaponName} shares this slot. CRB p.168 double/triple turret
+          linking requires identical weapons; this override is ignored until only one remains.
+        </p>
+      )}
+      <div className="grid grid-cols-2 gap-2">
+        <OverrideField
+          label="Custom name"
+          value={override?.label}
+          placeholder={base.label}
+          onChange={(v) => onField('label', v)}
+          wide
+        />
+        <OverrideField
+          label="Damage dice"
+          value={override?.damageDice}
+          placeholder={String(base.damageDice)}
+          onChange={(v) => onField('damageDice', v)}
+          numeric
+          min={0}
+          max={20}
+        />
+        <OverrideField
+          label="Damage bonus"
+          value={override?.damageBonus}
+          placeholder={String(base.damageBonus ?? 0)}
+          onChange={(v) => onField('damageBonus', v)}
+          numeric
+          min={-9}
+          max={20}
+        />
+        <OverrideField
+          label="GM notes"
+          value={override?.notes}
+          placeholder="Refit notes…"
+          onChange={(v) => onField('notes', v)}
+          wide
+        />
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Turret row: slot number, weapon chips, add weapon dropdown, remove turret.
+ * The caller keys this component by `turret.weapons.length` (in addition to
+ * `turret.slot`) so adding/removing a weapon remounts it — the cleanest way
+ * to reset `editingIdx` without a stale index once positions shift, no
+ * effect required.
+ */
+function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurret, onOverrideField }) {
+  const [editingIdx, setEditingIdx] = useState(null)
+
   const n          = turret.weapons.length
   const firstMount = n > 0 ? weaponMount(turret.weapons[0]) : null
   const isFixedMount = firstMount === 'barbette' || firstMount === 'bay'
@@ -191,61 +307,97 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
     ? TURRET_WEAPON_IDS
     : TURRET_WEAPON_IDS.filter((w) => weaponMount(w) === 'turret')
 
-  return (
-    <div className="flex flex-wrap items-center gap-1.5 bg-slate-800 rounded px-2 py-1.5">
-      <span className="text-slate-400 font-mono text-xs shrink-0 w-16">
-        Weapon {turret.slot}
-      </span>
-      <span className="text-slate-600 font-mono text-[10px] shrink-0">{typeLabel}</span>
+  const editingName = editingIdx != null ? turret.weapons[editingIdx] : null
+  const editingBase = editingName ? WEAPONS[editingName] : null
 
-      {/* Weapon chips */}
-      {turret.weapons.map((w, wIdx) => (
-        <span
-          key={wIdx}
-          className="flex items-center gap-1 bg-slate-700 border border-slate-600 text-slate-300 font-mono text-xs rounded px-1.5 py-0.5"
-        >
-          {w}
+  return (
+    <div className="space-y-1.5">
+      <div className="flex flex-wrap items-center gap-1.5 bg-slate-800 rounded px-2 py-1.5">
+        <span className="text-slate-400 font-mono text-xs shrink-0 w-16">
+          Weapon {turret.slot}
+        </span>
+        <span className="text-slate-600 font-mono text-[10px] shrink-0">{typeLabel}</span>
+
+        {/* Weapon chips */}
+        {turret.weapons.map((w, wIdx) => {
+          const override      = turret.weaponOverrides?.[wIdx]
+          const isSingleton    = isSingletonInSlot(turret, w)
+          const overrideActive = !!override && isSingleton
+          return (
+            <span
+              key={wIdx}
+              className="flex items-center gap-1 bg-slate-700 border border-slate-600 text-slate-300 font-mono text-xs rounded px-1.5 py-0.5"
+            >
+              {overrideActive ? (override.label || w) : w}
+              {overrideActive && (
+                <span className="text-(--neon-cyan)" title="Custom override active">●</span>
+              )}
+              {override && !isSingleton && (
+                <span className="text-amber-400" title="Override inactive — duplicate weapon in slot">!</span>
+              )}
+              <Tooltip label="GM override — name/damage/notes" position="top">
+                <button
+                  type="button"
+                  onClick={() => setEditingIdx(editingIdx === wIdx ? null : wIdx)}
+                  className={`leading-none transition-colors ${editingIdx === wIdx ? 'text-(--neon-cyan)' : 'text-slate-400 hover:text-(--neon-cyan)'}`}
+                  aria-label={`Customize ${w}`}
+                >
+                  ⚙
+                </button>
+              </Tooltip>
+              <button
+                type="button"
+                onClick={() => onRemoveWeapon(slotIdx, wIdx)}
+                className="text-slate-400 hover:text-red-400 leading-none transition-colors"
+                aria-label={`Remove ${w}`}
+              >
+                ×
+              </button>
+            </span>
+          )
+        })}
+
+        {/* Add weapon — turret slots hold up to 4 (quad turret, HG p.81); barbette/bay are single-mount (HG p.29) */}
+        {canAddMore && (
+          <select
+            value=""
+            onChange={(e) => { onAddWeapon(slotIdx, e.target.value); e.target.value = '' }}
+            className="bg-slate-700 border border-slate-600 text-slate-400 font-mono text-xs rounded px-1.5 py-0.5 focus:outline-none focus:border-(--neon-cyan)/60 cursor-pointer"
+          >
+            <option value="">+ weapon</option>
+            {addableWeaponIds.map((w) => (
+              <option key={w} value={w}>{w}</option>
+            ))}
+          </select>
+        )}
+        {!canAddMore && (
+          <span className="text-slate-400 font-mono text-xs italic">
+            {isFixedMount ? `${typeLabel} — single mount` : 'QUAD — max 4'}
+          </span>
+        )}
+
+        {/* Remove turret */}
+        <Tooltip label="Remove weapon slot" position="top">
           <button
             type="button"
-            onClick={() => onRemoveWeapon(slotIdx, wIdx)}
-            className="text-slate-400 hover:text-red-400 leading-none transition-colors"
-            aria-label={`Remove ${w}`}
+            onClick={() => onRemoveTurret(slotIdx)}
+            className="ml-auto text-slate-400 hover:text-red-400 font-mono text-sm leading-none transition-colors px-1"
+            aria-label="Remove weapon slot"
           >
-            ×
+            ✕
           </button>
-        </span>
-      ))}
+        </Tooltip>
+      </div>
 
-      {/* Add weapon — turret slots hold up to 4 (quad turret, HG p.81); barbette/bay are single-mount (HG p.29) */}
-      {canAddMore && (
-        <select
-          value=""
-          onChange={(e) => { onAddWeapon(slotIdx, e.target.value); e.target.value = '' }}
-          className="bg-slate-700 border border-slate-600 text-slate-400 font-mono text-xs rounded px-1.5 py-0.5 focus:outline-none focus:border-(--neon-cyan)/60 cursor-pointer"
-        >
-          <option value="">+ weapon</option>
-          {addableWeaponIds.map((w) => (
-            <option key={w} value={w}>{w}</option>
-          ))}
-        </select>
+      {editingIdx != null && editingBase && (
+        <WeaponOverrideEditor
+          weaponName={editingName}
+          base={editingBase}
+          override={turret.weaponOverrides?.[editingIdx]}
+          isSingleton={isSingletonInSlot(turret, editingName)}
+          onField={(field, value) => onOverrideField(slotIdx, editingIdx, field, value)}
+        />
       )}
-      {!canAddMore && (
-        <span className="text-slate-400 font-mono text-xs italic">
-          {isFixedMount ? `${typeLabel} — single mount` : 'QUAD — max 4'}
-        </span>
-      )}
-
-      {/* Remove turret */}
-      <Tooltip label="Remove weapon slot" position="top">
-        <button
-          type="button"
-          onClick={() => onRemoveTurret(slotIdx)}
-          className="ml-auto text-slate-400 hover:text-red-400 font-mono text-sm leading-none transition-colors px-1"
-          aria-label="Remove weapon slot"
-        >
-          ✕
-        </button>
-      </Tooltip>
     </div>
   )
 }
@@ -329,9 +481,37 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
   const removeWeapon = (slotIdx, weaponIdx) => {
     setForm((f) => ({
       ...f,
-      turrets: f.turrets.map((t, i) =>
-        i === slotIdx ? { ...t, weapons: t.weapons.filter((_, j) => j !== weaponIdx) } : t
-      ),
+      turrets: f.turrets.map((t, i) => {
+        if (i !== slotIdx) return t
+        const weapons = t.weapons.filter((_, j) => j !== weaponIdx)
+        // weaponOverrides is keyed by position — removing an index shifts every
+        // later weapon down one slot, so its override must shift with it.
+        const weaponOverrides = reindexOverridesAfterRemoval(t.weaponOverrides, weaponIdx)
+        return { ...t, weapons, weaponOverrides }
+      }),
+    }))
+  }
+
+  /**
+   * Set or clear one override field for a turret weapon (#21 iteration 1).
+   * An empty value clears that field; the whole `weaponOverrides[weaponIdx]`
+   * entry is dropped once every field on it is empty, keeping the map sparse.
+   */
+  const setOverrideField = (slotIdx, weaponIdx, field, rawValue) => {
+    setForm((f) => ({
+      ...f,
+      turrets: f.turrets.map((t, i) => {
+        if (i !== slotIdx) return t
+        const current = { ...(t.weaponOverrides?.[weaponIdx] ?? {}) }
+        if (rawValue === '') {
+          delete current[field]
+        } else {
+          current[field] = (field === 'damageDice' || field === 'damageBonus') ? Number(rawValue) : rawValue
+        }
+        const weaponOverrides = { ...(t.weaponOverrides ?? {}), [weaponIdx]: pruneEmpty(current) }
+        if (weaponOverrides[weaponIdx] === undefined) delete weaponOverrides[weaponIdx]
+        return { ...t, weaponOverrides: pruneEmpty(weaponOverrides) }
+      }),
     }))
   }
 
@@ -494,12 +674,13 @@ export function ShipProfileForm({ profileId, onSave, onCancel }) {
           <div className="space-y-1.5">
             {form.turrets.map((t, idx) => (
               <TurretRow
-                key={t.slot}
+                key={`${t.slot}-${t.weapons.length}`}
                 turret={t}
                 slotIdx={idx}
                 onAddWeapon={addWeapon}
                 onRemoveWeapon={removeWeapon}
                 onRemoveTurret={removeTurret}
+                onOverrideField={setOverrideField}
               />
             ))}
           </div>

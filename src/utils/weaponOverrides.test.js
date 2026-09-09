@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resolveWeapon, resolveTurretWeapon, resolveWeaponForSlot } from './weaponOverrides.js'
+import { resolveWeapon, resolveTurretWeapon, resolveWeaponForSlot, isSingletonInSlot } from './weaponOverrides.js'
 import { WEAPONS } from '../data/weapons.js'
 
 describe('resolveWeapon', () => {
@@ -80,5 +80,22 @@ describe('resolveWeaponForSlot', () => {
   it('returns null for an unknown weapon name', () => {
     const turret = { slot: 1, weapons: ['Not A Real Weapon'] }
     expect(resolveWeaponForSlot(turret, 'Not A Real Weapon')).toBeNull()
+  })
+})
+
+describe('isSingletonInSlot', () => {
+  it('true when the weapon name occurs once', () => {
+    const turret = { slot: 1, weapons: ['Pulse Laser', 'Beam Laser'] }
+    expect(isSingletonInSlot(turret, 'Pulse Laser')).toBe(true)
+  })
+
+  it('false when the weapon name occurs more than once', () => {
+    const turret = { slot: 1, weapons: ['Pulse Laser', 'Pulse Laser'] }
+    expect(isSingletonInSlot(turret, 'Pulse Laser')).toBe(false)
+  })
+
+  it('false when the weapon name is absent', () => {
+    const turret = { slot: 1, weapons: ['Beam Laser'] }
+    expect(isSingletonInSlot(turret, 'Pulse Laser')).toBe(false)
   })
 })

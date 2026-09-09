@@ -52,6 +52,27 @@ export function resolveTurretWeapon(turret, index) {
  * @returns {object|null}
  */
 export function resolveWeaponForSlot(turret, weaponName) {
+  const matchIndex = singletonIndexInSlot(turret, weaponName)
+  if (matchIndex === -1) return WEAPONS[weaponName] ?? null
+  return resolveTurretWeapon(turret, matchIndex)
+}
+
+/**
+ * True if `weaponName` occurs exactly once in `turret.weapons` — the
+ * condition under which a GM override is eligible to apply (see
+ * `resolveWeaponForSlot`). Shared with the profile-editing UI
+ * (`ShipProfileForm.jsx`) so both sides agree on what "singleton" means;
+ * duplicating this check would risk the two silently drifting apart.
+ * @param {{weapons: string[]}} turret
+ * @param {string} weaponName
+ * @returns {boolean}
+ */
+export function isSingletonInSlot(turret, weaponName) {
+  return singletonIndexInSlot(turret, weaponName) !== -1
+}
+
+/** Index of `weaponName` in `turret.weapons` if it occurs exactly once, else -1. */
+function singletonIndexInSlot(turret, weaponName) {
   let matchIndex = -1
   let matchCount = 0
   for (let i = 0; i < turret.weapons.length; i++) {
@@ -60,6 +81,5 @@ export function resolveWeaponForSlot(turret, weaponName) {
       matchCount++
     }
   }
-  if (matchCount !== 1) return WEAPONS[weaponName] ?? null
-  return resolveTurretWeapon(turret, matchIndex)
+  return matchCount === 1 ? matchIndex : -1
 }
