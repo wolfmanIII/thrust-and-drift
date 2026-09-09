@@ -477,6 +477,31 @@ describe('advancePhase', () => {
   })
 })
 
+// CRB p.171: "a weapon used for point defence cannot be used to make attacks in the
+// same combat round and vice versa." Point Defence resolves during Movement
+// (MissileImpactModal marks the turret via markTurretFired); the fix removes a
+// redundant reset that used to wipe that mark the moment Attack phase began.
+describe('advancePhase — firedTurrets survives the Movement → Attack transition (#45)', () => {
+  it('a turret marked fired during Movement stays excluded once Attack phase begins', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().markTurretFired(id, 1)
+    useBattleStore.setState({ phase: 'movement' })
+    useBattleStore.getState().advancePhase() // movement → attack
+    expect(useBattleStore.getState().phase).toBe('attack')
+    expect(useBattleStore.getState().ships[0].firedTurrets).toContain(1)
+  })
+
+  it('firedTurrets still resets once per round, at the start of the next round', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().markTurretFired(id, 1)
+    useBattleStore.setState({ phase: 'end' })
+    useBattleStore.getState().advancePhase() // end → new round
+    expect(useBattleStore.getState().ships[0].firedTurrets).toEqual([])
+  })
+})
+
 describe('advanceActor', () => {
   it('increments currentActorIndex', () => {
     useBattleStore.setState({ currentActorIndex: 1 })

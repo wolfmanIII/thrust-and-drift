@@ -1374,7 +1374,11 @@ const useBattleStore = create((set, get) => {
       ships: s.ships.map((sh) => ({
         ...sh,
         hasActedThisPhase: false,
-        ...(nextPhase === 'attack'   ? { firedTurrets: [] }     : {}),
+        // firedTurrets is NOT reset here (#45): a turret used for Point Defence during
+        // Movement must stay excluded from Attack-phase weapon selection in the same
+        // round (CRB p.171 — "a weapon used for point defence cannot be used to make
+        // attacks in the same combat round and vice versa"). It resets once per round
+        // in buildNextRoundState instead.
         ...(nextPhase === 'actions' ? { usedCrewMembers: [] }  : {}),
       })),
       log: [...s.log, makeLogEntry({
