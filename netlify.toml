@@ -2,3 +2,13 @@
   command = "npm run build"
   publish = "dist"
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- src/ public/ index.html vite.config.js package.json"
+
+# Consolidate SEO/backlink authority onto the custom domain — Google indexed the
+# netlify.app subdomain (community links pointed there before the domain move) and
+# ignores the canonical tag on tad.nav-fi-3.space because no real backlink signals
+# point at it. A 301 fixes indexing at the source.
+[[redirects]]
+  from = "https://thrust-and-drift.netlify.app/*"
+  to = "https://tad.nav-fi-3.space/:splat"
+  status = 301
+  force = true
