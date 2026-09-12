@@ -132,6 +132,8 @@ function buildNextRoundState(s) {
       type: r.missile.type,
       ewAppliedThisRound: false,
       hasSmartGuidance: r.missile.hasSmartGuidance ?? true,
+      weaponLabel: r.missile.weaponLabel ?? null,
+      damageDice: r.missile.damageDice ?? null,
     }))
   } else if (s.missiles.length > 0) {
     // vectorial mode: reset ewAppliedThisRound each round
@@ -864,6 +866,8 @@ const useBattleStore = create((set, get) => {
       type: m.type,
       ewAppliedThisRound: false,
       hasSmartGuidance: m.hasSmartGuidance ?? true,
+      weaponLabel: m.weaponLabel ?? null,
+      damageDice: m.damageDice ?? null,
     }))
 
     const entries = movedShips.map((sh) => makeLogEntry({
@@ -1256,12 +1260,17 @@ const useBattleStore = create((set, get) => {
    * @param {{ q: number, r: number }} position  Launch position (attacker hex)
    * @param {{ q: number, r: number }} vector    Initial vector (inherits attacker vector)
    * @param {'Standard'|'Smart'|'Nuclear'|'Ortillery'} type
+   * @param {boolean} hasSmartGuidance
+   * @param {string|null} weaponLabel  GM override display name (#48), null = use base type name
+   * @param {number|null} damageDice   GM override damage dice per missile (#48), null = base rules value
    */
-  launchMissile: wh((launchedBy, target, count, position, vector, type = 'Standard', hasSmartGuidance = true) => {
+  launchMissile: wh((launchedBy, target, count, position, vector, type = 'Standard', hasSmartGuidance = true, weaponLabel = null, damageDice = null) => {
     const state = get()
     const attacker = state.ships.find((s) => s.id === launchedBy)
     const missile = {
       id: uuidv7(),
+      weaponLabel,
+      damageDice,
       launchedBy,
       target,
       count,
@@ -1294,7 +1303,7 @@ const useBattleStore = create((set, get) => {
         round: s.round,
         phase: s.phase,
         type: 'attack',
-        message: `${attacker?.name ?? '?'} launches ${count} missile(s) (${type}).`,
+        message: `${attacker?.name ?? '?'} launches ${count} missile(s) (${weaponLabel ?? type}).`,
         shipId: launchedBy,
         details: missile,
       })],

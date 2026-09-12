@@ -23,6 +23,8 @@ function setupImpact({
   targetFiredTurrets = [],
   faction            = 'npc',
   count              = 3,
+  weaponLabel        = null,
+  damageDice         = null,
 } = {}) {
   useBattleStore.getState().addShip(
     { id: 'p-launcher', name: 'Launcher', hull: 20, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
@@ -53,6 +55,8 @@ function setupImpact({
       type:               'Missile',
       hasSmartGuidance:   false,
       ewAppliedThisRound: false,
+      weaponLabel,
+      damageDice,
     }],
   })
 
@@ -343,5 +347,49 @@ describe('AttackModal — PD absent for missile weapons (REQ-08)', () => {
     expect(screen.queryByText(/REACTIONS/i)).not.toBeInTheDocument()
     // "Point Defence" text must not appear
     expect(screen.queryByText(/Point Defence/i)).not.toBeInTheDocument()
+  })
+})
+
+// ── #48: GM weapon override reaches the launched salvo ────────────────────────
+
+describe('MissileImpactModal — weapon override on the impacted salvo (#48)', () => {
+  it('shows the overridden weapon label instead of the base type', () => {
+    setupImpact({ weaponLabel: 'Advanced Missile Rack', damageDice: 5 })
+    render(<MissileImpactModal />)
+    expect(screen.getAllByText(/Advanced Missile Rack/).length).toBeGreaterThan(0)
+    expect(screen.queryByText(/^Missile$/)).not.toBeInTheDocument()
+  })
+
+  it('falls back to the base type name when no override is present', () => {
+    setupImpact({})
+    render(<MissileImpactModal />)
+    expect(screen.getAllByText(/Missile/).length).toBeGreaterThan(0)
+  })
+
+  it('rolls damage using the overridden damage dice, not the type-based default', () => {
+    setupImpact({ weaponLabel: 'Advanced Missile Rack', damageDice: 5, count: 3 })
+    render(<MissileImpactModal />)
+
+    fireEvent.change(screen.getByPlaceholderText('D1'), { target: { value: '6' } })
+    fireEvent.change(screen.getByPlaceholderText('D2'), { target: { value: '6' } })
+    fireEvent.click(screen.getByRole('button', { name: /ROLL DAMAGE/ }))
+
+    // 5D6 (override), not 4D6 (the type-based default for a non-Torpedo salvo).
+    expect(screen.getByText('5D6')).toBeInTheDocument()
+    expect(screen.queryByText('4D6')).not.toBeInTheDocument()
+  })
+
+  it('applies damage with a log message using the overridden weapon label', () => {
+    setupImpact({ weaponLabel: 'Advanced Missile Rack', damageDice: 5, count: 3 })
+    render(<MissileImpactModal />)
+
+    fireEvent.change(screen.getByPlaceholderText('D1'), { target: { value: '6' } })
+    fireEvent.change(screen.getByPlaceholderText('D2'), { target: { value: '6' } })
+    fireEvent.click(screen.getByRole('button', { name: /ROLL DAMAGE/ }))
+    fireEvent.change(screen.getByPlaceholderText('0'), { target: { value: '10' } })
+    fireEvent.click(screen.getByRole('button', { name: /APPLY .* DAMAGE/ }))
+
+    const log = useBattleStore.getState().log
+    expect(log.some((e) => e.message.includes('Advanced Missile Rack'))).toBe(true)
   })
 })

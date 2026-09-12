@@ -479,3 +479,48 @@ describe('AttackModal — custom weapon override name shown in picker and battle
     expect(target.hullCurrent).toBeLessThan(10)
   })
 })
+
+describe('AttackModal — Missile Rack override reaches the launched salvo (#48)', () => {
+  beforeEach(() => {
+    useBattleStore.getState().resetBattle('vectorial')
+    useUiStore.setState({ activeModal: null, modalPayload: null })
+  })
+
+  it('passes the overridden label and damage dice to launchMissile', () => {
+    const profile = makeRackProfile('Viper', {
+      turrets: [{ slot: 1, weapons: ['Missile Rack'], weaponOverrides: { 0: { label: 'Advanced Missile Rack', damageDice: 5 } } }],
+    })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Bogey', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att] = useBattleStore.getState().ships
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+    render(<AttackModal />)
+
+    // Picker shows the override name (#47) — click it to select the weapon.
+    fireEvent.click(screen.getByText('Advanced Missile Rack'))
+    fireEvent.click(screen.getByText('Bogey'))
+    fireEvent.click(screen.getByText('🚀 LAUNCH SALVO →'))
+
+    const missile = useBattleStore.getState().missiles[0]
+    expect(missile.weaponLabel).toBe('Advanced Missile Rack')
+    expect(missile.damageDice).toBe(5)
+  })
+
+  it('still resolves the base label/damage dice for an unmodified Missile Rack (no override needed)', () => {
+    setupAttack()
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Missile Rack'))
+    fireEvent.click(screen.getAllByText('Target').at(-1))
+    fireEvent.click(screen.getByText('🚀 LAUNCH SALVO →'))
+
+    // Always resolved via resolveWeaponForSlot, override or not — this also fixes
+    // the pre-#48 salvo badge showing the generic "Standard" category instead of
+    // the actual weapon name.
+    const missile = useBattleStore.getState().missiles[0]
+    expect(missile.weaponLabel).toBe('Missile Rack')
+    expect(missile.damageDice).toBe(4) // HG p.28
+  })
+})
