@@ -9,17 +9,17 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.9.1 |
+| **Versione** | 2.9.2 |
 | **Branch** | main |
-| **Test** | 1489 Vitest + 68 Playwright e2e |
-| **Ultimo commit** | fix(store): stop resetting firedTurrets on entering Attack phase (#45, v2.9.1) |
+| **Test** | 1504 Vitest + 68 Playwright e2e |
+| **Ultimo commit** | test(store): cover #48 weapon override propagation in basic mode too (v2.9.2) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.9.1)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45 chiuse automaticamente via `Fixes #N`/`Closes #N`.
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.9.2)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45, #46, #47, #48 chiuse automaticamente via `Fixes #N`/`Closes #N`.
 - **#21 iterazione 2** (se richiesta) — range/salvo/ammo/traits custom, nuove armi non basate su una entry esistente. Struttura dati attuale (`weaponOverrides` indicizzato per posizione, attivo solo se l'arma è singola nello slot) regge l'iterazione 1 ma andrebbe rivista per selezione multi-istanza (id stabile per arma invece di indice) se si espande oltre il cosmetic+danno. **#21 resta OPEN** (iterazione 1 rilasciata in v2.9.0, non auto-chiusa).
 - **Wishlist CotI aperta come issue** (#36–#44, non urgenti, nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #38 icone navi, #39 leggibilità testo UI, #40 posizione bottone Add Ship, #41 Enter = Next Phase, #42 chiarezza Point Defence, #43 raggruppamento report PDF, #44 gestione Power armi Ion (priorità bassa per l'utente).
 
@@ -27,7 +27,25 @@
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — wishlist CotI + fix Point Defence/firedTurrets (v2.9.1, #45)
+### Sessione corrente — fix override armi: damageBonus, nome custom, missili (v2.9.2, #46/#47/#48)
+
+Feedback CotI da test reale di v2.9.1 (weapon overrides): 3 bug distinti trovati testando l'editor a mano su Pulse Laser/Particle Barbette/Missile Rack.
+
+1. **#46 — `damageBonus` morto**: campo definito su ogni entry di `weapons.js` (sempre 0 per le armi base) ma mai letto da nessun calcolo danno — `AttackDamageStep` non lo sommava mai al totale. Sempre stato un dead field, mai notato prima perché sempre 0; l'editor #21 lo espone come funzionante ma non lo era. Fix: aggiunto `weaponDamageBonus` alla formula (auto-roll e manuale) e all'etichetta.
+2. **#47 — nome custom invisibile in combattimento**: picker armi e log/report mostravano sempre il nome base, mai il `label` dell'override. Scoperto durante il fix che alcune armi hanno `.label` diverso dalla chiave (es. "Ion Cannon Bay (S)" vs "Ion Cannon Bay (Small)") — quindi il fix mostra il nome custom **solo se esiste davvero un override**, altrimenti nessun cambio di comportamento per armi mai toccate.
+3. **#48 — override missili mai applicati**: architettura separata dal path direct-fire — `launchMissile` riduceva tutto a un enum `'Standard'|'Torpedo'`, nessun weaponKey/turretSlot salvato sul missile; `MissileImpactModal` calcolava danno con un lookup hardcoded (4D/6D) che non consultava mai `WEAPONS` né l'override. Fix: risolto il peso reale via `resolveWeaponForSlot` al lancio, snapshot di `weaponLabel`/`damageDice` sull'oggetto missile, propagato in **entrambi** i path di impatto (`resolveMovement` vettoriale e `buildNextRoundState` basic mode). Effetto collaterale positivo: anche i missili mai overridati ora mostrano il nome vero arma invece del generico "Standard".
+
+L'utente ha corretto la mia prima chiusura frettolosa: avevo detto "basic mode fuori scope" per il test mancante, ma il fix copriva già basic mode — mancava solo la verifica. Aggiunto test di integrazione basic-mode, verde al primo colpo (confermando che il fix era già corretto lì).
+
+15 test nuovi totali (5 AttackModal #46/#47 + 2 store + 2 AttackModal + 4 MissileImpactModal per #48 + 2 test di integrazione pipeline vettoriale/basic). Nessun test e2e — tutte correzioni di formula/dati su schermate già coperte da e2e (#21) o da flussi RTL completi che arrivano fino alla vera store action (`applyDamage`, `launchMissile`).
+
+Aperte anche 9 issue per il resto della wishlist CotI (#36–#44) e commentata #21 per chiarire lo scope dell'iterazione 1 vs 2.
+
+Rimosso lean-ctx (disinstallato completamente: binario, hook shell, config) e serena (config globale `~/.serena/` + config progetto `.serena/` nel repo) su richiesta esplicita — troppo overhead (hook che intercettavano/bloccavano comandi nativi Grep/Glob/Bash).
+
+Totale 1504 Vitest (+15 da 1489), 68 Playwright e2e (invariato).
+
+### Sessione precedente — wishlist CotI + fix Point Defence/firedTurrets (v2.9.1, #45)
 
 Ricevuto un lungo feedback CotI post-v2.9.0: wishlist di 7 richieste "biggest usefulness" (custom weapon editing esteso, bay missili/torpedo, varianti missili, icone navi, leggibilità testo, posizione bottone Add Ship, scorciatoia Enter=Next Phase) + 2 "nice to have" (chiarezza Point Defence, raggruppamento report PDF) + 1 "lower priority" (gestione Power Ion). Verificato che "custom weapon editing" è coperto solo in parte da #21 iterazione 1 (nome/danno, non range/traits/DM/ammo/mount type) — commentato su #21 per chiarire lo scope invece di aprire un duplicato. Aperte 9 issue nuove (#36–#44) per il resto della lista, ciascuna con la citazione originale e il tag di priorità dell'utente. Preparata (non ancora postata) bozza di risposta CotI che spiega la scelta architetturale dietro la scope-riduzione di #21.
 
