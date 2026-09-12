@@ -10,6 +10,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.9.2] — 2026-09-12
+
+### Fixed
+
+- **Weapon override `damageBonus` never applied to damage rolls (#46)** — `weapon.damageBonus` was defined on every `WEAPONS` entry (always `0` for base weapons) but never read by `AttackDamageStep`'s damage formula, so the #21 override editor exposed a GM control that silently did nothing. Wired into both the auto-roll and manual damage total, and into the formula label.
+- **Weapon override custom name never shown in combat (#47)** — the weapon picker and the `applyDamage` log/report message always showed the base weapon name, never a GM override's custom label. Now shown only when an override is actually present on that singleton weapon — some base weapons already have a `.label` distinct from their key (e.g. "Ion Cannon Bay (S)" vs the key "Ion Cannon Bay (Small)"), so the swap is scoped to real overrides only, not applied unconditionally.
+- **Missile Rack/Barbette overrides never reached the launched salvo (#48)** — `launchMissile` collapsed every salvo to a coarse Standard/Torpedo enum with no `weaponKey`/`turretSlot` stored, and `MissileImpactModal`'s damage-dice lookup hardcoded 4D/6D by that enum, never consulting `WEAPONS` or an override. Now resolves the weapon via `resolveWeaponForSlot` at launch and snapshots `weaponLabel`/`damageDice` onto the missile object — a fired salvo is independent of the launcher's current loadout. As a side effect, even unmodified missiles now show their real weapon name ("Missile Rack") instead of the generic launch category ("Standard") in the impact log/report.
+
+All three reported via CotI testing of v2.9.1's weapon override feature. 15 new tests, including a real launch→flight→impact integration test (vectorial and basic mode) covering the propagation path itself, not just injected state.
+
+---
+
 ## [2.9.1] — 2026-09-09
 
 ### Fixed
