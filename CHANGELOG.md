@@ -10,6 +10,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.10.0] — 2026-09-12
+
+### Added
+
+- **GM-facing UI text scale (#39)** — a 🔍N% button in the HUD cycles the whole app's text size 100% → 115% → 130% → 100%. Overrides Tailwind v4's built-in text-size theme tokens (`--text-xs/sm/base/lg/xl/2xl`) with a `--ui-scale` multiplier in `index.css`, so every existing `text-xs`/`text-sm`/etc. utility across the app scales together with no per-component changes. The 34 `text-[10px]` arbitrary-value usages (which don't reference theme CSS variables and so wouldn't have scaled) were renamed to a new `text-2xs` theme token for the same reason. Canvas-drawn text (ship name/hull label, missile salvo count badge) doesn't read CSS custom properties, so it's scaled separately in `tokenRenderers.js`/`useCanvasRenderer.js` via the same value — this is what the original CotI report ("hard to read... when ships are close together") was actually pointing at, more than the DOM chrome text. Reported via CotI; GM preference, resets each session (not persisted, matching the existing audio-toggle convention).
+
+### Changed
+
+- **Swapped SAVE and 🏠 (return to main menu) HUD button positions**, per explicit request.
+
+---
+
 ## [2.9.2] — 2026-09-12
 
 ### Fixed

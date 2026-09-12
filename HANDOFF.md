@@ -9,25 +9,42 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.9.2 |
+| **Versione** | 2.10.0 |
 | **Branch** | main |
-| **Test** | 1504 Vitest + 68 Playwright e2e |
-| **Ultimo commit** | test(store): cover #48 weapon override propagation in basic mode too (v2.9.2) |
+| **Test** | 1506 Vitest + 68 Playwright e2e |
+| **Ultimo commit** | feat(ui): GM-facing UI text scale + HUD button reorder (#39, v2.10.0) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.9.2)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45, #46, #47, #48 chiuse automaticamente via `Fixes #N`/`Closes #N`.
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.10.0)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45, #46, #47, #48 chiuse automaticamente via `Fixes #N`/`Closes #N`. **#39 chiusa manualmente** (commit 6631001 non usava il trailer `Fixes #39` — occhio la prossima volta a metterlo anche per feature, non solo bugfix).
 - **#21 iterazione 2** (se richiesta) — range/salvo/ammo/traits custom, nuove armi non basate su una entry esistente. Struttura dati attuale (`weaponOverrides` indicizzato per posizione, attivo solo se l'arma è singola nello slot) regge l'iterazione 1 ma andrebbe rivista per selezione multi-istanza (id stabile per arma invece di indice) se si espande oltre il cosmetic+danno. **#21 resta OPEN** (iterazione 1 rilasciata in v2.9.0, non auto-chiusa).
-- **Wishlist CotI aperta come issue** (#36–#44, non urgenti, nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #38 icone navi, #39 leggibilità testo UI, #40 posizione bottone Add Ship, #41 Enter = Next Phase, #42 chiarezza Point Defence, #43 raggruppamento report PDF, #44 gestione Power armi Ion (priorità bassa per l'utente).
+- **Wishlist CotI aperta come issue** (#36–#38, #40–#44, non urgenti, nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #38 icone navi, #40 posizione bottone Add Ship, #41 Enter = Next Phase, #42 chiarezza Point Defence, #43 raggruppamento report PDF, #44 gestione Power armi Ion (priorità bassa per l'utente). #39 chiusa (v2.10.0).
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — fix override armi: damageBonus, nome custom, missili (v2.9.2, #46/#47/#48)
+### Sessione corrente — UI text scale + HUD reorder (v2.10.0, #39)
+
+Ultima voce della wishlist CotI "biggest usefulness" ancora aperta. Scoperto che `text-xs` è usato **555 volte** in 42 file (più 34 `text-[10px]`) — non è una patch piccola, è la taglia di testo base di tutta l'app. Chiesto all'utente come procedere: scelto "scaling opzionale" (non bump globale, non solo contrasto).
+
+Investigazione ha rivelato che la lamentela CotI ("hard to read... when ships are close together") punta quasi certamente alle **etichette disegnate sul canvas** (nome nave/hull a 11px, conteggio missili a 7px in `tokenRenderers.js`), non al testo DOM dei modali — due meccanismi completamente diversi (CSS vs `ctx.font`, che non legge le CSS custom property). Implementata soluzione a due binari con un solo controllo:
+
+1. **DOM**: Tailwind v4 espone i token `--text-xs`/`--text-sm`/ecc. come CSS custom property — sovrascritti in `index.css` con `calc(valore-base * var(--ui-scale))`, così tutte le ~600 utility esistenti scalano insieme senza toccare nessun componente. Rinominati i 34 `text-[10px]` (valori arbitrari, non legano a un token theme) in un nuovo `text-2xs` per farli scalare anche loro.
+2. **Canvas**: `drawShipLabel`/`drawMissileToken` in `tokenRenderers.js` ora accettano un parametro `uiScale`, moltiplicato sulla dimensione font prima di `ctx.font`.
+
+Controllo: bottone ciclico 🔍N% nell'HUD (100→115→130%, in `uiStore.js`, non persistito — stessa convenzione del toggle audio). Verificato **visivamente in browser reale** (script Playwright one-off, non un test automatico) con screenshot a 100% e 130% — confermato che DOM e canvas scalano insieme.
+
+Nella stessa sessione, richiesta separata: scambiate le posizioni di SAVE e 🏠 nell'HUD.
+
+**Nota per prossima sessione**: il commit `6631001` non aveva il trailer `Fixes #39` (dimenticato — la convenzione vale anche per feature, non solo bugfix). Issue #39 chiusa manualmente via `gh issue close`.
+
+Totale 1506 Vitest (+2 da 1504), 68 Playwright e2e (invariato — verifica UI scale fatta a mano in browser, non aggiunta a e2e).
+
+### Sessione precedente — fix override armi: damageBonus, nome custom, missili (v2.9.2, #46/#47/#48)
 
 Feedback CotI da test reale di v2.9.1 (weapon overrides): 3 bug distinti trovati testando l'editor a mano su Pulse Laser/Particle Barbette/Missile Rack.
 

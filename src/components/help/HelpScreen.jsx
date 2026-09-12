@@ -208,6 +208,7 @@ export function HelpScreen({ onBack } = {}) {
           <KV k="Hex scale" v="1 hex = 648 km (Traveller Companion 2024, p.171). SHORT ≤ 1,296 km · MEDIUM ≤ 9,720 km · LONG ≤ 24,624 km · VERY LONG ≤ 49,896 km." />
           <KV k="Right-click hex" v="Open context menu — actions depend on what is in the hex and the current phase." />
           <KV k="🔊/🔇 button" v="Audio toggle (HUD, top-left) — enables or mutes procedural sound effects (laser, impact, thrust plume, missile launch)." />
+          <KV k="🔍N% button" v="UI text scale (HUD) — click to cycle 100% → 115% → 130% → 100%. Scales HUD/modal/form labels and the map's ship name/hull labels and missile count badges. GM-only preference, resets each session." />
           <KV k="Hover ship token" v="After 200 ms, a tooltip panel appears showing: name, hull bar, vector, available thrust, evasion DM, initiative, sensor lock → target (if active, with DM), Locked by [attacker] (if targeted), ⚡ N× missile inbound (if applicable), critical hits. Clears on pan or mouse-leave." />
           <Note>Context menu actions are phase-gated and initiative-gated. Only options valid for the current phase are shown — and in the Acceleration, Attack, and Actions phases, combat actions are shown only for the ship whose turn it currently is. Right-clicking another ship shows "Not this ship's turn".</Note>
 

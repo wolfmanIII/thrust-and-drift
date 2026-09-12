@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.9.2** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.10.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -129,6 +129,7 @@ The battle map is a **flat-top hex grid**. All interaction is mouse-driven.
 | **Left-click token** | Select the ship (highlights it). Range band rings appear centred on the selected ship (see below). |
 | **Right-click hex** | Open context menu — actions depend on the hex content and the current phase. |
 | **🔊/🔇 (HUD)** | Audio toggle — enables or mutes procedural sound effects (laser fire, impacts, thrust plume, missile launch). No audio files required. |
+| **🔍N% (HUD)** | UI text scale — click to cycle 100% → 115% → 130% → 100%. Scales every on-screen label (HUD, modals, forms) and the map's ship name/hull labels and missile count badges. GM-only preference, resets each session. |
 
 > **Note:** Context menu actions are phase-gated **and initiative-gated**.
 > Only options valid for the current phase are shown — and in the Acceleration,
