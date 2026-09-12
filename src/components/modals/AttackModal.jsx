@@ -224,7 +224,7 @@ function AttackConfigStep({
               </p>
             )}
             {visibleWeapons.map((w) => {
-              const wDef = WEAPONS[w.weaponName]
+              const wDef = w.displayWeapon ?? WEAPONS[w.weaponName]
               const wOutOfRange = target && wDef ? isOutOfRange(wDef.maxRange, rangeBand) : false
               const isSelected  = weaponKey === w.weaponName && selectedTurretSlot === w.turretSlot
               return (
@@ -240,7 +240,7 @@ function AttackConfigStep({
                   <span className="flex items-center justify-between gap-2">
                     <span>
                       <span className="text-slate-400 mr-1.5">W{w.turretSlot}</span>
-                      {w.weaponName}
+                      {w.hasOverride ? (wDef?.label ?? w.weaponName) : w.weaponName}
                       {(w.linkedCount ?? 1) > 1 && (
                         <span className="ml-1.5 text-amber-400/80">×{w.linkedCount}</span>
                       )}
@@ -258,7 +258,7 @@ function AttackConfigStep({
                       ) : (
                         <>
                           DM {wDef.attackDM >= 0 ? `+${wDef.attackDM}` : wDef.attackDM}
-                          {' · '}{wDef.damageDice}D{(w.damageDiceBonus ?? 0) > 0 ? `+${w.damageDiceBonus}` : ''} dmg{' · '}max {wDef.maxRange}
+                          {' · '}{wDef.damageDice}D{(w.damageDiceBonus ?? 0) > 0 ? `+${w.damageDiceBonus}` : ''}{wDef.damageBonus ? `${wDef.damageBonus > 0 ? '+' : ''}${wDef.damageBonus}` : ''} dmg{' · '}max {wDef.maxRange}
                         </>
                       )}
                     </span>
@@ -871,7 +871,7 @@ function MissilePdStep({ missile, launcherName, targetName, attacker, turretSlot
  *   onClose: Function,
  * }} props
  */
-function AttackDamageStep({ damageDice, effectBonus, linkedBonus = 0, armor, apReduction = 0, damageMultiple = 1, isPlayer, damageResult, setDamageResult, onApply, onClose }) {
+function AttackDamageStep({ damageDice, effectBonus, linkedBonus = 0, weaponDamageBonus = 0, armor, apReduction = 0, damageMultiple = 1, isPlayer, damageResult, setDamageResult, onApply, onClose }) {
   const [manualRaw, setManualRaw] = useState('')
 
   // AP reduces effective armour before damage, multiplier applied after. // MgT2e HG p.28–29
@@ -881,21 +881,24 @@ function AttackDamageStep({ damageDice, effectBonus, linkedBonus = 0, armor, apR
 
   const handleAutoRoll = () => {
     const roll  = rollDice(damageDice, 6)
-    const total = Math.max(0, roll.total + effectBonus + linkedBonus - effectiveArmor) * damageMultiple
-    setDamageResult({ roll, total, effectBonus, linkedBonus, armor: effectiveArmor, damageMultiple })
+    const total = Math.max(0, roll.total + effectBonus + linkedBonus + weaponDamageBonus - effectiveArmor) * damageMultiple
+    setDamageResult({ roll, total, effectBonus, linkedBonus, weaponDamageBonus, armor: effectiveArmor, damageMultiple })
   }
 
   const handleManualConfirm = () => {
     const raw   = Number(manualRaw)
     if (!raw && raw !== 0) return
-    const total = Math.max(0, raw + effectBonus + linkedBonus - effectiveArmor) * damageMultiple
-    setDamageResult({ roll: { results: [], total: raw }, total, effectBonus, linkedBonus, armor: effectiveArmor, damageMultiple })
+    const total = Math.max(0, raw + effectBonus + linkedBonus + weaponDamageBonus - effectiveArmor) * damageMultiple
+    setDamageResult({ roll: { results: [], total: raw }, total, effectBonus, linkedBonus, weaponDamageBonus, armor: effectiveArmor, damageMultiple })
   }
 
-  const linkedPart   = linkedBonus > 0 ? ` +${linkedBonus} linked` : ''
+  const linkedPart = linkedBonus > 0 ? ` +${linkedBonus} linked` : ''
+  // GM weapon override damage bonus (#21) — distinct from linkedBonus (double/triple
+  // turret linking, CRB p.168): this is a flat per-weapon modifier set in the profile editor.
+  const weaponBonusPart = weaponDamageBonus !== 0 ? ` ${weaponDamageBonus > 0 ? '+' : ''}${weaponDamageBonus}` : ''
   const formulaLabel = damageMultiple > 1
-    ? `(${damageDice}D${linkedPart} + Effect − Armour) × ${damageMultiple}`
-    : `${damageDice}D${linkedPart} + Effect − Armour`
+    ? `(${damageDice}D${linkedPart}${weaponBonusPart} + Effect − Armour) × ${damageMultiple}`
+    : `${damageDice}D${linkedPart}${weaponBonusPart} + Effect − Armour`
 
   return (
     <Modal title="Damage" onClose={onClose}>
@@ -952,9 +955,10 @@ function AttackDamageStep({ damageDice, effectBonus, linkedBonus = 0, armor, apR
                   const ap       = apReduction > 0 ? ` (AP−${apLabel})` : ''
                   const mult     = damageMultiple > 1 ? ` ×${damageMultiple}` : ''
                   const linked   = linkedBonus > 0 ? ` +${linkedBonus} linked` : ''
+                  const wpnBonus = weaponDamageBonus !== 0 ? ` ${weaponDamageBonus > 0 ? '+' : ''}${weaponDamageBonus}` : ''
                   const base     = isPlayer
-                    ? `${damageResult.roll.total} (entered)${linked} + ${effectBonus} − ${effectiveArmor} armour${ap}`
-                    : `[${damageResult.roll.results.join('+')}]${linked} + ${effectBonus} − ${effectiveArmor} armour${ap}`
+                    ? `${damageResult.roll.total} (entered)${linked}${wpnBonus} + ${effectBonus} − ${effectiveArmor} armour${ap}`
+                    : `[${damageResult.roll.results.join('+')}]${linked}${wpnBonus} + ${effectBonus} − ${effectiveArmor} armour${ap}`
                   return base + mult
                 })()}
               </p>
@@ -1333,7 +1337,7 @@ export function AttackModal() {
   const handleApplyDamage = () => {
     if (!damageResult || !target) return
     if (selectedTurretSlot !== null) markTurretFired(attacker.id, selectedTurretSlot)
-    applyDamage(target.id, damageResult.total, `${weaponKey} from ${attacker.name}`)
+    applyDamage(target.id, damageResult.total, `${weapon?.label ?? weaponKey} from ${attacker.name}`)
 
     if (damageResult.total > 0 && isCriticalHit(attackResult?.effect ?? 0)) {
       setStep('critical')
@@ -1574,6 +1578,7 @@ export function AttackModal() {
       damageDice={weapon?.damageDice ?? 1}
       effectBonus={attackResult?.effect ?? 0}
       linkedBonus={damageDiceBonus}
+      weaponDamageBonus={weapon?.damageBonus ?? 0}
       armor={(target?.profile.armor ?? 0) + sandBonusArmor}
       apReduction={getApValue(weapon?.traits ?? [])}
       damageMultiple={weapon?.damageMultiple ?? 1}

@@ -361,3 +361,121 @@ describe('AttackModal — DM Summary row visibility (#33)', () => {
     expect(screen.queryByText('Dogfight')).not.toBeInTheDocument()
   })
 })
+
+describe('AttackModal — weapon override damageBonus reaches the damage roll (#46)', () => {
+  beforeEach(() => {
+    useBattleStore.getState().resetBattle('vectorial')
+    useUiStore.setState({ activeModal: null, modalPayload: null })
+  })
+
+  function setupOverriddenAttack(damageBonus) {
+    const profile = {
+      id: 'profile-simple', name: 'Gunship', hull: 20, armor: 0, thrust: 4, tonnage: 100,
+      turrets: [{ slot: 1, weapons: ['Pulse Laser'], weaponOverrides: { 0: { damageBonus } } }],
+      crew: [],
+    }
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Bogey', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att] = useBattleStore.getState().ships
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+  }
+
+  it('the damage formula label shows the override bonus', () => {
+    setupOverriddenAttack(13)
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Pulse Laser'))
+    fireEvent.click(screen.getByText('Bogey'))
+    fireEvent.click(screen.getByText('ROLL ATTACK →'))
+    fireEvent.change(screen.getByLabelText('Die 1'), { target: { value: '6' } })
+    fireEvent.change(screen.getByLabelText('Die 2'), { target: { value: '6' } })
+    fireEvent.click(screen.getByText('CONFIRM ROLL'))
+    fireEvent.click(screen.getByText('CALCULATE DAMAGE →'))
+    expect(screen.getByText(/2D \+13 \+ Effect − Armour/)).toBeInTheDocument()
+  })
+
+  it('the rolled damage total includes the override bonus, not just the base formula', () => {
+    setupOverriddenAttack(13)
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Pulse Laser'))
+    fireEvent.click(screen.getByText('Bogey'))
+    fireEvent.click(screen.getByText('ROLL ATTACK →'))
+    fireEvent.change(screen.getByLabelText('Die 1'), { target: { value: '6' } })
+    fireEvent.change(screen.getByLabelText('Die 2'), { target: { value: '6' } })
+    fireEvent.click(screen.getByText('CONFIRM ROLL'))
+    const effectMatch = screen.getByText(/HIT! Effect: \+\d+/).textContent.match(/\+(\d+)/)
+    const effect = Number(effectMatch[1])
+    fireEvent.click(screen.getByText('CALCULATE DAMAGE →'))
+
+    fireEvent.change(screen.getByPlaceholderText('—'), { target: { value: '5' } })
+    fireEvent.click(screen.getByText('CONFIRM DAMAGE'))
+
+    // Total = raw roll (5) + Effect + weaponDamageBonus (13) − armour (0).
+    expect(screen.getByText(String(5 + effect + 13))).toBeInTheDocument()
+  })
+})
+
+describe('AttackModal — custom weapon override name shown in picker and battle log (#47)', () => {
+  beforeEach(() => {
+    useBattleStore.getState().resetBattle('vectorial')
+    useUiStore.setState({ activeModal: null, modalPayload: null })
+  })
+
+  function setupOverriddenNameAttack(label) {
+    const profile = {
+      id: 'profile-simple', name: 'Gunship', hull: 20, armor: 0, thrust: 4, tonnage: 100,
+      turrets: [{ slot: 1, weapons: ['Pulse Laser'], weaponOverrides: { 0: { label } } }],
+      crew: [],
+    }
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Bogey', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att] = useBattleStore.getState().ships
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+  }
+
+  it('shows the overridden name in the weapon picker instead of the base name', () => {
+    setupOverriddenNameAttack('Hot Plasma')
+    render(<AttackModal />)
+    expect(screen.getByText('Hot Plasma')).toBeInTheDocument()
+    expect(screen.queryByText('Pulse Laser')).not.toBeInTheDocument()
+  })
+
+  it('does not change the picker label when the weapon has no override', () => {
+    const profile = { id: 'profile-simple', name: 'Gunship', hull: 20, armor: 0, thrust: 4, tonnage: 100, turrets: [{ slot: 1, weapons: ['Pulse Laser'] }], crew: [] }
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Bogey', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att] = useBattleStore.getState().ships
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+    render(<AttackModal />)
+    expect(screen.getByText('Pulse Laser')).toBeInTheDocument()
+  })
+
+  it('uses the overridden name in the applyDamage log message, not the base weapon key', () => {
+    setupOverriddenNameAttack('Hot Plasma')
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Hot Plasma'))
+    fireEvent.click(screen.getByText('Bogey'))
+    fireEvent.click(screen.getByText('ROLL ATTACK →'))
+    fireEvent.change(screen.getByLabelText('Die 1'), { target: { value: '6' } })
+    fireEvent.change(screen.getByLabelText('Die 2'), { target: { value: '6' } })
+    fireEvent.click(screen.getByText('CONFIRM ROLL'))
+    fireEvent.click(screen.getByText('CALCULATE DAMAGE →'))
+    fireEvent.change(screen.getByPlaceholderText('—'), { target: { value: '5' } })
+    fireEvent.click(screen.getByText('CONFIRM DAMAGE'))
+    fireEvent.click(screen.getByText('APPLY DAMAGE'))
+
+    const target = useBattleStore.getState().ships.find((s) => s.name === 'Bogey')
+    const log = useBattleStore.getState().log
+    expect(log.some((e) => e.message.includes('Hot Plasma from Gunship'))).toBe(true)
+    expect(log.some((e) => e.message.includes('Pulse Laser'))).toBe(false)
+    expect(target.hullCurrent).toBeLessThan(10)
+  })
+})

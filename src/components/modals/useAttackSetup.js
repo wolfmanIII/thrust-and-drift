@@ -6,7 +6,7 @@
 
 import { useBattleStore } from '../../store/battleStore.js'
 import { WEAPONS, DEFENSIVE_WEAPONS } from '../../data/weapons.js'
-import { resolveWeaponForSlot } from '../../utils/weaponOverrides.js'
+import { resolveWeaponForSlot, isSingletonInSlot } from '../../utils/weaponOverrides.js'
 import { hexDistance, getRangeBand } from '../../utils/hex.js'
 import { getRangeDM, getTargetSizeDM, isOutOfRange, bayWeaponSmallShipDM } from '../../utils/combat.js'
 import { getEffectiveSkill } from '../../utils/crew.js'
@@ -90,7 +90,16 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
         const damageDiceBonus = MISSILE_WEAPONS.has(weaponName)
           ? 0
           : (linkedCount - 1) * (wDef?.damageDice ?? 0)
-        return { weaponName, turretSlot: t.slot, linkedCount, damageDiceBonus }
+        // Override-resolved def for display (#47), but only when an override
+        // actually exists — otherwise displayWeapon stays === wDef, so weapons
+        // with no override show exactly what they always did (some weapons'
+        // .label is a deliberately abbreviated display string, e.g. "Ion Cannon
+        // Bay (S)" vs the key "Ion Cannon Bay (Small)" — only surface that swap
+        // when a GM override is the reason, not for every weapon unconditionally).
+        const singletonIdx = isSingletonInSlot(t, weaponName) ? t.weapons.indexOf(weaponName) : -1
+        const hasOverride  = singletonIdx !== -1 && !!t.weaponOverrides?.[singletonIdx]
+        const displayWeapon = hasOverride ? resolveWeaponForSlot(t, weaponName) : wDef
+        return { weaponName, turretSlot: t.slot, linkedCount, damageDiceBonus, displayWeapon, hasOverride }
       })
     })
 
