@@ -82,7 +82,11 @@ export function MissileImpactModal() {
   }
 
   const armor      = target.profile.armor ?? 0
-  const diceEach   = dicePerUnit(impact.type)
+  // GM override (#48) — snapshotted on the missile at launch, since a fired salvo
+  // is independent of the launcher's current loadout. Falls back to the type-based
+  // base value for older saved missiles/battles from before this field existed.
+  const diceEach   = impact.damageDice ?? dicePerUnit(impact.type)
+  const weaponLabel = impact.weaponLabel ?? impact.type ?? 'Missile'
   const pending    = pendingMissileImpacts.length
   const pilotSkill = getEffectiveSkill(target.profile.crew, target.crewAssignments, 'pilot')
 
@@ -192,7 +196,7 @@ export function MissileImpactModal() {
     applyDamage(
       impact.target,
       netDamage,
-      `${impact.count}× ${impact.type ?? 'Missile'} salvo (${launcher?.name ?? '?'})`,
+      `${impact.count}× ${weaponLabel} salvo (${launcher?.name ?? '?'})`,
     )
     dismissMissileImpact(impact.id)
   }
@@ -232,7 +236,7 @@ export function MissileImpactModal() {
           </div>
           <div className="flex justify-between text-xs font-mono">
             <span className="text-slate-400">SALVO</span>
-            <span className="text-amber-300">{impact.count}× {impact.type ?? 'Missile'}</span>
+            <span className="text-amber-300">{impact.count}× {weaponLabel}</span>
           </div>
           <div className="flex justify-between text-xs font-mono">
             <span className="text-slate-400">HULL</span>

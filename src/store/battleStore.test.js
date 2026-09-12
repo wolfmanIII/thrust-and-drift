@@ -877,6 +877,26 @@ describe('resolveMovement', () => {
     vi.useRealTimers()
   })
 
+  // GitHub #48 — weaponLabel/damageDice must survive the real launch → flight →
+  // impact pipeline (resolveMovement's newImpacts mapping), not just launchMissile's
+  // own output. Same setup as the impact-queueing test above, extended with an override.
+  it('carries weaponLabel/damageDice through to the queued pendingMissileImpacts entry', () => {
+    vi.useFakeTimers()
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'B' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(
+      att.id, tgt.id, 2, { q: 1, r: 0 }, { q: 1, r: 0 }, 'Standard', true, 'Advanced Missile Rack', 5,
+    )
+    useBattleStore.getState().resolveMovement()
+    vi.runAllTimers()
+    const impacts = useBattleStore.getState().pendingMissileImpacts
+    expect(impacts).toHaveLength(1)
+    expect(impacts[0].weaponLabel).toBe('Advanced Missile Rack')
+    expect(impacts[0].damageDice).toBe(5)
+    vi.useRealTimers()
+  })
+
   it('missile guidance is partial when correction exceeds GUIDANCE_THRUST per round', () => {
     // Missile at {q:0,r:0} vector {q:1,r:0}, target at {q:20,r:0} stationary.
     // predictedQ=20, deltaQ=19, deltaMag=19, scale=10/19 → correction=round(10)=10
@@ -1136,6 +1156,29 @@ describe('launchMissile', () => {
     const [att, tgt] = useBattleStore.getState().ships
     useBattleStore.getState().launchMissile(att.id, tgt.id, 2, { q: 0, r: 0 }, { q: 1, r: 0 })
     expect(useBattleStore.getState().missiles[0].ewAppliedThisRound).toBe(false)
+  })
+
+  // GitHub #48 — GM weapon override (name + damage dice) must reach the launched salvo.
+  it('stores weaponLabel and damageDice on the missile when provided', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(
+      att.id, tgt.id, 2, { q: 0, r: 0 }, { q: 1, r: 0 }, 'Standard', true, 'Advanced Missile Rack', 5,
+    )
+    const m = useBattleStore.getState().missiles[0]
+    expect(m.weaponLabel).toBe('Advanced Missile Rack')
+    expect(m.damageDice).toBe(5)
+  })
+
+  it('defaults weaponLabel and damageDice to null when not provided', () => {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2' }), { q: 5, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(att.id, tgt.id, 2, { q: 0, r: 0 }, { q: 1, r: 0 })
+    const m = useBattleStore.getState().missiles[0]
+    expect(m.weaponLabel).toBeNull()
+    expect(m.damageDice).toBeNull()
   })
 })
 
