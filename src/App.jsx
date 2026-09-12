@@ -34,7 +34,7 @@ import { BasicManoeuvreModal }  from './components/modals/BasicManoeuvreModal.js
 import { BattleReportModal }   from './components/modals/BattleReportModal.jsx'
 import { RenameShipModal }    from './components/modals/RenameShipModal.jsx'
 import { LegalFooter }     from './components/ui/LegalFooter.jsx'
-import { useState, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { Modal }           from './components/modals/Modal.jsx'
 import { useUiStore }      from './store/uiStore.js'
 import { useBattleStore }  from './store/battleStore.js'
@@ -113,6 +113,13 @@ export function App() {
   const activeModal      = useUiStore((s) => s.activeModal)
   const pendingPlacement = useUiStore((s) => s.pendingPlacement)
   const combatMode       = useBattleStore((s) => s.combatMode)
+  const uiScale          = useUiStore((s) => s.uiScale)
+
+  // #39 — drives every text-xs/sm/base/lg/xl/2xl utility via the --ui-scale
+  // token override in index.css; applies app-wide, not just the battle screen.
+  useEffect(() => {
+    document.documentElement.style.setProperty('--ui-scale', uiScale)
+  }, [uiScale])
 
   const { detectedGroups, clearDetected } = useDogfightDetection()
 

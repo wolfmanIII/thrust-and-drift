@@ -198,7 +198,7 @@ export function InitiativeModal() {
                       <span className="text-(--neon-cyan) font-mono text-sm font-bold">{ship.initiative}</span>
                     </div>
                     {bd && (
-                      <div className="flex items-center gap-1 mt-0.5 ml-7 font-mono text-[10px] text-slate-500">
+                      <div className="flex items-center gap-1 mt-0.5 ml-7 font-mono text-2xs text-slate-500">
                         <span>2D:{bd.roll}</span>
                         <span>+ Pilot:{bd.pilotSkill}</span>
                         <span>+ T{bd.thrust}</span>

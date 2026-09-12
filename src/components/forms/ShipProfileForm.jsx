@@ -149,7 +149,7 @@ function CrewMemberRow({ member, onChange, onRemove }) {
       <div className="grid grid-cols-3 gap-1.5">
         {CREW_SKILLS.map((skill) => (
           <label key={skill} className="flex flex-col gap-0.5">
-            <span className="font-mono text-[10px] text-slate-400 tracking-wide uppercase">
+            <span className="font-mono text-2xs text-slate-400 tracking-wide uppercase">
               {skill.toUpperCase()}
             </span>
             <input
@@ -209,7 +209,7 @@ function pruneEmpty(obj) {
 function OverrideField({ label, value, placeholder, onChange, numeric = false, min, max, wide = false }) {
   return (
     <label className={`flex flex-col gap-0.5 ${wide ? 'col-span-2' : ''}`}>
-      <span className="font-mono text-[10px] text-slate-400 tracking-wide uppercase">{label}</span>
+      <span className="font-mono text-2xs text-slate-400 tracking-wide uppercase">{label}</span>
       <input
         type={numeric ? 'number' : 'text'}
         min={min}
@@ -236,12 +236,12 @@ function WeaponOverrideEditor({ weaponName, base, override, isSingleton, onField
   return (
     <div className="bg-slate-900 border border-(--neon-cyan)/30 rounded px-3 py-2 space-y-2">
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[10px] text-slate-400 tracking-widest uppercase">
+        <span className="font-mono text-2xs text-slate-400 tracking-widest uppercase">
           Override — {weaponName}
         </span>
       </div>
       {!isSingleton && (
-        <p className="text-amber-400 font-mono text-[10px] leading-snug">
+        <p className="text-amber-400 font-mono text-2xs leading-snug">
           ⚠ Inactive — another {weaponName} shares this slot. CRB p.168 double/triple turret
           linking requires identical weapons; this override is ignored until only one remains.
         </p>
@@ -316,7 +316,7 @@ function TurretRow({ turret, slotIdx, onAddWeapon, onRemoveWeapon, onRemoveTurre
         <span className="text-slate-400 font-mono text-xs shrink-0 w-16">
           Weapon {turret.slot}
         </span>
-        <span className="text-slate-600 font-mono text-[10px] shrink-0">{typeLabel}</span>
+        <span className="text-slate-600 font-mono text-2xs shrink-0">{typeLabel}</span>
 
         {/* Weapon chips */}
         {turret.weapons.map((w, wIdx) => {

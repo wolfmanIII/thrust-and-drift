@@ -92,7 +92,7 @@ export function BoardingOutcomeModal() {
         {/* Objectives summary */}
         {Object.entries(boarding.objectives).some(([, v]) => v) && (
           <div className="bg-slate-900/40 rounded px-3 py-2">
-            <p className="text-slate-400 font-mono text-[10px] uppercase mb-1.5">Captured objectives</p>
+            <p className="text-slate-400 font-mono text-2xs uppercase mb-1.5">Captured objectives</p>
             <div className="flex gap-3">
               {[['bridge', 'Bridge'], ['engineering', 'Engineering'], ['turrets', 'Turrets']].map(([k, l]) => (
                 <span key={k} className={`font-mono text-xs ${boarding.objectives[k] ? 'text-emerald-400' : 'text-slate-400'}`}>
@@ -123,7 +123,7 @@ export function BoardingOutcomeModal() {
                 <p className={`font-mono text-xs font-bold ${selectedOutcome === o.key ? OUTCOME_STYLES[o.color].label : 'text-slate-300'}`}>
                   {o.label}
                 </p>
-                <p className="text-slate-400 font-mono text-[10px] mt-0.5">{o.desc}</p>
+                <p className="text-slate-400 font-mono text-2xs mt-0.5">{o.desc}</p>
               </div>
             </button>
           ))}
@@ -145,7 +145,7 @@ export function BoardingOutcomeModal() {
                 {attacker.faction.toUpperCase()}
               </span>
             </label>
-            <p className="text-slate-400 font-mono text-[10px]">
+            <p className="text-slate-400 font-mono text-2xs">
               Enemy crew removed — ship under attacker control.
             </p>
           </div>

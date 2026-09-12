@@ -19,6 +19,7 @@ beforeEach(() => {
     thrustTargeting:   null,
     centerRequest:     null,
     audioEnabled:      true,
+    uiScale:           1,
   })
 })
 
@@ -220,6 +221,23 @@ describe('toggleAudio', () => {
     useUiStore.setState({ audioEnabled: false })
     useUiStore.getState().toggleAudio()
     expect(useUiStore.getState().audioEnabled).toBe(true)
+  })
+})
+
+// GitHub #39 — GM-facing UI scale, cycled via an HUD button.
+describe('cycleUiScale', () => {
+  it('defaults to 1', () => {
+    expect(useUiStore.getState().uiScale).toBe(1)
+  })
+
+  it('cycles 1 → 1.15 → 1.3 → 1', () => {
+    useUiStore.setState({ uiScale: 1 })
+    useUiStore.getState().cycleUiScale()
+    expect(useUiStore.getState().uiScale).toBe(1.15)
+    useUiStore.getState().cycleUiScale()
+    expect(useUiStore.getState().uiScale).toBe(1.3)
+    useUiStore.getState().cycleUiScale()
+    expect(useUiStore.getState().uiScale).toBe(1)
   })
 })
 

@@ -153,7 +153,7 @@ export function PlaceObstacleModal() {
               onChange={(e) => setRadius(Number(e.target.value))}
               className="w-full accent-cyan-400"
             />
-            <div className="flex justify-between font-mono text-[10px] text-slate-600">
+            <div className="flex justify-between font-mono text-2xs text-slate-600">
               <span>{rMin}</span>
               <span>{rMax}</span>
             </div>

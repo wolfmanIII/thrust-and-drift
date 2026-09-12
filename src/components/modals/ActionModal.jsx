@@ -460,7 +460,7 @@ export function ActionModal() {
                           {launcher?.name ?? '?'} → {target?.name ?? '?'}
                         </span>
                         {salvo.isPending && !alreadyEW && (
-                          <span className="ml-2 text-orange-400 text-[10px] uppercase tracking-wider">⚡ impact</span>
+                          <span className="ml-2 text-orange-400 text-2xs uppercase tracking-wider">⚡ impact</span>
                         )}
                         {alreadyEW && <span className="ml-auto float-right text-slate-600">EW this round</span>}
                       </button>

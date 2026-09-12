@@ -126,7 +126,7 @@ export function BasicManoeuvreModal() {
                   <span className="font-bold">{e.name}</span>
                   <span className="ml-auto text-slate-400">{band}</span>
                   {pool !== 0 && (
-                    <span className={`text-[10px] ${pool > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <span className={`text-2xs ${pool > 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {pool > 0 ? `+${pool}` : pool}
                     </span>
                   )}

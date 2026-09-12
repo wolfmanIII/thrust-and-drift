@@ -191,7 +191,7 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
             <StatusRow key={name} icon="⚡" className="text-amber-400">
               <span className="font-semibold">{count}× {type}</span>
               <span className="text-slate-400"> inbound ← {name}</span>
-              {eta !== null && <span className="ml-1 text-slate-500 text-[10px]">~{eta}r</span>}
+              {eta !== null && <span className="ml-1 text-slate-500 text-2xs">~{eta}r</span>}
             </StatusRow>
           ))}
 
@@ -199,7 +199,7 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
             <StatusRow key={name} icon="🚀" className="text-slate-300">
               <span className="font-semibold">{count}× {type}</span>
               <span className="text-slate-400"> away → {name}</span>
-              {eta !== null && <span className="ml-1 text-slate-500 text-[10px]">~{eta}r</span>}
+              {eta !== null && <span className="ml-1 text-slate-500 text-2xs">~{eta}r</span>}
             </StatusRow>
           ))}
 
@@ -261,7 +261,7 @@ function ShipBentoCard({ ship, ships, missiles, onContextMenu }) {
 
 function Badge({ label, className }) {
   return (
-    <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded border ${className}`}>
+    <span className={`font-mono text-2xs px-1.5 py-0.5 rounded border ${className}`}>
       {label}
     </span>
   )

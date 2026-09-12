@@ -69,7 +69,7 @@ export function PhaseTracker() {
                       : ship.initiative
                     }
                     {(ship.initiativeTemporaryBonus ?? 0) > 0 && (
-                      <span className="text-amber-400 text-[10px]">↑ini</span>
+                      <span className="text-amber-400 text-2xs">↑ini</span>
                     )}
                   </span>
                 </li>
@@ -77,7 +77,7 @@ export function PhaseTracker() {
             })}
             {shipAddedThisRound && (
               <li className="px-3 py-1 border-t border-slate-700/30">
-                <span className="font-mono text-[10px] text-amber-400/70" title="A ship was added mid-battle — all ships re-roll initiative at the start of the next round">
+                <span className="font-mono text-2xs text-amber-400/70" title="A ship was added mid-battle — all ships re-roll initiative at the start of the next round">
                   ↺ re-roll next round
                 </span>
               </li>

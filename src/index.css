@@ -7,6 +7,28 @@
   --neon-cyan: #7dd3fc;
   /* Display font for UI chrome (headers, labels, buttons) */
   --font-display: 'Orbitron', sans-serif;
+
+  /* GitHub #39 — GM-facing UI scale (1 / 1.15 / 1.3, cycled via HUD button).
+   * Overriding the built-in text-size tokens with a --ui-scale multiplier makes
+   * every existing text-xs/sm/base/lg/xl/2xl utility scale together — no
+   * per-component changes needed. Canvas-drawn text (ship labels) reads this
+   * same value separately in useCanvasRenderer.js, since CSS vars don't reach
+   * ctx.font. --ui-scale itself is set at runtime on :root by App.jsx. */
+  --ui-scale: 1;
+  --text-2xs: calc(0.625rem * var(--ui-scale));
+  --text-2xs--line-height: calc(0.75rem * var(--ui-scale));
+  --text-xs: calc(0.75rem * var(--ui-scale));
+  --text-xs--line-height: calc(1rem * var(--ui-scale));
+  --text-sm: calc(0.875rem * var(--ui-scale));
+  --text-sm--line-height: calc(1.25rem * var(--ui-scale));
+  --text-base: calc(1rem * var(--ui-scale));
+  --text-base--line-height: calc(1.5rem * var(--ui-scale));
+  --text-lg: calc(1.125rem * var(--ui-scale));
+  --text-lg--line-height: calc(1.75rem * var(--ui-scale));
+  --text-xl: calc(1.25rem * var(--ui-scale));
+  --text-xl--line-height: calc(1.75rem * var(--ui-scale));
+  --text-2xl: calc(1.5rem * var(--ui-scale));
+  --text-2xl--line-height: calc(2rem * var(--ui-scale));
 }
 
 /* ── Base layer ───────────────────────────────────────────────────────────── */
