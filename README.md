@@ -31,6 +31,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Ion Weapons** | Barbette (2D×10) and Bay (Small 6D×10 / Medium 8D×20 / Large 10D×100) — no hull damage; ignores armour; reduces target Power and computer bandwidth; thrust cap = `floor(baseThrust × currentPower / maxPower)`; stacking hits; hardened (/fib) computers immune; blue burst/aura canvas effects; ION NR badge + COMMS DOWN warning (HG p.30–33, FAQ HG 2022 p.1) |
 | **Sandcaster ammo** | 20 canisters per sandcaster slot; depleted by Disperse Sand reaction; shown as 🪨 N/max on bento cards, ship detail modal, and tooltip |
 | **Sound effects** | Procedural synthesis via Web Audio API — laser, impact, critical, missile launch, thrust plume; 🔊/🔇 mute toggle in HUD; no audio files required |
+| **UI text scale** | 🔍N% HUD button cycles 100% → 115% → 130%; scales every label (HUD, modals, forms) plus the map's ship name/hull labels and missile count badges via a single `--ui-scale` CSS token |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in on all roll steps (attack, damage, critical location, extra damage, reactions, crew actions, initiative); NPC ships auto-roll |
 | **Destroyed ships** | Hull = 0 → `isDestroyed` flag; token rendered at 35% opacity with ☠ badge; all combat actions blocked ("WRECK — no actions available"); ship skipped in initiative cycling; excluded from the attack target list; GM removes wreck manually |
 | **Crew assignments** | Right-click any ship → Assign Crew: assign each named member to a role (Pilot, Leadership, Tactics, Engineer, Sensors, Gunner W1…Wn); unassigned roles contribute 0; weapon slots without a gunner cannot fire. A single crew member can cover all roles (monoposto / solo pilot). |
@@ -168,7 +169,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1504 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1506 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 
