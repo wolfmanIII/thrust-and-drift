@@ -254,6 +254,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
   const obstaclesEnabled  = useBattleStore((s) => s.obstaclesEnabled)
   const selectedShipId    = useUiStore((s) => s.selectedShipId)
   const thrustTargeting   = useUiStore((s) => s.thrustTargeting)
+  const uiScale           = useUiStore((s) => s.uiScale)
 
   // Phases where turn order matters; acceleration reverses the list (TC p.174)
   const ACTOR_PHASES = ['acceleration', 'attack', 'actions']
@@ -345,7 +346,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
         renderPos = lerpHex(anim.startPositions[missile.id], missile.position, t)
       }
       const { x: cx, y: cy } = hexToPixel(renderPos.q, renderPos.r, size, ox, oy)
-      drawMissileToken(ctx, missile, cx, cy)
+      drawMissileToken(ctx, missile, cx, cy, uiScale)
     }
 
     // --- Layer 6 + 7: Ship tokens + labels ---
@@ -357,7 +358,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
       }
       const { x: cx, y: cy } = hexToPixel(renderPos.q, renderPos.r, size, ox, oy)
       drawShipToken(ctx, ship, cx, cy, ship.id === selectedShipId, ship.id === currentActorId, timestampRef.current)
-      drawShipLabel(ctx, ship, cx, cy)
+      drawShipLabel(ctx, ship, cx, cy, uiScale)
     }
 
     // Clear animation state once complete
@@ -367,7 +368,7 @@ export function useCanvasRenderer({ canvasRef, offset, zoom, mouseHexRef }) {
   // ships/missiles/obstacles are read fresh via getState() inside render, but kept in deps to
   // trigger useCallback recreation → useEffect([render]) fires → canvas redraws on store change.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canvasRef, ships, missiles, phase, initiativeOrder, currentActorIndex, combatMode, obstacles, obstaclesEnabled, selectedShipId, offset, zoom, timestampRef, thrustTargeting, mouseHexRef])
+  }, [canvasRef, ships, missiles, phase, initiativeOrder, currentActorIndex, combatMode, obstacles, obstaclesEnabled, selectedShipId, offset, zoom, timestampRef, thrustTargeting, mouseHexRef, uiScale])
 
   // Render on state changes
   useEffect(() => {

@@ -14,7 +14,7 @@ import { getShapeTracer, getDetailDrawer } from './shipTokenShapes.js'
 const TOKEN_RADIUS = 18
 const VECTOR_ARROW_HEAD = 7
 const HP_BAR_RADIUS = TOKEN_RADIUS + 5
-const LABEL_FONT = 'bold 11px monospace'
+const LABEL_FONT_SIZE = 11 // px — scaled by uiScale (#39); CSS vars don't reach ctx.font
 const GHOST_ALPHA = 0.35
 const MISSILE_RADIUS = 11
 
@@ -177,10 +177,11 @@ export function drawShipToken(ctx, ship, cx, cy, selected, isCurrentActor, times
  * @param {object} ship
  * @param {number} cx
  * @param {number} cy
+ * @param {number} [uiScale=1]  GM-facing text scale (#39) — canvas text ignores CSS vars
  */
-export function drawShipLabel(ctx, ship, cx, cy) {
+export function drawShipLabel(ctx, ship, cx, cy, uiScale = 1) {
   const label = `${ship.name}  ${ship.hullCurrent}/${ship.profile.hull}`
-  ctx.font = LABEL_FONT
+  ctx.font = `bold ${Math.round(LABEL_FONT_SIZE * uiScale)}px monospace`
   ctx.fillStyle = 'rgba(255,255,255,0.85)'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
@@ -268,8 +269,9 @@ function traceMissileShape(ctx, cx, cy, ox, oy) {
  * @param {object} missile  MissileToken
  * @param {number} cx
  * @param {number} cy
+ * @param {number} [uiScale=1]  GM-facing text scale (#39) — canvas text ignores CSS vars
  */
-export function drawMissileToken(ctx, missile, cx, cy) {
+export function drawMissileToken(ctx, missile, cx, cy, uiScale = 1) {
   const OFFSETS = [[-3, 1.5], [0, -1.5], [3, 1.5]]
   const rotation = computeShipRotation(missile.vector)
   const isTorpedo = missile.type === 'Torpedo'
@@ -286,7 +288,7 @@ export function drawMissileToken(ctx, missile, cx, cy) {
   ctx.restore()
 
   // Count label and thrust arc — canvas-space, unrotated (same as ship name label)
-  ctx.font = 'bold 7px monospace'
+  ctx.font = `bold ${Math.round(7 * uiScale)}px monospace`
   ctx.fillStyle = isTorpedo ? '#f87171' : '#fbbf24'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'

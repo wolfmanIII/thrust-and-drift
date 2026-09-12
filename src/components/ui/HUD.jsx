@@ -43,6 +43,8 @@ export function HUD() {
   const openModal           = useUiStore((s) => s.openModal)
   const audioEnabled        = useUiStore((s) => s.audioEnabled)
   const toggleAudio         = useUiStore((s) => s.toggleAudio)
+  const uiScale             = useUiStore((s) => s.uiScale)
+  const cycleUiScale        = useUiStore((s) => s.cycleUiScale)
   const dogfights               = useBattleStore((s) => s.dogfights)
   const boardings               = useBattleStore((s) => s.boardings)
   const obstaclesEnabled        = useBattleStore((s) => s.obstaclesEnabled)
@@ -254,12 +256,12 @@ export function HUD() {
             </button>
           </Tooltip>
         )}
-        <Tooltip label="Save session to file" position="bottom">
+        <Tooltip label="Return to main menu" position="bottom">
           <button
-            onClick={exportBattleState}
-            className="flex-1 bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
+            onClick={() => setShowExitWarning(true)}
+            className="bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-500 font-mono text-base rounded px-2 py-1 backdrop-blur-sm transition-colors"
           >
-            💾 SAVE
+            🏠
           </button>
         </Tooltip>
         <Tooltip label={audioEnabled ? 'Mute sound effects' : 'Unmute sound effects'} position="bottom">
@@ -275,12 +277,21 @@ export function HUD() {
             {audioEnabled ? '🔊' : '🔇'}
           </button>
         </Tooltip>
-        <Tooltip label="Return to main menu" position="bottom">
+        <Tooltip label={`UI text size: ${Math.round(uiScale * 100)}% — click to cycle (100/115/130%)`} position="bottom">
           <button
-            onClick={() => setShowExitWarning(true)}
-            className="bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-500 font-mono text-base rounded px-2 py-1 backdrop-blur-sm transition-colors"
+            onClick={cycleUiScale}
+            aria-label="Cycle UI text size"
+            className="bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
           >
-            🏠
+            🔍{Math.round(uiScale * 100)}%
+          </button>
+        </Tooltip>
+        <Tooltip label="Save session to file" position="bottom">
+          <button
+            onClick={exportBattleState}
+            className="flex-1 bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-500 font-mono text-xs rounded px-2 py-1 backdrop-blur-sm transition-colors"
+          >
+            💾 SAVE
           </button>
         </Tooltip>
       </div>

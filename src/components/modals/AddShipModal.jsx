@@ -59,7 +59,7 @@ function ShapePreview({ shape, selected, onClick }) {
         ref={canvasRef}
         style={{ width: PREVIEW_SIZE, height: PREVIEW_SIZE }}
       />
-      <span className={`font-mono text-[10px] ${selected ? 'text-(--neon-cyan)' : 'text-slate-400'}`}>
+      <span className={`font-mono text-2xs ${selected ? 'text-(--neon-cyan)' : 'text-slate-400'}`}>
         {SHAPE_LABELS[shape]}
       </span>
     </button>

@@ -104,7 +104,7 @@ const CATEGORY_COLORS = {
 function CategoryBadge({ title }) {
   const cls = CATEGORY_COLORS[title] ?? 'text-slate-400 border-slate-700'
   return (
-    <span className={`font-mono text-[10px] tracking-widest border rounded px-1.5 py-0.5 ${cls}`}>
+    <span className={`font-mono text-2xs tracking-widest border rounded px-1.5 py-0.5 ${cls}`}>
       {title.toUpperCase()}
     </span>
   )

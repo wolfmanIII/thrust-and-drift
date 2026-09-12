@@ -36,7 +36,7 @@ function ObjectiveRow({ label, desc, conquered, onChange }) {
         <p className={`font-mono text-xs font-bold ${conquered ? 'text-emerald-400' : 'text-slate-300'}`}>
           {label}
         </p>
-        <p className="text-slate-400 font-mono text-[10px]">{desc}</p>
+        <p className="text-slate-400 font-mono text-2xs">{desc}</p>
       </div>
       <span className={`font-mono text-xs shrink-0 ${conquered ? 'text-emerald-400' : 'text-slate-400'}`}>
         {conquered ? 'CAPTURED' : 'CONTESTED'}
@@ -53,7 +53,7 @@ function RollResult({ result }) {
   if (!result) return null
   return (
     <div className="bg-slate-900/60 rounded px-3 py-2 space-y-1">
-      <p className="text-slate-400 font-mono text-[10px]">
+      <p className="text-slate-400 font-mono text-2xs">
         Dice: [{result.results.join(', ')}] → {result.modified ?? result.total}
       </p>
       <p className={`font-mono text-xs font-bold ${
@@ -146,7 +146,7 @@ export function BoardingConflictModal() {
           <p className="text-slate-400 font-mono text-xs uppercase font-bold">
             Stacking — targeting non-first combatant
           </p>
-          <p className="text-slate-400 font-mono text-[10px]">
+          <p className="text-slate-400 font-mono text-2xs">
             Roll 2D ≥ 10, else first in line becomes the target. (HG p.131)
           </p>
           <button
@@ -172,7 +172,7 @@ export function BoardingConflictModal() {
           <p className="text-slate-400 font-mono text-xs uppercase font-bold">
             Missed shot — where does the bullet go?
           </p>
-          <p className="text-slate-400 font-mono text-[10px]">
+          <p className="text-slate-400 font-mono text-2xs">
             Every missed attack rolls 2D on this table. (HG p.132)
           </p>
           <label className="flex items-center gap-2 text-slate-400 font-mono text-xs cursor-pointer">
@@ -195,7 +195,7 @@ export function BoardingConflictModal() {
 
         {/* Weapon DM reminder */}
         <div className="bg-slate-900/40 rounded px-3 py-2">
-          <p className="text-slate-400 font-mono text-[10px] uppercase mb-1">Weapon DM in tight spaces</p>
+          <p className="text-slate-400 font-mono text-2xs uppercase mb-1">Weapon DM in tight spaces</p>
           <p className="text-slate-400 font-mono text-xs">Rifles −2 · Heavy weapons −4 · Grenades → 6D+</p>
         </div>
 

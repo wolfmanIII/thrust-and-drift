@@ -32,10 +32,10 @@ function TumblingControl({ boarding, onApply, onClear }) {
     return (
       <div className="flex-1 py-2 px-3 rounded border bg-red-900/30 border-red-500 text-red-400 font-mono text-xs space-y-1">
         <p className="font-bold">🌀 TUMBLING</p>
-        <p className="text-[10px] text-slate-400">{boarding.rotatingRoundsLeft ?? 1}r remaining · DM −1 Contact</p>
+        <p className="text-2xs text-slate-400">{boarding.rotatingRoundsLeft ?? 1}r remaining · DM −1 Contact</p>
         <button
           onClick={onClear}
-          className="mt-1 w-full py-1 bg-slate-800 border border-slate-600 text-slate-400 hover:text-slate-200 font-mono text-[10px] rounded transition-colors"
+          className="mt-1 w-full py-1 bg-slate-800 border border-slate-600 text-slate-400 hover:text-slate-200 font-mono text-2xs rounded transition-colors"
         >
           DEACTIVATE
         </button>
@@ -49,7 +49,7 @@ function TumblingControl({ boarding, onApply, onClear }) {
   return (
     <div className="flex-1 py-2 px-3 rounded border bg-slate-800 border-slate-600 font-mono text-xs space-y-2">
       <p className="text-slate-400 font-bold">🌀 Tumbling</p>
-      <p className="text-[10px] text-slate-400">Pilot (DEX) Routine (6+)</p>
+      <p className="text-2xs text-slate-400">Pilot (DEX) Routine (6+)</p>
       <DiceInput value={dice} onChange={setDice} />
       {checkTotal !== null && (
         <p className={passed ? 'text-emerald-400' : 'text-red-400'}>
@@ -58,7 +58,7 @@ function TumblingControl({ boarding, onApply, onClear }) {
       )}
       {passed && (
         <div className="flex items-center gap-2">
-          <span className="text-slate-400 text-[10px]">D3 duration:</span>
+          <span className="text-slate-400 text-2xs">D3 duration:</span>
           {[1, 2, 3].map((n) => (
             <button
               key={n}
@@ -77,7 +77,7 @@ function TumblingControl({ boarding, onApply, onClear }) {
       {passed && (
         <button
           onClick={() => onApply(duration)}
-          className="w-full py-1 bg-red-900/30 border border-red-500 text-red-400 font-mono text-[10px] rounded transition-colors hover:bg-red-900/50"
+          className="w-full py-1 bg-red-900/30 border border-red-500 text-red-400 font-mono text-2xs rounded transition-colors hover:bg-red-900/50"
         >
           ACTIVATE ({duration}r)
         </button>
@@ -269,7 +269,7 @@ export function BoardingContactModal() {
               >
                 <div className="flex-1">
                   <p className="font-bold">{m.label}</p>
-                  <p className="text-slate-400 text-[10px]">
+                  <p className="text-slate-400 text-2xs">
                     {m.check ? `${m.check} (${m.difficulty}+)` : 'No check'}
                     {' · '}
                     {m.time}
@@ -298,7 +298,7 @@ export function BoardingContactModal() {
             }`}
           >
             {boarding.forcedLinkage ? '🔗 LINKAGE ACTIVE' : '🔗 Forced Linkage'}
-            <span className="block text-[10px] text-slate-400">DM +2 Contact</span>
+            <span className="block text-2xs text-slate-400">DM +2 Contact</span>
           </button>
         </div>
 

@@ -139,6 +139,14 @@ const useUiStore = create((set) => ({
 
   /** Toggle sound effects on/off. */
   toggleAudio: () => set((s) => ({ audioEnabled: !s.audioEnabled })),
+
+  // === UI SCALE (#39) ===
+  /** DOM text scale multiplier (drives CSS --ui-scale) and canvas ctx.font sizes. */
+  uiScale: 1,
+  /** Cycle 100% → 115% → 130% → 100%. */
+  cycleUiScale: () => set((s) => ({
+    uiScale: s.uiScale >= 1.3 ? 1 : s.uiScale >= 1.15 ? 1.3 : 1.15,
+  })),
 }))
 
 export { useUiStore }

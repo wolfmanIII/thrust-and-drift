@@ -61,7 +61,7 @@ export function BattleReportModal() {
 
         {/* ── Ship Roster ─────────────────────────────────────────── */}
         <div>
-          <div className="text-slate-500 uppercase tracking-widest text-[10px] mb-2">
+          <div className="text-slate-500 uppercase tracking-widest text-2xs mb-2">
             Ship Roster — Final State
           </div>
           <table className="w-full border-collapse">
@@ -125,7 +125,7 @@ export function BattleReportModal() {
 
         {/* ── Battle Log ──────────────────────────────────────────── */}
         <div>
-          <div className="text-slate-500 uppercase tracking-widest text-[10px] mb-2">
+          <div className="text-slate-500 uppercase tracking-widest text-2xs mb-2">
             Battle Log
           </div>
           {sortedRounds.length === 0 && (
