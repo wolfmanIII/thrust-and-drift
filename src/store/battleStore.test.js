@@ -897,6 +897,29 @@ describe('resolveMovement', () => {
     vi.useRealTimers()
   })
 
+  it('carries weaponLabel/damageDice through the basic-mode impact pipeline (buildNextRoundState)', () => {
+    useBattleStore.getState().resetBattle('basic')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'A' }), { q: 0, r: 0 }, 'players', '#fff')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'B' }), { q: 0, r: 0 }, 'npc',     '#f00')
+    const [att, tgt] = useBattleStore.getState().ships
+    useBattleStore.getState().launchMissile(
+      att.id, tgt.id, 2, { q: 0, r: 0 }, { q: 0, r: 0 }, 'Standard', true, 'Advanced Missile Rack', 5,
+    )
+    const missileId = useBattleStore.getState().missiles[0].id
+    // Force the salvo to Adjacent so buildNextRoundState resolves it as impacted
+    // on the next round transition (advanceBasicMissileOneRound: band === 'Adjacent' → impacted).
+    useBattleStore.setState({
+      missiles: useBattleStore.getState().missiles.map((m) =>
+        m.id === missileId ? { ...m, basicRangeBand: 'Adjacent' } : m
+      ),
+    })
+    useBattleStore.getState().startNextRound()
+    const impacts = useBattleStore.getState().pendingMissileImpacts
+    expect(impacts).toHaveLength(1)
+    expect(impacts[0].weaponLabel).toBe('Advanced Missile Rack')
+    expect(impacts[0].damageDice).toBe(5)
+  })
+
   it('missile guidance is partial when correction exceeds GUIDANCE_THRUST per round', () => {
     // Missile at {q:0,r:0} vector {q:1,r:0}, target at {q:20,r:0} stationary.
     // predictedQ=20, deltaQ=19, deltaMag=19, scale=10/19 → correction=round(10)=10
