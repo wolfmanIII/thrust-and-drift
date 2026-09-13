@@ -41,6 +41,7 @@ export function HUD() {
   const pendingMissileImpacts  = useBattleStore((s) => s.pendingMissileImpacts)
   const gotoScreen          = useUiStore((s) => s.gotoScreen)
   const openModal           = useUiStore((s) => s.openModal)
+  const activeModal         = useUiStore((s) => s.activeModal)
   const audioEnabled        = useUiStore((s) => s.audioEnabled)
   const toggleAudio         = useUiStore((s) => s.toggleAudio)
   const uiScale             = useUiStore((s) => s.uiScale)
@@ -91,6 +92,21 @@ export function HUD() {
     setPhaseBlockMsg(null)
     advancePhase()
   }, [canAdvancePhase, advancePhase, phase, initiativeOrder, currentActorIndex, pendingMissileImpacts, activeDogfights])
+
+  // Enter key advances phase (#41) — gated like the 1/2/3 zoom shortcuts (BattleMap.jsx):
+  // disabled while any modal is open, so it never fires as an accidental form submit.
+  const canPressEnterToAdvance = combatMode === 'vectorial' || phase !== 'movement'
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key !== 'Enter') return
+      if (activeModal) return
+      if (!canPressEnterToAdvance) return
+      e.preventDefault()
+      handleAdvancePhase()
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [activeModal, canPressEnterToAdvance, handleAdvancePhase])
 
   const handleUndo = useCallback(() => {
     if (canUndo) undoLastAction()
@@ -186,17 +202,6 @@ export function HUD() {
         </p>
       )}
 
-      {/* Add ship without pre-picking a hex — deferred placement, click the map after confirming.
-          Vectorial mode only: basic mode's empty-area right-click already reaches this flow (#30). */}
-      {combatMode === 'vectorial' && (
-        <button
-          onClick={() => openModal('addShip', {})}
-          className="pointer-events-auto bg-slate-800/80 border border-slate-700 rounded px-3 py-1.5 backdrop-blur-sm hover:border-(--neon-cyan)/60 text-slate-300 hover:text-(--neon-cyan) transition-colors font-mono text-xs tracking-widest"
-        >
-          ➕ ADD SHIP
-        </button>
-      )}
-
       {/* Obstacles toggle — setup phase + vectorial mode only */}
       {phase === 'setup' && combatMode === 'vectorial' && (
         <button
@@ -234,6 +239,20 @@ export function HUD() {
 
       {/* Battle utilities */}
       <div className="pointer-events-auto flex gap-1 mt-0.5">
+        {/* Add ship without pre-picking a hex — deferred placement, click the map after confirming.
+            Vectorial mode only: basic mode's empty-area right-click already reaches this flow (#30).
+            Kept apart from the phase-flow buttons above — moved here per #40 to avoid misclicks
+            against NEXT PHASE during normal play. */}
+        {combatMode === 'vectorial' && (
+          <Tooltip label="Add a ship to the battle" position="bottom">
+            <button
+              onClick={() => openModal('addShip', {})}
+              className="bg-slate-800/80 border border-slate-700 rounded px-2 py-1 backdrop-blur-sm hover:border-(--neon-cyan)/60 text-slate-400 hover:text-(--neon-cyan) transition-colors font-mono text-xs tracking-widest"
+            >
+              ➕ ADD SHIP
+            </button>
+          </Tooltip>
+        )}
         {canUndo && (
           <Tooltip label="Undo last action (Ctrl+Z)" position="bottom">
             <button

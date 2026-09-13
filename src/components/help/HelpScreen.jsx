@@ -238,7 +238,7 @@ export function HelpScreen({ onBack } = {}) {
         <Section id="phase-flow" title="Phase Flow">
           <p>
             Each combat round follows this sequence. The HUD (top-left) shows the current round and phase.
-            Click <span className="text-slate-200">NEXT PHASE ⟶</span> to advance.
+            Click <span className="text-slate-200">NEXT PHASE ⟶</span> to advance, or press <kbd className="bg-slate-700 px-1 rounded">Enter</kbd>.
           </p>
           <div className="space-y-1.5">
             {[
@@ -259,6 +259,7 @@ export function HelpScreen({ onBack } = {}) {
               When blocked, the button dims and clicking shows an amber warning below it.
               The warning clears automatically once the condition is met.
             </p>
+            <KV k="Keyboard" v="Enter also triggers NEXT PHASE ⟶ and follows the same guards. Disabled while any modal is open, so it never submits a form by accident." />
             <KV k="⚡ Any phase" v="Missile impacts must all be resolved before advancing. The button dims and shows 🚨 Resolve all pending missile impacts. Use the ↩ button in the Battle Log to re-open a dismissed impact modal." />
             <KV k="Setup" v="At least 1 ship must be placed on the map. 🚨 Place at least one ship first." />
             <KV k="Initiative" v="Initiative must be rolled (Roll Initiative modal). 🚨 Roll initiative before advancing." />
@@ -271,7 +272,7 @@ export function HelpScreen({ onBack } = {}) {
         <Section id="setup" title="Setup Phase">
           <p>Place ships on the hex grid before the battle begins.</p>
           <Sub title="ADDING A SHIP">
-            <p>Right-click any empty hex → <span className="text-slate-200">Add ship here</span> (places at that hex directly), or click <span className="text-slate-200">➕ ADD SHIP</span> in the HUD (vectorial mode) to confirm the profile/faction/vector first and pick the hex afterward by clicking the map. A modal opens where you select:</p>
+            <p>Right-click any empty hex → <span className="text-slate-200">Add ship here</span> (places at that hex directly), or click <span className="text-slate-200">➕ ADD SHIP</span> in the HUD's utility row (bottom-left, vectorial mode only — kept apart from NEXT PHASE ⟶ to avoid misclicks) to confirm the profile/faction/vector first and pick the hex afterward by clicking the map. A modal opens where you select:</p>
             <KV k="Profile" v="Which saved ship profile to use." />
             <KV k="Faction" v="Players, Allies, Enemies, Neutral — affects token colour and auto-roll behaviour." />
             <KV k="Color" v="Token display colour." />
