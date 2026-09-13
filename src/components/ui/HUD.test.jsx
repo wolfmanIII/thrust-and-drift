@@ -260,6 +260,85 @@ describe('HUD — redo button', () => {
   })
 })
 
+// === #40: ADD SHIP button moved to battle utilities row ======================
+
+describe('HUD — ADD SHIP button placement (#40)', () => {
+  it('renders in vectorial mode, grouped with battle utilities not phase controls', () => {
+    useBattleStore.setState({ combatMode: 'vectorial', phase: 'attack' })
+    render(<HUD />)
+    const addShipBtn  = screen.getByRole('button', { name: /ADD SHIP/i })
+    const nextPhaseBtn = screen.getByText(/NEXT PHASE/)
+    // no longer adjacent siblings of the phase-flow block
+    expect(addShipBtn.parentElement).not.toBe(nextPhaseBtn.parentElement)
+  })
+
+  it('hidden in basic mode', () => {
+    useBattleStore.setState({ combatMode: 'basic', phase: 'attack' })
+    render(<HUD />)
+    expect(screen.queryByRole('button', { name: /ADD SHIP/i })).not.toBeInTheDocument()
+  })
+
+  it('click opens the addShip modal', () => {
+    useBattleStore.setState({ combatMode: 'vectorial', phase: 'attack' })
+    render(<HUD />)
+    fireEvent.click(screen.getByRole('button', { name: /ADD SHIP/i }))
+    expect(useUiStore.getState().activeModal).toBe('addShip')
+  })
+})
+
+// === #41: Enter key advances phase ============================================
+
+describe('HUD — Enter key advances phase (#41)', () => {
+  it('pressing Enter calls advancePhase when guard passes', () => {
+    useBattleStore.setState({ combatMode: 'vectorial', phase: 'setup' })
+    useBattleStore.getState().addShip(
+      { id: 'g1', name: 'Guard', hull: 10, thrust: 2, turrets: [], crew: [] },
+      { q: 0, r: 0 }, 'players', '#0ff'
+    )
+    render(<HUD />)
+    fireEvent.keyDown(window, { key: 'Enter' })
+    expect(useBattleStore.getState().phase).toBe('initiative')
+  })
+
+  it('pressing Enter is ignored while a modal is open', () => {
+    useBattleStore.setState({ combatMode: 'vectorial', phase: 'setup' })
+    useBattleStore.getState().addShip(
+      { id: 'g1', name: 'Guard', hull: 10, thrust: 2, turrets: [], crew: [] },
+      { q: 0, r: 0 }, 'players', '#0ff'
+    )
+    useUiStore.setState({ activeModal: 'addShip' })
+    render(<HUD />)
+    fireEvent.keyDown(window, { key: 'Enter' })
+    expect(useBattleStore.getState().phase).toBe('setup')
+  })
+
+  it('pressing Enter is ignored when NEXT PHASE button is hidden (basic mode, movement phase)', () => {
+    useBattleStore.setState({ combatMode: 'basic', phase: 'movement' })
+    render(<HUD />)
+    fireEvent.keyDown(window, { key: 'Enter' })
+    expect(useBattleStore.getState().phase).toBe('movement')
+  })
+
+  it('pressing Enter still shows the block message when advance is not allowed', () => {
+    useBattleStore.setState({ combatMode: 'vectorial', phase: 'setup', ships: [] })
+    render(<HUD />)
+    fireEvent.keyDown(window, { key: 'Enter' })
+    expect(useBattleStore.getState().phase).toBe('setup')
+    expect(screen.getByText(/Place at least one ship/)).toBeInTheDocument()
+  })
+
+  it('other keys do not advance the phase', () => {
+    useBattleStore.setState({ combatMode: 'vectorial', phase: 'setup' })
+    useBattleStore.getState().addShip(
+      { id: 'g1', name: 'Guard', hull: 10, thrust: 2, turrets: [], crew: [] },
+      { q: 0, r: 0 }, 'players', '#0ff'
+    )
+    render(<HUD />)
+    fireEvent.keyDown(window, { key: 'a' })
+    expect(useBattleStore.getState().phase).toBe('setup')
+  })
+})
+
 // === REQ-13: ↺ initiative override button ====================================
 
 describe('HUD — ↺ initiative override (REQ-13)', () => {
