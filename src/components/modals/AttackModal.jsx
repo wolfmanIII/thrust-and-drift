@@ -227,14 +227,19 @@ function AttackConfigStep({
               const wDef = w.displayWeapon ?? WEAPONS[w.weaponName]
               const wOutOfRange = target && wDef ? isOutOfRange(wDef.maxRange, rangeBand) : false
               const isSelected  = weaponKey === w.weaponName && selectedTurretSlot === w.turretSlot
+              const isPdCapable = LASER_PD.includes(w.weaponName)
               return (
                 <button
                   key={`${w.turretSlot}-${w.weaponName}`}
-                  onClick={() => setWeaponSelection(w.weaponName, w.turretSlot, w.damageDiceBonus ?? 0)}
+                  onClick={() => { if (!w.fired) setWeaponSelection(w.weaponName, w.turretSlot, w.damageDiceBonus ?? 0) }}
+                  disabled={w.fired}
+                  title={w.fired ? 'This turret already fired this round.' : undefined}
                   className={`text-left px-3 py-1.5 rounded font-mono text-xs border transition-colors ${
-                    isSelected
-                      ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
-                      : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                    w.fired
+                      ? 'border-slate-800 text-slate-600 cursor-not-allowed'
+                      : isSelected
+                        ? 'border-(--neon-cyan)/60 bg-(--neon-cyan)/10 text-(--neon-cyan)'
+                        : 'border-slate-700 text-slate-400 hover:border-slate-500'
                   }`}
                 >
                   <span className="flex items-center justify-between gap-2">
@@ -244,8 +249,13 @@ function AttackConfigStep({
                       {(w.linkedCount ?? 1) > 1 && (
                         <span className="ml-1.5 text-amber-400/80">×{w.linkedCount}</span>
                       )}
+                      {!isMissilePdMode && isPdCapable && !w.fired && (
+                        <span className="ml-1.5 text-blue-400/80" title="Can also be used as Point Defence against in-flight missiles (CRB p.161).">🛡 PD</span>
+                      )}
                     </span>
-                    {wOutOfRange && (
+                    {w.fired ? (
+                      <span className="text-slate-500 font-bold tracking-widest">FIRED</span>
+                    ) : wOutOfRange && (
                       <span className="text-red-500 font-bold tracking-widest">OUT OF RANGE</span>
                     )}
                   </span>

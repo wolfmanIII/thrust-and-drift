@@ -32,7 +32,9 @@ export const EVASIVE_DM_KEY = 'evasiveDM'
  *   enemies:          object[],
  *   target:           object|undefined,
  *   weapon:           object|null,
- *   availableWeapons: { weaponName: string, turretSlot: number }[],
+ *   availableWeapons: { weaponName: string, turretSlot: number, fired: boolean }[],
+ *     // `fired` turrets stay in the list (not silently dropped) so the UI can show them
+ *     // disabled with a "FIRED" badge instead of just vanishing (#42).
  *   distance:         number|null,
  *   rangeBand:        string,
  *   storedBand:       string|null,
@@ -74,12 +76,12 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   const firedTurrets     = attacker?.firedTurrets ?? []
   const assignments      = attacker?.crewAssignments ?? null
   const availableWeapons = (attacker?.profile.turrets ?? [])
-    .filter((t) => {
-      if (firedTurrets.includes(t.slot)) return false
-      if (assignments && (assignments.gunners?.[t.slot] ?? null) === null) return false
-      return true
-    })
+    // A fired turret is kept in the list (marked `fired: true`, see below) so the picker
+    // can show it disabled instead of silently vanishing — an unassigned-gunner turret is a
+    // setup/crew concern, not a per-round firing state, so it's still dropped entirely (#42).
+    .filter((t) => !(assignments && (assignments.gunners?.[t.slot] ?? null) === null))
     .flatMap((t) => {
+      const fired = firedTurrets.includes(t.slot)
       const offensiveWeapons = t.weapons.filter((w) => !DEFENSIVE_WEAPONS.includes(w))
       // Count occurrences of each weapon type in the slot
       const counts = {}
@@ -99,7 +101,7 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
         const singletonIdx = isSingletonInSlot(t, weaponName) ? t.weapons.indexOf(weaponName) : -1
         const hasOverride  = singletonIdx !== -1 && !!t.weaponOverrides?.[singletonIdx]
         const displayWeapon = hasOverride ? resolveWeaponForSlot(t, weaponName) : wDef
-        return { weaponName, turretSlot: t.slot, linkedCount, damageDiceBonus, displayWeapon, hasOverride }
+        return { weaponName, turretSlot: t.slot, linkedCount, damageDiceBonus, displayWeapon, hasOverride, fired }
       })
     })
 
