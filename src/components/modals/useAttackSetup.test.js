@@ -130,7 +130,7 @@ describe('useAttackSetup — same-type weapon grouping (#14)', () => {
     expect(result.current.availableWeapons).toHaveLength(0)
   })
 
-  it('fired turret slot excluded from availableWeapons', () => {
+  it('fired turret slot stays in availableWeapons, marked fired (#42)', () => {
     const att = addAttacker([
       { slot: 1, weapons: ['Pulse Laser', 'Pulse Laser'] },
       { slot: 2, weapons: ['Beam Laser'] },
@@ -144,8 +144,9 @@ describe('useAttackSetup — same-type weapon grouping (#14)', () => {
       useAttackSetup(att.id, '', '', null, null)
     )
     const w = result.current.availableWeapons
-    expect(w).toHaveLength(1)
-    expect(w[0]).toMatchObject({ weaponName: 'Beam Laser', turretSlot: 2 })
+    expect(w).toHaveLength(2)
+    expect(w.find((e) => e.turretSlot === 1)).toMatchObject({ weaponName: 'Pulse Laser', fired: true })
+    expect(w.find((e) => e.turretSlot === 2)).toMatchObject({ weaponName: 'Beam Laser', fired: false })
   })
 
   it('multiple slots: each slot grouped independently', () => {

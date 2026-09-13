@@ -876,6 +876,13 @@ arrive at its target.
 > There is no restriction on which faction the salvo belongs to — a ship may
 > intercept salvos targeting allies.
 
+**Weapon picker clarity (#42):** MgT2e has no dedicated Point Defence
+hardware — any unfired Pulse Laser / Beam Laser turret doubles as both a
+normal weapon and a PD system. The weapon picker in the Attack modal marks
+these with a **🛡 PD** badge. An already-fired turret is no longer removed
+from the list — it stays visible, greyed out and disabled, tagged **FIRED**,
+so it's clear at a glance which weapons are still available this round.
+
 ---
 
 ## 10. Actions Phase — Crew

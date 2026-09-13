@@ -524,3 +524,70 @@ describe('AttackModal — Missile Rack override reaches the launched salvo (#48)
     expect(missile.damageDice).toBe(4) // HG p.28
   })
 })
+
+// ── #42: fired-turret / PD clarity in the weapon picker ───────────────────────
+
+describe('AttackModal — fired-turret and PD clarity (#42)', () => {
+  function setupTwoTurrets() {
+    const profile = {
+      id: 'profile-42', name: 'Gunship', hull: 20, armor: 0, thrust: 4, tonnage: 100,
+      turrets: [
+        { slot: 1, weapons: ['Pulse Laser'] },
+        { slot: 2, weapons: ['Beam Laser'] },
+      ],
+      crew: [],
+    }
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Target', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att] = useBattleStore.getState().ships
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+    return att
+  }
+
+  it('unfired turret weapon shows a PD badge for PD-capable lasers', () => {
+    setupTwoTurrets()
+    render(<AttackModal />)
+    expect(screen.getAllByText(/PD/).length).toBeGreaterThan(0)
+  })
+
+  it('fired turret weapon still shown, marked FIRED, not silently hidden', () => {
+    const att = setupTwoTurrets()
+    useBattleStore.setState({
+      ships: useBattleStore.getState().ships.map((s) =>
+        s.id === att.id ? { ...s, firedTurrets: [1] } : s
+      ),
+    })
+    render(<AttackModal />)
+    expect(screen.getByText('Pulse Laser')).toBeInTheDocument()
+    expect(screen.getByText('FIRED')).toBeInTheDocument()
+  })
+
+  it('clicking a fired turret weapon does not select it', () => {
+    const att = setupTwoTurrets()
+    useBattleStore.setState({
+      ships: useBattleStore.getState().ships.map((s) =>
+        s.id === att.id ? { ...s, firedTurrets: [1] } : s
+      ),
+    })
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Pulse Laser'))
+    // no damage-config step should appear for the fired weapon — Beam Laser (unfired) remains selectable instead
+    expect(screen.getByText('Beam Laser')).toBeInTheDocument()
+    expect(screen.queryByText(/DM Summary/i)).not.toBeInTheDocument()
+  })
+
+  it('fired turret weapon has no PD badge', () => {
+    const att = setupTwoTurrets()
+    useBattleStore.setState({
+      ships: useBattleStore.getState().ships.map((s) =>
+        s.id === att.id ? { ...s, firedTurrets: [1] } : s
+      ),
+    })
+    render(<AttackModal />)
+    const firedRow = screen.getByText('Pulse Laser').closest('button')
+    expect(firedRow).not.toHaveTextContent('PD')
+  })
+})

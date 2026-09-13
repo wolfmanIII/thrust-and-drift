@@ -490,6 +490,8 @@ export function HelpScreen({ onBack } = {}) {
             <p>A ship with unfired laser weapon slots may use its Attack turn to intercept an enemy missile salvo currently in flight, before it reaches its target.</p>
             <p>Select a <span className="text-slate-200">Pulse Laser</span> or <span className="text-slate-200">Beam Laser</span> slot in the Attack Config step, then choose an enemy in-flight salvo as the target. Click <span className="text-slate-200">INTERCEPT</span> to open the intercept step. Roll 2D6 + Gunner + laser bonus (DM+1 for 2-laser, DM+2 for 3-laser). Effect (min 0) missiles are destroyed; the salvo is removed if count reaches 0. The weapon slot is marked fired; result is logged.</p>
             <Note>This consumes the attacker&apos;s Attack turn for that weapon slot — the same slot cannot be used for attack or PD reaction in the same round. May target salvos threatening allied ships.</Note>
+            <KV k="🛡 PD badge" v="Shown next to Pulse Laser / Beam Laser in the weapon picker — there is no separate PD hardware in MgT2e, any unfired laser turret can be used for either a normal attack or Point Defence." />
+            <KV k="FIRED badge" v="An already-fired turret stays visible in the picker (greyed, disabled, tagged FIRED) instead of disappearing — makes it clear at a glance which weapons are still available this round." />
           </Sub>
 
           <Sub title="SENSOR LOCK">
