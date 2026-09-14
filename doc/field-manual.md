@@ -234,7 +234,7 @@ Right-click any empty hex → **Add ship here** (places the ship at that hex dir
 - **Faction** — Players, Allies, Enemies, Neutral. Affects token colour and
   auto-roll behaviour.
 - **Color** — token display colour.
-- **Shape** — token silhouette: Delta, Needle, Freighter, Gunship, Cruiser, or Capital. Each shape has a distinct hull outline and bridge/cockpit detail overlay. **Auto-selected from the profile's tonnage** (Needle <100t, Delta <1,000t, Gunship <2,000t, Cruiser <6,000t, Capital 6,000t+) so ships read as visually distinct without extra clicks — Freighter is never auto-picked (it signals a civilian role, not a size) and any shape can still be picked manually, which overrides the auto choice until a different profile is selected *(#38)*. The choice is per-placement and does not affect game mechanics.
+- **Shape** — token silhouette: Delta, Needle, Freighter, Gunship, Cruiser, or Capital. Each shape has a distinct hull outline and bridge/cockpit detail overlay. The choice is per-placement and does not affect game mechanics.
 - **Initial vector (Δq / Δr)** *(vectorial mode only)* — Pre-set the ship's starting velocity vector. Default is 0 / 0 (stationary). Use this for ships arriving at cruise speed, fleeing, or intercepting at the start of an engagement.
 
 After placing, right-click the ship token → **Assign Crew…** to review or

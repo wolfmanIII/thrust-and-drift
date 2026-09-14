@@ -9,7 +9,7 @@ import { useUiStore } from '../../store/uiStore.js'
 import { useProfilesStore } from '../../store/profilesStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { FACTIONS } from '../../data/factions.js'
-import { getShapeTracer, getDetailDrawer, SHIP_SHAPES, suggestTokenShape } from '../map/shipTokenShapes.js'
+import { getShapeTracer, getDetailDrawer, SHIP_SHAPES } from '../map/shipTokenShapes.js'
 
 const SHAPE_LABELS = {
   delta:     'Delta',
@@ -86,7 +86,7 @@ export function AddShipModal() {
   const [faction, setFaction]     = useState('npc')
   const [color, setColor]         = useState('#f87171')
   const [filter, setFilter]       = useState('')
-  const [shapeOverride, setShapeOverride] = useState(null)
+  const [tokenShape, setTokenShape] = useState('delta')
   const [vectorQ, setVectorQ]     = useState(0)
   const [vectorR, setVectorR]     = useState(0)
 
@@ -95,16 +95,6 @@ export function AddShipModal() {
   )
 
   const selectedProfile = profiles.find((p) => p.id === selectedProfileId)
-
-  // Default silhouette is auto-suggested from tonnage (#38) so ships look visually
-  // distinct without the GM having to remember to pick a shape every placement.
-  // Manual pick still wins; switching profile clears the override back to auto.
-  const autoShape  = suggestTokenShape(selectedProfile?.tonnage)
-  const tokenShape = shapeOverride ?? autoShape
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- clears a stale manual pick when the GM switches profile
-    setShapeOverride(null)
-  }, [selectedProfileId])
 
   const handleConfirm = () => {
     if (!selectedProfile) return
@@ -198,19 +188,14 @@ export function AddShipModal() {
 
         {/* Token shape */}
         <div>
-          <p className="text-slate-400 font-mono text-xs mb-1.5">
-            Token shape
-            {shapeOverride === null && (
-              <span className="text-slate-500"> — auto-selected by tonnage, click to override</span>
-            )}
-          </p>
+          <p className="text-slate-400 font-mono text-xs mb-1.5">Token shape</p>
           <div className="grid grid-cols-6 gap-1.5">
             {Object.keys(SHIP_SHAPES).map((shape) => (
               <ShapePreview
                 key={shape}
                 shape={shape}
                 selected={tokenShape === shape}
-                onClick={() => setShapeOverride(shape)}
+                onClick={() => setTokenShape(shape)}
               />
             ))}
           </div>
