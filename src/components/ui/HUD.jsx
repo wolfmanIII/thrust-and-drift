@@ -239,20 +239,6 @@ export function HUD() {
 
       {/* Battle utilities */}
       <div className="pointer-events-auto flex gap-1 mt-0.5">
-        {/* Add ship without pre-picking a hex — deferred placement, click the map after confirming.
-            Vectorial mode only: basic mode's empty-area right-click already reaches this flow (#30).
-            Kept apart from the phase-flow buttons above — moved here per #40 to avoid misclicks
-            against NEXT PHASE during normal play. */}
-        {combatMode === 'vectorial' && (
-          <Tooltip label="Add a ship to the battle" position="bottom">
-            <button
-              onClick={() => openModal('addShip', {})}
-              className="bg-slate-800/80 border border-slate-700 rounded px-2 py-1 backdrop-blur-sm hover:border-(--neon-cyan)/60 text-slate-400 hover:text-(--neon-cyan) transition-colors font-mono text-xs tracking-widest"
-            >
-              ➕ ADD SHIP
-            </button>
-          </Tooltip>
-        )}
         {canUndo && (
           <Tooltip label="Undo last action (Ctrl+Z)" position="bottom">
             <button
@@ -314,6 +300,23 @@ export function HUD() {
           </button>
         </Tooltip>
       </div>
+
+      {/* Add ship without pre-picking a hex — deferred placement, click the map after confirming.
+          Vectorial mode only: basic mode's empty-area right-click already reaches this flow (#30).
+          Kept apart from the phase-flow buttons above — moved here per #40 to avoid misclicks
+          against NEXT PHASE during normal play; own row below battle utilities. */}
+      {combatMode === 'vectorial' && (
+        <div className="pointer-events-auto">
+          <Tooltip label="Add a ship to the battle" position="bottom">
+            <button
+              onClick={() => openModal('addShip', {})}
+              className="bg-slate-800/80 border border-slate-700 rounded px-3 py-1.5 backdrop-blur-sm hover:border-(--neon-cyan)/60 text-slate-300 hover:text-(--neon-cyan) transition-colors font-mono text-xs tracking-widest"
+            >
+              ➕ ADD SHIP
+            </button>
+          </Tooltip>
+        </div>
+      )}
 
       {/* ── Dogfight trackers ──────────────────────────────────────── */}
       {activeDogfights.map((group, idx) => {
