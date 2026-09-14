@@ -9,6 +9,7 @@ import { render, screen, fireEvent }         from '@testing-library/react'
 import { AddShipModal }                      from './AddShipModal.jsx'
 import { useBattleStore }                    from '../../store/battleStore.js'
 import { useUiStore }                        from '../../store/uiStore.js'
+import { useProfilesStore }                  from '../../store/profilesStore.js'
 
 // === Helpers ==================================================================
 
@@ -137,5 +138,84 @@ describe('AddShipModal — vector forwarded via startPlacement', () => {
     fireEvent.change(screen.getByLabelText('Initial vector Δr'), { target: { value: '0' } })
     fireEvent.click(screen.getByText('SELECT HEX ON MAP →'))
     expect(useUiStore.getState().pendingPlacement?.vector).toEqual({ q: -5, r: 0 })
+  })
+})
+
+// === #38: default token shape auto-suggested from tonnage ====================
+
+describe('AddShipModal — auto-suggested token shape by tonnage (#38)', () => {
+  function selectProfileByTonnage(name, tonnage) {
+    useProfilesStore.getState().addProfile({
+      name, hull: 10, thrust: 4, tonnage, turrets: [], crew: {},
+    })
+    openVectorial()
+    render(<AddShipModal />)
+    fireEvent.click(screen.getByText(name))
+  }
+
+  it('defaults to Needle for a fighter-class hull (<100t)', () => {
+    selectProfileByTonnage('Interceptor-38a', 50)
+    expect(screen.getByText((_, el) => el?.tagName === 'P' && el.textContent === 'Token shape — auto-selected by tonnage, click to override')).toBeInTheDocument()
+    const needleBtn = screen.getByText('Needle').closest('button')
+    expect(needleBtn.className).toMatch(/border-\(--neon-cyan\)/)
+  })
+
+  it('defaults to Delta for a small hull (<1000t)', () => {
+    selectProfileByTonnage('Courier-38b', 200)
+    const deltaBtn = screen.getByText('Delta').closest('button')
+    expect(deltaBtn.className).toMatch(/border-\(--neon-cyan\)/)
+  })
+
+  it('defaults to Gunship for a mid hull (<2000t)', () => {
+    selectProfileByTonnage('Frigate-38c', 1500)
+    const gunshipBtn = screen.getByText('Gunship').closest('button')
+    expect(gunshipBtn.className).toMatch(/border-\(--neon-cyan\)/)
+  })
+
+  it('defaults to Cruiser for a large hull (<6000t)', () => {
+    selectProfileByTonnage('Cruiser-38d', 4000)
+    const cruiserBtn = screen.getByText('Cruiser').closest('button')
+    expect(cruiserBtn.className).toMatch(/border-\(--neon-cyan\)/)
+  })
+
+  it('defaults to Capital for a very large hull (6000t+)', () => {
+    selectProfileByTonnage('Dreadnought-38e', 8000)
+    const capitalBtn = screen.getByText('Capital').closest('button')
+    expect(capitalBtn.className).toMatch(/border-\(--neon-cyan\)/)
+  })
+
+  it('manual pick overrides the auto default, and hint disappears', () => {
+    selectProfileByTonnage('Courier-38f', 200)
+    fireEvent.click(screen.getByText('Capital'))
+    const capitalBtn = screen.getByText('Capital').closest('button')
+    expect(capitalBtn.className).toMatch(/border-\(--neon-cyan\)/)
+    expect(screen.queryByText((_, el) => el?.tagName === 'P' && el.textContent === 'Token shape — auto-selected by tonnage, click to override')).not.toBeInTheDocument()
+  })
+
+  it('switching profile clears the manual override back to auto', () => {
+    useProfilesStore.getState().addProfile({ name: 'SmallA-38g', hull: 10, thrust: 4, tonnage: 200, turrets: [], crew: {} })
+    useProfilesStore.getState().addProfile({ name: 'BigB-38h',   hull: 10, thrust: 4, tonnage: 8000, turrets: [], crew: {} })
+    openVectorial()
+    render(<AddShipModal />)
+    fireEvent.click(screen.getByText('SmallA-38g'))
+    fireEvent.click(screen.getByText('Needle')) // manual override, differs from SmallA's auto (Delta)
+    fireEvent.click(screen.getByText('BigB-38h')) // switch profile — auto for 8000t is Capital
+    const capitalBtn = screen.getByText('Capital').closest('button')
+    const needleBtn  = screen.getByText('Needle').closest('button')
+    expect(capitalBtn.className).toMatch(/border-\(--neon-cyan\)/)
+    expect(needleBtn.className).not.toMatch(/border-\(--neon-cyan\)/)
+    expect(screen.getByText((_, el) => el?.tagName === 'P' && el.textContent === 'Token shape — auto-selected by tonnage, click to override')).toBeInTheDocument()
+  })
+
+  it('confirmed placement carries the auto-suggested shape into the ship profile', () => {
+    useProfilesStore.getState().addProfile({
+      name: 'Dreadnought-38i', hull: 10, thrust: 4, tonnage: 8000, turrets: [], crew: {},
+    })
+    openVectorial({ hex: { q: 0, r: 0 } })
+    render(<AddShipModal />)
+    fireEvent.click(screen.getByText('Dreadnought-38i'))
+    fireEvent.click(screen.getByText('NPC'))
+    fireEvent.click(screen.getByText('PLACE SHIP'))
+    expect(useBattleStore.getState().ships[0].profile.tokenShape).toBe('capital')
   })
 })
