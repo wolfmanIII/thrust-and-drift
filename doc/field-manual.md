@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.10.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.11.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -194,7 +194,7 @@ session.
 ## 4. Phase Flow
 
 Each combat round follows this sequence. The HUD (top-left) shows the current
-round and phase. Click **NEXT PHASE ⟶** to advance.
+round and phase. Click **NEXT PHASE ⟶** to advance, or press **Enter** *(#41)*.
 
 | Phase | What happens |
 | ----- | ------------ |
@@ -220,6 +220,8 @@ round and phase. Click **NEXT PHASE ⟶** to advance.
 
 When blocked, the button turns dim (`cursor-not-allowed`) and clicking it shows an amber warning below the button. The warning clears automatically once the condition is satisfied.
 
+**Enter key** *(#41)* triggers the same action as clicking **NEXT PHASE ⟶**, subject to the same guards above. Disabled while any modal is open, so it never fires as an accidental form submit.
+
 ---
 
 ## 5. Setup Phase
@@ -228,7 +230,7 @@ Place ships on the hex grid before the battle begins.
 
 ### 5.1 Adding a Ship
 
-Right-click any empty hex → **Add ship here** (places the ship at that hex directly), or click the **➕ ADD SHIP** button in the HUD (vectorial mode) to confirm the profile/faction/vector first and pick the hex afterward by clicking the map. A modal opens where you select:
+Right-click any empty hex → **Add ship here** (places the ship at that hex directly), or click the **➕ ADD SHIP** button in the HUD — on its own row below the battle utilities, deliberately apart from the phase-flow buttons to avoid misclicks *(#40)* — (vectorial mode) to confirm the profile/faction/vector first and pick the hex afterward by clicking the map. A modal opens where you select:
 
 - **Profile** — which saved ship profile to use.
 - **Faction** — Players, Allies, Enemies, Neutral. Affects token colour and

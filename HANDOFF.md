@@ -9,25 +9,39 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.10.0 |
+| **Versione** | 2.11.0 |
 | **Branch** | main |
-| **Test** | 1506 Vitest + 68 Playwright e2e |
-| **Ultimo commit** | feat(ui): GM-facing UI text scale + HUD button reorder (#39, v2.10.0) |
+| **Test** | 1518 Vitest + 68 Playwright e2e |
+| **Ultimo commit** | chore(release): v2.11.0 — Add Ship placement, Enter shortcut, PD clarity (#40/#41/#42) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.10.0)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45, #46, #47, #48 chiuse automaticamente via `Fixes #N`/`Closes #N`. **#39 chiusa manualmente** (commit 6631001 non usava il trailer `Fixes #39` — occhio la prossima volta a metterlo anche per feature, non solo bugfix).
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.11.0)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45, #46, #47, #48, #40, #41, #42 chiuse automaticamente via `Fixes #N`/`Closes #N`. **#39 chiusa manualmente** in v2.10.0. **#38 chiusa manualmente come non applicabile** (v2.11.0, vedi sotto).
 - **#21 iterazione 2** (se richiesta) — range/salvo/ammo/traits custom, nuove armi non basate su una entry esistente. Struttura dati attuale (`weaponOverrides` indicizzato per posizione, attivo solo se l'arma è singola nello slot) regge l'iterazione 1 ma andrebbe rivista per selezione multi-istanza (id stabile per arma invece di indice) se si espande oltre il cosmetic+danno. **#21 resta OPEN** (iterazione 1 rilasciata in v2.9.0, non auto-chiusa).
-- **Wishlist CotI aperta come issue** (#36–#38, #40–#44, non urgenti, nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #38 icone navi, #40 posizione bottone Add Ship, #41 Enter = Next Phase, #42 chiarezza Point Defence, #43 raggruppamento report PDF, #44 gestione Power armi Ion (priorità bassa per l'utente). #39 chiusa (v2.10.0).
+- **Wishlist CotI ancora aperta** (#36, #37, #43, #44 — enhancement, non urgenti, nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #43 raggruppamento report PDF, #44 gestione Power armi Ion (priorità bassa per l'utente).
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — UI text scale + HUD reorder (v2.10.0, #39)
+### Sessione corrente — wishlist CotI: Add Ship placement, Enter shortcut, PD clarity (v2.11.0, #40/#41/#42), #38 chiusa non applicabile
+
+Continuazione della wishlist CotI aperta come issue nella sessione precedente. Tre fix "facili" (piccolo scope, nessun nuovo modello dati):
+
+1. **#40 — Add Ship troppo vicino ai controlli fase**: bottone spostato dallo stack `NEXT PHASE ⟶` a una riga propria sotto la riga utility (undo/redo/🏠/audio/scale/save), su richiesta esplicita dell'utente di separarlo ulteriormente.
+2. **#41 — Enter avanza fase**: nuovo handler `keydown` in `HUD.jsx`, stesso gate dei tasti zoom 1/2/3 (`activeModal` check) — disabilitato con un modale aperto per non scatenare submit accidentali. Riusa `handleAdvancePhase` esistente, stessi guard/messaggio di blocco del click.
+3. **#42 — chiarezza Point Defence**: `useAttackSetup.js` non esclude più le torrette già sparate da `availableWeapons` — le marca con un flag `fired` invece di ometterle. Il picker armi in `AttackModal.jsx` le mostra disabilitate con badge **FIRED**, e aggiunge un badge **🛡 PD** su Pulse/Beam Laser per chiarire che in MgT2e non esiste hardware PD dedicato — qualunque torretta laser non ancora sparata funge sia da arma normale che da intercettazione PD.
+
+**#38 (icone navi distinte)** — tentato un primo approccio: le 6 silhouette esistevano già da giugno (commit precedente a questa wishlist) ma ogni nave nuova partiva sempre con forma Delta di default, richiedendo selezione manuale ad ogni piazzamento — probabile causa per cui la richiesta CotI persisteva nonostante la feature esistesse. Prima soluzione: default automatico forma-da-tonnellaggio (Needle/Delta/Gunship/Cruiser/Capital per fascia). **L'utente ha respinto l'idea come priva di senso** — questa mappa non ha navi che occupano più esagoni, non c'è concetto di "dimensione" spaziale da rappresentare. Revert pulito (`git revert`, commit singolo, 0cbaa7b) e issue chiusa come **non applicabile**: l'app è un VTT GM-operated per poche/decine di navi a schermo condiviso, non un fleet simulator — nome + colore token già sufficienti per identificare le navi nell'uso reale. Le 6 forme restano disponibili come scelta manuale opzionale.
+
+Nessun test e2e aggiunto — tutte modifiche di layout/logica già coperte da RTL (HUD.test.jsx, AttackModal.test.jsx, useAttackSetup.test.js) o da e2e esistenti che selezionano per ruolo/testo, non per posizione DOM (batch3-features.spec.js per Add Ship).
+
+Totale 1518 Vitest (+12 da 1506: #40/#41 +8, #42 +4; il tentativo #38 aveva aggiunto +8 poi rimossi col revert), 68 Playwright e2e (invariato).
+
+### Sessione precedente — UI text scale + HUD reorder (v2.10.0, #39)
 
 Ultima voce della wishlist CotI "biggest usefulness" ancora aperta. Scoperto che `text-xs` è usato **555 volte** in 42 file (più 34 `text-[10px]`) — non è una patch piccola, è la taglia di testo base di tutta l'app. Chiesto all'utente come procedere: scelto "scaling opzionale" (non bump globale, non solo contrasto).
 

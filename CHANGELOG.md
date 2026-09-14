@@ -10,6 +10,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.11.0] — 2026-09-14
+
+### Added
+
+- **Enter key advances phase (#41)** — pressing Enter triggers the same action as clicking NEXT PHASE ⟶, including the same preconditions and block message. Disabled while any modal is open (same gating pattern as the 1/2/3 zoom shortcuts), so it never fires as an accidental form submit.
+
+### Changed
+
+- **➕ ADD SHIP button separated from phase-flow controls (#40)** — was stacked directly above NEXT PHASE ⟶, easy to misclick during normal play. Moved to its own row below the undo/redo/home/audio/scale/save utility row.
+- **Clearer Point Defence weapon availability in AttackModal (#42)** — an already-fired turret no longer vanishes silently from the weapon picker; it now stays visible, greyed out, tagged FIRED. Pulse Laser / Beam Laser entries get a 🛡 PD badge, clarifying that MgT2e has no dedicated PD hardware — any unfired laser turret doubles as a normal weapon or a Point Defence intercept.
+
+All three reported via the CotI wishlist (#36–#44). Investigated and closed #38 ("distinct ship icons") as not applicable — the app is a GM-operated VTT for shared-screen sessions with at most a few dozen ships on screen, not a fleet simulator with hundreds/thousands of units; token name + colour already identify ships in that use case. The 6 existing silhouettes (Delta/Needle/Freighter/Gunship/Cruiser/Capital) remain available as an optional manual pick.
+
+---
+
 ## [2.10.0] — 2026-09-12
 
 ### Added
