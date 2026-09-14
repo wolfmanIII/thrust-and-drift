@@ -38,6 +38,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Crew actions** | Named crew members with multi-skill support; pick member → available actions; skill DM override per action. A crew member assigned to a role can perform its actions even at skill 0 (no DM bonus). Sensor operators have three actions: Sensor Lock (8+, DM+2 flat), Electronic Warfare (8+, breaks sensor lock), **EW — Counter Missile** (10+, Effect removes missiles from a salvo — CRB p.173) |
 | **Initiative** | 2D6 + Pilot + Thrust [+ Tactics Effect] [+2 Holographic Controls]; optional Tactics(naval) check (CRB p.165); Holographic Controls is a per-ship bridge option toggled on the profile, always applies DM+2 (CRB p.186 / HG Update 2022 p.31); rolled once at the start of combat — from round 2+ the order is carried over and the phase skips directly to Acceleration; GM **↺** override button forces a re-roll when needed; if a ship is added mid-battle, initiative is re-rolled next round |
 | **Phase tracker** | Setup → Initiative → Acceleration → Movement → Attack → Actions → End. Ship names are clickable — click to pan the map to that token |
+| **Keyboard: Enter advances phase** | Pressing Enter triggers NEXT PHASE ⟶ (same guards, same block message); disabled while any modal is open |
 | **Phase-gated menu** | Right-click actions shown only when valid for the current phase AND when it is that ship's turn (initiative order enforced in Acceleration, Attack, Actions phases) |
 | **Actor highlight ring** | The current initiative actor's token shows a pulsing cyan ring on the canvas — instantly visible which ship should act next, even with multiple identical tokens |
 | **Mount type labels** | Weapon slots in the Ship Detail modal show their turret mount type: Single Turret (1 weapon), Double Turret (2 weapons), Triple Turret (3 weapons) |
@@ -169,7 +170,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1506 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1518 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 
