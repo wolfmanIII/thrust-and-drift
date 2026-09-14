@@ -402,20 +402,3 @@ export const SHIP_SHAPES = {
 export function getShapeTracer(key) {
   return SHIP_SHAPES[key] ?? traceShipBodyDelta
 }
-
-/**
- * Suggest a default token shape from a ship's tonnage — cosmetic sizing tiers only,
- * loosely following the target-size DM bands (CRB p.163, +1 DM per 1,000t) so bigger
- * hulls read as visually bigger silhouettes by default. Freighter is deliberately
- * excluded — it signals a civilian role, not a size, so it stays manual-pick only (#38).
- * @param {number} tonnage
- * @returns {string} shape key
- */
-export function suggestTokenShape(tonnage) {
-  const t = tonnage ?? 0
-  if (t < 100)   return 'needle'
-  if (t < 1000)  return 'delta'
-  if (t < 2000)  return 'gunship'
-  if (t < 6000)  return 'cruiser'
-  return 'capital'
-}
