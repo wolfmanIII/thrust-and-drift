@@ -18,6 +18,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Hex grid map** | Flat-top axial hex grid with pan & zoom |
 | **Vectorial movement** | Ships have velocity vectors; thrust modifies them |
 | **Thrust targeting** | Rubber-band canvas interaction during Acceleration: right-click → *Apply Thrust* → move cursor to aim; dashed line + ghost preview + `cost/max` badge; line turns orange at thrust cap; click to confirm, ESC to cancel |
+| **Initial vector compass** | Add Ship modal — 6-direction triangle-button compass (+ E/W composite shortcuts) sets a new ship's starting velocity vector without reasoning about raw Δq/Δr hex math; center preview shows the chosen token shape/colour rotated live to face the vector, click to reset. Manual Δq/Δr fields stay available alongside it for an exact vector |
 | **Ship profiles** | Full CRUD — create, edit, duplicate, delete (with confirmation); weapon slots capped at 3 (triple turret, CRB p.163) |
 | **Ship catalog** | Built-in read-only catalog from High Guard 2022 — browse, filter, add to session |
 | **Attack resolution** | 4-step flow: weapon/target config → 2D6 roll → damage → critical; per-slot firing limit (CRB p.164) — each slot fires once per round, slot badge (W1, W2…) shown in weapon list |
@@ -170,7 +171,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1518 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1529 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 

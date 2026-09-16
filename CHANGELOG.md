@@ -10,6 +10,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.12.0] — 2026-09-16
+
+### Added
+
+- **Initial vector compass in AddShipModal** — replaces the raw Δq/Δr-only entry for a new ship's starting velocity vector with a 6-direction hex compass (NW/N/NE/SW/S/SE), each button a filled triangle rotated to face its travel direction (reuses `computeShipRotation`, the same math the ship token itself uses to orient on the map) instead of a text label. Each click adds one hex-step to the current vector — cumulative, not a single-choice selector, so clicking the same direction repeatedly builds a straight-line vector while mixing directions composes a diagonal one (documented explicitly in the field manual, since it's easy to assume clicking a new direction "switches" the heading instead of adding to it).
+- **E/W composite shortcut buttons** — a flat-top hex has no true East/West neighbour, only the 6 real directions above; E and W apply two hex-steps in one click (E = NE+SE, W = NW+SW) for convenience, visually marked amber to distinguish them from the 6 real single-step directions.
+- **Rotating token preview at compass center** — shows the ship's chosen shape and colour inside a hex frame (flat-top, matching the map's grid orientation), rotated live to face the vector currently being set; click it to reset to (0, 0).
+
+### Changed
+
+- Compass and the live `(q, r)` readout / manual Δq/Δr fields now sit side by side instead of stacked, shortening the Add Ship panel.
+
+All from continued CotI wishlist follow-through — the raw Δq/Δr fields were flagged as unintuitive for a GM to reason about spatially. 11 new tests.
+
+---
+
 ## [2.11.0] — 2026-09-14
 
 ### Added
