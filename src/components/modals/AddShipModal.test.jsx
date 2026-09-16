@@ -91,8 +91,8 @@ describe('AddShipModal — initial vector compass', () => {
   it('clicking NE twice steps the vector to (2, -2) and updates Δq/Δr inputs', () => {
     openVectorial()
     render(<AddShipModal />)
-    fireEvent.click(screen.getByText('NE'))
-    fireEvent.click(screen.getByText('NE'))
+    fireEvent.click(screen.getByRole('button', { name: 'NE' }))
+    fireEvent.click(screen.getByRole('button', { name: 'NE' }))
     expect(screen.getByText('(2, -2)')).toBeInTheDocument()
     expect(screen.getByLabelText('Initial vector Δq')).toHaveValue(2)
     expect(screen.getByLabelText('Initial vector Δr')).toHaveValue(-2)
@@ -101,15 +101,15 @@ describe('AddShipModal — initial vector compass', () => {
   it('N then S cancels out back to (0, 0)', () => {
     openVectorial()
     render(<AddShipModal />)
-    fireEvent.click(screen.getByText('N'))
-    fireEvent.click(screen.getByText('S'))
+    fireEvent.click(screen.getByRole('button', { name: 'N' }))
+    fireEvent.click(screen.getByRole('button', { name: 'S' }))
     expect(screen.getByText('(0, 0)')).toBeInTheDocument()
   })
 
   it('E is a composite shortcut for NE+SE in one click', () => {
     openVectorial()
     render(<AddShipModal />)
-    fireEvent.click(screen.getByText('E'))
+    fireEvent.click(screen.getByRole('button', { name: 'E' }))
     expect(screen.getByText('(2, -1)')).toBeInTheDocument()
     expect(screen.getByLabelText('Initial vector Δq')).toHaveValue(2)
     expect(screen.getByLabelText('Initial vector Δr')).toHaveValue(-1)
@@ -118,23 +118,23 @@ describe('AddShipModal — initial vector compass', () => {
   it('W is a composite shortcut for NW+SW in one click', () => {
     openVectorial()
     render(<AddShipModal />)
-    fireEvent.click(screen.getByText('W'))
+    fireEvent.click(screen.getByRole('button', { name: 'W' }))
     expect(screen.getByText('(-2, 1)')).toBeInTheDocument()
   })
 
   it('E then W cancels out back to (0, 0)', () => {
     openVectorial()
     render(<AddShipModal />)
-    fireEvent.click(screen.getByText('E'))
-    fireEvent.click(screen.getByText('W'))
+    fireEvent.click(screen.getByRole('button', { name: 'E' }))
+    fireEvent.click(screen.getByRole('button', { name: 'W' }))
     expect(screen.getByText('(0, 0)')).toBeInTheDocument()
   })
 
   it('clicking the center token preview resets the vector after compass clicks', () => {
     openVectorial()
     render(<AddShipModal />)
-    fireEvent.click(screen.getByText('SE'))
-    fireEvent.click(screen.getByText('SE'))
+    fireEvent.click(screen.getByRole('button', { name: 'SE' }))
+    fireEvent.click(screen.getByRole('button', { name: 'SE' }))
     expect(screen.getByText('(2, 0)')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Reset vector to (0, 0)' }))
     expect(screen.getByText('(0, 0)')).toBeInTheDocument()
@@ -143,7 +143,7 @@ describe('AddShipModal — initial vector compass', () => {
   it('compass click and manual input compose — click then manual edit', () => {
     openVectorial()
     render(<AddShipModal />)
-    fireEvent.click(screen.getByText('NW'))
+    fireEvent.click(screen.getByRole('button', { name: 'NW' }))
     fireEvent.change(screen.getByLabelText('Initial vector Δr'), { target: { value: '4' } })
     expect(screen.getByText('(-1, 4)')).toBeInTheDocument()
   })
@@ -151,8 +151,8 @@ describe('AddShipModal — initial vector compass', () => {
   it('confirmed placement carries the compass-set vector', () => {
     openVectorial({ hex: { q: 0, r: 0 } })
     render(<AddShipModal />)
-    fireEvent.click(screen.getByText('SW'))
-    fireEvent.click(screen.getByText('SW'))
+    fireEvent.click(screen.getByRole('button', { name: 'SW' }))
+    fireEvent.click(screen.getByRole('button', { name: 'SW' }))
     fireEvent.click(screen.getByText('PLACE SHIP'))
     expect(useBattleStore.getState().ships[0].vector).toEqual({ q: -2, r: 2 })
   })
@@ -171,7 +171,7 @@ describe('AddShipModal — initial vector compass', () => {
     expect(canvas).toBeInTheDocument()
     // rotation is drawn on canvas (untestable via DOM assertions) — just confirm the
     // preview re-renders without throwing as the vector state changes
-    fireEvent.click(screen.getByText('NE'))
+    fireEvent.click(screen.getByRole('button', { name: 'NE' }))
     expect(canvas).toBeInTheDocument()
   })
 })
