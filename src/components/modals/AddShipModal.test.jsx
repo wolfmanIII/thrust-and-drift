@@ -78,6 +78,68 @@ describe('AddShipModal — initial vector inputs (REQ-01)', () => {
   })
 })
 
+// === Initial vector compass (direction buttons) ==============================
+
+describe('AddShipModal — initial vector compass', () => {
+  it('shows a live (q, r) readout defaulting to (0, 0)', () => {
+    openVectorial()
+    render(<AddShipModal />)
+    expect(screen.getByText('Vector:')).toBeInTheDocument()
+    expect(screen.getByText('(0, 0)')).toBeInTheDocument()
+  })
+
+  it('clicking NE twice steps the vector to (2, -2) and updates Δq/Δr inputs', () => {
+    openVectorial()
+    render(<AddShipModal />)
+    fireEvent.click(screen.getByText('NE'))
+    fireEvent.click(screen.getByText('NE'))
+    expect(screen.getByText('(2, -2)')).toBeInTheDocument()
+    expect(screen.getByLabelText('Initial vector Δq')).toHaveValue(2)
+    expect(screen.getByLabelText('Initial vector Δr')).toHaveValue(-2)
+  })
+
+  it('N then S cancels out back to (0, 0)', () => {
+    openVectorial()
+    render(<AddShipModal />)
+    fireEvent.click(screen.getByText('N'))
+    fireEvent.click(screen.getByText('S'))
+    expect(screen.getByText('(0, 0)')).toBeInTheDocument()
+  })
+
+  it('RST resets the vector after compass clicks', () => {
+    openVectorial()
+    render(<AddShipModal />)
+    fireEvent.click(screen.getByText('SE'))
+    fireEvent.click(screen.getByText('SE'))
+    expect(screen.getByText('(2, 0)')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('RST'))
+    expect(screen.getByText('(0, 0)')).toBeInTheDocument()
+  })
+
+  it('compass click and manual input compose — click then manual edit', () => {
+    openVectorial()
+    render(<AddShipModal />)
+    fireEvent.click(screen.getByText('NW'))
+    fireEvent.change(screen.getByLabelText('Initial vector Δr'), { target: { value: '4' } })
+    expect(screen.getByText('(-1, 4)')).toBeInTheDocument()
+  })
+
+  it('confirmed placement carries the compass-set vector', () => {
+    openVectorial({ hex: { q: 0, r: 0 } })
+    render(<AddShipModal />)
+    fireEvent.click(screen.getByText('SW'))
+    fireEvent.click(screen.getByText('SW'))
+    fireEvent.click(screen.getByText('PLACE SHIP'))
+    expect(useBattleStore.getState().ships[0].vector).toEqual({ q: -2, r: 2 })
+  })
+
+  it('hidden in basic mode, same as the manual inputs', () => {
+    openBasic()
+    render(<AddShipModal />)
+    expect(screen.queryByText('RST')).not.toBeInTheDocument()
+  })
+})
+
 // === REQ-01: vector forwarded on direct-hex placement ========================
 
 describe('AddShipModal — vector forwarded to addShip via direct hex', () => {
