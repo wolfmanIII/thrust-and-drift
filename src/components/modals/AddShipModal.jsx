@@ -10,6 +10,20 @@ import { useProfilesStore } from '../../store/profilesStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { FACTIONS } from '../../data/factions.js'
 import { getShapeTracer, getDetailDrawer, SHIP_SHAPES } from '../map/shipTokenShapes.js'
+import { HEX_DIRECTIONS } from '../../utils/hex.js'
+
+/** Compass step button — same 6-direction hex layout used for thrust input elsewhere. */
+function DirButton({ label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-12 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono text-xs rounded hover:border-(--neon-cyan)/60 hover:text-(--neon-cyan) transition-colors"
+    >
+      {label}
+    </button>
+  )
+}
 
 const SHAPE_LABELS = {
   delta:     'Delta',
@@ -205,9 +219,41 @@ export function AddShipModal() {
         {!isBasicMode && (
           <div>
             <p className="text-slate-400 font-mono text-xs mb-1.5">
-              Initial vector (Δq / Δr)
-              <span className="text-slate-600 ml-2">— leave 0 if stationary</span>
+              Initial vector
+              <span className="text-slate-600 ml-2">— leave at (0, 0) if stationary</span>
             </p>
+
+            {/* Compass — click a direction to step the vector one hex that way (#41-adjacent UX
+                improvement: raw Δq/Δr math isn't intuitive, so this is the primary input and the
+                manual fields below are the fallback for an exact/large vector). */}
+            <div className="flex flex-col items-center gap-1 mb-2">
+              <div className="flex gap-2">
+                <DirButton label="NW" onClick={() => { const d = HEX_DIRECTIONS[3]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+                <DirButton label="N"  onClick={() => { const d = HEX_DIRECTIONS[2]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+                <DirButton label="NE" onClick={() => { const d = HEX_DIRECTIONS[1]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+              </div>
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => { setVectorQ(0); setVectorR(0) }}
+                  className="w-10 h-10 rounded-full border border-slate-600 text-slate-400 font-mono text-xs hover:border-slate-400 hover:text-slate-300 transition-colors"
+                >
+                  RST
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <DirButton label="SW" onClick={() => { const d = HEX_DIRECTIONS[4]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+                <DirButton label="S"  onClick={() => { const d = HEX_DIRECTIONS[5]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+                <DirButton label="SE" onClick={() => { const d = HEX_DIRECTIONS[0]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+              </div>
+            </div>
+
+            {/* Live readout */}
+            <p className="text-center font-mono text-xs text-slate-400 mb-2">
+              Vector: <span className="text-(--neon-cyan)">({vectorQ}, {vectorR})</span>
+            </p>
+
+            {/* Manual Δq/Δr — precise or large vectors */}
             <div className="flex gap-2">
               <div className="flex-1 flex items-center gap-1.5">
                 <span className="font-mono text-xs text-slate-500 w-5 shrink-0">Δq</span>
