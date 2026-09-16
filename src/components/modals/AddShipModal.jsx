@@ -13,15 +13,32 @@ import { getShapeTracer, getDetailDrawer, SHIP_SHAPES } from '../map/shipTokenSh
 import { computeShipRotation } from '../map/tokenRenderers.js'
 import { HEX_DIRECTIONS } from '../../utils/hex.js'
 
-/** Compass step button — same 6-direction hex layout used for thrust input elsewhere. */
-function DirButton({ label, onClick }) {
+/**
+ * Compass step button — a filled triangle pointing in the travel direction (same rotation
+ * math as the ship token itself, via computeShipRotation) instead of a text label, for a
+ * cleaner sci-fi HUD look. `name` stays as the accessible name (title/aria-label) so the
+ * direction is still identifiable to screen readers and in tests.
+ * `composite` (E/W shortcuts, no true single hex-step on a flat-top grid) renders amber
+ * instead of cyan-on-hover, matching the app's existing colour convention for house-rule/
+ * shortcut deviations (e.g. the Missile Barbette salvo stepper).
+ */
+function DirButton({ name, angle, onClick, composite = false }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="w-9 h-6 bg-slate-800 border border-slate-600 text-slate-300 font-mono text-2xs rounded hover:border-(--neon-cyan)/60 hover:text-(--neon-cyan) transition-colors"
+      title={name}
+      aria-label={name}
+      className="group w-9 h-6 bg-slate-800 border border-slate-600 rounded hover:border-(--neon-cyan)/60 transition-colors flex items-center justify-center"
     >
-      {label}
+      <span
+        style={{ transform: `rotate(${angle}rad)` }}
+        className={`block w-0 h-0 border-l-[3px] border-r-[3px] border-b-[10px] border-l-transparent border-r-transparent transition-colors ${
+          composite
+            ? 'border-b-amber-500/70 group-hover:border-b-amber-400'
+            : 'border-b-slate-300 group-hover:border-b-(--neon-cyan)'
+        }`}
+      />
     </button>
   )
 }
@@ -303,59 +320,63 @@ export function AddShipModal() {
               <span className="text-slate-600 ml-2">— leave at (0, 0) if stationary</span>
             </p>
 
-            {/* Compass — click a direction to step the vector one hex that way (#41-adjacent UX
-                improvement: raw Δq/Δr math isn't intuitive, so this is the primary input and the
-                manual fields below are the fallback for an exact/large vector). */}
-            <div className="flex flex-col items-center gap-1 mb-2">
-              <div className="flex gap-1.5">
-                <DirButton label="NW" onClick={() => { const d = HEX_DIRECTIONS[3]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
-                <DirButton label="N"  onClick={() => { const d = HEX_DIRECTIONS[2]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
-                <DirButton label="NE" onClick={() => { const d = HEX_DIRECTIONS[1]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+            {/* Compass (left) + live readout/manual Δq/Δr (right) side by side — keeps the
+                panel shorter than stacking everything in one column. Compass click a
+                direction to step the vector one hex that way (#41-adjacent UX improvement:
+                raw Δq/Δr math isn't intuitive, so it's the primary input; the fields on the
+                right are the fallback for an exact/large vector). */}
+            <div className="flex items-center gap-4 mb-2">
+              <div className="flex flex-col items-center gap-1 shrink-0">
+                <div className="flex gap-1.5">
+                  <DirButton name="NW" angle={computeShipRotation(HEX_DIRECTIONS[3])} onClick={() => { const d = HEX_DIRECTIONS[3]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+                  <DirButton name="N"  angle={computeShipRotation(HEX_DIRECTIONS[2])} onClick={() => { const d = HEX_DIRECTIONS[2]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+                  <DirButton name="NE" angle={computeShipRotation(HEX_DIRECTIONS[1])} onClick={() => { const d = HEX_DIRECTIONS[1]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <DirButton name="W" angle={computeShipRotation(WEST_STEP)} composite onClick={() => { setVectorQ((q) => q + WEST_STEP.q); setVectorR((r) => r + WEST_STEP.r) }} />
+                  <CompassTokenPreview
+                    shape={tokenShape}
+                    color={color}
+                    vectorQ={vectorQ}
+                    vectorR={vectorR}
+                    onClick={() => { setVectorQ(0); setVectorR(0) }}
+                  />
+                  <DirButton name="E" angle={computeShipRotation(EAST_STEP)} composite onClick={() => { setVectorQ((q) => q + EAST_STEP.q); setVectorR((r) => r + EAST_STEP.r) }} />
+                </div>
+                <div className="flex gap-1.5">
+                  <DirButton name="SW" angle={computeShipRotation(HEX_DIRECTIONS[4])} onClick={() => { const d = HEX_DIRECTIONS[4]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+                  <DirButton name="S"  angle={computeShipRotation(HEX_DIRECTIONS[5])} onClick={() => { const d = HEX_DIRECTIONS[5]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+                  <DirButton name="SE" angle={computeShipRotation(HEX_DIRECTIONS[0])} onClick={() => { const d = HEX_DIRECTIONS[0]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <DirButton label="W" onClick={() => { setVectorQ((q) => q + WEST_STEP.q); setVectorR((r) => r + WEST_STEP.r) }} />
-                <CompassTokenPreview
-                  shape={tokenShape}
-                  color={color}
-                  vectorQ={vectorQ}
-                  vectorR={vectorR}
-                  onClick={() => { setVectorQ(0); setVectorR(0) }}
-                />
-                <DirButton label="E" onClick={() => { setVectorQ((q) => q + EAST_STEP.q); setVectorR((r) => r + EAST_STEP.r) }} />
-              </div>
-              <div className="flex gap-1.5">
-                <DirButton label="SW" onClick={() => { const d = HEX_DIRECTIONS[4]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
-                <DirButton label="S"  onClick={() => { const d = HEX_DIRECTIONS[5]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
-                <DirButton label="SE" onClick={() => { const d = HEX_DIRECTIONS[0]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
-              </div>
-            </div>
 
-            {/* Live readout */}
-            <p className="text-center font-mono text-xs text-slate-400 mb-2">
-              Vector: <span className="text-(--neon-cyan)">({vectorQ}, {vectorR})</span>
-            </p>
+              <div className="flex-1 flex flex-col gap-2">
+                {/* Live readout */}
+                <p className="text-center font-mono text-xs text-slate-400">
+                  Vector: <span className="text-(--neon-cyan)">({vectorQ}, {vectorR})</span>
+                </p>
 
-            {/* Manual Δq/Δr — precise or large vectors */}
-            <div className="flex gap-2">
-              <div className="flex-1 flex items-center gap-1.5">
-                <span className="font-mono text-xs text-slate-500 w-5 shrink-0">Δq</span>
-                <input
-                  type="number"
-                  value={vectorQ}
-                  onChange={(e) => setVectorQ(Number(e.target.value) || 0)}
-                  className="w-full bg-slate-800 border border-slate-600 text-(--neon-cyan) font-mono text-xs rounded px-2 py-1 text-center focus:outline-none focus:border-(--neon-cyan)/60"
-                  aria-label="Initial vector Δq"
-                />
-              </div>
-              <div className="flex-1 flex items-center gap-1.5">
-                <span className="font-mono text-xs text-slate-500 w-5 shrink-0">Δr</span>
-                <input
-                  type="number"
-                  value={vectorR}
-                  onChange={(e) => setVectorR(Number(e.target.value) || 0)}
-                  className="w-full bg-slate-800 border border-slate-600 text-(--neon-cyan) font-mono text-xs rounded px-2 py-1 text-center focus:outline-none focus:border-(--neon-cyan)/60"
-                  aria-label="Initial vector Δr"
-                />
+                {/* Manual Δq/Δr — precise or large vectors */}
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono text-xs text-slate-500 w-5 shrink-0">Δq</span>
+                  <input
+                    type="number"
+                    value={vectorQ}
+                    onChange={(e) => setVectorQ(Number(e.target.value) || 0)}
+                    className="w-full bg-slate-800 border border-slate-600 text-(--neon-cyan) font-mono text-xs rounded px-2 py-1 text-center focus:outline-none focus:border-(--neon-cyan)/60"
+                    aria-label="Initial vector Δq"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono text-xs text-slate-500 w-5 shrink-0">Δr</span>
+                  <input
+                    type="number"
+                    value={vectorR}
+                    onChange={(e) => setVectorR(Number(e.target.value) || 0)}
+                    className="w-full bg-slate-800 border border-slate-600 text-(--neon-cyan) font-mono text-xs rounded px-2 py-1 text-center focus:outline-none focus:border-(--neon-cyan)/60"
+                    aria-label="Initial vector Δr"
+                  />
+                </div>
               </div>
             </div>
           </div>
