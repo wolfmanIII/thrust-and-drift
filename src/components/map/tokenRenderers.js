@@ -28,7 +28,7 @@ const MISSILE_RADIUS = 11
  * @param {{ q: number, r: number }} vector
  * @returns {number} Radians
  */
-function computeShipRotation(vector) {
+export function computeShipRotation(vector) {
   if (vector.q === 0 && vector.r === 0) return 0
   // Flat-top hex pixel direction (proportional; no size/offset needed)
   const vx = 1.5 * vector.q

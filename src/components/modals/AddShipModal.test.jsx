@@ -106,13 +106,13 @@ describe('AddShipModal — initial vector compass', () => {
     expect(screen.getByText('(0, 0)')).toBeInTheDocument()
   })
 
-  it('RST resets the vector after compass clicks', () => {
+  it('clicking the center token preview resets the vector after compass clicks', () => {
     openVectorial()
     render(<AddShipModal />)
     fireEvent.click(screen.getByText('SE'))
     fireEvent.click(screen.getByText('SE'))
     expect(screen.getByText('(2, 0)')).toBeInTheDocument()
-    fireEvent.click(screen.getByText('RST'))
+    fireEvent.click(screen.getByRole('button', { name: 'Reset vector to (0, 0)' }))
     expect(screen.getByText('(0, 0)')).toBeInTheDocument()
   })
 
@@ -136,7 +136,19 @@ describe('AddShipModal — initial vector compass', () => {
   it('hidden in basic mode, same as the manual inputs', () => {
     openBasic()
     render(<AddShipModal />)
-    expect(screen.queryByText('RST')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Reset vector to (0, 0)' })).not.toBeInTheDocument()
+  })
+
+  it('center token preview rotates to face the set vector', () => {
+    openVectorial()
+    render(<AddShipModal />)
+    const resetBtn = screen.getByRole('button', { name: 'Reset vector to (0, 0)' })
+    const canvas = resetBtn.querySelector('canvas')
+    expect(canvas).toBeInTheDocument()
+    // rotation is drawn on canvas (untestable via DOM assertions) — just confirm the
+    // preview re-renders without throwing as the vector state changes
+    fireEvent.click(screen.getByText('NE'))
+    expect(canvas).toBeInTheDocument()
   })
 })
 

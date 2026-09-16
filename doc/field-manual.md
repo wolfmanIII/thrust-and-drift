@@ -237,7 +237,7 @@ Right-click any empty hex → **Add ship here** (places the ship at that hex dir
   auto-roll behaviour.
 - **Color** — token display colour.
 - **Shape** — token silhouette: Delta, Needle, Freighter, Gunship, Cruiser, or Capital. Each shape has a distinct hull outline and bridge/cockpit detail overlay. The choice is per-placement and does not affect game mechanics.
-- **Initial vector** *(vectorial mode only)* — Pre-set the ship's starting velocity vector. Default is 0 / 0 (stationary). Use this for ships arriving at cruise speed, fleeing, or intercepting at the start of an engagement. A 6-direction compass (NW/N/NE/SW/S/SE) is the primary input — click a direction to step the vector one hex that way, click again to keep stacking; **RST** resets to (0, 0). The Δq/Δr fields below stay available as a manual fallback for an exact or larger vector.
+- **Initial vector** *(vectorial mode only)* — Pre-set the ship's starting velocity vector. Default is 0 / 0 (stationary). Use this for ships arriving at cruise speed, fleeing, or intercepting at the start of an engagement. A 6-direction compass (NW/N/NE/SW/S/SE) is the primary input — click a direction to step the vector one hex that way, click again to keep stacking. The center of the compass shows the chosen token shape and colour inside a hex frame, rotated live to face the vector being set — click it to reset to (0, 0). The Δq/Δr fields below stay available as a manual fallback for an exact or larger vector.
 
 After placing, right-click the ship token → **Assign Crew…** to review or
 adjust which crew member covers each role and turret (see [§ 11.3](#113-crew-role-assignments)).

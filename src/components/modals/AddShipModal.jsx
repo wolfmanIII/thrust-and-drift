@@ -10,6 +10,7 @@ import { useProfilesStore } from '../../store/profilesStore.js'
 import { useBattleStore } from '../../store/battleStore.js'
 import { FACTIONS } from '../../data/factions.js'
 import { getShapeTracer, getDetailDrawer, SHIP_SHAPES } from '../map/shipTokenShapes.js'
+import { computeShipRotation } from '../map/tokenRenderers.js'
 import { HEX_DIRECTIONS } from '../../utils/hex.js'
 
 /** Compass step button — same 6-direction hex layout used for thrust input elsewhere. */
@@ -18,9 +19,79 @@ function DirButton({ label, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="w-12 h-8 bg-slate-800 border border-slate-600 text-slate-300 font-mono text-xs rounded hover:border-(--neon-cyan)/60 hover:text-(--neon-cyan) transition-colors"
+      className="w-9 h-6 bg-slate-800 border border-slate-600 text-slate-300 font-mono text-2xs rounded hover:border-(--neon-cyan)/60 hover:text-(--neon-cyan) transition-colors"
     >
       {label}
+    </button>
+  )
+}
+
+const COMPASS_PREVIEW_SIZE = 48
+
+/**
+ * Center of the compass — the chosen token shape/colour, drawn inside a hex frame and
+ * rotated to face the vector currently being set. Doubles as the RST button (click to
+ * reset to (0, 0)); the ↺ badge in the corner marks it as clickable.
+ */
+function CompassTokenPreview({ shape, color, vectorQ, vectorR, onClick }) {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const dpr = window.devicePixelRatio ?? 1
+    canvas.width  = COMPASS_PREVIEW_SIZE * dpr
+    canvas.height = COMPASS_PREVIEW_SIZE * dpr
+    ctx.scale(dpr, dpr)
+    ctx.clearRect(0, 0, COMPASS_PREVIEW_SIZE, COMPASS_PREVIEW_SIZE)
+    ctx.save()
+    ctx.translate(COMPASS_PREVIEW_SIZE / 2, COMPASS_PREVIEW_SIZE / 2)
+
+    // Hex frame (flat-top), decorative — matches the map's hex grid orientation
+    const hexR = COMPASS_PREVIEW_SIZE * 0.47
+    ctx.beginPath()
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i + Math.PI / 6
+      const x = hexR * Math.cos(angle)
+      const y = hexR * Math.sin(angle)
+      if (i === 0) ctx.moveTo(x, y)
+      else ctx.lineTo(x, y)
+    }
+    ctx.closePath()
+    ctx.fillStyle = 'rgba(30,41,59,0.85)'
+    ctx.fill()
+    ctx.strokeStyle = 'rgba(100,116,139,0.5)'
+    ctx.lineWidth = 1
+    ctx.stroke()
+
+    // Token, rotated to face the vector being set
+    ctx.rotate(computeShipRotation({ q: vectorQ, r: vectorR }))
+    const shapeSize = COMPASS_PREVIEW_SIZE * 0.28
+    getShapeTracer(shape)(ctx, shapeSize)
+    ctx.fillStyle = color
+    ctx.fill()
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)'
+    ctx.lineWidth = 1
+    ctx.stroke()
+    getDetailDrawer(shape)?.(ctx, shapeSize)
+
+    ctx.restore()
+  }, [shape, color, vectorQ, vectorR])
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title="Reset vector to (0, 0)"
+      aria-label="Reset vector to (0, 0)"
+      className="relative hover:opacity-80 transition-opacity"
+    >
+      <canvas
+        ref={canvasRef}
+        style={{ width: COMPASS_PREVIEW_SIZE, height: COMPASS_PREVIEW_SIZE }}
+      />
+      <span className="absolute bottom-0 right-0 text-slate-400 text-2xs leading-none">↺</span>
     </button>
   )
 }
@@ -227,21 +298,21 @@ export function AddShipModal() {
                 improvement: raw Δq/Δr math isn't intuitive, so this is the primary input and the
                 manual fields below are the fallback for an exact/large vector). */}
             <div className="flex flex-col items-center gap-1 mb-2">
-              <div className="flex gap-2">
+              <div className="flex gap-1.5">
                 <DirButton label="NW" onClick={() => { const d = HEX_DIRECTIONS[3]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
                 <DirButton label="N"  onClick={() => { const d = HEX_DIRECTIONS[2]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
                 <DirButton label="NE" onClick={() => { const d = HEX_DIRECTIONS[1]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
               </div>
               <div className="flex items-center justify-center">
-                <button
-                  type="button"
+                <CompassTokenPreview
+                  shape={tokenShape}
+                  color={color}
+                  vectorQ={vectorQ}
+                  vectorR={vectorR}
                   onClick={() => { setVectorQ(0); setVectorR(0) }}
-                  className="w-10 h-10 rounded-full border border-slate-600 text-slate-400 font-mono text-xs hover:border-slate-400 hover:text-slate-300 transition-colors"
-                >
-                  RST
-                </button>
+                />
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5">
                 <DirButton label="SW" onClick={() => { const d = HEX_DIRECTIONS[4]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
                 <DirButton label="S"  onClick={() => { const d = HEX_DIRECTIONS[5]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
                 <DirButton label="SE" onClick={() => { const d = HEX_DIRECTIONS[0]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
