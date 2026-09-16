@@ -26,6 +26,14 @@ function DirButton({ label, onClick }) {
   )
 }
 
+/**
+ * Flat-top hexes have no true East/West neighbour — only the 6 real directions
+ * (N/NE/SE/S/SW/NW). E and W are composite shortcuts: one click applying two hex-steps
+ * at once (NE+SE / NW+SW), same net result as clicking both in sequence.
+ */
+const EAST_STEP = { q: HEX_DIRECTIONS[1].q + HEX_DIRECTIONS[0].q, r: HEX_DIRECTIONS[1].r + HEX_DIRECTIONS[0].r }
+const WEST_STEP = { q: HEX_DIRECTIONS[3].q + HEX_DIRECTIONS[4].q, r: HEX_DIRECTIONS[3].r + HEX_DIRECTIONS[4].r }
+
 const COMPASS_PREVIEW_SIZE = 48
 
 /**
@@ -304,7 +312,8 @@ export function AddShipModal() {
                 <DirButton label="N"  onClick={() => { const d = HEX_DIRECTIONS[2]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
                 <DirButton label="NE" onClick={() => { const d = HEX_DIRECTIONS[1]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
               </div>
-              <div className="flex items-center justify-center">
+              <div className="flex items-center gap-1.5">
+                <DirButton label="W" onClick={() => { setVectorQ((q) => q + WEST_STEP.q); setVectorR((r) => r + WEST_STEP.r) }} />
                 <CompassTokenPreview
                   shape={tokenShape}
                   color={color}
@@ -312,6 +321,7 @@ export function AddShipModal() {
                   vectorR={vectorR}
                   onClick={() => { setVectorQ(0); setVectorR(0) }}
                 />
+                <DirButton label="E" onClick={() => { setVectorQ((q) => q + EAST_STEP.q); setVectorR((r) => r + EAST_STEP.r) }} />
               </div>
               <div className="flex gap-1.5">
                 <DirButton label="SW" onClick={() => { const d = HEX_DIRECTIONS[4]; setVectorQ((q) => q + d.q); setVectorR((r) => r + d.r) }} />
