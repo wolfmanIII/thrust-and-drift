@@ -106,6 +106,30 @@ describe('AddShipModal — initial vector compass', () => {
     expect(screen.getByText('(0, 0)')).toBeInTheDocument()
   })
 
+  it('E is a composite shortcut for NE+SE in one click', () => {
+    openVectorial()
+    render(<AddShipModal />)
+    fireEvent.click(screen.getByText('E'))
+    expect(screen.getByText('(2, -1)')).toBeInTheDocument()
+    expect(screen.getByLabelText('Initial vector Δq')).toHaveValue(2)
+    expect(screen.getByLabelText('Initial vector Δr')).toHaveValue(-1)
+  })
+
+  it('W is a composite shortcut for NW+SW in one click', () => {
+    openVectorial()
+    render(<AddShipModal />)
+    fireEvent.click(screen.getByText('W'))
+    expect(screen.getByText('(-2, 1)')).toBeInTheDocument()
+  })
+
+  it('E then W cancels out back to (0, 0)', () => {
+    openVectorial()
+    render(<AddShipModal />)
+    fireEvent.click(screen.getByText('E'))
+    fireEvent.click(screen.getByText('W'))
+    expect(screen.getByText('(0, 0)')).toBeInTheDocument()
+  })
+
   it('clicking the center token preview resets the vector after compass clicks', () => {
     openVectorial()
     render(<AddShipModal />)

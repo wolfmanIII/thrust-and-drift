@@ -247,6 +247,7 @@ Pre-sets the ship's starting velocity vector for ships arriving at cruise speed,
 
 - Six direction buttons (NW / N / NE / SW / S / SE) surround a center preview. **Each click adds exactly one hex-step in that direction to the current vector** — it is cumulative, not a single-choice selector.
 - To set a straight vector of length *N* in one direction, click that same button *N* times (e.g. click **NE** three times for a vector of 3 hexes northeast).
+- **E** and **W** buttons are also available, either side of the center preview. A flat-top hex has no true East/West neighbour — only the 6 directions above exist as a single hex-step — so **E**/**W** are composite shortcuts: one click applies two hex-steps at once (**E** = NE + SE = (+2, −1), **W** = NW + SW = (−2, +1)), the same net result as clicking both of those buttons in sequence, just in one click.
 - The center preview shows the chosen ship shape/colour inside a hex frame, **rotated live to always face the vector's actual current direction** — use it (and the `(q, r)` readout underneath) to confirm the result after every click, especially once you start mixing directions.
 - **To reset:** click the center preview itself (the ship icon inside the hex, marked with a small ↺ in the corner) — this immediately sets the vector back to (0, 0), regardless of how many direction clicks came before. Use it whenever the readout shows something other than what you meant, rather than trying to click your way back to zero.
 
