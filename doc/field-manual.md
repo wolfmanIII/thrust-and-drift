@@ -237,7 +237,20 @@ Right-click any empty hex → **Add ship here** (places the ship at that hex dir
   auto-roll behaviour.
 - **Color** — token display colour.
 - **Shape** — token silhouette: Delta, Needle, Freighter, Gunship, Cruiser, or Capital. Each shape has a distinct hull outline and bridge/cockpit detail overlay. The choice is per-placement and does not affect game mechanics.
-- **Initial vector** *(vectorial mode only)* — Pre-set the ship's starting velocity vector. Default is 0 / 0 (stationary). Use this for ships arriving at cruise speed, fleeing, or intercepting at the start of an engagement. A 6-direction compass (NW/N/NE/SW/S/SE) is the primary input — click a direction to step the vector one hex that way, click again to keep stacking. The center of the compass shows the chosen token shape and colour inside a hex frame, rotated live to face the vector being set — click it to reset to (0, 0). The Δq/Δr fields below stay available as a manual fallback for an exact or larger vector.
+- **Initial vector** *(vectorial mode only)* — see § 5.1.1 below.
+
+#### 5.1.1 Setting the Initial Vector
+
+Pre-sets the ship's starting velocity vector for ships arriving at cruise speed, fleeing, or intercepting at the start of an engagement. Default is (0, 0) — stationary.
+
+**How the compass works:**
+
+- Six direction buttons (NW / N / NE / SW / S / SE) surround a center preview. **Each click adds exactly one hex-step in that direction to the current vector** — it is cumulative, not a single-choice selector.
+- To set a straight vector of length *N* in one direction, click that same button *N* times (e.g. click **NE** three times for a vector of 3 hexes northeast).
+- The center preview shows the chosen ship shape/colour inside a hex frame, **rotated live to always face the vector's actual current direction** — use it (and the `(q, r)` readout underneath) to confirm the result after every click, especially once you start mixing directions.
+- **To reset:** click the center preview itself (the ship icon inside the hex, marked with a small ↺ in the corner) — this immediately sets the vector back to (0, 0), regardless of how many direction clicks came before. Use it whenever the readout shows something other than what you meant, rather than trying to click your way back to zero.
+
+> ⚠ **Clicking different directions in sequence does not "switch" the heading — it adds up.** Each click is a separate hex-step added to whatever is already set, exactly like axial vector addition. Alternating between two directions (e.g. N, then NE, then N again) composes a diagonal result that may not point where you intended, and does **not** cancel or override the earlier clicks. If you want a clean single-direction vector, click only that one button, repeatedly. If you want a diagonal vector on purpose, that's exactly what mixing directions is for — just watch the rotating preview and the `(q, r)` readout to confirm the composite result before confirming placement. This is unrelated to the Thrust budget used in the Acceleration phase (§ 7) — there is no cap here, and no cost is deducted; it is purely a starting-condition convenience. The Δq/Δr fields below the compass always show (and accept) the exact current values if you'd rather type the vector directly than reason about clicks.
 
 After placing, right-click the ship token → **Assign Crew…** to review or
 adjust which crew member covers each role and turret (see [§ 11.3](#113-crew-role-assignments)).
