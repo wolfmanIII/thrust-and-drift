@@ -9,17 +9,17 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.11.0 |
+| **Versione** | 2.12.0 |
 | **Branch** | main |
-| **Test** | 1518 Vitest + 68 Playwright e2e |
-| **Ultimo commit** | chore(release): v2.11.0 — Add Ship placement, Enter shortcut, PD clarity (#40/#41/#42) |
+| **Test** | 1529 Vitest + 68 Playwright e2e |
+| **Ultimo commit** | chore(release): v2.12.0 — Initial vector compass in AddShipModal |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.11.0)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45, #46, #47, #48, #40, #41, #42 chiuse automaticamente via `Fixes #N`/`Closes #N`. **#39 chiusa manualmente** in v2.10.0. **#38 chiusa manualmente come non applicabile** (v2.11.0, vedi sotto).
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.12.0)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45, #46, #47, #48, #40, #41, #42 chiuse automaticamente via `Fixes #N`/`Closes #N`. **#39 chiusa manualmente** in v2.10.0. **#38 chiusa manualmente come non applicabile** (v2.11.0).
 - **#21 iterazione 2** (se richiesta) — range/salvo/ammo/traits custom, nuove armi non basate su una entry esistente. Struttura dati attuale (`weaponOverrides` indicizzato per posizione, attivo solo se l'arma è singola nello slot) regge l'iterazione 1 ma andrebbe rivista per selezione multi-istanza (id stabile per arma invece di indice) se si espande oltre il cosmetic+danno. **#21 resta OPEN** (iterazione 1 rilasciata in v2.9.0, non auto-chiusa).
 - **Wishlist CotI ancora aperta** (#36, #37, #43, #44 — enhancement, non urgenti, nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #43 raggruppamento report PDF, #44 gestione Power armi Ion (priorità bassa per l'utente).
 
@@ -27,7 +27,25 @@
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — wishlist CotI: Add Ship placement, Enter shortcut, PD clarity (v2.11.0, #40/#41/#42), #38 chiusa non applicabile
+### Sessione corrente — bussola vettore iniziale in AddShipModal (v2.12.0)
+
+L'utente ha segnalato che i 2 campi Δq/Δr per il vettore iniziale (AddShipModal, piazzamento nave) erano difficili da usare — coordinate esagonali grezze, poco intuitive. Trovato un pattern già pronto e collaudato in `ThrustModal.jsx` (file non più usato, sostituito dal drag sul canvas, ma con la stessa identica bussola a 6 direzioni) e riadattato.
+
+Iterazioni successive, tutte su feedback diretto dell'utente:
+
+1. **Bussola base** — 6 bottoni direzionali (NW/N/NE/SW/S/SE), click cumulativo (ogni click somma un hex-step), readout live `(q, r)`, campi Δq/Δr mantenuti sotto come fallback manuale.
+2. **Token ruotante al centro** — invece del semplice bottone RST, il centro della bussola mostra la forma/colore nave scelta dentro una cornice esagonale, ruotata live per puntare nella direzione del vettore impostato (riusa `computeShipRotation`, la stessa funzione che orienta i token reali sulla mappa — esportata da `tokenRenderers.js` per l'occasione). Click sul token = reset.
+3. **Fix orientamento esagono** — la cornice esagonale decorativa aveva un offset di 30° (pointy-top invece di flat-top); corretto per matchare l'orientamento reale della griglia mappa.
+4. **Documentazione meccanica click** — l'utente ha fatto notare che cliccare direzioni diverse in sequenza NON sostituisce la direzione precedente ma la SOMMA (composizione vettoriale) — comportamento non ovvio, rischio di "disperdere" il vettore invece di puntare dove voluto. Documentato esplicitamente in field-manual + HelpScreen (nuovo §5.1.1), incluso come resettare.
+5. **Bottoni E/W compositi** — su richiesta, aggiunti come scorciatoie: un click applica 2 hex-step insieme (E=NE+SE, W=NW+SW), dato che un esagono flat-top non ha un vicino Est/Ovest puro a 1 solo step. Colorati ambra per segnalare che non sono una 7ª/8ª direzione reale.
+6. **Triangoli pieni invece di testo** — su richiesta "si perde l'immersione con le lettere", sostituite le etichette NW/N/NE/ecc. con triangoli pieni ruotati (stessa `computeShipRotation`), nome direzione mantenuto come `aria-label`/`title` per accessibilità e test. **Falso allarme investigato a fondo**: leggendo gli screenshot mi sembrava che le diagonali puntassero nella direzione sbagliata (180° di errore) — ho verificato con `getComputedStyle` la matrice di trasformazione CSS reale di ogni bottone: tutte esatte al centesimo di grado. Il "bug" era una mia cattiva lettura visiva di triangoli piccoli/tozzi in screenshot, non un problema di codice — confermato anche dal fatto che la richiesta successiva dell'utente ("isoscele invece di equilatero") era esattamente la fix giusta per quell'ambiguità visiva.
+7. **Layout affiancato** — bussola a sinistra, readout+Δq/Δr a destra invece che impilati, per ridurre l'altezza del pannello.
+
+Nessun test e2e nuovo — tutto copre via RTL (canvas 2D funziona in jsdom senza mock speciali, sorprendentemente, già collaudato da `ShapePreview`). Verificato visivamente più volte in browser reale via script Playwright one-off (mai committati, puliti a fine sessione).
+
+Totale 1529 Vitest (+11 da 1518), 68 Playwright e2e (invariato).
+
+### Sessione precedente — wishlist CotI: Add Ship placement, Enter shortcut, PD clarity (v2.11.0, #40/#41/#42), #38 chiusa non applicabile
 
 Continuazione della wishlist CotI aperta come issue nella sessione precedente. Tre fix "facili" (piccolo scope, nessun nuovo modello dati):
 
