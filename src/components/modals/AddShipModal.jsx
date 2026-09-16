@@ -49,10 +49,11 @@ function CompassTokenPreview({ shape, color, vectorQ, vectorR, onClick }) {
     ctx.translate(COMPASS_PREVIEW_SIZE / 2, COMPASS_PREVIEW_SIZE / 2)
 
     // Hex frame (flat-top), decorative — matches the map's hex grid orientation
+    // (same corner formula as hexCorners() in useCanvasRenderer.js, no angle offset)
     const hexR = COMPASS_PREVIEW_SIZE * 0.47
     ctx.beginPath()
     for (let i = 0; i < 6; i++) {
-      const angle = (Math.PI / 3) * i + Math.PI / 6
+      const angle = (Math.PI / 3) * i
       const x = hexR * Math.cos(angle)
       const y = hexR * Math.sin(angle)
       if (i === 0) ctx.moveTo(x, y)
