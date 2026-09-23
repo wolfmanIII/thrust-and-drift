@@ -112,3 +112,15 @@ src/
 ## AVAILABLE TOOLING — claude-mem
 
 - **claude-mem**: cross-session memory of past work on this repo. Use `mem-search`/`smart-search`/`timeline` style lookups when checking whether something was already solved, how a past bug/feature was handled, or for session history context — before re-deriving it from scratch.
+
+## AVAILABLE TOOLING — codegraph
+
+- **codegraph**: CLI-only code intelligence graph for this repo (initialized, NOT registered as an MCP server — no hook/tool overhead). Index lives in `.codegraph/` (gitignored), auto-syncs on `codegraph sync`/via daemon.
+- Prefer it over Grep/manual reading when the question is about *structure* or *relationships*, not text search:
+  - `codegraph query <search>` — find a symbol
+  - `codegraph explore <query...>` — relevant symbols' source + call paths in one shot
+  - `codegraph node <name>` — one symbol's source + caller/callee trail
+  - `codegraph callers <symbol>` / `codegraph callees <symbol>` — who calls this / what this calls
+  - `codegraph impact <symbol>` — what breaks if this changes
+  - `codegraph affected [files...]` — which test files cover changed source files
+- Run via Bash (`codegraph <command>`), not as an MCP tool.
