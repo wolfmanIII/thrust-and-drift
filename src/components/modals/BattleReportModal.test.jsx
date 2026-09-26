@@ -217,6 +217,81 @@ describe('BattleReportModal — battle log', () => {
   })
 })
 
+// ── Battle Log grouping by category (#43) ─────────────────────────────────────
+
+describe('BattleReportModal — battle log grouped by category (#43)', () => {
+  it('groups an attack-type entry under Attacks', () => {
+    useBattleStore.setState({ log: [makeEntry({ type: 'attack', message: 'Alpha fires on Bravo.' })] })
+    render(<BattleReportModal />)
+    expect(screen.getByText('Attacks')).toBeInTheDocument()
+  })
+
+  it('groups a missile launch message under Missile Salvos', () => {
+    useBattleStore.setState({ log: [makeEntry({ type: 'attack', message: 'Alpha launches 2 missile(s) (Missile Rack).' })] })
+    render(<BattleReportModal />)
+    expect(screen.getByText('Missile Salvos')).toBeInTheDocument()
+    expect(screen.queryByText('Attacks')).not.toBeInTheDocument()
+  })
+
+  it('groups an Evasive Action message under Reactions', () => {
+    useBattleStore.setState({ log: [makeEntry({ type: 'info', message: 'Bravo Evasive Action: 1 thrust — DM −2.' })] })
+    render(<BattleReportModal />)
+    expect(screen.getByText('Reactions')).toBeInTheDocument()
+  })
+
+  it('groups a Disperse Sand message under Reactions', () => {
+    useBattleStore.setState({ log: [makeEntry({ type: 'info', message: 'Bravo Disperse Sand (T1): total 9 — +2 armour vs this laser attack.' })] })
+    render(<BattleReportModal />)
+    expect(screen.getByText('Reactions')).toBeInTheDocument()
+  })
+
+  it('groups a Point Defence message under Point Defence, not Missile Salvos', () => {
+    useBattleStore.setState({ log: [makeEntry({ type: 'info', message: 'Bravo Point Defence (T1): total 10, Effect +2 — 2 missiles destroyed.' })] })
+    render(<BattleReportModal />)
+    expect(screen.getByText('Point Defence')).toBeInTheDocument()
+    expect(screen.queryByText('Missile Salvos')).not.toBeInTheDocument()
+  })
+
+  it('groups a Critical hit message under Critical Hits', () => {
+    useBattleStore.setState({ log: [makeEntry({ type: 'info', message: 'Bravo: Critical hit on Power Plant (Severity 2).' })] })
+    render(<BattleReportModal />)
+    expect(screen.getByText('Critical Hits')).toBeInTheDocument()
+  })
+
+  it('groups an unrelated system message under Other', () => {
+    useBattleStore.setState({ log: [makeEntry({ type: 'system', message: 'Initiative rolled for all ships.' })] })
+    render(<BattleReportModal />)
+    expect(screen.getByText('Other')).toBeInTheDocument()
+  })
+
+  it('renders multiple category sections within the same round, in a fixed order', () => {
+    useBattleStore.setState({
+      log: [
+        makeEntry({ round: 1, type: 'info', message: 'Bravo: Critical hit on Sensors (Severity 1).' }),
+        makeEntry({ round: 1, type: 'attack', message: 'Alpha fires on Bravo.' }),
+        makeEntry({ round: 1, type: 'info', message: 'Alpha launches 1 missile(s) (Missile Rack).' }),
+      ],
+    })
+    render(<BattleReportModal />)
+    expect(screen.getByText('Attacks')).toBeInTheDocument()
+    expect(screen.getByText('Missile Salvos')).toBeInTheDocument()
+    expect(screen.getByText('Critical Hits')).toBeInTheDocument()
+    // fixed display order: Attacks, Missile Salvos, ..., Critical Hits — Attacks precedes Critical Hits in the DOM
+    const attacksEl  = screen.getByText('Attacks')
+    const criticalEl = screen.getByText('Critical Hits')
+    expect(attacksEl.compareDocumentPosition(criticalEl) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('does not render a section header for a category with no entries', () => {
+    useBattleStore.setState({ log: [makeEntry({ type: 'attack', message: 'Alpha fires on Bravo.' })] })
+    render(<BattleReportModal />)
+    expect(screen.queryByText('Reactions')).not.toBeInTheDocument()
+    expect(screen.queryByText('Point Defence')).not.toBeInTheDocument()
+    expect(screen.queryByText('Critical Hits')).not.toBeInTheDocument()
+    expect(screen.queryByText('Missile Salvos')).not.toBeInTheDocument()
+  })
+})
+
 // ── Print button ──────────────────────────────────────────────────────────────
 
 describe('BattleReportModal — print', () => {

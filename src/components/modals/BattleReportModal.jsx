@@ -13,6 +13,37 @@ const PHASE_LABEL = {
   end:          'End',
 }
 
+/**
+ * Battle log entries carry only a coarse `type` (action/attack/damage/move/
+ * movement/system) plus free-form ad-hoc entries logged as `info` — too coarse
+ * to group by combat event (#43: CotI asked for attacks/missiles/reactions/PD/
+ * criticals grouping in the printed report). Classifies by message content
+ * instead — display-only, no store/schema change, no RAW/game-logic risk.
+ * Order matters: check the most specific category first so e.g. a Point
+ * Defence message mentioning "missiles destroyed" doesn't fall into Missiles.
+ * @param {{ type: string, message: string }} entry
+ * @returns {'critical'|'pd'|'missile'|'reaction'|'attack'|'other'}
+ */
+function classifyLogEntry(entry) {
+  const msg = entry.message
+  if (/Critical hit|\(Critical\)/i.test(msg))          return 'critical'
+  if (/Point Defence/i.test(msg))                       return 'pd'
+  if (/missile|torpedo|salvo/i.test(msg))                return 'missile'
+  if (/Evasive Action|Disperse Sand/i.test(msg))         return 'reaction'
+  if (entry.type === 'attack' || entry.type === 'damage'
+    || / damage from | takes .*damage|hit — |Ion Cannon|hardened systems/i.test(msg)) return 'attack'
+  return 'other'
+}
+
+const REPORT_SECTIONS = [
+  { key: 'attack',   label: 'Attacks' },
+  { key: 'missile',  label: 'Missile Salvos' },
+  { key: 'reaction', label: 'Reactions' },
+  { key: 'pd',       label: 'Point Defence' },
+  { key: 'critical', label: 'Critical Hits' },
+  { key: 'other',    label: 'Other' },
+]
+
 export function BattleReportModal() {
   const closeModal = useUiStore((s) => s.closeModal)
   const ships      = useBattleStore((s) => s.ships)
@@ -131,27 +162,44 @@ export function BattleReportModal() {
           {sortedRounds.length === 0 && (
             <p className="text-slate-600">No log entries.</p>
           )}
-          {sortedRounds.map((r) => (
-            <div key={r} className="mb-4">
-              <div data-print-accent className="text-cyan-600 font-bold mb-1">
-                ── Round {r} ──
+          {sortedRounds.map((r) => {
+            const byCategory = {}
+            for (const entry of logByRound[r]) {
+              (byCategory[classifyLogEntry(entry)] ??= []).push(entry)
+            }
+            return (
+              <div key={r} className="mb-4">
+                <div data-print-accent className="text-cyan-600 font-bold mb-1">
+                  ── Round {r} ──
+                </div>
+                {REPORT_SECTIONS.map(({ key, label }) => {
+                  const entries = byCategory[key]
+                  if (!entries || entries.length === 0) return null
+                  return (
+                    <div key={key} className="mb-2">
+                      <div className="text-slate-500 text-2xs tracking-wide mb-0.5">
+                        {label}
+                      </div>
+                      <table className="w-full border-collapse">
+                        <tbody>
+                          {entries.map((entry) => (
+                            <tr key={entry.id} className="border-b border-slate-800/40">
+                              <td className="py-0.5 pr-4 text-slate-500 w-28 align-top">
+                                {PHASE_LABEL[entry.phase] ?? entry.phase}
+                              </td>
+                              <td className="py-0.5 text-slate-300 align-top">
+                                {entry.message}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )
+                })}
               </div>
-              <table className="w-full border-collapse">
-                <tbody>
-                  {logByRound[r].map((entry) => (
-                    <tr key={entry.id} className="border-b border-slate-800/40">
-                      <td className="py-0.5 pr-4 text-slate-500 w-28 align-top">
-                        {PHASE_LABEL[entry.phase] ?? entry.phase}
-                      </td>
-                      <td className="py-0.5 text-slate-300 align-top">
-                        {entry.message}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
       </div>

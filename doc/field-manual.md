@@ -1460,7 +1460,7 @@ The report summarises the current battle state in three sections:
 | ------- | -------- |
 | **Header** | Session title, current round number, combat mode (Vectorial Combat / Basic Combat) |
 | **Ship Roster** | Vessel name · Faction · Hull (current/max) · Critical hits (system + severity) · Status (Active / WRECK) |
-| **Battle Log** | All log entries grouped by round; each entry shows Phase and message |
+| **Battle Log** | All log entries grouped by round, then by category within each round — Attacks, Missile Salvos, Reactions, Point Defence, Critical Hits, Other (only categories with entries are shown); each entry shows Phase and message *(#43)* |
 
 Click **⎙ Print / Save PDF** to open the browser print dialog. Choose a printer or select *Save as PDF* to export the report. The printout uses a white background with monospace text — no additional software required.
 

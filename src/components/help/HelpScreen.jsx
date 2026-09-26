@@ -750,7 +750,7 @@ export function HelpScreen({ onBack } = {}) {
           <Sub title="Contents">
             <KV k="Header" v="Session title, current round number, combat mode (Vectorial Combat / Basic Combat)." />
             <KV k="Ship Roster" v="Vessel name · Faction · Hull (current / max) · Critical hits (system + severity) · Status (Active / WRECK)." />
-            <KV k="Battle Log" v="All log entries grouped by round; each entry shows the phase and message." />
+            <KV k="Battle Log" v="All log entries grouped by round, then by category within each round — Attacks, Missile Salvos, Reactions, Point Defence, Critical Hits, Other (only categories with entries are shown); each entry shows the phase and message." />
           </Sub>
           <Sub title="Print / Save PDF">
             <p>Click <span className="text-slate-200">⎙ Print / Save PDF</span> to open the browser print dialog. Select a printer or choose <em>Save as PDF</em> to export the report.</p>
