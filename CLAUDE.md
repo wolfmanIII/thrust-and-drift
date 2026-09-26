@@ -63,7 +63,7 @@ Local VTT lite (Virtual Tabletop) for Mongoose Traveller 2e space combat. Implem
 ## AVAILABLE TOOLING — codegraph
 
 - **codegraph**: CLI-only code intelligence graph for this repo (initialized, NOT registered as an MCP server — no hook/tool overhead). Index lives in `.codegraph/` (gitignored), auto-syncs on `codegraph sync`/via daemon.
-- Prefer it over Grep/manual reading when the question is about *structure* or *relationships*, not text search:
+- DEFAULT to it over Grep/find/sed for structure or relationship questions — don't fall back to grep habit. Concretely: "who calls/uses X" → `callers`/`callees`, "what tests cover this file" → `affected`, "where is X" → `query`/`node`, not `grep -rn`.
   - `codegraph query <search>` — find a symbol
   - `codegraph explore <query...>` — relevant symbols' source + call paths in one shot
   - `codegraph node <name>` — one symbol's source + caller/callee trail
