@@ -49,53 +49,10 @@ Local VTT lite (Virtual Tabletop) for Mongoose Traveller 2e space combat. Implem
 - DO NOT introduce TypeScript unless explicitly requested — project uses JSX.
 - DO NOT exercise operational complacency. Flag suboptimal patterns immediately.
 
-## PROJECT STRUCTURE
+## GOTCHAS
 
-```text
-src/
-├── main.jsx                    ← React entry point
-├── App.jsx                     ← Root component, router/layout
-├── App.css                     ← Global styles (augments Tailwind)
-├── index.css                   ← Tailwind directives + @theme tokens
-├── components/
-│   ├── map/
-│   │   ├── BattleMap.jsx       ← Canvas principale
-│   │   ├── useCanvasRenderer.js← Hook rendering hex + token
-│   │   ├── useMapInteraction.js← Hook pan, zoom, click, right-click
-│   │   └── tokenRenderers.js   ← Draw functions per navi e missili
-│   ├── modals/
-│   │   ├── Modal.jsx           ← Generic modal wrapper
-│   │   ├── ShipProfileModal.jsx
-│   │   ├── AddShipModal.jsx
-│   │   ├── ThrustModal.jsx     ← ⚠ UNUSED — dead code (rubber-band targeting replaced it)
-│   │   ├── AttackModal.jsx     ← Attack resolution + DM calc
-│   │   ├── ShipDetailModal.jsx
-│   │   ├── ActionModal.jsx
-│   │   ├── InitiativeModal.jsx
-│   │   └── BattleReportModal.jsx ← PDF battle report (window.print() + @media print)
-│   ├── ui/
-│   │   ├── ContextMenu.jsx     ← Right-click context menu
-│   │   ├── HUD.jsx             ← Round/phase/initiative overlay
-│   │   ├── BattleLog.jsx       ← Collapsible event log
-│   │   └── PhaseTracker.jsx
-│   └── forms/
-│       ├── ShipProfileForm.jsx
-│       ├── ThrustInput.jsx     ← 6 hex direction buttons + Δq/Δr input
-│       └── DiceRoller.jsx
-├── store/
-│   ├── profilesStore.js        ← Ship profiles (CRUD + import/export)
-│   ├── battleStore.js          ← Active battle state
-│   └── uiStore.js              ← Modal open state, selected ship, etc.
-├── utils/
-│   ├── hex.js                  ← Hex math (cube coords, neighbors, distance)
-│   ├── combat.js               ← DM calc, damage, range bands
-│   ├── io.js                   ← JSON import/export via File API
-│   └── dice.js                 ← Dice rolling + result formatting
-└── data/
-    ├── weapons.js              ← Weapon tables, traits, damage
-    ├── rangeBands.js           ← Distance band thresholds (hex)
-    └── defaultProfiles.js      ← Preset ship profiles
-```
+- `src/components/modals/ThrustModal.jsx` is unused dead code — canvas rubber-band targeting (right-click → Apply Thrust → drag) replaced it. Don't wire it up as if it were live.
+- Battle report PDF (`BattleReportModal.jsx`) is generated via `window.print()` + `@media print` CSS, not a PDF library.
 
 ## DOCUMENTATION
 
