@@ -33,14 +33,11 @@ Local VTT lite (Virtual Tabletop) for Mongoose Traveller 2e space combat. Implem
 
 ## CRITICAL RULES
 
-- DO NOT apologize.
 - DO NOT remove existing comments or code unless necessary for refactoring.
-- DO NOT hallucinate React APIs, Zustand APIs, or Canvas methods.
 - DO NOT add synchronous heavy computation on the main thread — offload to `setTimeout`/`requestAnimationFrame` or a Web Worker if needed.
 - DO NOT add Co-Authored-By lines to git commits.
 - DO commit frequently — every logical unit (component, hook, store slice, util) is a separate commit.
 - DO NOT introduce TypeScript unless explicitly requested — project uses JSX.
-- DO NOT exercise operational complacency. Flag suboptimal patterns immediately.
 
 ## GOTCHAS
 
