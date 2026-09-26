@@ -9,25 +9,39 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.12.0 |
+| **Versione** | 2.13.0 |
 | **Branch** | main |
-| **Test** | 1529 Vitest + 68 Playwright e2e |
-| **Ultimo commit** | chore(release): v2.12.0 — Initial vector compass in AddShipModal |
+| **Test** | 1538 Vitest + 68 Playwright e2e |
+| **Ultimo commit** | chore(release): v2.13.0 — battle report grouped by category (#43) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.12.0)
-- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45, #46, #47, #48, #40, #41, #42 chiuse automaticamente via `Fixes #N`/`Closes #N`. **#39 chiusa manualmente** in v2.10.0. **#38 chiusa manualmente come non applicabile** (v2.11.0).
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.13.0)
+- Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45, #46, #47, #48, #40, #41, #42, #43 chiuse automaticamente via `Fixes #N`/`Closes #N`. **#39 chiusa manualmente** in v2.10.0. **#38 chiusa manualmente come non applicabile** (v2.11.0).
 - **#21 iterazione 2** (se richiesta) — range/salvo/ammo/traits custom, nuove armi non basate su una entry esistente. Struttura dati attuale (`weaponOverrides` indicizzato per posizione, attivo solo se l'arma è singola nello slot) regge l'iterazione 1 ma andrebbe rivista per selezione multi-istanza (id stabile per arma invece di indice) se si espande oltre il cosmetic+danno. **#21 resta OPEN** (iterazione 1 rilasciata in v2.9.0, non auto-chiusa).
-- **Wishlist CotI ancora aperta** (#36, #37, #43, #44 — enhancement, non urgenti, nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #43 raggruppamento report PDF, #44 gestione Power armi Ion (priorità bassa per l'utente).
+- **Wishlist CotI ancora aperta** (#36, #37, #44 — enhancement, non urgenti, nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #44 gestione Power armi Ion (priorità bassa per l'utente). #43 chiusa (v2.13.0).
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — bussola vettore iniziale in AddShipModal (v2.12.0)
+### Sessione corrente — CLAUDE.md cleanup + report PDF raggruppato (v2.13.0, #43)
+
+Due filoni distinti:
+
+1. **CLAUDE.md pruning** — su richiesta esplicita ("aggiorniamo il CLAUDE.md in base alle ultime direttive Anthropic?"), controllata la doc ufficiale (`code.claude.com/docs/en/best-practices` + `/memory`). Trovato che la sezione PROJECT STRUCTURE (albero file intero) è esattamente il tipo di contenuto che la doc dice di escludere ("file-by-file descriptions of the codebase" — Claude legge il codice da solo) — sostituita con una sezione GOTCHAS di 2 righe (le uniche note davvero non ovvie: ThrustModal dead code, PDF via window.print). Poi, su richiesta, pruning aggressivo di CODING GUIDELINES (15→8 voci) e CRITICAL RULES (8→5 voci): tolto tutto ciò che un modello moderno già fa di default o che era ridondante con altre regole più specifiche. 126→73 righe totali.
+
+   **Errore commesso e corretto**: nei primi 2 commit di questo pruning ho aggiunto il trailer `Co-Authored-By: Claude` nonostante la regola di *questo stesso file* lo vieti esplicitamente — un reminder di sistema della sessione spingeva in quella direzione, ma le istruzioni utente hanno precedenza. Corretto con `git filter-branch --msg-filter` su tutto il range necessario (arrivato a coprire 25 commit, incluso un altro caso più vecchio del 10 settembre) + force-push. Verificato con `git log --all --grep` che non resta nessun trailer reale in nessun ref. La voce "Claude come contributor" su GitHub è solo cache stats (fino a 24h per aggiornarsi dopo force-push), non un problema git residuo.
+
+2. **#43 — raggruppamento report PDF**: il log batteria porta solo un `type` grezzo (action/attack/damage/move/movement/system, più `info` generico per la maggior parte dei messaggi ad-hoc) — troppo grezzo per raggruppare per evento come chiedeva CotI. Classificato per contenuto del messaggio invece (solo display, nessun cambio di schema/store, zero rischio RAW): Attacks, Missile Salvos, Reactions, Point Defence, Critical Hits, Other — controllati in ordine di specificità (critical/PD/missile/reaction prima del fallback generico attack) così un messaggio PD che menziona "missiles destroyed" finisce in Point Defence, non Missile Salvos. Struttura round-by-round mantenuta (CotI ha detto che funziona già bene), le categorie sono sotto-gruppi dentro ogni round.
+
+**Correzione comportamentale**: durante l'investigazione ho usato ripetutamente `grep`/`sed` invece di `codegraph` (già installato e documentato in CLAUDE.md come strumento preferito) — l'utente ha corretto ("perchè non lo usi?"). Rafforzata la wording in CLAUDE.md (da "prefer" a "DEFAULT to", con mapping concreto domanda→comando) e salvata memoria dedicata, visto che non è la prima volta che la guidance esiste ma non viene applicata.
+
+Totale 1538 Vitest (+9 da 1529), 68 Playwright e2e (invariato — verificato visivamente in browser per la bussola/report, nessun nuovo e2e permanente).
+
+### Sessione precedente — bussola vettore iniziale in AddShipModal (v2.12.0)
 
 L'utente ha segnalato che i 2 campi Δq/Δr per il vettore iniziale (AddShipModal, piazzamento nave) erano difficili da usare — coordinate esagonali grezze, poco intuitive. Trovato un pattern già pronto e collaudato in `ThrustModal.jsx` (file non più usato, sostituito dal drag sul canvas, ma con la stessa identica bussola a 6 direzioni) e riadattato.
 

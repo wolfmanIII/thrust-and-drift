@@ -10,6 +10,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.13.0] — 2026-09-26
+
+### Added
+
+- **Battle report grouped by category (#43)** — the printed PDF report now groups log entries by combat-event category within each round (Attacks, Missile Salvos, Reactions, Point Defence, Critical Hits, Other), on top of the existing round-by-round structure. Log entries only carry a coarse `type` field (action/attack/damage/move/movement/system) plus a generic `info` type for most ad-hoc messages, too coarse to group by event — categorised by message content instead, a display-only change with no store schema or game-logic impact. Reported via the CotI wishlist.
+
+### Changed
+
+- Trimmed `CLAUDE.md` per current Anthropic Claude Code best-practices guidance — replaced a stale full file-tree with a short gotchas list, and pruned `CODING GUIDELINES`/`CRITICAL RULES` down to project-specific constraints (cut generic advice a current model already follows by default). 126 → 73 lines.
+
+---
+
 ## [2.12.0] — 2026-09-16
 
 ### Added

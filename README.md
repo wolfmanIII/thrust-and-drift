@@ -46,6 +46,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Crew AUTO-ASSIGN** | One-click to assign the best-skilled crew member to every role and gunner slot simultaneously. One person can cover multiple roles (e.g., solo-pilot light fighter). Available in the Assign Crew modal (right-click ship → Assign Crew…) |
 | **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals, sensor lock → target, locked-by attacker, inbound missiles (200ms delay) |
 | **Battle log** | Timestamped event log with colour-coded entry types |
+| **Battle report grouping** | Printed PDF report groups log entries by category within each round — Attacks, Missile Salvos, Reactions, Point Defence, Critical Hits, Other |
 | **Undo/Redo (Ctrl+Z / Ctrl+Y)** | Snapshot-based undo/redo — 20-step stacks; `↩️` `↪️` buttons in HUD; new action clears redo |
 | **Session save / resume** | Export session to JSON; resume flow shows a full preview before loading |
 | **Autosave** | IndexedDB autosave after every significant action — persists ships, missiles, dogfights, boardings, range bands, and log; Dashboard shows full roster preview; one-click restore or clear |
@@ -171,7 +172,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1529 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1538 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 
