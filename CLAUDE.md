@@ -22,21 +22,14 @@ Local VTT lite (Virtual Tabletop) for Mongoose Traveller 2e space combat. Implem
 
 ## CODING GUIDELINES
 
-1. **Conciseness**: Do not explain basic concepts. Only explain complex architectural decisions.
-2. **Safety**: Handle all edge cases. Explicit error handling — no `catch(e) {}` swallowing.
-3. **Modern JS**: ES2024, named exports preferred, no default exports on stores/utils.
-4. **React Patterns**: Functional components only. Custom hooks for logic reuse (`use` prefix). Keep components lean — extract logic to hooks or utils.
-5. **State Management**: All game state in Zustand stores (`store/`). UI-only state (hover, focus) may live in component `useState`. No prop drilling past 2 levels — use store selectors.
-6. **Canvas Rendering**: All draw calls in `useCanvasRenderer.js`. Never call `ctx.draw*` from JSX components directly.
-7. **No Placeholders**: Write full implementations. Never leave TODOs.
-8. **SOLID Principles**: Apply to **all** `.js`/`.jsx` files. Single-responsibility for hooks and utils.
-9. **Code Organization**: UI (JSX/components) strictly separated from logic (hooks, utils, store).
-10. **Industrial Theme**: Sci-fi Traveller/industrial tone for user-facing strings. Dark palette — slate/zinc base, neon cyan accents.
-11. **Imports**: Always explicit. Never `import *`.
-12. **Strict Scope**: Stay within discussed scope. Do not add extra features unless requested.
-13. **Tailwind v4 Syntax**: Canonical class syntax — `(--var)` not `[var(--var)]`, `bg-linear-to-t` not `bg-gradient-to-t`. No `tailwind.config.js` — use CSS `@theme` for custom tokens.
-14. **No External State Libraries**: Do not introduce Redux, Jotai, Context-based state — Zustand only.
-15. **Game Rules Fidelity**: All mechanical calculations (DM, damage, thrust, range bands) must match Mongoose Traveller 2e RAW. Flag any ambiguity before implementing.
+1. **Modern JS**: ES2024, named exports preferred, no default exports on stores/utils.
+2. **State Management**: All game state in Zustand stores (`store/`). UI-only state (hover, focus) may live in component `useState`. No prop drilling past 2 levels — use store selectors.
+3. **Canvas Rendering**: All draw calls in `useCanvasRenderer.js`. Never call `ctx.draw*` from JSX components directly.
+4. **Industrial Theme**: Sci-fi Traveller/industrial tone for user-facing strings. Dark palette — slate/zinc base, neon cyan accents.
+5. **Strict Scope**: Stay within discussed scope. Do not add extra features unless requested.
+6. **Tailwind v4 Syntax**: Canonical class syntax — `(--var)` not `[var(--var)]`, `bg-linear-to-t` not `bg-gradient-to-t`. No `tailwind.config.js` — use CSS `@theme` for custom tokens.
+7. **No External State Libraries**: Do not introduce Redux, Jotai, Context-based state — Zustand only.
+8. **Game Rules Fidelity**: All mechanical calculations (DM, damage, thrust, range bands) must match Mongoose Traveller 2e RAW. Flag any ambiguity before implementing.
 
 ## CRITICAL RULES
 
