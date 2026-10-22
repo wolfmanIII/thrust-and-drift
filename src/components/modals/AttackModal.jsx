@@ -163,7 +163,7 @@ function ReactionsPanel({
  *   weapon: object|null,
  *   rangeBand: string,
  *   distance: number,
- *   dmEntries: { key: string, label: string, value: number }[],
+ *   dmEntries: { key: string, label: string, value: number, source: string }[],
  *   totalDM: number,
  *   isMissile: boolean,
  *   missileCount: number,
@@ -183,6 +183,7 @@ function AttackConfigStep({
   reactions,
   onNext, onClose,
 }) {
+  const [showDmDetails, setShowDmDetails] = useState(false)
   // Torpedo salvo capped at 3 per barbette (HG p.31).
   // Missile Rack salvo capped at the number of racks mounted in this turret — a rack is a
   // single mount that launches one missile per round, even inside a mixed-weapon turret
@@ -392,11 +393,47 @@ function AttackConfigStep({
         {/* DM summary — non-missile weapons only */}
         {!isMissile && weapon && target && (
           <div className="bg-slate-800 rounded p-3 font-mono text-xs space-y-0.5">
-            <p className="text-slate-400 mb-2">DM Summary (target: 8+)</p>
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-slate-400">DM Summary (target: 8+)</p>
+              <button
+                type="button"
+                onClick={() => setShowDmDetails(true)}
+                className="text-(--neon-cyan) hover:underline"
+              >
+                DM details
+              </button>
+            </div>
             {dmEntries.filter((e) => ALWAYS_SHOWN_DM_KEYS.has(e.key) || e.value !== 0).map((e) => (
               <DmRow key={e.key} label={e.label} value={e.value} />
             ))}
             <div className="border-t border-slate-700 mt-1 pt-1">
+              <DmRow label="Total DM" value={totalDM} highlight />
+            </div>
+          </div>
+        )}
+
+        {/* DM details popup — every modifier incl. zeros, with source and rules reference */}
+        {showDmDetails && (
+          <div
+            role="dialog"
+            aria-label="DM details"
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+            onClick={() => setShowDmDetails(false)}
+          >
+            <div
+              className="bg-slate-900 border border-slate-600 rounded p-4 w-full max-w-md max-h-[80vh] overflow-y-auto font-mono text-xs space-y-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center">
+                <p className="text-(--neon-cyan) font-bold">ATTACK DM — MODIFIER SOURCES</p>
+                <button type="button" onClick={() => setShowDmDetails(false)} className="text-slate-400 hover:text-slate-200">Close</button>
+              </div>
+              {dmEntries.map((e) => (
+                <div key={e.key} className="border-b border-slate-800 pb-1">
+                  <DmRow label={e.label} value={e.value} highlight={e.value !== 0} />
+                  <p className="text-slate-500">{e.source}</p>
+                </div>
+              ))}
               <DmRow label="Total DM" value={totalDM} highlight />
             </div>
           </div>

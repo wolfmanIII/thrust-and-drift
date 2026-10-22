@@ -163,18 +163,29 @@ export function useAttackSetup(attackerShipId, targetId, weaponKey, manualRangeB
   // the DM Summary display and reduces it into rollAttack's params. Adding a new modifier
   // (weapon-specific or situational) means adding one entry here — nowhere else.
   const dmEntries = [
-    { key: 'gunnerSkill',   label: 'Gunner',               value: gunnerSkill },
-    { key: 'weaponDM',      label: `Weapon (${weaponKey})`, value: weaponDM },
-    { key: 'rangeDM',       label: `Range (${rangeBand})`,  value: rangeDM },
-    { key: 'sizeDM',        label: 'Target size',           value: sizeDM },
+    { key: 'gunnerSkill',   label: 'Gunner',               value: gunnerSkill,
+      source: 'Skill level of the gunner assigned to this turret. (MgT2e CRB p.163)' },
+    { key: 'weaponDM',      label: `Weapon (${weaponKey})`, value: weaponDM,
+      source: 'Intrinsic attack DM of the selected weapon.' },
+    { key: 'rangeDM',       label: `Range (${rangeBand})`,  value: rangeDM,
+      source: 'Range band between attacker and target. (MgT2e CRB p.164)' },
+    { key: 'sizeDM',        label: 'Target size',           value: sizeDM,
+      source: 'Target hull tonnage: bigger is easier to hit, smaller is harder. (MgT2e CRB p.163)' },
     // evasiveDM is always 0 here — AttackModal.jsx overrides it dynamically from Reactions.
-    { key: EVASIVE_DM_KEY,         label: 'Evasion',                value: 0 },
-    { key: 'sensorLockDM',         label: 'Sensor Lock',            value: sensorLockDM },
-    { key: 'aidGunnersDM',         label: 'Aid Gunners',             value: aidGunnersDM },
-    { key: 'dogfightDM',           label: 'Dogfight',                value: dogfightDM },
-    { key: 'obstacleCoverDM',      label: 'Field cover',             value: obstacleCoverDM },
-    { key: 'torpedoSmallShipDM',   label: 'Torpedo vs <2kt',         value: torpedoSmallShipDM },        // HG p.39
-    { key: 'bayWeaponSmallShipDM', label: 'Bay vs small target',     value: bayWeaponSmallShipDMValue }, // HG p.31
+    { key: EVASIVE_DM_KEY,         label: 'Evasion',                value: 0,
+      source: 'Target Evasive Action reaction (thrust spent dodging). (MgT2e CRB p.171)' },
+    { key: 'sensorLockDM',         label: 'Sensor Lock',            value: sensorLockDM,
+      source: 'Attacker holds a sensor lock on this target. (MgT2e CRB p.172)' },
+    { key: 'aidGunnersDM',         label: 'Aid Gunners',             value: aidGunnersDM,
+      source: 'Aid Gunners crew action this round (task chain DM, can be negative). (MgT2e CRB p.166)' },
+    { key: 'dogfightDM',           label: 'Dogfight',                value: dogfightDM,
+      source: 'Dogfight round winner +2, loser −2, tie 0. (MgT2e CRB p.138)' },
+    { key: 'obstacleCoverDM',      label: 'Field cover',             value: obstacleCoverDM,
+      source: 'Target sits inside an asteroid field or nebula (obstacles enabled).' },
+    { key: 'torpedoSmallShipDM',   label: 'Torpedo vs <2kt',         value: torpedoSmallShipDM,        // HG p.39
+      source: 'Torpedo against a target under 2,000 tons. (HG p.39)' },
+    { key: 'bayWeaponSmallShipDM', label: 'Bay vs small target',     value: bayWeaponSmallShipDMValue, // HG p.31
+      source: 'Bay weapon against a small target. (HG p.31)' },
   ]
   const totalDM     = dmEntries.reduce((sum, e) => sum + e.value, 0)
   const dmBreakdown = { ...Object.fromEntries(dmEntries.map((e) => [e.key, e.value])), totalDM }

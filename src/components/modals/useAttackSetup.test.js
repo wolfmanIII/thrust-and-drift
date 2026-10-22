@@ -181,6 +181,8 @@ describe('useAttackSetup — dmEntries', () => {
       expect(entry, `missing dmEntries entry for "${key}"`).toBeDefined()
       expect(entry.value).toBe(dmBreakdown[key])
       expect(typeof entry.label).toBe('string')
+      expect(typeof entry.source, `dmEntries "${key}" needs a source`).toBe('string')
+      expect(entry.source.length).toBeGreaterThan(0)
     }
   })
 

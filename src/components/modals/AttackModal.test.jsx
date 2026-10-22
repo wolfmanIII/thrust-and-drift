@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, fireEvent }         from '@testing-library/react'
+import { render, screen, fireEvent, within }         from '@testing-library/react'
 import { AttackModal }   from './AttackModal.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore }     from '../../store/uiStore.js'
@@ -359,6 +359,39 @@ describe('AttackModal — DM Summary row visibility (#33)', () => {
     fireEvent.click(screen.getByText('Bogey'))
     expect(screen.queryByText('Aid Gunners')).not.toBeInTheDocument()
     expect(screen.queryByText('Dogfight')).not.toBeInTheDocument()
+  })
+})
+
+// ── #54: DM details popup — all modifiers incl. zeros, with sources ──
+
+describe('AttackModal — DM details popup (#54)', () => {
+  beforeEach(() => {
+    useBattleStore.getState().resetBattle('vectorial')
+    useUiStore.setState({ activeModal: null, modalPayload: null })
+    useBattleStore.getState().addShip(
+      { id: 'profile-simple', name: 'Gunship', hull: 20, armor: 0, thrust: 4, tonnage: 100, turrets: [{ slot: 1, weapons: ['Pulse Laser'] }], crew: [] },
+      { q: 0, r: 0 }, 'players', '#0f0',
+    )
+    useBattleStore.getState().addShip(
+      { id: 'profile-tgt', name: 'Bogey', hull: 10, armor: 0, thrust: 4, tonnage: 100, turrets: [], crew: [] },
+      { q: 5, r: 0 }, 'npc', '#f00',
+    )
+    const [att] = useBattleStore.getState().ships
+    useUiStore.setState({ activeModal: 'attack', modalPayload: { shipId: att.id } })
+  })
+
+  it('opens a popup listing zero-value modifiers with their rules source, and closes again', () => {
+    render(<AttackModal />)
+    fireEvent.click(screen.getByText('Pulse Laser'))
+    fireEvent.click(screen.getByText('Bogey'))
+    expect(screen.queryByRole('dialog', { name: 'DM details' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('DM details'))
+    const dialog = screen.getByRole('dialog', { name: 'DM details' })
+    // Aid Gunners is hidden (0) in the summary but listed in the popup, with its source
+    expect(within(dialog).getByText('Aid Gunners')).toBeInTheDocument()
+    expect(within(dialog).getByText(/MgT2e CRB p\.166/)).toBeInTheDocument()
+    fireEvent.click(within(dialog).getByText('Close'))
+    expect(screen.queryByRole('dialog', { name: 'DM details' })).not.toBeInTheDocument()
   })
 })
 
