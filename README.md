@@ -30,7 +30,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Barbette ×3 multiplier** | All barbette weapons apply `×3` to net hull damage after armour subtraction (HG p.29): `netDamage = max(0, roll + Effect − effectiveArmour) × 3` |
 | **AP trait** | `AP N` trait reduces effective armour before damage: `effectiveArmour = max(0, armour − apReduction)` — active on Railgun (4), Fusion Barbette (3), Plasma Barbette (2), Railgun Barbette (5) |
 | **Ion Weapons** | Barbette (2D×10) and Bay (Small 6D×10 / Medium 8D×20 / Large 10D×100) — no hull damage; ignores armour; reduces target Power and computer bandwidth; thrust cap = `floor(baseThrust × currentPower / maxPower)`; stacking hits; hardened (/fib) computers immune; blue burst/aura canvas effects; ION NR badge + COMMS DOWN warning (HG p.30–33, FAQ HG 2022 p.1) |
-| **Sandcaster ammo** | 20 canisters per sandcaster slot; depleted by Disperse Sand reaction; shown as 🪨 N/max on bento cards, ship detail modal, and tooltip |
+| **Sandcaster ammo** | 20 canisters per sandcaster slot; depleted by Disperse Sand reaction and by Deploy Chaff; shown as 🪨 N/max on bento cards, ship detail modal, and tooltip |
 | **Sound effects** | Procedural synthesis via Web Audio API — laser, impact, critical, missile launch, thrust plume; 🔊/🔇 mute toggle in HUD; no audio files required |
 | **UI text scale** | 🔍N% HUD button cycles 100% → 115% → 130%; scales every label (HUD, modals, forms) plus the map's ship name/hull labels and missile count badges via a single `--ui-scale` CSS token |
 | **Player dice rolls** | Player ships enter their own 2D6 (physical dice); inputs start empty; 🎲 auto-roll opt-in on all roll steps (attack, damage, critical location, extra damage, reactions, crew actions, initiative); NPC ships auto-roll |
@@ -46,6 +46,8 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Crew AUTO-ASSIGN** | One-click to assign the best-skilled crew member to every role and gunner slot simultaneously. One person can cover multiple roles (e.g., solo-pilot light fighter). Available in the Assign Crew modal (right-click ship → Assign Crew…) |
 | **Ship hover tooltip** | Hover a token to see hull bar, vector, thrust, evasion, criticals, sensor lock → target, locked-by attacker, inbound missiles (200ms delay) |
 | **Battle log** | Timestamped event log with colour-coded entry types |
+| **Chaff canister (HG p.38)** | Gunner action **Deploy Chaff** (automatic): spends 1 sandcaster canister and 1 unfired sandcaster; chaff cloud for 1 round gives DM−1 to Sensor Lock checks and missile attack rolls against the ship (not torpedoes, not lasers/energy/particle) |
+| **Attack DM details** | **DM details** button in the Attack modal opens a popup listing every attack modifier — zeros included — with where it comes from and its rules reference |
 | **Battle report grouping** | Printed PDF report groups log entries by category within each round — Attacks, Missile Salvos, Reactions, Point Defence, Critical Hits, Other |
 | **Undo/Redo (Ctrl+Z / Ctrl+Y)** | Snapshot-based undo/redo — 20-step stacks; `↩️` `↪️` buttons in HUD; new action clears redo |
 | **Session save / resume** | Export session to JSON; resume flow shows a full preview before loading |
@@ -172,7 +174,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1538 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1557 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 

@@ -9,25 +9,34 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.13.0 |
+| **Versione** | 2.14.0 |
 | **Branch** | main |
-| **Test** | 1538 Vitest + 68 Playwright e2e |
-| **Ultimo commit** | chore(release): v2.13.0 — battle report grouped by category (#43) |
+| **Test** | 1557 Vitest + 68 Playwright e2e |
+| **Ultimo commit** | chore(release): v2.14.0 — chaff canister (#49) + DM details popup (#54) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.13.0)
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.14.0)
 - Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45, #46, #47, #48, #40, #41, #42, #43 chiuse automaticamente via `Fixes #N`/`Closes #N`. **#39 chiusa manualmente** in v2.10.0. **#38 chiusa manualmente come non applicabile** (v2.11.0).
 - **#21 iterazione 2** (se richiesta) — range/salvo/ammo/traits custom, nuove armi non basate su una entry esistente. Struttura dati attuale (`weaponOverrides` indicizzato per posizione, attivo solo se l'arma è singola nello slot) regge l'iterazione 1 ma andrebbe rivista per selezione multi-istanza (id stabile per arma invece di indice) se si espande oltre il cosmetic+danno. **#21 resta OPEN** (iterazione 1 rilasciata in v2.9.0, non auto-chiusa).
-- **Wishlist CotI ancora aperta** (#36, #37, #44 — enhancement, non urgenti, nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #44 gestione Power armi Ion (priorità bassa per l'utente). #43 chiusa (v2.13.0).
+- **Wishlist CotI ancora aperta** (nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #44 gestione Power armi Ion (priorità bassa per l'utente), #50 Screens (Angle/Meson/Nuclear Damper), #51 Spinal Mount (dipende da #44 per il power drop), #52 Black Globe (priorità molto bassa per CotI), #53 Pebble canister vs abbordaggio (esito semplice riuscito/fallito, verificare CRB p.74 prima). #43 chiusa (v2.13.0), #49 e #54 chiuse (v2.14.0).
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — CLAUDE.md cleanup + report PDF raggruppato (v2.13.0, #43)
+### Sessione corrente — chaff canister + popup dettaglio DM (v2.14.0, #49, #54)
+
+Partito da un nuovo feedback CotI (Black Globe a priorità molto bassa, Spinal Mount desiderato con power drop, pebble canister come esito semplice riuscito/fallito, più una nuova richiesta: popup con i DM e la loro origine prima del tiro).
+
+1. **#54 — popup DM details**: il "DM Summary" in `AttackModal.jsx` esisteva già ma nascondeva gli zeri e non diceva l'origine dei modificatori. Ogni voce di `dmEntries` (`useAttackSetup.js`) ha ora un campo `source` (testo + riferimento di pagina); bottone "DM details" apre un popup con tutte le voci. Pagine verificate sul PDF CRB: Aid Gunners p.166, Sensor Lock p.172. Il commento in `combat.js` che cita p.167 per il sensor lock è probabilmente sbagliato, non toccato.
+2. **#49 — chaff**: letto HG p.38 sul PDF e chiesto all'utente le ambiguità RAW prima di codificare. Decisioni: DM−1 solo alle azioni *contro* la nave col chaff (Sensor Lock + attack roll dei missili); durata 1 round; attivazione come azione Gunner automatica `deploy_chaff`; pool unico `sandAmmoTotal` (nessuna modifica a profilo/autosave/export). Scelta mia, non discussa: i **siluri non sono colpiti** (HG p.38 nomina solo i missili) — una riga in `MissileImpactModal.jsx` se si cambia idea. `chaffActive` è un campo nave (le navi sono salvate intere, nessuna allowlist da toccare), resettato in `buildNextRoundState`.
+
+Nessun e2e (Playwright non usato, come da memoria): coperto da test componente/store. Totale 1557 Vitest (+19 da 1538), 68 Playwright e2e (invariato).
+
+### Sessione precedente — CLAUDE.md cleanup + report PDF raggruppato (v2.13.0, #43)
 
 Due filoni distinti:
 

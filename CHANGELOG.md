@@ -10,6 +10,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.14.0] — 2026-10-22
+
+### Added
+
+- **Chaff canister (#49)** — new Gunner crew action **Deploy Chaff** (automatic, Actions phase). Spends 1 sandcaster canister (shared `sandAmmoTotal` stock) and marks one unfired sandcaster as fired; the ship is wrapped in a chaff cloud until the next round boundary. While active, **Sensor Lock** checks against the ship and **missile** attack rolls against it suffer DM−1 (HG p.38); the Action modal shows a notice and the Missile Impact modal a "Chaff cloud" DM row. Chaff gives no protection against laser, energy or particle weapons. Interpretation choices where RAW is silent or ambiguous: duration 1 round (like sand); only checks *aimed at* the chaff ship are penalised, not its own; torpedoes are unaffected (HG p.38 names missiles only). New `CHAFF_DM` constant and optional `chaffDM` parameter on `computeMissileAttackDM`. Reported via the CotI wishlist.
+- **DM details popup in the Attack modal (#54)** — a **DM details** button next to the DM Summary opens a popup listing every attack modifier, zero values included, each with a short description of where it comes from and its rules reference. Each `dmEntries` entry in `useAttackSetup` now carries a `source` string, so a new modifier is still declared in one place. Suggested via CotI.
+
+---
+
 ## [2.13.0] — 2026-09-26
 
 ### Added
