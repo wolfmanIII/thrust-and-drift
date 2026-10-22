@@ -554,6 +554,11 @@ breakdown:
 - Evasion DM *(shown only when active)*
 - Sensor Lock DM *(shown only when active)*
 
+The **DM details** button next to the DM Summary opens a popup listing **every**
+modifier — zero values included — each with where it comes from and its rules
+reference. Use it to check which modifiers are in play and to spot unexpected
+negative DMs before rolling.
+
 ### 9.2 Attack Modal — Step 2: Roll
 
 Target number is always **8+** *(MgT2e CRB p. 164)*.

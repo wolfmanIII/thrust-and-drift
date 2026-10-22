@@ -413,6 +413,7 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="Weapon" v="Select which turret/weapon to fire." />
             <KV k="Target" v="Select the target ship. Destroyed ships (☠ WRECK) are excluded from the target list." />
             <KV k="DM Breakdown" v="The modal shows all applicable DMs: gunner skill, weapon trait, range band, target size, evasion DM (when active), sensor lock DM (when active)." />
+            <KV k="DM details" v="The DM details button next to the DM Summary opens a popup listing every modifier — zero values included — each with where it comes from and its rules reference. Use it to check which modifiers are in play and to spot unexpected negative DMs before rolling." />
           </Sub>
 
           <Sub title="REACTIONS (CRB p.171)">
