@@ -744,6 +744,17 @@ on the token shows when a ship has used reactions this round.
 
 > **Point Defence** for missile salvos is resolved in the **Missile Impact modal** (§8.1), not here. The Reactions panel is not shown for missile attacks.
 
+**Chaff Canister** *(HG p.38)*: the Gunner action **Deploy Chaff** (Actions phase)
+creates a chaff cloud around the ship. All Electronics checks and missile attack
+rolls aimed at that ship suffer **DM−1**; chaff gives no protection against
+laser, energy or particle weapons. T&D applies it to **Sensor Lock** checks
+against the ship (a notice shows in the Action modal) and to **missile** attack
+rolls (a "Chaff cloud" row in the Missile Impact modal). Torpedoes are not
+affected (HG p.38 names missiles only), and the ship's own checks are not
+penalised. RAW gives no duration: the cloud lasts **1 round**, like sand. A
+canister comes from the same sandcaster stock as Disperse Sand and the
+sandcaster is marked fired, so one sandcaster cannot do both in the same round.
+
 ### 9.10 Special Weapon Mechanics
 
 #### AP (Armour Piercing) Trait
@@ -942,6 +953,7 @@ All checks are **2D6 + skill DM vs. 8+** unless marked Automatic.
 | **Engineer** | **Overload M-Drive** | Difficult 10+ (Engineer), cumulative DM−2 per prior attempt this battle | +1 Thrust (fixed) next round *(CRB p.171)* |
 | **Engineer** | **Repair System** | Average 8+ (Sev 1–2) / Difficult 10+ (Sev 3–4) / Very Difficult 12+ (Sev 5–6) (Engineer) | Removes 1 critical hit from this ship. The GM selects which critical to repair when multiple are present *(CRB p.167)* |
 | **Gunner** | **Reload Turret** | Automatic | Reloads 1 missile turret; no roll required *(CRB p.167)* |
+| **Gunner** | **Deploy Chaff** | Automatic | Spends 1 sandcaster canister and 1 unfired sandcaster; chaff cloud around this ship until the next round: **DM−1** to Sensor Lock checks and missile attack rolls against it *(HG p.38)* |
 | **Sensors** | **Sensor Lock** | 8+ (Electronics) | DM+2 flat to all attacks against the selected target *(CRB p.172)* |
 | **Sensors** | **Electronic Warfare** | 8+ (Electronics) | Removes an enemy sensor lock from this ship *(CRB p.167)* |
 | **Sensors** | **EW — Counter Missile** | 10+ (Electronics) | Removes **Effect** missiles (min 1) from one in-flight salvo. Targets **both** salvos still in transit (`missiles` array) and those awaiting impact resolution (`⚡ impact` badge). Cumulative across rounds; a salvo may only be EW'd once per round *(CRB p.173)* |
@@ -984,7 +996,7 @@ Ships have a list of **named crew members**, each with individual skill ratings.
 | **LDR** | Leadership | Improve Initiative action (Actions phase) |
 | **TAC** | Tactics | Initiative DM at start of battle (Initiative phase) |
 | **ENG** | Engineer | Overload M-Drive action, Repair System action |
-| **GNR** | Gunner | Attack DM, Reload Turret action |
+| **GNR** | Gunner | Attack DM, Reload Turret action, Deploy Chaff action |
 | **SEN** | Sensors | Sensor Lock action, Electronic Warfare action, EW — Counter Missile action |
 
 Skill levels range from **0 to 5**.

@@ -420,6 +420,7 @@ export function HelpScreen({ onBack } = {}) {
             <p>The defender can declare Reactions in Step 1 before the attack roll.</p>
             <KV k="Evasive Action" v="Toggle: spend 1 thrust to dodge this attack. The attack suffers DM −Pilot skill (fixed). Button disabled if no thrust remains or Pilot skill is 0." />
             <KV k="Disperse Sand" v="Laser attacks only. Gunner (turret) check — on success adds 1D+Effect to armour for this attack only. Slot marked fired." />
+            <KV k="Chaff (Deploy Chaff)" v="Gunner action in the Actions phase (HG p.38). Spends 1 sandcaster canister and 1 unfired sandcaster; chaff cloud around the ship for 1 round. DM−1 to Sensor Lock checks and missile attack rolls against it. No effect on laser, energy or particle weapons; torpedoes and the ship's own checks are not affected. Shares the sandcaster stock with Disperse Sand." />
             <p className="text-slate-400 text-xs italic">Point Defence for missile salvos is resolved in the Missile Impact modal, not here. The Reactions panel is not shown for missile attacks.</p>
             <p className="text-slate-400 italic text-xs">Player-controlled defending ships enter physical dice manually for PD and Sand rolls.</p>
           </Sub>
@@ -542,7 +543,7 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="LDR — Leadership" v="Improve Initiative action (Actions phase)." />
             <KV k="TAC — Tactics" v="Initiative DM at start of battle (Initiative phase)." />
             <KV k="ENG — Engineer" v="Overload M-Drive action, Repair System action." />
-            <KV k="GNR — Gunner" v="Attack DM, Reload Turret action." />
+            <KV k="GNR — Gunner" v="Attack DM, Reload Turret action, Deploy Chaff action." />
             <KV k="SEN — Sensors" v="Sensor Lock action, Electronic Warfare action, EW — Counter Missile action." />
             <p>Skill levels range from 0 to 5. One crew member can hold multiple skills — e.g. a solo pilot/gunner on a fighter.</p>
           </Sub>
