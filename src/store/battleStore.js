@@ -173,6 +173,7 @@ function buildNextRoundState(s) {
       firedTurrets:         [],
       usedCrewMembers:      [],
       aidGunnersDM:         0,
+      chaffActive:          false,   // chaff cloud lasts 1 round, like sand. HG p.38
       ionRoundsLeft:        ionNext,
       // Penalty persists while ionCurrent > 0 (survives one boundary for N+1 acceleration).
       // Clears only when ionCurrent reaches 0. // HG p.30, FAQ HG 2022 p.1 — BUG-001
@@ -503,6 +504,7 @@ const useBattleStore = create((set, get) => {
       evasiveThrust: 0,
       firedTurrets: [],
       aidGunnersDM: 0,
+      chaffActive: false,
       usedCrewMembers: [],
       sensorLockOn: null,
       sensorLockedBy: null,
@@ -1148,6 +1150,46 @@ const useBattleStore = create((set, get) => {
       }),
     }))
   },
+
+  /**
+   * Deploy a chaff cloud around the ship using one unfired sandcaster and one canister
+   * from the shared sandcaster stock. While active (until the next round boundary):
+   * Electronics (sensors) Sensor Lock checks against this ship and missile attack rolls
+   * against it suffer DM-1. Duration is not specified by RAW — 1 round, like sand.
+   * // MgT2e HG p.38 — Chaff Canister
+   * @param {string} shipId
+   */
+  deployChaff: wh(
+    (shipId) => {
+      const sh = get().ships.find((x) => x.id === shipId)
+      if (!sh || sh.chaffActive) return false
+      if ((sh.sandAmmoTotal ?? countSandcasters(sh.profile)) <= 0) return false
+      return (sh.profile.turrets ?? []).some(
+        (t) => t.weapons?.includes('Sandcaster') && !(sh.firedTurrets ?? []).includes(t.slot)
+      )
+    },
+    (shipId) => {
+      const ship = get().ships.find((x) => x.id === shipId)
+      const turret = (ship.profile.turrets ?? []).find(
+        (t) => t.weapons?.includes('Sandcaster') && !(ship.firedTurrets ?? []).includes(t.slot)
+      )
+      set((s) => ({
+        ships: s.ships.map((sh) => sh.id !== shipId ? sh : {
+          ...sh,
+          chaffActive: true,
+          firedTurrets: [...new Set([...(sh.firedTurrets ?? []), turret.slot])],
+          sandAmmoTotal: Math.max(0, (sh.sandAmmoTotal ?? countSandcasters(sh.profile)) - 1),
+        }),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'action',
+          message: `${ship.name}: chaff cloud deployed — DM-1 to Sensor Lock and missile attack rolls against it this round. (HG p.38)`,
+          shipId,
+        })],
+      }))
+    },
+  ),
 
   /**
    * Apply Ion weapon hit to a ship — reduces Power and computer bandwidth.

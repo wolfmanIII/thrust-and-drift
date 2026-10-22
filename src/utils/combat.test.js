@@ -30,6 +30,7 @@ import {
   taskChainDM,
   overloadDrivePenaltyDM,
   bayWeaponSmallShipDM,
+  CHAFF_DM,
 } from './combat.js'
 
 // === RANGE DMs ===
@@ -643,6 +644,20 @@ describe('countSandcasters', () => {
 
 // === MISSILE IMPACT ===
 // // MgT2e CRB p.173 — IMPACT
+
+describe('computeMissileAttackDM — chaff (HG p.38)', () => {
+  it('CHAFF_DM is -1', () => {
+    expect(CHAFF_DM).toBe(-1)
+  })
+
+  it('chaff DM is added to the salvo DM', () => {
+    expect(computeMissileAttackDM(3, true, 0, CHAFF_DM)).toBe(4)
+  })
+
+  it('defaults to no chaff', () => {
+    expect(computeMissileAttackDM(3, true, 0)).toBe(5)
+  })
+})
 
 describe('computeMissileAttackDM', () => {
   // DM = count (salvo size) + 2 (Smart, if TL ≥ 9) − evasivePilot

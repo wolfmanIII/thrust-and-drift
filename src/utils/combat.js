@@ -323,11 +323,18 @@ export function bayWeaponSmallShipDM(isBayWeapon, targetTonnage) {
  * @param {number}  count         Missiles remaining in salvo
  * @param {boolean} hasSmart      True if launcher ship TL ≥ 9 (default true for safety)
  * @param {number}  evasivePilot  Pilot skill of evading target (0 = not evading)
+ * @param {number}  chaffDM       CHAFF_DM when the target is inside a chaff cloud, else 0 (HG p.38)
  * @returns {number}
  */
-export function computeMissileAttackDM(count, hasSmart = true, evasivePilot = 0) {
-  return count + (hasSmart ? 2 : 0) - evasivePilot   // salvoSize + Smart − evasive
+export function computeMissileAttackDM(count, hasSmart = true, evasivePilot = 0, chaffDM = 0) {
+  return count + (hasSmart ? 2 : 0) - evasivePilot + chaffDM   // salvoSize + Smart − evasive + chaff
 }
+
+/**
+ * DM applied to Electronics (sensors) Sensor Lock checks and missile attack rolls
+ * against a ship inside its own chaff cloud. // MgT2e HG p.38 — Chaff Canister
+ */
+export const CHAFF_DM = -1
 
 /**
  * Compute net missile salvo damage per CRB p.173 IMPACT formula.

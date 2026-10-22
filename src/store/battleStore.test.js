@@ -2526,6 +2526,70 @@ describe('spendSandAmmo', () => {
   })
 })
 
+// === DEPLOY CHAFF ===
+// // MgT2e HG p.38 — Chaff Canister
+
+describe('deployChaff', () => {
+  const sandProfile = () => makeProfile({ turrets: [{ slot: 1, weapons: ['Sandcaster'] }] })
+
+  it('activates the cloud, spends one canister and fires the sandcaster turret', () => {
+    useBattleStore.getState().addShip(sandProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().deployChaff(id)
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.chaffActive).toBe(true)
+    expect(ship.sandAmmoTotal).toBe(19)
+    expect(ship.firedTurrets).toEqual([1])
+  })
+
+  it('is a no-op without a sandcaster', () => {
+    useBattleStore.getState().addShip(makeProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().deployChaff(id)
+    expect(useBattleStore.getState().ships[0].chaffActive).toBe(false)
+  })
+
+  it('is a no-op when no canisters are left', () => {
+    useBattleStore.getState().addShip(sandProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().updateShip(id, { sandAmmoTotal: 0 })
+    useBattleStore.getState().deployChaff(id)
+    expect(useBattleStore.getState().ships[0].chaffActive).toBe(false)
+  })
+
+  it('is a no-op when every sandcaster already fired this round', () => {
+    useBattleStore.getState().addShip(sandProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().markTurretFired(id, 1)
+    useBattleStore.getState().deployChaff(id)
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.chaffActive).toBe(false)
+    expect(ship.sandAmmoTotal).toBe(20)
+  })
+
+  it('only one cloud per round — a second call does not spend another canister', () => {
+    const profile = makeProfile({ turrets: [{ slot: 1, weapons: ['Sandcaster'] }, { slot: 2, weapons: ['Sandcaster'] }] })
+    useBattleStore.getState().addShip(profile, { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    useBattleStore.getState().deployChaff(id)
+    useBattleStore.getState().deployChaff(id)
+    expect(useBattleStore.getState().ships[0].sandAmmoTotal).toBe(39)
+  })
+
+  it('chaffActive starts false and clears at the next round', () => {
+    useBattleStore.getState().addShip(sandProfile(), { q: 0, r: 0 }, 'players', '#fff')
+    const { id } = useBattleStore.getState().ships[0]
+    expect(useBattleStore.getState().ships[0].chaffActive).toBe(false)
+    useBattleStore.getState().deployChaff(id)
+    useBattleStore.getState().startNextRound()
+    expect(useBattleStore.getState().ships[0].chaffActive).toBe(false)
+  })
+
+  it('unknown shipId is no-op', () => {
+    expect(() => useBattleStore.getState().deployChaff('ghost')).not.toThrow()
+  })
+})
+
 // === MISSILE AMMO — BARBETTES AND TORPEDOES ===
 // // MgT2e HG p.30–31
 

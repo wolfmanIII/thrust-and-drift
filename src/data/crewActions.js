@@ -76,5 +76,12 @@ export const CREW_ACTIONS = {
       skill: 'gunner',
       description: 'Automatic. Reloads 1 missile turret. // MgT2e CRB p.167',
     },
+    {
+      id: 'deploy_chaff',
+      label: 'Deploy Chaff',
+      difficulty: 'auto',
+      skill: 'gunner',
+      description: 'Automatic. Spends 1 sandcaster canister and 1 unfired sandcaster. Until the next round: DM-1 to Sensor Lock checks and missile attack rolls against this ship; no protection against laser, energy or particle weapons. // MgT2e HG p.38',
+    },
   ],
 }
