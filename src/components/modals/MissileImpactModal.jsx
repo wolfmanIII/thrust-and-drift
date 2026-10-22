@@ -20,7 +20,7 @@ import { Modal }                                         from './Modal.jsx'
 import { useBattleStore }                                from '../../store/battleStore.js'
 import { rollDice, roll2D6 }                             from '../../utils/dice.js'
 import { getEffectiveSkill }                             from '../../utils/crew.js'
-import { computeMissileAttackDM, computeMissileImpactDamage, computeIonThrustEffect } from '../../utils/combat.js'
+import { computeMissileAttackDM, computeMissileImpactDamage, computeIonThrustEffect, CHAFF_DM } from '../../utils/combat.js'
 import { DiceInput }                                     from '../forms/DiceInput.jsx'
 
 /** Laser types usable as Point Defence. // MgT2e CRB p.161 */
@@ -121,7 +121,10 @@ export function MissileImpactModal() {
   const isPlayerTarget = target.faction === 'players'
 
   // Attack DMs — CRB p.173 (use remainingCount after PD)
-  const totalDM     = computeMissileAttackDM(remainingCount, hasSmart, evasiveActive ? pilotSkill : 0)
+  // Chaff cloud: DM-1 to missile attack rolls (HG p.38). Torpedoes are a separate weapon
+  // class in HG ("missiles" only in the chaff text), so they are not affected.
+  const chaffDM     = (target.chaffActive && impact.type !== 'Torpedo') ? CHAFF_DM : 0
+  const totalDM     = computeMissileAttackDM(remainingCount, hasSmart, evasiveActive ? pilotSkill : 0, chaffDM)
   const smartDM     = hasSmart ? 2 : 0
   const salvoSizeDM = remainingCount
   const evasiveDM  = evasiveActive ? -pilotSkill : 0
@@ -266,6 +269,12 @@ export function MissileImpactModal() {
                   <div className="flex justify-between">
                     <span className="text-slate-400">Evasive Action (Pilot {pilotSkill})</span>
                     <span className="text-red-400">{dmSign(evasiveDM)}</span>
+                  </div>
+                )}
+                {chaffDM !== 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Chaff cloud (HG p.38)</span>
+                    <span className="text-red-400">{dmSign(chaffDM)}</span>
                   </div>
                 )}
                 <div className="flex justify-between border-t border-slate-700 pt-1 mt-0.5">

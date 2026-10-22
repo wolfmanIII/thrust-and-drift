@@ -23,6 +23,7 @@ function setupImpact({
   targetFiredTurrets = [],
   faction            = 'npc',
   count              = 3,
+  type               = 'Missile',
   weaponLabel        = null,
   damageDice         = null,
 } = {}) {
@@ -52,7 +53,7 @@ function setupImpact({
       launchedBy:         launcher.id,
       target:             target.id,
       count,
-      type:               'Missile',
+      type,
       hasSmartGuidance:   false,
       ewAppliedThisRound: false,
       weaponLabel,
@@ -391,5 +392,31 @@ describe('MissileImpactModal — weapon override on the impacted salvo (#48)', (
 
     const log = useBattleStore.getState().log
     expect(log.some((e) => e.message.includes('Advanced Missile Rack'))).toBe(true)
+  })
+})
+
+// ── Chaff cloud DM-1 (HG p.38) ────────────────────────────────────────────────
+
+describe('MissileImpactModal — chaff cloud DM', () => {
+  it('shows a Chaff DM-1 row and lowers the total when the target has chaff active', () => {
+    const { target } = setupImpact({ count: 3 })
+    useBattleStore.getState().updateShip(target.id, { chaffActive: true })
+    render(<MissileImpactModal />)
+    expect(screen.getByText(/Chaff cloud/)).toBeInTheDocument()
+    // 3 missiles, no Smart (hasSmartGuidance false) → +3, chaff −1 → +2
+    expect(screen.getAllByText('+2').length).toBeGreaterThan(0)
+  })
+
+  it('no chaff row when the target has no chaff cloud', () => {
+    setupImpact({ count: 3 })
+    render(<MissileImpactModal />)
+    expect(screen.queryByText(/Chaff cloud/)).not.toBeInTheDocument()
+  })
+
+  it('torpedo salvos are not affected by chaff (HG p.38 names missiles only)', () => {
+    const { target } = setupImpact({ count: 1, type: 'Torpedo' })
+    useBattleStore.getState().updateShip(target.id, { chaffActive: true })
+    render(<MissileImpactModal />)
+    expect(screen.queryByText(/Chaff cloud/)).not.toBeInTheDocument()
   })
 })

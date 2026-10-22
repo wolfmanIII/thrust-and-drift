@@ -430,3 +430,51 @@ describe('ActionModal — Overload M-Drive severe failure critical hit (CRB p.17
     expect(useBattleStore.getState().ships[0].criticalHits).toHaveLength(0)
   })
 })
+
+// ── HG p.38: Chaff Canister ──────────────────────────────────────────────────
+
+describe('ActionModal — Chaff (HG p.38)', () => {
+  const chaffShip = (over = {}) => ({
+    ...makeSoloShip({ skills: { gunner: 1, sensors: 1 }, assignments: { sensors: 'crew-solo', gunners: { 1: 'crew-solo' } } }),
+    sandAmmoTotal: 20,
+    ...over,
+  })
+  const withSandcaster = (ship) => ({
+    ...ship, profile: { ...ship.profile, turrets: [{ slot: 1, weapons: ['Sandcaster'] }] },
+  })
+
+  beforeEach(() => {
+    useBattleStore.getState().resetBattle('vectorial')
+    useBattleStore.setState({ phase: 'actions' })
+    useUiStore.setState({ activeModal: 'action', modalPayload: { shipId: 'ship-solo' } })
+  })
+
+  it('Deploy Chaff spends a canister and flags the ship', () => {
+    useBattleStore.setState({ ships: [withSandcaster(chaffShip())] })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Solo Pilot'))
+    fireEvent.click(screen.getByText('Deploy Chaff'))
+    fireEvent.click(screen.getByText(/EXECUTE ACTION/i))
+    const ship = useBattleStore.getState().ships[0]
+    expect(ship.chaffActive).toBe(true)
+    expect(ship.sandAmmoTotal).toBe(19)
+  })
+
+  it('Deploy Chaff is disabled without a free sandcaster', () => {
+    useBattleStore.setState({ ships: [chaffShip()] })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Solo Pilot'))
+    expect(screen.getByText('Deploy Chaff').closest('button')).toBeDisabled()
+  })
+
+  it('Sensor Lock against a ship inside a chaff cloud shows the DM-1 notice', () => {
+    const target = { ...makeSoloShip(), id: 'ship-tgt', name: 'Bogey', chaffActive: true }
+    useBattleStore.setState({ ships: [chaffShip(), target] })
+    render(<ActionModal />)
+    fireEvent.click(screen.getByText('Solo Pilot'))
+    fireEvent.click(screen.getByText('Sensor Lock'))
+    expect(screen.queryByText(/inside a chaff cloud/)).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('Bogey'))
+    expect(screen.getByText(/inside a chaff cloud/)).toBeInTheDocument()
+  })
+})

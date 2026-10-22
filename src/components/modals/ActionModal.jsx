@@ -13,7 +13,7 @@ import { CREW_ACTIONS } from '../../data/crewActions.js'
 import { migrateCrew, CREW_SKILLS } from '../../utils/crew.js'
 import { DiceInput } from '../forms/DiceInput.jsx'
 import { getObstacleAt } from '../../utils/obstacles.js'
-import { taskChainDM, overloadDrivePenaltyDM } from '../../utils/combat.js'
+import { taskChainDM, overloadDrivePenaltyDM, CHAFF_DM } from '../../utils/combat.js'
 
 /**
  * Apply the mechanical effect of a successful action to the battle state.
@@ -26,6 +26,7 @@ function useActionEffects() {
   const applyAidGunners      = useBattleStore((s) => s.applyAidGunners)
   const overloadDrive        = useBattleStore((s) => s.overloadDrive)
   const reloadTurret         = useBattleStore((s) => s.reloadTurret)
+  const deployChaff          = useBattleStore((s) => s.deployChaff)
   const applyMissileEW       = useBattleStore((s) => s.applyMissileEW)
   const addCriticalHit       = useBattleStore((s) => s.addCriticalHit)
 
@@ -64,6 +65,9 @@ function useActionEffects() {
         break
       case 'reload_turret':
         reloadTurret(shipId)
+        break
+      case 'deploy_chaff':
+        deployChaff(shipId)
         break
       default:
         break
@@ -209,6 +213,17 @@ export function ActionModal() {
   const isOverloadDrive   = selectedAction?.id === 'overload_drive'
   const overloadPenaltyDM = isOverloadDrive ? overloadDrivePenaltyDM(ship.overloadDriveAttempts ?? 0) : 0
 
+  // Chaff cloud around the lock target: DM-1 to the Sensor Lock check (HG p.38).
+  // Only checks aimed at the chaff ship are penalised, not the chaff ship's own checks.
+  const chaffPenaltyDM = (selectedAction?.id === 'sensor_lock' && targetShip?.chaffActive) ? CHAFF_DM : 0
+
+  // Deploy Chaff needs an unfired sandcaster and a canister, and only one cloud per round.
+  const canDeployChaff = !ship.chaffActive
+    && (ship.sandAmmoTotal ?? 0) > 0
+    && (ship.profile.turrets ?? []).some(
+      (t) => t.weapons?.includes('Sandcaster') && !(ship.firedTurrets ?? []).includes(t.slot)
+    )
+
   const handleRoll = () => {
     if (!selectedAction) return
     if (selectedAction.requiresTarget && !targetShipId) return
@@ -219,7 +234,7 @@ export function ActionModal() {
       result = { display: 'Automatic', success: true, effect: 0, finalTotal: 8 }
     } else {
       const roll = isPlayer ? manualDice : roll2D6()
-      const dm   = (skillOverride ?? selectedAction.skillLevel) + overloadPenaltyDM
+      const dm   = (skillOverride ?? selectedAction.skillLevel) + overloadPenaltyDM + chaffPenaltyDM
       result = formatCheckResult(roll, dm, effectiveDifficulty)
     }
 
@@ -294,6 +309,7 @@ export function ActionModal() {
                     : '⚠ M-Drive critical hit — Severity 1 applied.'
                 )}
                 {selectedAction.id === 'reload_turret'      && 'Turret reloaded.'}
+                {selectedAction.id === 'deploy_chaff'       && 'Chaff cloud deployed — DM-1 to Sensor Lock and missile attacks against this ship this round.'}
               </p>
             )}
 
@@ -369,7 +385,8 @@ export function ActionModal() {
                     const noCrits     = isRepair && ship.criticalHits.length === 0
                     const sensorBlocked = noPower && SENSOR_ACTIONS.includes(action.id)
                     const nebulaBlocked = action.id === 'sensor_lock' && (actorInNebula || targetInNebula)
-                    const disabled    = noCrits || sensorBlocked || nebulaBlocked
+                    const chaffBlocked = action.id === 'deploy_chaff' && !canDeployChaff
+                    const disabled    = noCrits || sensorBlocked || nebulaBlocked || chaffBlocked
                     return (
                       <button
                         key={action.id}
@@ -391,6 +408,7 @@ export function ActionModal() {
                         {noCrits       && <span className="ml-2 text-slate-600">— no criticals</span>}
                         {sensorBlocked && <span className="ml-2 text-red-800">— ⚡ power offline</span>}
                         {nebulaBlocked && <span className="ml-2 text-sky-700">— ☁ nebula interference</span>}
+                        {chaffBlocked  && <span className="ml-2 text-slate-600">— no free sandcaster / canister, or chaff already out</span>}
                       </button>
                     )
                   })}
@@ -502,6 +520,12 @@ export function ActionModal() {
                 {isRepairAction && selectedCrit
                   ? `Engineer check (${repairDifficultyLabel(selectedCrit.severity)}). Success: removes ${selectedCrit.system} Sev.${selectedCrit.severity}. // MgT2e CRB p.167`
                   : selectedAction.description}
+              </p>
+            )}
+
+            {chaffPenaltyDM !== 0 && (
+              <p className="text-amber-400/80 font-mono text-xs">
+                ☁ {targetShip.name} is inside a chaff cloud — DM{chaffPenaltyDM} to this check (HG p.38)
               </p>
             )}
 
