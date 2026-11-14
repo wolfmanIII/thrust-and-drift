@@ -5,7 +5,7 @@
  * @see MgT2e CRB p.175 (abstract resolution, not used here)
  */
 
-import { roll2D6 } from './dice.js'
+import { roll2D6, rollDice } from './dice.js'
 
 // ---------------------------------------------------------------------------
 // Entry methods — Phase 2 Contact
@@ -202,4 +202,49 @@ export function getWeaponSpaceDM(weaponClass) {
   if (weaponClass === 'rifle') return -2
   if (weaponClass === 'heavy') return -4
   return 0
+}
+
+// ---------------------------------------------------------------------------
+// Sandcaster canisters vs. boarding parties — Phase 2 Contact
+// ---------------------------------------------------------------------------
+
+/**
+ * Canister rounds a sandcaster can direct at an incoming boarding party.
+ * Damage is Ground scale (not multiplied by the Spacecraft scale) and is rolled
+ * once for each target in the party.
+ * `multiplier` is the Destructive (DD) ×10 applied to the total rolled.
+ * @type {Record<'sand'|'pebble', { label: string, diceCount: number, multiplier: number, source: string }>}
+ */
+export const BOARDER_CANISTERS = {
+  // MgT2e CRB p.171 — Disperse Sand: "each target in the boarding party suffers 8D point of damage at Ground scale (so do not multiply it)"
+  sand:   { label: 'Sand',   diceCount: 8, multiplier: 1,  source: 'CRB p.171' },
+  // MgT2e HG p.38 — Pebble Canister: "1DD damage (Ground scale)"; CRB p.78 — Destructive multiplies the total rolled by 10
+  pebble: { label: 'Pebble', diceCount: 1, multiplier: 10, source: 'HG p.38, CRB p.78' },
+}
+
+/**
+ * Gunner (turret) check against an incoming boarding party: 2D6 + Gunner ≥ 8 (Average).
+ * Difficulty is not stated for this use of Disperse Sand; Average matches the laser reaction.
+ * // MgT2e CRB p.171
+ * @param {number} diceTotal  2D6 total
+ * @param {number} gunnerSkill
+ * @returns {{ total: number, effect: number, success: boolean }}
+ */
+export function resolveBoarderCanisterCheck(diceTotal, gunnerSkill) {
+  const total  = diceTotal + gunnerSkill
+  const effect = total - 8
+  return { total, effect, success: effect >= 0 }
+}
+
+/**
+ * Roll Ground-scale canister damage for one target in the boarding party.
+ * @param {'sand'|'pebble'} type
+ * @param {(n: number, sides: number) => { results: number[], total: number }} [rng]  injectable for tests
+ * @returns {{ results: number[], total: number, damage: number }}
+ */
+export function rollBoarderCanisterDamage(type, rng = rollDice) {
+  const canister = BOARDER_CANISTERS[type]
+  if (!canister) throw new Error(`Unknown boarder canister type: ${type}`)
+  const { results, total } = rng(canister.diceCount, 6)
+  return { results, total, damage: total * canister.multiplier }
 }

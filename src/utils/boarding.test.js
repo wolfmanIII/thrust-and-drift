@@ -2,7 +2,7 @@
  * Tests for boarding.js utility functions.
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   getHullResilience,
   cuttingDamage,
@@ -10,6 +10,9 @@ import {
   rollMissedShot,
   getContactDM,
   getWeaponSpaceDM,
+  BOARDER_CANISTERS,
+  resolveBoarderCanisterCheck,
+  rollBoarderCanisterDamage,
   ENTRY_METHODS,
   CUT_TOOLS,
 } from './boarding.js'
@@ -179,5 +182,55 @@ describe('CUT_TOOLS', () => {
   it('assault cutter has highest cutRate', () => {
     const rates = Object.values(CUT_TOOLS).map((t) => t.cutRate)
     expect(CUT_TOOLS.assault.cutRate).toBe(Math.max(...rates))
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Sandcaster canisters vs. boarders — CRB p.171, HG p.38, CRB p.78
+// ---------------------------------------------------------------------------
+
+describe('BOARDER_CANISTERS', () => {
+  it('sand is 8D Ground scale, not multiplied (CRB p.171)', () => {
+    expect(BOARDER_CANISTERS.sand).toMatchObject({ diceCount: 8, multiplier: 1 })
+  })
+  it('pebble is 1DD = 1D x10 (HG p.38, CRB p.78)', () => {
+    expect(BOARDER_CANISTERS.pebble).toMatchObject({ diceCount: 1, multiplier: 10 })
+  })
+})
+
+describe('resolveBoarderCanisterCheck', () => {
+  it('succeeds at exactly 8 with effect 0', () => {
+    expect(resolveBoarderCanisterCheck(6, 2)).toEqual({ total: 8, effect: 0, success: true })
+  })
+  it('fails below 8', () => {
+    expect(resolveBoarderCanisterCheck(5, 2)).toEqual({ total: 7, effect: -1, success: false })
+  })
+  it('adds Gunner skill, including negative untrained value', () => {
+    expect(resolveBoarderCanisterCheck(10, -3)).toEqual({ total: 7, effect: -1, success: false })
+  })
+})
+
+describe('rollBoarderCanisterDamage', () => {
+  const fixed = (results) => () => ({ results, total: results.reduce((a, b) => a + b, 0) })
+
+  it('sand sums 8 dice with no multiplier', () => {
+    const r = rollBoarderCanisterDamage('sand', fixed([1, 2, 3, 4, 5, 6, 1, 2]))
+    expect(r.total).toBe(24)
+    expect(r.damage).toBe(24)
+  })
+  it('pebble multiplies the single die by 10', () => {
+    const r = rollBoarderCanisterDamage('pebble', fixed([4]))
+    expect(r.total).toBe(4)
+    expect(r.damage).toBe(40)
+  })
+  it('requests the right dice count', () => {
+    const rng = vi.fn(() => ({ results: [1], total: 1 }))
+    rollBoarderCanisterDamage('sand', rng)
+    expect(rng).toHaveBeenCalledWith(8, 6)
+    rollBoarderCanisterDamage('pebble', rng)
+    expect(rng).toHaveBeenLastCalledWith(1, 6)
+  })
+  it('unknown type throws', () => {
+    expect(() => rollBoarderCanisterDamage('nuke')).toThrow('Unknown boarder canister type')
   })
 })
