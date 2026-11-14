@@ -674,6 +674,7 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="Forced Linkage" v="Pilot (DEX) 8+ — DM +2 to all Contact checks. Locks defender movement." />
             <KV k="Hull Cut" v="Mechanic (DEX) 8+/round — reduces component Resilience until breach. 🚨 Decompression risk." />
             <p>Modifiers: <span className="text-red-400">🌀 Tumbling</span> (DM −1 — click the Tumbling button; roll Pilot DEX Routine 6+, then select D3 result 1–3 rounds; app auto-clears when rounds expire) · <span className="text-emerald-400">🔗 Forced Linkage</span> (DM +2)</p>
+            <KV k="Sandcaster vs boarders" v="Contact phase only, defender side. Gunner (turret) 8+ with an unfired sandcaster. On a hit each boarder takes Ground-scale damage, rolled per boarder: Sand 8D (CRB p.171) · Pebble 1DD = 1D×10 (HG p.38). Spends 1 canister and marks the slot fired. The GM applies END/armour and rules the outcome." />
           </Sub>
 
           <Sub title="PHASE 3 — CONFLICT">

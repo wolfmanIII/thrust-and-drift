@@ -161,6 +161,20 @@ Ogni round, lo strumento riduce la **Resilienza** del componente bersaglio di:
 
 > ⚠️ **Decompressione:** Tagliare uno scafo o un portello senza che il compartimento sia stato evacuato può causare **decompressione esplosiva**. Le navi militari evacuano i comparti prima dell'azione; le navi civili spesso no.
 
+### 3.6 Sandcaster contro i Boarder
+
+Il difensore può puntare un sandcaster contro la squadra d'abbordaggio **in avvicinamento**: solo in fase Contatto, perché una volta dentro lo scafo la squadra è fuori portata.
+
+- **Check:** Gunner (turret), Average (8+) — 2D6 + Gunner. Il Core non indica la difficoltà per questo uso; si adotta Average come per Disperse Sand contro i laser.
+- **Successo:** *ogni bersaglio della squadra* subisce danno a **scala Ground** (non si moltiplica per la scala astronave), tirato **separatamente per ogni boarder**:
+
+| Canister | Danno per boarder | Fonte |
+|---|---|---|
+| Sand | 8D | CR p.171 (Disperse Sand) |
+| Pebble | 1DD = 1D × 10 | HG p.38; Destructive: CR p.78 |
+
+- Costo: **1 canister** dalla scorta del sandcaster; la torretta è segnata come sparata.
+- T&D non modella i singoli boarder (numero, END, armatura): il GM sottrae END/armatura e decide l'esito. Nessuna regola della casa — il numero di boarder fermati non è definito dal RAW.
 ---
 
 ## 4. Fase 3 — Conflitto

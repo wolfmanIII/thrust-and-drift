@@ -755,6 +755,15 @@ penalised. RAW gives no duration: the cloud lasts **1 round**, like sand. A
 canister comes from the same sandcaster stock as Disperse Sand and the
 sandcaster is marked fired, so one sandcaster cannot do both in the same round.
 
+**Sandcaster vs boarders** *(CRB p.171, HG p.38)*: in the **Contact** modal
+the defender can fire a sandcaster at the incoming boarding party. Gunner
+(turret) check 2D6 + Gunner, Average (8+) — RAW gives no difficulty for this
+use, so it matches Disperse Sand against lasers. On a hit **each boarder** takes
+Ground-scale damage, rolled per boarder: **Sand 8D** (not multiplied) or
+**Pebble 1DD = 1D×10** (Destructive ×10, CRB p.78). One canister is spent and
+the turret is marked fired. T&D does not track individual boarders, so the GM
+subtracts END/armour and rules the outcome.
+
 ### 9.10 Special Weapon Mechanics
 
 #### AP (Armour Piercing) Trait

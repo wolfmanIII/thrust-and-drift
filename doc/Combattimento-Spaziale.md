@@ -299,7 +299,7 @@ Formula: **2D6 + Gunner(turret) + DM DEX**
 
 Se il check ha successo, per quell'attacco laser l'armatura della nave aumenta di **1D + Effetto del check** [+ 1 per ogni sandcaster aggiuntivo].
 
-> I sandcaster possono essere usati anche contro gruppi di abbordaggio in arrivo: se il check ha successo, ogni membro del gruppo subisce **8D danni** (scala Ground — non moltiplicare per 10).
+> **Contro i boarder (CR p.171, HG p.38):** il sandcaster può essere puntato anche contro una squadra d'abbordaggio in arrivo. Se il check ha successo ogni boarder subisce danno a scala Ground (non si moltiplica per la scala astronave), tirato per ciascuno: **8D** con sand, **1DD (1D×10)** con pebble canister. Vedi *Abbordaggio High Guard* §3.6.
 
 ---
 
