@@ -11,6 +11,7 @@ import { Modal }          from './Modal.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore }     from '../../store/uiStore.js'
 import { rollStackingCheck, rollMissedShot } from '../../utils/boarding.js'
+import { BoardingRosterPanel } from './BoardingRosterPanel.jsx'
 
 // ---------------------------------------------------------------------------
 // Objective row
@@ -85,6 +86,7 @@ export function BoardingConflictModal() {
   const [stackResult, setStackResult]   = useState(null)
   const [missedResult, setMissedResult] = useState(null)
   const [armoredBulkhead, setArmoredBulkhead] = useState(false)
+  const [damageTarget, setDamageTarget] = useState(null)
 
   const isOpen = activeModal === 'boarding-conflict'
   if (!isOpen) return null
@@ -140,6 +142,15 @@ export function BoardingConflictModal() {
             </p>
           )}
         </div>
+
+        {/* GM-defined rosters for both sides (CRB p.77, HG p.132) */}
+        <BoardingRosterPanel
+          boarding={boarding}
+          attackerName={attacker.name}
+          defenderName={defender.name}
+          damageTarget={damageTarget}
+          setDamageTarget={setDamageTarget}
+        />
 
         {/* Stacking check */}
         <div className="bg-slate-800/60 rounded px-3 py-2.5 space-y-2">

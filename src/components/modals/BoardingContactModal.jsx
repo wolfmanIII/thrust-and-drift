@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { Modal }          from './Modal.jsx'
 import { BoarderCanisterPanel } from './BoarderCanisterPanel.jsx'
+import { BoardingRosterPanel } from './BoardingRosterPanel.jsx'
 import { DiceInput }      from '../forms/DiceInput.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore }     from '../../store/uiStore.js'
@@ -207,6 +208,7 @@ export function BoardingContactModal() {
   } = useBattleStore()
 
   const [dice, setDice] = useState(null)
+  const [damageTarget, setDamageTarget] = useState(null)
 
   const isOpen = activeModal === 'boarding-contact'
   if (!isOpen) return null
@@ -340,6 +342,15 @@ export function BoardingContactModal() {
             onDamage={handleApplyCutDamage}
           />
         )}
+
+        {/* GM-defined rosters for both sides (CRB p.77, HG p.132) */}
+        <BoardingRosterPanel
+          boarding={boarding}
+          attackerName={attacker.name}
+          defenderName={defender.name}
+          damageTarget={damageTarget}
+          setDamageTarget={setDamageTarget}
+        />
 
         {/* Defender sandcaster fire at the incoming party (CRB p.171, HG p.38) */}
         <BoarderCanisterPanel boarding={boarding} defender={defender} />
