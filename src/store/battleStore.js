@@ -14,6 +14,7 @@ import { getCriticalLocation, getCriticalEffect } from '../data/criticalHits.js'
 import { roll2D6, rollDice } from '../utils/dice.js'
 import { getEffectiveSkill, buildDefaultAssignments } from '../utils/crew.js'
 import { resolveDogfightChecks } from '../utils/dogfight.js'
+import { BOARDER_CANISTERS } from '../utils/boarding.js'
 import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST } from '../data/rangeBands.js'
 import { useUiStore } from './uiStore.js'
 import { emitEffect } from '../utils/effectQueue.js'
@@ -2078,6 +2079,58 @@ const useBattleStore = create((set, get) => {
         boardings: s.boardings.map((b) =>
           b.id !== boardingId ? b : { ...b, forcedLinkage: !b.forcedLinkage }
         ),
+      }))
+    },
+  ),
+
+  /**
+   * Defender fires a sandcaster canister at the incoming boarding party (Contact phase only —
+   * once inside the hull the party is out of the caster's reach). Marks the turret fired,
+   * spends one canister from the shared sandcaster stock and logs the check outcome.
+   * Ground-scale damage per target is rolled by the caller (see rollBoarderCanisterDamage).
+   * // MgT2e CRB p.171 (sand), HG p.38 (pebble)
+   * @param {string} boardingId
+   * @param {'sand'|'pebble'} canisterType
+   * @param {number} turretSlot  Defender's Sandcaster turret slot
+   * @param {{ total: number, effect: number, success: boolean }} check  Gunner (turret) check result
+   */
+  fireBoarderCanister: wh(
+    (boardingId, canisterType, turretSlot) => {
+      const { boardings, ships } = get()
+      const boarding = boardings.find((b) => b.id === boardingId)
+      if (!boarding || boarding.phase !== 'contact' || boarding.outcome !== null) return false
+      if (!BOARDER_CANISTERS[canisterType]) return false
+      const defender = ships.find((x) => x.id === boarding.defenderId)
+      if (!defender) return false
+      if ((defender.sandAmmoTotal ?? countSandcasters(defender.profile)) <= 0) return false
+      if ((defender.firedTurrets ?? []).includes(turretSlot)) return false
+      return (defender.profile.turrets ?? []).some(
+        (t) => t.slot === turretSlot && t.weapons?.includes('Sandcaster')
+      )
+    },
+    (boardingId, canisterType, turretSlot, check) => {
+      const boarding = get().boardings.find((b) => b.id === boardingId)
+      const defender = get().ships.find((x) => x.id === boarding.defenderId)
+      const canister = BOARDER_CANISTERS[canisterType]
+      set((s) => ({
+        ships: s.ships.map((sh) => sh.id !== defender.id ? sh : {
+          ...sh,
+          firedTurrets: [...new Set([...(sh.firedTurrets ?? []), turretSlot])],
+          sandAmmoTotal: Math.max(0, (sh.sandAmmoTotal ?? countSandcasters(sh.profile)) - 1),
+        }),
+        boardings: s.boardings.map((b) => b.id !== boardingId ? b : {
+          ...b,
+          canisterAttacks: [...(b.canisterAttacks ?? []), {
+            type: canisterType, turretSlot, total: check.total, effect: check.effect, success: check.success,
+          }],
+        }),
+        log: [...s.log, makeLogEntry({
+          round: s.round,
+          phase: s.phase,
+          type: 'action',
+          message: `${defender.name} fires ${canister.label} canister (T${turretSlot}) at the boarding party: total ${check.total} — ${check.success ? 'HIT, each boarder takes Ground-scale damage' : 'MISS'}. (${canister.source})`,
+          shipId: defender.id,
+        })],
       }))
     },
   ),

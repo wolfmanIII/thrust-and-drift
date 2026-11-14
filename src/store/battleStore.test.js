@@ -2590,6 +2590,77 @@ describe('deployChaff', () => {
   })
 })
 
+// === FIRE BOARDER CANISTER ===
+// // MgT2e CRB p.171, HG p.38
+
+describe('fireBoarderCanister', () => {
+  const hit  = { total: 10, effect: 2,  success: true }
+  const miss = { total: 6,  effect: -2, success: false }
+
+  function setup(turrets = [{ slot: 1, weapons: ['Sandcaster'] }]) {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'Raider' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'Trader', turrets }), { q: 1, r: 0 }, 'npc', '#f00')
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().startBoarding(a.id, b.id)
+    return { boardingId: useBattleStore.getState().boardings[0].id, defenderId: b.id }
+  }
+  const defender = (id) => useBattleStore.getState().ships.find((s) => s.id === id)
+
+  it('spends a canister, fires the turret, records the attack and logs it', () => {
+    const { boardingId, defenderId } = setup()
+    useBattleStore.getState().fireBoarderCanister(boardingId, 'pebble', 1, hit)
+    expect(defender(defenderId).sandAmmoTotal).toBe(19)
+    expect(defender(defenderId).firedTurrets).toEqual([1])
+    expect(useBattleStore.getState().boardings[0].canisterAttacks).toEqual([
+      { type: 'pebble', turretSlot: 1, total: 10, effect: 2, success: true },
+    ])
+    expect(useBattleStore.getState().log.at(-1).message).toContain('Pebble canister')
+  })
+
+  it('a miss still spends the canister and the turret', () => {
+    const { boardingId, defenderId } = setup()
+    useBattleStore.getState().fireBoarderCanister(boardingId, 'sand', 1, miss)
+    expect(defender(defenderId).sandAmmoTotal).toBe(19)
+    expect(useBattleStore.getState().log.at(-1).message).toContain('MISS')
+  })
+
+  it('no-op when the turret already fired', () => {
+    const { boardingId, defenderId } = setup()
+    useBattleStore.getState().markTurretFired(defenderId, 1)
+    useBattleStore.getState().fireBoarderCanister(boardingId, 'sand', 1, hit)
+    expect(defender(defenderId).sandAmmoTotal).toBe(20)
+    expect(useBattleStore.getState().boardings[0].canisterAttacks).toBeUndefined()
+  })
+
+  it('no-op when the slot is not a Sandcaster', () => {
+    const { boardingId, defenderId } = setup([{ slot: 1, weapons: ['Pulse Laser'] }])
+    useBattleStore.getState().fireBoarderCanister(boardingId, 'sand', 1, hit)
+    expect(defender(defenderId).sandAmmoTotal).toBe(0)
+    expect(defender(defenderId).firedTurrets).toEqual([])
+  })
+
+  it('no-op when no canisters are left', () => {
+    const { boardingId, defenderId } = setup()
+    useBattleStore.getState().updateShip(defenderId, { sandAmmoTotal: 0 })
+    useBattleStore.getState().fireBoarderCanister(boardingId, 'sand', 1, hit)
+    expect(defender(defenderId).firedTurrets).toEqual([])
+  })
+
+  it('no-op outside the Contact phase', () => {
+    const { boardingId, defenderId } = setup()
+    useBattleStore.getState().advanceBoardingPhase(boardingId)
+    useBattleStore.getState().fireBoarderCanister(boardingId, 'sand', 1, hit)
+    expect(defender(defenderId).sandAmmoTotal).toBe(20)
+  })
+
+  it('no-op for unknown canister type or boarding', () => {
+    const { boardingId, defenderId } = setup()
+    useBattleStore.getState().fireBoarderCanister(boardingId, 'nuke', 1, hit)
+    expect(() => useBattleStore.getState().fireBoarderCanister('ghost', 'sand', 1, hit)).not.toThrow()
+    expect(defender(defenderId).sandAmmoTotal).toBe(20)
+  })
+})
+
 // === MISSILE AMMO — BARBETTES AND TORPEDOES ===
 // // MgT2e HG p.30–31
 
