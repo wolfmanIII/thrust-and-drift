@@ -2,8 +2,8 @@
  * Tests for BoardingConflictModal.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { BoardingConflictModal } from './BoardingConflictModal.jsx'
 import { useBattleStore }        from '../../store/battleStore.js'
 import { useUiStore }            from '../../store/uiStore.js'
@@ -121,5 +121,113 @@ describe('BoardingConflictModal — actions', () => {
     fireEvent.click(screen.getByText(/END CONFLICT/i))
     expect(useBattleStore.getState().boardings.find((b) => b.id === bid).phase).toBe('security')
     expect(useUiStore.getState().activeModal).toBeNull()
+  })
+})
+
+// === Targets from the rosters — HG pp.132–133 ===
+
+describe('BoardingConflictModal — roster targeting', () => {
+  const stat = { str: 7, dex: 7, end: 7 }
+
+  function seed(bid) {
+    const s = useBattleStore.getState()
+    s.addBoarders(bid, 'attacker', [{ name: 'Raider A', ...stat }, { name: 'Raider B', ...stat }])
+    s.addBoarders(bid, 'defender', [{ name: 'Guard A', ...stat }, { name: 'Guard B', ...stat }])
+  }
+
+  afterEach(() => { vi.restoreAllMocks() })
+
+  it('shows the front of the target line and switches with the firing side', () => {
+    const { bid } = setupConflict()
+    seed(bid)
+    render(<BoardingConflictModal />)
+    expect(screen.getByText(/Front of the defenders/)).toBeTruthy()
+    expect(screen.getByText('Guard A')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'DEFENDERS' }))
+    expect(screen.getByText(/Front of the boarders/)).toBeTruthy()
+    expect(screen.getByText('Raider A')).toBeTruthy()
+  })
+
+  it('stack hit of 9 or less picks the first in the stack', () => {
+    const { bid } = setupConflict()
+    seed(bid)
+    vi.spyOn(Math, 'random').mockReturnValue(0)       // 1 + 1 = 2
+    render(<BoardingConflictModal />)
+    fireEvent.click(screen.getByText('ROLL STACK HIT'))
+    const target = within(screen.getByTestId('conflict-target'))
+    expect(target.getByText(/First in the stack/)).toBeTruthy()
+    expect(target.getByText(/Guard A/)).toBeTruthy()
+  })
+
+  it('stack hit of 10–12 picks another member', () => {
+    const { bid } = setupConflict()
+    seed(bid)
+    vi.spyOn(Math, 'random').mockReturnValue(0.99)    // 6 + 6 = 12
+    render(<BoardingConflictModal />)
+    fireEvent.click(screen.getByText('ROLL STACK HIT'))
+    const target = within(screen.getByTestId('conflict-target'))
+    expect(target.getByText(/Another member/)).toBeTruthy()
+    expect(target.getByText(/Guard B/)).toBeTruthy()
+  })
+
+  it('DAMAGE on a resolved target opens the roster damage form and applies it', () => {
+    const { bid } = setupConflict()
+    seed(bid)
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    render(<BoardingConflictModal />)
+    fireEvent.click(screen.getByText('ROLL STACK HIT'))
+    fireEvent.click(screen.getByRole('button', { name: 'DAMAGE' }))
+    fireEvent.change(screen.getByLabelText('Damage'), { target: { value: '4' } })
+    fireEvent.click(screen.getByRole('button', { name: 'APPLY DAMAGE' }))
+    const guard = useBattleStore.getState().boardings[0].parties.defender[0]
+    expect(guard.cur.end).toBe(3)
+  })
+
+  it('missed shot 1–3 hits a member of the firing group', () => {
+    const { bid } = setupConflict()
+    seed(bid)
+    vi.spyOn(Math, 'random').mockReturnValue(0)       // 2 → attacker_hit
+    render(<BoardingConflictModal />)
+    fireEvent.click(screen.getByText(/ROLL MISSED SHOT/i))
+    const target = within(screen.getByTestId('conflict-target'))
+    expect(target.getByText(/Raider A/)).toBeTruthy()
+    expect(target.getByText(/boarders\)/)).toBeTruthy()
+  })
+
+  it('missed shot 1–3 follows the firing side when the defenders shoot', () => {
+    const { bid } = setupConflict()
+    seed(bid)
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    render(<BoardingConflictModal />)
+    fireEvent.click(screen.getByRole('button', { name: 'DEFENDERS' }))
+    fireEvent.click(screen.getByText(/ROLL MISSED SHOT/i))
+    expect(within(screen.getByTestId('conflict-target')).getByText(/Guard A/)).toBeTruthy()
+  })
+
+  it('missed shot 4–5 hits the opposing group', () => {
+    const { bid } = setupConflict()
+    seed(bid)
+    // 2D = 2 + 2 → 4: Math.random = 0.2 → floor(0.2*6)+1 = 2 per die
+    vi.spyOn(Math, 'random').mockReturnValue(0.2)
+    render(<BoardingConflictModal />)
+    fireEvent.click(screen.getByText(/ROLL MISSED SHOT/i))
+    expect(within(screen.getByTestId('conflict-target')).getByText(/Guard/)).toBeTruthy()
+  })
+
+  it('system or no-effect results show no target', () => {
+    const { bid } = setupConflict()
+    seed(bid)
+    vi.spyOn(Math, 'random').mockReturnValue(0.99)    // 12 → critical system
+    render(<BoardingConflictModal />)
+    fireEvent.click(screen.getByText(/ROLL MISSED SHOT/i))
+    expect(screen.queryByTestId('conflict-target')).toBeNull()
+  })
+
+  it('tells the GM to resolve manually when the group has no living boarders', () => {
+    setupConflict()
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    render(<BoardingConflictModal />)
+    fireEvent.click(screen.getByText('ROLL STACK HIT'))
+    expect(screen.getByText(/resolve manually/)).toBeTruthy()
   })
 })

@@ -12,6 +12,7 @@ import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore }     from '../../store/uiStore.js'
 import { rollStackingCheck, rollMissedShot } from '../../utils/boarding.js'
 import { BoardingRosterPanel } from './BoardingRosterPanel.jsx'
+import { useConflictTargeting } from './useConflictTargeting.js'
 
 // ---------------------------------------------------------------------------
 // Objective row
@@ -70,6 +71,43 @@ function RollResult({ result }) {
 }
 
 // ---------------------------------------------------------------------------
+// Resolved target from the rosters
+// ---------------------------------------------------------------------------
+
+/**
+ * @param {{
+ *   dice?: string,
+ *   heading: string,
+ *   side: 'attacker'|'defender',
+ *   boarder: { id: string, name: string }|null,
+ *   onDamage: (t: { side: string, boarderId: string }) => void,
+ * }} props
+ */
+function TargetResult({ dice, heading, side, boarder, onDamage }) {
+  return (
+    <div className="bg-slate-900/60 rounded px-3 py-2 space-y-1" data-testid="conflict-target">
+      {dice && <p className="text-slate-400 font-mono text-2xs">Dice: {dice}</p>}
+      <p className="text-slate-300 font-mono text-xs">{heading}</p>
+      {boarder ? (
+        <div className="flex items-center gap-2">
+          <span className="text-amber-400 font-mono text-xs font-bold flex-1 truncate">
+            {boarder.name} <span className="text-slate-400 font-normal">({side === 'attacker' ? 'boarders' : 'defenders'})</span>
+          </span>
+          <button
+            onClick={() => onDamage({ side, boarderId: boarder.id })}
+            className="px-2 py-0.5 bg-red-900/30 border border-red-500 text-red-400 hover:bg-red-900/50 font-mono text-2xs rounded transition-colors"
+          >
+            DAMAGE
+          </button>
+        </div>
+      ) : (
+        <p className="text-slate-400 font-mono text-2xs">No living boarders defined on that side — resolve manually.</p>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
@@ -81,15 +119,9 @@ const OBJECTIVES = [
 
 export function BoardingConflictModal() {
   const { activeModal, modalPayload, closeModal } = useUiStore()
-  const { ships, boardings, setObjective, advanceBoardingPhase } = useBattleStore()
+  const { ships, boardings } = useBattleStore()
 
-  const [stackResult, setStackResult]   = useState(null)
-  const [missedResult, setMissedResult] = useState(null)
-  const [armoredBulkhead, setArmoredBulkhead] = useState(false)
-  const [damageTarget, setDamageTarget] = useState(null)
-
-  const isOpen = activeModal === 'boarding-conflict'
-  if (!isOpen) return null
+  if (activeModal !== 'boarding-conflict') return null
 
   const boarding = boardings.find(
     (b) => b.id === modalPayload?.boardingId && b.phase === 'conflict' && b.outcome === null,
@@ -99,6 +131,19 @@ export function BoardingConflictModal() {
   const attacker = ships.find((s) => s.id === boarding.attackerId)
   const defender = ships.find((s) => s.id === boarding.defenderId)
   if (!attacker || !defender) return null
+
+  return <ConflictBody boarding={boarding} attacker={attacker} defender={defender} closeModal={closeModal} />
+}
+
+/** Conflict phase content. Split from the guard above so the targeting hook runs unconditionally. */
+function ConflictBody({ boarding, attacker, defender, closeModal }) {
+  const { setObjective, advanceBoardingPhase } = useBattleStore()
+
+  const [stackResult, setStackResult]   = useState(null)
+  const [missedResult, setMissedResult] = useState(null)
+  const [armoredBulkhead, setArmoredBulkhead] = useState(false)
+  const [damageTarget, setDamageTarget] = useState(null)
+  const targeting = useConflictTargeting(boarding)
 
   const allConquered = OBJECTIVES.every((o) => boarding.objectives[o.key])
 
@@ -152,13 +197,38 @@ export function BoardingConflictModal() {
           setDamageTarget={setDamageTarget}
         />
 
+        {/* Firing side — decides which group is hit by stacking and missed shots */}
+        <div className="bg-slate-800/60 rounded px-3 py-2.5 space-y-1.5">
+          <p className="text-slate-400 font-mono text-xs uppercase font-bold">Shots fired by</p>
+          <div className="flex gap-2">
+            {[['attacker', 'BOARDERS'], ['defender', 'DEFENDERS']].map(([side, label]) => (
+              <button
+                key={side}
+                onClick={() => targeting.chooseFiringSide(side)}
+                aria-pressed={targeting.firingSide === side}
+                className={`flex-1 py-1 font-mono text-xs rounded border transition-colors ${
+                  targeting.firingSide === side
+                    ? 'bg-(--neon-cyan)/10 border-(--neon-cyan) text-(--neon-cyan)'
+                    : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-400'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="text-slate-400 font-mono text-2xs">
+            Front of the {targeting.targetSide === 'attacker' ? 'boarders' : 'defenders'}&apos; line:{' '}
+            <span className="text-slate-200">{targeting.frontOfLine?.name ?? '— none defined —'}</span>
+          </p>
+        </div>
+
         {/* Stacking check */}
         <div className="bg-slate-800/60 rounded px-3 py-2.5 space-y-2">
           <p className="text-slate-400 font-mono text-xs uppercase font-bold">
             Stacking — targeting non-first combatant
           </p>
           <p className="text-slate-400 font-mono text-2xs">
-            Roll 2D ≥ 10, else first in line becomes the target. (HG p.131)
+            To aim at anyone but the front target roll 2D ≥ 10, else the front of the line becomes the target. (HG p.132)
           </p>
           <button
             onClick={() => setStackResult(rollStackingCheck())}
@@ -176,6 +246,25 @@ export function BoardingConflictModal() {
                 : `✗ Failure (${stackResult.total}) — first in line becomes the target`,
             }} />
           )}
+
+          <p className="text-slate-400 font-mono text-2xs pt-1">
+            Un-aimed attack that hit: roll 2D — 9 or less hits the first in the stack, 10–12 another member. (HG p.132)
+          </p>
+          <button
+            onClick={targeting.rollStackHit}
+            className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-slate-200 font-mono text-xs rounded transition-colors"
+          >
+            ROLL STACK HIT
+          </button>
+          {targeting.stackHit && (
+            <TargetResult
+              dice={`[${targeting.stackHit.results.join(', ')}] → ${targeting.stackHit.total}`}
+              heading={targeting.stackHit.total <= 9 ? 'First in the stack is hit' : 'Another member of the group is hit'}
+              side={targeting.stackHit.side}
+              boarder={targeting.stackHit.boarder}
+              onDamage={setDamageTarget}
+            />
+          )}
         </div>
 
         {/* Missed shot table */}
@@ -184,7 +273,7 @@ export function BoardingConflictModal() {
             Missed shot — where does the bullet go?
           </p>
           <p className="text-slate-400 font-mono text-2xs">
-            Every missed attack rolls 2D on this table. (HG p.132)
+            Every missed attack rolls 2D on this table. (HG p.133)
           </p>
           <label className="flex items-center gap-2 text-slate-400 font-mono text-xs cursor-pointer">
             <input
@@ -196,12 +285,24 @@ export function BoardingConflictModal() {
             Armored bulkhead (DM −1)
           </label>
           <button
-            onClick={() => setMissedResult(rollMissedShot(armoredBulkhead))}
+            onClick={() => {
+              const result = rollMissedShot(armoredBulkhead)
+              setMissedResult(result)
+              targeting.resolveMissedShot(result.outcome)
+            }}
             className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 border border-slate-500 text-slate-200 font-mono text-xs rounded transition-colors"
           >
             ROLL MISSED SHOT
           </button>
           {missedResult && <RollResult result={missedResult} />}
+          {missedResult && targeting.missedMember && (
+            <TargetResult
+              heading="Random member struck — roll 8+ to hit"
+              side={targeting.missedMember.side}
+              boarder={targeting.missedMember.boarder}
+              onDamage={setDamageTarget}
+            />
+          )}
         </div>
 
         {/* Weapon DM reminder */}
