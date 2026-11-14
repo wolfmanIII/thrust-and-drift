@@ -12,7 +12,7 @@ import { getStackOrder, pickStackTarget, pickRandomMember } from '../../utils/bo
 const EMPTY_PARTIES = { attacker: [], defender: [] }
 
 /**
- * @param {object} boarding
+ * @param {object|undefined} boarding  undefined while no boarding is open (hooks run unconditionally)
  * @returns {{
  *   firingSide: 'attacker'|'defender',
  *   targetSide: 'attacker'|'defender',
@@ -29,7 +29,7 @@ export function useConflictTargeting(boarding) {
   const [stackHit, setStackHit]           = useState(null)
   const [missedMember, setMissedMember]   = useState(null)
 
-  const parties    = boarding.parties ?? EMPTY_PARTIES
+  const parties    = boarding?.parties ?? EMPTY_PARTIES
   const targetSide = firingSide === 'attacker' ? 'defender' : 'attacker'
 
   const chooseFiringSide = (side) => {

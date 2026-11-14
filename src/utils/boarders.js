@@ -21,6 +21,9 @@ import { v7 as uuidv7 } from 'uuid'
  * }} Boarder
  */
 
+/** Largest batch of boarders added in one go. */
+export const MAX_BOARDER_BATCH = 20
+
 const isPositiveInt    = (n) => Number.isInteger(n) && n >= 1
 const isNonNegativeInt = (n) => Number.isInteger(n) && n >= 0
 
@@ -171,10 +174,11 @@ export function pickRandomMember(party, rng = Math.random) {
 export function getCasualtyStats(party) {
   const total = party.length
   const down  = party.filter((b) => getBoarderStatus(b) !== 'ok').length
-  const ratio = total === 0 ? 0 : (down / total) * 100
+  // Integer arithmetic: the shown percentage and the threshold always agree (29.6% is 29%, not 30%).
+  const pct = total === 0 ? 0 : Math.floor((down * 100) / total)
   let moraleTarget = null
-  if (ratio >= 60) moraleTarget = 12
-  else if (ratio >= 30) moraleTarget = 10
-  else if (ratio >= 10) moraleTarget = 8
-  return { total, down, pct: Math.round(ratio), moraleTarget }
+  if (pct >= 60) moraleTarget = 12
+  else if (pct >= 30) moraleTarget = 10
+  else if (pct >= 10) moraleTarget = 8
+  return { total, down, pct, moraleTarget }
 }

@@ -126,7 +126,10 @@ function PartySection({ side, title, boarding, damageTarget, setDamageTarget }) 
                   <button className={smallBtn} aria-label={`Move ${b.name} down`} disabled={i === party.length - 1} onClick={() => reorderBoarder(boarding.id, side, b.id, 1)}>↓</button>
                   <button className={smallBtn} aria-label={`Damage ${b.name}`} disabled={status === 'dead'} onClick={() => setDamageTarget({ side, boarderId: b.id })}>DMG</button>
                   <button className={smallBtn} aria-label={`Edit ${b.name}`} onClick={() => setEditingId(b.id)}>✎</button>
-                  <button className={smallBtn} aria-label={`Remove ${b.name}`} onClick={() => removeBoarder(boarding.id, side, b.id)}>✕</button>
+                  <button className={smallBtn} aria-label={`Remove ${b.name}`} onClick={() => {
+                    if (damageTarget?.boarderId === b.id) setDamageTarget(null)
+                    removeBoarder(boarding.id, side, b.id)
+                  }}>✕</button>
                 </div>
               )}
             </li>
@@ -159,32 +162,42 @@ function PartySection({ side, title, boarding, damageTarget, setDamageTarget }) 
 }
 
 /**
+ * `damageTarget`/`setDamageTarget` are optional: pass them to drive the damage form from outside
+ * (Conflict targets); otherwise the panel keeps its own, which is dropped when the modal closes.
  * @param {{
  *   boarding: object,
  *   attackerName: string,
  *   defenderName: string,
- *   damageTarget: { side: string, boarderId: string }|null,
- *   setDamageTarget: (t: { side: string, boarderId: string }|null) => void,
+ *   damageTarget?: { side: string, boarderId: string }|null,
+ *   setDamageTarget?: (t: { side: string, boarderId: string }|null) => void,
  * }} props
  */
 export function BoardingRosterPanel({ boarding, attackerName, defenderName, damageTarget, setDamageTarget }) {
   const [open, setOpen] = useState(false)
+  const [localTarget, setLocalTarget] = useState(null)
+  const controlled = setDamageTarget !== undefined
+  const target    = controlled ? damageTarget : localTarget
+  const setTarget = controlled ? setDamageTarget : setLocalTarget
+
   const total = (boarding.parties?.attacker.length ?? 0) + (boarding.parties?.defender.length ?? 0)
+  // A target whose boarder was removed must not keep the panel forced open.
+  const targetExists = !!target && (boarding.parties?.[target.side] ?? []).some((b) => b.id === target.boarderId)
+  const expanded = open || targetExists
 
   return (
     <div className="bg-slate-800/40 rounded px-3 py-2 space-y-2" data-testid="boarding-roster">
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between text-slate-400 hover:text-slate-200 font-mono text-xs uppercase font-bold transition-colors"
-        aria-expanded={open || !!damageTarget}
+        aria-expanded={expanded}
       >
         <span>Parties{total > 0 ? ` · ${total}` : ''}</span>
-        <span>{open || damageTarget ? '▾' : '▸'}</span>
+        <span>{expanded ? '▾' : '▸'}</span>
       </button>
-      {(open || damageTarget) && (
+      {expanded && (
         <div className="space-y-3">
-          <PartySection side="attacker" title={`Boarding party — ${attackerName}`} boarding={boarding} damageTarget={damageTarget} setDamageTarget={setDamageTarget} />
-          <PartySection side="defender" title={`Defenders — ${defenderName}`} boarding={boarding} damageTarget={damageTarget} setDamageTarget={setDamageTarget} />
+          <PartySection side="attacker" title={`Boarding party — ${attackerName}`} boarding={boarding} damageTarget={target} setDamageTarget={setTarget} />
+          <PartySection side="defender" title={`Defenders — ${defenderName}`} boarding={boarding} damageTarget={target} setDamageTarget={setTarget} />
         </div>
       )}
     </div>

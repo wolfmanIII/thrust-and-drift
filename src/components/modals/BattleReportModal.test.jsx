@@ -271,6 +271,13 @@ describe('BattleReportModal — battle log grouped by category (#43)', () => {
     expect(screen.queryByText('Other')).not.toBeInTheDocument()
   })
 
+  it('keeps dogfight ⚔ entries out of Boarding', () => {
+    useBattleStore.setState({ log: [makeEntry({ type: 'system', message: '⚔ Dogfight engaged — Viper vs Raider.' })] })
+    render(<BattleReportModal />)
+    expect(screen.queryByText('Boarding')).not.toBeInTheDocument()
+    expect(screen.getByText('Other')).toBeInTheDocument()
+  })
+
   it('keeps Disperse Sand against lasers under Reactions, not Boarding', () => {
     useBattleStore.setState({ log: [makeEntry({ type: 'info', message: 'Trader Disperse Sand (T1): total 10 — +5 armour vs this laser attack.' })] })
     render(<BattleReportModal />)

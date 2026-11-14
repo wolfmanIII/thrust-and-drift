@@ -22,8 +22,11 @@ export function BoarderDamageForm({ boarder, onApply, onCancel }) {
   const [effect, setEffect] = useState('0')
 
   const dmg = Number(damage)
-  const valid = damage !== '' && Number.isFinite(dmg) && dmg >= 0
-  const hit = { damage: dmg, ap: Math.max(0, Number(ap) || 0), effect: Number(effect) || 0 }
+  const apValue = Number(ap)
+  const effectValue = Number(effect)
+  const valid = damage !== '' && Number.isInteger(dmg) && dmg >= 0
+    && Number.isInteger(apValue) && apValue >= 0 && Number.isInteger(effectValue)
+  const hit = { damage: dmg, ap: apValue, effect: effectValue }
   const preview = valid ? applyPersonalDamage(boarder, hit.damage, hit) : null
 
   return (

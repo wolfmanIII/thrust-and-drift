@@ -119,41 +119,41 @@ const OBJECTIVES = [
 
 export function BoardingConflictModal() {
   const { activeModal, modalPayload, closeModal } = useUiStore()
-  const { ships, boardings } = useBattleStore()
+  const { ships, boardings, setObjective, advanceBoardingPhase } = useBattleStore()
 
-  if (activeModal !== 'boarding-conflict') return null
+  const [stackResult, setStackResult]   = useState(null)
+  const [missedResult, setMissedResult] = useState(null)
+  const [armoredBulkhead, setArmoredBulkhead] = useState(false)
+  const [damageTarget, setDamageTarget] = useState(null)
 
   const boarding = boardings.find(
     (b) => b.id === modalPayload?.boardingId && b.phase === 'conflict' && b.outcome === null,
   )
+  const targeting = useConflictTargeting(boarding)
+
+  const isOpen = activeModal === 'boarding-conflict'
+  if (!isOpen) return null
   if (!boarding) return null
 
   const attacker = ships.find((s) => s.id === boarding.attackerId)
   const defender = ships.find((s) => s.id === boarding.defenderId)
   if (!attacker || !defender) return null
 
-  return <ConflictBody boarding={boarding} attacker={attacker} defender={defender} closeModal={closeModal} />
-}
-
-/** Conflict phase content. Split from the guard above so the targeting hook runs unconditionally. */
-function ConflictBody({ boarding, attacker, defender, closeModal }) {
-  const { setObjective, advanceBoardingPhase } = useBattleStore()
-
-  const [stackResult, setStackResult]   = useState(null)
-  const [missedResult, setMissedResult] = useState(null)
-  const [armoredBulkhead, setArmoredBulkhead] = useState(false)
-  const [damageTarget, setDamageTarget] = useState(null)
-  const targeting = useConflictTargeting(boarding)
-
   const allConquered = OBJECTIVES.every((o) => boarding.objectives[o.key])
 
-  function handleAdvance() {
-    advanceBoardingPhase(boarding.id)
+  /** Close and drop the pending damage form so it does not reappear on reopen. */
+  function handleClose() {
+    setDamageTarget(null)
     closeModal()
   }
 
+  function handleAdvance() {
+    advanceBoardingPhase(boarding.id)
+    handleClose()
+  }
+
   return (
-    <Modal title="⚔ CONFLICT" onClose={closeModal}>
+    <Modal title="⚔ CONFLICT" onClose={handleClose}>
       <div className="space-y-4 min-w-80">
 
         {/* Ships banner */}

@@ -2800,6 +2800,23 @@ describe('boarder roster', () => {
     expect(party(id, 'attacker')[0].cur.end).toBe(7)
   })
 
+  it('applyBoarderDamage ignores fractional or negative damage', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine()])
+    const bid = party(id, 'attacker')[0].id
+    useBattleStore.getState().applyBoarderDamage(id, 'attacker', [{ boarderId: bid, damage: 2.5 }])
+    useBattleStore.getState().applyBoarderDamage(id, 'attacker', [{ boarderId: bid, damage: -3 }])
+    expect(party(id, 'attacker')[0].cur.end).toBe(7)
+  })
+
+  it('addBoarders rejects batches above the cap', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'attacker', Array.from({ length: 21 }, () => marine()))
+    expect(party(id, 'attacker')).toEqual([])
+    useBattleStore.getState().addBoarders(id, 'attacker', Array.from({ length: 20 }, () => marine()))
+    expect(party(id, 'attacker')).toHaveLength(20)
+  })
+
   it('applyBoarderDamage targets the given side only', () => {
     const id = setup()
     useBattleStore.getState().addBoarders(id, 'defender', [marine()])

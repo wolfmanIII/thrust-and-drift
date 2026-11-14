@@ -175,7 +175,10 @@ export function BoarderCanisterPanel({ boarding, defender }) {
               </p>
             </>
           )}
-          {lastAttack.success && livingBoarders.length === 0 && !rosterHits && (
+          {lastAttack.success && livingBoarders.length === 0 && !rosterHits && (boarding.parties?.attacker.length ?? 0) > 0 && (
+            <p className="text-slate-400 text-2xs font-mono">No living boarders left in the boarding party.</p>
+          )}
+          {lastAttack.success && (boarding.parties?.attacker.length ?? 0) === 0 && !rosterHits && (
             <>
               <button
                 onClick={handleRollDamage}

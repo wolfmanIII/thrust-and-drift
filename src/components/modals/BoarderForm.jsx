@@ -3,6 +3,7 @@
  */
 
 import { NPC_EXPERIENCE, PERSONAL_ARMOUR } from '../../data/boarderPresets.js'
+import { MAX_BOARDER_BATCH } from '../../utils/boarders.js'
 import { useBoarderForm } from './useBoarderForm.js'
 
 const input = 'bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-1.5 py-1 focus:outline-none focus:border-(--neon-cyan)/60'
@@ -34,7 +35,7 @@ export function BoarderForm({ onSubmit, onCancel }) {
         <label className="w-14 text-slate-400 font-mono text-2xs">
           Qty
           <input
-            type="number" min={1} max={20} value={form.count} onChange={(e) => setField('count', e.target.value)}
+            type="number" min={1} max={MAX_BOARDER_BATCH} value={form.count} onChange={(e) => setField('count', e.target.value)}
             className={`${input} w-full mt-0.5`} aria-label="Quantity"
           />
         </label>

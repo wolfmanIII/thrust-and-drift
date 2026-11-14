@@ -157,10 +157,10 @@ export function rollMissedShot(armoredBulkhead = false) {
   let label
   if (modified <= 3) {
     outcome = 'attacker_hit'
-    label   = 'Hits random member — ATTACKER squad (8+ to hit)'
+    label   = 'Hits random member — FIRING group (8+ to hit)'
   } else if (modified <= 5) {
     outcome = 'defender_hit'
-    label   = 'Hits random member — DEFENDER squad (8+ to hit)'
+    label   = 'Hits random member — OPPOSING group (8+ to hit)'
   } else if (modified <= 8) {
     outcome = 'minor_system'
     label   = 'Minor system damaged (lights, door controls, etc.)'

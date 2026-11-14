@@ -6,9 +6,7 @@
 
 import { useState } from 'react'
 import { NPC_EXPERIENCE, PERSONAL_ARMOUR } from '../../data/boarderPresets.js'
-import { validateBoarderData } from '../../utils/boarders.js'
-
-export const MAX_BOARDER_BATCH = 20
+import { validateBoarderData, MAX_BOARDER_BATCH } from '../../utils/boarders.js'
 
 const DEFAULT_FORM = {
   name:       'Marine',

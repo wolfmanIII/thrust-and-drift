@@ -195,6 +195,13 @@ describe('getCasualtyStats', () => {
   it('60% → MRL 12+', () => {
     expect(getCasualtyStats(group(10, 6))).toMatchObject({ pct: 60, moraleTarget: 12 })
   })
+  it('percentage is floored so display and threshold agree (8/27 = 29%)', () => {
+    expect(getCasualtyStats(group(27, 8))).toMatchObject({ pct: 29, moraleTarget: 8 })
+  })
+  it('exact thresholds survive floating point (29/100 is 29%, 30/100 is 30%)', () => {
+    expect(getCasualtyStats(group(100, 29))).toMatchObject({ pct: 29, moraleTarget: 8 })
+    expect(getCasualtyStats(group(100, 30))).toMatchObject({ pct: 30, moraleTarget: 10 })
+  })
   it('counts unconscious and dead together', () => {
     const party = [mk(), withCur(mk(), { str: 0 }), withCur(mk(), { str: 0, dex: 0, end: 0 }), mk()]
     expect(getCasualtyStats(party)).toMatchObject({ total: 4, down: 2, pct: 50, moraleTarget: 10 })

@@ -30,7 +30,7 @@ function classifyLogEntry(entry) {
   if (/Point Defence/i.test(msg))                       return 'pd'
   if (/missile|torpedo|salvo/i.test(msg))                return 'missile'
   if (/Evasive Action|Disperse Sand/i.test(msg))         return 'reaction'
-  if (/⚔|boarding|boarder|canister/i.test(msg))          return 'boarding'
+  if (/boarding|boarder|canister/i.test(msg))            return 'boarding'
   if (entry.type === 'attack' || entry.type === 'damage'
     || / damage from | takes .*damage|hit — |Ion Cannon|hardened systems/i.test(msg)) return 'attack'
   return 'other'

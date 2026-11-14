@@ -110,7 +110,7 @@ describe('BoardingConflictModal — actions', () => {
     setupConflict()
     render(<BoardingConflictModal />)
     fireEvent.click(screen.getByText(/ROLL MISSED SHOT/i))
-    const labels = ['ATTACKER', 'DEFENDER', 'Minor system', 'No critical', 'Critical system']
+    const labels = ['FIRING', 'OPPOSING', 'Minor system', 'No critical', 'Critical system']
     const found = labels.some((l) => screen.queryAllByText(new RegExp(l, 'i')).length > 0)
     expect(found).toBe(true)
   })

@@ -15,7 +15,7 @@ import { roll2D6, rollDice } from '../utils/dice.js'
 import { getEffectiveSkill, buildDefaultAssignments } from '../utils/crew.js'
 import { resolveDogfightChecks } from '../utils/dogfight.js'
 import { BOARDER_CANISTERS } from '../utils/boarding.js'
-import { createBoarder, validateBoarderData, applyPersonalDamage } from '../utils/boarders.js'
+import { createBoarder, validateBoarderData, applyPersonalDamage, MAX_BOARDER_BATCH } from '../utils/boarders.js'
 import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST } from '../data/rangeBands.js'
 import { useUiStore } from './uiStore.js'
 import { emitEffect } from '../utils/effectQueue.js'
@@ -259,6 +259,7 @@ const useBattleStore = create((set, get) => {
   // --- Boarder roster helpers (see addBoarders & co.) ---
   const BOARDER_SIDE_LABEL = { attacker: 'boarding party', defender: 'defenders' }
   const isBoarderSide = (side) => side === 'attacker' || side === 'defender'
+  const isValidHitDamage = (n) => Number.isInteger(n) && n >= 0
   const isOpenBoarding = (id) => !!get().boardings.find((b) => b.id === id && b.outcome === null)
   const getParty = (boardingId, side) =>
     get().boardings.find((b) => b.id === boardingId)?.parties?.[side] ?? []
@@ -2172,7 +2173,7 @@ const useBattleStore = create((set, get) => {
   addBoarders: wh(
     (boardingId, side, dataList) =>
       isOpenBoarding(boardingId) && isBoarderSide(side) &&
-      Array.isArray(dataList) && dataList.length > 0 &&
+      Array.isArray(dataList) && dataList.length > 0 && dataList.length <= MAX_BOARDER_BATCH &&
       dataList.every((d) => validateBoarderData(d) === null),
     (boardingId, side, dataList) => {
       const added = dataList.map((d) => createBoarder(d))
@@ -2272,13 +2273,13 @@ const useBattleStore = create((set, get) => {
   applyBoarderDamage: wh(
     (boardingId, side, hits) =>
       isOpenBoarding(boardingId) && isBoarderSide(side) && Array.isArray(hits) &&
-      hits.some((h) => Number.isFinite(h.damage) && getParty(boardingId, side).some((b) => b.id === h.boarderId)),
+      hits.some((h) => isValidHitDamage(h.damage) && getParty(boardingId, side).some((b) => b.id === h.boarderId)),
     (boardingId, side, hits, source = 'Hit') => {
       const messages = []
       updateParty(boardingId, side, (party) => {
         let next = party
         for (const h of hits) {
-          if (!Number.isFinite(h.damage)) continue
+          if (!isValidHitDamage(h.damage)) continue
           const target = next.find((b) => b.id === h.boarderId)
           if (!target) continue
           const r = applyPersonalDamage(target, h.damage, { ap: h.ap, effect: h.effect, minOneOnEffect6: h.minOneOnEffect6 })

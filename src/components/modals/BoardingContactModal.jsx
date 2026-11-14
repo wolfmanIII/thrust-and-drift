@@ -208,7 +208,6 @@ export function BoardingContactModal() {
   } = useBattleStore()
 
   const [dice, setDice] = useState(null)
-  const [damageTarget, setDamageTarget] = useState(null)
 
   const isOpen = activeModal === 'boarding-contact'
   if (!isOpen) return null
@@ -348,8 +347,6 @@ export function BoardingContactModal() {
           boarding={boarding}
           attackerName={attacker.name}
           defenderName={defender.name}
-          damageTarget={damageTarget}
-          setDamageTarget={setDamageTarget}
         />
 
         {/* Defender sandcaster fire at the incoming party (CRB p.171, HG p.38) */}
