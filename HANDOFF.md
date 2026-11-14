@@ -9,25 +9,35 @@
 
 | Campo | Valore |
 | --- | --- |
-| **Versione** | 2.14.0 |
+| **Versione** | 2.15.0 |
 | **Branch** | main |
-| **Test** | 1557 Vitest + 68 Playwright e2e |
-| **Ultimo commit** | chore(release): v2.14.0 — chaff canister (#49) + DM details popup (#54) |
+| **Test** | 1708 Vitest + 69 Playwright e2e |
+| **Ultimo commit** | chore(release): v2.15.0 — sandcaster vs boarders (#53) + boarder rosters (#55) |
 
 ---
 
 ## Prossimo task
 
-- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.14.0)
+- **PDF field-manual** — rigenerare con MD2FastPdf/Gotenberg (header versione → 2.15.0)
 - Issue #28 resta aperta finché non chiusa manualmente (il commit di fix non usa `Fixes #N`). #29, #30, #31, #32, #23, #33, #34, #35, #22, #45, #46, #47, #48, #40, #41, #42, #43 chiuse automaticamente via `Fixes #N`/`Closes #N`. **#39 chiusa manualmente** in v2.10.0. **#38 chiusa manualmente come non applicabile** (v2.11.0).
 - **#21 iterazione 2** (se richiesta) — range/salvo/ammo/traits custom, nuove armi non basate su una entry esistente. Struttura dati attuale (`weaponOverrides` indicizzato per posizione, attivo solo se l'arma è singola nello slot) regge l'iterazione 1 ma andrebbe rivista per selezione multi-istanza (id stabile per arma invece di indice) se si espande oltre il cosmetic+danno. **#21 resta OPEN** (iterazione 1 rilasciata in v2.9.0, non auto-chiusa).
-- **Wishlist CotI ancora aperta** (nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #44 gestione Power armi Ion (priorità bassa per l'utente), #50 Screens (Angle/Meson/Nuclear Damper), #51 Spinal Mount (dipende da #44 per il power drop), #52 Black Globe (priorità molto bassa per CotI), #53 Pebble canister vs abbordaggio (esito semplice riuscito/fallito, verificare CRB p.74 prima). #43 chiusa (v2.13.0), #49 e #54 chiuse (v2.14.0).
+- **Wishlist CotI ancora aperta** (nessuna in lavorazione): #36 bay missili/torpedo, #37 varianti missili, #44 gestione Power armi Ion (priorità bassa per l'utente), #50 Screens (Angle/Meson/Nuclear Damper), #51 Spinal Mount (dipende da #44 per il power drop), #52 Black Globe (priorità molto bassa per CotI). #43 chiusa (v2.13.0), #49 e #54 chiuse (v2.14.0), #53 e #55 chiuse (v2.15.0).
 
 ---
 
 ## Cosa è stato fatto nelle ultime sessioni
 
-### Sessione corrente — chaff canister + popup dettaglio DM (v2.14.0, #49, #54)
+### Sessione corrente — sandcaster vs boarders + roster boarder (v2.15.0, #53, #55)
+
+Partita dal commento di CotI su #53 ("1 canister = 1 chance di respingere 1 boarding party, successo-o-morte, verificare p.74"). Rilette le fonti sui PDF in `doc/` (Core, HG, Companion, FAQ) prima di codificare.
+
+1. **#53 — sandcaster vs boarders**: la regola esiste già in RAW ma non come la descriveva CotI. CRB p.171 (Disperse Sand): "each target in the boarding party suffers 8D at Ground scale (so do not multiply it)"; HG p.38 (pebble): "1DD (Ground scale)"; Destructive è a **p.78**, non p.74, e non dice "10× contro esseri viventi". Implementato in fase Contatto (dentro lo scafo la squadra è fuori portata): check Gunner (turret) 8+ (difficoltà non indicata dal RAW, scelta Average come per Disperse Sand vs laser), 1 canister dalla scorta `sandAmmoTotal`, torretta segnata sparata.
+2. **#55 — roster boarder**: il RAW non dà stat block (HG p.125: squadra 4–12, "la composizione varia"), quindi i roster li inserisce il GM. Danno personale CRB p.77 (Protection → END → overflow STR/DEX; STR/DEX 0 incosciente; tutte e 3 a 0 morto), preset esperienza CRB p.92–93 e armature CRB p.100, stacking/colpi mancati HG pp.132–133, soglie Morale Companion pp.6–7. Scelte dell'utente: Protection applicata ai canister (regola generale p.77), roster per entrambi i lati, overflow come preferenza per boarder.
+3. **Interpretazioni mie, non nel testo**: Effect del check Gunner non sommato al danno; Protection sottratta dopo il ×10 del pebble; morale da 10 %; "attacking group" dei colpi mancati = gruppo di chi ha sparato (etichette ora FIRING/OPPOSING — l'utente ha lasciato la scelta "più chiara"). Documentate in `Abbordaggio-High-Guard.md` §3.7.
+4. **Review**: `/simplify` (reuse, simplification, efficiency, altitude) + review read-only; fix applicati: regex del report (il `⚔` nudo catturava i dogfight), stato modale Conflict, danno non intero, soglie % in aritmetica intera, `getParties`/`mergeBoarderPatch`/`countByStatus`. Saltati (refactor più grossi o cambio di comportamento): `damageTarget` in uiStore, tiro canister spostato nello store, categoria esplicita nel log del report, subscription `useBattleStore()` senza selector nelle vecchie modali boarding, classi Tailwind duplicate nelle vecchie modali.
+5. **e2e**: nuovo `e2e/boarders.spec.js` (flusso completo, navi iniettate via store, boarding avviato dal context menu). Suite completa 69 e2e; 1708 Vitest.
+
+### Sessione precedente — chaff canister + popup dettaglio DM (v2.14.0, #49, #54)
 
 Partito da un nuovo feedback CotI (Black Globe a priorità molto bassa, Spinal Mount desiderato con power drop, pebble canister come esito semplice riuscito/fallito, più una nuova richiesta: popup con i DM e la loro origine prima del tiro).
 

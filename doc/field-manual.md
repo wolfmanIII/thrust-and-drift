@@ -1,6 +1,6 @@
 # Thrust & Drift — Field Manual
 
-**Version 2.14.0** · Mongoose Traveller 2e Space Combat Simulator
+**Version 2.15.0** · Mongoose Traveller 2e Space Combat Simulator
 
 ---
 
@@ -1334,6 +1334,8 @@ The **⚔️ CONTACT** modal opens. The GM selects the entry method:
 - **🔗 Forced Linkage** — DM +2 to all Contact checks; defender cannot manoeuvre
 
 **Hull Cut tracker:** select component (Hatch / Airlock / Hull) and cutting tool, roll each round. Damage reduces component Resilience; breach achieved when damage ≥ breach threshold.
+
+**Sandcaster vs boarders and Parties:** the defender can fire a sandcaster at the incoming party and the GM can define boarder rosters in the **Parties** panel — see §9.9 (*Sandcaster vs boarders*, *Boarder rosters*).
 
 When entry is secured, click **ADVANCE TO CONFLICT →**.
 

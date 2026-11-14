@@ -114,8 +114,14 @@ thrust-and-drift/
     │   │   ├── DogfightRoundModal.jsx        ← Micro-round dogfight (fuga + Pilot check)
     │   │   ├── BoardingSetupModal.jsx        ← Selezione bersaglio + avvio abbordaggio
     │   │   ├── BoardingContactModal.jsx      ← Fase 2: metodo ingresso, hull-cut, modificatori
-    │   │   ├── BoardingConflictModal.jsx     ← Fase 3: obiettivi, stacking, missed-shot
-    │   │   ├── BoardingOutcomeModal.jsx      ← Fase 4: esito + trasferimento fazione
+    │   │   ├── BoarderCanisterPanel.jsx      ← Sandcaster (Sand/Pebble) contro la squadra in avvicinamento
+    │   │   ├── BoardingRosterPanel.jsx       ← Roster definiti dal GM: aggiunta/modifica/ordine, danno, perdite
+    │   │   ├── BoarderForm.jsx               ← Aggiunta boarder (preset esperienza + armatura)
+    │   │   ├── BoarderDamageForm.jsx         ← Inserimento colpo su un boarder (Damage, AP, Effect)
+    │   │   ├── useBoarderForm.js             ← Hook: stato e validazione del form boarder
+    │   │   ├── useConflictTargeting.js       ← Hook: bersagli di stacking e colpi mancati dai roster
+    │   │   ├── BoardingConflictModal.jsx     ← Fase 3: obiettivi, stacking, missed-shot, bersagli
+    │   │   ├── BoardingOutcomeModal.jsx      ← Fase 4: esito, superstiti, trasferimento fazione
     │   │   └── useAttackSetup.js             ← Hook derivazione DM attacco
     │   ├── ui/
     │   │   ├── ContextMenu.jsx        ← Menu tasto destro (phase-gated + initiative order)
@@ -139,7 +145,8 @@ thrust-and-drift/
     │   ├── hex.js                     ← Matematica esagonale (flat-top)
     │   ├── combat.js                  ← Calcoli combattimento (DM, danni, range band)
     │   ├── crew.js                    ← Helper equipaggio array (getCrewSkill, getEffectiveSkill, getAssignedSkill, buildDefaultAssignments, migrateCrew, blankCrewMember)
-    │   ├── boarding.js                ← Logica abbordaggio (metodi ingresso, resilienza, stacking)
+    │   ├── boarding.js                ← Logica abbordaggio (metodi ingresso, resilienza, stacking, danno canister)
+    │   ├── boarders.js                ← Modello boarder: danno personale (CR p.77), stato, bersagli stack, perdite
     │   ├── dogfight.js                ← Logica dogfight (tonnage DM, Pilot check, fuga)
     │   ├── effectQueue.js             ← Coda effetti canvas (emitEffect, drainEffects, subscribeEffects)
     │   ├── audioSynth.js              ← Sintesi procedurale Web Audio API (laser, impact, critical, missile, thrust)
@@ -153,6 +160,7 @@ thrust-and-drift/
         ├── crewActions.js             ← Definizioni azioni equipaggio fase Actions
         ├── factions.js                ← Fazioni disponibili
         ├── shipCatalog.js             ← Catalogo ufficiale navi HG 2022 (sola lettura)
+        ├── boarderPresets.js          ← Preset esperienza NPC (CR p.92–93) e armature personali (CR p.100)
         └── defaultProfiles.js         ← Profili nave preimpostati (Scout, Free Trader, ecc.)
 ```
 
@@ -164,6 +172,9 @@ Suite Vitest collocata accanto ai file sorgente (`*.test.js` / `*.test.jsx`):
 | ---- | -------- |
 | `utils/hex.test.js` | `hex.js` — coordinate, distanza, pixel↔hex, range band |
 | `utils/combat.test.js` | `combat.js` — DM, danni, iniziativa, attacco, getApValue, countMissileAmmoCapacity, countTorpedoAmmoCapacity, countSandcasters, computeMissileAttackDM, computeMissileImpactDamage, computeIonThrustEffect |
+| `utils/boarding.test.js` | `boarding.js` — risoluzione, DM, canister (`BOARDER_CANISTERS`, check, danno) |
+| `utils/boarders.test.js` | `boarders.js` — createBoarder, danno personale (Protection, AP, Effect 6+, overflow END→STR/DEX, stato), stacking, colpi mancati, perdite/morale, `getParties`, `mergeBoarderPatch`, `countByStatus` |
+| `data/boarderPresets.test.js` | `boarderPresets.js` — tabella armature CR p.100, bonus esperienza CR p.92–93 |
 | `utils/dice.test.js` | `dice.js` — rollDice, formatDiceResults, formatCheckResult |
 | `utils/crew.test.js` | `crew.js` — getCrewSkill, getEffectiveSkill, getAssignedSkill, buildDefaultAssignments, migrateCrew, blankCrewMember |
 | `data/weapons.test.js` | `weapons.js` — completezza catalogo WEAPON_IDS, campi obbligatori per ogni arma, barbette damageMultiple=3, turret damageMultiple=1, Ion Cannon (barbette, bayOnly, damageMultiple, ignoresArmour), bay variants S/M/L, Torpedo, Missile Barbette, AP cross-check, missile maxRange=Special, DEFENSIVE_WEAPONS |
@@ -1498,6 +1509,21 @@ Durante la fase Movimento, per ogni coppia di navi ostili si verifica se le trai
 - Tutta la UI in inglese — nessuna stringa italiana nell'interfaccia
 
 **Scope escluso da v1.5:** abstract mode (CRB p.175) — rimandato a versione successiva.
+
+### 13.7b Versione 2.15.0 — Roster Boarder + Sandcaster contro i Boarder ✅ COMPLETATA
+
+Il RAW non fornisce stat block per i boarder (HG p.125: squadra di 4–12, "la composizione varia"): i roster li definisce il GM, T&D non inventa numeri. Regole in [Abbordaggio-High-Guard.md](Abbordaggio-High-Guard.md) §3.6–3.7, modello dati in [boarding-system-design.md](boarding-system-design.md) §4.1.
+
+**Scope tecnico implementato:**
+
+- `utils/boarders.js` — `createBoarder`, `validateBoarderData`, `mergeBoarderPatch`, `applyPersonalDamage` (Protection, AP, Effect 6+ min 1, END → overflow STR/DEX → altra, CR p.77), `getBoarderStatus` (derivato), `getParties` (fallback legacy), `countByStatus`, `getStackOrder`, `pickStackTarget` / `pickRandomMember` (HG pp.132–133), `getCasualtyStats` (soglie Morale Companion pp.6–7)
+- `data/boarderPresets.js` — `NPC_EXPERIENCE` (CR p.92–93), `PERSONAL_ARMOUR` (CR p.100)
+- `utils/boarding.js` — `BOARDER_CANISTERS` (Sand 8D CR p.171, Pebble 1DD HG p.38), `resolveBoarderCanisterCheck`, `rollBoarderCanisterDamage`
+- `battleStore` — campo opzionale `boarding.parties { attacker[], defender[] }` e `canisterAttacks[]`; azioni `fireBoarderCanister`, `addBoarders`, `updateBoarder`, `removeBoarder`, `reorderBoarder`, `applyBoarderDamage` (un passo di undo ciascuna, log per colpo). Nessuna migrazione: i boarding precedenti si leggono con roster vuoti
+- UI — `BoardingRosterPanel` (Contatto e Conflitto), `BoarderCanisterPanel` (solo Contatto), `BoarderForm`, `BoarderDamageForm`; Conflitto: scelta di chi spara, *Roll Stack Hit* e colpi mancati puntano un boarder reale; Sicurezza: riepilogo superstiti; battle report con sezione **Boarding**
+- Test — Vitest per utils/store/componenti e `e2e/boarders.spec.js` (flusso completo)
+
+**Interpretazioni** (il testo non le definisce): l'Effect del check Gunner non si somma al danno dei canister; la Protection si sottrae dopo il ×10 del pebble; il danno dei canister è fisso (nessun minimo 1 con Effect 6+); soglie Morale da 10 % di perdite; "attacking group" dei colpi mancati = gruppo di chi ha sparato.
 
 ### 13.8 Versione 1.6 — Range Massimo Armi ✅ COMPLETATA
 

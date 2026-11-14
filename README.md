@@ -48,7 +48,7 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Battle log** | Timestamped event log with colour-coded entry types |
 | **Chaff canister (HG p.38)** | Gunner action **Deploy Chaff** (automatic): spends 1 sandcaster canister and 1 unfired sandcaster; chaff cloud for 1 round gives DM−1 to Sensor Lock checks and missile attack rolls against the ship (not torpedoes, not lasers/energy/particle) |
 | **Attack DM details** | **DM details** button in the Attack modal opens a popup listing every attack modifier — zeros included — with where it comes from and its rules reference |
-| **Battle report grouping** | Printed PDF report groups log entries by category within each round — Attacks, Missile Salvos, Reactions, Point Defence, Critical Hits, Other |
+| **Battle report grouping** | Printed PDF report groups log entries by category within each round — Attacks, Missile Salvos, Reactions, Point Defence, Boarding, Critical Hits, Other |
 | **Undo/Redo (Ctrl+Z / Ctrl+Y)** | Snapshot-based undo/redo — 20-step stacks; `↩️` `↪️` buttons in HUD; new action clears redo |
 | **Session save / resume** | Export session to JSON; resume flow shows a full preview before loading |
 | **Autosave** | IndexedDB autosave after every significant action — persists ships, missiles, dogfights, boardings, range bands, and log; Dashboard shows full roster preview; one-click restore or clear |
@@ -60,6 +60,8 @@ optional **vectorial combat system** (Traveller Companion 2024, pp.169–186).
 | **Missile hover tooltip** | Hover a missile salvo token (150 ms) to see type, launcher → target with faction colour dots, and a thrust-remaining bar (cyan → yellow → red); portal overlay, clears on pan/click |
 | **Dogfight system** | Close-range sub-system: 6 micro-rounds per standard round; Pilot opposed checks; tonnage/thrust/multi-enemy DMs; escape via thrust advantage or pursuit check; pulsing token visuals |
 | **Boarding system** | 4-phase boarding action (HG 2022): Contact → Conflict → Security; 6 entry methods incl. hull-cut tracker; stacking rolls; missed-shot table; Bridge/Engineering/Turrets objectives; optional faction transfer on capture; HUD badge per active boarding |
+| **Sandcaster vs boarders** | Contact phase: the defender fires a sandcaster at the incoming party — Gunner (turret) 8+, each boarder takes Ground-scale damage, Sand 8D (CRB p.171) or Pebble 1DD = 1D×10 (HG p.38); spends 1 canister |
+| **Boarder rosters** | GM-defined boarding party and defenders (STR/DEX/END, Protection, overflow STR/DEX, NPC experience and armour presets); personal damage Protection → END → STR/DEX with derived Fit/Down/Dead status (CRB p.77); stack order and missed shots pick real targets (HG pp.132–133); casualty % with Morale hint (Companion pp.6–7); survivors summary on Security |
 | **Weapon range enforcement** | Each weapon has a maximum range band (CRB p.167); Attack Modal shows OUT OF RANGE badge and blocks firing beyond a weapon's listed range |
 | **Movement animation** | Ship and missile tokens slide smoothly from start to end position during the Movement phase (~2 s easeInOut); canvas input blocked for the duration to prevent mis-clicks |
 | **Basic combat mode** | Non-vectorial mode: no hex map; ships shown as bento cards (Header / Hull bar / conditional Status zone) grouped by faction; range bands tracked per ship pair (`Adjacent`→`Distant`); each ship manoeuvres independently, contributing thrust to a per-pair pool that accumulates across rounds (CRB p.166 cost table — Short 2, Medium 5, Long 10, Very Long 25, Distant 50); missiles advance at Thrust 10/round against the same table and impact at Adjacent range, with bento cards showing `~Xr` ETA; Attack Modal reads stored range band automatically |
@@ -174,7 +176,7 @@ npm run test:watch        # watch mode
 npx vitest --coverage     # coverage report (v8 provider)
 ```
 
-1557 unit/component tests across utils, Zustand stores, hooks, and UI components.
+1708 unit/component tests across utils, Zustand stores, hooks, and UI components.
 
 End-to-end tests run in Chromium via Playwright (dev server auto-started):
 
@@ -183,7 +185,7 @@ npm run e2e               # headless
 npm run e2e:headed        # visible browser
 ```
 
-68 e2e tests in `e2e/` covering discrete zoom levels, the PDF battle report flow, crew skill input constraints, the Hardpoint budget check, and assorted fix/feature regressions.
+69 e2e tests in `e2e/` covering discrete zoom levels, the PDF battle report flow, crew skill input constraints, the Hardpoint budget check, the boarder roster flow, and assorted fix/feature regressions.
 
 ---
 
@@ -225,8 +227,14 @@ src/
 │   │   ├── MissileImpactModal.jsx        ← Missile salvo impact damage resolution
 │   │   ├── BoardingSetupModal.jsx        ← Target selection + boarding initiation
 │   │   ├── BoardingContactModal.jsx      ← Phase 2: entry method, hull-cut, modifiers
-│   │   ├── BoardingConflictModal.jsx     ← Phase 3: objectives, stacking, missed shot
-│   │   ├── BoardingOutcomeModal.jsx      ← Phase 4: outcome + faction transfer
+│   │   ├── BoarderCanisterPanel.jsx      ← Sandcaster (Sand/Pebble) vs the incoming boarding party
+│   │   ├── BoardingRosterPanel.jsx       ← GM-defined rosters: add/edit/reorder, damage, casualties
+│   │   ├── BoarderForm.jsx               ← Add boarders (experience + armour presets)
+│   │   ├── BoarderDamageForm.jsx         ← Enter a hit on a boarder (Damage, AP, Effect)
+│   │   ├── useBoarderForm.js             ← Hook: boarder form state + validation
+│   │   ├── useConflictTargeting.js       ← Hook: stack hit / missed-shot targets from the rosters
+│   │   ├── BoardingConflictModal.jsx     ← Phase 3: objectives, stacking, missed shot, targets
+│   │   ├── BoardingOutcomeModal.jsx      ← Phase 4: outcome, survivors, faction transfer
 │   │   └── useAttackSetup.js   ← Hook: attack DM derivation
 │   └── ui/
 │       ├── ContextMenu.jsx     ← Right-click context menu
@@ -244,6 +252,7 @@ src/
 │   ├── crewActions.js          ← Crew action definitions (Actions phase)
 │   ├── factions.js             ← Available factions
 │   ├── shipCatalog.js          ← HG 2022 read-only catalog
+│   ├── boarderPresets.js       ← NPC experience levels + personal armour (Protection)
 │   └── defaultProfiles.js      ← Preset ship profiles
 ├── store/
 │   ├── profilesStore.js        ← Ship profiles (CRUD + import/export)
@@ -258,7 +267,8 @@ src/
     ├── io.js                   ← JSON import/export via File API
     ├── dice.js                 ← Dice rolling + result formatting
     ├── dogfight.js             ← Dogfight logic (tonnageDM, Pilot checks, escape)
-    ├── boarding.js             ← Boarding logic (entry methods, resilience, stacking, missed shot)
+    ├── boarding.js             ← Boarding logic (entry methods, resilience, stacking, missed shot, canister damage)
+    ├── boarders.js             ← Boarder roster model: personal damage, status, stack targets, casualties
     └── db.js                   ← IndexedDB wrapper (openDB, get, put, delete)
 ```
 

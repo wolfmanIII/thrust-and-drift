@@ -10,6 +10,26 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.15.0] — 2026-11-14
+
+### Added
+
+- **Sandcaster vs boarding parties (#53)** — in the **Contact** modal the defender can fire a sandcaster at the incoming boarding party. Gunner (turret) check 2D6 + Gunner, Average (8+); on a hit each boarder takes Ground-scale damage: **Sand 8D** (CRB p.171, not multiplied) or **Pebble 1DD = 1D×10** (HG p.38, Destructive ×10 CRB p.78). Spends 1 canister from the shared sandcaster stock and marks the turret fired; the salvo is recorded in `boarding.canisterAttacks` and logged. RAW gives no difficulty for this use, so the check matches Disperse Sand against lasers. New store action `fireBoarderCanister`, helpers `BOARDER_CANISTERS`, `resolveBoarderCanisterCheck`, `rollBoarderCanisterDamage` in `utils/boarding.js`.
+- **Boarder rosters (#55)** — the rules give no boarder stat blocks, so the GM defines a roster for the boarding party and one for the defenders in the new **Parties** panel of the Contact and Conflict modals: STR/DEX/END, armour Protection, overflow STR/DEX, experience preset (CRB p.92–93) and armour presets (CRB p.100), batch add, edit, reorder, remove. Personal damage follows CRB p.77: Protection (AP ignores it up to its value; Effect 6+ inflicts at least 1) → END → overflow STR/DEX; STR or DEX 0 = unconscious, all three 0 = dead; status is always derived. Optional `boarding.parties` field (legacy boardings load as empty rosters; no migration). New `utils/boarders.js` (`createBoarder`, `applyPersonalDamage`, `mergeBoarderPatch`, `getParties`, `countByStatus`, stacking and casualty helpers), `data/boarderPresets.js`, store actions `addBoarders`, `updateBoarder`, `removeBoarder`, `reorderBoarder`, `applyBoarderDamage` (one undo step each).
+- **Canister damage applied to the roster** — with a boarding party defined, *ROLL DAMAGE — ALL BOARDERS* rolls Sand/Pebble damage for every living boarder and applies it through their Protection; without a roster the old per-boarder damage list is kept.
+- **Conflict targets from the rosters** — pick who is firing; *ROLL STACK HIT* (2D ≤ 9 front of the line, 10–12 another member, HG p.132) and the Missed Shots table (1–3 firing group, 4–5 opposing group, HG p.133) name a real boarder, with a DAMAGE button that opens the hit form (Damage, AP, Effect).
+- **Morale hint** — the roster shows casualties (down + dead) and notes when the Referee may call a Morale check: 10 % → MRL 8+, 30 % → 10+, 60 % → 12+ (Traveller Companion pp.6–7). The app never rolls it.
+- **Survivors summary** in the Security modal (fit / down / dead per side) and a **Boarding** section in the printed battle report.
+- **e2e** — `e2e/boarders.spec.js` covers the whole flow: Setup → Contact (roster + pebble canister) → Conflict (stack hit, damage) → Security (survivors) → report.
+
+### Changed
+
+- Missed-shot result labels now read **FIRING group / OPPOSING group** instead of "ATTACKER / DEFENDER squad": HG p.133's "attacking group" is the group that fired, so the old wording contradicted the target shown when the defenders shoot.
+- Conflict modal help texts cite HG p.132 (stacking) and p.133 (missed shots).
+- Interpretation choices where RAW is silent: the Gunner check Effect is not added to canister damage; Protection is subtracted after pebble's ×10; Morale thresholds start at 10 % casualties. All documented in `doc/Abbordaggio-High-Guard.md` §3.7.
+
+---
+
 ## [2.14.0] — 2026-10-22
 
 ### Added
