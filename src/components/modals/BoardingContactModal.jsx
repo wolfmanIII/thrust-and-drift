@@ -8,6 +8,7 @@
 
 import { useState } from 'react'
 import { Modal }          from './Modal.jsx'
+import { BoarderCanisterPanel } from './BoarderCanisterPanel.jsx'
 import { DiceInput }      from '../forms/DiceInput.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore }     from '../../store/uiStore.js'
@@ -339,6 +340,9 @@ export function BoardingContactModal() {
             onDamage={handleApplyCutDamage}
           />
         )}
+
+        {/* Defender sandcaster fire at the incoming party (CRB p.171, HG p.38) */}
+        <BoarderCanisterPanel boarding={boarding} defender={defender} />
 
         {/* Advance button */}
         <div className="flex gap-2 pt-1">
