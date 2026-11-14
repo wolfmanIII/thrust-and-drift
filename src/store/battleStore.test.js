@@ -2661,6 +2661,162 @@ describe('fireBoarderCanister', () => {
   })
 })
 
+// === BOARDER ROSTER ===
+// // MgT2e CRB p.77 (personal damage), HG p.132 (stack order)
+
+describe('boarder roster', () => {
+  const marine = (over = {}) => ({ name: 'Marine', str: 7, dex: 7, end: 7, ...over })
+
+  function setup() {
+    useBattleStore.getState().addShip(makeProfile({ id: 'p1', name: 'Raider' }), { q: 0, r: 0 }, 'players', '#0f0')
+    useBattleStore.getState().addShip(makeProfile({ id: 'p2', name: 'Trader' }), { q: 1, r: 0 }, 'npc', '#f00')
+    const [a, b] = useBattleStore.getState().ships
+    useBattleStore.getState().startBoarding(a.id, b.id)
+    return useBattleStore.getState().boardings[0].id
+  }
+  const party = (id, side) => useBattleStore.getState().boardings.find((b) => b.id === id).parties[side]
+
+  it('startBoarding creates empty rosters', () => {
+    const id = setup()
+    expect(useBattleStore.getState().boardings[0].parties).toEqual({ attacker: [], defender: [] })
+    expect(party(id, 'attacker')).toEqual([])
+  })
+
+  it('addBoarders adds to the right side with one log line', () => {
+    const id = setup()
+    const before = useBattleStore.getState().log.length
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine({ name: 'M1' }), marine({ name: 'M2' })])
+    expect(party(id, 'attacker').map((b) => b.name)).toEqual(['M1', 'M2'])
+    expect(party(id, 'defender')).toEqual([])
+    expect(useBattleStore.getState().log.length).toBe(before + 1)
+  })
+
+  it('addBoarders is a single undo step', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine(), marine(), marine()])
+    useBattleStore.getState().undoLastAction()
+    expect(party(id, 'attacker')).toEqual([])
+  })
+
+  it('addBoarders rejects invalid data, empty lists, bad side and unknown boarding', () => {
+    const id = setup()
+    const s = useBattleStore.getState()
+    s.addBoarders(id, 'attacker', [marine({ end: 0 })])
+    s.addBoarders(id, 'attacker', [])
+    s.addBoarders(id, 'nobody', [marine()])
+    s.addBoarders('ghost', 'attacker', [marine()])
+    expect(party(id, 'attacker')).toEqual([])
+  })
+
+  it('addBoarders after the boarding is resolved is a no-op', () => {
+    const id = setup()
+    useBattleStore.getState().resolveBoarding(id, 'defender_repels')
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine()])
+    expect(party(id, 'attacker')).toEqual([])
+  })
+
+  it('updateBoarder edits fields and clamps current to max', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'defender', [marine()])
+    const bid = party(id, 'defender')[0].id
+    useBattleStore.getState().updateBoarder(id, 'defender', bid, { name: 'Sgt', protection: 8, max: { end: 5 } })
+    const b = party(id, 'defender')[0]
+    expect(b).toMatchObject({ name: 'Sgt', protection: 8 })
+    expect(b.max.end).toBe(5)
+    expect(b.cur.end).toBe(5)
+  })
+
+  it('updateBoarder can restore current characteristics (GM correction)', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine()])
+    const bid = party(id, 'attacker')[0].id
+    useBattleStore.getState().applyBoarderDamage(id, 'attacker', [{ boarderId: bid, damage: 5 }])
+    useBattleStore.getState().updateBoarder(id, 'attacker', bid, { cur: { end: 7 } })
+    expect(party(id, 'attacker')[0].cur.end).toBe(7)
+  })
+
+  it('updateBoarder rejects invalid values', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine()])
+    const bid = party(id, 'attacker')[0].id
+    useBattleStore.getState().updateBoarder(id, 'attacker', bid, { protection: -3 })
+    useBattleStore.getState().updateBoarder(id, 'attacker', bid, { overflowTo: 'end' })
+    useBattleStore.getState().updateBoarder(id, 'attacker', bid, { cur: { str: -1 } })
+    expect(party(id, 'attacker')[0]).toMatchObject({ protection: 0, overflowTo: 'dex' })
+    expect(party(id, 'attacker')[0].cur.str).toBe(7)
+  })
+
+  it('removeBoarder removes only that boarder', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine({ name: 'A' }), marine({ name: 'B' })])
+    useBattleStore.getState().removeBoarder(id, 'attacker', party(id, 'attacker')[0].id)
+    expect(party(id, 'attacker').map((b) => b.name)).toEqual(['B'])
+  })
+
+  it('reorderBoarder swaps neighbours and ignores moves off the ends', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine({ name: 'A' }), marine({ name: 'B' }), marine({ name: 'C' })])
+    const [a, , c] = party(id, 'attacker')
+    useBattleStore.getState().reorderBoarder(id, 'attacker', a.id, 1)
+    expect(party(id, 'attacker').map((b) => b.name)).toEqual(['B', 'A', 'C'])
+    useBattleStore.getState().reorderBoarder(id, 'attacker', c.id, 1)
+    expect(party(id, 'attacker').map((b) => b.name)).toEqual(['B', 'A', 'C'])
+  })
+
+  it('applyBoarderDamage applies Protection, tracks status and logs each hit', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine({ name: 'A', protection: 4 }), marine({ name: 'B' })])
+    const [a, b] = party(id, 'attacker')
+    const before = useBattleStore.getState().log.length
+    useBattleStore.getState().applyBoarderDamage(id, 'attacker', [
+      { boarderId: a.id, damage: 9 },
+      { boarderId: b.id, damage: 100 },
+    ], 'Sand canister')
+    expect(party(id, 'attacker')[0].cur.end).toBe(2)
+    expect(party(id, 'attacker')[1].cur).toEqual({ str: 0, dex: 0, end: 0 })
+    const lines = useBattleStore.getState().log.slice(before).map((l) => l.message)
+    expect(lines).toHaveLength(2)
+    expect(lines[0]).toContain('9 dmg − 4 armour → 5')
+    expect(lines[1]).toContain('DEAD')
+  })
+
+  it('applyBoarderDamage is one undo step for the whole volley', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine(), marine()])
+    const [a, b] = party(id, 'attacker')
+    useBattleStore.getState().applyBoarderDamage(id, 'attacker', [
+      { boarderId: a.id, damage: 3 }, { boarderId: b.id, damage: 3 },
+    ])
+    useBattleStore.getState().undoLastAction()
+    expect(party(id, 'attacker').map((x) => x.cur.end)).toEqual([7, 7])
+  })
+
+  it('applyBoarderDamage skips unknown boarders and no-ops when none match', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine()])
+    const logLen = useBattleStore.getState().log.length
+    useBattleStore.getState().applyBoarderDamage(id, 'attacker', [{ boarderId: 'ghost', damage: 5 }])
+    expect(useBattleStore.getState().log.length).toBe(logLen)
+    expect(party(id, 'attacker')[0].cur.end).toBe(7)
+  })
+
+  it('applyBoarderDamage targets the given side only', () => {
+    const id = setup()
+    useBattleStore.getState().addBoarders(id, 'defender', [marine()])
+    const d = party(id, 'defender')[0]
+    useBattleStore.getState().applyBoarderDamage(id, 'attacker', [{ boarderId: d.id, damage: 5 }])
+    expect(party(id, 'defender')[0].cur.end).toBe(7)
+  })
+
+  it('legacy boardings without parties are handled', () => {
+    const id = setup()
+    useBattleStore.setState((s) => ({ boardings: s.boardings.map(({ parties: _p, ...rest }) => rest) }))
+    useBattleStore.getState().addBoarders(id, 'attacker', [marine()])
+    expect(party(id, 'attacker')).toHaveLength(1)
+    expect(party(id, 'defender')).toEqual([])
+  })
+})
+
 // === MISSILE AMMO — BARBETTES AND TORPEDOES ===
 // // MgT2e HG p.30–31
 

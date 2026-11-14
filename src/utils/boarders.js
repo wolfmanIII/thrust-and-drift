@@ -25,6 +25,18 @@ const isPositiveInt    = (n) => Number.isInteger(n) && n >= 1
 const isNonNegativeInt = (n) => Number.isInteger(n) && n >= 0
 
 /**
+ * Validate the numeric fields of boarder data.
+ * @param {{ str: number, dex: number, end: number, protection?: number, overflowTo?: string }} data
+ * @returns {string|null}  error message, or null when valid
+ */
+export function validateBoarderData({ str, dex, end, protection = 0, overflowTo = 'dex' }) {
+  if (![str, dex, end].every(isPositiveInt)) return 'Boarder STR, DEX and END must be integers ≥ 1'
+  if (!isNonNegativeInt(protection)) return 'Boarder Protection must be an integer ≥ 0'
+  if (overflowTo !== 'str' && overflowTo !== 'dex') return "Boarder overflowTo must be 'str' or 'dex'"
+  return null
+}
+
+/**
  * Build a boarder at full health.
  * Characteristics have no upper bound: armour such as battle dress can raise STR/DEX
  * well above 15. // MgT2e CRB p.100
@@ -39,15 +51,8 @@ export function createBoarder({
   id = uuidv7(), name = 'Boarder', str, dex, end,
   protection = 0, armourKey = null, overflowTo = 'dex',
 }) {
-  if (![str, dex, end].every(isPositiveInt)) {
-    throw new Error('Boarder STR, DEX and END must be integers ≥ 1')
-  }
-  if (!isNonNegativeInt(protection)) {
-    throw new Error('Boarder Protection must be an integer ≥ 0')
-  }
-  if (overflowTo !== 'str' && overflowTo !== 'dex') {
-    throw new Error("Boarder overflowTo must be 'str' or 'dex'")
-  }
+  const error = validateBoarderData({ str, dex, end, protection, overflowTo })
+  if (error) throw new Error(error)
   const trimmed = String(name).trim()
   return {
     id,
