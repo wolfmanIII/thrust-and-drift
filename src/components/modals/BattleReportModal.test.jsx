@@ -258,6 +258,26 @@ describe('BattleReportModal — battle log grouped by category (#43)', () => {
     expect(screen.getByText('Critical Hits')).toBeInTheDocument()
   })
 
+  it.each([
+    ['system', '⚔ Boarding initiated — Viper → Far Trader.'],
+    ['system', '⚔ 3 added to the boarding party.'],
+    ['action', 'Far Trader fires Pebble canister (T1) at the boarding party: total 10 — HIT, each boarder takes Ground-scale damage. (HG p.38, CRB p.78)'],
+    ['action', '⚔ Pebble canister — Marine 1 (boarding party): 40 dmg − 13 armour → 27 · UNCONSCIOUS.'],
+    ['info',   'Sand canister — boarder #2: 17 damage (Ground scale).'],
+  ])('groups boarding message (%s) under Boarding', (type, message) => {
+    useBattleStore.setState({ log: [makeEntry({ type, message })] })
+    render(<BattleReportModal />)
+    expect(screen.getByText('Boarding')).toBeInTheDocument()
+    expect(screen.queryByText('Other')).not.toBeInTheDocument()
+  })
+
+  it('keeps Disperse Sand against lasers under Reactions, not Boarding', () => {
+    useBattleStore.setState({ log: [makeEntry({ type: 'info', message: 'Trader Disperse Sand (T1): total 10 — +5 armour vs this laser attack.' })] })
+    render(<BattleReportModal />)
+    expect(screen.getByText('Reactions')).toBeInTheDocument()
+    expect(screen.queryByText('Boarding')).not.toBeInTheDocument()
+  })
+
   it('groups an unrelated system message under Other', () => {
     useBattleStore.setState({ log: [makeEntry({ type: 'system', message: 'Initiative rolled for all ships.' })] })
     render(<BattleReportModal />)

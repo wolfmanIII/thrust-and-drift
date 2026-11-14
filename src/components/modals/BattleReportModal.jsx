@@ -22,7 +22,7 @@ const PHASE_LABEL = {
  * Order matters: check the most specific category first so e.g. a Point
  * Defence message mentioning "missiles destroyed" doesn't fall into Missiles.
  * @param {{ type: string, message: string }} entry
- * @returns {'critical'|'pd'|'missile'|'reaction'|'attack'|'other'}
+ * @returns {'critical'|'pd'|'missile'|'reaction'|'boarding'|'attack'|'other'}
  */
 function classifyLogEntry(entry) {
   const msg = entry.message
@@ -30,6 +30,7 @@ function classifyLogEntry(entry) {
   if (/Point Defence/i.test(msg))                       return 'pd'
   if (/missile|torpedo|salvo/i.test(msg))                return 'missile'
   if (/Evasive Action|Disperse Sand/i.test(msg))         return 'reaction'
+  if (/⚔|boarding|boarder|canister/i.test(msg))          return 'boarding'
   if (entry.type === 'attack' || entry.type === 'damage'
     || / damage from | takes .*damage|hit — |Ion Cannon|hardened systems/i.test(msg)) return 'attack'
   return 'other'
@@ -40,6 +41,7 @@ const REPORT_SECTIONS = [
   { key: 'missile',  label: 'Missile Salvos' },
   { key: 'reaction', label: 'Reactions' },
   { key: 'pd',       label: 'Point Defence' },
+  { key: 'boarding', label: 'Boarding' },
   { key: 'critical', label: 'Critical Hits' },
   { key: 'other',    label: 'Other' },
 ]
