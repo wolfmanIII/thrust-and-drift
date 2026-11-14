@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { DiceInput }      from '../forms/DiceInput.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
 import { getEffectiveSkill } from '../../utils/crew.js'
-import { applyPersonalDamage, getStackOrder } from '../../utils/boarders.js'
+import { applyPersonalDamage, getParties, getStackOrder } from '../../utils/boarders.js'
 import {
   BOARDER_CANISTERS,
   resolveBoarderCanisterCheck,
@@ -67,7 +67,8 @@ export function BoarderCanisterPanel({ boarding, defender }) {
     addLogEntry(`${BOARDER_CANISTERS[type].label} canister — boarder #${target}: ${rolled.damage} damage (Ground scale).`)
   }
 
-  const livingBoarders = getStackOrder(boarding.parties?.attacker ?? [])
+  const rosterSize     = getParties(boarding).attacker.length
+  const livingBoarders = getStackOrder(getParties(boarding).attacker)
 
   /** Roll Ground-scale damage for every living boarder and apply it (Protection → END → STR/DEX). */
   function handleRollRoster() {
@@ -175,10 +176,10 @@ export function BoarderCanisterPanel({ boarding, defender }) {
               </p>
             </>
           )}
-          {lastAttack.success && livingBoarders.length === 0 && !rosterHits && (boarding.parties?.attacker.length ?? 0) > 0 && (
+          {lastAttack.success && livingBoarders.length === 0 && !rosterHits && rosterSize > 0 && (
             <p className="text-slate-400 text-2xs font-mono">No living boarders left in the boarding party.</p>
           )}
-          {lastAttack.success && (boarding.parties?.attacker.length ?? 0) === 0 && !rosterHits && (
+          {lastAttack.success && rosterSize === 0 && !rosterHits && (
             <>
               <button
                 onClick={handleRollDamage}

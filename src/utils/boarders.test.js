@@ -11,6 +11,9 @@ import {
   pickStackTarget,
   pickRandomMember,
   getCasualtyStats,
+  getParties,
+  mergeBoarderPatch,
+  countByStatus,
 } from './boarders.js'
 
 const mk = (over = {}) => createBoarder({ id: 'b', name: 'Marine', str: 7, dex: 7, end: 7, ...over })
@@ -205,5 +208,60 @@ describe('getCasualtyStats', () => {
   it('counts unconscious and dead together', () => {
     const party = [mk(), withCur(mk(), { str: 0 }), withCur(mk(), { str: 0, dex: 0, end: 0 }), mk()]
     expect(getCasualtyStats(party)).toMatchObject({ total: 4, down: 2, pct: 50, moraleTarget: 10 })
+  })
+})
+
+describe('getParties', () => {
+  it('returns empty rosters for a legacy boarding without parties', () => {
+    expect(getParties({})).toEqual({ attacker: [], defender: [] })
+    expect(getParties(undefined)).toEqual({ attacker: [], defender: [] })
+  })
+  it('fills a missing side', () => {
+    const b = mk()
+    expect(getParties({ parties: { attacker: [b] } })).toEqual({ attacker: [b], defender: [] })
+  })
+  it('returns the stored rosters untouched', () => {
+    const parties = { attacker: [mk({ id: 'a' })], defender: [mk({ id: 'd' })] }
+    expect(getParties({ parties })).toEqual(parties)
+  })
+})
+
+describe('countByStatus', () => {
+  it('counts fit, unconscious and dead boarders', () => {
+    const party = [mk(), withCur(mk(), { str: 0 }), withCur(mk(), { str: 0, dex: 0, end: 0 }), mk()]
+    expect(countByStatus(party)).toEqual({ ok: 2, unconscious: 1, dead: 1 })
+  })
+  it('empty party', () => {
+    expect(countByStatus([])).toEqual({ ok: 0, unconscious: 0, dead: 0 })
+  })
+})
+
+describe('mergeBoarderPatch', () => {
+  it('edits fields without mutating the input', () => {
+    const b = mk()
+    const r = mergeBoarderPatch(b, { name: ' Sgt ', protection: 8, armourKey: 'vacc_tl10', overflowTo: 'str' })
+    expect(r).toMatchObject({ name: 'Sgt', protection: 8, armourKey: 'vacc_tl10', overflowTo: 'str' })
+    expect(b.protection).toBe(0)
+  })
+  it('keeps the old name when the new one is blank', () => {
+    expect(mergeBoarderPatch(mk(), { name: '   ' }).name).toBe('Marine')
+  })
+  it('clamps current characteristics to a lowered max', () => {
+    const r = mergeBoarderPatch(mk(), { max: { end: 5 } })
+    expect(r.max.end).toBe(5)
+    expect(r.cur.end).toBe(5)
+  })
+  it('can set current to 0 (damage correction) but never above max', () => {
+    expect(mergeBoarderPatch(mk(), { cur: { end: 0 } }).cur.end).toBe(0)
+    expect(mergeBoarderPatch(mk(), { cur: { end: 99 } }).cur.end).toBe(7)
+  })
+  it.each([
+    [{ protection: -1 }],
+    [{ overflowTo: 'end' }],
+    [{ cur: { str: -1 } }],
+    [{ cur: { str: 1.5 } }],
+    [{ max: { dex: 0 } }],
+  ])('rejects invalid patch %j', (patch) => {
+    expect(mergeBoarderPatch(mk(), patch)).toBeNull()
   })
 })

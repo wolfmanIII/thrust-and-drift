@@ -10,7 +10,7 @@ import { useState } from 'react'
 import { Modal }          from './Modal.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore }     from '../../store/uiStore.js'
-import { getBoarderStatus } from '../../utils/boarders.js'
+import { countByStatus, getParties } from '../../utils/boarders.js'
 
 const OUTCOMES = [
   {
@@ -50,8 +50,7 @@ const FACTION_COLORS = {
  * @param {{ label: string, party: object[] }} props
  */
 function SurvivorsRow({ label, party }) {
-  const counts = { ok: 0, unconscious: 0, dead: 0 }
-  for (const b of party) counts[getBoarderStatus(b)] += 1
+  const counts = countByStatus(party)
   return (
     <div className="flex items-center gap-3 font-mono text-xs" data-testid="survivors-row">
       <span className="text-slate-300 flex-1 truncate">{label}</span>
@@ -80,6 +79,8 @@ export function BoardingOutcomeModal() {
   const attacker = ships.find((s) => s.id === boarding.attackerId)
   const defender = ships.find((s) => s.id === boarding.defenderId)
   if (!attacker || !defender) return null
+
+  const parties = getParties(boarding)
 
   function handleResolve() {
     if (!selectedOutcome) return
@@ -122,11 +123,11 @@ export function BoardingOutcomeModal() {
         )}
 
         {/* Survivors — only when a roster was defined */}
-        {((boarding.parties?.attacker.length ?? 0) + (boarding.parties?.defender.length ?? 0)) > 0 && (
+        {(parties.attacker.length + parties.defender.length) > 0 && (
           <div className="bg-slate-900/40 rounded px-3 py-2 space-y-1">
             <p className="text-slate-400 font-mono text-2xs uppercase">Survivors</p>
-            {boarding.parties.attacker.length > 0 && <SurvivorsRow label={`Boarders — ${attacker.name}`} party={boarding.parties.attacker} />}
-            {boarding.parties.defender.length > 0 && <SurvivorsRow label={`Defenders — ${defender.name}`} party={boarding.parties.defender} />}
+            {parties.attacker.length > 0 && <SurvivorsRow label={`Boarders — ${attacker.name}`} party={parties.attacker} />}
+            {parties.defender.length > 0 && <SurvivorsRow label={`Defenders — ${defender.name}`} party={parties.defender} />}
           </div>
         )}
 

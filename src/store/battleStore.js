@@ -15,7 +15,7 @@ import { roll2D6, rollDice } from '../utils/dice.js'
 import { getEffectiveSkill, buildDefaultAssignments } from '../utils/crew.js'
 import { resolveDogfightChecks } from '../utils/dogfight.js'
 import { BOARDER_CANISTERS } from '../utils/boarding.js'
-import { createBoarder, validateBoarderData, applyPersonalDamage, MAX_BOARDER_BATCH } from '../utils/boarders.js'
+import { createBoarder, validateBoarderData, applyPersonalDamage, mergeBoarderPatch, getParties, MAX_BOARDER_BATCH } from '../utils/boarders.js'
 import { RANGE_BAND_ORDER, RANGE_BAND_MOVE_COST } from '../data/rangeBands.js'
 import { useUiStore } from './uiStore.js'
 import { emitEffect } from '../utils/effectQueue.js'
@@ -261,23 +261,25 @@ const useBattleStore = create((set, get) => {
   const isBoarderSide = (side) => side === 'attacker' || side === 'defender'
   const isValidHitDamage = (n) => Number.isInteger(n) && n >= 0
   const isOpenBoarding = (id) => !!get().boardings.find((b) => b.id === id && b.outcome === null)
+  /** Common guard prefix of the roster actions: an unresolved boarding and a valid side. */
+  const guardParty = (boardingId, side) => isOpenBoarding(boardingId) && isBoarderSide(side)
   const getParty = (boardingId, side) =>
-    get().boardings.find((b) => b.id === boardingId)?.parties?.[side] ?? []
+    getParties(get().boardings.find((b) => b.id === boardingId))[side]
   /**
-   * Replace one side of a boarding's roster. Legacy boardings without `parties` get empty rosters.
+   * Replace one side of a boarding's roster and append the given log lines in the same update.
    * @param {string} boardingId
    * @param {'attacker'|'defender'} side
-   * @param {(party: object[]) => object[]} fn
-   * @param {string} [logMessage]
+   * @param {(party: readonly object[]) => object[]} fn
+   * @param {Array<{ type: string, message: string }>} [logs]
    */
-  const updateParty = (boardingId, side, fn, logMessage) => {
+  const updateParty = (boardingId, side, fn, logs = []) => {
     set((s) => ({
       boardings: s.boardings.map((b) => b.id !== boardingId ? b : {
         ...b,
-        parties: { attacker: [], defender: [], ...(b.parties ?? {}), [side]: fn(b.parties?.[side] ?? []) },
+        parties: { ...getParties(b), [side]: fn(getParties(b)[side]) },
       }),
-      log: logMessage
-        ? [...s.log, makeLogEntry({ round: s.round, phase: s.phase, type: 'system', message: logMessage })]
+      log: logs.length > 0
+        ? [...s.log, ...logs.map(({ type, message }) => makeLogEntry({ round: s.round, phase: s.phase, type, message }))]
         : s.log,
     }))
   }
@@ -2172,12 +2174,14 @@ const useBattleStore = create((set, get) => {
    */
   addBoarders: wh(
     (boardingId, side, dataList) =>
-      isOpenBoarding(boardingId) && isBoarderSide(side) &&
+      guardParty(boardingId, side) &&
       Array.isArray(dataList) && dataList.length > 0 && dataList.length <= MAX_BOARDER_BATCH &&
       dataList.every((d) => validateBoarderData(d) === null),
     (boardingId, side, dataList) => {
       const added = dataList.map((d) => createBoarder(d))
-      updateParty(boardingId, side, (party) => [...party, ...added], `⚔ ${added.length} added to the ${BOARDER_SIDE_LABEL[side]}.`)
+      updateParty(boardingId, side, (party) => [...party, ...added], [
+        { type: 'system', message: `⚔ ${added.length} added to the ${BOARDER_SIDE_LABEL[side]}.` },
+      ])
     },
   ),
 
@@ -2192,33 +2196,12 @@ const useBattleStore = create((set, get) => {
    */
   updateBoarder: wh(
     (boardingId, side, boarderId, patch) => {
-      if (!isOpenBoarding(boardingId) || !isBoarderSide(side) || !patch) return false
+      if (!guardParty(boardingId, side) || !patch) return false
       const b = getParty(boardingId, side).find((x) => x.id === boarderId)
-      if (!b) return false
-      const max = { ...b.max, ...(patch.max ?? {}) }
-      const cur = { ...b.cur, ...(patch.cur ?? {}) }
-      const curOk = ['str', 'dex', 'end'].every((k) => Number.isInteger(cur[k]) && cur[k] >= 0)
-      return curOk && validateBoarderData({
-        ...max,
-        protection: patch.protection ?? b.protection,
-        overflowTo: patch.overflowTo ?? b.overflowTo,
-      }) === null
+      return !!b && mergeBoarderPatch(b, patch) !== null
     },
     (boardingId, side, boarderId, patch) => {
-      updateParty(boardingId, side, (party) => party.map((b) => {
-        if (b.id !== boarderId) return b
-        const max = { ...b.max, ...(patch.max ?? {}) }
-        const cur = { ...b.cur, ...(patch.cur ?? {}) }
-        return {
-          ...b,
-          name: patch.name !== undefined ? (String(patch.name).trim() || b.name) : b.name,
-          protection: patch.protection ?? b.protection,
-          armourKey: patch.armourKey !== undefined ? patch.armourKey : b.armourKey,
-          overflowTo: patch.overflowTo ?? b.overflowTo,
-          max,
-          cur: { str: Math.min(cur.str, max.str), dex: Math.min(cur.dex, max.dex), end: Math.min(cur.end, max.end) },
-        }
-      }))
+      updateParty(boardingId, side, (party) => party.map((b) => b.id === boarderId ? mergeBoarderPatch(b, patch) : b))
     },
   ),
 
@@ -2230,7 +2213,7 @@ const useBattleStore = create((set, get) => {
    */
   removeBoarder: wh(
     (boardingId, side, boarderId) =>
-      isOpenBoarding(boardingId) && isBoarderSide(side) &&
+      guardParty(boardingId, side) &&
       getParty(boardingId, side).some((b) => b.id === boarderId),
     (boardingId, side, boarderId) => {
       updateParty(boardingId, side, (party) => party.filter((b) => b.id !== boarderId))
@@ -2247,7 +2230,7 @@ const useBattleStore = create((set, get) => {
    */
   reorderBoarder: wh(
     (boardingId, side, boarderId, dir) => {
-      if (!isOpenBoarding(boardingId) || !isBoarderSide(side) || (dir !== -1 && dir !== 1)) return false
+      if (!guardParty(boardingId, side) || (dir !== -1 && dir !== 1)) return false
       const party = getParty(boardingId, side)
       const i = party.findIndex((b) => b.id === boarderId)
       return i !== -1 && i + dir >= 0 && i + dir < party.length
@@ -2272,26 +2255,24 @@ const useBattleStore = create((set, get) => {
    */
   applyBoarderDamage: wh(
     (boardingId, side, hits) =>
-      isOpenBoarding(boardingId) && isBoarderSide(side) && Array.isArray(hits) &&
+      guardParty(boardingId, side) && Array.isArray(hits) &&
       hits.some((h) => isValidHitDamage(h.damage) && getParty(boardingId, side).some((b) => b.id === h.boarderId)),
     (boardingId, side, hits, source = 'Hit') => {
-      const messages = []
-      updateParty(boardingId, side, (party) => {
-        let next = party
-        for (const h of hits) {
-          if (!isValidHitDamage(h.damage)) continue
-          const target = next.find((b) => b.id === h.boarderId)
-          if (!target) continue
-          const r = applyPersonalDamage(target, h.damage, { ap: h.ap, effect: h.effect, minOneOnEffect6: h.minOneOnEffect6 })
-          next = next.map((b) => b.id === target.id ? r.boarder : b)
-          const state = r.statusAfter !== r.statusBefore ? ` · ${r.statusAfter.toUpperCase()}` : ''
-          messages.push(`⚔ ${source} — ${target.name} (${BOARDER_SIDE_LABEL[side]}): ${h.damage} dmg − ${r.absorbed} armour → ${r.applied}${state}.`)
-        }
-        return next
-      })
-      set((s) => ({
-        log: [...s.log, ...messages.map((message) => makeLogEntry({ round: s.round, phase: s.phase, type: 'action', message }))],
-      }))
+      const logs = []
+      let party = getParty(boardingId, side)
+      for (const h of hits) {
+        if (!isValidHitDamage(h.damage)) continue
+        const target = party.find((b) => b.id === h.boarderId)
+        if (!target) continue
+        const r = applyPersonalDamage(target, h.damage, { ap: h.ap, effect: h.effect, minOneOnEffect6: h.minOneOnEffect6 })
+        party = party.map((b) => b.id === target.id ? r.boarder : b)
+        const state = r.statusAfter !== r.statusBefore ? ` · ${r.statusAfter.toUpperCase()}` : ''
+        logs.push({
+          type: 'action',
+          message: `⚔ ${source} — ${target.name} (${BOARDER_SIDE_LABEL[side]}): ${h.damage} dmg − ${r.absorbed} armour → ${r.applied}${state}.`,
+        })
+      }
+      updateParty(boardingId, side, () => party, logs)
     },
   ),
 

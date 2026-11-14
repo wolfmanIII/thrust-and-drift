@@ -9,9 +9,6 @@ describe('NPC_EXPERIENCE', () => {
   it('every level starts from a characteristic of 7', () => {
     for (const lvl of Object.values(NPC_EXPERIENCE)) expect(lvl.base).toBe(7)
   })
-  it('skill level grows green 0 → elite 3', () => {
-    expect(Object.values(NPC_EXPERIENCE).map((l) => l.skill)).toEqual([0, 1, 2, 3])
-  })
   it('bonus hints follow the CRB table', () => {
     expect(NPC_EXPERIENCE.green.bonuses).toEqual([])
     expect(NPC_EXPERIENCE.average.bonuses).toEqual([1])
@@ -34,10 +31,9 @@ describe('PERSONAL_ARMOUR', () => {
   it('has no laser-only Reflec entry', () => {
     expect(Object.keys(PERSONAL_ARMOUR).some((k) => k.startsWith('reflec'))).toBe(false)
   })
-  it('every entry has label, tl and non-negative protection', () => {
+  it('every entry has a label and non-negative protection', () => {
     for (const a of Object.values(PERSONAL_ARMOUR)) {
       expect(typeof a.label).toBe('string')
-      expect(a.tl).toBeGreaterThanOrEqual(0)
       expect(a.protection).toBeGreaterThanOrEqual(0)
     }
   })

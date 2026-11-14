@@ -5,8 +5,9 @@
 import { NPC_EXPERIENCE, PERSONAL_ARMOUR } from '../../data/boarderPresets.js'
 import { MAX_BOARDER_BATCH } from '../../utils/boarders.js'
 import { useBoarderForm } from './useBoarderForm.js'
+import { INPUT_BASE, CANCEL_BTN } from './boarderStyles.js'
 
-const input = 'bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-1.5 py-1 focus:outline-none focus:border-(--neon-cyan)/60'
+const input = `${INPUT_BASE} px-1.5 py-1`
 
 /**
  * @param {{ onSubmit: (dataList: object[]) => void, onCancel: () => void }} props
@@ -100,7 +101,7 @@ export function BoarderForm({ onSubmit, onCancel }) {
         </button>
         <button
           type="button" onClick={onCancel}
-          className="px-3 py-1 bg-slate-800 border border-slate-600 text-slate-400 hover:text-slate-200 font-mono text-xs rounded transition-colors"
+          className={CANCEL_BTN}
         >
           CLOSE
         </button>

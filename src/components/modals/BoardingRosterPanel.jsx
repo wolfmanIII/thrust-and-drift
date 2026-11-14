@@ -6,7 +6,8 @@
 
 import { useState } from 'react'
 import { useBattleStore } from '../../store/battleStore.js'
-import { getBoarderStatus, getCasualtyStats } from '../../utils/boarders.js'
+import { getBoarderStatus, getCasualtyStats, getParties } from '../../utils/boarders.js'
+import { INPUT_BASE } from './boarderStyles.js'
 import { BoarderForm } from './BoarderForm.jsx'
 import { BoarderDamageForm } from './BoarderDamageForm.jsx'
 
@@ -17,7 +18,9 @@ const STATUS_STYLE = {
 }
 
 const smallBtn = 'px-1.5 py-0.5 bg-slate-800 border border-slate-600 text-slate-400 hover:text-slate-200 hover:border-slate-400 font-mono text-2xs rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed'
-const editInput = 'bg-slate-700 border border-slate-600 text-slate-200 font-mono text-xs rounded px-1 py-0.5 w-full focus:outline-none focus:border-(--neon-cyan)/60'
+const editInput = `${INPUT_BASE} px-1 py-0.5 w-full`
+
+const STATUS_LABEL = { ok: 'OK', unconscious: 'DOWN', dead: 'DEAD' }
 
 /**
  * Inline editor for a boarder's name, Protection and current characteristics (GM correction).
@@ -80,7 +83,7 @@ function PartySection({ side, title, boarding, damageTarget, setDamageTarget }) 
   const [adding, setAdding]     = useState(false)
   const [editingId, setEditingId] = useState(null)
 
-  const party = boarding.parties?.[side] ?? []
+  const party = getParties(boarding)[side]
   const stats = getCasualtyStats(party)
   const damaging = damageTarget?.side === side
     ? party.find((b) => b.id === damageTarget.boarderId) ?? null
@@ -121,7 +124,7 @@ function PartySection({ side, title, boarding, damageTarget, setDamageTarget }) 
                     S{b.cur.str}/{b.max.str} D{b.cur.dex}/{b.max.dex} E{b.cur.end}/{b.max.end}
                   </span>
                   <span className="text-slate-400 text-2xs shrink-0">P{b.protection}</span>
-                  <span className={`text-2xs font-bold uppercase shrink-0 w-12 text-right ${STATUS_STYLE[status]}`}>{status === 'ok' ? 'OK' : status === 'unconscious' ? 'DOWN' : 'DEAD'}</span>
+                  <span className={`text-2xs font-bold uppercase shrink-0 w-12 text-right ${STATUS_STYLE[status]}`}>{STATUS_LABEL[status]}</span>
                   <button className={smallBtn} aria-label={`Move ${b.name} up`} disabled={i === 0} onClick={() => reorderBoarder(boarding.id, side, b.id, -1)}>↑</button>
                   <button className={smallBtn} aria-label={`Move ${b.name} down`} disabled={i === party.length - 1} onClick={() => reorderBoarder(boarding.id, side, b.id, 1)}>↓</button>
                   <button className={smallBtn} aria-label={`Damage ${b.name}`} disabled={status === 'dead'} onClick={() => setDamageTarget({ side, boarderId: b.id })}>DMG</button>
@@ -179,9 +182,10 @@ export function BoardingRosterPanel({ boarding, attackerName, defenderName, dama
   const target    = controlled ? damageTarget : localTarget
   const setTarget = controlled ? setDamageTarget : setLocalTarget
 
-  const total = (boarding.parties?.attacker.length ?? 0) + (boarding.parties?.defender.length ?? 0)
+  const parties = getParties(boarding)
+  const total = parties.attacker.length + parties.defender.length
   // A target whose boarder was removed must not keep the panel forced open.
-  const targetExists = !!target && (boarding.parties?.[target.side] ?? []).some((b) => b.id === target.boarderId)
+  const targetExists = !!target && parties[target.side].some((b) => b.id === target.boarderId)
   const expanded = open || targetExists
 
   return (

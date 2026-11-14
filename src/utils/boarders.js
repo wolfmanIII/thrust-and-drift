@@ -68,6 +68,21 @@ export function createBoarder({
   }
 }
 
+const EMPTY_PARTY = Object.freeze([])
+
+/**
+ * Both rosters of a boarding. Boardings saved before rosters existed have no `parties`:
+ * this is the single place that fallback lives.
+ * @param {{ parties?: { attacker?: Boarder[], defender?: Boarder[] } }|undefined|null} boarding
+ * @returns {{ attacker: readonly Boarder[], defender: readonly Boarder[] }}
+ */
+export function getParties(boarding) {
+  return {
+    attacker: boarding?.parties?.attacker ?? EMPTY_PARTY,
+    defender: boarding?.parties?.defender ?? EMPTY_PARTY,
+  }
+}
+
 /**
  * Derived status — never stored.
  * STR or DEX at 0 = unconscious; STR, DEX and END all at 0 = dead. // MgT2e CRB p.77
@@ -80,6 +95,32 @@ export function getBoarderStatus(boarder) {
   if (str === 0 && dex === 0 && end === 0) return 'dead'
   if (str === 0 || dex === 0) return 'unconscious'
   return 'ok'
+}
+
+/**
+ * Apply an edit to a boarder: name, Protection, armour label, overflow target and
+ * current/max characteristics. Current values are clamped to max.
+ * @param {Boarder} boarder
+ * @param {{ name?: string, protection?: number, armourKey?: string|null, overflowTo?: 'str'|'dex',
+ *           cur?: Partial<PhysicalStats>, max?: Partial<PhysicalStats> }} patch
+ * @returns {Boarder|null}  the edited boarder, or null when the patch is invalid
+ */
+export function mergeBoarderPatch(boarder, patch) {
+  const max = { ...boarder.max, ...(patch.max ?? {}) }
+  const cur = { ...boarder.cur, ...(patch.cur ?? {}) }
+  const protection = patch.protection ?? boarder.protection
+  const overflowTo = patch.overflowTo ?? boarder.overflowTo
+  if (!['str', 'dex', 'end'].every((k) => isNonNegativeInt(cur[k]))) return null
+  if (validateBoarderData({ ...max, protection, overflowTo }) !== null) return null
+  return {
+    ...boarder,
+    name: patch.name !== undefined ? (String(patch.name).trim() || boarder.name) : boarder.name,
+    protection,
+    overflowTo,
+    armourKey: patch.armourKey !== undefined ? patch.armourKey : boarder.armourKey,
+    max,
+    cur: { str: Math.min(cur.str, max.str), dex: Math.min(cur.dex, max.dex), end: Math.min(cur.end, max.end) },
+  }
 }
 
 /**
@@ -165,6 +206,17 @@ export function pickRandomMember(party, rng = Math.random) {
 }
 
 /**
+ * Head count by status.
+ * @param {readonly Boarder[]} party
+ * @returns {{ ok: number, unconscious: number, dead: number }}
+ */
+export function countByStatus(party) {
+  const counts = { ok: 0, unconscious: 0, dead: 0 }
+  for (const b of party) counts[getBoarderStatus(b)] += 1
+  return counts
+}
+
+/**
  * Casualty figures and the Morale check the Referee may call. Unconscious and dead count as
  * casualties. Thresholds: 10% casualties → MRL 8+, 30% → 10+, 60% → 12+.
  * The app only reports the threshold, it never rolls the check. // Traveller Companion pp.6–7
@@ -173,7 +225,7 @@ export function pickRandomMember(party, rng = Math.random) {
  */
 export function getCasualtyStats(party) {
   const total = party.length
-  const down  = party.filter((b) => getBoarderStatus(b) !== 'ok').length
+  const down  = total - countByStatus(party).ok
   // Integer arithmetic: the shown percentage and the threshold always agree (29.6% is 29%, not 30%).
   const pct = total === 0 ? 0 : Math.floor((down * 100) / total)
   let moraleTarget = null

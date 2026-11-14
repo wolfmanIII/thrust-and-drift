@@ -7,9 +7,7 @@
 
 import { useState } from 'react'
 import { roll2D6 } from '../../utils/dice.js'
-import { getStackOrder, pickStackTarget, pickRandomMember } from '../../utils/boarders.js'
-
-const EMPTY_PARTIES = { attacker: [], defender: [] }
+import { getParties, getStackOrder, pickStackTarget, pickRandomMember } from '../../utils/boarders.js'
 
 /**
  * @param {object|undefined} boarding  undefined while no boarding is open (hooks run unconditionally)
@@ -29,7 +27,7 @@ export function useConflictTargeting(boarding) {
   const [stackHit, setStackHit]           = useState(null)
   const [missedMember, setMissedMember]   = useState(null)
 
-  const parties    = boarding?.parties ?? EMPTY_PARTIES
+  const parties    = getParties(boarding)
   const targetSide = firingSide === 'attacker' ? 'defender' : 'attacker'
 
   const chooseFiringSide = (side) => {
