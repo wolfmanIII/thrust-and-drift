@@ -112,3 +112,42 @@ describe('BoardingOutcomeModal — actions', () => {
     expect(screen.getByText(/CONFIRM OUTCOME/i)).not.toBeDisabled()
   })
 })
+
+describe('BoardingOutcomeModal — survivors', () => {
+  const stat = { str: 7, dex: 7, end: 7 }
+
+  it('is hidden when no roster was defined', () => {
+    setupSecurity()
+    render(<BoardingOutcomeModal />)
+    expect(screen.queryByText('Survivors')).toBeNull()
+  })
+
+  it('counts fit, downed and dead boarders per side', () => {
+    const { bid } = setupSecurity()
+    const store = useBattleStore.getState()
+    store.addBoarders(bid, 'attacker', [{ name: 'A', ...stat }, { name: 'B', ...stat }, { name: 'C', ...stat }])
+    const [a, b] = useBattleStore.getState().boardings[0].parties.attacker
+    useBattleStore.getState().applyBoarderDamage(bid, 'attacker', [
+      { boarderId: a.id, damage: 14 },    // unconscious
+      { boarderId: b.id, damage: 100 },   // dead
+    ])
+    render(<BoardingOutcomeModal />)
+    expect(screen.getByText('Survivors')).toBeTruthy()
+    const rows = screen.getAllByTestId('survivors-row')
+    expect(rows).toHaveLength(1)
+    expect(rows[0].textContent).toContain('Boarders — Viper')
+    expect(rows[0].textContent).toContain('1 fit')
+    expect(rows[0].textContent).toContain('1 down')
+    expect(rows[0].textContent).toContain('1 dead')
+  })
+
+  it('shows both sides when both have a roster', () => {
+    const { bid } = setupSecurity()
+    const store = useBattleStore.getState()
+    store.addBoarders(bid, 'attacker', [{ name: 'A', ...stat }])
+    store.addBoarders(bid, 'defender', [{ name: 'G', ...stat }])
+    render(<BoardingOutcomeModal />)
+    expect(screen.getAllByTestId('survivors-row')).toHaveLength(2)
+    expect(screen.getByText(/Defenders — Far Trader/)).toBeTruthy()
+  })
+})

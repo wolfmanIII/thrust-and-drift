@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { Modal }          from './Modal.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
 import { useUiStore }     from '../../store/uiStore.js'
+import { getBoarderStatus } from '../../utils/boarders.js'
 
 const OUTCOMES = [
   {
@@ -42,6 +43,23 @@ const FACTION_COLORS = {
   players: 'text-blue-400',
   npc:     'text-red-400',
   neutral: 'text-slate-400',
+}
+
+/**
+ * Read-only head count of a roster: fit, downed (unconscious) and dead. // MgT2e CRB p.77
+ * @param {{ label: string, party: object[] }} props
+ */
+function SurvivorsRow({ label, party }) {
+  const counts = { ok: 0, unconscious: 0, dead: 0 }
+  for (const b of party) counts[getBoarderStatus(b)] += 1
+  return (
+    <div className="flex items-center gap-3 font-mono text-xs" data-testid="survivors-row">
+      <span className="text-slate-300 flex-1 truncate">{label}</span>
+      <span className="text-emerald-400">{counts.ok} fit</span>
+      <span className="text-amber-400">{counts.unconscious} down</span>
+      <span className="text-red-400">{counts.dead} dead</span>
+    </div>
+  )
 }
 
 export function BoardingOutcomeModal() {
@@ -100,6 +118,15 @@ export function BoardingOutcomeModal() {
                 </span>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Survivors — only when a roster was defined */}
+        {((boarding.parties?.attacker.length ?? 0) + (boarding.parties?.defender.length ?? 0)) > 0 && (
+          <div className="bg-slate-900/40 rounded px-3 py-2 space-y-1">
+            <p className="text-slate-400 font-mono text-2xs uppercase">Survivors</p>
+            {boarding.parties.attacker.length > 0 && <SurvivorsRow label={`Boarders — ${attacker.name}`} party={boarding.parties.attacker} />}
+            {boarding.parties.defender.length > 0 && <SurvivorsRow label={`Defenders — ${defender.name}`} party={boarding.parties.defender} />}
           </div>
         )}
 
