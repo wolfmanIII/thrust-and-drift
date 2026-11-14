@@ -2,13 +2,16 @@
  * BoarderCanisterPanel — defender's sandcaster fire against an incoming boarding party.
  * Contact phase only: once the party is inside the hull it is out of the caster's reach.
  * Gunner (turret) check → on success each boarder takes Ground-scale damage
- * (Sand 8D, CRB p.171; Pebble 1DD, HG p.38). The GM decides the consequences per boarder.
+ * (Sand 8D, CRB p.171; Pebble 1DD, HG p.38). With a boarding party defined, the damage is rolled
+ * for each living boarder and applied through their Protection and characteristics (CRB p.77);
+ * otherwise it is shown per anonymous boarder and the GM decides the consequences.
  */
 
 import { useState } from 'react'
 import { DiceInput }      from '../forms/DiceInput.jsx'
 import { useBattleStore } from '../../store/battleStore.js'
 import { getEffectiveSkill } from '../../utils/crew.js'
+import { applyPersonalDamage, getStackOrder } from '../../utils/boarders.js'
 import {
   BOARDER_CANISTERS,
   resolveBoarderCanisterCheck,
@@ -21,12 +24,14 @@ import {
 export function BoarderCanisterPanel({ boarding, defender }) {
   const fireBoarderCanister = useBattleStore((s) => s.fireBoarderCanister)
   const addLogEntry         = useBattleStore((s) => s.addLogEntry)
+  const applyBoarderDamage  = useBattleStore((s) => s.applyBoarderDamage)
 
   const [canisterType, setCanisterType] = useState('sand')
   const [slotChoice, setSlotChoice]     = useState(null)
   const [dice, setDice]                 = useState(null)
   const [diceKey, setDiceKey]           = useState(0)
   const [damages, setDamages]           = useState([])
+  const [rosterHits, setRosterHits]     = useState(null)
 
   const ammoLeft = defender.sandAmmoTotal ?? 0
   const freeSlots = ammoLeft > 0
@@ -50,6 +55,7 @@ export function BoarderCanisterPanel({ boarding, defender }) {
     setDice(null)
     setDiceKey((k) => k + 1)
     setDamages([])
+    setRosterHits(null)
   }
 
   function handleRollDamage() {
@@ -59,6 +65,26 @@ export function BoarderCanisterPanel({ boarding, defender }) {
     const rolled = rollBoarderCanisterDamage(type)
     setDamages((prev) => [...prev, rolled])
     addLogEntry(`${BOARDER_CANISTERS[type].label} canister — boarder #${target}: ${rolled.damage} damage (Ground scale).`)
+  }
+
+  const livingBoarders = getStackOrder(boarding.parties?.attacker ?? [])
+
+  /** Roll Ground-scale damage for every living boarder and apply it (Protection → END → STR/DEX). */
+  function handleRollRoster() {
+    if (!lastAttack?.success || rosterHits) return
+    const type = lastAttack.type
+    const rows = livingBoarders.map((b) => {
+      const rolled = rollBoarderCanisterDamage(type)
+      const result = applyPersonalDamage(b, rolled.damage, { minOneOnEffect6: false })
+      return { boarder: b, rolled, result }
+    })
+    applyBoarderDamage(
+      boarding.id,
+      'attacker',
+      rows.map((r) => ({ boarderId: r.boarder.id, damage: r.rolled.damage, minOneOnEffect6: false })),
+      `${BOARDER_CANISTERS[type].label} canister`,
+    )
+    setRosterHits(rows)
   }
 
   const btn = 'font-mono text-xs rounded border transition-colors'
@@ -122,7 +148,34 @@ export function BoarderCanisterPanel({ boarding, defender }) {
           <p className={`font-mono text-xs font-bold ${lastAttack.success ? 'text-emerald-400' : 'text-red-400'}`}>
             Last salvo: {BOARDER_CANISTERS[lastAttack.type].label} (T{lastAttack.turretSlot}) — {lastAttack.success ? 'HIT' : 'MISS'}
           </p>
-          {lastAttack.success && (
+          {lastAttack.success && (livingBoarders.length > 0 || rosterHits) && (
+            <>
+              <button
+                onClick={handleRollRoster}
+                disabled={!!rosterHits}
+                className="w-full py-1 bg-red-900/30 border border-red-500 text-red-400 hover:bg-red-900/50 disabled:opacity-40 disabled:cursor-not-allowed font-mono text-xs rounded transition-colors"
+              >
+                🎲 ROLL DAMAGE — {rosterHits ? `${rosterHits.length} BOARDERS HIT` : `ALL ${livingBoarders.length} BOARDERS`}
+              </button>
+              {rosterHits && (
+                <ul className="font-mono text-xs text-slate-300 space-y-0.5" data-testid="canister-roster-results">
+                  {rosterHits.map(({ boarder, rolled, result }) => (
+                    <li key={boarder.id}>
+                      {boarder.name}: {rolled.damage} − {result.absorbed} armour →{' '}
+                      <span className="text-red-400 font-bold">{result.applied}</span>
+                      {result.statusAfter !== result.statusBefore && (
+                        <span className="text-red-400 font-bold"> · {result.statusAfter.toUpperCase()}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="text-slate-400 text-2xs font-mono">
+                Ground-scale damage rolled for each living boarder; Protection applies (CRB p.77).
+              </p>
+            </>
+          )}
+          {lastAttack.success && livingBoarders.length === 0 && !rosterHits && (
             <>
               <button
                 onClick={handleRollDamage}
@@ -141,7 +194,7 @@ export function BoarderCanisterPanel({ boarding, defender }) {
                 </ul>
               )}
               <p className="text-slate-400 text-2xs font-mono">
-                Ground-scale damage, rolled per boarder. Deduct END/armour and rule the outcome.
+                No boarding party defined: Ground-scale damage per anonymous boarder. Deduct END/armour and rule the outcome.
               </p>
             </>
           )}

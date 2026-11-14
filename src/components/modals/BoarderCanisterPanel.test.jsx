@@ -79,4 +79,67 @@ describe('BoarderCanisterPanel', () => {
     expect(screen.getByText(/Last salvo: Sand.*MISS/)).toBeTruthy()
     expect(screen.queryByText(/ROLL DAMAGE/)).toBeNull()
   })
+
+  describe('with a boarding party defined', () => {
+    const party = (id) => useBattleStore.getState().boardings.find((b) => b.id === id).parties.attacker
+
+    function seedParty(boardingId, protection = 0) {
+      useBattleStore.getState().addBoarders(boardingId, 'attacker', [
+        { name: 'M1', str: 7, dex: 7, end: 7, protection },
+        { name: 'M2', str: 7, dex: 7, end: 7, protection },
+      ])
+    }
+
+    it('rolls damage for every living boarder in one volley', () => {
+      const { boarding } = setupBoarding()
+      seedParty(boarding.id)
+      render(<BoardingContactModal />)
+      enterDice(5, 5)
+      fireEvent.click(screen.getByText(/FIRE SAND CANISTER/))
+      fireEvent.click(screen.getByText(/ALL 2 BOARDERS/))
+      expect(screen.getByTestId('canister-roster-results').querySelectorAll('li')).toHaveLength(2)
+      // 8D sand: 8–48 damage vs END 7 + overflow → every boarder took damage
+      expect(party(boarding.id).every((b) => b.cur.end < 7)).toBe(true)
+    })
+
+    it('Protection reduces canister damage (pebble 1DD vs armour 60 = no damage)', () => {
+      const { boarding } = setupBoarding()
+      seedParty(boarding.id, 60)
+      render(<BoardingContactModal />)
+      fireEvent.click(screen.getByText(/Pebble · 1D×10/))
+      enterDice(5, 5)
+      fireEvent.click(screen.getByText(/FIRE PEBBLE CANISTER/))
+      fireEvent.click(screen.getByText(/ALL 2 BOARDERS/))
+      expect(party(boarding.id).map((b) => b.cur.end)).toEqual([7, 7])
+    })
+
+    it('the volley can be applied only once per salvo', () => {
+      const { boarding } = setupBoarding()
+      seedParty(boarding.id)
+      render(<BoardingContactModal />)
+      enterDice(5, 5)
+      fireEvent.click(screen.getByText(/FIRE SAND CANISTER/))
+      fireEvent.click(screen.getByText(/ALL 2 BOARDERS/))
+      expect(screen.getByText(/2 BOARDERS HIT/).closest('button').disabled).toBe(true)
+    })
+
+    it('a miss offers no damage roll', () => {
+      const { boarding } = setupBoarding()
+      seedParty(boarding.id)
+      render(<BoardingContactModal />)
+      enterDice(1, 2)
+      fireEvent.click(screen.getByText(/FIRE SAND CANISTER/))
+      expect(screen.queryByText(/ROLL DAMAGE/)).toBeNull()
+    })
+
+    it('dead boarders are skipped', () => {
+      const { boarding } = setupBoarding()
+      seedParty(boarding.id)
+      useBattleStore.getState().applyBoarderDamage(boarding.id, 'attacker', [{ boarderId: party(boarding.id)[0].id, damage: 100 }])
+      render(<BoardingContactModal />)
+      enterDice(5, 5)
+      fireEvent.click(screen.getByText(/FIRE SAND CANISTER/))
+      expect(screen.getByText(/ALL 1 BOARDERS/)).toBeTruthy()
+    })
+  })
 })
