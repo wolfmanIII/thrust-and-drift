@@ -91,6 +91,19 @@ npm run preview
 
 ---
 
+## Deployment
+
+The live app ([tad.nav-fi-3.space](https://tad.nav-fi-3.space)) is hosted on Netlify. Deploys are **manual** — pushing to `main` does **not** publish a new version, and every deploy consumes Netlify credits, so release one batch of changes at a time.
+
+```bash
+npm run lint && npm test && npm run build      # all green first
+npx netlify-cli deploy --prod --dir=dist       # publish the build
+```
+
+The site is linked through the local, git-ignored `.netlify/state.json` (run `npx netlify-cli login` and `npx netlify-cli link` on a new machine). After the deploy, check that the Dashboard badge on the live site shows the new version.
+
+---
+
 ## How to Use
 
 ### 1 — Prepare ship profiles

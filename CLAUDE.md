@@ -44,6 +44,12 @@ Local VTT lite (Virtual Tabletop) for Mongoose Traveller 2e space combat. Implem
 - `src/components/modals/ThrustModal.jsx` is unused dead code — canvas rubber-band targeting (right-click → Apply Thrust → drag) replaced it. Don't wire it up as if it were live.
 - Battle report PDF (`BattleReportModal.jsx`) is generated via `window.print()` + `@media print` CSS, not a PDF library.
 
+## DEPLOY
+
+- Hosting is Netlify and the deploy is **manual** — `git push` does NOT deploy. Each deploy costs credits: one deploy per release, never deploy unless asked.
+- Flow: `npm run lint && npm test && npm run build` green → `npx netlify-cli deploy --prod --dir=dist` (site linked via gitignored `.netlify/state.json`, auth in `~/.config/netlify`) → check the live bundle shows the new `vX.Y.Z` (Dashboard badge) at <https://tad.nav-fi-3.space>.
+- After a version bump, sync docs first (README, HANDOFF, spec, field-manual, CHANGELOG, Dashboard badge, `public/field-manual.pdf`).
+
 ## DOCUMENTATION
 
 - Code: JSDoc on hooks and complex functions (English, technical tone).
