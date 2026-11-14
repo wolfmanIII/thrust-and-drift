@@ -174,7 +174,34 @@ Il difensore può puntare un sandcaster contro la squadra d'abbordaggio **in avv
 | Pebble | 1DD = 1D × 10 | HG p.38; Destructive: CR p.78 |
 
 - Costo: **1 canister** dalla scorta del sandcaster; la torretta è segnata come sparata.
-- T&D non modella i singoli boarder (numero, END, armatura): il GM sottrae END/armatura e decide l'esito. Nessuna regola della casa — il numero di boarder fermati non è definito dal RAW.
+- Con un roster definito (§3.7) il danno viene tirato **per ogni boarder vivo** e applicato con le regole del danno personale. Senza roster T&D mostra il danno per boarder anonimo e il GM decide l'esito.
+
+### 3.7 Roster dei Boarder
+
+Il RAW non fornisce stat block, numero o armature dei boarder (HG p.125: squadra di 4–12 per navi da 100–1.000 ton, 2–4 marine con boarding vacc suit, combat armour o battle dress; "la composizione varia"). Per questo **il GM definisce i roster a mano**, uno per la squadra d'abbordaggio e uno per i difensori. T&D non genera né inventa numeri.
+
+Dal pannello **Parties** delle modali Contatto e Conflitto si aggiungono boarder (anche in blocco, "Qty") con:
+
+- **STR / DEX / END** (interi ≥ 1, nessun massimo: la battle dress alza STR/DEX oltre 15).
+- **Protection** dell'armatura. I preset seguono la tabella armature del CR p.100 (vacc suit +4/+8/+10, combat armour +13/+17/+19, battle dress +22/+25, …), modificabili.
+- **Experience** (preset CR p.92–93): imposta le caratteristiche a 7 (Green) e mostra i bonus della tabella (Average +1; Experienced +1, +2; Elite +1, +2, +3) da assegnare a mano. Il RAW non dice a quali caratteristiche vanno.
+- **Overflow STR/DEX:** dove va l'eccesso di danno oltre END ("a scelta del bersaglio", CR p.77).
+
+**Danno personale (CR p.77):**
+
+1. Il danno è ridotto della **Protection** (un'arma AP ignora Protection fino al proprio valore; un attacco con Effect 6+ infligge sempre almeno 1 punto).
+2. Il danno va prima su **END**.
+3. A END 0 l'eccesso va sulla caratteristica di overflow; quando questa è a 0 il resto va sull'altra.
+4. **STR o DEX a 0:** incosciente. **STR, DEX ed END a 0:** morto. Il danno a un boarder morto non ha effetto.
+
+Lo stato (Fit / Down / Dead) è sempre calcolato dalle caratteristiche. I danni "manuali" (pulsante DMG, o DAMAGE su un bersaglio estratto in Conflitto) si inseriscono con Damage, AP ed Effect decisi dal GM: T&D non simula il combattimento personale.
+
+**Scelte interpretive** (il testo non le definisce):
+
+- Il danno di sand (8D) e pebble (1DD) è fisso: l'Effect del check Gunner **non** si aggiunge e non si applica il minimo di 1 con Effect 6+.
+- La Protection si sottrae **dopo** il ×10 del pebble (CR p.78 moltiplica "il totale tirato"; la Protection riduce "il danno subito"). Né CR p.171 né HG p.38 nominano l'armatura personale: vale la regola generale del CR p.77.
+- **Morale** (Companion pp.6–7): con perdite (incoscienti + morti) ≥ 10 % T&D segnala che il Referee può chiamare un check MRL (8+ da 10 %, 10+ da 30 %, 12+ da 60 %). Non lo tira.
+
 ---
 
 ## 4. Fase 3 — Conflitto
@@ -205,6 +232,10 @@ Nei corridoi e nei passaggi stretti, i combattenti si trovano inevitabilmente in
 
 **Per mirare a un bersaglio che non è il primo della fila:** Roll 2D ≥ 10, altrimenti il primo della fila diventa il bersaglio (poi si tira normalmente per colpirlo).
 
+**Attacco non mirato che ha colpito (HG p.132):** dopo il tiro per colpire si tira 2D. Con 9 o meno è colpito il primo della fila, con 10–12 un altro membro del gruppo.
+
+Con i roster definiti (§3.7) l'**ordine del roster è l'ordine della fila**: i morti ne escono, gli incoscienti restano. In Conflitto si sceglie chi spara (Boarders / Defenders) e il bersaglio è il gruppo opposto. *ROLL STACK HIT* estrae il nome colpito e il pulsante DAMAGE apre il form danno su quel boarder.
+
 ### 4.3 Colpi Mancati — Dove Finisce il Proiettile
 
 Ogni attacco che **manca** il bersaglio non scompare nel vuoto. Tira 2D:
@@ -218,6 +249,8 @@ Ogni attacco che **manca** il bersaglio non scompare nel vuoto. Tira 2D:
 | 11–12 | **Sistema critico danneggiato** (controllo airlock, tubazione carburante, consolle di comando, ecc.) |
 
 > **Paratie corazzate** (vedi High Guard p.43): DM −1 ai tiri sulla tabella dei colpi mancati.
+
+Con i roster definiti, i risultati 1–5 estraggono un **membro vivo a caso** del gruppo indicato: 1–3 il gruppo di chi ha sparato, 4–5 il gruppo opposto (per colpirlo serve 8+, tirato dal GM). Il nome compare con il pulsante DAMAGE.
 
 ### 4.4 Soglie di Danno ai Sistemi
 

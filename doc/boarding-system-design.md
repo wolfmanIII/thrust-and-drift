@@ -123,10 +123,28 @@ Risoluzione: chi controlla la nave. Aggiornamento stato `ShipInstance`:
         turrets:     boolean,
       },
       outcome: null | 'attacker_wins' | 'defender_wins',
+      canisterAttacks?: [{ type: 'sand'|'pebble', turretSlot, total, effect, success }],  // CR p.171, HG p.38
+      parties: {                   // roster definiti dal GM (#55); default { attacker: [], defender: [] }
+        attacker: Boarder[],       // squadra d'abbordaggio — l'ordine è l'ordine di fila (HG p.132)
+        defender: Boarder[],       // equipaggio / sicurezza
+      },
     }
   ]
 }
+
+// Boarder — lo stato (ok | unconscious | dead) è derivato, mai salvato
+{
+  id, name,
+  max: { str, dex, end }, cur: { str, dex, end },
+  protection: number,           // Protection armatura, CR p.100
+  armourKey: string|null,       // etichetta preset (data/boarderPresets.js)
+  overflowTo: 'str' | 'dex',    // dove va l'eccesso oltre END, CR p.77
+}
 ```
+
+`parties` è opzionale in lettura (`b.parties ?? …`): i boarding salvati prima di #55 e i file di export vecchi si caricano senza migrazione. Undo, export e autosave copiano già l'intero array `boardings`.
+
+Logica pura in `utils/boarders.js` (`createBoarder`, `applyPersonalDamage`, `getBoarderStatus`, `pickStackTarget`, `pickRandomMember`, `getCasualtyStats`); preset in `data/boarderPresets.js`. Regole in `Abbordaggio-High-Guard.md` §3.7.
 
 ### 4.2 Modifica a ShipInstance
 
@@ -198,6 +216,11 @@ Token della nave bersaglio sul canvas: bordo rosso pulsante.
 | `BoardingConflictModal.jsx` | Modal | Fase Conflitto — obiettivi, stacking, colpi mancati |
 | `BoardingOutcomeModal.jsx` | Modal | Fase Sicurezza — esito, cambio fazione |
 | `boarding.js` | Util (`utils/`) | `getHullResilience`, `rollMissedShot`, `getBoardingDM` |
+| `BoarderCanisterPanel.jsx` | Pannello | Sand/Pebble contro la squadra (Contatto); danno applicato al roster |
+| `BoardingRosterPanel.jsx` | Pannello | Roster di entrambi i lati: aggiunta, modifica, ordine, danno, perdite/morale |
+| `BoarderForm.jsx`, `BoarderDamageForm.jsx` | Form | Creazione boarder (preset); inserimento di un colpo |
+| `useBoarderForm.js`, `useConflictTargeting.js` | Hook | Stato del form; bersagli di stacking e colpi mancati |
+| `boarders.js` | Util (`utils/`) | Modello boarder, danno personale, stacking, perdite |
 
 ---
 
@@ -212,6 +235,16 @@ toggleForcedLinkage(boardingId)
 setObjective(boardingId, objective, conquered)
 resolveBoarding(boardingId, outcome)
 // outcome 'attacker_wins' → opzionale: updateShipFaction(defenderId, newFaction)
+
+// Sandcaster contro la squadra in avvicinamento (solo Contatto) — CR p.171, HG p.38
+fireBoarderCanister(boardingId, canisterType, turretSlot, check)
+
+// Roster dei boarder (#55) — un solo passo di undo per chiamata
+addBoarders(boardingId, side, dataList)            // side: 'attacker' | 'defender'
+updateBoarder(boardingId, side, boarderId, patch)
+removeBoarder(boardingId, side, boarderId)
+reorderBoarder(boardingId, side, boarderId, dir)   // dir: -1 | +1 — l'ordine è la fila
+applyBoarderDamage(boardingId, side, hits, source) // Protection → END → STR/DEX, CR p.77
 ```
 
 ---

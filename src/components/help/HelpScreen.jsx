@@ -674,7 +674,9 @@ export function HelpScreen({ onBack } = {}) {
             <KV k="Forced Linkage" v="Pilot (DEX) 8+ — DM +2 to all Contact checks. Locks defender movement." />
             <KV k="Hull Cut" v="Mechanic (DEX) 8+/round — reduces component Resilience until breach. 🚨 Decompression risk." />
             <p>Modifiers: <span className="text-red-400">🌀 Tumbling</span> (DM −1 — click the Tumbling button; roll Pilot DEX Routine 6+, then select D3 result 1–3 rounds; app auto-clears when rounds expire) · <span className="text-emerald-400">🔗 Forced Linkage</span> (DM +2)</p>
-            <KV k="Sandcaster vs boarders" v="Contact phase only, defender side. Gunner (turret) 8+ with an unfired sandcaster. On a hit each boarder takes Ground-scale damage, rolled per boarder: Sand 8D (CRB p.171) · Pebble 1DD = 1D×10 (HG p.38). Spends 1 canister and marks the slot fired. The GM applies END/armour and rules the outcome." />
+            <KV k="Sandcaster vs boarders" v="Contact phase only, defender side. Gunner (turret) 8+ with an unfired sandcaster. On a hit each boarder takes Ground-scale damage: Sand 8D (CRB p.171) · Pebble 1DD = 1D×10 (HG p.38). Spends 1 canister and marks the slot fired. With a boarding party defined the damage is rolled and applied to every living boarder (Protection applies, CRB p.77); otherwise the GM rules the outcome." />
+            <KV k="Parties (boarder rosters)" v="Contact and Conflict modals. The GM defines the boarding party and the defenders: STR/DEX/END, Protection (armour presets, CRB p.100), experience preset (CRB p.92–93), overflow STR/DEX. Damage goes through Protection → END → overflow STR/DEX (CRB p.77): STR or DEX 0 = down, all three 0 = dead. Roster order is the stack order (HG p.132). Casualties ≥ 10% note a possible Morale check (Companion p.6–7)." />
+            <KV k="Conflict targets" v="Pick who is firing. ROLL STACK HIT: 2D ≤ 9 first in the stack, 10–12 another member (HG p.132). Missed shot 1–3 hits a random member of the firing group, 4–5 of the opposing group (HG p.133). DAMAGE opens the hit form on that boarder." />
           </Sub>
 
           <Sub title="PHASE 3 — CONFLICT">

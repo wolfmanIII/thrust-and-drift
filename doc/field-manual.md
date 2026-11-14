@@ -761,8 +761,36 @@ the defender can fire a sandcaster at the incoming boarding party. Gunner
 use, so it matches Disperse Sand against lasers. On a hit **each boarder** takes
 Ground-scale damage, rolled per boarder: **Sand 8D** (not multiplied) or
 **Pebble 1DD = 1D×10** (Destructive ×10, CRB p.78). One canister is spent and
-the turret is marked fired. T&D does not track individual boarders, so the GM
-subtracts END/armour and rules the outcome.
+the turret is marked fired. With a **boarding party defined** (see below) the
+damage is rolled for every living boarder and applied through their Protection
+and characteristics; without one it is shown per anonymous boarder and the GM
+rules the outcome.
+
+**Boarder rosters** *(CRB p.77, p.92–93, p.100; HG p.132–133; Companion p.6–7)*:
+the rules give no boarder stat blocks, so the **GM defines the rosters** — one
+for the boarding party, one for the defenders — in the **Parties** panel of the
+Contact and Conflict modals. Each boarder has STR, DEX, END, armour Protection
+(presets from the CRB armour table, editable), an experience preset (CRB p.92–93:
+characteristics 7, the table bonuses are shown for you to assign) and an
+**overflow** characteristic.
+
+- **Damage (CRB p.77):** Protection reduces the damage (AP ignores Protection up
+  to its value; Effect 6+ always inflicts at least 1). It goes to END, then the
+  excess to the overflow STR/DEX and, once that is 0, to the other. STR or DEX 0 =
+  unconscious; STR, DEX and END all 0 = dead. Status is always derived.
+- **Canisters:** sand 8D / pebble 1DD are fixed damage — the Gunner check Effect is
+  not added. Protection is subtracted after pebble's ×10. Neither CRB p.171 nor HG
+  p.38 mentions personal armour, so the general CRB p.77 rule applies.
+- **Stacking (HG p.132):** roster order is the line (the dead leave it,
+  unconscious boarders stay). In Conflict pick who is firing; *Roll Stack Hit*
+  gives the first in the stack on 2D ≤ 9, another member on 10–12.
+- **Missed Shots (HG p.133):** 1–3 hits a random living member of the firing
+  group, 4–5 of the opposing group (the GM rolls the 8+ to hit).
+- **Morale (Companion p.6–7):** at 10 % casualties (down + dead) the panel notes
+  that the Referee may call a Morale check (MRL 8+; 30 % → 10+; 60 % → 12+). The
+  app never rolls it.
+- The Security modal shows a head count of fit, downed and dead boarders; the
+  battle report groups boarding events under a **Boarding** section.
 
 ### 9.10 Special Weapon Mechanics
 
